@@ -23,7 +23,7 @@ El comodín vale sólo para el `SUPERADMIN` de plataforma. Un código privilegia
 comodín de RBAC, no habilita el barrido entre tenants ni declarar un tenant ajeno
 (`hasPrivilegedTenantRole` y `roleAuthorizesInTenant` aplican la misma regla). Los códigos de rol
 de plataforma (`SUPERADMIN`, `SYSTEM`, `SECURITY_ADMIN`, `USER`, `PATIENT`, `PRACTITIONER`,
-`CLINICIAN`) están reservados: `POST /authz/roles` responde 409 `ROLE_CODE_RESERVED` si se pide uno.
+`CLINICIAN`, `SUPPORT_STAFF`) están reservados: `POST /authz/roles` responde 409 `ROLE_CODE_RESERVED` si se pide uno.
 
 Si el rol no alcanza: `403 FORBIDDEN` (`ErrorCode.FORBIDDEN`, ver `docs/api/error-model.md`).
 
@@ -67,6 +67,13 @@ propio. Las rutas revisadas caen en estas clases:
 - `GET /public/pharmacies/open-now`, `GET /public/profiles/f/:slug/branches` y
   `POST /public/profiles/f/:slug/branch-availability` son `@Public()`. El `POST` es una lectura: los
   renglones de la receta viajan en el cuerpo para no quedar en la URL, y no se guardan.
+
+**Sonda de vida de instancias (`ops_console`).** `POST /internal/ops/heartbeats` lleva
+`@Roles('SYSTEM')`: sólo el token que firma `SystemApiClient` en cada worker puede registrar un
+latido, y un administrador de plataforma recibe `403` (nadie fabrica la vida de un proceso desde el
+portal). `GET /admin/ops/instances/liveness` es de sólo lectura y exige los mismos `OPS_READ_ROLES`
+(`PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`) que el resto de
+`/admin/ops`.
 
 Una ruta que **escribe** con un dueño que viaja en el cuerpo y sin comprobación en el servicio
 **no** entra en ninguna de estas clases y lleva `@Roles`: las altas de `/common/addresses`,
@@ -118,6 +125,25 @@ decisiones; revocar un consentimiento o una relación asistencial debe invalidar
 del sistema — fija el tenant activo para la request/transacción. Que Row-Level Security
 (`RLS_ENFORCE`) esté activo depende de la configuración de cada entorno, no sólo del código — ver
 [aislamiento por tenant](../security/tenant-isolation.md).
+
+### Datasets de plataforma: AloVida Insights
+
+`/marketing/insights/*` sirve tablas sin `tenant_id` (`marketing.insights_*`), así que no aísla por
+tenant: aísla por rol. Cada handler declara `@Roles('MARKETING_MANAGER', 'PLATFORM_ADMIN',
+'DATA_PLATFORM_ADMIN')` y la clase `@PlatformTenantOptional('SUPERADMIN', 'PLATFORM_ADMIN',
+'DATA_PLATFORM_ADMIN')`. `MARKETING_MANAGER` es un rol de **tenant** (`scopedRoles`): no entra en la
+lista tenant-opcional, así que `TenantScopeGuard` le exige `X-Tenant-Id` o una única membresía
+(`403 TENANT_AMBIGUOUS` / `TENANT_REQUIRED` si no hay forma de resolverlo) y `RolesGuard` solo lo
+autoriza en el tenant donde se le concedió (`403 ROLE_INSUFFICIENT` en otro). El dato devuelto es el
+mismo en cualquier tenant. Los roles globales `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` leen sin
+cabecera. `BUSINESS_ADMIN` nunca. Lo fija `src/modules/marketing/insights-access.spec.ts`.
+
+Las **escrituras** del portal (alertas, preferencias, vistas guardadas, informes) usan los
+mismos roles que las lecturas y llevan `@Audited`; `PATCH alert-rules/:code` (reglas compartidas)
+exige solo `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` (`MARKETING_MANAGER` recibe 403). Alertas y reglas son compartidas; lo que es de la persona se acota
+por el **id del usuario autenticado** (`user.id`), nunca por un `userId` de la petición: un usuario no
+ve ni modifica filas de otro (`404` si manda un `id` ajeno). Las modificaciones de alertas y reglas se
+protegen con `If-Match`/`row_version` (`412 MARKETING_INSIGHTS_VERSION_MISMATCH`).
 
 ### Prácticas visibles para un `PRACTITIONER`
 

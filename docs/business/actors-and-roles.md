@@ -25,6 +25,13 @@ PHI, se exige además alcance clínico vigente (relación asistencial, consentim
 (tutor, apoderado) vía `PatientLegalRepresentationsRepository`, siguen reglas de alcance propias
 dentro del mismo PDP clínico.
 
+## Personal de apoyo hospitalario (secretaria)
+
+`SUPPORT_STAFF`. Lo da el alta de la secretaria (`POST /iam/auth/register-support-staff`) y dice
+quién es la cuenta, no a qué accede: ve sólo los hospitales, sedes, servicios, pisos y doctores de
+sus vínculos **aceptados** por la otra parte (el hospital o el doctor), y no es actor clínico. Ver
+el README de `delegated_access` §«Secretarias».
+
 ## Financiero y facturación
 
 `ACCOUNTANT`, `ACCOUNTING_APPROVER`, `ACCOUNTS_PAYABLE`, `BILLING`, `BILLING_AGENT`,
@@ -78,8 +85,8 @@ grafo de dependencias (`docs/reports/graphify-audit.md` §9, "Surprising Connect
 
 Un rol que una ruta exige solo se ejerce si alguien puede recibirlo. Hay cuatro orígenes:
 
-- **Globales de `iam`** (`USER`, `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SECURITY_ADMIN`,
-  `SUPERADMIN`): viajan en `iam.user_global_roles`.
+- **Globales de `iam`** (`USER`, `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`,
+  `SECURITY_ADMIN`, `SUPERADMIN`): viajan en `iam.user_global_roles`.
 - **Sembrados en `authz.roles`** y asignables con `POST /authz/users/:userId/role-assignments`: los
   asistenciales (`authz.seed.ts`), los de negocio de seguros y contabilidad
   (`authz.business-roles.seed.ts`), los de cada módulo (`*.roles.ts`) y el resto de los roles

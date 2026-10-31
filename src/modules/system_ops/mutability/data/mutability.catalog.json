@@ -12,7 +12,7 @@
   "pumlDeclarations": 510,
   "matrixRows": 25,
   "readmeDeclarations": 140,
-  "endpointTableRefs": 12123,
+  "endpointTableRefs": 12414,
   "tables": 1430
  },
  "records": [
@@ -922,14 +922,14 @@
      "kind": "CODE_DELETE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:393",
+     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:398",
      "claim": "Inventario de endpoints: BORRA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:368",
+     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:372",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -958,14 +958,14 @@
      "kind": "CODE_DELETE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:520",
+     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:525",
      "claim": "Inventario de endpoints: BORRA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:508",
+     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:513",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -994,14 +994,14 @@
      "kind": "CODE_DELETE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:611",
+     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:616",
      "claim": "Inventario de endpoints: BORRA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:598",
+     "source": "src/modules/accounting/services/practitioner-simple-accounting.service.ts:603",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -5571,7 +5571,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -11341,20 +11341,13 @@
    "table": "resource_scope_grants",
    "database": "main",
    "writeMode": "UPDATABLE",
-   "writeModeLevel": "ENFORCED_CODE",
+   "writeModeLevel": "INFERRED",
    "disposition": "UNKNOWN",
    "dispositionLevel": "UNKNOWN",
    "retention": null,
    "legalHold": "UNKNOWN",
    "legalHoldLevel": "UNKNOWN",
    "evidence": [
-    {
-     "kind": "CODE_UPDATE",
-     "level": "ENFORCED_CODE",
-     "supports": "WRITE_MODE",
-     "source": "src/modules/authz/services/authz-governance-read.service.ts:180",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
-    },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
@@ -11586,20 +11579,13 @@
    "table": "user_role_assignments",
    "database": "main",
    "writeMode": "UPDATABLE",
-   "writeModeLevel": "ENFORCED_CODE",
+   "writeModeLevel": "INFERRED",
    "disposition": "UNKNOWN",
    "dispositionLevel": "UNKNOWN",
    "retention": null,
    "legalHold": "UNKNOWN",
    "legalHoldLevel": "UNKNOWN",
    "evidence": [
-    {
-     "kind": "CODE_UPDATE",
-     "level": "ENFORCED_CODE",
-     "supports": "WRITE_MODE",
-     "source": "src/modules/authz/services/authz-user-lifecycle.service.ts:366",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
-    },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
@@ -13146,7 +13132,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -14212,7 +14198,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -14409,7 +14395,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -17497,7 +17483,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -17623,7 +17609,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -17684,7 +17670,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -17774,7 +17760,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -17864,7 +17850,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -17973,7 +17959,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -18038,7 +18024,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -18074,7 +18060,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -18164,7 +18150,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -18290,7 +18276,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -18424,7 +18410,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -18662,7 +18648,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -19115,7 +19101,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -19133,6 +19119,13 @@
    "legalHold": "UNKNOWN",
    "legalHoldLevel": "UNKNOWN",
    "evidence": [
+    {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
+     "source": "src/modules/delegated_access/services/prescription-shares.service.ts:270",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
     {
      "kind": "COLUMN_VERSIONING",
      "level": "INFERRED",
@@ -20962,6 +20955,20 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
+     "source": "src/modules/delegated_access/repositories/support-links.repository.ts:707",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
+    {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
+     "source": "src/modules/delegated_access/repositories/support-links.repository.ts:677",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
+    {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
      "source": "src/modules/directory/services/directory-tenants.service.ts:617",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
@@ -20980,18 +20987,11 @@
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
-     "kind": "CODE_UPDATE",
+     "kind": "CODE_SUMMARY",
      "level": "INFERRED",
-     "supports": "WRITE_MODE",
-     "source": "src/modules/directory/services/directory-memberships.service.ts:379",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
-    },
-    {
-     "kind": "CODE_UPDATE",
-     "level": "INFERRED",
-     "supports": "WRITE_MODE",
-     "source": "src/modules/directory/services/directory-memberships.service.ts:323",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+     "supports": "CONTEXT",
+     "source": "inventario/endpoints",
+     "claim": "…y 2 observaciones más de escritura/borrado"
     },
     {
      "kind": "COLUMN_VERSIONING",
@@ -23447,7 +23447,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -23512,7 +23512,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -23562,7 +23562,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -23598,7 +23598,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -23648,7 +23648,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -23698,7 +23698,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -23792,7 +23792,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -25309,7 +25309,7 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/application/services/iam-assisted-registration.service.ts:284",
+     "source": "src/modules/iam/application/services/iam-assisted-registration.service.ts:287",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -25411,14 +25411,14 @@
      "kind": "CODE_UPDATE",
      "level": "ENFORCED_CODE",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/infrastructure/repositories/credentials.repository.ts:316",
+     "source": "src/modules/iam/infrastructure/repositories/credentials.repository.ts:351",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/application/services/iam-assisted-registration.service.ts:320",
+     "source": "src/modules/iam/application/services/iam-assisted-registration.service.ts:323",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -25605,13 +25605,6 @@
      "kind": "CODE_UPDATE",
      "level": "ENFORCED_CODE",
      "supports": "WRITE_MODE",
-     "source": "src/modules/authz/services/authz-user-lifecycle.service.ts:356",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
-    },
-    {
-     "kind": "CODE_UPDATE",
-     "level": "ENFORCED_CODE",
-     "supports": "WRITE_MODE",
      "source": "src/modules/iam/infrastructure/repositories/refresh-tokens.repository.ts:96",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
     },
@@ -25713,13 +25706,6 @@
      "kind": "CODE_UPDATE",
      "level": "ENFORCED_CODE",
      "supports": "WRITE_MODE",
-     "source": "src/modules/authz/services/authz-user-lifecycle.service.ts:350",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
-    },
-    {
-     "kind": "CODE_UPDATE",
-     "level": "ENFORCED_CODE",
-     "supports": "WRITE_MODE",
      "source": "src/modules/iam/infrastructure/repositories/sessions.repository.ts:131",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
     },
@@ -25784,7 +25770,7 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/application/services/iam-users.service.ts:267",
+     "source": "src/modules/iam/application/services/iam-users.service.ts:271",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -25802,7 +25788,7 @@
    "table": "users",
    "database": "main",
    "writeMode": "UPDATABLE",
-   "writeModeLevel": "ENFORCED_CODE",
+   "writeModeLevel": "INFERRED",
    "disposition": "UNKNOWN",
    "dispositionLevel": "UNKNOWN",
    "retention": null,
@@ -25811,16 +25797,9 @@
    "evidence": [
     {
      "kind": "CODE_UPDATE",
-     "level": "ENFORCED_CODE",
-     "supports": "WRITE_MODE",
-     "source": "src/modules/authz/services/authz-user-lifecycle.service.ts:328",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza DIRECTA)"
-    },
-    {
-     "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/application/services/iam-assisted-registration.service.ts:330",
+     "source": "src/modules/iam/application/services/iam-assisted-registration.service.ts:333",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -25841,14 +25820,21 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/application/services/iam-users.service.ts:310",
+     "source": "src/modules/iam/application/services/iam-users.service.ts:314",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/iam/application/services/iam-users.service.ts:182",
+     "source": "src/modules/iam/application/services/iam-users.service.ts:186",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
+    {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
+     "source": "src/modules/iam/application/services/iam-mfa.service.ts:164",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -25856,7 +25842,7 @@
      "level": "INFERRED",
      "supports": "CONTEXT",
      "source": "inventario/endpoints",
-     "claim": "…y 3 observaciones más de escritura/borrado"
+     "claim": "…y 2 observaciones más de escritura/borrado"
     },
     {
      "kind": "COLUMN_VERSIONING",
@@ -26781,7 +26767,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -30565,7 +30551,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -30662,7 +30648,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -30737,7 +30723,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -30834,7 +30820,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -30953,7 +30939,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -31028,7 +31014,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -31125,7 +31111,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -34050,6 +34036,13 @@
    "legalHoldLevel": "UNKNOWN",
    "evidence": [
     {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
+     "source": "src/modules/payments/services/payments-gateway-webhook.service.ts:525",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
+    {
      "kind": "COLUMN_VERSIONING",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
@@ -34130,6 +34123,13 @@
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
+     "source": "src/modules/payments/services/payments-gateway-webhook.service.ts:514",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
+    {
      "kind": "COLUMN_VERSIONING",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
@@ -34199,28 +34199,35 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/payments/services/payments-transactions.service.ts:445",
+     "source": "src/modules/payments/services/payments-transactions.service.ts:1099",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/payments/services/payments-intents.service.ts:217",
+     "source": "src/modules/payments/services/payments-gateway-webhook.service.ts:380",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/payments/services/payments-intents.service.ts:274",
+     "source": "src/modules/payments/services/payments-intents.service.ts:233",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/payments/services/payments-transactions.service.ts:235",
+     "source": "src/modules/payments/services/payments-intents.service.ts:305",
+     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
+    },
+    {
+     "kind": "CODE_UPDATE",
+     "level": "INFERRED",
+     "supports": "WRITE_MODE",
+     "source": "src/modules/payments/services/payments-transactions.service.ts:209",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -34366,7 +34373,7 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/payments/services/payments-transactions.service.ts:425",
+     "source": "src/modules/payments/services/payments-transactions.service.ts:1079",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -35080,7 +35087,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -35203,7 +35210,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -35239,7 +35246,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -36187,28 +36194,28 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696",
+     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1719",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2050",
+     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2073",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1114",
+     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1137",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:740",
+     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:763",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -36490,14 +36497,14 @@
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1109",
+     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1132",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
      "kind": "CODE_UPDATE",
      "level": "INFERRED",
      "supports": "WRITE_MODE",
-     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1172",
+     "source": "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1195",
      "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_TIPO, inferida por tipo de endpoint: no prueba la sentencia)"
     },
     {
@@ -36859,7 +36866,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -37960,20 +37967,13 @@
    "table": "tool_registry",
    "database": "main",
    "writeMode": "UPDATABLE",
-   "writeModeLevel": "ENFORCED_CODE",
+   "writeModeLevel": "INFERRED",
    "disposition": "UNKNOWN",
    "dispositionLevel": "UNKNOWN",
    "retention": null,
    "legalHold": "UNKNOWN",
    "legalHoldLevel": "UNKNOWN",
    "evidence": [
-    {
-     "kind": "CODE_UPDATE",
-     "level": "ENFORCED_CODE",
-     "supports": "WRITE_MODE",
-     "source": "src/modules/platform_ops/runtime_pieces/runtime-pieces.repository.ts:141",
-     "claim": "Inventario de endpoints: ACTUALIZA (confianza POR_SQL)"
-    },
     {
      "kind": "COLUMN_VERSIONING",
      "level": "INFERRED",
@@ -42580,7 +42580,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -42834,7 +42834,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -42934,7 +42934,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -44609,7 +44609,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],
@@ -45382,7 +45382,7 @@
      "kind": "CODE_NO_HOLD_SWEEP",
      "level": "ENFORCED_CODE",
      "supports": "LEGAL_HOLD",
-     "source": "src/modules/system_ops/system_ops.module.ts:79",
+     "source": "src/modules/system_ops/system_ops.module.ts:86",
      "claim": "Hay una vía de borrado/purga y ningún barrido genérico consulta legal_holds para esta tabla (RETENTION_DISPOSITION_EXECUTORS vacío)"
     }
    ],

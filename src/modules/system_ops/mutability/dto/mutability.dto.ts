@@ -7,7 +7,7 @@ import {
   Matches,
   MaxLength,
 } from 'class-validator';
-import { GovernancePageQueryDto } from '../../dto/governance-read.dto';
+import { GovPageQueryDto } from '../../dto/governance-read.dto';
 import {
   DISPOSITIONS,
   EVIDENCE_LEVELS,
@@ -29,7 +29,7 @@ export const FINDING_FILTERS = ['ANY', 'NONE', 'CONTRADICTION', 'GAP'] as const;
 export type FindingFilter = (typeof FINDING_FILTERS)[number];
 
 /** Filtros de `GET /admin/governance/mutability`. */
-export class ListMutabilityQueryDto extends GovernancePageQueryDto {
+export class ListMutabilityQueryDto extends GovPageQueryDto {
   /** Schema de la tabla. */
   @ApiPropertyOptional({ maxLength: 63 })
   @IsOptional()

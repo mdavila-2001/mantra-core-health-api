@@ -6,6 +6,7 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
+import { readCursorFields } from '../../../common/pagination/keyset-fields';
 import { normalizeTemplate } from '../../../observability/route-index/route-index.service';
 import {
   RouteMetadataService,
@@ -15,7 +16,10 @@ import { AUD } from '../audit.concepts';
 import { deriveHealthRisk, type DataOperation } from '../domain/health-risk';
 import {
   AUDIT_DEFAULT_PAGE_SIZE,
+  AUDIT_MAX_PAGE_SIZE,
   AUDIT_METHODS,
+  AUDIT_RESULTS,
+  type AuditFilterCatalogDto,
   type AuditLogQueryDto,
   type AuditLogPageDto,
   type DataAccessPageDto,
@@ -91,6 +95,7 @@ export class AuditQueryService {
       outcomeConceptId: q.result ? conceptoDeResultado(q.result) : undefined,
       action: q.action,
       entity: q.entity,
+      entityId: q.entityId,
       matcher: this.matcher(q.method, q.route),
       cursor: cursorDe(q.cursor),
       limit,
@@ -127,6 +132,98 @@ export class AuditQueryService {
           ? encodeKeysetCursor({ t: ultimo.recorded_at, i: ultimo.id })
           : null,
       limit,
+    };
+  }
+
+  /**
+   * Qué filtros acepta `GET /audit/log`, con sus límites y lo que **no** se puede consultar. No toca
+   * la base: la pantalla lo pide para armar la barra de filtros sin repetir las reglas del servidor.
+   *
+   * `requestId` y `correlationId` van declarados como no medidos: la columna `correlation_id` existe
+   * en el DDL de `audit.audit_log`, pero la entidad del ORM no la mapea y ningún sello la rellena;
+   * mostrar un filtro que siempre devuelve vacío sería hacer pasar la ausencia de dato por un hallazgo.
+   */
+  filterCatalog(): AuditFilterCatalogDto {
+    return {
+      filters: [
+        {
+          name: 'userId',
+          type: 'uuid',
+          description: 'Actor: quién hizo la acción',
+          options: [],
+        },
+        {
+          name: 'entity',
+          type: 'text',
+          description: 'Tipo de recurso afectado',
+          options: [],
+        },
+        {
+          name: 'entityId',
+          type: 'uuid',
+          description: 'Recurso afectado: la historia de un registro',
+          options: [],
+        },
+        {
+          name: 'action',
+          type: 'text',
+          description:
+            'Acción exacta (código de negocio o `HTTP <VERBO> <ruta>`)',
+          options: [],
+        },
+        {
+          name: 'method',
+          type: 'enum',
+          description: 'Verbo HTTP de la ruta sellada',
+          options: [...AUDIT_METHODS],
+        },
+        {
+          name: 'route',
+          type: 'text',
+          description: 'Plantilla exacta de la ruta, con `:parámetros`',
+          options: [],
+        },
+        {
+          name: 'result',
+          type: 'enum',
+          description: 'Resultado de la operación',
+          options: [...AUDIT_RESULTS],
+        },
+        {
+          name: 'tenantId',
+          type: 'uuid',
+          description: 'Organización',
+          options: [],
+        },
+        {
+          name: 'from',
+          type: 'datetime',
+          description: 'Desde (ISO 8601, incluido)',
+          options: [],
+        },
+        {
+          name: 'to',
+          type: 'datetime',
+          description: 'Hasta (ISO 8601, excluido)',
+          options: [],
+        },
+      ],
+      defaultWindowDays: AUDIT_DEFAULT_WINDOW_DAYS,
+      defaultPageSize: AUDIT_DEFAULT_PAGE_SIZE,
+      maxPageSize: AUDIT_MAX_PAGE_SIZE,
+      order: 'recorded_at desc, id desc',
+      notMeasured: [
+        {
+          field: 'requestId',
+          reason:
+            'El sello de auditoría no guarda el identificador de la petición; no hay dato contra el cual buscar',
+        },
+        {
+          field: 'correlationId',
+          reason:
+            'audit.audit_log.correlation_id existe en el DDL pero la entidad del ORM no lo mapea y ningún sello lo rellena; las filas son WORM y no se completan hacia atrás',
+        },
+      ],
     };
   }
 
@@ -257,8 +354,8 @@ function rango(
 
 function cursorDe(cursor: string | undefined): TimeCursor | undefined {
   if (!cursor) return undefined;
-  const k = decodeKeysetCursor(cursor);
-  if (typeof k.t !== 'string' || typeof k.i !== 'string')
-    throw new BadRequestException('El cursor de paginación no es válido');
-  return { t: k.t, i: k.i };
+  return readCursorFields(decodeKeysetCursor(cursor), {
+    t: 'timestamp',
+    i: 'uuid',
+  });
 }

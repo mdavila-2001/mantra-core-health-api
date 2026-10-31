@@ -3,9 +3,9 @@
 # Endpoints del módulo `pharmacy_inventory`
 
 - **Bloque:** Farmacia (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
-- **Operaciones:** 36 (30 en el contrato, 6 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 28 · BAJO 6
-- **Tablas distintas que tocan:** 64
+- **Operaciones:** 40 (40 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 30 · BAJO 8
+- **Tablas distintas que tocan:** 70
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/pharmacy-inventory.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,39 +15,43 @@
 | 1 | POST | `/internal/inventory-sync-batches` | Ingerir un lote de sincronización ERP | MEDIO | 7 | SECURITY_ADMIN |
 | 2 | POST | `/internal/inventory-sync/{batchId}/reconcile` | Conciliar lote de sincronización externa (UC-25-12) | MEDIO | 6 | SECURITY_ADMIN |
 | 3 | POST | `/internal/reservations/expire` | Liberar reservas y pedidos vencidos (UC-25-05) | MEDIO | 24 | SYSTEM, SECURITY_ADMIN |
-| 4 | GET | `/pharmacies/{pharmacyId}/integration-connections` | — | BAJO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 5 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products` | — | BAJO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 6 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings` | — | BAJO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 7 | POST | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync` | — | MEDIO | 16 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 8 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches` | — | BAJO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 9 | PUT | `/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` | «Lo tengo / No lo tengo» de un producto en una sede. | MEDIO | 8 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 10 | GET | `/pharmacy-inventory/availability` | Consultar qué sedes pueden surtir un conjunto de productos | BAJO | 10 | sesión (sin roles) |
-| 11 | GET | `/pharmacy-inventory/sites/{siteId}/stock` | Consultar el stock disponible de una sede | BAJO | 6 | sesión (sin roles) |
-| 12 | POST | `/pharmacy/{pharmacyId}/dispensations` | Dispensar una prescripción a un paciente (UC-25-03) | MEDIO | 19 | SECURITY_ADMIN |
-| 13 | POST | `/pharmacy/{pharmacyId}/goods-receipts` | Recepcionar mercancía por lote (UC-25-02) | MEDIO | 19 | SECURITY_ADMIN |
-| 14 | POST | `/pharmacy/{pharmacyId}/purchase-orders` | Emitir una orden de compra a proveedor (UC-25-01) | MEDIO | 8 | SECURITY_ADMIN |
-| 15 | POST | `/pharmacy/{pharmacyId}/reservations` | Reservar stock para una prescripción (UC-25-04) | MEDIO | 13 | SECURITY_ADMIN |
-| 16 | POST | `/pharmacy/{pharmacyId}/suppliers` | Registrar un proveedor de farmacia | MEDIO | 2 | SECURITY_ADMIN |
-| 17 | POST | `/pharmacy/{pharmacyId}/transfers` | Transferir stock entre ubicaciones (UC-25-10) | MEDIO | 10 | SECURITY_ADMIN |
-| 18 | POST | `/pharmacy/{siteId}/count-sessions` | Iniciar y congelar una sesión de conteo (UC-25-06) | MEDIO | 9 | SECURITY_ADMIN |
-| 19 | POST | `/pharmacy/{siteId}/inventory-locations` | Crear una ubicación de inventario | MEDIO | 4 | SECURITY_ADMIN |
-| 20 | POST | `/pharmacy/count-sessions/{id}/approve` | Aprobar conteo y ajustar ledger por varianza (UC-25-07) | MEDIO | 13 | SECURITY_ADMIN |
-| 21 | POST | `/pharmacy/dispensations/{id}/reverse` | Reversar una dispensación (UC-25-11) | MEDIO | 10 | SECURITY_ADMIN |
-| 22 | GET | `/pharmacy/orders` | Bandeja de pedidos de las farmacias del tenant (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 23 | POST | `/pharmacy/orders` | Crear un pedido de farmacia (FAR-E1) | MEDIO | 27 | PATIENT |
-| 24 | GET | `/pharmacy/orders/{id}` | Consultar un pedido de farmacia (FAR-E1) | ALTO | 49 | sesión (sin roles) |
-| 25 | POST | `/pharmacy/orders/{id}/accept-substitutions` | Aceptar los genéricos propuestos (paciente) | MEDIO | 26 | PATIENT |
-| 26 | POST | `/pharmacy/orders/{id}/cancel` | Cancelar un pedido de farmacia (FAR-E1) | MEDIO | 23 | PATIENT |
-| 27 | POST | `/pharmacy/orders/{id}/confirm` | Confirmar el pedido (FAR-E2) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 28 | POST | `/pharmacy/orders/{id}/conversation` | Abrir el chat del pedido con la farmacia | ALTO | 11 | sesión (sin roles) |
-| 29 | POST | `/pharmacy/orders/{id}/dispense` | Dispensar el pedido en el mostrador (FAR-E3) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 30 | POST | `/pharmacy/orders/{id}/prefer-original` | Preferir los productos originales (paciente) | MEDIO | 19 | PATIENT |
-| 31 | POST | `/pharmacy/orders/{id}/ready` | Marcar el pedido listo para retiro (FAR-E2/E3) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 32 | POST | `/pharmacy/orders/{id}/reject` | Rechazar el pedido (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 33 | POST | `/pharmacy/orders/{id}/review` | Abrir revisión del pedido (FAR-E2) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 34 | GET | `/pharmacy/orders/me` | Mis pedidos de farmacia, más nuevos primero (FAR-E1) | MEDIO | 48 | PATIENT |
-| 35 | POST | `/pharmacy/recall-holds` | Aplicar retiro/recall de lote (UC-25-08) | MEDIO | 11 | SECURITY_ADMIN |
-| 36 | POST | `/pharmacy/recall-holds/{id}/release` | Liberar recall y reactivar lote (UC-25-09) | MEDIO | 11 | SECURITY_ADMIN |
+| 4 | GET | `/pharmacies/{pharmacyId}/integration-connections` | Conexiones de integración de la farmacia | BAJO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 5 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products` | Catálogo del sistema de la farmacia, con el vínculo de cada código | BAJO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 6 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings` | Vínculos de productos de una conexión | BAJO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 7 | POST | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync` | Traer el stock del sistema de la farmacia y aplicarlo por sede | MEDIO | 17 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 8 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches` | Últimas sincronizaciones de una conexión | BAJO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 9 | POST | `/pharmacies/{pharmacyId}/sites/{siteId}/availability/bulk` | Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa | MEDIO | 8 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 10 | PUT | `/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` | Marcar si una sucursal tiene un producto, y cuántas unidades | MEDIO | 8 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 11 | GET | `/pharmacy-inventory/availability` | Consultar qué sedes pueden surtir un conjunto de productos | BAJO | 10 | sesión (sin roles) |
+| 12 | GET | `/pharmacy-inventory/availability/medications` | Consultar qué sedes de la red pueden surtir unos medicamentos | BAJO | 10 | sesión (sin roles) |
+| 13 | GET | `/pharmacy-inventory/sites/{siteId}/stock` | Consultar el stock disponible de una sede | BAJO | 6 | sesión (sin roles) |
+| 14 | POST | `/pharmacy/{pharmacyId}/dispensations` | Dispensar una prescripción a un paciente (UC-25-03) | MEDIO | 19 | SECURITY_ADMIN |
+| 15 | POST | `/pharmacy/{pharmacyId}/goods-receipts` | Recepcionar mercancía por lote (UC-25-02) | MEDIO | 19 | SECURITY_ADMIN |
+| 16 | POST | `/pharmacy/{pharmacyId}/purchase-orders` | Emitir una orden de compra a proveedor (UC-25-01) | MEDIO | 8 | SECURITY_ADMIN |
+| 17 | POST | `/pharmacy/{pharmacyId}/reservations` | Reservar stock para una prescripción (UC-25-04) | MEDIO | 13 | SECURITY_ADMIN |
+| 18 | POST | `/pharmacy/{pharmacyId}/suppliers` | Registrar un proveedor de farmacia | MEDIO | 2 | SECURITY_ADMIN |
+| 19 | POST | `/pharmacy/{pharmacyId}/transfers` | Transferir stock entre ubicaciones (UC-25-10) | MEDIO | 10 | SECURITY_ADMIN |
+| 20 | POST | `/pharmacy/{siteId}/count-sessions` | Iniciar y congelar una sesión de conteo (UC-25-06) | MEDIO | 9 | SECURITY_ADMIN |
+| 21 | POST | `/pharmacy/{siteId}/inventory-locations` | Crear una ubicación de inventario | MEDIO | 7 | SECURITY_ADMIN |
+| 22 | POST | `/pharmacy/count-sessions/{id}/approve` | Aprobar conteo y ajustar ledger por varianza (UC-25-07) | MEDIO | 13 | SECURITY_ADMIN |
+| 23 | POST | `/pharmacy/dispensations/{id}/reverse` | Reversar una dispensación (UC-25-11) | MEDIO | 10 | SECURITY_ADMIN |
+| 24 | POST | `/pharmacy/inventory-locations/{id}/relocate` | Reubicar una ubicación de inventario (F5c) | BAJO | 0 | SECURITY_ADMIN |
+| 25 | GET | `/pharmacy/orders` | Bandeja de pedidos de las farmacias del tenant (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 26 | POST | `/pharmacy/orders` | Crear un pedido de farmacia (FAR-E1) | MEDIO | 29 | PATIENT |
+| 27 | GET | `/pharmacy/orders/{id}` | Consultar un pedido de farmacia (FAR-E1) | ALTO | 49 | sesión (sin roles) |
+| 28 | POST | `/pharmacy/orders/{id}/accept-substitutions` | Aceptar los genéricos propuestos (paciente) | MEDIO | 25 | PATIENT |
+| 29 | POST | `/pharmacy/orders/{id}/cancel` | Cancelar un pedido de farmacia (FAR-E1) | MEDIO | 23 | PATIENT |
+| 30 | POST | `/pharmacy/orders/{id}/confirm` | Confirmar el pedido (FAR-E2) | MEDIO | 40 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 31 | POST | `/pharmacy/orders/{id}/conversation` | Abrir el chat del pedido con la farmacia | ALTO | 11 | sesión (sin roles) |
+| 32 | POST | `/pharmacy/orders/{id}/dispense` | Dispensar el pedido en el mostrador (FAR-E3) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 33 | POST | `/pharmacy/orders/{id}/prefer-original` | Preferir los productos originales (paciente) | MEDIO | 19 | PATIENT |
+| 34 | POST | `/pharmacy/orders/{id}/ready` | Marcar el pedido listo para retiro (FAR-E2/E3) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 35 | POST | `/pharmacy/orders/{id}/reject` | Rechazar el pedido (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 36 | POST | `/pharmacy/orders/{id}/review` | Abrir revisión del pedido (FAR-E2) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 37 | GET | `/pharmacy/orders/me` | Mis pedidos de farmacia, más nuevos primero (FAR-E1) | MEDIO | 48 | PATIENT |
+| 38 | GET | `/pharmacy/prescription-shares/{token}` | Abrir una receta compartida desde la farmacia (FAR-02) | MEDIO | 21 | PHARMACY_STAFF |
+| 39 | POST | `/pharmacy/recall-holds` | Aplicar retiro/recall de lote (UC-25-08) | MEDIO | 11 | SECURITY_ADMIN |
+| 40 | POST | `/pharmacy/recall-holds/{id}/release` | Liberar recall y reactivar lote (UC-25-09) | MEDIO | 11 | SECURITY_ADMIN |
 
 ---
 
@@ -76,10 +80,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -89,9 +93,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → SyncRepository.findBatchById | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:91` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → SyncRepository.createItem | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:155` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → SyncRepository.findItemByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:115` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → InventoryScopeRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → InventoryScopeRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:118` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.createSyncBatch → InventorySyncService.createBatch → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
 
 ### Cuerpo — DTO `CreateSyncBatchDto` · `application/json`
 
@@ -194,9 +198,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: batchId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -206,8 +210,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute → SyncRepository.findBatchById | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:91` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts:56` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute → SyncRepository.findItems | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:105` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → InventoryScopeRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.reconcile → InventorySyncService.reconcile → ReconcileInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireManagedConnection → InventoryScopeRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:118` |
 
 ### Parámetros
 
@@ -275,8 +279,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -303,7 +307,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/expire-inventory-reservations.use-case.ts:33` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReservationsRepository.findExpired | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:125` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → PharmacyOrdersService.expireDue → PharmacyOrdersUseCases.expireDue → PharmacyOrdersRepository.findPharmaciesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:265` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → PharmacyOrdersService.expireDue → PharmacyOrdersUseCases.expireDue → PharmacyOrderNotificationsService.expiredToPrescriber → NotifyPharmacyOrderUseCase.expiredToPrescriber → NotifyPharmacyOrderUseCase.emitToPerson → ProfilesPersonAccountLinksAdapter.findActiveByPerson → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
@@ -347,8 +351,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 4. GET /pharmacies/{pharmacyId}/integration-connections
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Conexiones de integración de la farmacia
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -356,9 +360,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+Conexiones de integración de la farmacia. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -370,17 +374,17 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inven
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → IntegrationReadRepository.findConnections | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:36` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → IntegrationReadRepository.findSites | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:87` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → IntegrationReadRepository.findConnections | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:37` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → IntegrationReadRepository.findSites | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:88` |
 
 ### Parámetros
 
@@ -396,16 +400,16 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<IntegrationConnectionDto>` | Sí | — | — | Conexiones, de la más nueva a la más vieja. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:108` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la conexión. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:57` |
-| `items[].pharmacySiteId` | `string` | No | formato uuid; admite null | — | Sede a la que se acota; `null` = todas las sedes activas. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:63` |
-| `items[].siteName` | `string` | No | admite null | — | Nombre de esa sede. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:69` |
-| `items[].integrationMode` | `string` | Sí | valores: BATCH, REALTIME | — | `BATCH` o `REALTIME`. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:75` |
-| `items[].supportsStockQuery` | `boolean` | Sí | — | — | Si la conexión admite consultar stock. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:81` |
-| `items[].status` | `string` | Sí | valores: ACTIVE, INACTIVE | — | `ACTIVE` o `INACTIVE`. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:87` |
-| `items[].providerConfigured` | `boolean` | Sí | — | — | Si la API sabe dónde está el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:93` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta de la conexión. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:99` |
-| `providerConfigured` | `boolean` | Sí | — | — | Si la API sabe dónde está el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:114` |
+| `items` | `array<IntegrationConnectionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:315` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:264` |
+| `items[].pharmacySiteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:270` |
+| `items[].siteName` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:276` |
+| `items[].integrationMode` | `string` | Sí | valores: BATCH, REALTIME | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:282` |
+| `items[].supportsStockQuery` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:288` |
+| `items[].status` | `string` | Sí | valores: ACTIVE, INACTIVE | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:294` |
+| `items[].providerConfigured` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:300` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:306` |
+| `providerConfigured` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:321` |
 
 ### Respuestas posibles
 
@@ -433,8 +437,8 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ## 5. GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo del sistema de la farmacia, con el vínculo de cada código
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -442,9 +446,9 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+Catálogo del sistema de la farmacia, con el vínculo de cada código. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -456,17 +460,17 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inven
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:60` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:61` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:50` |
 
 ### Parámetros
 
@@ -483,12 +487,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ExternalCatalogProductDto>` | Sí | — | — | Productos del sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:204` |
-| `items[].code` | `string` | Sí | — | — | Código del producto en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:171` |
-| `items[].name` | `string` | Sí | — | — | Nombre en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:177` |
-| `items[].presentation` | `string` | No | admite null | — | Presentación en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:183` |
-| `items[].unitCode` | `string` | No | admite null | — | Unidad en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:189` |
-| `items[].mappedProductId` | `string` | No | formato uuid; admite null | — | Producto de la farmacia vinculado; `null` si no tiene o es ambiguo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:195` |
+| `items` | `array<ExternalCatalogProductDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:430` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:385` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:391` |
+| `items[].presentation` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:397` |
+| `items[].unitCode` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:403` |
+| `items[].mappedProductId` | `object` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:409` |
+| `items[].mappingStatus` | `string` | Sí | valores: MAPPED, UNMAPPED, AMBIGUOUS | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:415` |
+| `items[].mappedProductIds` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:421` |
 
 ### Respuestas posibles
 
@@ -517,8 +523,8 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ## 6. GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Vínculos de productos de una conexión
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -526,9 +532,9 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+Vínculos de productos de una conexión. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -540,18 +546,18 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inven
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:60` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadRepository.findProducts | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:74` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:61` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:50` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadRepository.findProducts | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:75` |
 
 ### Parámetros
 
@@ -568,13 +574,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<IntegrationMappingDto>` | Sí | — | — | Vínculos, por código externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:162` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador del vínculo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:123` |
-| `items[].externalProductCode` | `string` | Sí | — | — | Código del producto en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:129` |
-| `items[].pharmacyProductId` | `string` | Sí | formato uuid | — | Producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:135` |
-| `items[].productCode` | `string` | No | admite null | — | Código del producto en la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:141` |
-| `items[].productName` | `string` | No | admite null | — | Nombre del producto en la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:147` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta del vínculo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:153` |
+| `items` | `array<IntegrationMappingDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:376` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:330` |
+| `items[].externalProductCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:336` |
+| `items[].pharmacyProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:342` |
+| `items[].productCode` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:348` |
+| `items[].productName` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:354` |
+| `items[].externalUnitCode` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:361` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:367` |
 
 ### Respuestas posibles
 
@@ -602,8 +609,8 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ## 7. POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Traer el stock del sistema de la farmacia y aplicarlo por sede
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -611,13 +618,13 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+Traer el stock del sistema de la farmacia y aplicarlo por sede. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync` la atiende `PharmacyIntegrationSyncController.syncNow` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `SyncExternalPharmacyCatalogUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items. Actualiza pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items, pharmacy.pharmacies, pharmacy.pharmacy_external_product_mappings, pharmacy.pharmacy_integration_connections, pharmacy.pharmacy_products y 1 más.
+`POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync` la atiende `PharmacyIntegrationSyncController.syncNow` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `SyncExternalPharmacyCatalogUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items. Actualiza pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items, pharmacy.pharmacies, pharmacy.pharmacy_external_product_mappings, pharmacy.pharmacy_integration_connections y 2 más.
 
 ### Requerimientos
 
@@ -625,30 +632,31 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inven
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
-| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:69` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.applySite → SiteStockWriter.write → SiteStockWriter.setSellable → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.applySite → IntegrationReadRepository.findMarkedNotAvailable | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:189` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.applySite → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:112` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.applySite → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:73` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.applySite → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.applySite → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_inventory_sync_batches` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.createBatch | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:129` |
 | `pharmacy_inventory.pharmacy_inventory_sync_batches` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → ReconcileInventorySyncBatchUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts:67` |
 | `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.findBatchById | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:91` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.createItem | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:155` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → ReconcileInventorySyncBatchUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts:56` |
 | `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.findItemByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:115` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:60` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findActiveSites | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:96` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findPharmacyCode | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:164` |
+| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:61` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:50` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findActiveSites | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:97` |
 
 ### Parámetros
 
@@ -665,13 +673,40 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `batchId` | `string` | Sí | formato uuid | — | Lote de sincronización que dejó la corrida. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:24` |
-| `received` | `number` | Sí | — | — | Líneas de stock recibidas del sistema externo (todas las sedes). | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:30` |
-| `mapped` | `number` | Sí | — | — | Líneas traducidas a un producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:36` |
-| `unmapped` | `array<UnmappedExternalProductDto>` | Sí | — | — | Códigos externos sin un vínculo único, una vez cada uno. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:42` |
-| `unmapped[].externalCode` | `string` | Sí | — | — | Código del producto en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:9` |
-| `unmapped[].name` | `string` | Sí | — | — | Nombre que le da el catálogo externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:15` |
-| `applied` | `number` | Sí | — | — | Posiciones de stock que cambiaron (las iguales no cuentan). | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:48` |
+| `batchId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:207` |
+| `received` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:213` |
+| `mapped` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:219` |
+| `unmappedLines` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:225` |
+| `unmapped` | `array<UnmappedExternalProductDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:231` |
+| `unmapped[].externalCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:29` |
+| `unmapped[].name` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:35` |
+| `unmapped[].reason` | `string` | Sí | valores: NO_MAPPING, AMBIGUOUS_MAPPING | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:42` |
+| `unmapped[].productIds` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:48` |
+| `applied` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:237` |
+| `sites` | `array<IntegrationSyncSiteDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:243` |
+| `sites[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:57` |
+| `sites[].siteCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:63` |
+| `sites[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:69` |
+| `sites[].received` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:75` |
+| `sites[].mapped` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:81` |
+| `sites[].unmapped` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:87` |
+| `sites[].applied` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:93` |
+| `sites[].unchanged` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:99` |
+| `sites[].skipped` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:105` |
+| `skipped` | `array<IntegrationSyncSkippedDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:249` |
+| `skipped[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:114` |
+| `skipped[].siteCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:120` |
+| `skipped[].externalCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:126` |
+| `skipped[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:132` |
+| `skipped[].quantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:138` |
+| `skipped[].reason` | `string` | Sí | valores: PRODUCT_NOT_AVAILABLE, PRODUCT_NOT_PUBLISHED, PRODUCT_OUT_OF_STOCK_DECLARED, SITE_PRODUCT_KEPT_BY_LOTS, SITE_MARKED_NOT_AVAILABLE, UNIT_MISMATCH, UNIT_NOT_REPORTED | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:153` |
+| `skipped[].mappingUnitCode` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:159` |
+| `skipped[].externalUnitCode` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:165` |
+| `notSent` | `array<IntegrationSyncNotSentDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:255` |
+| `notSent[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:174` |
+| `notSent[].siteCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:180` |
+| `notSent[].externalCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:186` |
+| `notSent[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:192` |
 
 ### Respuestas posibles
 
@@ -701,8 +736,8 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ## 8. GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Últimas sincronizaciones de una conexión
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -710,9 +745,9 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+Últimas sincronizaciones de una conexión. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -724,18 +759,18 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inven
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadRepository.findBatches | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:118` |
-| `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadRepository.countDiscrepancies | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:132` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
+| `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadRepository.findBatches | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:119` |
+| `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadRepository.countDiscrepancies | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:133` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:50` |
 
 ### Parámetros
 
@@ -743,7 +778,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inven
 |---|---|---|---|---|
 | `pharmacyId` | path | Sí | `string` | — |
 | `connectionId` | path | Sí | `string` | — |
-| `limit` | query | sin dato | `number \| undefined` | — |
+| `limit` | query | No | `desconocido` | Entre 1 y 20; por defecto 5 |
 
 ### Cuerpo
 
@@ -753,13 +788,13 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<IntegrationSyncBatchDto>` | Sí | — | — | Lotes, del más nuevo al más viejo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:252` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador del lote. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:213` |
-| `items[].status` | `string` | Sí | valores: RECEIVED, COMPLETED | — | `RECEIVED` o `COMPLETED`. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:219` |
-| `items[].receivedAt` | `string` | No | formato date-time; admite null | — | Cuándo se recibió. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:225` |
-| `items[].completedAt` | `string` | No | formato date-time; admite null | — | Cuándo se concilió. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:231` |
-| `items[].itemCount` | `number` | Sí | — | — | Ítems del lote. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:237` |
-| `items[].discrepancies` | `number` | Sí | — | — | Ítems sin producto (códigos sin vínculo). | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:243` |
+| `items` | `array<IntegrationSyncBatchDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:478` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:439` |
+| `items[].status` | `string` | Sí | valores: RECEIVED, COMPLETED | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:445` |
+| `items[].receivedAt` | `object` | No | formato date-time; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:451` |
+| `items[].completedAt` | `object` | No | formato date-time; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:457` |
+| `items[].itemCount` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:463` |
+| `items[].discrepancies` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:469` |
 
 ### Respuestas posibles
 
@@ -785,47 +820,181 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 9. PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability
+## 9. POST /pharmacies/{pharmacyId}/sites/{siteId}/availability/bulk
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** «Lo tengo / No lo tengo» de un producto en una sede.
+- **Origen:** CONTRATO
+- **Nombre:** Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacySiteAvailabilityController.setSiteAvailability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40`
+- **Implementación:** `PharmacySiteAvailabilityController.bulkSiteAvailability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
-«Lo tengo / No lo tengo» de un producto en una sede. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` la atiende `PharmacySiteAvailabilityController.setSiteAvailability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `SetSiteAvailabilityDto` (2 campos, 1 obligatorio). Delega en `SetSiteProductAvailabilityUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+`POST /pharmacies/{pharmacyId}/sites/{siteId}/availability/bulk` la atiende `PharmacySiteAvailabilityController.bulkSiteAvailability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:80). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `BulkRequestDto` (3 campos, 2 obligatorios). Delega en `BulkSiteAvailabilityUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId, productId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:80` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
-| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:69` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → BulkSiteAvailabilityUseCase.handlerFor → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → SiteStockWriter.setSellable → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → BulkSiteAvailabilityUseCase.handlerFor → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:112` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → BulkSiteAvailabilityUseCase.handlerFor → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:73` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → BulkSiteAvailabilityUseCase.handlerFor → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → BulkSiteAvailabilityUseCase.handlerFor → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → BulkSiteAvailabilityUseCase.handlerFor → InventoryScopeRepository.findProductByCodeInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:89` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.bulkSiteAvailability → BulkSiteAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `siteId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `BulkRequestDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `mode` | `string` | Sí | valores: CREATE, UPDATE, UPSERT | `@IsIn(BULK_MODES)` | — | `src/common/dto/bulk-load.dto.ts:50` |
+| `dryRun` | `boolean` | No | — | `@ValidateIf((_body: unknown, value: unknown) => value !== undefined)` `@IsStrictBoolean()` | — | `src/common/dto/bulk-load.dto.ts:61` |
+| `rows` | `array<object>` | Sí | mínimo 1 elemento(s); máximo 1000 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(BULK_MAX_ROWS)` `@IsObject({ each: true })` `@Type(() => Object)` | — | `src/common/dto/bulk-load.dto.ts:79` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "mode": "CREATE",
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "mode": "CREATE",
+  "dryRun": false,
+  "rows": [
+    {
+      "clave": "valor"
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<BulkResponseDto>` · DTO `BulkResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `dryRun` | `boolean` | Sí | — | — | — | `src/common/dto/bulk-load.dto.ts:144` |
+| `results` | `array<BulkRowResultDto>` | Sí | — | — | — | `src/common/dto/bulk-load.dto.ts:150` |
+| `results[].row` | `number` | Sí | — | — | — | `src/common/dto/bulk-load.dto.ts:109` |
+| `results[].outcome` | `string` | Sí | valores: CREATED, UPDATED, REJECTED, UNCHANGED | — | — | `src/common/dto/bulk-load.dto.ts:115` |
+| `results[].id` | `string` | No | formato uuid | — | — | `src/common/dto/bulk-load.dto.ts:121` |
+| `results[].errors` | `array<BulkRowErrorDto>` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:127` |
+| `results[].errors[].field` | `string` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:88` |
+| `results[].errors[].reason` | `string` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:94` |
+| `results[].errors[].message` | `string` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:100` |
+| `results[].warnings` | `array<BulkRowErrorDto>` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:135` |
+| `results[].warnings[].field` | `string` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:88` |
+| `results[].warnings[].reason` | `string` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:94` |
+| `results[].warnings[].message` | `string` | No | — | — | — | `src/common/dto/bulk-load.dto.ts:100` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: dryRun debe ser true o false |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DryRunRollback: {await withWarnings(tx, ctx, handler, { outcome: 'UNCHANGED'…}; DryRunRollback: {outcome} |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.spec.ts:103` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacySiteAvailabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability
+
+- **Origen:** CONTRATO
+- **Nombre:** Marcar si una sucursal tiene un producto, y cuántas unidades
+- **Bloque:** Farmacia
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacySiteAvailabilityController.setSiteAvailability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:47`
+
+### Qué es y para qué sirve (negocio)
+
+Marcar si una sucursal tiene un producto, y cuántas unidades. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` la atiende `PharmacySiteAvailabilityController.setSiteAvailability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `SetSiteAvailabilityDto` (2 campos, 1 obligatorio). Delega en `SetSiteProductAvailabilityUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:47` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId, productId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:47` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → SiteStockWriter.setSellable → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:112` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:73` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SetSiteProductAvailabilityUseCase.writeInSite → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Parámetros
 
@@ -835,12 +1004,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `siteId` | path | Sí | `string` | — |
 | `productId` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `SetSiteAvailabilityDto`
+### Cuerpo — DTO `SetSiteAvailabilityDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `available` | `boolean` | Sí | — | `@IsBoolean()` | «Lo tengo» en esta sucursal | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:14` |
-| `quantity` | `number` | No | mínimo 0; máximo 1_000_000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(1_000_000)` | Unidades para vender en la sede. Sin ella, «Lo tengo» toma el conteo del catálogo, o 1 si el producto no tiene conteo o está en 0. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:25` |
+| `available` | `boolean` | Sí | — | `@IsStrictBoolean()` | «Lo tengo» en esta sucursal | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:26` |
+| `quantity` | `number` | No | mínimo 0; máximo 1000000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(1_000_000)` | — | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:37` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -865,22 +1034,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `siteId` | `string` | Sí | formato uuid | — | Sede de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:34` |
-| `productId` | `string` | Sí | formato uuid | — | Producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:40` |
-| `available` | `boolean` | Sí | — | — | Si hay unidades para vender en la sede. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:46` |
-| `quantity` | `number` | Sí | — | — | Unidades para vender en la sede (sin lo reservado ni lo retenido). | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:52` |
-| `stockUpdatedAt` | `string` | Sí | formato date-time | — | Última actualización de la existencia de la sede, en ISO 8601. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:58` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:46` |
+| `productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:52` |
+| `available` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:58` |
+| `quantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:64` |
+| `stockUpdatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:70` |
 
 ### Respuestas posibles
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST} |
 
 El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
 
@@ -888,7 +1056,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.spec.ts:64` |
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.spec.ts:68` |
 
 ### Flujos
 
@@ -896,14 +1064,14 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 10. GET /pharmacy-inventory/availability
+## 11. GET /pharmacy-inventory/availability
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar qué sedes pueden surtir un conjunto de productos
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryReadController.availability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:56`
+- **Implementación:** `PharmacyInventoryReadController.availability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -913,32 +1081,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy-inventory/availability` la atiende `PharmacyInventoryReadController.availability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:56). Exige sesión; el controlador no declara roles. Delega en `PharmacyInventoryReadService.availability`. Lee common.addresses, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites y 2 más.
+`GET /pharmacy-inventory/availability` la atiende `PharmacyInventoryReadController.availability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:60). Exige sesión; el controlador no declara roles. Delega en `PharmacyInventoryReadService.availability`. Lee common.addresses, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites y 2 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | products (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.resolveAddresses → PharmacyDirectoryAdapter.findAddresses → PharmacyReadRepository.findAddresses | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:295` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findVisibleByTenant → PharmacyReadRepository.findVisibleByTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:47` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:226` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:253` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findSellableProductsByIds → PharmacyReadRepository.findSellableProductsByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:207` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findActiveSites → PharmacyReadRepository.findActiveSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:78` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.resolveAddresses → PharmacyDirectoryAdapter.findPracticeSites → PharmacyReadRepository.findPracticeSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:286` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findConcepts → PharmacyReadRepository.findConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:304` |
+| `common.addresses` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → ReadPharmacyInventoryUseCase.resolveAddresses → PharmacyDirectoryAdapter.findAddresses → PharmacyReadRepository.findAddresses | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:339` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findVisibleByTenant → PharmacyReadRepository.findVisibleByTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:48` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:270` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:297` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → PharmacyDirectoryAdapter.findSellableProductsByIds → PharmacyReadRepository.findSellableProductsByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:208` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findActiveSites → PharmacyReadRepository.findActiveSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:79` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → ReadPharmacyInventoryUseCase.resolveAddresses → PharmacyDirectoryAdapter.findPracticeSites → PharmacyReadRepository.findPracticeSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:330` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availability → PharmacyInventoryReadService.availability → ReadPharmacyInventoryUseCase.availability → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findConcepts → PharmacyReadRepository.findConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:348` |
 
 ### Parámetros
 
@@ -1013,7 +1181,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.spec.ts:20` |
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.spec.ts:21` |
 
 ### Flujos
 
@@ -1021,14 +1189,141 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 11. GET /pharmacy-inventory/sites/{siteId}/stock
+## 12. GET /pharmacy-inventory/availability/medications
+
+- **Origen:** CONTRATO
+- **Nombre:** Consultar qué sedes de la red pueden surtir unos medicamentos
+- **Bloque:** Farmacia
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyInventoryReadController.availabilityByMedication` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:107`
+
+### Qué es y para qué sirve (negocio)
+
+Consultar qué sedes de la red pueden surtir unos medicamentos. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`GET /pharmacy-inventory/availability/medications` la atiende `PharmacyInventoryReadController.availabilityByMedication` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:107). Exige sesión; el controlador no declara roles. Delega en `PharmacyInventoryReadService.availabilityByMedication`. Lee common.addresses, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites y 2 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:107` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | medications (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → ReadPharmacyInventoryUseCase.resolveAddresses → PharmacyDirectoryAdapter.findAddresses → PharmacyReadRepository.findAddresses | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:339` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → PharmacyDirectoryAdapter.findVisibleByTenant → PharmacyReadRepository.findVisibleByTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:48` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:270` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:297` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → PharmacyDirectoryAdapter.findSellableProductsByMedicationConcepts → PharmacyReadRepository.findSellableProductsByMedicationConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:226` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findActiveSites → PharmacyReadRepository.findActiveSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:79` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → ReadPharmacyInventoryUseCase.resolveAddresses → PharmacyDirectoryAdapter.findPracticeSites → PharmacyReadRepository.findPracticeSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:330` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.availabilityByMedication → PharmacyInventoryReadService.availabilityByMedication → ReadMedicationAvailabilityUseCase.execute → ReadPharmacyInventoryUseCase.siteCandidates → PharmacyDirectoryAdapter.findConcepts → PharmacyReadRepository.findConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:348` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `medications` | query | Sí | `array<string>` | Medicamentos solicitados (`medication_concept_id`): UUIDs separados por coma |
+| `lat` | query | No | `string` | Latitud WGS84 desde donde medir distancia (va con lng) |
+| `lng` | query | No | `string` | Longitud WGS84 desde donde medir distancia (va con lat) |
+| `limit` | query | No | `number` | Tope de sedes servidas (por defecto 20) |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MedicationAvailabilityResponseDto>` · DTO `MedicationAvailabilityResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `requestedMedicationConceptIds` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:54` |
+| `unpublishedMedicationConceptIds` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:61` |
+| `items` | `array<MedicationAvailabilitySiteDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:71` |
+| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:228` |
+| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:234` |
+| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:240` |
+| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:246` |
+| `items[].addressText` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:252` |
+| `items[].latitude` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:258` |
+| `items[].longitude` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:264` |
+| `items[].distanceKm` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:271` |
+| `items[].homeDeliveryAvailable` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:277` |
+| `items[].pickupAvailable` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:283` |
+| `items[].complete` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:289` |
+| `items[].availableCount` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:295` |
+| `items[].totalAmount` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:309` |
+| `items[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:315` |
+| `items[].currency.code` | `string` | No | — | — | — | sin fuente |
+| `items[].currency.display` | `string` | No | — | — | — | sin fuente |
+| `items[].stockUpdatedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:325` |
+| `items[].missingMedicationConceptIds` | `array<string>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:39` |
+| `items[].products` | `array<MedicationAvailabilityProductDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:47` |
+| `items[].products[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:169` |
+| `items[].products[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:175` |
+| `items[].products[].brandName` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:181` |
+| `items[].products[].genericName` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:187` |
+| `items[].products[].strengthText` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:193` |
+| `items[].products[].packageSizeText` | `object` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:199` |
+| `items[].products[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:205` |
+| `items[].products[].medication.code` | `string` | No | — | — | — | sin fuente |
+| `items[].products[].medication.display` | `string` | No | — | — | — | sin fuente |
+| `items[].products[].availableQuantity` | `number` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:213` |
+| `items[].products[].price` | `AvailabilityPriceDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:219` |
+| `items[].products[].price.unitAmount` | `string` | No | — | — | — | sin fuente |
+| `items[].products[].price.patientAmount` | `object` | No | admite null | — | — | sin fuente |
+| `items[].products[].price.currency` | `InventoryConceptDto` | No | admite null | — | — | sin fuente |
+| `items[].products[].price.currency.code` | `string` | No | — | — | — | sin fuente |
+| `items[].products[].price.currency.display` | `string` | No | — | — | — | sin fuente |
+| `items[].products[].price.priceListCode` | `string` | No | — | — | — | sin fuente |
+| `items[].products[].medicationConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:21` |
+| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/medication-availability.dto.ts:75` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; BadRequestException: medications es obligatorio: la disponibilidad se consulta para una receta concreta |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.spec.ts:78` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 13. GET /pharmacy-inventory/sites/{siteId}/stock
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el stock disponible de una sede
 - **Bloque:** Farmacia
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryReadController.getSiteStock` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:38`
+- **Implementación:** `PharmacyInventoryReadController.getSiteStock` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:42`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1038,17 +1333,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy-inventory/sites/{siteId}/stock` la atiende `PharmacyInventoryReadController.getSiteStock` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:38). Exige sesión; el controlador no declara roles. Delega en `PharmacyInventoryReadService.getSiteStock`. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts.
+`GET /pharmacy-inventory/sites/{siteId}/stock` la atiende `PharmacyInventoryReadController.getSiteStock` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:42). Exige sesión; el controlador no declara roles. Delega en `PharmacyInventoryReadService.getSiteStock`. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:38` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:42` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:42` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1056,10 +1351,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
 | `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findVisibleById → PharmacyReadRepository.findVisibleById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:64` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findActiveProductsByIds → PharmacyReadRepository.findActiveProductsByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:191` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findActiveSiteById → PharmacyReadRepository.findActiveSiteById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:93` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findConcepts → PharmacyReadRepository.findConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:304` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findVisibleById → PharmacyReadRepository.findVisibleById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:65` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findActiveProductsByIds → PharmacyReadRepository.findActiveProductsByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:192` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findActiveSiteById → PharmacyReadRepository.findActiveSiteById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:94` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyInventoryReadController.getSiteStock → PharmacyInventoryReadService.getSiteStock → ReadPharmacyInventoryUseCase.getSiteStock → PharmacyDirectoryAdapter.findConcepts → PharmacyReadRepository.findConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:348` |
 
 ### Parámetros
 
@@ -1119,7 +1414,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /pharmacy/{pharmacyId}/dispensations
+## 14. POST /pharmacy/{pharmacyId}/dispensations
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispensar una prescripción a un paciente (UC-25-03)
@@ -1144,35 +1439,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:38` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:127` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:143` |
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → LedgerRepository.findEntryIdsBySource | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:125` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
-| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
-| `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:231` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
+| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
+| `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:307` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → ReservationsRepository.findLinesByReservation | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:142` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:224` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:300` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → ReservationsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:116` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:197` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:266` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.medication_dispensation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:177` |
 | `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:131` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:147` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.findByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:117` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientExists | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:111` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientExists | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:127` |
 
 ### Parámetros
 
@@ -1254,7 +1549,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense; PreconditionFailedException: Stock insuficiente para dispensar |
+| 409 | `CONFLICT` | ConflictException: Stock disponible insuficiente en el botiquín |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense; PreconditionFailedException: La reserva no está vigente; PreconditionFailedException: Stock insuficiente para dispensar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
@@ -1269,7 +1565,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. POST /pharmacy/{pharmacyId}/goods-receipts
+## 15. POST /pharmacy/{pharmacyId}/goods-receipts
 
 - **Origen:** CONTRATO
 - **Nombre:** Recepcionar mercancía por lote (UC-25-02)
@@ -1294,11 +1590,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1306,12 +1602,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LedgerRepository.findEntryIdsBySource | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:125` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
 | `pharmacy_inventory.inventory_lots` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LotsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:69` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LotsRepository.findByProductAndNumber | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:58` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods | `src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts:373` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_goods_receipt_lines` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:166` |
 | `pharmacy_inventory.pharmacy_goods_receipt_lines` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:123` |
 | `pharmacy_inventory.pharmacy_goods_receipts` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:139` |
@@ -1320,9 +1616,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.pharmacy_purchase_order_lines` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PurchaseOrdersRepository.findLineById | `src/modules/pharmacy_inventory/infrastructure/repositories/purchase-orders.repository.ts:134` |
 | `pharmacy_inventory.pharmacy_purchase_orders` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods | `src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts:415` |
 | `pharmacy_inventory.pharmacy_purchase_orders` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PurchaseOrdersRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/purchase-orders.repository.ts:95` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Parámetros
 
@@ -1425,7 +1721,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /pharmacy/{pharmacyId}/purchase-orders
+## 16. POST /pharmacy/{pharmacyId}/purchase-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir una orden de compra a proveedor (UC-25-01)
@@ -1450,11 +1746,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:61` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1465,9 +1761,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.pharmacy_purchase_orders` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PurchaseOrdersRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/purchase-orders.repository.ts:148` |
 | `pharmacy_inventory.pharmacy_purchase_orders` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PurchaseOrdersRepository.findByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/purchase-orders.repository.ts:104` |
 | `pharmacy_inventory.pharmacy_suppliers` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → SuppliersRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/suppliers.repository.ts:49` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyProcurementController.createPurchaseOrder → PharmacyProcurementService.createPurchaseOrder → PharmacyProcurementUseCases.createPurchaseOrder → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Parámetros
 
@@ -1554,14 +1850,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /pharmacy/{pharmacyId}/reservations
+## 17. POST /pharmacy/{pharmacyId}/reservations
 
 - **Origen:** CONTRATO
 - **Nombre:** Reservar stock para una prescripción (UC-25-04)
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.reserve` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:84`
+- **Implementación:** `PharmacyInventoryController.reserve` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1571,37 +1867,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/{pharmacyId}/reservations` la atiende `PharmacyInventoryController.reserve` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:84). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReservationDto` (10 campos, 5 obligatorios). Delega en `InventoryReservationsService.reserve`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations. Lee clinical.medication_requests, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products y 2 más.
+`POST /pharmacy/{pharmacyId}/reservations` la atiende `PharmacyInventoryController.reserve` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:103). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReservationDto` (10 campos, 5 obligatorios). Delega en `InventoryReservationsService.reserve`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations. Lee clinical.medication_requests, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products y 2 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:84` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:103` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:103` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:127` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:143` |
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
-| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
+| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → ReservationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:188` |
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → ReservationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:158` |
-| `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:133` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientExists | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:111` |
+| `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:149` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientExists | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:127` |
 
 ### Parámetros
 
@@ -1693,7 +1989,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. POST /pharmacy/{pharmacyId}/suppliers
+## 18. POST /pharmacy/{pharmacyId}/suppliers
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un proveedor de farmacia
@@ -1718,18 +2014,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:43` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `pharmacy_inventory.pharmacy_suppliers` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.createSupplier → PharmacyProcurementService.createSupplier → PharmacyProcurementUseCases.createSupplier → SuppliersRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/suppliers.repository.ts:60` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyProcurementController.createSupplier → PharmacyProcurementService.createSupplier → PharmacyProcurementUseCases.createSupplier → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyProcurementController.createSupplier → PharmacyProcurementService.createSupplier → PharmacyProcurementUseCases.createSupplier → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
 
 ### Parámetros
 
@@ -1793,14 +2089,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /pharmacy/{pharmacyId}/transfers
+## 19. POST /pharmacy/{pharmacyId}/transfers
 
 - **Origen:** CONTRATO
 - **Nombre:** Transferir stock entre ubicaciones (UC-25-10)
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.transfer` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:102`
+- **Implementación:** `PharmacyInventoryController.transfer` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:121`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1810,19 +2106,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/{pharmacyId}/transfers` la atiende `PharmacyInventoryController.transfer` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTransferDto` (6 campos, 5 obligatorios). Delega en `InventoryTransfersService.transfer`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_stock_positions. Actualiza pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+`POST /pharmacy/{pharmacyId}/transfers` la atiende `PharmacyInventoryController.transfer` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:121). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTransferDto` (6 campos, 5 obligatorios). Delega en `InventoryTransfersService.transfer`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_stock_positions. Actualiza pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:102` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:121` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:121` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1830,14 +2126,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLocationInPharmacy → InventoryScopeRepository.findLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:64` |
-| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts:125` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLocationInPharmacy → InventoryScopeRepository.findLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:71` |
+| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Parámetros
 
@@ -1899,6 +2195,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Stock disponible insuficiente en el botiquín |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Stock disponible insuficiente en origen |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1914,14 +2211,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. POST /pharmacy/{siteId}/count-sessions
+## 20. POST /pharmacy/{siteId}/count-sessions
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar y congelar una sesión de conteo (UC-25-06)
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.openCountSession` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:119`
+- **Implementación:** `PharmacyInventoryController.openCountSession` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:138`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1931,19 +2228,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/{siteId}/count-sessions` la atiende `PharmacyInventoryController.openCountSession` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:119). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCountSessionDto` (5 campos, 3 obligatorios). Delega en `InventoryCountService.openSession`. Crea filas en pharmacy_inventory.inventory_count_lines, pharmacy_inventory.inventory_count_sessions. Lee pharmacy_inventory.inventory_count_sessions, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+`POST /pharmacy/{siteId}/count-sessions` la atiende `PharmacyInventoryController.openCountSession` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:138). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCountSessionDto` (5 campos, 3 obligatorios). Delega en `InventoryCountService.openSession`. Crea filas en pharmacy_inventory.inventory_count_lines, pharmacy_inventory.inventory_count_sessions. Lee pharmacy_inventory.inventory_count_sessions, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:138` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:138` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1952,12 +2249,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_count_lines` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → CountSessionsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/count-sessions.repository.ts:168` |
 | `pharmacy_inventory.inventory_count_sessions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → CountSessionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/count-sessions.repository.ts:142` |
 | `pharmacy_inventory.inventory_count_sessions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → CountSessionsRepository.countOpenAtLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/count-sessions.repository.ts:97` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
-| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:77` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
+| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:66` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:45` |
 
 ### Parámetros
 
@@ -1969,11 +2266,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `inventoryLocationId` | `string` | Sí | formato uuid | `@IsUUID()` | Ubicación a contar | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:36` |
-| `freeze` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Congelar movimientos durante el conteo | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:46` |
-| `items` | `array<CountSessionItemDto>` | Sí | — | `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => CountSessionItemDto)` | Productos/lotes a contar | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:58` |
-| `items[].pharmacyProductId` | `string` | Sí | formato uuid | `@IsUUID()` | Producto de farmacia | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:18` |
-| `items[].inventoryLotId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Lote específico | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:26` |
+| `inventoryLocationId` | `string` | Sí | formato uuid | `@IsUUID()` | Ubicación a contar | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:31` |
+| `freeze` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | Congelar movimientos durante el conteo | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:41` |
+| `items` | `array<CountSessionItemDto>` | Sí | — | `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => CountSessionItemDto)` | Productos/lotes a contar | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:53` |
+| `items[].pharmacyProductId` | `string` | Sí | formato uuid | `@IsUUID()` | Producto de farmacia | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:13` |
+| `items[].inventoryLotId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Lote específico | `src/modules/pharmacy_inventory/presentation/dto/create-count-session.dto.ts:21` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2036,14 +2333,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. POST /pharmacy/{siteId}/inventory-locations
+## 21. POST /pharmacy/{siteId}/inventory-locations
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una ubicación de inventario
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.createLocation` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:66`
+- **Implementación:** `PharmacyInventoryController.createLocation` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2053,28 +2350,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/{siteId}/inventory-locations` la atiende `PharmacyInventoryController.createLocation` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:66). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateLocationDto` (4 campos, 2 obligatorios). Delega en `InventoryLocationsService.create`. Crea filas en pharmacy_inventory.inventory_locations. Lee pharmacy_inventory.inventory_locations, pharmacy.pharmacies, pharmacy.pharmacy_sites.
+`POST /pharmacy/{siteId}/inventory-locations` la atiende `PharmacyInventoryController.createLocation` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateLocationDto` (7 campos, 2 obligatorios). Delega en `InventoryLocationsService.create`. Crea filas en messaging.domain_events, messaging.outbox_messages, pharmacy_inventory.inventory_locations. Lee messaging.outbox_messages, pharmacy_inventory.inventory_locations, pharmacy.pharmacies, pharmacy.pharmacy_sites. Publica un evento calculado (null).
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:66` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:67` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → MessagingDomainEventAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → MessagingDomainEventAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → MessagingDomainEventAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:112` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.findActiveWardStock | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:85` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:45` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | calculado: `null` | `src/modules/pharmacy_inventory/infrastructure/adapters/messaging-domain-event.adapter.ts:16` |
 
 ### Parámetros
 
@@ -2086,10 +2392,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | Código de la ubicación | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:18` |
-| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre legible de la ubicación | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:26` |
-| `parentLocationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ubicación padre (jerarquía) | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:37` |
-| `controlledAccess` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Requiere acceso controlado | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:45` |
+| `code` | `string` | Sí | longitud máxima 64 | `@IsString()` `@MaxLength(64)` | Código de la ubicación | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:13` |
+| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre legible de la ubicación | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:21` |
+| `parentLocationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ubicación padre (jerarquía) | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:32` |
+| `controlledAccess` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | Requiere acceso controlado | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:40` |
+| `careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Espacio físico (F5c) | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:46` |
+| `clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Unidad clínica (F5c) | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:52` |
+| `locationTypeCode` | `string` | No | valores: SHELF, WARD_STOCK | `@IsOptional()` `@IsIn(['SHELF', 'WARD_STOCK'])` | — | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:58` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2107,7 +2416,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "parentLocationId": "00000000-0000-4000-8000-000000000001",
-  "controlledAccess": true
+  "controlledAccess": true,
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+  "locationTypeCode": "SHELF"
 }
 ```
 
@@ -2141,14 +2453,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. POST /pharmacy/count-sessions/{id}/approve
+## 22. POST /pharmacy/count-sessions/{id}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar conteo y ajustar ledger por varianza (UC-25-07)
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.approveCountSession` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:139`
+- **Implementación:** `PharmacyInventoryController.approveCountSession` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:158`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2158,19 +2470,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/count-sessions/{id}/approve` la atiende `PharmacyInventoryController.approveCountSession` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:139). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApproveCountSessionDto` (3 campos, 3 obligatorios). Delega en `InventoryCountService.approve`. Crea filas en pharmacy_inventory.inventory_ledger_entries. Actualiza pharmacy_inventory.inventory_count_lines, pharmacy_inventory.inventory_count_sessions, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_count_lines, pharmacy_inventory.inventory_count_sessions, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products y 1 más.
+`POST /pharmacy/count-sessions/{id}/approve` la atiende `PharmacyInventoryController.approveCountSession` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:158). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApproveCountSessionDto` (3 campos, 3 obligatorios). Delega en `InventoryCountService.approve`. Crea filas en pharmacy_inventory.inventory_ledger_entries. Actualiza pharmacy_inventory.inventory_count_lines, pharmacy_inventory.inventory_count_sessions, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_count_lines, pharmacy_inventory.inventory_count_sessions, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:139` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:158` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:158` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2182,13 +2494,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_count_sessions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → CountSessionsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/count-sessions.repository.ts:88` |
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
-| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
+| `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:102` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-count/approve-inventory-count.use-case.ts:122` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:45` |
 
 ### Parámetros
 
@@ -2264,7 +2576,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /pharmacy/dispensations/{id}/reverse
+## 23. POST /pharmacy/dispensations/{id}/reverse
 
 - **Origen:** CONTRATO
 - **Nombre:** Reversar una dispensación (UC-25-11)
@@ -2289,11 +2601,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:58` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2301,14 +2613,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts:115` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → DispensationsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:131` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts:86` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → DispensationsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:108` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Parámetros
 
@@ -2369,7 +2681,100 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. GET /pharmacy/orders
+## 24. POST /pharmacy/inventory-locations/{id}/relocate
+
+- **Origen:** CONTRATO
+- **Nombre:** Reubicar una ubicación de inventario (F5c)
+- **Bloque:** Farmacia
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyInventoryController.relocateLocation` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:85`
+
+### Qué es y para qué sirve (negocio)
+
+Reubicar una ubicación de inventario (F5c). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`POST /pharmacy/inventory-locations/{id}/relocate` la atiende `PharmacyInventoryController.relocateLocation` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:85). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RelocateLocationDto` (1 campo, 1 obligatorio). Delega en `InventoryLocationsService.relocate`. No se determinaron tablas para esta operación.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:85` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:85` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `RelocateLocationDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `careSpaceId` | `string` | Sí | formato uuid | `@IsUUID()` | Espacio destino | `src/modules/pharmacy_inventory/presentation/dto/create-location.dto.ts:66` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "careSpaceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5c.int-spec.ts:269` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. GET /pharmacy/orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de pedidos de las farmacias del tenant (FAR-E2)
@@ -2394,8 +2799,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2422,10 +2827,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1769` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersRepository.findOrdersForPharmacies | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:99` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersRepository.findPharmaciesByTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:116` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2460,15 +2865,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PharmacyOrderDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:602` |
-| `items[].reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `items[].reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `items[].reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `items[].reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `items[].reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `items[].reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `items[].reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `items[].insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `items` | `array<PharmacyOrderDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:630` |
+| `items[].reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `items[].reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `items[].reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `items[].reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `items[].reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `items[].reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `items[].reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `items[].insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `items[].insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `items[].insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `items[].insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -2489,71 +2894,71 @@ La operación no recibe cuerpo.
 | `items[].insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `items[].insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `items[].insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `items[].insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `items[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `items[].insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `items[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `items[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `items[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `items[].createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `items[].expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `items[].medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `items[].prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `items[].createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `items[].expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `items[].medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `items[].prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `items[].prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `items[].prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `items[].deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `items[].deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `items[].deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `items[].deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `items[].deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `items[].pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `items[].pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `items[].pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `items[].totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `items[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `items[].deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `items[].pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `items[].pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `items[].pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `items[].totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `items[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `items[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `items[].substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `items[].substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `items[].substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `items[].substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `items[].substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `items[].substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `items[].substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `items[].substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `items[].substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `items[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `items[].substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `items[].substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `items[].substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `items[].substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `items[].substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `items[].substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `items[].substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `items[].substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `items[].substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `items[].substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `items[].substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `items[].substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `items[].substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `items[].substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `items[].lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `items[].lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `items[].lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `items[].lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `items[].lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `items[].lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `items[].lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `items[].lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `items[].lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `items[].substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `items[].lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `items[].lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `items[].lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `items[].lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `items[].lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `items[].lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `items[].lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `items[].lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `items[].lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `items[].lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `items[].lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `items[].lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `items[].lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `items[].lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `items[].lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `items[].lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `items[].lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `items[].lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `items[].lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `items[].lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `items[].lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `items[].lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `items[].lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `items[].lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `items[].lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:608` |
+| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:636` |
 
 ### Respuestas posibles
 
@@ -2579,7 +2984,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 23. POST /pharmacy/orders
+## 26. POST /pharmacy/orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un pedido de farmacia (FAR-E1)
@@ -2596,7 +3001,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/orders` la atiende `PharmacyOrdersController.create` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:94). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `CreatePharmacyOrderDto` (7 campos, 4 obligatorios). Delega en `PharmacyOrdersService.create`. Crea filas en messaging.domain_events, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations. Actualiza pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions. Lee clinical.medication_requests, common.addresses, community.public_profiles, directory.tenants, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_reservation_lines y 12 más. Publica un evento calculado (null).
+`POST /pharmacy/orders` la atiende `PharmacyOrdersController.create` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:94). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `CreatePharmacyOrderDto` (7 campos, 4 obligatorios). Delega en `PharmacyOrdersService.create`. Crea filas en messaging.domain_events, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations. Actualiza pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions. Lee clinical.medication_requests, common.addresses, community.public_profiles, directory.tenants, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_reservation_lines y 14 más. Publica un evento calculado (null).
 
 ### Requerimientos
 
@@ -2604,16 +3009,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersRepository.findOwnMedicationRequest | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:278` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PrescriptionOrderGuard.lockOwnRequest → PrescriptionBalanceRepository.lockRequest | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:134` |
 | `common.addresses` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findAddressesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:361` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → CommunityPharmacyOrderChatAdapter.findPharmacyShowcases → CommunityOrderChatService.findOrganizationShowcases → PublicProfilesRepository.listByIds | `src/modules/community/repositories/public-profiles.repository.ts:135` |
 | `directory.tenants` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → CommunityPharmacyOrderChatAdapter.findPharmacyShowcases → CommunityOrderChatService.findOrganizationShowcases → CommunityOrganizationStaffService.verifiedActiveTenantIds | `src/modules/community/services/community-organization-staff.service.ts:283` |
@@ -2623,19 +3028,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → PharmacyOrdersUseCases.reserveLineStock → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → PharmacyOrdersUseCases.reserveLineStock → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
-| `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → PharmacyOrdersUseCases.reserveLineStock → ReservationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:188` |
+| `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → ReservationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:188` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → ReservationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:158` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.sealFrozenTotal | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2050` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.sealFrozenTotal | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2123` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersRepository.findOrderByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:182` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → PharmacyOrdersUseCases.reserveLineStock | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2311` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → PharmacyOrdersUseCases.reserveLineStock | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2403` |
 | `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.reserveOrderLines → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
+| `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | POR_SQL | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PrescriptionOrderGuard.assertOrderRespectsPrescription → PrescriptionOrderGuard.resolvePrescription → PrescriptionBalanceRepository.balanceByConcept | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:250` |
+| `pharmacy_inventory.medication_dispensations` | LEE | LEE | POR_SQL | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PrescriptionOrderGuard.assertOrderRespectsPrescription → PrescriptionOrderGuard.resolvePrescription → PrescriptionBalanceRepository.balanceByConcept | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:250` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyDirectoryAdapter.findVisibleById → PharmacyReadRepository.findVisibleById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:64` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:226` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:253` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyDirectoryAdapter.findSellableProductsByIds → PharmacyReadRepository.findSellableProductsByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:207` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyDirectoryAdapter.findActiveSiteById → PharmacyReadRepository.findActiveSiteById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:93` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyDirectoryAdapter.findVisibleById → PharmacyReadRepository.findVisibleById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:65` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:270` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:297` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyDirectoryAdapter.findSellableProductsByIds → PharmacyReadRepository.findSellableProductsByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:208` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyDirectoryAdapter.findActiveSiteById → PharmacyReadRepository.findActiveSiteById | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:94` |
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findPersonNamesByProfileIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:143` |
 | `profiles.persons` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findPersonNamesByProfileIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:135` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | PharmacyOrdersController.create → PharmacyOrdersService.create → PharmacyOrdersUseCases.create → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findPrimarySpecialtyConceptIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:331` |
@@ -2651,13 +3058,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `siteId` | `string` | Sí | formato uuid | `@IsUUID()` | Sede de farmacia | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:69` |
-| `medicationRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Receta (clinical.medication_requests) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:80` |
-| `deliveryMode` | `string` | No | valores: RETIRO, DOMICILIO, TRABAJO | `@IsOptional()` `@IsIn([...DELIVERY_MODES])` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:91` |
-| `idempotencyKey` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Clave de idempotencia; repetirla devuelve el mismo pedido | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:104` |
-| `lines` | `array<PharmacyOrderLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => PharmacyOrderLineInputDto)` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:114` |
-| `lines[].productId` | `string` | Sí | formato uuid | `@IsUUID()` | Producto de farmacia | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:51` |
-| `lines[].quantity` | `number` | Sí | mínimo 0; mayor que 0 | `@IsNumber()` `@IsPositive()` | Cantidad solicitada | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:59` |
+| `siteId` | `string` | Sí | formato uuid | `@IsUUID()` | Sede de farmacia | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:72` |
+| `medicationRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Receta (clinical.medication_requests) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:83` |
+| `deliveryMode` | `string` | No | valores: RETIRO, DOMICILIO, TRABAJO | `@IsOptional()` `@IsIn([...DELIVERY_MODES])` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:94` |
+| `idempotencyKey` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Clave de idempotencia; repetirla devuelve el mismo pedido | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:107` |
+| `lines` | `array<PharmacyOrderLineInputDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => PharmacyOrderLineInputDto)` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:117` |
+| `lines[].productId` | `string` | Sí | formato uuid | `@IsUUID()` | Producto de farmacia | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:54` |
+| `lines[].quantity` | `number` | Sí | mínimo 0; mayor que 0 | `@IsNumber()` `@IsPositive()` | Cantidad solicitada | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:62` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2696,14 +3103,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -2724,68 +3131,68 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -2798,7 +3205,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Sede de farmacia no encontrada; ResourceNotFoundException: Receta no encontrada; ResourceNotFoundException: Producto no disponible en la sede |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente; PreconditionFailedException: El pedido repite productos; use una línea por producto; PreconditionFailedException: El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente; PreconditionFailedException: El pedido repite productos; use una línea por producto; PreconditionFailedException: El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO; PreconditionFailedException: {PRESCRIPTION_ORDER_MESSAGES[violation.reason]} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
@@ -2813,7 +3220,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. GET /pharmacy/orders/{id}
+## 27. GET /pharmacy/orders/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar un pedido de farmacia (FAR-E1)
@@ -2838,9 +3245,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2881,10 +3288,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1769` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersRepository.findOrderById | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:45` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2916,14 +3323,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -2944,68 +3351,68 @@ La operación no recibe cuerpo.
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -3033,7 +3440,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 25. POST /pharmacy/orders/{id}/accept-substitutions
+## 28. POST /pharmacy/orders/{id}/accept-substitutions
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar los genéricos propuestos (paciente)
@@ -3050,7 +3457,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/orders/{id}/accept-substitutions` la atiende `PharmacyOrdersController.acceptSubstitutions` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:249). Exige sesión con alguno de los roles PATIENT. Delega en `PharmacyOrdersService.acceptSubstitutions`. Crea filas en messaging.domain_events, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_reservation_lines. Actualiza pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_order_substitutions. Lee clinical.medication_requests, common.addresses, community.public_profiles, directory.tenants, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_reservation_lines y 10 más. Publica un evento calculado (null).
+`POST /pharmacy/orders/{id}/accept-substitutions` la atiende `PharmacyOrdersController.acceptSubstitutions` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:249). Exige sesión con alguno de los roles PATIENT. Delega en `PharmacyOrdersService.acceptSubstitutions`. Crea filas en messaging.domain_events, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries. Actualiza pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_order_substitutions. Lee clinical.medication_requests, common.addresses, community.public_profiles, directory.tenants, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_reservation_lines y 10 más. Publica un evento calculado (null).
 
 ### Requerimientos
 
@@ -3058,9 +3465,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:249` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3077,13 +3484,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.reserveLineStock → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
-| `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.reserveLineStock → ReservationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:188` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1114` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1187` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.loadOwnOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.reserveLineStock | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2311` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.reserveLineStock | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2403` |
 | `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
-| `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1109` |
+| `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1182` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.pendingProposalsOf → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.loadOwnOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.acceptSubstitutions → PharmacyOrdersService.acceptSubstitutions → PharmacyOrdersUseCases.acceptSubstitutions → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -3113,14 +3519,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -3141,68 +3547,68 @@ La operación no recibe cuerpo.
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -3229,7 +3635,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. POST /pharmacy/orders/{id}/cancel
+## 29. POST /pharmacy/orders/{id}/cancel
 
 - **Origen:** CONTRATO
 - **Nombre:** Cancelar un pedido de farmacia (FAR-E1)
@@ -3254,9 +3660,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:178` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3273,10 +3679,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → ReservationsRepository.findLinesByReservation | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:142` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:740` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:781` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -3306,14 +3712,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -3334,68 +3740,68 @@ La operación no recibe cuerpo.
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -3423,7 +3829,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. POST /pharmacy/orders/{id}/confirm
+## 30. POST /pharmacy/orders/{id}/confirm
 
 - **Origen:** CONTRATO
 - **Nombre:** Confirmar el pedido (FAR-E2)
@@ -3440,7 +3846,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/orders/{id}/confirm` la atiende `PharmacyOrdersController.confirm` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:224). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `ConfirmPharmacyOrderDto` (4 campos, 0 obligatorios). Delega en `PharmacyOrdersService.confirm`. Crea filas en messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.pharmacy_order_substitutions. Actualiza iam.devices, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions. Lee clinical.medication_requests, common.addresses, community.public_profiles, directory.tenants, iam.devices, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers y 18 más. Publica un evento calculado (null).
+`POST /pharmacy/orders/{id}/confirm` la atiende `PharmacyOrdersController.confirm` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:224). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `ConfirmPharmacyOrderDto` (5 campos, 0 obligatorios). Delega en `PharmacyOrdersService.confirm`. Crea filas en messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions y 1 más. Actualiza iam.devices, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions. Lee clinical.medication_requests, common.addresses, community.public_profiles, directory.tenants, iam.devices, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers y 19 más. Publica un evento calculado (null).
 
 ### Requerimientos
 
@@ -3448,11 +3854,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:224` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:224` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3475,19 +3881,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.publishStaffEvent → MessagingDomainEventAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrderNotificationsService.substitutionsProposed → NotifyPharmacyOrderUseCase.substitutionsProposed → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → MessagingInAppNotificationAdapter.emit → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrderNotificationsService.substitutionsProposed → NotifyPharmacyOrderUseCase.substitutionsProposed → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → MessagingInAppNotificationAdapter.emit → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
-| `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.reserveLineStock → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.reserveLineStock → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PendingOrderLines.resolveOnConfirm → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:112` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PendingOrderLines.resolveOnConfirm → PendingOrderLines.sitePositions → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:972` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1039` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PendingOrderLines.resolveOnConfirm → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:140` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.reserveLineStock | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:2403` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.reserveLineStock → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrderSubstitutionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:74` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:226` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:253` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:270` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrdersUseCases.freezePricesFor → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:297` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findSitesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:247` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrderNotificationsService.substitutionsProposed → NotifyPharmacyOrderUseCase.substitutionsProposed → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → ProfilesPersonAccountLinksAdapter.findActiveByPerson → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
@@ -3512,10 +3921,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `adjustments` | `array<ConfirmOrderAdjustmentDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ConfirmOrderAdjustmentDto)` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:536` |
-| `adjustments[].productId` | `string` | No | formato uuid | `@IsUUID()` | Producto de la línea ajustada | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:503` |
-| `adjustments[].decision` | `string` | No | valores: NO_DISPONIBLE, PROPONER_GENERICO | `@IsIn([...CONFIRM_LINE_DECISIONS])` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:510` |
-| `adjustments[].proposedProductId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Producto propuesto (mismo concepto del vademécum) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:523` |
+| `adjustments` | `array<ConfirmOrderAdjustmentDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ConfirmOrderAdjustmentDto)` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:564` |
+| `adjustments[].productId` | `string` | No | formato uuid | `@IsUUID()` | Producto de la línea ajustada | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:514` |
+| `adjustments[].decision` | `string` | No | valores: NO_DISPONIBLE, PROPONER_GENERICO, CONFIRMAR_STOCK | `@IsIn([...CONFIRM_LINE_DECISIONS])` | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:521` |
+| `adjustments[].proposedProductId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Producto propuesto (mismo concepto del vademécum) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:534` |
+| `adjustments[].quantity` | `number` | No | mínimo 1; máximo 1000000 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(1_000_000)` | Unidades que la sede tiene para vender (con CONFIRMAR_STOCK, sobre una línea por confirmar) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:551` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3531,7 +3941,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
     {
       "productId": "00000000-0000-4000-8000-000000000001",
       "decision": "NO_DISPONIBLE",
-      "proposedProductId": "00000000-0000-4000-8000-000000000001"
+      "proposedProductId": "00000000-0000-4000-8000-000000000001",
+      "quantity": 1
     }
   ]
 }
@@ -3543,14 +3954,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -3571,68 +3982,68 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -3659,7 +4070,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. POST /pharmacy/orders/{id}/conversation
+## 31. POST /pharmacy/orders/{id}/conversation
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir el chat del pedido con la farmacia
@@ -3684,9 +4095,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3718,8 +4129,8 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:615` |
-| `pharmacyProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:622` |
+| `conversationId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:643` |
+| `pharmacyProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:650` |
 
 ### Respuestas posibles
 
@@ -3744,7 +4155,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 29. POST /pharmacy/orders/{id}/dispense
+## 32. POST /pharmacy/orders/{id}/dispense
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispensar el pedido en el mostrador (FAR-E3)
@@ -3769,11 +4180,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:345` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:345` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3800,10 +4211,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1553` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1626` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1527` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1600` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.medication_dispensation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:177` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:147` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.findByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:117` |
@@ -3833,9 +4244,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `pickupCode` | `string` | Sí | longitud mínima 1; longitud máxima 20 | `@IsString()` `@IsNotEmpty()` `@MaxLength(20)` | Código de retiro que presenta la persona | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:565` |
-| `productIds` | `array<string>` | No | formato uuid; mínimo 1 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(1)` `@IsUUID('all', { each: true })` | Productos de esta entrega; omitido = todo el saldo en pie | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:580` |
-| `idempotencyKey` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Clave de idempotencia; repetirla no duplica la entrega | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:593` |
+| `pickupCode` | `string` | Sí | longitud mínima 1; longitud máxima 20 | `@IsString()` `@IsNotEmpty()` `@MaxLength(20)` | Código de retiro que presenta la persona | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:593` |
+| `productIds` | `array<string>` | No | formato uuid; mínimo 1 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(1)` `@IsUUID('all', { each: true })` | Productos de esta entrega; omitido = todo el saldo en pie | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:608` |
+| `idempotencyKey` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Clave de idempotencia; repetirla no duplica la entrega | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:621` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3863,14 +4274,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -3891,68 +4302,68 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -3980,7 +4391,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /pharmacy/orders/{id}/prefer-original
+## 33. POST /pharmacy/orders/{id}/prefer-original
 
 - **Origen:** CONTRATO
 - **Nombre:** Preferir los productos originales (paciente)
@@ -4005,9 +4416,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:273` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:273` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4021,9 +4432,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.publishStaffEvent → MessagingDomainEventAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.publishStaffEvent → MessagingDomainEventAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1177` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1250` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.loadOwnOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
-| `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1172` |
+| `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1245` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.pendingProposalsOf → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.loadOwnOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.preferOriginal → PharmacyOrdersService.preferOriginal → PharmacyOrdersUseCases.preferOriginal → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4053,14 +4464,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -4081,68 +4492,68 @@ La operación no recibe cuerpo.
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -4169,7 +4580,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. POST /pharmacy/orders/{id}/ready
+## 34. POST /pharmacy/orders/{id}/ready
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar el pedido listo para retiro (FAR-E2/E3)
@@ -4194,9 +4605,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:320` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:320` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4220,7 +4631,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready → PharmacyOrderNotificationsService.orderReady → NotifyPharmacyOrderUseCase.orderReady → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → MessagingInAppNotificationAdapter.emit → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready → PharmacyOrderNotificationsService.orderReady → NotifyPharmacyOrderUseCase.orderReady → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → MessagingInAppNotificationAdapter.emit → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1301` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1374` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.ready → PharmacyOrdersService.ready → PharmacyOrdersUseCases.ready → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
@@ -4252,14 +4663,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -4280,68 +4691,68 @@ La operación no recibe cuerpo.
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -4369,7 +4780,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 32. POST /pharmacy/orders/{id}/reject
+## 35. POST /pharmacy/orders/{id}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar el pedido (FAR-E2)
@@ -4394,11 +4805,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:294` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:294` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4425,10 +4836,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → ReservationsRepository.findLinesByReservation | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:142` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1233` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1306` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4455,7 +4866,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | Sí | longitud mínima 1; longitud máxima 500 | `@IsString()` `@IsNotEmpty()` `@MaxLength(500)` | Motivo del rechazo (se persiste en el pedido) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:551` |
+| `reason` | `string` | Sí | longitud mínima 1; longitud máxima 500 | `@IsString()` `@IsNotEmpty()` `@MaxLength(500)` | Motivo del rechazo (se persiste en el pedido) | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:579` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4479,14 +4890,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -4507,68 +4918,68 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -4595,7 +5006,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 33. POST /pharmacy/orders/{id}/review
+## 36. POST /pharmacy/orders/{id}/review
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir revisión del pedido (FAR-E2)
@@ -4620,9 +5031,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:203` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:203` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4646,7 +5057,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview → PharmacyOrderNotificationsService.orderUnderReview → NotifyPharmacyOrderUseCase.orderUnderReview → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → MessagingInAppNotificationAdapter.emit → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview → PharmacyOrderNotificationsService.orderUnderReview → NotifyPharmacyOrderUseCase.orderUnderReview → NotifyPharmacyOrderUseCase.emitToPatient → NotifyPharmacyOrderUseCase.emitToPerson → MessagingInAppNotificationAdapter.emit → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:853` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:894` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.openReview → PharmacyOrdersService.openReview → PharmacyOrdersUseCases.openReview → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
@@ -4678,14 +5089,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -4706,68 +5117,68 @@ La operación no recibe cuerpo.
 | `insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `currency.code` | `string` | No | — | — | — | sin fuente |
 | `currency.display` | `string` | No | — | — | — | sin fuente |
-| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
 
@@ -4794,7 +5205,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 34. GET /pharmacy/orders/me
+## 37. GET /pharmacy/orders/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis pedidos de farmacia, más nuevos primero (FAR-E1)
@@ -4819,8 +5230,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4860,10 +5271,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:44` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findLinesByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:220` |
-| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
+| `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1769` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersRepository.findOrdersByPatient | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:165` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:83` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → PharmacyOrdersRepository.findPharmaciesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:265` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4889,15 +5300,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PharmacyOrderDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:602` |
-| `items[].reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:253` |
-| `items[].reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:212` |
-| `items[].reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:215` |
-| `items[].reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:218` |
-| `items[].reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:221` |
-| `items[].reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:224` |
-| `items[].reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:227` |
-| `items[].insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:256` |
+| `items` | `array<PharmacyOrderDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:630` |
+| `items[].reservationLines` | `array<PharmacyOrderReservationLineDto>` | Sí | — | — | Porciones confirmadas o entregadas vigentes para facturación | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:258` |
+| `items[].reservationLines[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:217` |
+| `items[].reservationLines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:220` |
+| `items[].reservationLines[].quantity` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:223` |
+| `items[].reservationLines[].unitPriceAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:226` |
+| `items[].reservationLines[].billedAmount` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:229` |
+| `items[].reservationLines[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:232` |
+| `items[].insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
 | `items[].insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `items[].insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `items[].insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -4918,71 +5329,71 @@ La operación no recibe cuerpo.
 | `items[].insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:18` |
 | `items[].insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:21` |
 | `items[].insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/patient-settlement.dto.ts:24` |
-| `items[].insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:261` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:267` |
-| `items[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:273` |
+| `items[].insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:266` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:272` |
+| `items[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:278` |
 | `items[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `items[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `items[].createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:279` |
-| `items[].expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:286` |
-| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:292` |
-| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:298` |
-| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:304` |
-| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:310` |
-| `items[].medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:316` |
-| `items[].prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:328` |
+| `items[].createdAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:284` |
+| `items[].expiresAt` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:291` |
+| `items[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:297` |
+| `items[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:303` |
+| `items[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:309` |
+| `items[].pharmacyName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:315` |
+| `items[].medicationRequestId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:321` |
+| `items[].prescriber` | `PharmacyOrderPrescriberDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:333` |
 | `items[].prescriber.name` | `string` | No | admite null | — | — | sin fuente |
 | `items[].prescriber.specialty` | `string` | No | admite null | — | — | sin fuente |
-| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:336` |
-| `items[].deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:343` |
+| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:341` |
+| `items[].deliveryMode` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:348` |
 | `items[].deliveryMode.code` | `string` | No | — | — | — | sin fuente |
 | `items[].deliveryMode.display` | `string` | No | — | — | — | sin fuente |
-| `items[].deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:351` |
-| `items[].pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:362` |
-| `items[].pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:373` |
-| `items[].pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:380` |
-| `items[].totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:391` |
-| `items[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:397` |
+| `items[].deliveryAddressText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:356` |
+| `items[].pickupCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:367` |
+| `items[].pharmacyPublicProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:378` |
+| `items[].pharmacyPublicSlug` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:385` |
+| `items[].totalAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:396` |
+| `items[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:402` |
 | `items[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:404` |
-| `items[].substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:412` |
-| `items[].substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:427` |
-| `items[].substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:433` |
-| `items[].substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:439` |
-| `items[].substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:445` |
-| `items[].substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:451` |
-| `items[].substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:457` |
-| `items[].substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:463` |
-| `items[].substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:469` |
+| `items[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:409` |
+| `items[].substitutions` | `array<PharmacyOrderSubstitutionDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:417` |
+| `items[].substitutions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:432` |
+| `items[].substitutions[].originalProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:438` |
+| `items[].substitutions[].originalName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:444` |
+| `items[].substitutions[].originalUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:450` |
+| `items[].substitutions[].proposedProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:456` |
+| `items[].substitutions[].proposedName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:462` |
+| `items[].substitutions[].proposedUnitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:468` |
+| `items[].substitutions[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:474` |
 | `items[].substitutions[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].substitutions[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:475` |
+| `items[].substitutions[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:480` |
 | `items[].substitutions[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `items[].substitutions[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `items[].substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:481` |
-| `items[].lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:418` |
-| `items[].lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:123` |
-| `items[].lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:129` |
-| `items[].lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:135` |
-| `items[].lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:141` |
-| `items[].lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:147` |
-| `items[].lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:153` |
-| `items[].lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:159` |
-| `items[].lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:165` |
+| `items[].substitutions[].decidedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:486` |
+| `items[].lines` | `array<PharmacyOrderLineDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:423` |
+| `items[].lines[].productId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:126` |
+| `items[].lines[].medicationConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:132` |
+| `items[].lines[].productCode` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:138` |
+| `items[].lines[].brandName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:144` |
+| `items[].lines[].genericName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:150` |
+| `items[].lines[].strengthText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:156` |
+| `items[].lines[].packageSizeText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:162` |
+| `items[].lines[].medication` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:168` |
 | `items[].lines[].medication.code` | `string` | No | — | — | — | sin fuente |
 | `items[].lines[].medication.display` | `string` | No | — | — | — | sin fuente |
-| `items[].lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:171` |
-| `items[].lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:177` |
-| `items[].lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:184` |
-| `items[].lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:193` |
-| `items[].lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:199` |
+| `items[].lines[].requestedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:174` |
+| `items[].lines[].reservedQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:180` |
+| `items[].lines[].fulfilledQuantity` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:187` |
+| `items[].lines[].unitPriceAmount` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:196` |
+| `items[].lines[].currency` | `InventoryConceptDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:202` |
 | `items[].lines[].currency.code` | `string` | No | — | — | — | sin fuente |
 | `items[].lines[].currency.display` | `string` | No | — | — | — | sin fuente |
-| `items[].lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:206` |
+| `items[].lines[].status` | `InventoryConceptDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:211` |
 | `items[].lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:17` |
 | `items[].lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts:23` |
-| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:608` |
+| `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts:636` |
 
 ### Respuestas posibles
 
@@ -5008,14 +5419,144 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 35. POST /pharmacy/recall-holds
+## 38. GET /pharmacy/prescription-shares/{token}
+
+- **Origen:** CONTRATO
+- **Nombre:** Abrir una receta compartida desde la farmacia (FAR-02)
+- **Bloque:** Farmacia
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyPrescriptionSharesController.open` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-prescription-shares.controller.ts:45`
+
+### Qué es y para qué sirve (negocio)
+
+Abrir una receta compartida desde la farmacia (FAR-02). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`GET /pharmacy/prescription-shares/{token}` la atiende `PharmacyPrescriptionSharesController.open` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-prescription-shares.controller.ts:45). Exige sesión con alguno de los roles PHARMACY_STAFF. Delega en `OpenPrescriptionShareUseCase.execute`. Crea filas en audit.data_access_log, delegated_access.shared_access_link_uses. Lee clinical.medication_requests, common.identifiers, delegated_access.shared_access_links, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_reservation_lines, pharmacy_inventory.inventory_reservations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.medication_dispensation_lines y 11 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-prescription-shares.controller.ts:45` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | user-agent (obligatoria) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → AuditPrescriptionShareAccessLogAdapter.recordPharmacyRead → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → DelegatedAccessPrescriptionSharesAdapter.openForPharmacy → PrescriptionSharesService.openForPharmacy → PrescriptionSharesService.resolve → SharedAccessLinksRepository.findItemsByEncounter | `src/modules/delegated_access/repositories/shared-access-links.repository.ts:215` |
+| `common.identifiers` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → ProfilesPatientIdentityAdapter.findByPatientProfile → IdentifiersRepository.findCurrentByOwner | `src/modules/common/repositories/identifiers.repository.ts:126` |
+| `delegated_access.shared_access_link_uses` | ESCRIBE | CREA | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → DelegatedAccessPrescriptionSharesAdapter.openForPharmacy → PrescriptionSharesService.openForPharmacy → PrescriptionSharesService.recordUse → SharedAccessLinksRepository.appendUse | `src/modules/delegated_access/repositories/shared-access-links.repository.ts:189` |
+| `delegated_access.shared_access_links` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → DelegatedAccessPrescriptionSharesAdapter.openForPharmacy → PrescriptionSharesService.openForPharmacy → PrescriptionSharesService.resolve → PrescriptionSharesService.findByToken → SharedAccessLinksRepository.findByTokenHash | `src/modules/delegated_access/repositories/shared-access-links.repository.ts:98` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.stockUpdates → InventoryReadRepository.findActiveLocationsBySites | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:21` |
+| `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | POR_SQL | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.balanceOf → PrescriptionBalanceRepository.balanceByConcept | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:250` |
+| `pharmacy_inventory.inventory_reservations` | LEE | LEE | POR_SQL | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.balanceOf → PrescriptionBalanceRepository.balanceByConcept | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:250` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.stockUpdates → InventoryReadRepository.findStockPositions | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-read.repository.ts:41` |
+| `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | POR_SQL | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.balanceOf → PrescriptionBalanceRepository.balanceByConcept | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:250` |
+| `pharmacy_inventory.medication_dispensations` | LEE | LEE | POR_SQL | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.balanceOf → PrescriptionBalanceRepository.balanceByConcept | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts:250` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → PharmacyDirectoryAdapter.findVisibleByTenant → PharmacyReadRepository.findVisibleByTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:48` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.generalPrices → PharmacyDirectoryAdapter.findCurrentPublicPriceLists → PharmacyReadRepository.findCurrentPublicPriceLists | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:270` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.generalPrices → PharmacyDirectoryAdapter.findCurrentPrices → PharmacyReadRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:297` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → PrescriptionShareReadRepository.findActiveProductsByMedicationConcepts | `src/modules/pharmacy_inventory/infrastructure/repositories/prescription-share-read.repository.ts:52` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → PharmacyDirectoryAdapter.findActiveSites → PharmacyReadRepository.findActiveSites | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:79` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → DelegatedAccessPrescriptionSharesAdapter.openForPharmacy → PrescriptionSharesService.openForPharmacy → PrescriptionSharesService.prescriberOf → PrescriberIdentityReader.read → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → DelegatedAccessPrescriptionSharesAdapter.openForPharmacy → PrescriptionSharesService.openForPharmacy → PrescriptionSharesService.prescriberOf → PrescriberIdentityReader.read → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → ProfilesPatientIdentityAdapter.findByPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.persons` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → ProfilesPatientIdentityAdapter.findByPatientProfile → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyPrescriptionSharesController.open → OpenPrescriptionShareUseCase.execute → OpenPrescriptionShareUseCase.compose → OpenPrescriptionShareUseCase.concepts → PharmacyDirectoryAdapter.findConcepts → PharmacyReadRepository.findConcepts | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:348` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `token` | path | Sí | `string` | — |
+| `user-agent` | header | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PharmacyPrescriptionShareDto>` · DTO `PharmacyPrescriptionShareDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:170` |
+| `issuedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:174` |
+| `validTo` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:178` |
+| `prescriber` | `PharmacyPrescriptionPrescriberDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:181` |
+| `prescriber.name` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:29` |
+| `prescriber.license` | `PharmacyPrescriptionLicenseDto` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:32` |
+| `prescriber.license.number` | `string` | No | — | — | — | sin fuente |
+| `prescriber.license.authority` | `string` | No | admite null | — | — | sin fuente |
+| `prescriber.license.state` | `string` | No | valores: ACTIVE, PENDING | — | — | sin fuente |
+| `patient` | `PharmacyPrescriptionPatientDto` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:184` |
+| `patient.maskedName` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:42` |
+| `patient.documentLast3` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:46` |
+| `items` | `array<PharmacyPrescriptionItemDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:187` |
+| `items[].medicationRequestId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:118` |
+| `items[].medicationConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:121` |
+| `items[].display` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:125` |
+| `items[].dosageText` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:129` |
+| `items[].prescribedQuantity` | `number` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:137` |
+| `items[].unitCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:145` |
+| `items[].dispensedQuantity` | `number` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:153` |
+| `items[].remainingQuantity` | `number` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:160` |
+| `items[].matches` | `array<PharmacyPrescriptionMatchDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:164` |
+| `items[].matches[].pharmacyId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:80` |
+| `items[].matches[].pharmacyProductId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:83` |
+| `items[].matches[].name` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:87` |
+| `items[].matches[].price` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:95` |
+| `items[].matches[].currencyCode` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:99` |
+| `items[].matches[].requiresPrescription` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:102` |
+| `items[].matches[].outOfStockDeclared` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:109` |
+| `items[].matches[].sites` | `array<PharmacyPrescriptionSiteDto>` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:112` |
+| `items[].matches[].sites[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:52` |
+| `items[].matches[].sites[].siteName` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:55` |
+| `items[].matches[].sites[].available` | `boolean` | Sí | — | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:59` |
+| `items[].matches[].sites[].quantity` | `number` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:66` |
+| `items[].matches[].sites[].stockUpdatedAt` | `string` | No | admite null | — | — | `src/modules/pharmacy_inventory/presentation/dto/pharmacy-prescription-share.dto.ts:74` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esta organización no tiene una farmacia verificada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-prescription-shares.controller.spec.ts:75` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyPrescriptionSharesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 39. POST /pharmacy/recall-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar retiro/recall de lote (UC-25-08)
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.createRecallHold` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:159`
+- **Implementación:** `PharmacyInventoryController.createRecallHold` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:178`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5025,18 +5566,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/recall-holds` la atiende `PharmacyInventoryController.createRecallHold` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:159). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRecallHoldDto` (7 campos, 6 obligatorios). Delega en `InventoryRecallService.createHold`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_recall_holds. Actualiza pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+`POST /pharmacy/recall-holds` la atiende `PharmacyInventoryController.createRecallHold` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:178). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRecallHoldDto` (7 campos, 6 obligatorios). Delega en `InventoryRecallService.createHold`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_recall_holds. Actualiza pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:178` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5044,15 +5585,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:63` |
 | `pharmacy_inventory.inventory_lots` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/create-recall-hold.use-case.ts:80` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → LotsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:49` |
 | `pharmacy_inventory.inventory_recall_holds` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → RecallHoldsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/recall-holds.repository.ts:67` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/create-recall-hold.use-case.ts:105` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:77` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:66` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:80` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Cuerpo — DTO `CreateRecallHoldDto` · `application/json`
 
@@ -5123,14 +5664,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 36. POST /pharmacy/recall-holds/{id}/release
+## 40. POST /pharmacy/recall-holds/{id}/release
 
 - **Origen:** CONTRATO
 - **Nombre:** Liberar recall y reactivar lote (UC-25-09)
 - **Bloque:** Farmacia
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacyInventoryController.releaseRecallHold` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:176`
+- **Implementación:** `PharmacyInventoryController.releaseRecallHold` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:195`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5140,19 +5681,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pharmacy/recall-holds/{id}/release` la atiende `PharmacyInventoryController.releaseRecallHold` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:176). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReleaseRecallHoldDto` (1 campo, 0 obligatorios). Delega en `InventoryRecallService.release`. Crea filas en pharmacy_inventory.inventory_ledger_entries. Actualiza pharmacy_inventory.inventory_recall_holds, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_recall_holds, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+`POST /pharmacy/recall-holds/{id}/release` la atiende `PharmacyInventoryController.releaseRecallHold` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:195). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReleaseRecallHoldDto` (1 campo, 0 obligatorios). Delega en `InventoryRecallService.release`. Crea filas en pharmacy_inventory.inventory_ledger_entries. Actualiza pharmacy_inventory.inventory_recall_holds, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_lots, pharmacy_inventory.inventory_recall_holds, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:176` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:195` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:195` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5160,15 +5701,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.resolveStoredLocation → InventoryScopeRepository.findLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:64` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.resolveStoredLocation → InventoryScopeRepository.findLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:71` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → LotsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:49` |
 | `pharmacy_inventory.inventory_recall_holds` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts:98` |
 | `pharmacy_inventory.inventory_recall_holds` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → RecallHoldsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/recall-holds.repository.ts:56` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts:127` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → StockPositionsRepository.findByLot | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:110` |
-| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
-| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → InventoryScopeRepository.findProduct | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:81` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.resolveStoredLocation → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → StockPositionsRepository.findByLot | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:126` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:40` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → InventoryScopeRepository.findProduct | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:97` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.resolveStoredLocation → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:54` |
 
 ### Parámetros
 
@@ -5180,7 +5721,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `writeOff` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si es true, el stock en cuarentena se da de baja (write-off) en vez de reintegrarse | `src/modules/pharmacy_inventory/presentation/dto/release-recall-hold.dto.ts:16` |
+| `writeOff` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | Si es true, el stock en cuarentena se da de baja (write-off) en vez de reintegrarse | `src/modules/pharmacy_inventory/presentation/dto/release-recall-hold.dto.ts:17` |
 
 **Payload mínimo** (sólo los obligatorios):
 

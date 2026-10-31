@@ -28,6 +28,7 @@ import { SystemApiClientModule } from './system-api-client.module';
 import { MockProviderClientModule } from './mock-provider-client.module';
 import { GoogleEmailClientModule } from './google-email-client.module';
 import { WorkerLifecycleService } from './worker-lifecycle.service';
+import { WorkerHeartbeatService } from './worker-heartbeat.service';
 import { configureTicks } from './run-tick.util';
 import { workerHealth } from './worker-health.registry';
 import { startWorkerHealthServer } from './worker-health.server';
@@ -94,7 +95,7 @@ export async function bootstrapWorker(
       ScheduleModule.forRoot(),
       domainModule,
     ],
-    providers: [WorkerLifecycleService],
+    providers: [WorkerLifecycleService, WorkerHeartbeatService],
   })
   class WorkerRootModule {}
 

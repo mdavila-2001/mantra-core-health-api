@@ -217,6 +217,12 @@ x-app-env: &app-env
   # siquiera el aborto del plazo surtió efecto.
   WORKER_TICK_TIMEOUT_MS: ${WORKER_TICK_TIMEOUT_MS:-300000}
   WORKER_STUCK_TICK_MS: ${WORKER_STUCK_TICK_MS:-600000}
+  # Latido de cada worker hacia la API, y umbrales con los que la API lo juzga
+  # (`GET /admin/ops/instances/liveness`). Van juntos porque la API exige
+  # down > degraded >= intervalo al arrancar.
+  WORKER_HEARTBEAT_INTERVAL_MS: ${WORKER_HEARTBEAT_INTERVAL_MS:-15000}
+  OPS_LIVENESS_DEGRADED_AFTER_SECONDS: ${OPS_LIVENESS_DEGRADED_AFTER_SECONDS:-30}
+  OPS_LIVENESS_DOWN_AFTER_SECONDS: ${OPS_LIVENESS_DOWN_AFTER_SECONDS:-60}
   # Drenaje y apagado. `WORKER_SHUTDOWN_TIMEOUT_MS` debe quedar por DEBAJO del
   # `stop_grace_period` de cada servicio worker, o quien fuerza la salida es un
   # SIGKILL mudo y se pierde el diagnóstico de qué seguía pendiente.
@@ -953,6 +959,28 @@ services:
     networks:
       - mantra-redesa-network
 
+  worker-practice:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-practice.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   worker-promotions:
     image: mantra-redesa-api:local
     build:
@@ -1113,6 +1141,28 @@ services:
       dockerfile: Dockerfile
     restart: always
     command: ["node", "dist/src/worker-scheduling.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-telemetry:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-telemetry.js"]
     environment:
       <<: *app-env
     deploy:

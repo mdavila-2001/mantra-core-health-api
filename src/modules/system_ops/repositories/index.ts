@@ -1,4 +1,6 @@
 export * from './governance.repository';
+export * from './governance-read.repository';
+export * from './governance-operations-read.repository';
 export * from './retention-execution.repository';
 export * from './residency.repository';
 export * from './legal-hold.repository';

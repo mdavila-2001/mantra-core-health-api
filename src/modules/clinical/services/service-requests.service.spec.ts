@@ -70,6 +70,20 @@ function build() {
     assertUsable: mockFn().mockResolvedValue(undefined),
     link: mockFn(),
   };
+  // v4.2.82: el detalle (V1–V9) tiene su propia spec; acá devuelve lo que recibe.
+  const detail = {
+    prepare: mockFn(async (_tx: any, input: any) => ({
+      categoryConceptId: input.categoryConceptId,
+      specimenTypeConceptId: input.specimenTypeConceptId,
+      modalityConceptId: input.imaging?.modalityConceptId,
+      bodySiteConceptId: input.imaging?.bodySiteConceptId,
+      lateralityConceptId: input.imaging?.lateralityConceptId,
+      contrastConceptId: input.imaging?.contrastConceptId,
+      componentConceptIds: input.componentConceptIds ?? [],
+    })),
+    writeComponents: mockFn(),
+    describe: mockFn().mockResolvedValue(new Map()),
+  };
   const service = new ServiceRequestsService(
     em as any,
     serviceRequestsRepo as any,
@@ -83,8 +97,10 @@ function build() {
     new PerformerSelectionValidator(sites as any),
     siteNames as any,
     basedOnNotes as any,
+    detail as any,
   );
   return {
+    detail,
     basedOnNotes,
     sites,
     siteNames,

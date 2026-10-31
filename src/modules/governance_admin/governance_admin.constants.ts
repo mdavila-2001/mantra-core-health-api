@@ -1,8 +1,7 @@
 import { defineModuleConcepts } from '../../common/seed/concept-seed';
 import { CONCEPTS } from '../../common';
-import { AUD } from '../audit/audit.concepts';
 
-/** Quien puede leer las vistas de calidad de datos y de solicitudes de privacidad. */
+/** Quien puede leer las vistas de calidad de datos clínicos. */
 export const GOVERNANCE_READ_ROLES = [
   'SECURITY_ADMIN',
   'PLATFORM_ADMIN',
@@ -59,63 +58,6 @@ export const SEVERITY_CONCEPT: Readonly<Record<Severity, string>> = {
   ERROR: CONCEPTS.ISSUE_SEV_ERROR,
   WARNING: CONCEPTS.ISSUE_SEV_WARNING,
   INFORMATION: CONCEPTS.ISSUE_SEV_INFORMATION,
-};
-
-export const DSAR_STATUSES = [
-  'RECEIVED',
-  'IN_PROGRESS',
-  'COMPLETED',
-  'REJECTED',
-] as const;
-export type DsarStatus = (typeof DSAR_STATUSES)[number];
-
-export const DSAR_STATUS_CONCEPT: Readonly<Record<DsarStatus, string>> = {
-  RECEIVED: AUD.DSAR_RECEIVED,
-  IN_PROGRESS: AUD.DSAR_IN_PROGRESS,
-  COMPLETED: AUD.DSAR_COMPLETED,
-  REJECTED: AUD.DSAR_REJECTED,
-};
-
-export const DSAR_TYPES = [
-  'ACCESS',
-  'ERASURE',
-  'RECTIFICATION',
-  'PORTABILITY',
-  'OBJECTION',
-] as const;
-export type DsarType = (typeof DSAR_TYPES)[number];
-
-export const DSAR_TYPE_CONCEPT: Readonly<Record<DsarType, string>> = {
-  ACCESS: AUD.DSAR_TYPE_ACCESS,
-  ERASURE: AUD.DSAR_TYPE_ERASURE,
-  RECTIFICATION: AUD.DSAR_TYPE_RECTIFICATION,
-  PORTABILITY: AUD.DSAR_TYPE_PORTABILITY,
-  OBJECTION: AUD.DSAR_TYPE_OBJECTION,
-};
-
-export const DSAR_JURISDICTIONS = ['PE', 'EU', 'US'] as const;
-export type DsarJurisdiction = (typeof DSAR_JURISDICTIONS)[number];
-
-export const DSAR_JURISDICTION_CONCEPT: Readonly<
-  Record<DsarJurisdiction, string>
-> = {
-  PE: AUD.JURISDICTION_PE,
-  EU: AUD.JURISDICTION_EU,
-  US: AUD.JURISDICTION_US,
-};
-
-/**
- * Transiciones que `PATCH /privacy/dsar/:id` admite hoy (ver `ComplianceService.updateDsar`):
- * el estado terminal no admite más. La lista que se publica en el detalle sale de aquí, de modo
- * que la pantalla no la reconstruye por su cuenta.
- */
-export const DSAR_TRANSITIONS: Readonly<
-  Record<DsarStatus, readonly DsarStatus[]>
-> = {
-  RECEIVED: ['IN_PROGRESS', 'COMPLETED', 'REJECTED'],
-  IN_PROGRESS: ['COMPLETED', 'REJECTED'],
-  COMPLETED: [],
-  REJECTED: [],
 };
 
 /** Invierte un mapa código → concepto; lo desconocido no se adivina. */

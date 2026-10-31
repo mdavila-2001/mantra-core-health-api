@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import {
-  ConflictException,
-  ResourceNotFoundException,
-} from '../../../common';
+import { ConflictException, ResourceNotFoundException } from '../../../common';
 import { encodeKeysetCursor } from '../../../common/pagination/keyset-cursor';
 import {
   DEFAULT_PAGE_SIZE,
@@ -104,7 +101,12 @@ export class DataQualityService {
 
   async listIssues(q: IssuesQueryDto): Promise<Page<QualityIssue>> {
     const limit = clampLimit(q.limit, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
-    const filters = { status: q.status, severity: q.severity, ruleId: q.ruleId, q: q.q };
+    const filters = {
+      status: q.status,
+      severity: q.severity,
+      ruleId: q.ruleId,
+      q: q.q,
+    };
     const after = readKeyset(q.cursor);
     const [rows, total] = await Promise.all([
       this.repo.listIssues(this.em, filters, limit + 1, after),
@@ -125,7 +127,8 @@ export class DataQualityService {
 
   async getIssue(id: string): Promise<QualityIssue> {
     const row = await this.repo.findIssue(this.em, id);
-    if (!row) throw new ResourceNotFoundException('Incidencia no encontrada', { id });
+    if (!row)
+      throw new ResourceNotFoundException('Incidencia no encontrada', { id });
     return this.toIssue(row);
   }
 
@@ -135,12 +138,20 @@ export class DataQualityService {
    * es un conflicto (409), no una sobreescritura.
    */
   async resolve(id: string, dto: ResolveIssueDto): Promise<ResolutionResult> {
-    const target: IssueStatus = dto.action === 'RESOLVE' ? 'RESOLVED' : 'DISMISSED';
-    const targetConcept = target === 'RESOLVED' ? GOV.ISSUE_RESOLVED : GOV.ISSUE_DISMISSED;
+    const target: IssueStatus =
+      dto.action === 'RESOLVE' ? 'RESOLVED' : 'DISMISSED';
+    const targetConcept =
+      target === 'RESOLVED' ? GOV.ISSUE_RESOLVED : GOV.ISSUE_DISMISSED;
     return this.em.transactional(async (tx) => {
-      const closed = await this.repo.closeIfOpen(tx, id, targetConcept, dto.note);
+      const closed = await this.repo.closeIfOpen(
+        tx,
+        id,
+        targetConcept,
+        dto.note,
+      );
       const row = await this.repo.findIssue(tx, id);
-      if (!row) throw new ResourceNotFoundException('Incidencia no encontrada', { id });
+      if (!row)
+        throw new ResourceNotFoundException('Incidencia no encontrada', { id });
       const issue = this.toIssue(row);
       if (closed) return { issue, alreadyApplied: false };
       if (issue.status === target) return { issue, alreadyApplied: true };
@@ -174,7 +185,8 @@ export class DataQualityService {
 
   async getRule(id: string): Promise<QualityRuleDetail> {
     const row = await this.repo.findRule(this.em, id);
-    if (!row) throw new ResourceNotFoundException('Regla no encontrada', { id });
+    if (!row)
+      throw new ResourceNotFoundException('Regla no encontrada', { id });
     const [counts, runs] = await Promise.all([
       this.repo.issueCountsByStatus(this.em, id),
       this.repo.recentRuns(this.em, row.rule_set_id, 10),

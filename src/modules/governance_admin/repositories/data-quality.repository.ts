@@ -108,7 +108,11 @@ const RULE_FROM = `
 /** Lecturas y la única escritura de la calidad de datos, con SQL parametrizado. */
 @Injectable()
 export class DataQualityRepository {
-  private q<T = unknown>(em: EntityManager, sql: string, params: unknown[] = []): Promise<T> {
+  private q<T = unknown>(
+    em: EntityManager,
+    sql: string,
+    params: unknown[] = [],
+  ): Promise<T> {
     return em
       .getConnection()
       .execute(sql, params, 'all', em.getTransactionContext()) as Promise<T>;
@@ -116,8 +120,10 @@ export class DataQualityRepository {
 
   private issueFilter(f: IssueFilters): SqlFilter {
     const w = new SqlFilter();
-    if (f.status) w.add('i.status_concept_id = ?', ISSUE_STATUS_CONCEPT[f.status]);
-    if (f.severity) w.add('r.severity_concept_id = ?', SEVERITY_CONCEPT[f.severity]);
+    if (f.status)
+      w.add('i.status_concept_id = ?', ISSUE_STATUS_CONCEPT[f.status]);
+    if (f.severity)
+      w.add('r.severity_concept_id = ?', SEVERITY_CONCEPT[f.severity]);
     if (f.ruleId) w.add('r.id = ?', f.ruleId);
     if (f.q) {
       const like = `%${escapeLike(f.q.toLowerCase())}%`;
@@ -193,7 +199,8 @@ export class DataQualityRepository {
 
   private ruleFilter(f: RuleFilters): SqlFilter {
     const w = new SqlFilter();
-    if (f.severity) w.add('r.severity_concept_id = ?', SEVERITY_CONCEPT[f.severity]);
+    if (f.severity)
+      w.add('r.severity_concept_id = ?', SEVERITY_CONCEPT[f.severity]);
     if (f.dimension) w.add('dim.code = ?', f.dimension);
     if (f.q) {
       const like = `%${escapeLike(f.q.toLowerCase())}%`;
@@ -266,7 +273,11 @@ export class DataQualityRepository {
   }
 
   /** Corridas más recientes del conjunto de reglas al que pertenece la regla. */
-  recentRuns(em: EntityManager, ruleSetId: string, limit: number): Promise<RunRow[]> {
+  recentRuns(
+    em: EntityManager,
+    ruleSetId: string,
+    limit: number,
+  ): Promise<RunRow[]> {
     return this.q<RunRow[]>(
       em,
       `select run.id, run.started_at, run.completed_at, run.result_concept_id,

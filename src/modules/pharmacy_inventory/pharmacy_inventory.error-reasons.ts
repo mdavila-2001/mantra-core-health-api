@@ -7,11 +7,41 @@
  */
 export enum PharmacyInventoryErrorReason {
   /**
+   * Una fila de la carga por sucursal nombra un código que el catálogo de la
+   * farmacia no tiene. Misma clave que la carga del catálogo de `pharmacy`.
+   */
+  PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
+  /**
    * La farmacia, sede, ubicación, producto, lote, proveedor, orden, reserva,
    * dispensación, conteo, recall, paciente o receta no existe o no pertenece
    * al ámbito del actor. Ambos casos responden igual a propósito.
    */
   PHARMACY_INVENTORY_RESOURCE_NOT_AVAILABLE = 'PHARMACY_INVENTORY_RESOURCE_NOT_AVAILABLE',
+  /**
+   * La receta del pedido no está emitida: es un borrador o fue invalidada,
+   * reemplazada o completada.
+   */
+  PRESCRIPTION_NOT_ACTIVE = 'PRESCRIPTION_NOT_ACTIVE',
+  /** La receta del pedido está emitida, pero su `valid_to` ya pasó. */
+  PRESCRIPTION_EXPIRED = 'PRESCRIPTION_EXPIRED',
+  /**
+   * Una línea del pedido es de un producto de receta obligatoria cuyo fármaco
+   * no está en la receta (o no declara fármaco).
+   */
+  PRODUCT_NOT_PRESCRIBED = 'PRODUCT_NOT_PRESCRIBED',
+  /**
+   * Lo pedido de un fármaco supera lo que queda de la receta (recetado −
+   * entregado − reservado), cuando la unidad recetada es comparable.
+   */
+  QUANTITY_EXCEEDS_PRESCRIPTION = 'QUANTITY_EXCEEDS_PRESCRIPTION',
+  /**
+   * Lo pedido de un fármaco sin saldo comparable ya se pidió: cada ítem de la
+   * receta de ese fármaco tiene una entrega o un pedido vivo. Un pedido
+   * cancelado, rechazado o vencido no cuenta. El estado clínico no cambia.
+   */
+  PRESCRIPTION_ITEM_ALREADY_ORDERED = 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+  /** Un pedido sin receta trae un producto de receta obligatoria. */
+  PRESCRIPTION_REQUIRED = 'PRESCRIPTION_REQUIRED',
   /**
    * Los datos ya guardados no cierran la cadena farmacia, sede, ubicación,
    * producto y lote: operar sobre ellos escribiría asientos con una farmacia
@@ -24,6 +54,17 @@ export enum PharmacyInventoryErrorReason {
    * una sede no la apaga. Se quita desde el catálogo.
    */
   PRODUCT_OUT_OF_STOCK_DECLARED = 'PRODUCT_OUT_OF_STOCK_DECLARED',
+  /**
+   * Ninguna línea del pedido tiene stock real en la sede: todas son «No lo
+   * tengo» o no tienen unidades para reservar. El pedido no se escribe. Basta
+   * una línea con stock, o una «por confirmar», para que el pedido entre.
+   */
+  PRODUCT_OUT_OF_STOCK = 'PRODUCT_OUT_OF_STOCK',
+  /**
+   * Un ajuste de la confirmación no cuadra con la línea: confirmar existencia
+   * sobre una línea que no está «por confirmar», o sin decir la cantidad.
+   */
+  ORDER_LINE_NOT_PENDING_CONFIRMATION = 'ORDER_LINE_NOT_PENDING_CONFIRMATION',
   /** El producto es un borrador o está retirado: no se ofrece en ninguna sede. */
   PRODUCT_NOT_PUBLISHED = 'PRODUCT_NOT_PUBLISHED',
   /**
@@ -45,4 +86,16 @@ export enum PharmacyInventoryErrorReason {
   PHARMACY_INTEGRATION_UNAVAILABLE = 'PHARMACY_INTEGRATION_UNAVAILABLE',
   /** La conexión no está activa o no admite consultar stock. */
   PHARMACY_INTEGRATION_CONNECTION_INACTIVE = 'PHARMACY_INTEGRATION_CONNECTION_INACTIVE',
+  /** F5c: el espacio o la unidad no son de la sede de práctica de la sede de farmacia. */
+  STOCK_POINT_SITE_MISMATCH = 'STOCK_POINT_SITE_MISMATCH',
+  /** F5c: la función del espacio no tiene perfil `stockPoint` o el espacio no está activo. */
+  SPACE_NOT_STOCK_POINT = 'SPACE_NOT_STOCK_POINT',
+  /** F5c: un botiquín (`WARD_STOCK`) exige su unidad clínica. */
+  WARD_STOCK_REQUIRES_UNIT = 'WARD_STOCK_REQUIRES_UNIT',
+  /** F5c: la unidad ya tiene un botiquín activo. */
+  WARD_STOCK_ALREADY_EXISTS = 'WARD_STOCK_ALREADY_EXISTS',
+  /** F5c: retiro o dispensa desde un botiquín sin `available_quantity` suficiente. */
+  INSUFFICIENT_AVAILABLE_STOCK = 'INSUFFICIENT_AVAILABLE_STOCK',
+  /** F5c: la reserva indicada para dispensar desde un botiquín no está confirmada o venció. */
+  RESERVATION_NOT_ACTIVE = 'RESERVATION_NOT_ACTIVE',
 }

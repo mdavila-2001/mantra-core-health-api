@@ -126,6 +126,36 @@ export class AuthzClinicalScopeService {
   }
 
   /**
+   * «Admisión crea el vínculo»: ¿se puede internar a este paciente creándole
+   * la huella en el tenant? Sólo si el perfil existe, NO tiene huella en el
+   * tenant y NO tiene huella propia en otro tenant (un paciente de otra
+   * organización no se adopta internándolo). La búsqueda en otros tenants
+   * corre en una transacción aparte con contexto de sistema y devuelve sólo
+   * el booleano; la del llamador no cambia.
+   *
+   * @param patientProfileId - Paciente.
+   * @param tenantId - Tenant activo.
+   */
+  async canAdmitWithoutFootprint(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    if (!(await this.scopeRepo.patientExists(em, patientProfileId)))
+      return false;
+    return em.fork().transactional(async (sys) => {
+      await sys.execute(
+        "select set_config('app.system_context', 'true', true)",
+      );
+      return !(await this.scopeRepo.hasFootprintElsewhere(
+        sys,
+        patientProfileId,
+        tenantId,
+      ));
+    });
+  }
+
+  /**
    * Exige sólo que el paciente exista. Es para la solicitud de relación que un
    * profesional le hace a un paciente encontrado en el padrón: el paciente aún no
    * tiene vínculo con el tenant y la relación nace `PENDING`, sin conceder nada

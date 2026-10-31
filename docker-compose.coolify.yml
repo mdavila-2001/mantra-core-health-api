@@ -75,6 +75,9 @@
 #     matrícula profesional. `assertMockProviderNotInProduction` aborta el
 #     arranque de cualquier worker si `MOCK_PROVIDER_BASE_URL` trae valor en
 #     producción; la variable se fija vacía explícitamente más abajo.
+#     El simulador del sistema de la farmacia externa (`/pharmacy-erp/*`, en
+#     el mismo emulador) tampoco: `PHARMACY_ERP_BASE_URL` va vacía y la API
+#     no arranca en producción si trae valor. Ver el bloque de esa variable.
 #
 #  7. LOS `*-init` NO MONTAN NADA DEL REPOSITORIO: LO HORNEAN.
 #     Coolify clona el repositorio DENTRO de un contenedor auxiliar
@@ -264,6 +267,20 @@ x-app-env: &app-env
   MESSAGING_QUEUE_CODES: ${MESSAGING_QUEUE_CODES:-}
   # VACÍA, y es una condición de arranque: ver el punto 6 de la cabecera.
   MOCK_PROVIDER_BASE_URL: ""
+
+  # --- Sistema de gestión de la farmacia externa (pestaña Integración) ----
+  # VACÍAS por defecto: la sincronización responde «no configurada» y no llama
+  # a nadie. Hoy el único sistema que existe es el simulador de
+  # `mock-provider-server/` (`/pharmacy-erp/*`), y con NODE_ENV=production
+  # la API NO ARRANCA si `PHARMACY_ERP_BASE_URL` trae valor
+  # (`assertPharmacyErpNotInProduction`): escribiría stock inventado en el
+  # libro real. No reutilizar `MOCK_PROVIDER_BASE_URL` para esto. Si algún día
+  # se levanta el simulador para pruebas: sin dominio público y con
+  # `MOCK_API_KEY` igual a `PHARMACY_ERP_API_KEY` (sin ella el simulador deja
+  # pasar cualquier petición, `api-key.guard.ts`).
+  PHARMACY_ERP_BASE_URL: ${PHARMACY_ERP_BASE_URL:-}
+  PHARMACY_ERP_API_KEY: ${PHARMACY_ERP_API_KEY:-}
+  PHARMACY_ERP_TIMEOUT_MS: ${PHARMACY_ERP_TIMEOUT_MS:-5000}
 
   # --- Plazos HTTP --------------------------------------------------------
   # `keepAlive` por encima del idle timeout del proxy que va delante, o
@@ -778,6 +795,14 @@ services:
       # que el reinicio fuera un OOM. Acotar el montón es correcto de todos
       # modos: hoy no hay ningún límite.
       NODE_OPTIONS: '--max-old-space-size=1024'
+      # Medición de peticiones HTTP, sólo en la API (es quien recibe el tráfico;
+      # los workers no la necesitan). El código la deja apagada por defecto y sin
+      # esto `GET /admin/ops/traffic` sale vacío en producción. Cuenta por minuto
+      # y por plantilla de ruta, nunca la URL real ni el usuario, y la vuelca a
+      # `time_series.service_sli_series`. Un valor inválido hace fallar el arranque.
+      OBSERVABILITY_HTTP_SLI_ENABLED: ${OBSERVABILITY_HTTP_SLI_ENABLED:-true}
+      OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS: ${OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS:-60}
+      TELEMETRY_IDEMPOTENCY_SECRET: ${TELEMETRY_IDEMPOTENCY_SECRET:-}
     deploy:
       resources: *api-resources
     volumes:

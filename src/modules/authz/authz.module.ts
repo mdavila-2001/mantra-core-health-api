@@ -1,10 +1,6 @@
 import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
 import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
 import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
-import { AuthzGovernanceController } from './controllers/authz-governance.controller';
-import { AuthzUserLifecycleService } from './services/authz-user-lifecycle.service';
-import { AuthzAccessReviewsService } from './services/authz-access-reviews.service';
-import { AuthzGovernanceReadService } from './services/authz-governance-read.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -18,6 +14,8 @@ import {
   AuthzPdpController,
   AuthzMeController,
   AuthzAdminController,
+  AuthzGovernanceController,
+  AuthzGovernanceExtController,
 } from './controllers';
 import {
   AuthzCatalogService,
@@ -32,6 +30,8 @@ import {
   AuthzMeService,
   AuthzAdminReadService,
   AuthzAssignmentRevocationService,
+  AuthzGovernanceService,
+  AuthzGovernanceExtService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -49,6 +49,7 @@ import {
   ResourceScopeGrantsRepository,
   AuthzServicePrincipalsRepository,
   AuthzAdminReadRepository,
+  AuthzGovernanceReadRepository,
   AuthzClinicalScopeRepository,
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
@@ -88,14 +89,12 @@ import {
     AuthzMeController,
     AuthzAdminController,
     AuthzGovernanceController,
+    AuthzGovernanceExtController,
     AuthzModulesCatalogController,
   ],
   providers: [
     AuthzModulesCatalogService,
     AuthzModulesRouteInventory,
-    AuthzUserLifecycleService,
-    AuthzAccessReviewsService,
-    AuthzGovernanceReadService,
     // Repositorios
     PermissionCategoriesRepository,
     PermissionsRepository,
@@ -112,6 +111,7 @@ import {
     ResourceScopeGrantsRepository,
     AuthzServicePrincipalsRepository,
     AuthzAdminReadRepository,
+    AuthzGovernanceReadRepository,
     // Lecturas de alcance (paciente, encuentro, consentimiento) de otros módulos.
     AuthzClinicalScopeRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
@@ -133,6 +133,8 @@ import {
     AuthzMeService,
     AuthzAdminReadService,
     AuthzAssignmentRevocationService,
+    AuthzGovernanceService,
+    AuthzGovernanceExtService,
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume
@@ -162,6 +164,9 @@ import {
     AuthzGrantsService,
     RolesRepository,
     UserRoleAssignmentsRepository,
+    // #893: `procedures_perioperative` prueba con la misma regla que los accesos
+    // clínicos que el paciente del caso quirúrgico pertenece al tenant.
+    AuthzClinicalScopeService,
   ],
 })
 export class AuthzModule {}

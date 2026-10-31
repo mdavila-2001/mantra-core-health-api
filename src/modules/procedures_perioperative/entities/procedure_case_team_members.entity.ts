@@ -108,4 +108,11 @@ export class ProcedureCaseTeamMembers {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({
+    fieldName: 'accepted_version_number',
+    columnType: 'int',
+    nullable: true,
+  })
+  acceptedVersionNumber?: number;
 }

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `insurance`
 
-- **Tablas:** 33 · **Columnas:** 475 (101 con descripción: 21.3 %) · **Índices:** 244
+- **Tablas:** 33 · **Columnas:** 475 (111 con descripción: 23.4 %) · **Índices:** 244
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -26,7 +26,7 @@
 | [insurance_brokers](#insurance_brokers) | Cataloga intermediarios de seguros que gestionan relaciones entre aseguradoras, empleadores, pacientes y productos. | 14 | 10 | 11 | COINCIDE |
 | [insurance_campaign_partners](#insurance_campaign_partners) | Asocia prestadores de la red a campañas preventivas de una aseguradora, identificando los participantes que pueden brindar las acciones de salud de cada campaña. | 12 | 6 | 22 | COINCIDE |
 | [insurance_campaigns](#insurance_campaigns) | Define campañas preventivas de una aseguradora para organizar acciones de promoción y cuidado de la salud destinadas a su población cubierta. | 17 | 6 | 22 | COINCIDE |
-| [insurance_carriers](#insurance_carriers) | Representa aseguradoras que emiten o administran coberturas de salud utilizadas por pacientes y prestadores. | 19 | 10 | 71 | COINCIDE |
+| [insurance_carriers](#insurance_carriers) | Representa aseguradoras que emiten o administran coberturas de salud utilizadas por pacientes y prestadores. | 19 | 10 | 79 | COINCIDE |
 | [insurance_claim_lines](#insurance_claim_lines) | Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudicación por prestación. | 12 | 5 | 20 | COINCIDE |
 | [insurance_claims](#insurance_claims) | Representa reclamos presentados a aseguradoras por servicios prestados a pacientes para gestionar reembolso o adjudicación. | 20 | 12 | 27 | COINCIDE |
 | [insurance_plan_benefits](#insurance_plan_benefits) | Detalla prestaciones o límites incluidos en cada plan para respaldar verificación de cobertura. | 18 | 6 | 15 | COINCIDE |
@@ -38,7 +38,7 @@
 | [network_provider_memberships](#network_provider_memberships) | Vincula prestadores con redes aseguradoras para resolver participación y vigencia de cobertura dentro de la red. | 20 | 12 | 7 | COINCIDE |
 | [patient_coverages](#patient_coverages) | Registra coberturas de seguro asociadas a pacientes para apoyar elegibilidad, autorización y facturación de atención. | 18 | 10 | 37 | COINCIDE |
 | [patient_explanations_of_benefit](#patient_explanations_of_benefit) | Conserva explicaciones de beneficios dirigidas al paciente para describir cómo se procesó una reclamación y qué cobertura aplicó. | 9 | 7 | 9 | COINCIDE |
-| [practitioner_insurer_requests](#practitioner_insurer_requests) | sin propósito | 12 | 7 | 0 | SIN_ENTIDAD |
+| [practitioner_insurer_requests](#practitioner_insurer_requests) | sin propósito | 12 | 7 | 14 | COINCIDE |
 | [prior_authorization_determinations](#prior_authorization_determinations) | Registra decisiones del asegurador sobre autorizaciones previas para hacer visible el resultado de cobertura. | 15 | 7 | 8 | COINCIDE |
 | [prior_authorization_items](#prior_authorization_items) | Desglosa servicios o procedimientos incluidos en una solicitud de autorización previa. | 10 | 5 | 8 | COINCIDE |
 | [prior_authorization_requests](#prior_authorization_requests) | Representa solicitudes de autorización previa para servicios que requieren aprobación del asegurador antes de prestarse o facturarse. | 16 | 10 | 9 | COINCIDE |
@@ -1715,7 +1715,7 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_carriers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsuranceCarriers` — `src/modules/insurance/entities/insurance_carriers.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 7 FK salientes · 9 entrantes · 71 operaciones
+- **Resumen:** 19 columnas · 10 índices · 7 FK salientes · 9 entrantes · 79 operaciones
 
 #### Columnas
 
@@ -1797,6 +1797,8 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | GET /insurance-brokers/{id} | LEE | DIRECTA |
 | POST /insurance-brokers/{id}/agreements | LEE | DIRECTA |
 | GET /insurance-campaigns | LEE | DIRECTA |
@@ -1838,6 +1840,9 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 | GET /insurance/patients/options | LEE | DIRECTA |
 | POST /insurance/patients/search | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | DIRECTA |
+| GET /insurance/practitioner-requests | LEE | DIRECTA |
+| POST /insurance/practitioner-requests/{id}/approve | LEE | DIRECTA |
+| POST /insurance/practitioner-requests/{id}/reject | LEE | DIRECTA |
 | GET /insurance/received-claims | LEE | DIRECTA |
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | GET /patient-coverages/by-patient/{patientProfileId} | LEE | POR_SQL |
@@ -1845,6 +1850,9 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 | POST /practitioner-settlement-batches | LEE | DIRECTA |
 | GET /practitioner-settlement-batches/{id} | LEE | DIRECTA |
 | GET /practitioners/{profileId}/insurance-networks | LEE | POR_SQL |
+| GET /practitioners/me/insurer-requests | LEE | DIRECTA |
+| POST /practitioners/me/insurer-requests | LEE | DIRECTA |
+| POST /practitioners/me/insurer-requests/{id}/withdraw | LEE | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
 | GET /prior-authorization-requests/inbox | LEE | DIRECTA |
@@ -2980,25 +2988,25 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `PractitionerInsurerRequests` — `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts`
+- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 14 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `insurance_carrier_id` | `uuid` | Clave foránea → insurance.insurance_carriers.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `decision_reason_text` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:30`)_ | coincide |
+| 2 | `practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | El profesional que pide. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:36`)_ | coincide |
+| 3 | `insurance_carrier_id` | `uuid` | Clave foránea → insurance.insurance_carriers.id; Obligatoria | La aseguradora a la que se le pide. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:42`)_ | coincide |
+| 4 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Pendiente · aprobada · rechazada · retirada (`INS.PRACTITIONER_REQUEST_*`). _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:48`)_ | coincide |
+| 5 | `decision_reason_text` | `varchar` | Opcional | Por qué la aseguradora la rechazó. **Lo lee el médico**: no es una nota interna, y un rechazo sin motivo es mudo para quien lo recibe. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:55`)_ | coincide |
+| 6 | `decided_at` | `timestamptz` | Opcional | Cuándo la aseguradora decidió. `null` mientras está pendiente. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:65`)_ | coincide |
+| 7 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Quién de la aseguradora decidió. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:75`)_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:81`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:87`)_ | coincide |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/practitioner_insurer_requests.entity.ts:105`)_ | coincide |
 
 #### Relaciones
 
@@ -3015,9 +3023,9 @@ _Sin propósito registrado._
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_practitioner_insurer_requests_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_insurer_requests_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_practitioner_insurer_requests_insurance_carrier_id` | no | insurance_carrier_id | Soporta la clave foránea fk_practitioner_insurer_requests_insurance_carrier_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_practitioner_insurer_requests_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practitioner_insurer_requests_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_insurer_requests_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_insurer_requests_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_insurer_requests_insurance_carrier_id` | no | insurance_carrier_id | Soporta la clave foránea fk_practitioner_insurer_requests_insurance_carrier_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «insurance_carrier_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_insurer_requests_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practitioner_insurer_requests_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_insurer_requests_decided_by_user_id` | no | decided_by_user_id | Soporta la clave foránea fk_practitioner_insurer_requests_decided_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_insurer_requests_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_insurer_requests_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_insurer_requests_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_insurer_requests_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3031,7 +3039,22 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| GET /insurance/practitioner-requests | LEE | DIRECTA |
+| POST /insurance/practitioner-requests/{id}/approve | ACTUALIZA | POR_TIPO |
+| POST /insurance/practitioner-requests/{id}/approve | LEE | DIRECTA |
+| POST /insurance/practitioner-requests/{id}/reject | ACTUALIZA | POR_TIPO |
+| POST /insurance/practitioner-requests/{id}/reject | LEE | DIRECTA |
+| GET /practitioners/me/insurer-requests | LEE | DIRECTA |
+| POST /practitioners/me/insurer-requests | CREA | DIRECTA |
+| POST /practitioners/me/insurer-requests | LEE | DIRECTA |
+| POST /practitioners/me/insurer-requests/{id}/withdraw | ACTUALIZA | POR_TIPO |
+| POST /practitioners/me/insurer-requests/{id}/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 

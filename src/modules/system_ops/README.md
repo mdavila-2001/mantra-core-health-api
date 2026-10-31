@@ -34,9 +34,11 @@ Entidades (`tableName`, 30 de 30 archivos `*.entity.ts`): `accepted_risks`, `ano
 | `POST /admin/ops/backup-policies` | SECURITY_ADMIN | `backup` |
 | `POST /admin/governance/drafts` | SECURITY_ADMIN | `draft` |
 | `POST /admin/governance/drafts/:id/publish` | SECURITY_ADMIN | `draft` |
-| `GET /admin/governance/policies` | ...PORTAL_READ_ROLES | `governance-read` |
-| `GET /admin/governance/policies/:id` | ...PORTAL_READ_ROLES | `governance-read` |
-| `GET /admin/governance/pii-fields` | ...PORTAL_READ_ROLES | `governance-read` |
+| `GET /admin/governance/policies` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/policies/:policyType/:id` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/change-log` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/entity-registry` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
+| `GET /admin/governance/entity-registry/:id/fields` | ...GOVERNANCE_VIEW_ROLES | `governance-read` |
 | `POST /admin/governance/entity-registry` | SECURITY_ADMIN | `governance-catalog` |
 | `POST /admin/governance/write-policies` | SECURITY_ADMIN | `governance-catalog` |
 | `PATCH /admin/governance/entity-registry/:id/write-policy` | SECURITY_ADMIN | `governance-catalog` |

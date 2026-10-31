@@ -124,4 +124,40 @@ describe('TransferInventoryUseCase', () => {
     ).rejects.toThrow('Stock disponible insuficiente en origen');
     expect(ledger.append).not.toHaveBeenCalled();
   });
+
+  it('F5c: desde un botiquín sin disponible suficiente → 409 INSUFFICIENT_AVAILABLE_STOCK, sin asientos', async () => {
+    const tx = { flush: jest.fn() };
+    const em = {
+      transactional: jest.fn(async (work: (tx: any) => unknown) => work(tx)),
+    };
+    const ledger = { nextSequence: jest.fn(), append: jest.fn() };
+    const scope = allowAllScope();
+    scope.requireLocationInPharmacy.mockImplementation(
+      async (_tx: unknown, _p: object, id: string) =>
+        ({
+          id,
+          pharmacySiteId: 'site-1',
+          locationTypeConceptId: PINV.LOCATION_TYPE_WARD_STOCK,
+        }) as any,
+    );
+    const useCase = new TransferInventoryUseCase(
+      em as any,
+      {
+        findByKeyForUpdate: jest.fn(async () => ({
+          onHandQuantity: '9',
+          availableQuantity: '2',
+        })),
+      } as any,
+      ledger as any,
+      scope,
+      { info: jest.fn() } as any,
+    );
+
+    const err: any = await useCase
+      .execute('pharmacy-1', dto as any, { id: 'actor-1' } as any)
+      .catch((e) => e);
+    expect(err.getStatus()).toBe(409);
+    expect(err.reason).toBe('INSUFFICIENT_AVAILABLE_STOCK');
+    expect(ledger.append).not.toHaveBeenCalled();
+  });
 });

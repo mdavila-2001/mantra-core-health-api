@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DirectoryTenantsService } from './directory-tenants.service';
 import { DIR } from '../directory.concepts';
+import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import {
   CONCEPTS,
   ConflictException,
@@ -686,6 +687,30 @@ describe('DirectoryTenantsService', () => {
         'user-plat',
       );
       expect(pharmacy.publicProfileId).toBe('pub-1');
+    });
+
+    it('también enlaza a la vitrina la farmacia que ya opera sin ella, sin tocar su estado', async () => {
+      const d = build();
+      const operating = {
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+        verificationStatusConceptId: PHARM.VERIFICATION_VERIFIED,
+      } as any;
+      const find = mockFn().mockResolvedValue([operating]);
+      (d.tx as any).find = find;
+      d.tenantsRepo.findById.mockResolvedValue(pharmacyTenant());
+
+      await d.service.verify('ten-ph', {} as any, actor);
+
+      // Se buscan los borradores y las activas sin vitrina del tenant.
+      expect(find).toHaveBeenCalledWith(expect.anything(), {
+        tenantId: 'ten-ph',
+        $or: [
+          { statusConceptId: PHARM.PHARMACY_DRAFT },
+          { statusConceptId: PHARM.PHARMACY_ACTIVE, publicProfileId: null },
+        ],
+      });
+      expect(operating.publicProfileId).toBe('pub-1');
+      expect(operating.statusConceptId).toBe(PHARM.PHARMACY_ACTIVE);
     });
   });
 

@@ -7,7 +7,6 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
@@ -16,26 +15,30 @@ import { ServiceCatalogRepository } from '../../billing/repositories';
 import { ProcedureReferenceReader } from '../../billing/services/procedure-reference.reader';
 import { PracticeAdministrationService } from './practice-administration.service';
 import { assertCatalogItemFits } from './healthcare-service-catalog-item';
-import { loadSiteInScope } from './practice-scope';
 import {
   PracticesRepository,
   PracticeSitesRepository,
   ClinicalUnitsRepository,
-  CareSpacesRepository,
   HealthcareServicesRepository,
 } from '../repositories';
 import {
   CreateClinicalUnitDto,
-  CreateCareSpaceDto,
   CreateHealthcareServiceDto,
   ClinicalUnitResponseDto,
-  CareSpaceResponseDto,
   HealthcareServiceResponseDto,
 } from '../dto';
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
+import { OutboxService } from '../../messaging/services/outbox.service';
+import { StructureAccessService } from './structure-access.service';
+import { appendStructureRevision } from './structure-history';
+import { STRUCTURE_EVENTS, publishStructureEvent } from './structure-events';
+import { flushStructure } from './structure-write-errors';
 
 /**
- * Estructura clínica bajo un sitio: unidades jerárquicas (UC-14-04), espacios de
- * atención (UC-14-05) y publicación de servicios de salud (UC-14-06).
+ * Estructura clínica bajo un sitio: unidades jerárquicas (UC-14-04) y
+ * publicación de servicios de salud (UC-14-06). El alta de espacios (UC-14-05)
+ * pasó a `CareSpacesAdminService` en F1, con las reglas del árbol físico.
  */
 @Injectable()
 export class ClinicalStructureService {
@@ -46,24 +49,28 @@ export class ClinicalStructureService {
    * @param practicesRepo - Valor de practices repo requerido por la operación.
    * @param sitesRepo - Valor de sites repo requerido por la operación.
    * @param unitsRepo - Valor de units repo requerido por la operación.
-   * @param spacesRepo - Valor de spaces repo requerido por la operación.
    * @param servicesRepo - Valor de services repo requerido por la operación.
    * @param administration - Regla de administración por organización (A-6).
    * @param catalogRepo - Catálogo de precios de la práctica.
    * @param procedures - Nomenclador de procedimientos.
    * @param logger - Valor de logger requerido por la operación.
+   * @param access - Pertenencia al tenant y quién escribe la estructura (org o sucursal).
+   * @param historyRepo - Versionado append-only en `audit.*_history`.
+   * @param outbox - Eventos de dominio en la misma transacción.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,
     private readonly sitesRepo: PracticeSitesRepository,
     private readonly unitsRepo: ClinicalUnitsRepository,
-    private readonly spacesRepo: CareSpacesRepository,
     private readonly servicesRepo: HealthcareServicesRepository,
     private readonly administration: PracticeAdministrationService,
     private readonly catalogRepo: ServiceCatalogRepository,
     private readonly procedures: ProcedureReferenceReader,
     private readonly logger: PinoLogger,
+    private readonly access: StructureAccessService,
+    private readonly historyRepo: HistoryRepository,
+    private readonly outbox: OutboxService,
   ) {
     this.logger.setContext(ClinicalStructureService.name);
   }
@@ -73,22 +80,15 @@ export class ClinicalStructureService {
     siteId: string,
     dto: CreateClinicalUnitDto,
     actor: AuthenticatedUser,
+    tenantId: string,
   ): Promise<ClinicalUnitResponseDto> {
-    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.unit.create', siteId },
       'Creating clinical unit',
     );
     return this.em.transactional(async (tx) => {
-      // La sede se resuelve hasta su práctica y se compara con el tenant activo
-      // antes de crear nada debajo.
-      const { site } = await loadSiteInScope(
-        this.sitesRepo,
-        this.practicesRepo,
-        tx,
-        siteId,
-        tenantId,
-      );
+      const site = await this.access.requireSite(tx, siteId, tenantId);
+      await this.access.assertCanWriteSite(tx, site, actor);
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
           siteId,
@@ -97,7 +97,11 @@ export class ClinicalStructureService {
 
       if (dto.parentUnitId) {
         const parent = await this.unitsRepo.findById(tx, dto.parentUnitId);
-        if (!parent || parent.practiceSiteId !== siteId) {
+        if (
+          !parent ||
+          parent.practiceSiteId !== siteId ||
+          parent.statusConceptId === PRAC.UNIT_RETIRED
+        ) {
           throw new PreconditionFailedException(
             'La unidad padre no pertenece al sitio',
             {
@@ -118,6 +122,7 @@ export class ClinicalStructureService {
             siteId,
             code: dto.code,
           },
+          PracticeErrorReason.UNIT_CODE_TAKEN,
         );
       }
 
@@ -130,102 +135,44 @@ export class ClinicalStructureService {
         specialtyConceptId: dto.specialtyConceptId,
         serviceModeConceptId: dto.serviceModeConceptId,
         statusConceptId: PRAC.UNIT_ACTIVE,
+        // F1: el tenant de la sede (NOT NULL desde v4.2.67b, FK compuesta).
+        tenantId: site.tenantId,
+        validFrom: new Date(),
         actorUserId: actor.id,
       });
-      await tx.flush();
+      await flushStructure(tx);
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'unit',
+        unit,
+        AUD.OPERATION_INSERT,
+        actor.id,
+      );
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.unitCreated,
+        {
+          tenantId: unit.tenantId,
+          aggregateId: unit.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId,
+            unitId: unit.id,
+            parentId: unit.parentUnitId ?? null,
+            code: unit.code,
+            rowVersion: unit.rowVersion ?? 1,
+          },
+        },
+      );
+      await flushStructure(tx);
       return {
         id: unit.id,
         practiceSiteId: unit.practiceSiteId,
         code: unit.code,
         status: unit.statusConceptId,
         createdAt: unit.createdAt,
-      };
-    });
-  }
-
-  /** UC-14-05: crea un espacio de atención bajo un sitio (opcionalmente en una unidad). */
-  async createCareSpace(
-    siteId: string,
-    dto: CreateCareSpaceDto,
-    actor: AuthenticatedUser,
-  ): Promise<CareSpaceResponseDto> {
-    const tenantId = requireTenantId();
-    this.logger.info(
-      { operation: 'practice.space.create', siteId },
-      'Creating care space',
-    );
-    return this.em.transactional(async (tx) => {
-      const { site } = await loadSiteInScope(
-        this.sitesRepo,
-        this.practicesRepo,
-        tx,
-        siteId,
-        tenantId,
-      );
-      if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
-        throw new PreconditionFailedException('El sitio no está activo', {
-          siteId,
-        });
-      }
-
-      if (dto.clinicalUnitId) {
-        const unit = await this.unitsRepo.findById(tx, dto.clinicalUnitId);
-        if (!unit || unit.practiceSiteId !== siteId) {
-          throw new PreconditionFailedException(
-            'La unidad no pertenece al sitio',
-            {
-              siteId,
-              clinicalUnitId: dto.clinicalUnitId,
-            },
-          );
-        }
-      }
-      if (dto.parentSpaceId) {
-        const parent = await this.spacesRepo.findById(tx, dto.parentSpaceId);
-        if (!parent || parent.practiceSiteId !== siteId) {
-          throw new PreconditionFailedException(
-            'El espacio padre no pertenece al sitio',
-            {
-              siteId,
-              parentSpaceId: dto.parentSpaceId,
-            },
-          );
-        }
-      }
-
-      const clash = (await this.spacesRepo.findBySite(tx, siteId)).find(
-        (s) => s.code === dto.code,
-      );
-      if (clash) {
-        throw new ConflictException(
-          'Ya existe un espacio con ese código en el sitio',
-          {
-            siteId,
-            code: dto.code,
-          },
-        );
-      }
-
-      const space = this.spacesRepo.create(tx, {
-        practiceSiteId: siteId,
-        clinicalUnitId: dto.clinicalUnitId,
-        parentSpaceId: dto.parentSpaceId,
-        code: dto.code,
-        name: dto.name,
-        spaceTypeConceptId: dto.spaceTypeConceptId ?? PRAC.SPACE_TYPE_ROOM,
-        capacity: dto.capacity,
-        operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
-        statusConceptId: PRAC.SPACE_ACTIVE,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-      return {
-        id: space.id,
-        practiceSiteId: space.practiceSiteId,
-        code: space.code,
-        status: space.statusConceptId,
-        operationalStatus: space.operationalStatusConceptId!,
-        createdAt: space.createdAt,
       };
     });
   }
@@ -309,6 +256,7 @@ export class ClinicalStructureService {
         if (existing) throw alreadyOffered(existing.id);
 
         const service = this.servicesRepo.create(tx, {
+          tenantId: practice.tenantId,
           practiceId,
           practiceSiteId: dto.practiceSiteId,
           clinicalUnitId: dto.clinicalUnitId,

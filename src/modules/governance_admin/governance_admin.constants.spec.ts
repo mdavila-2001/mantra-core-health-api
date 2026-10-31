@@ -1,7 +1,4 @@
 import {
-  DSAR_STATUSES,
-  DSAR_STATUS_CONCEPT,
-  DSAR_TRANSITIONS,
   GOV,
   ISSUE_STATUS_CONCEPT,
   SEVERITY_CONCEPT,
@@ -16,19 +13,9 @@ describe('governance_admin.constants', () => {
   });
 
   it('codeOfConcept no adivina lo que no conoce', () => {
-    expect(codeOfConcept(ISSUE_STATUS_CONCEPT, GOV.ISSUE_DISMISSED)).toBe('DISMISSED');
+    expect(codeOfConcept(ISSUE_STATUS_CONCEPT, GOV.ISSUE_DISMISSED)).toBe(
+      'DISMISSED',
+    );
     expect(codeOfConcept(ISSUE_STATUS_CONCEPT, 'otro')).toBeNull();
-  });
-
-  it('un estado terminal de la solicitud no admite transiciones', () => {
-    expect(DSAR_TRANSITIONS.COMPLETED).toEqual([]);
-    expect(DSAR_TRANSITIONS.REJECTED).toEqual([]);
-    expect(DSAR_STATUSES.every((s) => DSAR_STATUS_CONCEPT[s])).toBe(true);
-  });
-
-  it('desde RECEIVED nunca se vuelve a RECEIVED', () => {
-    for (const to of Object.values(DSAR_TRANSITIONS).flat()) {
-      expect(to).not.toBe('RECEIVED');
-    }
   });
 });

@@ -15,6 +15,7 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { CatalogDocumentationSeedService } from './catalog/catalog-documentation-seed.service';
 import { MutabilityRegistrySeedService } from './mutability/mutability-registry-seed.service';
+import { FrontendRoutesSeedService } from '../../modules/read_models/seed/frontend-routes-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -36,10 +37,12 @@ import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PracticeInfrastructureSeedService } from './practice-infrastructure-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { ToolRegistrySeedService } from './tool-registry-seed.service';
 import { CommunitySearchIndexService } from '../../modules/community/services';
 import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
 import { SeedCoreState } from './seed-core.state';
@@ -292,6 +295,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly boMedicalSpecialties: BoMedicalSpecialtiesSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
+    private readonly practiceInfrastructure: PracticeInfrastructureSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
@@ -306,6 +310,10 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly padronOrgAdmins?: PadronOrgAdminsSeedService,
     @Optional()
     private readonly searchIndex?: CommunitySearchIndexService,
+    @Optional()
+    private readonly toolRegistry?: ToolRegistrySeedService,
+    @Optional()
+    private readonly frontendRoutes?: FrontendRoutesSeedService,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -709,6 +717,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'content',
         run: () => this.directoryNetworks.run(this.explicitly()),
       },
+      // F1 de infraestructura hospitalaria: reglas padre→hijo y de tipología
+      // (concept ids de `practice.concepts.ts`, que el catálogo acaba de
+      // materializar) y forma `LOC_FORM_ROOM` en los espacios anteriores. Es
+      // núcleo: sin reglas, toda alta de espacio que cuelgue de un padre
+      // responde 422 `SPACE_PARENT_RULE`.
+      {
+        name: 'reglas de infraestructura hospitalaria',
+        kind: 'core',
+        run: () => this.practiceInfrastructure.run(),
+      },
       // Después de las aseguradoras y de las redes, y antes del servicio por
       // defecto de cada práctica: crea las organizaciones del padrón público
       // (hospitales, clínicas, centros de salud, laboratorios, imágenes y
@@ -736,6 +754,33 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
               kind: 'content' as const,
               run: () =>
                 this.padronOrgAdmins!.run(undefined, this.explicitly()),
+            },
+          ]
+        : []),
+      // Catálogo interno de herramientas de plataforma (`platform_ops`). Solo
+      // necesita los conceptos `platform_ops:*` que materializó el catálogo.
+      // Contenido: sin él `GET /admin/ops/tools` responde vacío, nada más.
+      ...(this.toolRegistry
+        ? [
+            {
+              id: 'registro-herramientas',
+              name: 'registro de herramientas de plataforma',
+              kind: 'content' as const,
+              run: () => this.toolRegistry!.run(),
+            },
+          ]
+        : []),
+      // Mapa «pantalla → superficie → dominio» (`read_models.frontend_routes`) que
+      // el panel de uso y errores usa para resolver cada `route_template`. Sólo
+      // necesita los conceptos `read_models:*` del catálogo. Contenido: sin él
+      // `GET /admin/analytics/parts` devuelve todo en `unmapped`, nada más.
+      ...(this.frontendRoutes
+        ? [
+            {
+              id: 'partes-del-frontend',
+              name: 'partes del frontend (superficies y rutas)',
+              kind: 'content' as const,
+              run: () => this.frontendRoutes!.run(),
             },
           ]
         : []),

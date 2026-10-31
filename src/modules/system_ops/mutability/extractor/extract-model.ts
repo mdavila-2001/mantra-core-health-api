@@ -40,6 +40,20 @@ function sqlDirs(sqlRoot: string): string[] {
     .sort();
 }
 
+/** Número de línea (1-based) de la primera que contiene `contains`, o `null` si no aparece. */
+export function findApiLine(
+  apiRoot: string,
+  file: string,
+  contains: string,
+): number | null {
+  const path = join(apiRoot, file);
+  if (!existsSync(path)) return null;
+  const index = readFileSync(path, 'utf8')
+    .split('\n')
+    .findIndex((l) => l.includes(contains));
+  return index >= 0 ? index + 1 : null;
+}
+
 /** Línea `n` (1-based) de un archivo de la API, o `null`. */
 export function readApiLine(
   apiRoot: string,
@@ -205,11 +219,15 @@ export function extractMutability(options: ExtractOptions): MutabilityCatalog {
     throw new Error(
       `Hechos de código desactualizados (el código se movió): ${stale.join(', ')}`,
     );
-  const exec = readApiLine(apiRoot, EXECUTORS_FACT.file, 79);
+  // La línea se busca por su contenido: el módulo gana y pierde líneas con cada controlador que
+  // se registra, y un número fijo dejaba la cita apuntando a otra cosa sin que nada lo notara.
+  const execLine = findApiLine(
+    apiRoot,
+    EXECUTORS_FACT.file,
+    EXECUTORS_FACT.contains,
+  );
   const genericExecutorsEmpty =
-    exec && exec.includes(EXECUTORS_FACT.contains)
-      ? { source: `${EXECUTORS_FACT.file}:79` }
-      : null;
+    execLine !== null ? { source: `${EXECUTORS_FACT.file}:${execLine}` } : null;
 
   const records = deriveMutability({
     tables: [...tables.values()],

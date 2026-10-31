@@ -23,6 +23,7 @@ import {
 } from '../../services';
 import {
   CreateLocationDto,
+  RelocateLocationDto,
   CreateReservationDto,
   CreateTransferDto,
   CreateCountSessionDto,
@@ -78,6 +79,24 @@ export class PharmacyInventoryController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.locations.create(siteId, dto, actor);
+  }
+
+  /** F5c: reubicar una ubicación en otro espacio (el stock la sigue). */
+  @Audited({
+    action: 'INVENTORY_LOCATION_RELOCATED',
+    entity: 'inventory_location',
+    entityId: 'param:id',
+  })
+  @Post('inventory-locations/:id/relocate')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reubicar una ubicación de inventario (F5c)' })
+  relocateLocation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RelocateLocationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.locations.relocate(id, dto, actor);
   }
 
   /** UC-25-04: reservar stock. */

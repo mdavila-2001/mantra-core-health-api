@@ -5,39 +5,183 @@
     "columnas": 18263,
     "indices": 8859,
     "relaciones": 7567,
-    "columnasConDescripcion": 4161,
+    "columnasConDescripcion": 4256,
     "descripcionPorFuente": {
-      "JSDOC_ESTANDAR": 2747,
-      "JSDOC_ENTIDAD": 1287,
+      "JSDOC_ESTANDAR": 2798,
+      "JSDOC_ENTIDAD": 1331,
       "MODELO_PUML": 127
     },
     "indicesConParaQue": 8369,
     "paraQuePorTipo": {
       "DOCUMENTO": 8638,
-      "CONSULTA": 1536,
+      "CONSULTA": 1577,
       "ESTRUCTURAL": 65
     },
-    "tablasConEntidad": 1248,
+    "tablasConEntidad": 1277,
     "tablasAppendOnlyDeclaradas": 140,
-    "tablasConOperaciones": 965,
+    "tablasConOperaciones": 991,
     "orm": {
-      "COINCIDE": 1208,
-      "DIVERGE": 40,
-      "SIN_ENTIDAD": 65
+      "COINCIDE": 1235,
+      "DIVERGE": 42,
+      "SIN_ENTIDAD": 36
     },
     "columnasOrm": {
-      "COINCIDE": 17174,
-      "AUSENTE_EN_ORM": 143,
-      "SIN_ENTIDAD": 939,
+      "COINCIDE": 17639,
+      "AUSENTE_EN_ORM": 66,
+      "SIN_ENTIDAD": 551,
       "NULABILIDAD_DIVERGE": 7
     }
   },
   "deriva": {
     "entidadesSinTabla": [
       {
+        "tabla": "audit.care_space_blocks_history",
+        "clase": "CareSpaceBlocksHistory",
+        "archivo": "src/modules/audit/entities/care_space_blocks_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.care_space_category_periods_history",
+        "clase": "CareSpaceCategoryPeriodsHistory",
+        "archivo": "src/modules/audit/entities/care_space_category_periods_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.charge_captures_history",
+        "clase": "ChargeCapturesHistory",
+        "archivo": "src/modules/audit/entities/charge_captures_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.cleaning_orders_history",
+        "clase": "CleaningOrdersHistory",
+        "archivo": "src/modules/audit/entities/cleaning_orders_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.encounter_locations_history",
+        "clase": "EncounterLocationsHistory",
+        "archivo": "src/modules/audit/entities/encounter_locations_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.operating_room_block_series_history",
+        "clase": "OperatingRoomBlockSeriesHistory",
+        "archivo": "src/modules/audit/entities/operating_room_block_series_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.operating_room_blocks_history",
+        "clase": "OperatingRoomBlocksHistory",
+        "archivo": "src/modules/audit/entities/operating_room_blocks_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.placement_incidents_history",
+        "clase": "PlacementIncidentsHistory",
+        "archivo": "src/modules/audit/entities/placement_incidents_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "audit.space_tariffs_history",
+        "clase": "SpaceTariffsHistory",
+        "archivo": "src/modules/audit/entities/space_tariffs_history.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "billing.charge_captures",
+        "clase": "ChargeCaptures",
+        "archivo": "src/modules/billing/entities/charge_captures.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "billing.space_tariffs",
+        "clase": "SpaceTariffs",
+        "archivo": "src/modules/billing/entities/space_tariffs.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "clinical.inpatient_census_adjustments",
+        "clase": "InpatientCensusAdjustments",
+        "archivo": "src/modules/clinical/entities/inpatient_census_adjustments.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "clinical.inpatient_census_days",
+        "clase": "InpatientCensusDays",
+        "archivo": "src/modules/clinical/entities/inpatient_census_days.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "clinical.inpatient_census_entries",
+        "clase": "InpatientCensusEntries",
+        "archivo": "src/modules/clinical/entities/inpatient_census_entries.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
         "tabla": "clinical.patient_reported_health_statements",
         "clase": "PatientReportedHealthStatements",
         "archivo": "src/modules/clinical/entities/patient_reported_health_statements.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "clinical.placement_incidents",
+        "clase": "PlacementIncidents",
+        "archivo": "src/modules/clinical/entities/placement_incidents.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "clinical.service_request_components",
+        "clase": "ServiceRequestComponents",
+        "archivo": "src/modules/clinical/entities/service_request_components.entity.ts",
         "ddl": {
           "tipo": "SIN_DDL",
           "fuente": null
@@ -59,6 +203,114 @@
         "ddl": {
           "tipo": "SIN_DDL",
           "fuente": null
+        }
+      },
+      {
+        "tabla": "observability.alert_evaluations",
+        "clase": "AlertEvaluations",
+        "archivo": "src/modules/observability/entities/alert_evaluations.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.alert_rules",
+        "clase": "AlertRules",
+        "archivo": "src/modules/observability/entities/alert_rules.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.dependency_probe_runs",
+        "clase": "DependencyProbeRuns",
+        "archivo": "src/modules/observability/entities/dependency_probe_runs.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.error_events",
+        "clase": "ErrorEvents",
+        "archivo": "src/modules/observability/entities/error_events.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.error_groups",
+        "clase": "ErrorGroups",
+        "archivo": "src/modules/observability/entities/error_groups.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.http_request_minute_series",
+        "clase": "HttpRequestMinuteSeries",
+        "archivo": "src/modules/observability/entities/http_request_minute_series.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.instances",
+        "clase": "Instances",
+        "archivo": "src/modules/observability/entities/instances.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.rollup_watermarks",
+        "clase": "RollupWatermarks",
+        "archivo": "src/modules/observability/entities/rollup_watermarks.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.slow_request_samples",
+        "clase": "SlowRequestSamples",
+        "archivo": "src/modules/observability/entities/slow_request_samples.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.sql_statement_minute_series",
+        "clase": "SqlStatementMinuteSeries",
+        "archivo": "src/modules/observability/entities/sql_statement_minute_series.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.sql_statements",
+        "clase": "SqlStatements",
+        "archivo": "src/modules/observability/entities/sql_statements.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
+        }
+      },
+      {
+        "tabla": "observability.worker_tick_minute_series",
+        "clase": "WorkerTickMinuteSeries",
+        "archivo": "src/modules/observability/entities/worker_tick_minute_series.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
         }
       },
       {
@@ -89,9 +341,63 @@
         }
       },
       {
+        "tabla": "practice.care_space_blocks",
+        "clase": "CareSpaceBlocks",
+        "archivo": "src/modules/practice/entities/care_space_blocks.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "practice.care_space_category_periods",
+        "clase": "CareSpaceCategoryPeriods",
+        "archivo": "src/modules/practice/entities/care_space_category_periods.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "practice.care_space_status_events",
+        "clase": "CareSpaceStatusEvents",
+        "archivo": "src/modules/practice/entities/care_space_status_events.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "practice.cleaning_orders",
+        "clase": "CleaningOrders",
+        "archivo": "src/modules/practice/entities/cleaning_orders.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
         "tabla": "procedures_perioperative.instrument_sets",
         "clase": "InstrumentSets",
         "archivo": "src/modules/procedures_perioperative/entities/instrument_sets.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "procedures_perioperative.operating_room_block_series",
+        "clase": "OperatingRoomBlockSeries",
+        "archivo": "src/modules/procedures_perioperative/entities/operating_room_block_series.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "procedures_perioperative.operating_room_blocks",
+        "clase": "OperatingRoomBlocks",
+        "archivo": "src/modules/procedures_perioperative/entities/operating_room_blocks.entity.ts",
         "ddl": {
           "tipo": "SIN_DDL",
           "fuente": null
@@ -149,6 +455,15 @@
         "ddl": {
           "tipo": "SIN_DDL",
           "fuente": null
+        }
+      },
+      {
+        "tabla": "telemetry.client_error_events",
+        "clase": "ClientErrorEvents",
+        "archivo": "src/modules/telemetry/entities/client_error_events.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql"
         }
       },
       {
@@ -426,8 +741,6 @@
       "delegated_access.lifecycle_cases",
       "delegated_access.patient_restriction_flags",
       "delegated_access.role_templates",
-      "delegated_access.shared_access_link_uses",
-      "delegated_access.shared_access_links",
       "delegated_access.sod_exceptions",
       "delegated_access.sod_rules",
       "delegated_access.support_grant_actions",
@@ -441,38 +754,11 @@
       "directory.affiliation_invitations",
       "iam.session_policies",
       "insurance.insurance_terms_conditions",
-      "insurance.practitioner_insurer_requests",
-      "marketing.insights_alert_rules",
-      "marketing.insights_alert_transitions",
-      "marketing.insights_alerts",
-      "marketing.insights_app_daily_facts",
-      "marketing.insights_app_onboarding_facts",
-      "marketing.insights_app_screen_daily_facts",
-      "marketing.insights_campaign_daily_facts",
-      "marketing.insights_campaign_hourly_facts",
-      "marketing.insights_campaigns",
-      "marketing.insights_creatives",
-      "marketing.insights_data_sources",
-      "marketing.insights_environment_items",
-      "marketing.insights_mentions",
-      "marketing.insights_milestones",
-      "marketing.insights_notification_preferences",
-      "marketing.insights_reports",
-      "marketing.insights_saved_views",
-      "marketing.insights_search_signals",
-      "marketing.insights_sector_trends",
-      "marketing.insights_social_daily_facts",
-      "marketing.insights_social_posts",
-      "marketing.insights_user_preferences",
-      "practice.facility_typology_rules",
       "practice.practitioner_location_assignments",
-      "practice.site_declared_capacities",
-      "practice.space_form_parent_rules",
-      "practice.space_unit_assignments",
       "surveys.survey_invitation_reminders"
     ],
-    "columnasAusentesEnOrm": 143,
-    "columnasDeMasEnOrm": 6,
+    "columnasAusentesEnOrm": 66,
+    "columnasDeMasEnOrm": 56,
     "nulabilidad": 7,
     "tipos": 0,
     "esquemasSinCatalogoDeApi": [],
@@ -702,8 +988,8 @@
       "dominio": "Financiero y ERP",
       "columnas": 12,
       "indices": 6,
-      "operaciones": 14,
-      "orm": "COINCIDE",
+      "operaciones": 19,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -779,8 +1065,8 @@
       "dominio": "Financiero y ERP",
       "columnas": 14,
       "indices": 7,
-      "operaciones": 0,
-      "orm": "COINCIDE",
+      "operaciones": 5,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -1967,7 +2253,7 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 17,
       "indices": 10,
-      "operaciones": 204,
+      "operaciones": 216,
       "orm": "DIVERGE",
       "appendOnly": true
     },
@@ -2033,8 +2319,8 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 11,
       "indices": 6,
-      "operaciones": 0,
-      "orm": "DIVERGE",
+      "operaciones": 3,
+      "orm": "COINCIDE",
       "appendOnly": true
     },
     {
@@ -2110,8 +2396,8 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 11,
       "indices": 6,
-      "operaciones": 0,
-      "orm": "DIVERGE",
+      "operaciones": 3,
+      "orm": "COINCIDE",
       "appendOnly": true
     },
     {
@@ -2264,7 +2550,7 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 11,
       "indices": 9,
-      "operaciones": 14,
+      "operaciones": 16,
       "orm": "COINCIDE",
       "appendOnly": true
     },
@@ -2903,7 +3189,7 @@
       "columnas": 11,
       "indices": 6,
       "operaciones": 0,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": true
     },
     {
@@ -3397,7 +3683,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 61,
+      "operaciones": 74,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3419,7 +3705,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 15,
       "indices": 3,
-      "operaciones": 77,
+      "operaciones": 90,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3430,7 +3716,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 17,
       "indices": 13,
-      "operaciones": 73,
+      "operaciones": 86,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3441,7 +3727,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 4,
-      "operaciones": 63,
+      "operaciones": 78,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3463,7 +3749,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 14,
       "indices": 2,
-      "operaciones": 63,
+      "operaciones": 76,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3485,7 +3771,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 26,
       "indices": 12,
-      "operaciones": 67,
+      "operaciones": 83,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -3496,7 +3782,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 70,
+      "operaciones": 86,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -3507,7 +3793,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 63,
+      "operaciones": 77,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3518,7 +3804,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 86,
+      "operaciones": 102,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3540,7 +3826,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 9,
-      "operaciones": 61,
+      "operaciones": 77,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3551,7 +3837,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 15,
       "indices": 11,
-      "operaciones": 89,
+      "operaciones": 101,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3936,7 +4222,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 18,
       "indices": 8,
-      "operaciones": 58,
+      "operaciones": 66,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4002,7 +4288,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4013,7 +4299,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4035,7 +4321,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 14,
       "indices": 11,
-      "operaciones": 29,
+      "operaciones": 31,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4057,7 +4343,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 20,
       "indices": 10,
-      "operaciones": 17,
+      "operaciones": 18,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4068,7 +4354,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 7,
       "indices": 4,
-      "operaciones": 8,
+      "operaciones": 9,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4079,7 +4365,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 18,
       "indices": 12,
-      "operaciones": 15,
+      "operaciones": 16,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4255,8 +4541,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 57,
       "indices": 19,
-      "operaciones": 15,
-      "orm": "DIVERGE",
+      "operaciones": 19,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -4299,8 +4585,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 16,
       "indices": 13,
-      "operaciones": 20,
-      "orm": "COINCIDE",
+      "operaciones": 21,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -4310,7 +4596,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 13,
       "indices": 9,
-      "operaciones": 4,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4321,7 +4607,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 21,
       "indices": 16,
-      "operaciones": 21,
+      "operaciones": 22,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4332,7 +4618,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 16,
       "indices": 14,
-      "operaciones": 20,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4343,8 +4629,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 13,
       "indices": 7,
-      "operaciones": 4,
-      "orm": "COINCIDE",
+      "operaciones": 48,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -4354,7 +4640,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 14,
       "indices": 7,
-      "operaciones": 11,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4365,8 +4651,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 20,
       "indices": 13,
-      "operaciones": 86,
-      "orm": "COINCIDE",
+      "operaciones": 113,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -4409,7 +4695,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 33,
       "indices": 17,
-      "operaciones": 47,
+      "operaciones": 52,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4508,7 +4794,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 6,
       "indices": 4,
-      "operaciones": 3,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4519,8 +4805,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 22,
       "indices": 18,
-      "operaciones": 34,
-      "orm": "COINCIDE",
+      "operaciones": 40,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -4541,7 +4827,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 24,
       "indices": 11,
-      "operaciones": 101,
+      "operaciones": 102,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4552,7 +4838,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 5,
-      "operaciones": 48,
+      "operaciones": 49,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4607,7 +4893,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 19,
       "indices": 11,
-      "operaciones": 61,
+      "operaciones": 63,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4970,7 +5256,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 189,
+      "operaciones": 193,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5795,7 +6081,7 @@
       "dominio": null,
       "columnas": 10,
       "indices": 1,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5806,7 +6092,7 @@
       "dominio": null,
       "columnas": 34,
       "indices": 3,
-      "operaciones": 28,
+      "operaciones": 33,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5828,7 +6114,7 @@
       "dominio": null,
       "columnas": 24,
       "indices": 1,
-      "operaciones": 16,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5850,7 +6136,7 @@
       "dominio": null,
       "columnas": 22,
       "indices": 2,
-      "operaciones": 23,
+      "operaciones": 28,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5927,7 +6213,7 @@
       "dominio": null,
       "columnas": 34,
       "indices": 3,
-      "operaciones": 21,
+      "operaciones": 22,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6125,7 +6411,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 35,
       "indices": 24,
-      "operaciones": 8,
+      "operaciones": 82,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -6169,8 +6455,8 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 8,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 3,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -6180,8 +6466,8 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 20,
       "indices": 13,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 7,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -6235,8 +6521,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 19,
       "indices": 9,
-      "operaciones": 9,
-      "orm": "DIVERGE",
+      "operaciones": 15,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -6312,7 +6598,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 20,
+      "operaciones": 25,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6334,7 +6620,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 19,
       "indices": 13,
-      "operaciones": 49,
+      "operaciones": 54,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6510,7 +6796,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 18,
       "indices": 12,
-      "operaciones": 13,
+      "operaciones": 14,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6566,7 +6852,7 @@
       "columnas": 17,
       "indices": 10,
       "operaciones": 0,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -6620,7 +6906,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 17,
       "indices": 13,
-      "operaciones": 5,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6697,7 +6983,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 14,
       "indices": 10,
-      "operaciones": 5,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6708,8 +6994,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 12,
       "indices": 8,
-      "operaciones": 0,
-      "orm": "COINCIDE",
+      "operaciones": 2,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -6730,7 +7016,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 7,
+      "operaciones": 9,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6785,7 +7071,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 21,
       "indices": 14,
-      "operaciones": 12,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6818,8 +7104,8 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 12,
       "indices": 8,
-      "operaciones": 8,
-      "orm": "DIVERGE",
+      "operaciones": 77,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -6829,7 +7115,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 22,
+      "operaciones": 25,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6862,7 +7148,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 18,
       "indices": 14,
-      "operaciones": 194,
+      "operaciones": 317,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -6884,7 +7170,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 19,
       "indices": 13,
-      "operaciones": 145,
+      "operaciones": 171,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -7786,7 +8072,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 16,
+      "operaciones": 17,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8501,7 +8787,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 3,
-      "operaciones": 4,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8534,7 +8820,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 50,
+      "operaciones": 57,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8545,7 +8831,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 5,
-      "operaciones": 118,
+      "operaciones": 120,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8556,7 +8842,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 12,
       "indices": 2,
-      "operaciones": 27,
+      "operaciones": 28,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8600,7 +8886,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 8,
       "indices": 5,
-      "operaciones": 35,
+      "operaciones": 33,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8622,7 +8908,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 7,
-      "operaciones": 138,
+      "operaciones": 143,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8633,7 +8919,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 9,
       "indices": 5,
-      "operaciones": 16,
+      "operaciones": 25,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8644,7 +8930,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 21,
       "indices": 8,
-      "operaciones": 86,
+      "operaciones": 112,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8952,7 +9238,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 19,
       "indices": 10,
-      "operaciones": 71,
+      "operaciones": 79,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9084,8 +9370,8 @@
       "dominio": "Financiero y ERP",
       "columnas": 12,
       "indices": 7,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 14,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9612,8 +9898,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 16,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9623,8 +9909,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 9,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9634,8 +9920,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 27,
       "indices": 7,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9646,7 +9932,7 @@
       "columnas": 14,
       "indices": 1,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9657,7 +9943,7 @@
       "columnas": 6,
       "indices": 1,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9668,7 +9954,7 @@
       "columnas": 9,
       "indices": 1,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9678,8 +9964,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 20,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 14,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9690,7 +9976,7 @@
       "columnas": 11,
       "indices": 2,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9700,8 +9986,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 22,
       "indices": 7,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 2,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9711,8 +9997,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 14,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9722,8 +10008,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 11,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 14,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9734,7 +10020,7 @@
       "columnas": 22,
       "indices": 5,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9745,7 +10031,7 @@
       "columnas": 19,
       "indices": 6,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9755,8 +10041,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 10,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9766,8 +10052,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 13,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9777,8 +10063,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 15,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 2,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9788,8 +10074,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 10,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 2,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9800,7 +10086,7 @@
       "columnas": 6,
       "indices": 1,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9811,7 +10097,7 @@
       "columnas": 5,
       "indices": 1,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9822,7 +10108,7 @@
       "columnas": 18,
       "indices": 1,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9833,7 +10119,7 @@
       "columnas": 20,
       "indices": 4,
       "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9843,8 +10129,8 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 11,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 1,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9942,7 +10228,7 @@
       "dominio": null,
       "columnas": 15,
       "indices": 4,
-      "operaciones": 9,
+      "operaciones": 17,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9953,7 +10239,7 @@
       "dominio": null,
       "columnas": 22,
       "indices": 6,
-      "operaciones": 12,
+      "operaciones": 23,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10052,7 +10338,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 13,
       "indices": 5,
-      "operaciones": 103,
+      "operaciones": 128,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10085,7 +10371,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 31,
       "indices": 8,
-      "operaciones": 82,
+      "operaciones": 84,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10096,7 +10382,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 73,
+      "operaciones": 75,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10118,7 +10404,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 48,
+      "operaciones": 49,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10129,7 +10415,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 22,
       "indices": 6,
-      "operaciones": 56,
+      "operaciones": 57,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10140,7 +10426,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 36,
       "indices": 8,
-      "operaciones": 91,
+      "operaciones": 92,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10151,7 +10437,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 35,
       "indices": 11,
-      "operaciones": 157,
+      "operaciones": 162,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10162,7 +10448,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 20,
       "indices": 7,
-      "operaciones": 207,
+      "operaciones": 257,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10173,7 +10459,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 26,
       "indices": 8,
-      "operaciones": 55,
+      "operaciones": 56,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10195,7 +10481,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 72,
+      "operaciones": 74,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10393,8 +10679,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 20,
       "indices": 13,
-      "operaciones": 4,
-      "orm": "DIVERGE",
+      "operaciones": 9,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -10415,7 +10701,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 18,
       "indices": 15,
-      "operaciones": 5,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10602,7 +10888,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 1,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10635,7 +10921,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 22,
       "indices": 14,
-      "operaciones": 2,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10668,7 +10954,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 22,
       "indices": 13,
-      "operaciones": 13,
+      "operaciones": 18,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10734,7 +11020,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 24,
       "indices": 15,
-      "operaciones": 10,
+      "operaciones": 11,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10745,7 +11031,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 2,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10921,7 +11207,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 2,
+      "operaciones": 3,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11383,7 +11669,7 @@
       "dominio": "Farmacia",
       "columnas": 23,
       "indices": 16,
-      "operaciones": 38,
+      "operaciones": 40,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11394,8 +11680,8 @@
       "dominio": "Farmacia",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 19,
-      "orm": "DIVERGE",
+      "operaciones": 28,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -11405,7 +11691,7 @@
       "dominio": "Farmacia",
       "columnas": 15,
       "indices": 6,
-      "operaciones": 10,
+      "operaciones": 11,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11438,7 +11724,7 @@
       "dominio": "Farmacia",
       "columnas": 22,
       "indices": 14,
-      "operaciones": 40,
+      "operaciones": 41,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11460,7 +11746,7 @@
       "dominio": "Farmacia",
       "columnas": 11,
       "indices": 3,
-      "operaciones": 44,
+      "operaciones": 52,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11471,7 +11757,7 @@
       "dominio": "Farmacia",
       "columnas": 12,
       "indices": 6,
-      "operaciones": 5,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11482,7 +11768,7 @@
       "dominio": "Farmacia",
       "columnas": 17,
       "indices": 13,
-      "operaciones": 6,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11581,7 +11867,7 @@
       "dominio": "Farmacia",
       "columnas": 17,
       "indices": 14,
-      "operaciones": 73,
+      "operaciones": 77,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11592,7 +11878,7 @@
       "dominio": "Farmacia",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 9,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11603,7 +11889,7 @@
       "dominio": "Farmacia",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 10,
+      "operaciones": 12,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11636,7 +11922,7 @@
       "dominio": "Farmacia",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 19,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11680,7 +11966,7 @@
       "dominio": "Farmacia",
       "columnas": 14,
       "indices": 5,
-      "operaciones": 24,
+      "operaciones": 26,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11691,7 +11977,7 @@
       "dominio": "Farmacia",
       "columnas": 26,
       "indices": 12,
-      "operaciones": 63,
+      "operaciones": 68,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11702,7 +11988,7 @@
       "dominio": "Farmacia",
       "columnas": 17,
       "indices": 9,
-      "operaciones": 48,
+      "operaciones": 52,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11768,7 +12054,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 0,
+      "operaciones": 2,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11834,7 +12120,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 14,
       "indices": 7,
-      "operaciones": 2,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11845,7 +12131,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 21,
       "indices": 10,
-      "operaciones": 1,
+      "operaciones": 3,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12054,7 +12340,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 10,
+      "operaciones": 12,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12120,7 +12406,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 6,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12351,7 +12637,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 34,
       "indices": 18,
-      "operaciones": 7,
+      "operaciones": 131,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -12362,8 +12648,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 19,
       "indices": 11,
-      "operaciones": 9,
-      "orm": "DIVERGE",
+      "operaciones": 94,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12373,8 +12659,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 8,
       "indices": 4,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 9,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12384,8 +12670,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 18,
-      "orm": "COINCIDE",
+      "operaciones": 20,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -12428,7 +12714,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 10,
       "indices": 4,
-      "operaciones": 3,
+      "operaciones": 24,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12439,8 +12725,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 30,
       "indices": 21,
-      "operaciones": 103,
-      "orm": "DIVERGE",
+      "operaciones": 205,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12450,7 +12736,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 9,
-      "operaciones": 186,
+      "operaciones": 222,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12472,7 +12758,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 119,
+      "operaciones": 146,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12483,7 +12769,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 1,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12494,8 +12780,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 3,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12505,8 +12791,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 7,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 6,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12516,8 +12802,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 12,
       "indices": 7,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 60,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12571,8 +12857,8 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 11,
       "indices": 8,
-      "operaciones": 4,
-      "orm": "COINCIDE",
+      "operaciones": 9,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -12736,7 +13022,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 9,
       "indices": 6,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12759,7 +13045,7 @@
       "columnas": 15,
       "indices": 7,
       "operaciones": 13,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12769,7 +13055,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 30,
       "indices": 20,
-      "operaciones": 15,
+      "operaciones": 26,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -12879,7 +13165,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 2,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12890,7 +13176,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 1,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12901,7 +13187,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 11,
       "indices": 7,
-      "operaciones": 2,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12934,7 +13220,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 17,
       "indices": 9,
-      "operaciones": 144,
+      "operaciones": 158,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12956,7 +13242,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 73,
+      "operaciones": 75,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -12989,7 +13275,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 14,
       "indices": 9,
-      "operaciones": 56,
+      "operaciones": 60,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13011,7 +13297,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 13,
       "indices": 9,
-      "operaciones": 150,
+      "operaciones": 169,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13022,7 +13308,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 257,
+      "operaciones": 286,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13033,7 +13319,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 9,
       "indices": 6,
-      "operaciones": 52,
+      "operaciones": 72,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13044,7 +13330,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 27,
       "indices": 14,
-      "operaciones": 149,
+      "operaciones": 193,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13055,7 +13341,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 17,
       "indices": 9,
-      "operaciones": 36,
+      "operaciones": 38,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13121,7 +13407,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 7,
       "indices": 3,
-      "operaciones": 0,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13451,7 +13737,7 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 20,
       "indices": 9,
-      "operaciones": 4,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13528,7 +13814,7 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 4,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13715,7 +14001,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 28,
       "indices": 20,
-      "operaciones": 127,
+      "operaciones": 140,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -13760,7 +14046,7 @@
       "columnas": 12,
       "indices": 5,
       "operaciones": 21,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -13770,7 +14056,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 0,
+      "operaciones": 2,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13781,7 +14067,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 17,
       "indices": 9,
-      "operaciones": 143,
+      "operaciones": 154,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -13847,7 +14133,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 15,
+      "operaciones": 17,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13869,8 +14155,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 133,
-      "orm": "COINCIDE",
+      "operaciones": 151,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -13880,7 +14166,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 18,
       "indices": 5,
-      "operaciones": 22,
+      "operaciones": 24,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13892,7 +14178,7 @@
       "columnas": 16,
       "indices": 8,
       "operaciones": 29,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -14012,7 +14298,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14023,7 +14309,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 17,
       "indices": 10,
-      "operaciones": 10,
+      "operaciones": 11,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14034,7 +14320,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 11,
       "indices": 4,
-      "operaciones": 4,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14045,7 +14331,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 6,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14188,7 +14474,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 10,
       "indices": 3,
-      "operaciones": 2,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14232,7 +14518,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 21,
       "indices": 7,
-      "operaciones": 14,
+      "operaciones": 20,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14243,7 +14529,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 14,
       "indices": 6,
-      "operaciones": 8,
+      "operaciones": 12,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14276,7 +14562,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 14,
       "indices": 7,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14364,7 +14650,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 13,
       "indices": 5,
-      "operaciones": 2,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14375,7 +14661,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 13,
       "indices": 7,
-      "operaciones": 8,
+      "operaciones": 10,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14397,7 +14683,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 2,
+      "operaciones": 1,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14419,7 +14705,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 5,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14430,7 +14716,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 14,
       "indices": 5,
-      "operaciones": 6,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14452,7 +14738,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 20,
       "indices": 9,
-      "operaciones": 3,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14463,7 +14749,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 8,
       "indices": 4,
-      "operaciones": 3,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14496,7 +14782,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 13,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14540,7 +14826,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 15,
       "indices": 5,
-      "operaciones": 5,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14551,7 +14837,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 12,
       "indices": 4,
-      "operaciones": 2,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14562,7 +14848,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 19,
       "indices": 12,
-      "operaciones": 12,
+      "operaciones": 19,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14573,7 +14859,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 13,
       "indices": 9,
-      "operaciones": 2,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14584,7 +14870,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 182,
+      "operaciones": 228,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14628,7 +14914,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 20,
+      "operaciones": 38,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14650,7 +14936,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 10,
       "indices": 3,
-      "operaciones": 27,
+      "operaciones": 41,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14672,7 +14958,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 14,
       "indices": 10,
-      "operaciones": 10,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14716,7 +15002,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 10,
       "indices": 5,
-      "operaciones": 48,
+      "operaciones": 60,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14738,7 +15024,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 12,
       "indices": 6,
-      "operaciones": 45,
+      "operaciones": 52,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -14749,7 +15035,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 12,
       "indices": 7,
-      "operaciones": 44,
+      "operaciones": 51,
       "orm": "COINCIDE",
       "appendOnly": false
     },

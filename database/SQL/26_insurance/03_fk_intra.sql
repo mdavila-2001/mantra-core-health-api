@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 26 · schema insurance
+-- SALUD v4.2.68 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
 
 
@@ -61,6 +61,12 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_network_provider_memberships_provider_network_id" FOREIGN KEY ("provider_network_id")
         REFERENCES "insurance"."provider_networks" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "insurance"."practitioner_insurer_requests"
+        ADD CONSTRAINT "fk_practitioner_insurer_requests_insurance_carrier_id" FOREIGN KEY ("insurance_carrier_id")
+        REFERENCES "insurance"."insurance_carriers" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_campaigns"

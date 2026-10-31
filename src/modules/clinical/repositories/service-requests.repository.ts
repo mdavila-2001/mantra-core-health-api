@@ -63,6 +63,8 @@ export interface CreateServiceRequestData {
    * Sede sugerida. Es una recomendación: no concede acceso a la orden.
    */
   suggestedPracticeSiteId?: string;
+  /** F5b: punto de toma sugerido. */
+  suggestedCareSpaceId?: string;
   /**
    * El informe diagnóstico previo que satisface este pedido, si el motor de
    * duplicidad encontró uno y el médico decidió (antiduplicación, v4.2.17).
@@ -73,6 +75,18 @@ export interface CreateServiceRequestData {
    * cuando la orden reutiliza el informe previo o no hubo duplicado.
    */
   duplicateOverrideReason?: string;
+  /** Agrupa los renglones pedidos juntos (`POST /clinical/requisitions`). */
+  requisitionId?: string;
+  /** Muestra pedida (sólo laboratorio/patología). */
+  specimenTypeConceptId?: string;
+  /** Modalidad de imagen. */
+  modalityConceptId?: string;
+  /** Región corporal (`imaging-body-structure`). */
+  bodySiteConceptId?: string;
+  /** Lateralidad (`condition-laterality`). */
+  lateralityConceptId?: string;
+  /** Contraste (`imaging-contrast`). */
+  contrastConceptId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -118,8 +132,17 @@ export class ServiceRequestsRepository {
         performerSelectionConceptId: data.performerSelectionConceptId,
         performerPractitionerProfileId: data.performerPractitionerProfileId,
         suggestedPracticeSiteId: data.suggestedPracticeSiteId,
+        ...(data.suggestedCareSpaceId
+          ? { suggestedCareSpaceId: data.suggestedCareSpaceId }
+          : {}),
         previousDiagnosticReportId: data.previousDiagnosticReportId,
         duplicateOverrideReason: data.duplicateOverrideReason,
+        requisitionId: data.requisitionId,
+        specimenTypeConceptId: data.specimenTypeConceptId,
+        modalityConceptId: data.modalityConceptId,
+        bodySiteConceptId: data.bodySiteConceptId,
+        lateralityConceptId: data.lateralityConceptId,
+        contrastConceptId: data.contrastConceptId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

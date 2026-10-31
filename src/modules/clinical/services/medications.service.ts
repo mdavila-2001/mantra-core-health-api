@@ -32,6 +32,7 @@ import { FormInstanceOriginValidator } from '../../forms/services/form-instance-
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
+import { assertValidToNotInPast } from './prescription-valid-to';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
@@ -365,6 +366,11 @@ export class MedicationsService {
         dto.prescriberProfileId,
         actor,
       );
+      // Una receta que nacería vencida se rechaza antes de escribir nada.
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : undefined,
+        new Date(),
+      );
       if (dto.indicationConditionId !== undefined) {
         await this.assertIndicationBelongsToPatient(
           tx,
@@ -461,7 +467,12 @@ export class MedicationsService {
         request.unitConceptId = dto.unitConceptId;
       if (dto.validFrom !== undefined)
         request.validFrom = new Date(dto.validFrom);
-      if (dto.validTo !== undefined) request.validTo = new Date(dto.validTo);
+      if (dto.validTo !== undefined) {
+        assertValidToNotInPast(new Date(dto.validTo), new Date(), {
+          requestId,
+        });
+        request.validTo = new Date(dto.validTo);
+      }
       if (dto.patientInstructionsText !== undefined)
         request.patientInstructionsText = dto.patientInstructionsText;
       if (dto.indicationConditionId !== undefined) {
@@ -587,6 +598,9 @@ export class MedicationsService {
           );
         }
       }
+
+      // Un borrador cuyo fin de vigencia pasó mientras esperaba no se emite.
+      assertValidToNotInPast(request.validTo, new Date(), { requestId });
 
       if (!request.signedAt) {
         const signatureRequired =
@@ -714,6 +728,14 @@ export class MedicationsService {
         );
       }
 
+      // El reemplazo hereda el fin de vigencia si no trae otro: tampoco nace
+      // vencido.
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : original.validTo,
+        new Date(),
+        { requestId },
+      );
+
       const replacement = this.requestsRepo.create(tx, {
         custodianTenantId: original.custodianTenantId,
         patientProfileId: original.patientProfileId,
@@ -800,6 +822,12 @@ export class MedicationsService {
           ClinicalErrorReason.MEDICATION_REQUEST_NOT_RENEWABLE,
         );
       }
+
+      assertValidToNotInPast(
+        dto.validTo ? new Date(dto.validTo) : undefined,
+        new Date(),
+        { requestId },
+      );
 
       const renewal = this.requestsRepo.create(tx, {
         custodianTenantId: source.custodianTenantId,

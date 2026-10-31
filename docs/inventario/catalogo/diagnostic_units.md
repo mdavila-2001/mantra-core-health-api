@@ -10,16 +10,16 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [diagnostic_equipment](#diagnostic_equipment) | Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar recursos tecnológicos de prestación. | 19 | 9 | 9 | DIVERGE |
+| [diagnostic_equipment](#diagnostic_equipment) | Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar recursos tecnológicos de prestación. | 19 | 9 | 15 | COINCIDE |
 | [diagnostic_price_schedules](#diagnostic_price_schedules) | Define esquemas temporales de precios para los servicios de unidades diagnósticas. | 17 | 11 | 7 | COINCIDE |
 | [diagnostic_study_components](#diagnostic_study_components) | Detalla componentes de estudios diagnósticos para representar pruebas o partes que integran una prestación. | 8 | 4 | 1 | COINCIDE |
 | [diagnostic_study_offerings](#diagnostic_study_offerings) | Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicitudes clínicas con capacidad disponible. | 22 | 10 | 27 | COINCIDE |
 | [diagnostic_study_prices](#diagnostic_study_prices) | Asocia precios a estudios concretos para disponer de valores económicos aplicables a prestaciones diagnósticas. | 15 | 5 | 8 | COINCIDE |
 | [diagnostic_unit_accreditations](#diagnostic_unit_accreditations) | Conserva acreditaciones de unidades diagnósticas para documentar certificaciones y alcance reconocido de sus servicios. | 15 | 8 | 8 | COINCIDE |
 | [diagnostic_unit_practitioner_assignments](#diagnostic_unit_practitioner_assignments) | Vincula profesionales con unidades diagnósticas para documentar asignación y responsabilidad de prestación. | 16 | 9 | 3 | COINCIDE |
-| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 20 | COINCIDE |
+| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 25 | COINCIDE |
 | [diagnostic_unit_specialties](#diagnostic_unit_specialties) | Asocia especialidades con unidades diagnósticas para describir las áreas clínicas que pueden atender. | 12 | 5 | 6 | COINCIDE |
-| [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 49 | COINCIDE |
+| [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 54 | COINCIDE |
 | [unit_medical_visitors](#unit_medical_visitors) | sin propósito | 26 | 10 | 0 | SIN_ENTIDAD |
 | [unit_visit_ratings](#unit_visit_ratings) | sin propósito | 16 | 5 | 0 | SIN_ENTIDAD |
 | [unit_visit_records](#unit_visit_records) | sin propósito | 22 | 10 | 0 | SIN_ENTIDAD |
@@ -208,7 +208,7 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_equipment`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticEquipment` — `src/modules/diagnostic_units/entities/diagnostic_equipment.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -229,10 +229,10 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/diagnostic_units/entities/diagnostic_equipment.entity.ts:108`)_ | coincide |
-| 16 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | + infraestructura hospitalaria F5a (2026-10-29): el equipo vive en una SALA del árbol físico (practice.care_spaces, mismo tenant que la unidad diagnóstica: lo garantiza el trigger del patch …_f5_operaciones) y se identifica en DICOM por su AE Title y su Station Name (≤ 16 caracteres, Modality Worklist 0040,0001 / 0040,0010). El recurso agendable RES_EQUIPMENT del equipo es opcional (lo crea la API bajo demanda). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:195`)_ | **AUSENTE_EN_ORM** |
-| 17 | `ae_title` | `varchar(16)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 18 | `station_name` | `varchar(16)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 19 | `schedulable_resource_id` | `uuid` | Clave foránea → scheduling.schedulable_resources.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 16 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | + infraestructura hospitalaria F5a (2026-10-29): el equipo vive en una SALA del árbol físico (practice.care_spaces, mismo tenant que la unidad diagnóstica: lo garantiza el trigger del patch …_f5_operaciones) y se identifica en DICOM por su AE Title y su Station Name (≤ 16 caracteres, Modality Worklist 0040,0001 / 0040,0010). El recurso agendable RES_EQUIPMENT del equipo es opcional (lo crea la API bajo demanda). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:195`)_ | coincide |
+| 17 | `ae_title` | `varchar(16)` | Opcional | _sin dato_ | coincide |
+| 18 | `station_name` | `varchar(16)` | Opcional | _sin dato_ | coincide |
+| 19 | `schedulable_resource_id` | `uuid` | Clave foránea → scheduling.schedulable_resources.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -272,8 +272,10 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| PATCH /diagnostic-equipment/{id} | ACTUALIZA | POR_TIPO |
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
 | PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | CREA | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | LEE | DIRECTA |
 | GET /diagnostic-units | LEE | DIRECTA |
@@ -281,6 +283,10 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| POST /care-spaces/{id}/lifecycle | LEE | POR_SQL |
+| GET /care-spaces/{id}/retire-check | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -824,7 +830,7 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_unit_sites`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnitSites` — `src/modules/diagnostic_units/entities/diagnostic_unit_sites.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 20 operaciones
+- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -876,7 +882,10 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
 | PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | PATCH /diagnostic-unit-sites/{siteId} | ACTUALIZA | POR_TIPO |
 | PATCH /diagnostic-unit-sites/{siteId} | LEE | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | ACTUALIZA | POR_TIPO |
@@ -896,6 +905,8 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -993,7 +1004,7 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_units`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnits` — `src/modules/diagnostic_units/entities/diagnostic_units.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 10 FK salientes · 13 entrantes · 49 operaciones
+- **Resumen:** 19 columnas · 13 índices · 10 FK salientes · 13 entrantes · 54 operaciones
 
 #### Columnas
 
@@ -1075,7 +1086,10 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
 | PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | DELETE /diagnostic-study-offerings/{id} | LEE | DIRECTA |
 | POST /diagnostic-unit-accreditations/{id}/renew | LEE | DIRECTA |
 | PATCH /diagnostic-unit-sites/{siteId} | LEE | DIRECTA |
@@ -1124,6 +1138,8 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
 
 #### Gobierno
 

@@ -1,79 +1,118 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { isoTimestampSql } from '../../../common/pagination/iso-timestamp-sql';
+import type {
+  PolicySort,
+  PolicyType,
+  SortOrder,
+} from '../dto/governance-read.dto';
 
-/** Fila cruda de una política, ya unificada: lo común más los atributos propios de su tipo. */
 export interface PolicyRow {
+  policy_type: PolicyType;
   id: string;
-  type: string;
   code: string;
   name: string | null;
-  stateCode: string | null;
-  stateDisplay: string | null;
-  updatedAt: Date | null;
-  /** Columnas propias del tipo, tal cual salen de la consulta. */
-  attributes: Record<string, unknown>;
+  state: string | null;
+  row_version: number;
+  updated_at: string;
 }
 
-/** Un grupo de destinos a los que se aplica una política. */
-export interface AppliesToRow {
-  kind: 'ENTITY' | 'FIELD' | 'TENANT_BINDING';
-  total: number;
-  items: string[];
+export interface PolicyListFilter {
+  type?: PolicyType;
+  state?: string;
+  q?: string;
+  sort: PolicySort;
+  order: SortOrder;
+  /** Valores de la última fila devuelta: `k` es el código o el instante, según el orden. */
+  cursor?: { k: string; t: string; i: string };
+  limit: number;
 }
 
-/** Fila cruda del inventario de campos con datos sensibles. */
-export interface PiiFieldRow {
+export interface PolicyDetailRow extends PolicyRow {
+  created_at: string;
+  created_by_user_id: string | null;
+  updated_by_user_id: string | null;
+  settings: Record<string, unknown>;
+}
+
+export interface AppliedToRow {
   schema_name: string;
   table_name: string;
-  column_name: string;
-  sensitivity: string | null;
-  review_status: string | null;
-  in_registry: boolean;
-  registry_is_pii: boolean | null;
-  registry_is_phi: boolean | null;
-  registry_classification: string | null;
-  registry_masking: string | null;
-  registry_anonymization_rule: string | null;
+  column_name: string | null;
+  total: number;
 }
 
-/** Cambio de gobierno registrado sobre una política (sin las fotos antes/después). */
-export interface PolicyChangeRow {
+export interface ChangeLogRow {
   id: string;
-  action_code: string | null;
-  action_display: string | null;
+  target_type: string;
+  target_id: string;
+  action: string | null;
   changed_by_user_id: string;
   reason: string | null;
-  recorded_at: Date;
+  recorded_at: string;
 }
 
-/**
- * Niveles de sensibilidad del catálogo de datos que cuentan como dato personal o secreto
- * (`data_catalog.constants` de la API). Es una constante interna, nunca entrada de usuario: por
- * eso puede ir escrita en la consulta sin parámetros.
- */
-export const PII_SENSITIVITIES = [
-  'PERSONAL',
-  'PHI_IDENTIFIER',
-  'PHI_SENSITIVE',
-  'PHI_SPECIAL',
-  'CREDENTIAL',
-] as const;
+export interface ChangeLogFilter {
+  from: Date;
+  to?: Date;
+  targetType?: string;
+  targetId?: string;
+  changedBy?: string;
+  cursor?: { t: string; i: string };
+  limit: number;
+}
 
-/** Tope de destinos que se listan por grupo en el detalle de una política. */
-export const APPLIES_TO_LIMIT = 50;
-/** Tope de cambios que se listan en el historial de una política. */
-export const HISTORY_LIMIT = 20;
+export interface EntityRegistryRow {
+  id: string;
+  schema_name: string;
+  table_name: string;
+  domain_code: string | null;
+  domain_name: string | null;
+  classification_code: string | null;
+  classification_name: string | null;
+  owner_team: string | null;
+  contains_pii: boolean | null;
+  contains_phi: boolean | null;
+  is_append_only: boolean;
+  is_soft_delete: boolean;
+  has_history: boolean;
+  retention_policy_code: string | null;
+  write_policy_code: string | null;
+  field_count: number;
+  personal_field_count: number;
+}
+
+export interface EntityRegistryFilter {
+  schema?: string;
+  q?: string;
+  domain?: string;
+  classification?: string;
+  containsPii?: boolean;
+  containsPhi?: boolean;
+  cursor?: { s: string; t: string; i: string };
+  limit: number;
+}
+
+export interface FieldRegistryRow {
+  id: string;
+  column_name: string;
+  classification: string | null;
+  is_pii: boolean | null;
+  is_phi: boolean | null;
+  masking_strategy: string | null;
+  anonymization_rule_code: string | null;
+}
+
+/** Cuántos «aplicada a» devuelve el detalle de una política; el resto se informa como `truncated`. */
+export const APPLIED_TO_LIMIT = 50;
+
+const escaparLike = (texto: string): string =>
+  texto.replace(/[\\%_]/g, (c) => `\\${c}`);
 
 /**
- * Lecturas del gobierno de datos (`system_ops`): políticas y campos con datos personales.
- *
- * SOLO LECTURA. SQL estático: ningún valor del cliente se concatena (los filtros se aplican
- * después, en memoria, sobre el resultado). Las tablas de política son catálogos chicos
- * (decenas de filas), por eso se leen enteras y se pagina por clave en el servicio.
- *
- * Las lecturas cruzan a `terminology` (códigos de los conceptos) y, en el inventario de campos,
- * a `data_catalog` (sensibilidad que clasificó el escaneo): es una vista de sólo lectura sobre
- * la misma base, igual que `data_catalog` ya lee `system_ops.entity_registry`.
+ * Lecturas de gobierno de `system_ops.*` con SQL parametrizado. **Sólo `select`**: ninguna de estas
+ * rutas escribe, y ninguna devuelve valores de parámetros ni snapshots (en una regla de anonimización
+ * sólo los nombres de sus parámetros). Los estados y modos salen como `code` del concepto, no como id.
  */
 @Injectable()
 export class GovernanceReadRepository {
@@ -87,351 +126,278 @@ export class GovernanceReadRepository {
       .execute(sql, params, 'all', em.getTransactionContext()) as Promise<T>;
   }
 
-  /** Todas las políticas de todos los tipos, en filas uniformes. */
-  async listPolicies(em: EntityManager): Promise<PolicyRow[]> {
-    const [write, retention, anonymization, classification, residency] =
-      await Promise.all([
-        this.writePolicies(em),
-        this.retentionPolicies(em),
-        this.anonymizationRules(em),
-        this.classifications(em),
-        this.residencyPolicies(em),
-      ]);
-    return [
-      ...write,
-      ...retention,
-      ...anonymization,
-      ...classification,
-      ...residency,
-    ];
+  // ---- políticas -------------------------------------------------------------------------
+
+  private policiesCte(): string {
+    return `with p as (
+      select 'WRITE'::text as policy_type, w.id, w.code::text as code, w.name::text as name, regexp_replace(sc.code, '^.*:', '')::text as state,
+             w.row_version, w.updated_at
+        from system_ops.write_policies w
+        left join terminology.catalog_concepts sc on sc.id = w.state_concept_id
+      union all
+      select 'RETENTION', r.id, r.code::text, r.name::text, regexp_replace(sc.code, '^.*:', '')::text, r.row_version, r.updated_at
+        from system_ops.retention_policies r
+        left join terminology.catalog_concepts sc on sc.id = r.state_concept_id
+      union all
+      select 'ANONYMIZATION', a.id, a.code::text, null::text, null::text, a.row_version, a.updated_at
+        from system_ops.anonymization_rules a
+      union all
+      select 'RESIDENCY', d.id, d.code::text, null::text, regexp_replace(sc.code, '^.*:', '')::text, d.row_version, d.updated_at
+        from system_ops.data_residency_policies d
+        left join terminology.catalog_concepts sc on sc.id = d.status_concept_id
+    )`;
   }
 
-  /** Una política por id, buscándola en cada tabla (los uuid no se repiten entre tablas). */
-  async findPolicy(em: EntityManager, id: string): Promise<PolicyRow | null> {
-    const todas = await this.listPolicies(em);
-    return todas.find((p) => p.id === id) ?? null;
-  }
-
-  private async writePolicies(em: EntityManager): Promise<PolicyRow[]> {
-    const rows = await this.q<Record<string, unknown>[]>(
-      em,
-      `select p.id, p.code, p.name, p.requires_reason, p.requires_approval, p.max_batch_size, p.dual_control,
-              p.updated_at,
-              ins.code as insert_mode, ins.display as insert_mode_display,
-              upd.code as update_mode, upd.display as update_mode_display,
-              del.code as delete_mode, del.display as delete_mode_display,
-              st.code as state_code, st.display as state_display
-         from system_ops.write_policies p
-         left join terminology.catalog_concepts ins on ins.id = p.insert_mode_concept_id
-         left join terminology.catalog_concepts upd on upd.id = p.update_mode_concept_id
-         left join terminology.catalog_concepts del on del.id = p.delete_mode_concept_id
-         left join terminology.catalog_concepts st on st.id = p.state_concept_id`,
-    );
-    return rows.map((r) =>
-      this.row('WRITE', r, {
-        insertMode: r['insert_mode_display'] ?? r['insert_mode'],
-        updateMode: r['update_mode_display'] ?? r['update_mode'],
-        deleteMode: r['delete_mode_display'] ?? r['delete_mode'],
-        requiresReason: r['requires_reason'],
-        requiresApproval: r['requires_approval'],
-        dualControl: r['dual_control'],
-        maxBatchSize: r['max_batch_size'],
-      }),
-    );
-  }
-
-  private async retentionPolicies(em: EntityManager): Promise<PolicyRow[]> {
-    const rows = await this.q<Record<string, unknown>[]>(
-      em,
-      `select p.id, p.code, p.name, p.retention_period_days, p.updated_at,
-              lb.code as legal_basis, lb.display as legal_basis_display,
-              dp.code as disposition, dp.display as disposition_display,
-              ju.code as jurisdiction, ju.display as jurisdiction_display,
-              st.code as state_code, st.display as state_display
-         from system_ops.retention_policies p
-         left join terminology.catalog_concepts lb on lb.id = p.legal_basis_concept_id
-         left join terminology.catalog_concepts dp on dp.id = p.disposition_concept_id
-         left join terminology.catalog_concepts ju on ju.id = p.jurisdiction_concept_id
-         left join terminology.catalog_concepts st on st.id = p.state_concept_id`,
-    );
-    return rows.map((r) =>
-      this.row('RETENTION', r, {
-        retentionPeriodDays: r['retention_period_days'],
-        legalBasis: r['legal_basis_display'] ?? r['legal_basis'],
-        disposition: r['disposition_display'] ?? r['disposition'],
-        jurisdiction: r['jurisdiction_display'] ?? r['jurisdiction'],
-      }),
-    );
-  }
-
-  private async anonymizationRules(em: EntityManager): Promise<PolicyRow[]> {
-    const rows = await this.q<Record<string, unknown>[]>(
-      em,
-      `select p.id, p.code, p.description, p.parameters_json, p.updated_at,
-              te.code as technique, te.display as technique_display
-         from system_ops.anonymization_rules p
-         left join terminology.catalog_concepts te on te.id = p.technique_concept_id`,
-    );
-    return rows.map((r) =>
-      this.row('ANONYMIZATION', r, {
-        technique: r['technique_display'] ?? r['technique'],
-        description: r['description'],
-      }),
-    );
-  }
-
-  private async classifications(em: EntityManager): Promise<PolicyRow[]> {
-    const rows = await this.q<Record<string, unknown>[]>(
-      em,
-      `select p.id, p.code, p.name, p.rank, p.is_pii, p.is_phi, p.updated_at,
-              st.code as state_code, st.display as state_display
-         from system_ops.data_classifications p
-         left join terminology.catalog_concepts st on st.id = p.state_concept_id`,
-    );
-    return rows.map((r) =>
-      this.row('CLASSIFICATION', r, {
-        rank: r['rank'],
-        isPii: r['is_pii'],
-        isPhi: r['is_phi'],
-      }),
-    );
-  }
-
-  private async residencyPolicies(em: EntityManager): Promise<PolicyRow[]> {
-    const rows = await this.q<Record<string, unknown>[]>(
-      em,
-      `select p.id, p.code, p.transfer_impact_assessment_required, p.encryption_key_region_locked,
-              p.valid_from, p.valid_to, p.updated_at,
-              ju.code as jurisdiction, ju.display as jurisdiction_display,
-              cl.code as data_classification,
-              tb.code as transfer_basis, tb.display as transfer_basis_display,
-              st.code as state_code, st.display as state_display
-         from system_ops.data_residency_policies p
-         left join terminology.catalog_concepts ju on ju.id = p.jurisdiction_concept_id
-         left join system_ops.data_classifications cl on cl.id = p.data_classification_id
-         left join terminology.catalog_concepts tb on tb.id = p.cross_border_transfer_basis_concept_id
-         left join terminology.catalog_concepts st on st.id = p.status_concept_id`,
-    );
-    return rows.map((r) =>
-      this.row('RESIDENCY', r, {
-        jurisdiction: r['jurisdiction_display'] ?? r['jurisdiction'],
-        dataClassification: r['data_classification'],
-        transferBasis: r['transfer_basis_display'] ?? r['transfer_basis'],
-        transferImpactAssessmentRequired:
-          r['transfer_impact_assessment_required'],
-        encryptionKeyRegionLocked: r['encryption_key_region_locked'],
-        validFrom: this.iso(r['valid_from']),
-        validTo: this.iso(r['valid_to']),
-      }),
-    );
-  }
-
-  private row(
-    type: string,
-    r: Record<string, unknown>,
-    attributes: Record<string, unknown>,
-  ): PolicyRow {
-    return {
-      id: String(r['id']),
-      type,
-      code: String(r['code']),
-      name: typeof r['name'] === 'string' ? r['name'] : null,
-      stateCode: (r['state_code'] as string | null | undefined) ?? null,
-      stateDisplay: (r['state_display'] as string | null | undefined) ?? null,
-      updatedAt: r['updated_at'] ? new Date(r['updated_at'] as string) : null,
-      attributes,
+  /** Políticas de los cuatro tipos en una sola lista, con orden total `(clave, tipo, id)`. */
+  policies(em: EntityManager, f: PolicyListFilter): Promise<PolicyRow[]> {
+    const where: string[] = [];
+    const params: unknown[] = [];
+    const agregar = (sql: string, ...valores: unknown[]): void => {
+      where.push(sql);
+      params.push(...valores);
     };
-  }
-
-  private iso(value: unknown): string | null {
-    return value ? new Date(value as string).toISOString() : null;
-  }
-
-  /**
-   * Configuración extensa de una política que no cabe en la fila de la lista (parámetros de la
-   * regla de anonimización, reglas de manejo de la clasificación). `null` si el tipo no la tiene.
-   */
-  async policyConfiguration(
-    em: EntityManager,
-    type: string,
-    id: string,
-  ): Promise<unknown> {
-    if (type === 'ANONYMIZATION') {
-      const [r] = await this.q<{ parameters_json: unknown }[]>(
-        em,
-        `select parameters_json from system_ops.anonymization_rules where id = ?`,
-        [id],
+    if (f.type) agregar('policy_type = ?', f.type);
+    if (f.state) agregar('state = ?', f.state);
+    if (f.q) {
+      const patron = `%${escaparLike(f.q.toLowerCase())}%`;
+      agregar(
+        `(lower(code) like ? escape '\\' or lower(coalesce(name, '')) like ? escape '\\')`,
+        patron,
+        patron,
       );
-      return r?.parameters_json ?? null;
     }
-    if (type === 'CLASSIFICATION') {
-      const [r] = await this.q<{ handling_rules_json: unknown }[]>(
-        em,
-        `select handling_rules_json from system_ops.data_classifications where id = ?`,
-        [id],
-      );
-      return r?.handling_rules_json ?? null;
-    }
-    return null;
-  }
-
-  /** A qué se aplica una política: entidades, campos o vínculos de residencia. */
-  async appliesTo(
-    em: EntityManager,
-    type: string,
-    id: string,
-  ): Promise<AppliesToRow[]> {
-    switch (type) {
-      case 'WRITE':
-        return [await this.entities(em, 'write_policy_id', id)];
-      case 'RETENTION':
-        return [await this.entities(em, 'retention_policy_id', id)];
-      case 'ANONYMIZATION':
-        return [await this.fields(em, 'anonymization_rule_id', id)];
-      case 'CLASSIFICATION':
-        return [
-          await this.entities(em, 'classification_id', id),
-          await this.fields(em, 'classification_id', id),
-        ];
-      case 'RESIDENCY': {
-        const [r] = await this.q<{ total: string }[]>(
-          em,
-          `select count(*)::text as total from system_ops.tenant_residency_bindings where residency_policy_id = ?`,
-          [id],
+    const dir = f.order === 'desc' ? 'desc' : 'asc';
+    const cmp = f.order === 'desc' ? '<' : '>';
+    if (f.cursor) {
+      if (f.sort === 'code')
+        agregar(
+          `(code, policy_type, id) ${cmp} (?, ?, ?::uuid)`,
+          f.cursor.k,
+          f.cursor.t,
+          f.cursor.i,
         );
-        return [
-          { kind: 'TENANT_BINDING', total: Number(r?.total ?? 0), items: [] },
-        ];
-      }
-      default:
-        return [];
+      else
+        agregar(
+          `(updated_at, policy_type, id) ${cmp} (?::timestamptz, ?, ?::uuid)`,
+          f.cursor.k,
+          f.cursor.t,
+          f.cursor.i,
+        );
     }
+    const clave = f.sort === 'code' ? 'code' : 'updated_at';
+    return this.q<PolicyRow[]>(
+      em,
+      `${this.policiesCte()}
+       select policy_type, id, code, name, state, row_version, ${isoTimestampSql('updated_at')} as updated_at
+         from p
+         ${where.length ? `where ${where.join(' and ')}` : ''}
+        order by ${clave} ${dir}, policy_type ${dir}, id ${dir}
+        limit ?`,
+      [...params, f.limit + 1],
+    );
   }
 
-  /** `column` sólo toma valores de este archivo: nunca viene del cliente. */
-  private async entities(
+  /** Detalle: los campos comunes y los ajustes propios del tipo, con conceptos resueltos a su código. */
+  async policyDetail(
     em: EntityManager,
-    column: 'write_policy_id' | 'retention_policy_id' | 'classification_id',
+    type: PolicyType,
     id: string,
-  ): Promise<AppliesToRow> {
-    const [count] = await this.q<{ total: string }[]>(
-      em,
-      `select count(*)::text as total from system_ops.entity_registry where ${column} = ?`,
-      [id],
-    );
-    const items = await this.q<{ schema_name: string; table_name: string }[]>(
-      em,
-      `select schema_name, table_name from system_ops.entity_registry where ${column} = ?
-        order by schema_name, table_name limit ${APPLIES_TO_LIMIT}`,
-      [id],
-    );
-    return {
-      kind: 'ENTITY',
-      total: Number(count?.total ?? 0),
-      items: items.map((i) => `${i.schema_name}.${i.table_name}`),
+  ): Promise<PolicyDetailRow | null> {
+    const comunes = (alias: string, nombre: string, estado: string): string =>
+      `${alias}.id, ${alias}.code::text as code, ${nombre} as name, ${estado} as state, ${alias}.row_version,
+       ${isoTimestampSql(`${alias}.updated_at`)} as updated_at, ${isoTimestampSql(`${alias}.created_at`)} as created_at,
+       ${alias}.created_by_user_id, ${alias}.updated_by_user_id`;
+    const consultas: Record<PolicyType, string> = {
+      WRITE: `select 'WRITE'::text as policy_type, ${comunes('w', 'w.name::text', "regexp_replace(sc.code, '^.*:', '')::text")},
+          jsonb_build_object('insertMode', regexp_replace(im.code, '^.*:', ''), 'updateMode', regexp_replace(um.code, '^.*:', ''), 'deleteMode', regexp_replace(dm.code, '^.*:', ''),
+            'requiresReason', w.requires_reason, 'requiresApproval', w.requires_approval,
+            'dualControl', w.dual_control, 'maxBatchSize', w.max_batch_size) as settings
+        from system_ops.write_policies w
+        left join terminology.catalog_concepts sc on sc.id = w.state_concept_id
+        left join terminology.catalog_concepts im on im.id = w.insert_mode_concept_id
+        left join terminology.catalog_concepts um on um.id = w.update_mode_concept_id
+        left join terminology.catalog_concepts dm on dm.id = w.delete_mode_concept_id
+       where w.id = ?::uuid`,
+      RETENTION: `select 'RETENTION'::text as policy_type, ${comunes('r', 'r.name::text', "regexp_replace(sc.code, '^.*:', '')::text")},
+          jsonb_build_object('retentionPeriodDays', r.retention_period_days, 'legalBasis', regexp_replace(lb.code, '^.*:', ''),
+            'disposition', regexp_replace(dp.code, '^.*:', ''), 'jurisdiction', regexp_replace(jc.code, '^.*:', '')) as settings
+        from system_ops.retention_policies r
+        left join terminology.catalog_concepts sc on sc.id = r.state_concept_id
+        left join terminology.catalog_concepts lb on lb.id = r.legal_basis_concept_id
+        left join terminology.catalog_concepts dp on dp.id = r.disposition_concept_id
+        left join terminology.catalog_concepts jc on jc.id = r.jurisdiction_concept_id
+       where r.id = ?::uuid`,
+      ANONYMIZATION: `select 'ANONYMIZATION'::text as policy_type, ${comunes('a', 'null::text', 'null::text')},
+          jsonb_build_object('technique', regexp_replace(tc.code, '^.*:', ''), 'description', a.description,
+            'parameterKeys', coalesce((select jsonb_agg(k order by k) from jsonb_object_keys(
+               case when jsonb_typeof(a.parameters_json) = 'object' then a.parameters_json else '{}'::jsonb end) k), '[]'::jsonb)) as settings
+        from system_ops.anonymization_rules a
+        left join terminology.catalog_concepts tc on tc.id = a.technique_concept_id
+       where a.id = ?::uuid`,
+      RESIDENCY: `select 'RESIDENCY'::text as policy_type, ${comunes('d', 'null::text', "regexp_replace(sc.code, '^.*:', '')::text")},
+          jsonb_build_object('jurisdiction', regexp_replace(jc.code, '^.*:', ''), 'dataClassification', dc.code,
+            'crossBorderTransferBasis', regexp_replace(tb.code, '^.*:', ''),
+            'transferImpactAssessmentRequired', d.transfer_impact_assessment_required,
+            'encryptionKeyRegionLocked', d.encryption_key_region_locked,
+            'validFrom', ${isoTimestampSql('d.valid_from')}, 'validTo', ${isoTimestampSql('d.valid_to')}) as settings
+        from system_ops.data_residency_policies d
+        left join terminology.catalog_concepts sc on sc.id = d.status_concept_id
+        left join terminology.catalog_concepts jc on jc.id = d.jurisdiction_concept_id
+        left join system_ops.data_classifications dc on dc.id = d.data_classification_id
+        left join terminology.catalog_concepts tb on tb.id = d.cross_border_transfer_basis_concept_id
+       where d.id = ?::uuid`,
     };
+    const [fila] = await this.q<PolicyDetailRow[]>(em, consultas[type], [id]);
+    return fila ?? null;
   }
 
-  private async fields(
+  /** Dónde se aplica una política: tablas o columnas, nombres solamente, acotado. */
+  appliedTo(
     em: EntityManager,
-    column: 'anonymization_rule_id' | 'classification_id',
+    type: PolicyType,
     id: string,
-  ): Promise<AppliesToRow> {
-    const [count] = await this.q<{ total: string }[]>(
-      em,
-      `select count(*)::text as total from system_ops.field_registry where ${column} = ?`,
-      [id],
-    );
-    const items = await this.q<
-      { schema_name: string; table_name: string; column_name: string }[]
-    >(
-      em,
-      `select e.schema_name, e.table_name, f.column_name
-         from system_ops.field_registry f
-         join system_ops.entity_registry e on e.id = f.entity_registry_id
-        where f.${column} = ?
-        order by e.schema_name, e.table_name, f.column_name limit ${APPLIES_TO_LIMIT}`,
-      [id],
-    );
-    return {
-      kind: 'FIELD',
-      total: Number(count?.total ?? 0),
-      items: items.map(
-        (i) => `${i.schema_name}.${i.table_name}.${i.column_name}`,
-      ),
+  ): Promise<AppliedToRow[]> {
+    if (type === 'RESIDENCY') return Promise.resolve([]);
+    const origen: Record<Exclude<PolicyType, 'RESIDENCY'>, string> = {
+      WRITE: `select er.schema_name, er.table_name, null::text as column_name
+                from system_ops.entity_registry er where er.write_policy_id = ?::uuid`,
+      RETENTION: `select er.schema_name, er.table_name, null::text as column_name
+                from system_ops.entity_registry er where er.retention_policy_id = ?::uuid`,
+      ANONYMIZATION: `select er.schema_name, er.table_name, fr.column_name::text as column_name
+                from system_ops.field_registry fr
+                join system_ops.entity_registry er on er.id = fr.entity_registry_id
+               where fr.anonymization_rule_id = ?::uuid`,
     };
-  }
-
-  /** Últimos cambios de gobierno sobre una política, del más reciente al más antiguo. */
-  history(em: EntityManager, id: string): Promise<PolicyChangeRow[]> {
-    return this.q<PolicyChangeRow[]>(
+    return this.q<AppliedToRow[]>(
       em,
-      `select l.id, a.code as action_code, a.display as action_display, l.changed_by_user_id, l.reason, l.recorded_at
-         from system_ops.governance_change_log l
-         left join terminology.catalog_concepts a on a.id = l.action_concept_id
-        where l.target_id = ?
-        order by l.recorded_at desc, l.id desc
-        limit ${HISTORY_LIMIT}`,
-      [id],
+      `select schema_name::text, table_name::text, column_name, (count(*) over())::int as total
+         from (${origen[type]}) x
+        order by schema_name, table_name, column_name nulls first
+        limit ?`,
+      [id, APPLIED_TO_LIMIT],
     );
   }
 
-  /**
-   * Campos con datos personales o secretos: los que el escaneo del catálogo clasificó con un nivel
-   * de `PII_SENSITIVITIES` y los que el registro de gobierno marca como personales o de salud.
-   * Una fila puede venir de una fuente, de la otra o de las dos.
-   */
-  piiFields(em: EntityManager): Promise<PiiFieldRow[]> {
-    const niveles = PII_SENSITIVITIES.map((n) => `'${n}'`).join(', ');
-    return this.q<PiiFieldRow[]>(
+  // ---- bitácora de cambios de gobierno -----------------------------------------------------
+
+  /** Cambios de gobierno, más recientes primero. Sin índice por objeto o fecha: la ventana es obligatoria. */
+  changeLog(em: EntityManager, f: ChangeLogFilter): Promise<ChangeLogRow[]> {
+    const where: string[] = ['g.recorded_at >= ?::timestamptz'];
+    const params: unknown[] = [f.from];
+    const agregar = (sql: string, ...valores: unknown[]): void => {
+      where.push(sql);
+      params.push(...valores);
+    };
+    if (f.to) agregar('g.recorded_at < ?::timestamptz', f.to);
+    if (f.targetType) agregar('g.target_type = ?', f.targetType);
+    if (f.targetId) agregar('g.target_id = ?::uuid', f.targetId);
+    if (f.changedBy) agregar('g.changed_by_user_id = ?::uuid', f.changedBy);
+    if (f.cursor)
+      agregar(
+        '(g.recorded_at, g.id) < (?::timestamptz, ?::uuid)',
+        f.cursor.t,
+        f.cursor.i,
+      );
+    return this.q<ChangeLogRow[]>(
       em,
-      `with cat as (
-         select o.schema_name, o.object_name as table_name, c.column_name, a.sensitivity, a.review_status
-           from data_catalog.catalog_columns c
-           join data_catalog.catalog_objects o on o.id = c.object_id
-           join data_catalog.catalog_annotations a on a.column_id = c.id and a.target_kind = 'COLUMN'
-          where c.observation_status = 'OBSERVED' and o.observation_status = 'OBSERVED'
-            and a.sensitivity in (${niveles})
-       ), reg as (
-         select e.schema_name, e.table_name, f.column_name, f.is_pii, f.is_phi,
-                k.code as classification, m.code as masking, r.code as anonymization_rule
-           from system_ops.field_registry f
-           join system_ops.entity_registry e on e.id = f.entity_registry_id
-           left join system_ops.data_classifications k on k.id = f.classification_id
-           left join terminology.catalog_concepts m on m.id = f.masking_strategy_concept_id
-           left join system_ops.anonymization_rules r on r.id = f.anonymization_rule_id
-          where coalesce(f.is_pii, false) or coalesce(f.is_phi, false)
-       )
-       select coalesce(cat.schema_name, reg.schema_name) as schema_name,
-              coalesce(cat.table_name, reg.table_name) as table_name,
-              coalesce(cat.column_name, reg.column_name) as column_name,
-              cat.sensitivity, cat.review_status,
-              (reg.column_name is not null) as in_registry,
-              reg.is_pii as registry_is_pii, reg.is_phi as registry_is_phi,
-              reg.classification as registry_classification, reg.masking as registry_masking,
-              reg.anonymization_rule as registry_anonymization_rule
-         from cat
-         full outer join reg
-           on reg.schema_name = cat.schema_name and reg.table_name = cat.table_name and reg.column_name = cat.column_name
-        order by 1, 2, 3`,
+      `select g.id, g.target_type, g.target_id, regexp_replace(ac.code, '^.*:', '')::text as action, g.changed_by_user_id, g.reason,
+              ${isoTimestampSql('g.recorded_at')} as recorded_at
+         from system_ops.governance_change_log g
+         left join terminology.catalog_concepts ac on ac.id = g.action_concept_id
+        where ${where.join(' and ')}
+        order by g.recorded_at desc, g.id desc
+        limit ?`,
+      [...params, f.limit + 1],
     );
   }
 
-  /** Cuántas fuentes hay detrás del inventario, para que una lista vacía diga por qué lo está. */
-  async piiSources(
+  // ---- registro de entidades y campos ------------------------------------------------------
+
+  entityRegistry(
     em: EntityManager,
-  ): Promise<{ catalogColumns: number; registryFields: number }> {
-    const [cat] = await this.q<{ total: string }[]>(
-      em,
-      `select count(*)::text as total from data_catalog.catalog_columns where observation_status = 'OBSERVED'`,
-    );
-    const [reg] = await this.q<{ total: string }[]>(
-      em,
-      `select count(*)::text as total from system_ops.field_registry`,
-    );
-    return {
-      catalogColumns: Number(cat?.total ?? 0),
-      registryFields: Number(reg?.total ?? 0),
+    f: EntityRegistryFilter,
+  ): Promise<EntityRegistryRow[]> {
+    const where: string[] = [];
+    const params: unknown[] = [];
+    const agregar = (sql: string, ...valores: unknown[]): void => {
+      where.push(sql);
+      params.push(...valores);
     };
+    if (f.schema) agregar('er.schema_name = ?', f.schema);
+    if (f.domain) agregar('dd.code = ?', f.domain);
+    if (f.classification) agregar('dc.code = ?', f.classification);
+    if (f.containsPii !== undefined)
+      agregar('coalesce(er.contains_pii, false) = ?', f.containsPii);
+    if (f.containsPhi !== undefined)
+      agregar('coalesce(er.contains_phi, false) = ?', f.containsPhi);
+    if (f.q) {
+      const patron = `%${escaparLike(f.q.toLowerCase())}%`;
+      agregar(
+        `lower(er.schema_name || '.' || er.table_name) like ? escape '\\'`,
+        patron,
+      );
+    }
+    if (f.cursor)
+      agregar(
+        '(er.schema_name, er.table_name, er.id) > (?, ?, ?::uuid)',
+        f.cursor.s,
+        f.cursor.t,
+        f.cursor.i,
+      );
+    return this.q<EntityRegistryRow[]>(
+      em,
+      `select er.id, er.schema_name, er.table_name, dd.code::text as domain_code, dd.name::text as domain_name,
+              dc.code::text as classification_code, dc.name::text as classification_name, er.owner_team,
+              er.contains_pii, er.contains_phi, er.is_append_only, er.is_soft_delete, er.has_history,
+              rp.code::text as retention_policy_code, wp.code::text as write_policy_code,
+              (select count(*) from system_ops.field_registry fr where fr.entity_registry_id = er.id)::int as field_count,
+              (select count(*) from system_ops.field_registry fr where fr.entity_registry_id = er.id
+                  and (coalesce(fr.is_pii, false) or coalesce(fr.is_phi, false)))::int as personal_field_count
+         from system_ops.entity_registry er
+         left join system_ops.data_domains dd on dd.id = er.domain_id
+         left join system_ops.data_classifications dc on dc.id = er.classification_id
+         left join system_ops.retention_policies rp on rp.id = er.retention_policy_id
+         left join system_ops.write_policies wp on wp.id = er.write_policy_id
+        ${where.length ? `where ${where.join(' and ')}` : ''}
+        order by er.schema_name, er.table_name, er.id
+        limit ?`,
+      [...params, f.limit + 1],
+    );
+  }
+
+  async entityExists(em: EntityManager, id: string): Promise<boolean> {
+    const filas = await this.q<{ id: string }[]>(
+      em,
+      'select id from system_ops.entity_registry where id = ?::uuid',
+      [id],
+    );
+    return filas.length > 0;
+  }
+
+  /** Campos declarados de una entidad. Las notas libres no salen. */
+  fieldRegistry(
+    em: EntityManager,
+    entityId: string,
+    f: { cursor?: { c: string; i: string }; limit: number },
+  ): Promise<FieldRegistryRow[]> {
+    const params: unknown[] = [entityId];
+    let cursor = '';
+    if (f.cursor) {
+      cursor = 'and (fr.column_name, fr.id) > (?, ?::uuid)';
+      params.push(f.cursor.c, f.cursor.i);
+    }
+    return this.q<FieldRegistryRow[]>(
+      em,
+      `select fr.id, fr.column_name::text as column_name, dc.code::text as classification, fr.is_pii, fr.is_phi,
+              regexp_replace(ms.code, '^.*:', '')::text as masking_strategy, ar.code::text as anonymization_rule_code
+         from system_ops.field_registry fr
+         left join system_ops.data_classifications dc on dc.id = fr.classification_id
+         left join terminology.catalog_concepts ms on ms.id = fr.masking_strategy_concept_id
+         left join system_ops.anonymization_rules ar on ar.id = fr.anonymization_rule_id
+        where fr.entity_registry_id = ?::uuid ${cursor}
+        order by fr.column_name, fr.id
+        limit ?`,
+      [...params, f.limit + 1],
+    );
   }
 }

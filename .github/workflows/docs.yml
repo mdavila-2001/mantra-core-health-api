@@ -147,6 +147,10 @@ jobs:
           # El token no queda guardado en .git/config del workspace, que en un
           # runner propio persiste entre jobs.
           persist-credentials: false
+          # Historial completo: `agenda-mensajeria-relacion` (H2.S1.M1) verifica
+          # con `git merge-base --is-ancestor` un commit de septiembre, que en un
+          # clon superficial no es alcanzable.
+          fetch-depth: 0
 
       # Corepack ANTES de `setup-node`, y no después: `cache: yarn` hace que la
       # acción invoque `yarn cache dir` durante su propio paso, y el yarn global
@@ -250,7 +254,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: mantra-core-technologies/mantra-core-health-model
-          ref: 33c01919039ea98cc8bbb9e2d6b91d3bffc7b359
+          ref: 9feb64abc688b96092801b5acbd91b8dcdf8d9c0
           path: _modelo
           persist-credentials: false
 
@@ -261,7 +265,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: mdavila-2001/mantra-core-health
-          ref: 4afab7a30e6d48077078e7b9b38c88ee2f59b69b
+          ref: 667aa525b1865338a94aedc4d617f3b27a257a59
           path: _frontend
           persist-credentials: false
           sparse-checkout: |

@@ -29,14 +29,14 @@
 | [company_bank_accounts](#company_bank_accounts) | Registra cuentas bancarias institucionales usadas para cobros y pagos de la organización sanitaria. | 18 | 10 | 1 | COINCIDE |
 | [controlling_areas](#controlling_areas) | Define ámbitos de control de gestión para consolidar información financiera de una o más unidades. | 13 | 7 | 0 | COINCIDE |
 | [cost_center_maps](#cost_center_maps) | Relaciona centros de costo con estructuras contables o institucionales para integrar reportes financieros. | 11 | 5 | 0 | COINCIDE |
-| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 14 | COINCIDE |
+| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 19 | DIVERGE |
 | [depreciation_areas](#depreciation_areas) | Define áreas de valoración donde se calculan depreciaciones con criterios contables o fiscales distintos. | 13 | 8 | 2 | COINCIDE |
 | [employee_payments](#employee_payments) | Registra pagos al personal para sostener contabilidad de remuneraciones institucionales. | 14 | 6 | 0 | COINCIDE |
 | [exchange_rates](#exchange_rates) | Conserva tasas de cambio utilizadas para registrar y comparar operaciones financieras en distintas monedas. | 11 | 4 | 3 | COINCIDE |
 | [fiscal_periods](#fiscal_periods) | Desglosa ejercicios en períodos contables para registrar y reportar movimientos financieros por fecha. | 11 | 4 | 21 | COINCIDE |
 | [fiscal_years](#fiscal_years) | Define ejercicios fiscales de la organización para ordenar períodos contables y cierres financieros. | 11 | 4 | 19 | COINCIDE |
 | [functional_areas](#functional_areas) | Define áreas funcionales para clasificar gastos y resultados según actividad institucional. | 11 | 7 | 0 | COINCIDE |
-| [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 0 | COINCIDE |
+| [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 5 | DIVERGE |
 | [internal_orders](#internal_orders) | Agrupa costos y compromisos de iniciativas internas para facilitar seguimiento presupuestario. | 20 | 14 | 0 | COINCIDE |
 | [journal_entry_assignments](#journal_entry_assignments) | Asocia asientos con dimensiones contables para clasificar movimientos por unidad y propósito. | 30 | 32 | 16 | COINCIDE |
 | [journal_transactions](#journal_transactions) | Agrupa asientos contables de una operación para conservar su registro financiero balanceado. | 22 | 9 | 38 | COINCIDE |
@@ -2204,7 +2204,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: cost_centers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `CostCenters` — `src/modules/accounting/entities/cost_centers.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 14 operaciones
+- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -2261,7 +2261,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | `ix_cost_centers_practice_id` | no | practice_id | Soporta la clave foránea fk_cost_centers_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_cost_centers_parent_cost_center_id` | no | parent_cost_center_id | Soporta la clave foránea fk_cost_centers_parent_cost_center_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_cost_centers_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_cost_centers_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_cost_centers_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_cost_centers_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cost_centers_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_cost_centers_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_cost_centers_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_cost_centers_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_cost_centers_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_cost_centers_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -2273,6 +2273,9 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | POST /accounting/accruals/run | LEE | DIRECTA |
 | POST /accounting/assets/capitalize | LEE | DIRECTA |
 | POST /accounting/clearing-documents | LEE | DIRECTA |
+| GET /accounting/cost-centers | LEE | POR_SQL |
+| POST /accounting/cost-centers/{id}/unit-link | ACTUALIZA | POR_TIPO |
+| POST /accounting/cost-centers/{id}/unit-link | LEE | DIRECTA |
 | POST /accounting/depreciation/run | LEE | DIRECTA |
 | GET /accounting/dimensions | LEE | DIRECTA |
 | POST /accounting/journal-transactions | LEE | DIRECTA |
@@ -2283,6 +2286,8 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
 | POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | POR_SQL |
+| POST /internal/billing/bed-day-charges/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -2776,7 +2781,7 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: infrastructure_items`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `InfrastructureItems` — `src/modules/accounting/entities/infrastructure_items.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2823,7 +2828,13 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /accounting/infrastructure-items | LEE | POR_SQL |
+| PATCH /accounting/infrastructure-items/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /accounting/infrastructure-items/{id} | LEE | DIRECTA |
+| POST /care-spaces/{id}/lifecycle | LEE | POR_SQL |
+| GET /care-spaces/{id}/retire-check | LEE | POR_SQL |
 
 #### Gobierno
 

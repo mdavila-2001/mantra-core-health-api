@@ -60,6 +60,7 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { CatalogDocumentationSeedService } from './catalog/catalog-documentation-seed.service';
 import { MutabilityRegistrySeedService } from './mutability/mutability-registry-seed.service';
+import { FrontendRoutesSeedService } from '../../modules/read_models/seed/frontend-routes-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -83,6 +84,7 @@ import {
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PracticeInfrastructureSeedService } from './practice-infrastructure-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { InsuranceModule } from '../../modules/insurance/insurance.module';
@@ -97,6 +99,7 @@ import { PadronOrganizationsSeedService } from './padron-organizations-seed.serv
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
 import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import { SeedCensusService } from './seed-census.service';
+import { ToolRegistrySeedService } from './tool-registry-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -203,6 +206,7 @@ import { SeedCensusService } from './seed-census.service';
     ClinicalFormsSeedService,
     BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
+    PracticeInfrastructureSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
@@ -210,6 +214,8 @@ import { SeedCensusService } from './seed-census.service';
     PadronOrgAdminsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
+    ToolRegistrySeedService,
+    FrontendRoutesSeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -245,6 +251,7 @@ import { SeedCensusService } from './seed-census.service';
     ClinicalFormsSeedService,
     BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
+    PracticeInfrastructureSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
@@ -252,6 +259,7 @@ import { SeedCensusService } from './seed-census.service';
     PadronOrgAdminsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
+    ToolRegistrySeedService,
   ],
 })
 export class SeedModule {}

@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ROLES_KEY } from '../../../../common/auth/roles.decorator';
-import { PORTAL_READ_ROLES } from '../../../data_catalog/data_catalog.constants';
+import { GOVERNANCE_VIEW_ROLES } from '../../../../common/auth/governance-read.roles';
 import { MutabilityController } from '../controllers/mutability.controller';
 import { ListMutabilityQueryDto } from '../dto/mutability.dto';
 import { MutabilityCatalogService } from './mutability-catalog.service';
@@ -168,13 +168,13 @@ describe('MutabilityLookupService (punto de extensión de la sonda)', () => {
 });
 
 describe('MutabilityController', () => {
-  it('las tres lecturas exigen los roles del portal de datos', () => {
+  it('las tres lecturas exigen los mismos roles de lectura de gobierno que GovernanceReadController', () => {
     for (const method of ['list', 'summary', 'detail'] as const) {
       const roles = Reflect.getMetadata(
         ROLES_KEY,
         Reflect.get(MutabilityController.prototype, method) as object,
       ) as readonly string[] | undefined;
-      expect(roles).toEqual([...PORTAL_READ_ROLES]);
+      expect(roles).toEqual([...GOVERNANCE_VIEW_ROLES]);
     }
   });
 

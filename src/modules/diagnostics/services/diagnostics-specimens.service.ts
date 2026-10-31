@@ -1,3 +1,4 @@
+import { collectionPoint } from '../../practice/services/ops/collection-points';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -75,6 +76,24 @@ export class DiagnosticsSpecimensService {
       if (dto.encounterId) {
         await this.scope.encounter(tx, dto.encounterId, dto.patientProfileId);
       }
+      // F5b: el punto de toma, del tenant (404) y un punto disponible (422).
+      const point = dto.collectionCareSpaceId
+        ? await collectionPoint(tx, dto.collectionCareSpaceId)
+        : null;
+      if (dto.collectionCareSpaceId) {
+        if (point && point.tenantId !== custodianTenantId)
+          throw new ResourceNotFoundException(
+            'Espacio no encontrado',
+            undefined,
+            DiagnosticsErrorReason.DIAGNOSTICS_RESOURCE_NOT_AVAILABLE,
+          );
+        if (!point || !point.available)
+          throw new PreconditionFailedException(
+            'El espacio no es un punto de toma disponible',
+            { collectionCareSpaceId: dto.collectionCareSpaceId },
+            'COLLECTION_POINT_INVALID',
+          );
+      }
       if (dto.serviceRequestId) {
         await this.scope.serviceRequest(
           tx,
@@ -96,6 +115,23 @@ export class DiagnosticsSpecimensService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      if (point) {
+        await tx.execute(
+          `INSERT INTO diagnostics.specimen_collection_events
+             (id, specimen_id, occurred_at, event_type_concept_id, collector_profile_id,
+              collection_site_id, collection_care_space_id, body_site_concept_id, method_concept_id, created_at)
+           VALUES (gen_random_uuid(), ?, now(), ?, ?, ?, ?, ?, ?, now())`,
+          [
+            specimen.id,
+            DIAG.COLLECTION_EVENT_COLLECTED,
+            dto.collectorProfileId ?? null,
+            point.practiceSiteId,
+            point.id,
+            dto.bodySiteConceptId ?? null,
+            dto.collectionMethodConceptId ?? null,
+          ],
+        );
+      }
       return { id: specimen.id, status: specimen.statusConceptId };
     });
   }

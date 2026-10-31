@@ -33,7 +33,8 @@ import { PharmacyTenantScopeGuard } from './pharmacy-tenant-scope.guard';
  * precios y sucursales, hasta 1000 filas por pedido y con vista previa
  * (`dryRun`). Mismo acceso que el resto del catálogo: `SECURITY_ADMIN` o el
  * personal de esa farmacia (`PharmacyTenantScopeGuard`). Responde 200 aunque
- * haya filas rechazadas: el resultado de cada una viaja en `results`.
+ * haya filas rechazadas: el resultado de cada una viaja en `results`. Una vista
+ * previa se audita como `*_BULK_PREVIEWED`, no como la carga que simula.
  */
 @ApiTags('pharmacy')
 @ApiBearerAuth()
@@ -51,6 +52,7 @@ export class PharmacyBulkController {
 
   @Audited({
     action: 'PHARMACY_CATEGORIES_BULK_LOADED',
+    dryRunAction: 'PHARMACY_CATEGORIES_BULK_PREVIEWED',
     entity: 'pharmacy',
     entityId: 'param:pharmacyId',
   })
@@ -68,6 +70,7 @@ export class PharmacyBulkController {
 
   @Audited({
     action: 'PHARMACY_PRODUCTS_BULK_LOADED',
+    dryRunAction: 'PHARMACY_PRODUCTS_BULK_PREVIEWED',
     entity: 'pharmacy',
     entityId: 'param:pharmacyId',
   })
@@ -85,6 +88,7 @@ export class PharmacyBulkController {
 
   @Audited({
     action: 'PHARMACY_PRICES_BULK_LOADED',
+    dryRunAction: 'PHARMACY_PRICES_BULK_PREVIEWED',
     entity: 'pharmacy',
     entityId: 'param:pharmacyId',
   })
@@ -104,6 +108,7 @@ export class PharmacyBulkController {
 
   @Audited({
     action: 'PHARMACY_SITES_BULK_LOADED',
+    dryRunAction: 'PHARMACY_SITES_BULK_PREVIEWED',
     entity: 'pharmacy',
     entityId: 'param:pharmacyId',
   })

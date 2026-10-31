@@ -393,7 +393,7 @@ describeIfDb('Analítica web (integración, PostgreSQL real)', () => {
       series.points.find((p) => p.bucket === '2026-09-10T11:00:00.000Z')!
         .events,
     ).toBe(1);
-    expect(series.points.filter((p) => p.events > 0)).toHaveLength(2);
+    expect(series.points.filter((p) => (p.events ?? 0) > 0)).toHaveLength(2);
   });
 
   it('los percentiles salen de la distribución, con muestra y ratings', async () => {
@@ -488,7 +488,7 @@ describeIfDb('Analítica web (integración, PostgreSQL real)', () => {
         { ...WINDOW, interval: 'hour' },
         TENANT_A,
       );
-      const total = series.points.reduce((sum, p) => sum + p.events, 0);
+      const total = series.points.reduce((sum, p) => sum + (p.events ?? 0), 0);
       expect(total).toBe(11);
     });
 
@@ -565,7 +565,7 @@ describeIfDb('Analítica web (integración, PostgreSQL real)', () => {
       }
       // Los eventos sueltos sí son de su tenant: el agregado cuenta uno por cada uno.
       const a = await service.overview(WINDOW2, TENANT_A);
-      expect(a.totals.events).toBe(1);
+      expect(a.totals!.events).toBe(1);
     });
   });
 });

@@ -42,7 +42,7 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 189 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 193 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [reply_templates](#reply_templates) | Conserva respuestas rápidas de una organización o de un profesional para que el equipo conteste mensajes administrativos con textos acordados. | 12 | 6 | 0 | SIN_ENTIDAD |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
@@ -3064,7 +3064,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 189 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 193 operaciones
 
 #### Columnas
 
@@ -3141,14 +3141,14 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_public_profiles_slug` | sí | slug | Garantiza que no se repita la combinación (slug) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «slug», la primera columna del índice _(CONSULTA)_ |
+| `uq_public_profiles_slug` | sí | slug | Garantiza que no se repita la combinación (slug) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «slug», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_tenant_id` | no | tenant_id | Soporta la clave foránea fk_public_profiles_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_avatar_file_id` | no | avatar_file_id | Soporta la clave foránea fk_public_profiles_avatar_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_cover_file_id` | no | cover_file_id | Soporta la clave foránea fk_public_profiles_cover_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_public_profiles_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_public_profiles_visibility_concept_id` | no | visibility_concept_id | Soporta la clave foránea fk_public_profiles_visibility_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «visibility_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_public_profiles_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_public_profiles_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_visibility_concept_id` | no | visibility_concept_id | Soporta la clave foránea fk_public_profiles_visibility_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «visibility_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_public_profiles_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_public_profiles_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_public_profiles_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -3164,6 +3164,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /referrals | LEE | DIRECTA |
 | DELETE /community/blocks | LEE | DIRECTA |
 | GET /community/blocks | LEE | DIRECTA |
 | POST /community/blocks | LEE | DIRECTA |
@@ -3269,6 +3270,8 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | PUT /tenants/{tenantId}/logo | CREA | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
@@ -3284,6 +3287,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /orgext/hospitals/{id}/activate | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | CREA | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify | LEE | POR_SQL |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /public/pharmacies/open-now | LEE | POR_SQL |

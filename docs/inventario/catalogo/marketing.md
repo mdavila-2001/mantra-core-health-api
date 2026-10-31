@@ -2,7 +2,7 @@
 
 # Catálogo del schema `marketing`
 
-- **Tablas:** 36 · **Columnas:** 585 (54 con descripción: 9.2 %) · **Índices:** 202
+- **Tablas:** 36 · **Columnas:** 585 (115 con descripción: 19.7 %) · **Índices:** 202
 - **Dominio:** Marketing y Crecimiento
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -16,28 +16,28 @@
 | [campaign_members](#campaign_members) | Relaciona personas o cuentas con campañas para seguir participación y elegibilidad de comunicación. | 16 | 5 | 7 | COINCIDE |
 | [campaign_schedules](#campaign_schedules) | Programa campañas y establece cuándo se ejecutan sus envíos. | 31 | 11 | 0 | COINCIDE |
 | [content_templates](#content_templates) | Define contenidos reutilizables para mensajes y piezas incluidas en campañas o recorridos. | 17 | 10 | 5 | COINCIDE |
-| [insights_alert_rules](#insights_alert_rules) | sin propósito | 16 | 4 | 0 | SIN_ENTIDAD |
-| [insights_alert_transitions](#insights_alert_transitions) | sin propósito | 9 | 4 | 0 | SIN_ENTIDAD |
-| [insights_alerts](#insights_alerts) | sin propósito | 27 | 7 | 0 | SIN_ENTIDAD |
-| [insights_app_daily_facts](#insights_app_daily_facts) | sin propósito | 14 | 1 | 0 | SIN_ENTIDAD |
-| [insights_app_onboarding_facts](#insights_app_onboarding_facts) | sin propósito | 6 | 1 | 0 | SIN_ENTIDAD |
-| [insights_app_screen_daily_facts](#insights_app_screen_daily_facts) | sin propósito | 9 | 1 | 0 | SIN_ENTIDAD |
-| [insights_campaign_daily_facts](#insights_campaign_daily_facts) | sin propósito | 20 | 3 | 0 | SIN_ENTIDAD |
-| [insights_campaign_hourly_facts](#insights_campaign_hourly_facts) | sin propósito | 11 | 2 | 0 | SIN_ENTIDAD |
-| [insights_campaigns](#insights_campaigns) | sin propósito | 22 | 7 | 0 | SIN_ENTIDAD |
-| [insights_creatives](#insights_creatives) | sin propósito | 14 | 4 | 0 | SIN_ENTIDAD |
-| [insights_data_sources](#insights_data_sources) | sin propósito | 11 | 4 | 0 | SIN_ENTIDAD |
-| [insights_environment_items](#insights_environment_items) | sin propósito | 22 | 5 | 0 | SIN_ENTIDAD |
-| [insights_mentions](#insights_mentions) | sin propósito | 19 | 6 | 0 | SIN_ENTIDAD |
-| [insights_milestones](#insights_milestones) | sin propósito | 10 | 4 | 0 | SIN_ENTIDAD |
-| [insights_notification_preferences](#insights_notification_preferences) | sin propósito | 13 | 3 | 0 | SIN_ENTIDAD |
-| [insights_reports](#insights_reports) | sin propósito | 15 | 3 | 0 | SIN_ENTIDAD |
-| [insights_saved_views](#insights_saved_views) | sin propósito | 10 | 3 | 0 | SIN_ENTIDAD |
-| [insights_search_signals](#insights_search_signals) | sin propósito | 6 | 1 | 0 | SIN_ENTIDAD |
-| [insights_sector_trends](#insights_sector_trends) | sin propósito | 5 | 1 | 0 | SIN_ENTIDAD |
-| [insights_social_daily_facts](#insights_social_daily_facts) | sin propósito | 18 | 1 | 0 | SIN_ENTIDAD |
-| [insights_social_posts](#insights_social_posts) | sin propósito | 20 | 4 | 0 | SIN_ENTIDAD |
-| [insights_user_preferences](#insights_user_preferences) | sin propósito | 11 | 3 | 0 | SIN_ENTIDAD |
+| [insights_alert_rules](#insights_alert_rules) | sin propósito | 16 | 4 | 1 | COINCIDE |
+| [insights_alert_transitions](#insights_alert_transitions) | sin propósito | 9 | 4 | 1 | COINCIDE |
+| [insights_alerts](#insights_alerts) | sin propósito | 27 | 7 | 1 | COINCIDE |
+| [insights_app_daily_facts](#insights_app_daily_facts) | sin propósito | 14 | 1 | 0 | COINCIDE |
+| [insights_app_onboarding_facts](#insights_app_onboarding_facts) | sin propósito | 6 | 1 | 0 | COINCIDE |
+| [insights_app_screen_daily_facts](#insights_app_screen_daily_facts) | sin propósito | 9 | 1 | 0 | COINCIDE |
+| [insights_campaign_daily_facts](#insights_campaign_daily_facts) | sin propósito | 20 | 3 | 14 | COINCIDE |
+| [insights_campaign_hourly_facts](#insights_campaign_hourly_facts) | sin propósito | 11 | 2 | 0 | COINCIDE |
+| [insights_campaigns](#insights_campaigns) | sin propósito | 22 | 7 | 2 | COINCIDE |
+| [insights_creatives](#insights_creatives) | sin propósito | 14 | 4 | 1 | COINCIDE |
+| [insights_data_sources](#insights_data_sources) | sin propósito | 11 | 4 | 14 | COINCIDE |
+| [insights_environment_items](#insights_environment_items) | sin propósito | 22 | 5 | 0 | COINCIDE |
+| [insights_mentions](#insights_mentions) | sin propósito | 19 | 6 | 0 | COINCIDE |
+| [insights_milestones](#insights_milestones) | sin propósito | 10 | 4 | 1 | COINCIDE |
+| [insights_notification_preferences](#insights_notification_preferences) | sin propósito | 13 | 3 | 1 | COINCIDE |
+| [insights_reports](#insights_reports) | sin propósito | 15 | 3 | 2 | COINCIDE |
+| [insights_saved_views](#insights_saved_views) | sin propósito | 10 | 3 | 2 | COINCIDE |
+| [insights_search_signals](#insights_search_signals) | sin propósito | 6 | 1 | 0 | COINCIDE |
+| [insights_sector_trends](#insights_sector_trends) | sin propósito | 5 | 1 | 0 | COINCIDE |
+| [insights_social_daily_facts](#insights_social_daily_facts) | sin propósito | 18 | 1 | 0 | COINCIDE |
+| [insights_social_posts](#insights_social_posts) | sin propósito | 20 | 4 | 0 | COINCIDE |
+| [insights_user_preferences](#insights_user_preferences) | sin propósito | 11 | 3 | 1 | COINCIDE |
 | [journey_enrollments](#journey_enrollments) | Registra participantes incorporados a recorridos para seguir su progreso y elegibilidad. | 14 | 7 | 4 | COINCIDE |
 | [journey_steps](#journey_steps) | Detalla pasos, esperas y decisiones de cada recorrido automatizado. | 16 | 8 | 5 | COINCIDE |
 | [journeys](#journeys) | Representa recorridos automatizados que organizan interacciones de marketing por etapas y condiciones. | 14 | 10 | 8 | COINCIDE |
@@ -866,29 +866,29 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 16 columnas · 4 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsAlertRules` — `src/modules/marketing/entities/insights_alert_rules.entity.ts`
+- **Resumen:** 16 columnas · 4 índices · 3 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `description` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `severity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `unit` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `default_threshold` | `numeric(18,4)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `threshold` | `numeric(18,4)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `direction` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `enabled` | `boolean = true` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `min_sample_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alert_rules.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `description` | `text` | Opcional | _sin dato_ | coincide |
+| 5 | `severity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `unit` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `default_threshold` | `numeric(18,4)` | Obligatoria | _sin dato_ | coincide |
+| 8 | `threshold` | `numeric(18,4)` | Obligatoria | _sin dato_ | coincide |
+| 9 | `direction` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 10 | `enabled` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
+| 11 | `min_sample_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alert_rules.entity.ts:83`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alert_rules.entity.ts:89`)_ | coincide |
+| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_alert_rules.entity.ts:107`)_ | coincide |
 
 #### Relaciones
 
@@ -915,7 +915,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/alert-rules | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -939,22 +941,22 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 9 columnas · 4 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsAlertTransitions` — `src/modules/marketing/entities/insights_alert_transitions.entity.ts`
+- **Resumen:** 9 columnas · 4 índices · 4 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `alert_id` | `uuid` | Clave foránea → marketing.insights_alerts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `from_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `to_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `from_owner_team_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `to_owner_team_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `note` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alert_transitions.entity.ts:12`)_ | coincide |
+| 2 | `alert_id` | `uuid` | Clave foránea → marketing.insights_alerts.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `from_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 4 | `to_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `from_owner_team_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `to_owner_team_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `note` | `text` | Opcional | _sin dato_ | coincide |
+| 8 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -976,7 +978,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/alert-workflow | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1000,40 +1004,40 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 27 columnas · 7 índices · 4 FK salientes · 1 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsAlerts` — `src/modules/marketing/entities/insights_alerts.entity.ts`
+- **Resumen:** 27 columnas · 7 índices · 4 FK salientes · 1 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `fingerprint` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `rule_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `severity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `title` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `what_text` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `detected_on` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `magnitude` | `numeric(18,4)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `magnitude_unit` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `source_text` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `module_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `context_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `cause_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `impact_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `recommendation_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `confidence_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `priority` | `smallint` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `owner_team_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `evidence_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `series_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 23 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 24 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 25 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 26 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 27 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alerts.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `fingerprint` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `rule_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 5 | `severity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `title` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `what_text` | `text` | Obligatoria | _sin dato_ | coincide |
+| 8 | `detected_on` | `date` | Obligatoria | _sin dato_ | coincide |
+| 9 | `magnitude` | `numeric(18,4)` | Opcional | _sin dato_ | coincide |
+| 10 | `magnitude_unit` | `varchar` | Opcional | _sin dato_ | coincide |
+| 11 | `source_text` | `varchar` | Opcional | _sin dato_ | coincide |
+| 12 | `module_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 13 | `context_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 14 | `cause_text` | `text` | Opcional | _sin dato_ | coincide |
+| 15 | `impact_text` | `text` | Opcional | _sin dato_ | coincide |
+| 16 | `recommendation_text` | `text` | Opcional | _sin dato_ | coincide |
+| 17 | `confidence_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 18 | `priority` | `smallint` | Obligatoria | _sin dato_ | coincide |
+| 19 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 20 | `owner_team_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 21 | `evidence_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 22 | `series_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 23 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alerts.entity.ts:175`)_ | coincide |
+| 24 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_alerts.entity.ts:181`)_ | coincide |
+| 25 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 26 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 27 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_alerts.entity.ts:199`)_ | coincide |
 
 #### Relaciones
 
@@ -1066,7 +1070,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/alert-workflow | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1090,27 +1096,27 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsAppDailyFacts` — `src/modules/marketing/entities/insights_app_daily_facts.entity.ts`
 - **Resumen:** 14 columnas · 1 índices · 0 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `dau` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `wau` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `mau` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `sessions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `total_session_seconds` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `new_users` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `returning_users` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `searches` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `bookings_started` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `bookings_completed` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_app_daily_facts.entity.ts:12`)_ | coincide |
+| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `dau` | `bigint` | Opcional | _sin dato_ | coincide |
+| 5 | `wau` | `bigint` | Opcional | _sin dato_ | coincide |
+| 6 | `mau` | `bigint` | Opcional | _sin dato_ | coincide |
+| 7 | `sessions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 8 | `total_session_seconds` | `bigint` | Opcional | _sin dato_ | coincide |
+| 9 | `new_users` | `bigint` | Opcional | _sin dato_ | coincide |
+| 10 | `returning_users` | `bigint` | Opcional | _sin dato_ | coincide |
+| 11 | `searches` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `bookings_started` | `bigint` | Opcional | _sin dato_ | coincide |
+| 13 | `bookings_completed` | `bigint` | Opcional | _sin dato_ | coincide |
+| 14 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
 
@@ -1150,19 +1156,19 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsAppOnboardingFacts` — `src/modules/marketing/entities/insights_app_onboarding_facts.entity.ts`
 - **Resumen:** 6 columnas · 1 índices · 0 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `app_version` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `step_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `step_order` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `users_reached` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_app_onboarding_facts.entity.ts:12`)_ | coincide |
+| 2 | `app_version` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `step_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `step_order` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 5 | `users_reached` | `bigint` | Opcional | _sin dato_ | coincide |
+| 6 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
 
@@ -1202,22 +1208,22 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsAppScreenDailyFacts` — `src/modules/marketing/entities/insights_app_screen_daily_facts.entity.ts`
 - **Resumen:** 9 columnas · 1 índices · 0 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `screen_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `views` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `exits` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `rage_taps` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `avg_seconds` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_app_screen_daily_facts.entity.ts:12`)_ | coincide |
+| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `screen_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `views` | `bigint` | Opcional | _sin dato_ | coincide |
+| 6 | `exits` | `bigint` | Opcional | _sin dato_ | coincide |
+| 7 | `rage_taps` | `bigint` | Opcional | _sin dato_ | coincide |
+| 8 | `avg_seconds` | `integer` | Opcional | _sin dato_ | coincide |
+| 9 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
 
@@ -1257,33 +1263,33 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 20 columnas · 3 índices · 2 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsCampaignDailyFacts` — `src/modules/marketing/entities/insights_campaign_daily_facts.entity.ts`
+- **Resumen:** 20 columnas · 3 índices · 2 FK salientes · 0 entrantes · 14 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `channel_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `creative_id` | `uuid` | Clave foránea → marketing.insights_creatives.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `impressions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `reach` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `engagements` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `clicks` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `video_views` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `watch_seconds` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `visits` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `leads` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `registrations` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `activations` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `first_uses` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `conversions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `spend_cents` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `revenue_cents` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_campaign_daily_facts.entity.ts:12`)_ | coincide |
+| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `channel_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `creative_id` | `uuid` | Clave foránea → marketing.insights_creatives.id; Opcional | _sin dato_ | coincide |
+| 6 | `impressions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 7 | `reach` | `bigint` | Opcional | _sin dato_ | coincide |
+| 8 | `engagements` | `bigint` | Opcional | _sin dato_ | coincide |
+| 9 | `clicks` | `bigint` | Opcional | _sin dato_ | coincide |
+| 10 | `video_views` | `bigint` | Opcional | _sin dato_ | coincide |
+| 11 | `watch_seconds` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `visits` | `bigint` | Opcional | _sin dato_ | coincide |
+| 13 | `leads` | `bigint` | Opcional | _sin dato_ | coincide |
+| 14 | `registrations` | `bigint` | Opcional | _sin dato_ | coincide |
+| 15 | `activations` | `bigint` | Opcional | _sin dato_ | coincide |
+| 16 | `first_uses` | `bigint` | Opcional | _sin dato_ | coincide |
+| 17 | `conversions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 18 | `spend_cents` | `bigint` | Opcional | _sin dato_ | coincide |
+| 19 | `revenue_cents` | `bigint` | Opcional | _sin dato_ | coincide |
+| 20 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1308,7 +1314,22 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/alert-rules | LEE | POR_SQL |
+| PATCH /marketing/insights/alert-rules/{code} | LEE | POR_SQL |
+| GET /marketing/insights/alert-workflow | LEE | POR_SQL |
+| PUT /marketing/insights/alert-workflow/{fingerprint} | LEE | POR_SQL |
+| GET /marketing/insights/campaign-facts | LEE | POR_SQL |
+| GET /marketing/insights/catalog | LEE | POR_SQL |
+| GET /marketing/insights/notification-preferences | LEE | POR_SQL |
+| PUT /marketing/insights/notification-preferences | LEE | POR_SQL |
+| GET /marketing/insights/reports | LEE | POR_SQL |
+| PUT /marketing/insights/reports/{id} | LEE | POR_SQL |
+| GET /marketing/insights/saved-views | LEE | POR_SQL |
+| PUT /marketing/insights/saved-views/{id} | LEE | POR_SQL |
+| GET /marketing/insights/user-preferences | LEE | POR_SQL |
+| PUT /marketing/insights/user-preferences | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1332,24 +1353,24 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsCampaignHourlyFacts` — `src/modules/marketing/entities/insights_campaign_hourly_facts.entity.ts`
 - **Resumen:** 11 columnas · 2 índices · 1 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `hour` | `smallint` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `channel_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `impressions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `clicks` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `registrations` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `conversions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `spend_cents` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_campaign_hourly_facts.entity.ts:12`)_ | coincide |
+| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `hour` | `smallint` | Obligatoria | _sin dato_ | coincide |
+| 4 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `channel_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `impressions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 7 | `clicks` | `bigint` | Opcional | _sin dato_ | coincide |
+| 8 | `registrations` | `bigint` | Opcional | _sin dato_ | coincide |
+| 9 | `conversions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 10 | `spend_cents` | `bigint` | Opcional | _sin dato_ | coincide |
+| 11 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -1396,35 +1417,35 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 22 columnas · 7 índices · 5 FK salientes · 4 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsCampaigns` — `src/modules/marketing/entities/insights_campaigns.entity.ts`
+- **Resumen:** 22 columnas · 7 índices · 5 FK salientes · 4 entrantes · 2 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `short_name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `objective_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `audience_text` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `start_on` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `end_on` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `budget_cents` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `ltv_cents` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `revenue_per_conversion_cents` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `owner_team_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `targets_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `marketing_campaign_id` | `uuid` | Clave foránea → marketing.marketing_campaigns.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_campaigns.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `short_name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `objective_text` | `text` | Opcional | _sin dato_ | coincide |
+| 7 | `audience_text` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `start_on` | `date` | Obligatoria | _sin dato_ | coincide |
+| 9 | `end_on` | `date` | Opcional | _sin dato_ | coincide |
+| 10 | `budget_cents` | `bigint` | Opcional | _sin dato_ | coincide |
+| 11 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 12 | `ltv_cents` | `bigint` | Opcional | _sin dato_ | coincide |
+| 13 | `revenue_per_conversion_cents` | `bigint` | Opcional | _sin dato_ | coincide |
+| 14 | `owner_team_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 15 | `targets_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 16 | `marketing_campaign_id` | `uuid` | Clave foránea → marketing.marketing_campaigns.id; Opcional | _sin dato_ | coincide |
+| 17 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_campaigns.entity.ts:135`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_campaigns.entity.ts:141`)_ | coincide |
+| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_campaigns.entity.ts:159`)_ | coincide |
 
 #### Relaciones
 
@@ -1460,7 +1481,10 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/campaign-facts | LEE | POR_SQL |
+| GET /marketing/insights/catalog | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1484,27 +1508,27 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 14 columnas · 4 índices · 4 FK salientes · 1 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsCreatives` — `src/modules/marketing/entities/insights_creatives.entity.ts`
+- **Resumen:** 14 columnas · 4 índices · 4 FK salientes · 1 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `channel_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `format_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `audience_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `cta_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_creatives.entity.ts:12`)_ | coincide |
+| 2 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `channel_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `format_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `audience_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `cta_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_creatives.entity.ts:70`)_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_creatives.entity.ts:76`)_ | coincide |
+| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_creatives.entity.ts:94`)_ | coincide |
 
 #### Relaciones
 
@@ -1533,7 +1557,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/catalog | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1557,24 +1583,24 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 11 columnas · 4 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsDataSources` — `src/modules/marketing/entities/insights_data_sources.entity.ts`
+- **Resumen:** 11 columnas · 4 índices · 3 FK salientes · 0 entrantes · 14 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `last_received_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `dataset_code` | `varchar = 'demo'` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_data_sources.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `last_received_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 5 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `dataset_code` | `varchar = 'demo'` | Obligatoria | _sin dato_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_data_sources.entity.ts:56`)_ | coincide |
+| 8 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_data_sources.entity.ts:62`)_ | coincide |
+| 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_data_sources.entity.ts:80`)_ | coincide |
 
 #### Relaciones
 
@@ -1601,7 +1627,22 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/alert-rules | LEE | POR_SQL |
+| PATCH /marketing/insights/alert-rules/{code} | LEE | POR_SQL |
+| GET /marketing/insights/alert-workflow | LEE | POR_SQL |
+| PUT /marketing/insights/alert-workflow/{fingerprint} | LEE | POR_SQL |
+| GET /marketing/insights/campaign-facts | LEE | POR_SQL |
+| GET /marketing/insights/catalog | LEE | POR_SQL |
+| GET /marketing/insights/notification-preferences | LEE | POR_SQL |
+| PUT /marketing/insights/notification-preferences | LEE | POR_SQL |
+| GET /marketing/insights/reports | LEE | POR_SQL |
+| PUT /marketing/insights/reports/{id} | LEE | POR_SQL |
+| GET /marketing/insights/saved-views | LEE | POR_SQL |
+| PUT /marketing/insights/saved-views/{id} | LEE | POR_SQL |
+| GET /marketing/insights/user-preferences | LEE | POR_SQL |
+| PUT /marketing/insights/user-preferences | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1625,35 +1666,35 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsEnvironmentItems` — `src/modules/marketing/entities/insights_environment_items.entity.ts`
 - **Resumen:** 22 columnas · 5 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `published_on` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `domain_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `category_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `scope_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `title` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `source_name` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `affects_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `relevance` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `impact_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `action_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `monitor_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `campaign_effects_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `analysis_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `trend_seed` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 22 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_environment_items.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `published_on` | `date` | Obligatoria | _sin dato_ | coincide |
+| 4 | `domain_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `category_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `scope_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `title` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 9 | `source_name` | `varchar` | Opcional | _sin dato_ | coincide |
+| 10 | `affects_text` | `text` | Opcional | _sin dato_ | coincide |
+| 11 | `relevance` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 12 | `impact_text` | `text` | Opcional | _sin dato_ | coincide |
+| 13 | `action_text` | `text` | Opcional | _sin dato_ | coincide |
+| 14 | `monitor_text` | `text` | Opcional | _sin dato_ | coincide |
+| 15 | `campaign_effects_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 16 | `analysis_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 17 | `trend_seed` | `integer` | Opcional | _sin dato_ | coincide |
+| 18 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_environment_items.entity.ts:124`)_ | coincide |
+| 19 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_environment_items.entity.ts:130`)_ | coincide |
+| 20 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 22 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_environment_items.entity.ts:148`)_ | coincide |
 
 #### Relaciones
 
@@ -1704,32 +1745,32 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsMentions` — `src/modules/marketing/entities/insights_mentions.entity.ts`
 - **Resumen:** 19 columnas · 6 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `mentioned_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `brand_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `source_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `topic_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `sentiment_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `department_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `body_text` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `reach` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `confidence` | `numeric(5,4)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `needs_response` | `boolean = false` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `responded_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_mentions.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `mentioned_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 4 | `brand_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `source_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `topic_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `sentiment_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 9 | `department_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 10 | `body_text` | `text` | Obligatoria | _sin dato_ | coincide |
+| 11 | `reach` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `confidence` | `numeric(5,4)` | Opcional | _sin dato_ | coincide |
+| 13 | `needs_response` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 14 | `responded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_mentions.entity.ts:104`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_mentions.entity.ts:110`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_mentions.entity.ts:128`)_ | coincide |
 
 #### Relaciones
 
@@ -1781,23 +1822,23 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsMilestones` — `src/modules/marketing/entities/insights_milestones.entity.ts`
+- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `occurred_on` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `label` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_milestones.entity.ts:12`)_ | coincide |
+| 2 | `occurred_on` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `label` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `campaign_id` | `uuid` | Clave foránea → marketing.insights_campaigns.id; Opcional | _sin dato_ | coincide |
+| 5 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_milestones.entity.ts:42`)_ | coincide |
+| 7 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_milestones.entity.ts:48`)_ | coincide |
+| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 10 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_milestones.entity.ts:66`)_ | coincide |
 
 #### Relaciones
 
@@ -1818,7 +1859,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/catalog | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1842,26 +1885,26 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 13 columnas · 3 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsNotificationPreferences` — `src/modules/marketing/entities/insights_notification_preferences.entity.ts`
+- **Resumen:** 13 columnas · 3 índices · 3 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `matrix_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `frequency_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `digest_hour` | `smallint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `quiet_from` | `time` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `quiet_to` | `time` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `quiet_exempt_critical` | `boolean = true` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_notification_preferences.entity.ts:12`)_ | coincide |
+| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `matrix_json` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 4 | `frequency_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `digest_hour` | `smallint` | Opcional | _sin dato_ | coincide |
+| 6 | `quiet_from` | `time` | Opcional | _sin dato_ | coincide |
+| 7 | `quiet_to` | `time` | Opcional | _sin dato_ | coincide |
+| 8 | `quiet_exempt_critical` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_notification_preferences.entity.ts:68`)_ | coincide |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_notification_preferences.entity.ts:74`)_ | coincide |
+| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_notification_preferences.entity.ts:92`)_ | coincide |
 
 #### Relaciones
 
@@ -1887,7 +1930,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/notification-preferences | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1911,28 +1956,28 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 15 columnas · 3 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsReports` — `src/modules/marketing/entities/insights_reports.entity.ts`
+- **Resumen:** 15 columnas · 3 índices · 3 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `title` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `type_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `audience_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `period_from` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `period_to` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `campaign_ids_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `channels_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `sections_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_reports.entity.ts:12`)_ | coincide |
+| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `title` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `type_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `audience_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `period_from` | `date` | Obligatoria | _sin dato_ | coincide |
+| 7 | `period_to` | `date` | Obligatoria | _sin dato_ | coincide |
+| 8 | `campaign_ids_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 9 | `channels_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 10 | `sections_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_reports.entity.ts:87`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_reports.entity.ts:93`)_ | coincide |
+| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_reports.entity.ts:111`)_ | coincide |
 
 #### Relaciones
 
@@ -1952,7 +1997,10 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/reports | LEE | POR_SQL |
+| DELETE /marketing/insights/reports/{id} | BORRA | POR_SQL |
 
 #### Gobierno
 
@@ -1976,23 +2024,23 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsSavedViews` — `src/modules/marketing/entities/insights_saved_views.entity.ts`
+- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `module_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `filters_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_saved_views.entity.ts:12`)_ | coincide |
+| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `module_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `filters_json` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_saved_views.entity.ts:47`)_ | coincide |
+| 7 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_saved_views.entity.ts:53`)_ | coincide |
+| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 10 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_saved_views.entity.ts:71`)_ | coincide |
 
 #### Relaciones
 
@@ -2018,7 +2066,10 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/saved-views | LEE | POR_SQL |
+| DELETE /marketing/insights/saved-views/{id} | BORRA | POR_SQL |
 
 #### Gobierno
 
@@ -2042,19 +2093,19 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsSearchSignals` — `src/modules/marketing/entities/insights_search_signals.entity.ts`
 - **Resumen:** 6 columnas · 1 índices · 0 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `week_start` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `query_text` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `volume` | `bigint` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_search_signals.entity.ts:12`)_ | coincide |
+| 2 | `week_start` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `query_text` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `kind_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `volume` | `bigint` | Obligatoria | _sin dato_ | coincide |
+| 6 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
 
@@ -2094,18 +2145,18 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsSectorTrends` — `src/modules/marketing/entities/insights_sector_trends.entity.ts`
 - **Resumen:** 5 columnas · 1 índices · 0 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `week_start` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `trend_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `value` | `numeric(18,4)` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_sector_trends.entity.ts:12`)_ | coincide |
+| 2 | `week_start` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `trend_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `value` | `numeric(18,4)` | Obligatoria | _sin dato_ | coincide |
+| 5 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
 
@@ -2145,31 +2196,31 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsSocialDailyFacts` — `src/modules/marketing/entities/insights_social_daily_facts.entity.ts`
 - **Resumen:** 18 columnas · 1 índices · 0 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `followers` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `new_followers` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `reach` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `impressions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `engagements` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `saves` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `shares` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `comments` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `clicks` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `video_views` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `watch_seconds` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `completions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `viewed_pct_numerator` | `numeric(18,4)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `viewed_pct_denominator` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_social_daily_facts.entity.ts:12`)_ | coincide |
+| 2 | `fact_date` | `date` | Obligatoria | _sin dato_ | coincide |
+| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `followers` | `bigint` | Opcional | _sin dato_ | coincide |
+| 5 | `new_followers` | `bigint` | Opcional | _sin dato_ | coincide |
+| 6 | `reach` | `bigint` | Opcional | _sin dato_ | coincide |
+| 7 | `impressions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 8 | `engagements` | `bigint` | Opcional | _sin dato_ | coincide |
+| 9 | `saves` | `bigint` | Opcional | _sin dato_ | coincide |
+| 10 | `shares` | `bigint` | Opcional | _sin dato_ | coincide |
+| 11 | `comments` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `clicks` | `bigint` | Opcional | _sin dato_ | coincide |
+| 13 | `video_views` | `bigint` | Opcional | _sin dato_ | coincide |
+| 14 | `watch_seconds` | `bigint` | Opcional | _sin dato_ | coincide |
+| 15 | `completions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 16 | `viewed_pct_numerator` | `numeric(18,4)` | Opcional | _sin dato_ | coincide |
+| 17 | `viewed_pct_denominator` | `bigint` | Opcional | _sin dato_ | coincide |
+| 18 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Índices
 
@@ -2209,33 +2260,33 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
+- **Entidad del ORM:** `InsightsSocialPosts` — `src/modules/marketing/entities/insights_social_posts.entity.ts`
 - **Resumen:** 20 columnas · 4 índices · 2 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `published_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `format_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `topic_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `title` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `impressions` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `reach` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `engagements` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `video_views` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `shares` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `saves` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `comments` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `clicks` | `bigint` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_social_posts.entity.ts:12`)_ | coincide |
+| 2 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `platform_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `published_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 5 | `format_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `topic_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `title` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 8 | `impressions` | `bigint` | Opcional | _sin dato_ | coincide |
+| 9 | `reach` | `bigint` | Opcional | _sin dato_ | coincide |
+| 10 | `engagements` | `bigint` | Opcional | _sin dato_ | coincide |
+| 11 | `video_views` | `bigint` | Opcional | _sin dato_ | coincide |
+| 12 | `shares` | `bigint` | Opcional | _sin dato_ | coincide |
+| 13 | `saves` | `bigint` | Opcional | _sin dato_ | coincide |
+| 14 | `comments` | `bigint` | Opcional | _sin dato_ | coincide |
+| 15 | `clicks` | `bigint` | Opcional | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_social_posts.entity.ts:102`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_social_posts.entity.ts:108`)_ | coincide |
+| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_social_posts.entity.ts:126`)_ | coincide |
 
 #### Relaciones
 
@@ -2285,24 +2336,24 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 11 columnas · 3 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `InsightsUserPreferences` — `src/modules/marketing/entities/insights_user_preferences.entity.ts`
+- **Resumen:** 11 columnas · 3 índices · 3 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `density_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `theme_code` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `nav_collapsed` | `boolean = false` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `timezone` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_user_preferences.entity.ts:12`)_ | coincide |
+| 2 | `user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `density_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `theme_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `nav_collapsed` | `boolean = false` | Obligatoria | _sin dato_ | coincide |
+| 6 | `timezone` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_user_preferences.entity.ts:48`)_ | coincide |
+| 8 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/marketing/entities/insights_user_preferences.entity.ts:54`)_ | coincide |
+| 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/insights_user_preferences.entity.ts:72`)_ | coincide |
 
 #### Relaciones
 
@@ -2328,7 +2379,9 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /marketing/insights/user-preferences | LEE | POR_SQL |
 
 #### Gobierno
 

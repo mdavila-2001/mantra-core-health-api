@@ -7,32 +7,67 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1313 |
-| Entidades del ORM | 1289 |
-| Tablas del DDL con entidad | 1248 |
-| Tablas del DDL **sin** entidad | 65 |
-| Entidades del ORM **sin** tabla en el DDL | 41 |
-| Columnas del DDL ausentes en su entidad | 143 |
+| Entidades del ORM | 1353 |
+| Tablas del DDL con entidad | 1277 |
+| Tablas del DDL **sin** entidad | 36 |
+| Entidades del ORM **sin** tabla en el DDL | 76 |
+| Columnas del DDL ausentes en su entidad | 66 |
 | Columnas con nulabilidad divergente | 7 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 6 |
+| Columnas de la entidad que el DDL no tiene | 56 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
+| `audit.care_space_blocks_history` | CareSpaceBlocksHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.care_space_category_periods_history` | CareSpaceCategoryPeriodsHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.charge_captures_history` | ChargeCapturesHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.cleaning_orders_history` | CleaningOrdersHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.encounter_locations_history` | EncounterLocationsHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.operating_room_block_series_history` | OperatingRoomBlockSeriesHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.operating_room_blocks_history` | OperatingRoomBlocksHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.placement_incidents_history` | PlacementIncidentsHistory | **en ninguna fuente de DDL del modelo** |
+| `audit.space_tariffs_history` | SpaceTariffsHistory | **en ninguna fuente de DDL del modelo** |
+| `billing.charge_captures` | ChargeCaptures | **en ninguna fuente de DDL del modelo** |
+| `billing.space_tariffs` | SpaceTariffs | **en ninguna fuente de DDL del modelo** |
+| `clinical.inpatient_census_adjustments` | InpatientCensusAdjustments | **en ninguna fuente de DDL del modelo** |
+| `clinical.inpatient_census_days` | InpatientCensusDays | **en ninguna fuente de DDL del modelo** |
+| `clinical.inpatient_census_entries` | InpatientCensusEntries | **en ninguna fuente de DDL del modelo** |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
+| `clinical.placement_incidents` | PlacementIncidents | **en ninguna fuente de DDL del modelo** |
+| `clinical.service_request_components` | ServiceRequestComponents | **en ninguna fuente de DDL del modelo** |
 | `directory.tenant_medical_facilities` | TenantMedicalFacilities | **en ninguna fuente de DDL del modelo** |
 | `directory.tenant_medical_facility_sites` | TenantMedicalFacilitySites | **en ninguna fuente de DDL del modelo** |
+| `observability.alert_evaluations` | AlertEvaluations | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.alert_rules` | AlertRules | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.dependency_probe_runs` | DependencyProbeRuns | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.error_events` | ErrorEvents | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.error_groups` | ErrorGroups | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.http_request_minute_series` | HttpRequestMinuteSeries | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.instances` | Instances | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.rollup_watermarks` | RollupWatermarks | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.slow_request_samples` | SlowRequestSamples | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.sql_statement_minute_series` | SqlStatementMinuteSeries | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.sql_statements` | SqlStatements | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
+| `observability.worker_tick_minute_series` | WorkerTickMinuteSeries | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
+| `practice.care_space_blocks` | CareSpaceBlocks | **en ninguna fuente de DDL del modelo** |
+| `practice.care_space_category_periods` | CareSpaceCategoryPeriods | **en ninguna fuente de DDL del modelo** |
+| `practice.care_space_status_events` | CareSpaceStatusEvents | **en ninguna fuente de DDL del modelo** |
+| `practice.cleaning_orders` | CleaningOrders | **en ninguna fuente de DDL del modelo** |
 | `procedures_perioperative.instrument_sets` | InstrumentSets | **en ninguna fuente de DDL del modelo** |
+| `procedures_perioperative.operating_room_block_series` | OperatingRoomBlockSeries | **en ninguna fuente de DDL del modelo** |
+| `procedures_perioperative.operating_room_blocks` | OperatingRoomBlocks | **en ninguna fuente de DDL del modelo** |
 | `procedures_perioperative.sterilization_loads` | SterilizationLoads | **en ninguna fuente de DDL del modelo** |
 | `profiles.admission_requirements` | AdmissionRequirements | **en ninguna fuente de DDL del modelo** |
 | `profiles.practitioner_admission_events` | PractitionerAdmissionEvents | **en ninguna fuente de DDL del modelo** |
 | `profiles.practitioner_admission_reviews` | PractitionerAdmissionReviews | **en ninguna fuente de DDL del modelo** |
 | `profiles.practitioner_admissions` | PractitionerAdmissions | **en ninguna fuente de DDL del modelo** |
 | `system_ops.accepted_risks` | AcceptedRisks | **en ninguna fuente de DDL del modelo** |
+| `telemetry.client_error_events` | ClientErrorEvents | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
 | `time_series.ads_delivery_event_series` | AdsDeliveryEventSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
 | `time_series.ai_runtime_metric_series` | AiRuntimeMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
 | `time_series.application_tracking_series` | ApplicationTrackingSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
@@ -87,8 +122,6 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | `delegated_access.lifecycle_cases` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.patient_restriction_flags` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.role_templates` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
-| `delegated_access.shared_access_link_uses` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
-| `delegated_access.shared_access_links` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.sod_exceptions` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.sod_rules` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.support_grant_actions` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
@@ -102,34 +135,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | `directory.affiliation_invitations` | `Mantra Core Health Context/modules/diagram_04_directory.puml` |
 | `iam.session_policies` | `Mantra Core Health Context/modules/diagram_01_iam.puml` |
 | `insurance.insurance_terms_conditions` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
-| `insurance.practitioner_insurer_requests` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
-| `marketing.insights_alert_rules` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_alert_transitions` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_alerts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_app_daily_facts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_app_onboarding_facts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_app_screen_daily_facts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_campaign_daily_facts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_campaign_hourly_facts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_campaigns` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_creatives` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_data_sources` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_environment_items` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_mentions` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_milestones` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_notification_preferences` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_reports` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_saved_views` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_search_signals` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_sector_trends` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_social_daily_facts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_social_posts` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `marketing.insights_user_preferences` | `Mantra Core Health Context/modules/diagram_50_marketing.puml` |
-| `practice.facility_typology_rules` | `Mantra Core Health Context/modules/diagram_14_practice.puml` |
 | `practice.practitioner_location_assignments` | `Mantra Core Health Context/modules/diagram_14_practice.puml` |
-| `practice.site_declared_capacities` | `Mantra Core Health Context/modules/diagram_14_practice.puml` |
-| `practice.space_form_parent_rules` | `Mantra Core Health Context/modules/diagram_14_practice.puml` |
-| `practice.space_unit_assignments` | `Mantra Core Health Context/modules/diagram_14_practice.puml` |
 | `surveys.survey_invitation_reminders` | `Mantra Core Health Context/modules/diagram_65_surveys.puml` |
 
 ## Columnas del DDL ausentes en la entidad
@@ -142,9 +148,6 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | audit.audit_log.session_id | uuid | opcional |
 | audit.audit_log.correlation_id | uuid | opcional |
 | audit.audit_log.actor_role_snapshot | varchar | opcional |
-| audit.care_spaces_history.tenant_id | uuid | obligatoria |
-| audit.clinical_units_history.tenant_id | uuid | obligatoria |
-| audit.practice_sites_history.tenant_id | uuid | obligatoria |
 | authz.permissions.sensitivity_concept_id | uuid | opcional |
 | authz.permissions.requires_reason | boolean | obligatoria |
 | authz.permissions.requires_step_up | boolean | obligatoria |
@@ -154,30 +157,6 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | authz.permissions.touches_clinical_data | boolean | obligatoria |
 | authz.permissions.support_assignable | boolean | obligatoria |
 | authz.resource_scope_grants.reason_text | text | opcional |
-| clinical_ext.referrals.transfer_required | boolean | opcional |
-| clinical_ext.referrals.transport_mode | varchar(24) | opcional |
-| clinical_ext.referrals.transport_detail | varchar(200) | opcional |
-| clinical_ext.referrals.companion_name | varchar(200) | opcional |
-| clinical_ext.referrals.companion_relationship | varchar(80) | opcional |
-| clinical_ext.referrals.companion_phone | varchar(40) | opcional |
-| clinical_ext.referrals.escort_professional_name | varchar(200) | opcional |
-| clinical_ext.referrals.escort_professional_role | varchar(80) | opcional |
-| clinical_ext.referrals.departure_condition | varchar(16) | opcional |
-| clinical_ext.referrals.vitals_recorded_at | timestamptz | opcional |
-| clinical_ext.referrals.vital_systolic_bp | smallint | opcional |
-| clinical_ext.referrals.vital_diastolic_bp | smallint | opcional |
-| clinical_ext.referrals.vital_heart_rate | smallint | opcional |
-| clinical_ext.referrals.vital_respiratory_rate | smallint | opcional |
-| clinical_ext.referrals.vital_temperature_c | numeric(4,1) | opcional |
-| clinical_ext.referrals.vital_oxygen_saturation | smallint | opcional |
-| clinical_ext.referrals.vital_glasgow | smallint | opcional |
-| clinical_ext.referrals.receiver_contacted | boolean | opcional |
-| clinical_ext.referrals.receiver_contact_name | varchar(200) | opcional |
-| clinical_ext.referrals.receiver_contacted_at | timestamptz | opcional |
-| clinical_ext.referrals.departed_at | timestamptz | opcional |
-| clinical_ext.referrals.arrived_at | timestamptz | opcional |
-| clinical_ext.referrals.arrival_condition | varchar(16) | opcional |
-| clinical_ext.referrals.arrival_notes | text | opcional |
 | community.direct_messages.authored_by_user_id | uuid | opcional |
 | community.direct_messages.on_behalf_of_profile_id | uuid | opcional |
 | community.direct_messages.delegate_assignment_id | uuid | opcional |
@@ -204,14 +183,6 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | delegated_access.practitioner_delegate_assignments.may_reply_on_behalf | boolean | obligatoria |
 | delegated_access.practitioner_delegate_assignments.reply_disclosure_concept_id | uuid | opcional |
 | delegated_access.practitioner_delegate_assignments.accepted_at | timestamptz | opcional |
-| diagnostic_units.diagnostic_equipment.care_space_id | uuid | opcional |
-| diagnostic_units.diagnostic_equipment.ae_title | varchar(16) | opcional |
-| diagnostic_units.diagnostic_equipment.station_name | varchar(16) | opcional |
-| diagnostic_units.diagnostic_equipment.schedulable_resource_id | uuid | opcional |
-| directory.branch_memberships.workday_concept_id | uuid | opcional |
-| directory.branch_memberships.responsible_user_id | uuid | opcional |
-| directory.tenant_memberships.workday_concept_id | uuid | opcional |
-| directory.tenant_memberships.responsible_user_id | uuid | opcional |
 | directory.tenant_memberships.origin_concept_id | uuid | opcional |
 | identity_assurance.identity_verification_cases.tenant_id | uuid | opcional |
 | insurance.broker_carrier_agreements.representation_mode_concept_id | uuid | opcional |
@@ -227,49 +198,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | insurance.insurance_products.max_age_years | integer | opcional |
 | insurance.insurance_products.eligibility_requirements | jsonb | opcional |
 | marketing.segments.version_number | integer | opcional |
-| organization_extensions.facility_licenses.clinical_unit_id | uuid | opcional |
-| organization_extensions.facility_licenses.healthcare_service_id | uuid | opcional |
-| pharmacy_inventory.inventory_locations.care_space_id | uuid | opcional |
-| pharmacy_inventory.inventory_locations.clinical_unit_id | uuid | opcional |
-| practice.care_spaces.prep_minutes | integer | opcional |
-| practice.care_spaces.cleanup_minutes | integer | opcional |
-| practice.care_spaces.tenant_id | uuid | obligatoria |
-| practice.care_spaces.form_concept_id | uuid | opcional |
-| practice.care_spaces.description | varchar | opcional |
-| practice.care_spaces.floor_number | integer | opcional |
-| practice.care_spaces.area_m2 | numeric(10,2) | opcional |
-| practice.care_spaces.asepsis_concept_id | uuid | opcional |
-| practice.care_spaces.pressure_concept_id | uuid | opcional |
-| practice.care_spaces.air_changes_per_hour | numeric(6,2) | opcional |
-| practice.care_spaces.hvac_validated_on | date | opcional |
-| practice.care_spaces.sex_restriction_concept_id | uuid | opcional |
-| practice.care_spaces.age_group_concept_id | uuid | opcional |
-| practice.care_spaces.bed_category_concept_id | uuid | opcional |
-| practice.care_spaces.censable | boolean | opcional |
-| practice.care_spaces.gln | varchar(13) | opcional |
-| practice.care_spaces.valid_from | timestamptz | opcional |
-| practice.care_spaces.valid_to | timestamptz | opcional |
 | practice.care_spaces.location_path | varchar | opcional |
-| practice.clinical_units.responsible_user_id | uuid | opcional |
-| practice.clinical_units.tenant_id | uuid | obligatoria |
-| practice.clinical_units.description | varchar | opcional |
-| practice.clinical_units.valid_from | timestamptz | opcional |
-| practice.clinical_units.valid_to | timestamptz | opcional |
-| practice.practice_sites.tenant_id | uuid | obligatoria |
-| practice.practice_sites.snis_code | varchar | opcional |
-| practice.practice_sites.subsector_concept_id | uuid | opcional |
-| practice.practice_sites.care_level_concept_id | uuid | opcional |
-| practice.practice_sites.facility_typology_concept_id | uuid | opcional |
-| practice.practice_sites.managing_entity_name | varchar | opcional |
-| practice.practice_sites.health_network_name | varchar | opcional |
-| practice.practice_sites.sedes_department_concept_id | uuid | opcional |
-| practice.practice_sites.municipality_name | varchar | opcional |
-| practice.practice_sites.snis_verified_at | timestamptz | opcional |
-| practice.practice_sites.snis_verified_by_user_id | uuid | opcional |
-| procedures_perioperative.procedure_case_team_members.accepted_version_number | integer | opcional |
-| procedures_perioperative.procedure_cases.prep_minutes | integer | opcional |
-| procedures_perioperative.procedure_cases.cleanup_minutes | integer | opcional |
-| procedures_perioperative.procedure_cases.version_number | integer | opcional |
 | scheduling.appointment_bookings.pre_visit_instructions_snapshot | text | opcional |
 | scheduling.appointment_bookings.care_space_id | uuid | opcional |
 | scheduling.appointment_bookings.healthcare_service_id | uuid | opcional |

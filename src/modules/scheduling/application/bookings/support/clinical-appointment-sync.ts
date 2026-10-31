@@ -1,4 +1,17 @@
-import type { AppointmentBookings } from '../../../entities';
+import {
+  ScheduleRules,
+  ScheduleTemplates,
+  type AppointmentBookings,
+} from '../../../entities';
+import { CONCEPTS } from '../../../../../common';
+import {
+  intervalInWeek,
+  referenceWeek,
+} from '../../../domain/catalog/week-bands';
+import {
+  CARE_SPACE_DIRECTORY_PORT,
+  type CareSpaceDirectoryPort,
+} from '../../ports/care-space-directory.port';
 import type { AuthenticatedUser } from '../../../../../common';
 import {
   CLINICAL_APPOINTMENTS_PORT,
@@ -19,7 +32,47 @@ export class ClinicalAppointmentSync {
   constructor(
     @Inject(CLINICAL_APPOINTMENTS_PORT)
     private readonly clinical: ClinicalAppointmentsPort,
+    @Inject(CARE_SPACE_DIRECTORY_PORT)
+    private readonly spaces?: CareSpaceDirectoryPort,
   ) {}
+
+  /**
+   * F5d: consultorio que ocupa una cita: el de la plantilla del cupo o, si
+   * no, el del recurso ROOM. Un espacio `allowOverlap` (sala de espera…) no
+   * se escribe (el EXCLUDE no cambia reglas de capacidad > 1).
+   *
+   * @param tx - Transacción.
+   * @param input - Plantilla del cupo y espacio del recurso.
+   */
+  async careSpaceFor(
+    tx: EntityManager,
+    input: {
+      templateId?: string | null;
+      resourceCareSpaceId?: string | null;
+      /** Cita sin cupo de plantilla (directa/espontánea): la plantilla publicada del recurso que cubre ese instante. */
+      resourceId?: string;
+      at?: Date;
+      timeZone?: string | null;
+    },
+  ): Promise<string | undefined> {
+    // Sin directorio de espacios no se puede descartar un `allowOverlap`: no
+    // se escribe consultorio (fail-closed hacia «sin espacio», como antes).
+    if (!this.spaces) return undefined;
+    let template = input.templateId
+      ? await tx.findOne(ScheduleTemplates, { id: input.templateId })
+      : null;
+    if (!template && input.resourceId && input.at)
+      template = await this.templateCovering(
+        tx,
+        input.resourceId,
+        input.at,
+        input.timeZone ?? 'UTC',
+      );
+    const id = template?.careSpaceId ?? input.resourceCareSpaceId ?? undefined;
+    if (!id) return undefined;
+    const space = await this.spaces.describe(tx, id);
+    return space && !space.allowOverlap ? id : undefined;
+  }
 
   /**
    * Crea la cita clínica que respalda una reserva confirmada.
@@ -52,6 +105,45 @@ export class ClinicalAppointmentSync {
    * @param data - Lo que la reserva sabe del turno.
    * @returns La cita creada, para enlazarla desde la reserva.
    */
+  /** Plantilla publicada del recurso, con consultorio, cuya franja cubre `at`. */
+  private async templateCovering(
+    tx: EntityManager,
+    resourceId: string,
+    at: Date,
+    zone: string,
+  ): Promise<ScheduleTemplates | null> {
+    const templates = (
+      await tx.find(ScheduleTemplates, {
+        resourceId,
+        statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+        careSpaceId: { $ne: null },
+      })
+    ).filter(
+      (t) =>
+        (!t.validFrom || t.validFrom.getTime() <= at.getTime()) &&
+        (!t.validTo || t.validTo.getTime() >= at.getTime()),
+    );
+    if (templates.length === 0) return null;
+    const rules = await tx.find(ScheduleRules, {
+      scheduleTemplateId: { $in: templates.map((t) => t.id) },
+    });
+    const week = referenceWeek(at);
+    const t = at.getTime();
+    const hit = rules.find((r) => {
+      const band = intervalInWeek(
+        week,
+        r.dayOfWeek,
+        r.startTime,
+        r.endTime,
+        zone,
+      );
+      return band.from <= t && t < band.to;
+    });
+    return hit
+      ? (templates.find((x) => x.id === hit.scheduleTemplateId) ?? null)
+      : null;
+  }
+
   createClinicalAppointment(
     tx: EntityManager,
     data: {
@@ -72,6 +164,7 @@ export class ClinicalAppointmentSync {
       channelConceptId?: string;
       /** Tipología (P42: la reconsulta nace `ACT_FOLLOW_UP`). Ausente = NULL. */
       typeConceptId?: string;
+      careSpaceId?: string;
       actorUserId?: string;
     },
   ): ClinicalAppointmentRef {
@@ -95,6 +188,9 @@ export class ClinicalAppointmentSync {
       ...(data.typeConceptId === undefined
         ? {}
         : { typeConceptId: data.typeConceptId }),
+      ...(data.careSpaceId === undefined
+        ? {}
+        : { careSpaceId: data.careSpaceId }),
       ...(data.actorUserId === undefined
         ? {}
         : { actorUserId: data.actorUserId }),

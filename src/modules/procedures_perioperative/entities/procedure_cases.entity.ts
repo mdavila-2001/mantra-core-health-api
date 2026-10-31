@@ -207,4 +207,62 @@ export class ProcedureCases {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de prep minutes mantenido por la instancia.
+   */
+  @Property({ fieldName: 'prep_minutes', columnType: 'int', nullable: true })
+  prepMinutes?: number;
+
+  /**
+   * Valor de cleanup minutes mantenido por la instancia.
+   */
+  @Property({ fieldName: 'cleanup_minutes', columnType: 'int', nullable: true })
+  cleanupMinutes?: number;
+
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
+  @Property({ fieldName: 'version_number', columnType: 'int', nullable: true })
+  versionNumber?: number;
+
+  /**
+   * Identificador asociado a schedulable resource.
+   */
+  @Property({
+    fieldName: 'schedulable_resource_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.schedulable_resources (inferida)
+  schedulableResourceId?: string;
+
+  /**
+   * Identificador asociado a operating room block.
+   */
+  @Property({
+    fieldName: 'operating_room_block_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → procedures_perioperative.operating_room_blocks (inferida)
+  operatingRoomBlockId?: string;
+
+  /**
+   * Valor de reserved start at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'reserved_start_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  reservedStartAt?: Date;
+
+  /**
+   * Valor de reserved end at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'reserved_end_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  reservedEndAt?: Date;
 }

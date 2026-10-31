@@ -1,8 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize,
-  IsArray,
   IsIn,
   IsInt,
   IsOptional,
@@ -11,223 +9,308 @@ import {
   Max,
   MaxLength,
   Min,
-  MinLength,
 } from 'class-validator';
+import { AdminPageQueryDto, UserRoleAssignmentDto } from './authz-admin.dto';
+import { EvaluateDecisionDto } from './evaluate-decision.dto';
+import type { DecisionResponseDto } from './authz-responses.dto';
 
-/** El motivo es obligatorio en toda acción de gobierno: queda en el rastro de seguridad. */
-export const GOVERNANCE_REASON_MIN = 10;
-export const GOVERNANCE_REASON_MAX = 500;
-
-/** Cuerpo de las acciones del ciclo de vida: suspender, reactivar y dar de baja. */
-export class LifecycleActionDto {
-  @ApiProperty({
-    minLength: GOVERNANCE_REASON_MIN,
-    maxLength: GOVERNANCE_REASON_MAX,
-    description: 'Por qué se hace; queda en el historial',
-  })
-  @IsString()
-  @MinLength(GOVERNANCE_REASON_MIN)
-  @MaxLength(GOVERNANCE_REASON_MAX)
-  reason!: string;
-}
-
-/** Estados que la API distingue de una cuenta interna. */
-export const USER_LIFECYCLE_STATES = [
+/** Estado de la cuenta, tal como lo muestra la consola de gobierno. */
+export const GOVERNANCE_ACCOUNT_STATUSES = [
   'ACTIVE',
-  'SUSPENDED',
-  'OFFBOARDED',
-  'LOCKED_OTHER',
+  'LOCKED',
   'ANONYMIZED',
   'OTHER',
 ] as const;
-export type UserLifecycleState = (typeof USER_LIFECYCLE_STATES)[number];
 
-export class LifecycleEventDto {
-  @ApiProperty() id!: string;
-  @ApiProperty({ enum: ['SUSPENDED', 'REACTIVATED', 'OFFBOARDED'] })
-  kind!: 'SUSPENDED' | 'REACTIVATED' | 'OFFBOARDED';
-  @ApiProperty() reason!: string;
-  @ApiProperty({ nullable: true, type: String }) actorUserId!: string | null;
-  @ApiProperty({ type: String, format: 'date-time' }) recordedAt!: Date;
+/** Qué vigencia ver en los listados de concesiones. */
+export const GOVERNANCE_GRANT_FILTERS = ['EFFECTIVE', 'ALL'] as const;
+
+/** Camino por el que un usuario tiene un permiso. */
+export const HOLDER_SOURCES = ['ROLE', 'USER', 'RESOURCE'] as const;
+
+/** Tope de días de la revisión periódica. */
+export const ACCESS_REVIEW_MAX_DAYS = 3650;
+export const ACCESS_REVIEW_DEFAULT_DAYS = 90;
+
+export class PermissionIdParamDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  permissionId!: string;
 }
 
-export class UserLifecycleDto {
-  @ApiProperty({ format: 'uuid' }) userId!: string;
-  @ApiProperty({ enum: USER_LIFECYCLE_STATES }) state!: UserLifecycleState;
-  @ApiProperty({ type: [LifecycleEventDto] }) history!: LifecycleEventDto[];
-}
-
-export class LifecycleResultDto {
-  @ApiProperty({ format: 'uuid' }) userId!: string;
-  @ApiProperty({ enum: USER_LIFECYCLE_STATES }) state!: UserLifecycleState;
-  @ApiProperty({
+/** Listado de concesiones de un usuario: qué vigencia y la paginación. */
+export class GrantsQueryDto extends AdminPageQueryDto {
+  @ApiPropertyOptional({
+    enum: GOVERNANCE_GRANT_FILTERS,
+    default: 'EFFECTIVE',
     description:
-      'Cuántas asignaciones de rol se revocaron (sólo la baja revoca roles)',
+      '`EFFECTIVE`: activas y dentro de su vigencia. `ALL`: también las revocadas, vencidas y futuras',
   })
-  revokedAssignments!: number;
-  @ApiProperty() note!: string;
+  @IsOptional()
+  @IsIn(GOVERNANCE_GRANT_FILTERS)
+  show?: (typeof GOVERNANCE_GRANT_FILTERS)[number];
 }
 
-/** Decisiones posibles de una revisión periódica de accesos. */
-export const ACCESS_REVIEW_DECISIONS = [
-  'CERTIFIED',
-  'CHANGES_REQUIRED',
-] as const;
-export type AccessReviewDecision = (typeof ACCESS_REVIEW_DECISIONS)[number];
+export class HoldersQueryDto extends AdminPageQueryDto {
+  @ApiPropertyOptional({
+    enum: HOLDER_SOURCES,
+    description: 'Sólo quienes lo tienen por ese camino',
+  })
+  @IsOptional()
+  @IsIn(HOLDER_SOURCES)
+  source?: (typeof HOLDER_SOURCES)[number];
 
-export class RecordAccessReviewDto {
-  @ApiProperty({ enum: ACCESS_REVIEW_DECISIONS })
-  @IsIn(ACCESS_REVIEW_DECISIONS)
-  decision!: AccessReviewDecision;
-
-  @ApiProperty({ minLength: GOVERNANCE_REASON_MIN, maxLength: GOVERNANCE_REASON_MAX })
+  @ApiPropertyOptional({
+    maxLength: 100,
+    description: 'Texto a buscar en el nombre visible',
+  })
+  @IsOptional()
   @IsString()
-  @MinLength(GOVERNANCE_REASON_MIN)
-  @MaxLength(GOVERNANCE_REASON_MAX)
-  reason!: string;
-
-  @ApiProperty({
-    type: [String],
-    description:
-      'Las asignaciones activas que se revisaron. Deben ser de ese usuario y seguir activas.',
-  })
-  @IsArray()
-  @ArrayMaxSize(200)
-  @IsUUID('all', { each: true })
-  assignmentIds!: string[];
+  @MaxLength(100)
+  q?: string;
 }
 
-export class AccessReviewDto {
-  @ApiProperty() id!: string;
-  @ApiProperty({ format: 'uuid' }) userId!: string;
-  @ApiProperty({ enum: ACCESS_REVIEW_DECISIONS }) decision!: AccessReviewDecision;
-  @ApiProperty() reason!: string;
-  @ApiProperty({ type: [String] }) assignmentIds!: string[];
-  @ApiProperty({ nullable: true, type: String }) reviewerUserId!: string | null;
-  @ApiProperty({ type: String, format: 'date-time' }) reviewedAt!: Date;
+export class ReviewsQueryDto extends AdminPageQueryDto {
+  @ApiPropertyOptional({ format: 'uuid', description: 'Cuenta revisada' })
+  @IsOptional()
+  @IsUUID()
+  userId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Quien revisó' })
+  @IsOptional()
+  @IsUUID()
+  reviewerId?: string;
 }
 
-export class UserAccessReviewsDto {
-  @ApiProperty({ format: 'uuid' }) userId!: string;
-  @ApiProperty({ type: [AccessReviewDto] }) items!: AccessReviewDto[];
-}
-
-/** Cuenta con accesos activos y la última revisión que tuvo (si tuvo alguna). */
-export class AccessReviewDueDto {
-  @ApiProperty({ format: 'uuid' }) userId!: string;
-  @ApiProperty() displayName!: string;
-  @ApiProperty({ description: 'Asignaciones de rol activas hoy' })
-  activeAssignments!: number;
-  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
-  lastReviewedAt!: Date | null;
-}
-
-export class AccessReviewDueQueryDto {
+export class DueReviewsQueryDto extends AdminPageQueryDto {
   @ApiPropertyOptional({
     minimum: 1,
-    maximum: 3650,
+    maximum: ACCESS_REVIEW_MAX_DAYS,
+    default: ACCESS_REVIEW_DEFAULT_DAYS,
     description:
-      'Se listan quienes no se revisaron en los últimos N días, o nunca. La cadencia la fija quien pregunta: la API no inventa una.',
+      'Cuentas cuya última revisión es anterior a estos días, o que nunca fueron revisadas',
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(3650)
+  @Max(ACCESS_REVIEW_MAX_DAYS)
   olderThanDays?: number;
 }
 
-export class AccessReviewDuePageDto {
-  @ApiProperty({ type: [AccessReviewDueDto] }) items!: AccessReviewDueDto[];
-  @ApiProperty({ nullable: true, type: Number }) olderThanDays!: number | null;
+export class AccessReviewDto {
+  @ApiProperty({ format: 'uuid', description: 'Id del sello en la bitácora' })
+  id!: string;
+  @ApiProperty({ format: 'uuid', description: 'Cuenta revisada' })
+  userId!: string;
+  @ApiPropertyOptional({ nullable: true, type: String })
+  userDisplayName!: string | null;
+  @ApiProperty({ format: 'uuid', description: 'Quien revisó' })
+  reviewerUserId!: string;
+  @ApiPropertyOptional({ nullable: true, type: String })
+  reviewerDisplayName!: string | null;
+  @ApiProperty({ type: String, format: 'date-time' }) reviewedAt!: string;
 }
 
-/* ---- Permisos por campo y por alcance de recurso ---------------------------- */
+export class AccessReviewsPageDto {
+  @ApiProperty({ type: [AccessReviewDto] }) items!: AccessReviewDto[];
+  @ApiPropertyOptional({ nullable: true, type: String }) nextCursor!:
+    string | null;
+  @ApiProperty() limit!: number;
+}
 
-export class RoleFieldPermissionDto {
+export class DueReviewDto {
+  @ApiProperty({ format: 'uuid' }) userId!: string;
+  @ApiProperty() displayName!: string;
+  @ApiProperty({ enum: GOVERNANCE_ACCOUNT_STATUSES }) accountStatus!: string;
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    format: 'date-time',
+    description: '`null`: sin revisión dentro del horizonte de búsqueda',
+  })
+  lastReviewedAt!: string | null;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  lastReviewerUserId!: string | null;
+}
+
+export class DueReviewsPageDto {
+  @ApiProperty({ type: [DueReviewDto] }) items!: DueReviewDto[];
+  @ApiPropertyOptional({ nullable: true, type: String }) nextCursor!:
+    string | null;
+  @ApiProperty() limit!: number;
+  @ApiProperty() olderThanDays!: number;
+  @ApiProperty({
+    description:
+      'Días hacia atrás en que se buscan revisiones: más allá, una cuenta cuenta como no revisada',
+  })
+  lookbackDays!: number;
+}
+
+export class AccessMapCountsDto {
+  @ApiProperty({ description: 'Excepciones de permiso por usuario vigentes' })
+  directGrants!: number;
+  @ApiProperty({ description: 'Grants sobre un recurso concreto vigentes' })
+  resourceScopeGrants!: number;
+  @ApiProperty({
+    description:
+      'Campos restringidos (sin lectura, sin escritura o enmascarados) por sus roles efectivos',
+  })
+  restrictedFields!: number;
+}
+
+export class AccessMapUserDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() displayName!: string;
+  @ApiProperty({ enum: GOVERNANCE_ACCOUNT_STATUSES }) accountStatus!: string;
+}
+
+/** «Quién puede qué» de un usuario: lo que no es paginable va aquí; el resto, en sus listados. */
+export class AccessMapDto {
+  @ApiProperty({ type: AccessMapUserDto }) user!: AccessMapUserDto;
+  @ApiProperty({
+    type: [String],
+    description: 'Roles globales de `iam` activos',
+  })
+  globalRoles!: string[];
+  @ApiProperty({
+    type: [UserRoleAssignmentDto],
+    description: 'Asignaciones de rol de `authz`, vigentes o no',
+  })
+  assignments!: UserRoleAssignmentDto[];
+  @ApiProperty({ type: AccessMapCountsDto }) counts!: AccessMapCountsDto;
+  @ApiPropertyOptional({ type: AccessReviewDto, nullable: true })
+  lastReview!: AccessReviewDto | null;
+}
+
+export class DirectGrantDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ format: 'uuid' }) permissionId!: string;
+  @ApiProperty() code!: string;
+  @ApiProperty() name!: string;
+  @ApiProperty() resource!: string;
+  @ApiProperty({ enum: ['ALLOW', 'DENY', 'OTHER'] }) effect!: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) scope!: string | null;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  tenantId!: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) reason!: string | null;
+  @ApiProperty({ enum: ['ACTIVE', 'REVOKED', 'EXPIRED', 'OTHER'] })
+  status!: string;
+  @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
+  validFrom!: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
+  validTo!: string | null;
+  @ApiProperty({ description: 'Activa y dentro de su vigencia: cuenta hoy' })
+  isEffective!: boolean;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  grantedByUserId!: string | null;
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: string;
+}
+
+export class ScopeGrantDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ format: 'uuid' }) permissionId!: string;
+  @ApiProperty() code!: string;
+  @ApiProperty({
+    enum: ['PATIENT', 'ENCOUNTER', 'DOCUMENT', 'RECORD', 'OTHER'],
+  })
+  resourceType!: string;
+  @ApiProperty({ format: 'uuid' }) resourceId!: string;
+  @ApiProperty({ enum: ['ALLOW', 'DENY', 'OTHER'] }) effect!: string;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  tenantId!: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
+  validFrom!: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
+  validTo!: string | null;
+  @ApiProperty({ description: 'Dentro de su vigencia: cuenta hoy' })
+  isEffective!: boolean;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  grantedByUserId!: string | null;
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: string;
+}
+
+export class RestrictedFieldDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ format: 'uuid' }) roleId!: string;
+  @ApiProperty({
+    description: 'Rol que define la regla (puede ser un rol padre heredado)',
+  })
+  roleCode!: string;
   @ApiProperty() entity!: string;
   @ApiProperty() columnName!: string;
   @ApiProperty() canRead!: boolean;
   @ApiProperty() canWrite!: boolean;
-  @ApiProperty({ nullable: true, type: String }) maskStrategy!: string | null;
-  @ApiProperty({ nullable: true, type: Object })
-  conditionJson!: Record<string, unknown> | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    enum: ['REDACT', 'HASH', 'PARTIAL', 'NULLIFY'],
+  })
+  maskStrategy!: string | null;
 }
 
-export class RoleFieldPermissionsDto {
-  @ApiProperty({ format: 'uuid' }) roleId!: string;
-  @ApiProperty({ type: [RoleFieldPermissionDto] }) items!: RoleFieldPermissionDto[];
-}
-
-export class ResourceScopeGrantsQueryDto {
-  @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID()
-  subjectId?: string;
-  @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID()
-  resourceId?: string;
-  @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID()
-  permissionId?: string;
-  @ApiPropertyOptional({ minimum: 1, maximum: 200, default: 50 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(200)
-  limit?: number;
-  @ApiPropertyOptional({ maxLength: 400 }) @IsOptional() @IsString() @MaxLength(400)
-  cursor?: string;
-}
-
-export class ResourceScopeGrantViewDto {
-  @ApiProperty() id!: string;
-  @ApiProperty({ format: 'uuid' }) subjectId!: string;
-  @ApiProperty({ format: 'uuid' }) permissionId!: string;
-  @ApiProperty({ format: 'uuid' }) resourceId!: string;
-  @ApiProperty({ nullable: true, type: String }) tenantId!: string | null;
-  @ApiProperty({ enum: ['USER', 'ROLE', 'SERVICE', 'OTHER'] })
-  subjectType!: string;
-  @ApiProperty({ enum: ['PATIENT', 'ENCOUNTER', 'DOCUMENT', 'RECORD', 'OTHER'] })
-  resourceType!: string;
-  @ApiProperty({ enum: ['ALLOW', 'DENY', 'OTHER'] }) effect!: string;
-  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
-  validFrom!: Date | null;
-  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
-  validTo!: Date | null;
-  @ApiProperty({ description: 'Vigente en el instante de la consulta' })
-  isEffective!: boolean;
-  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
-}
-
-export class ResourceScopeGrantsPageDto {
-  @ApiProperty({ type: [ResourceScopeGrantViewDto] })
-  items!: ResourceScopeGrantViewDto[];
-  @ApiProperty({ nullable: true, type: String }) nextCursor!: string | null;
+/** Página genérica de la vista de gobierno. */
+class GovernancePageBase {
+  @ApiPropertyOptional({ nullable: true, type: String }) nextCursor!:
+    string | null;
   @ApiProperty() limit!: number;
 }
-
-export class ResourceScopeGrantIdParamDto {
-  @ApiProperty({ format: 'uuid' }) @IsUUID() grantId!: string;
+export class DirectGrantsPageDto extends GovernancePageBase {
+  @ApiProperty({ type: [DirectGrantDto] }) items!: DirectGrantDto[];
+}
+export class ScopeGrantsPageDto extends GovernancePageBase {
+  @ApiProperty({ type: [ScopeGrantDto] }) items!: ScopeGrantDto[];
+}
+export class RestrictedFieldsPageDto extends GovernancePageBase {
+  @ApiProperty({ type: [RestrictedFieldDto] }) items!: RestrictedFieldDto[];
 }
 
-/**
- * Cuerpo opcional de `DELETE /authz/resource-scope-grants/:grantId`. Es opcional para no romper a
- * los clientes que no lo envían; el servicio lo exige cuando el permiso a terminar es de efecto
- * DENY (`RESOURCE_SCOPE_GRANT_DENY_REASON_REQUIRED`), porque levantar una denegación abre un acceso.
- */
-export class EndResourceScopeGrantDto {
+export class HolderSourceDto {
+  @ApiProperty({ enum: HOLDER_SOURCES }) source!: string;
+  @ApiProperty({ enum: ['ALLOW', 'DENY', 'OTHER'] }) effect!: string;
   @ApiPropertyOptional({
-    minLength: GOVERNANCE_REASON_MIN,
-    maxLength: GOVERNANCE_REASON_MAX,
-    description:
-      'Por qué se termina. Obligatorio si el permiso es de efecto DENY; opcional en un ALLOW.',
+    nullable: true,
+    type: String,
+    description: '`ROLE`: rol que tiene asignado',
   })
-  @IsOptional()
-  @IsString()
-  @MinLength(GOVERNANCE_REASON_MIN)
-  @MaxLength(GOVERNANCE_REASON_MAX)
-  reason?: string;
+  roleCode!: string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    description:
+      '`ROLE`: rol que define el permiso (distinto del asignado si lo hereda de un rol padre)',
+  })
+  viaRoleCode!: string | null;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  resourceId!: string | null;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid', type: String })
+  tenantId!: string | null;
 }
 
-export class EndedResourceScopeGrantDto {
-  @ApiProperty() id!: string;
-  @ApiProperty({ type: String, format: 'date-time' }) validTo!: Date;
+export class PermissionHolderDto {
+  @ApiProperty({ format: 'uuid' }) userId!: string;
+  @ApiProperty() displayName!: string;
+  @ApiProperty({ enum: GOVERNANCE_ACCOUNT_STATUSES }) accountStatus!: string;
+  @ApiProperty({ type: [HolderSourceDto] }) sources!: HolderSourceDto[];
+}
+
+export class PermissionHoldersPageDto extends GovernancePageBase {
+  @ApiProperty({ format: 'uuid' }) permissionId!: string;
+  @ApiProperty({ type: [PermissionHolderDto] }) items!: PermissionHolderDto[];
+}
+
+/** Cuerpo de la simulación: el mismo de `POST /authz/decisions/evaluate`. */
+export class SimulateDecisionDto extends EvaluateDecisionDto {}
+
+export class SimulationResultDto {
+  @ApiProperty({
+    enum: [true],
+    description: 'Siempre `true`: nada se aplicó ni se concedió',
+  })
+  simulated!: true;
+  @ApiProperty({
+    description:
+      'La decisión que devuelve el PDP real, sin transformar: la misma que `POST /authz/decisions/evaluate`',
+  })
+  decision!: DecisionResponseDto;
 }

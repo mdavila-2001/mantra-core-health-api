@@ -13,7 +13,7 @@ se purga por retención y qué admite un legal hold. Es de sólo lectura; la esc
 | `data/mutability.catalog.json` | Catálogo **derivado** (ni oficial ni curado). La API lo consume como dato: no lee el repo del modelo en ejecución. |
 | `services/mutability-catalog.service.ts` | Lista, detalle y resumen (numerador/denominador). |
 | `services/mutability-lookup.service.ts` | **Punto de extensión** para la sonda de catalogación: `declared(schema, table)`. Una tabla desconocida es `null`, no `UNKNOWN`. |
-| `controllers/mutability.controller.ts` | `GET /admin/governance/mutability`, `/summary`, `/:schema/:table`. Roles: `PORTAL_READ_ROLES`. |
+| `controllers/mutability.controller.ts` | `GET /admin/governance/mutability`, `/summary`, `/:schema/:table`. Roles: `GOVERNANCE_VIEW_ROLES` (los mismos de `GovernanceReadController`). |
 | `../../../common/seed/mutability/` | Sembrador idempotente del registro (`entity_registry`, `write_policies`, `retention_policies`). |
 
 ## Reglas

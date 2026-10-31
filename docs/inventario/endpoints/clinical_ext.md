@@ -3,9 +3,9 @@
 # Endpoints del módulo `clinical_ext`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 32 (32 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 20 · BAJO 10
-- **Tablas distintas que tocan:** 51
+- **Operaciones:** 34 (34 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 21 · BAJO 11
+- **Tablas distintas que tocan:** 52
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical-ext.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -33,17 +33,19 @@
 | 19 | POST | `/prescription-favorites` | Guardar un favorito de prescripción | ALTO | 4 | sesión (sin roles) |
 | 20 | DELETE | `/prescription-favorites/{id}` | Borrar un favorito de prescripción propio | ALTO | 4 | sesión (sin roles) |
 | 21 | GET | `/referrals` | Listar derivaciones de un paciente | BAJO | 22 | CLINICIAN, PRACTITIONER |
-| 22 | POST | `/referrals` | Emitir una referencia desde un encuentro | MEDIO | 38 | CLINICIAN, PRACTITIONER |
+| 22 | POST | `/referrals` | Emitir una referencia desde un encuentro | MEDIO | 40 | CLINICIAN, PRACTITIONER |
 | 23 | GET | `/referrals/{id}` | Leer una derivación | BAJO | 21 | CLINICIAN, PRACTITIONER |
-| 24 | PATCH | `/referrals/{id}/cancel` | Anular una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 25 | PATCH | `/referrals/{id}/counter-referral` | Registrar la contrarreferencia de una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 26 | PATCH | `/referrals/{id}/respond` | Responder / aceptar una referencia inter-tenant | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 27 | GET | `/referrals/me` | Mis derivaciones | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
-| 28 | GET | `/referrals/target-services` | Servicios activos de un destino de derivación | BAJO | 4 | CLINICIAN, PRACTITIONER |
-| 29 | GET | `/referrals/targets` | Buscar destinos de derivación | BAJO | 5 | CLINICIAN, PRACTITIONER |
-| 30 | POST | `/virtual-encounters` | Iniciar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 31 | PATCH | `/virtual-encounters/{id}/end` | Finalizar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 32 | PATCH | `/virtual-encounters/{id}/join` | Unirse a una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER, PATIENT |
+| 24 | PATCH | `/referrals/{id}/arrival` | Registrar la llegada del paciente derivado | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 25 | PATCH | `/referrals/{id}/cancel` | Anular una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 26 | PATCH | `/referrals/{id}/counter-referral` | Registrar la contrarreferencia de una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 27 | PATCH | `/referrals/{id}/respond` | Responder / aceptar una referencia inter-tenant | MEDIO | 3 | CLINICIAN, PRACTITIONER |
+| 28 | PATCH | `/referrals/{id}/transfer` | Completar o corregir el traslado de una derivación | BAJO | 19 | CLINICIAN, PRACTITIONER |
+| 29 | GET | `/referrals/me` | Mis derivaciones | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
+| 30 | GET | `/referrals/target-services` | Servicios activos de un destino de derivación | BAJO | 6 | CLINICIAN, PRACTITIONER |
+| 31 | GET | `/referrals/targets` | Buscar destinos de derivación | BAJO | 5 | CLINICIAN, PRACTITIONER |
+| 32 | POST | `/virtual-encounters` | Iniciar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 33 | PATCH | `/virtual-encounters/{id}/end` | Finalizar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 34 | PATCH | `/virtual-encounters/{id}/join` | Unirse a una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER, PATIENT |
 
 ---
 
@@ -72,11 +74,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:63` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -172,10 +174,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -297,9 +299,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -388,10 +390,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -532,9 +534,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/clinical_ext/controllers/care-teams.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -612,10 +614,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -723,11 +725,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -830,9 +832,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:88` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -912,10 +914,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/cds.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1022,10 +1024,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/cds.controller.ts:113` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1142,9 +1144,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:37` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1221,11 +1223,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1320,10 +1322,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:157` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1417,10 +1419,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1518,10 +1520,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/order-sets.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1646,11 +1648,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/order-sets.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/order-sets.controller.ts:60` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1669,8 +1671,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `clinical_ext.order_set_items` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → OrderSetsRepository.itemsBySet | `src/modules/clinical_ext/repositories/order-sets.repository.ts:119` |
 | `clinical_ext.order_sets` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → OrderSetsRepository.findById | `src/modules/clinical_ext/repositories/order-sets.repository.ts:97` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
-| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:104` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
+| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:118` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | OrderSetsController.apply → OrderSetsService.apply → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
@@ -1780,11 +1782,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1901,8 +1903,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1977,10 +1979,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2096,9 +2098,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2153,7 +2155,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.listByPatient` — `src/modules/clinical_ext/controllers/referrals.controller.ts:162`
+- **Implementación:** `ReferralsController.listByPatient` — `src/modules/clinical_ext/controllers/referrals.controller.ts:202`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2163,17 +2165,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals` la atiende `ReferralsController.listByPatient` (src/modules/clinical_ext/controllers/referrals.controller.ts:162). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`GET /referrals` la atiende `ReferralsController.listByPatient` (src/modules/clinical_ext/controllers/referrals.controller.ts:202). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:162` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:202` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2191,8 +2193,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → SchedulingOfferingsRepository.findCatalogItems | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:116` |
-| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsRepository.findByPatient | `src/modules/clinical_ext/repositories/referrals.repository.ts:166` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:678` |
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsRepository.findByPatient | `src/modules/clinical_ext/repositories/referrals.repository.ts:174` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ReferralsService.toListItems → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ReferralsController.listByPatient → ReferralsService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
@@ -2216,45 +2218,45 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:441` |
-| `status` | `string` | Sí | valores: PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:449` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la referencia (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
-| `referralType` | `string` | Sí | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:465` |
-| `referralTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:471` |
-| `targetServiceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:477` |
-| `sourceEncounterId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:483` |
-| `referringProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:489` |
-| `targetProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:495` |
-| `targetTenantId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:501` |
-| `targetTenantName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:507` |
-| `targetBranchId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:513` |
-| `targetBranchName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:519` |
-| `targetExternalName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:525` |
-| `targetExternalContact` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:531` |
-| `specialtyConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:537` |
-| `serviceRequestId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:543` |
-| `requestedServiceText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:549` |
-| `requestedServiceConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:555` |
-| `reasonConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:561` |
-| `reasonText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:567` |
-| `diagnosisText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:573` |
-| `clinicalSummary` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:579` |
-| `treatmentGivenText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:585` |
-| `informedConsentId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:591` |
-| `priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:597` |
-| `validUntil` | `string` | No | formato date | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:603` |
-| `respondedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:609` |
-| `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:615` |
-| `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:621` |
-| `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:627` |
-| `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:633` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:639` |
-| `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
-| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:666` |
-| `rowVersion` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:670` |
-| `targetDisplayName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
-| `targetServiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:678` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:457` |
+| `status` | `string` | Sí | valores: PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:465` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la referencia (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
+| `referralType` | `string` | Sí | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:481` |
+| `referralTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:487` |
+| `targetServiceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:493` |
+| `sourceEncounterId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:499` |
+| `referringProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:505` |
+| `targetProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:511` |
+| `targetTenantId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:517` |
+| `targetTenantName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:523` |
+| `targetBranchId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:529` |
+| `targetBranchName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:535` |
+| `targetExternalName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:541` |
+| `targetExternalContact` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:547` |
+| `specialtyConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:553` |
+| `serviceRequestId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:559` |
+| `requestedServiceText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:565` |
+| `requestedServiceConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:571` |
+| `reasonConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:577` |
+| `reasonText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:583` |
+| `diagnosisText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:589` |
+| `clinicalSummary` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:595` |
+| `treatmentGivenText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:601` |
+| `informedConsentId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:607` |
+| `priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:613` |
+| `validUntil` | `string` | No | formato date | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:619` |
+| `respondedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:625` |
+| `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:631` |
+| `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:637` |
+| `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:643` |
+| `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:656` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
+| `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:685` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:689` |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:693` |
+| `targetDisplayName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:697` |
+| `targetServiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:701` |
 
 ### Respuestas posibles
 
@@ -2272,7 +2274,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:60` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:65` |
 
 ### Flujos
 
@@ -2287,7 +2289,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.create` — `src/modules/clinical_ext/controllers/referrals.controller.ts:66`
+- **Implementación:** `ReferralsController.create` — `src/modules/clinical_ext/controllers/referrals.controller.ts:68`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2297,18 +2299,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:66). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (21 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
+`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:68). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (44 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 26 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:68` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2325,11 +2327,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
-| `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertServiceOfTarget → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:89` |
-| `clinical_ext.referrals` | ESCRIBE | CREA | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsRepository.create | `src/modules/clinical_ext/repositories/referrals.repository.ts:174` |
-| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsRepository.findDuplicate | `src/modules/clinical_ext/repositories/referrals.repository.ts:140` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create | `src/modules/clinical_ext/services/referrals.service.ts:292` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertServiceOfTarget → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:101` |
+| `clinical_ext.referrals` | ESCRIBE | CREA | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsRepository.create | `src/modules/clinical_ext/repositories/referrals.repository.ts:182` |
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsRepository.findDuplicate | `src/modules/clinical_ext/repositories/referrals.repository.ts:148` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.organizationNotice | `src/modules/clinical_ext/services/referral-notifier.service.ts:238` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create | `src/modules/clinical_ext/services/referrals.service.ts:341` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertTargetTenantActive → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
@@ -2346,8 +2350,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practices` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertServiceOfTarget → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.person_profiles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.accountOf → ReferralNotifier.personIdOf | `src/modules/clinical_ext/services/referral-notifier.service.ts:167` |
-| `profiles.persons` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.displayNameOf | `src/modules/clinical_ext/services/referral-notifier.service.ts:190` |
+| `profiles.person_profiles` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.accountOf → ReferralNotifier.personIdOf | `src/modules/clinical_ext/services/referral-notifier.service.ts:271` |
+| `profiles.persons` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralNotifier.notifyRecommended → ReferralNotifier.displayNameOf | `src/modules/clinical_ext/services/referral-notifier.service.ts:294` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
 | `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.create → ReferralsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | ReferralsController.create → ReferralsService.create → ReferralsService.assertServiceOfTarget → SchedulingOfferingsRepository.findOfferingOf | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:62` |
@@ -2357,27 +2361,50 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/clinical_ext/dto/referral.dto.ts:51` |
-| `sourceEncounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro origen | `src/modules/clinical_ext/dto/referral.dto.ts:59` |
-| `referringProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que deriva | `src/modules/clinical_ext/dto/referral.dto.ts:70` |
-| `targetProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional destino | `src/modules/clinical_ext/dto/referral.dto.ts:78` |
-| `targetTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant destino (referencia inter-tenant) | `src/modules/clinical_ext/dto/referral.dto.ts:89` |
-| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Especialidad destino (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:100` |
-| `reasonConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Motivo codificado (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:111` |
-| `reasonText` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/clinical_ext/dto/referral.dto.ts:120` |
-| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:131` |
-| `validUntil` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | Vigencia de la referencia | `src/modules/clinical_ext/dto/referral.dto.ts:143` |
-| `referralType` | `string` | No | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER | `@IsOptional()` `@IsIn(REFERRAL_TYPES)` | Tipo de derivación (tratamiento, consulta, estudio, …) | `src/modules/clinical_ext/dto/referral.dto.ts:155` |
-| `targetBranchId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede u organización médica destino | `src/modules/clinical_ext/dto/referral.dto.ts:166` |
-| `targetExternalName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Doctor u organización destino fuera de la plataforma | `src/modules/clinical_ext/dto/referral.dto.ts:179` |
-| `targetExternalContact` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Contacto del destino externo | `src/modules/clinical_ext/dto/referral.dto.ts:192` |
-| `requestedServiceText` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(500)` | Servicio específico pedido | `src/modules/clinical_ext/dto/referral.dto.ts:205` |
-| `requestedServiceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio codificado (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:216` |
-| `diagnosisText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Diagnóstico presuntivo o definitivo | `src/modules/clinical_ext/dto/referral.dto.ts:229` |
-| `clinicalSummary` | `string` | No | longitud mínima 1; longitud máxima 8000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(8000)` | Resumen clínico | `src/modules/clinical_ext/dto/referral.dto.ts:239` |
-| `treatmentGivenText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Tratamiento realizado antes de derivar | `src/modules/clinical_ext/dto/referral.dto.ts:252` |
-| `informedConsentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento registrado con targetType=REFERRAL y targetId=<derivación>. | `src/modules/clinical_ext/dto/referral.dto.ts:264` |
-| `targetServiceCatalogId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio del catálogo del destino | `src/modules/clinical_ext/dto/referral.dto.ts:277` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/clinical_ext/dto/referral.dto.ts:57` |
+| `sourceEncounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro origen | `src/modules/clinical_ext/dto/referral.dto.ts:65` |
+| `referringProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que deriva | `src/modules/clinical_ext/dto/referral.dto.ts:76` |
+| `targetProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional destino | `src/modules/clinical_ext/dto/referral.dto.ts:84` |
+| `targetTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant destino (referencia inter-tenant) | `src/modules/clinical_ext/dto/referral.dto.ts:95` |
+| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Especialidad destino (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:106` |
+| `reasonConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Motivo codificado (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:117` |
+| `reasonText` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/clinical_ext/dto/referral.dto.ts:126` |
+| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:137` |
+| `validUntil` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | Vigencia de la referencia | `src/modules/clinical_ext/dto/referral.dto.ts:149` |
+| `referralType` | `string` | No | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER | `@IsOptional()` `@IsIn(REFERRAL_TYPES)` | Tipo de derivación (tratamiento, consulta, estudio, …) | `src/modules/clinical_ext/dto/referral.dto.ts:161` |
+| `targetBranchId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede u organización médica destino | `src/modules/clinical_ext/dto/referral.dto.ts:172` |
+| `targetExternalName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Doctor u organización destino fuera de la plataforma | `src/modules/clinical_ext/dto/referral.dto.ts:185` |
+| `targetExternalContact` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Contacto del destino externo | `src/modules/clinical_ext/dto/referral.dto.ts:198` |
+| `requestedServiceText` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(500)` | Servicio específico pedido | `src/modules/clinical_ext/dto/referral.dto.ts:211` |
+| `requestedServiceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio codificado (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:222` |
+| `diagnosisText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Diagnóstico presuntivo o definitivo | `src/modules/clinical_ext/dto/referral.dto.ts:235` |
+| `clinicalSummary` | `string` | No | longitud mínima 1; longitud máxima 8000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(8000)` | Resumen clínico | `src/modules/clinical_ext/dto/referral.dto.ts:245` |
+| `treatmentGivenText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Tratamiento realizado antes de derivar | `src/modules/clinical_ext/dto/referral.dto.ts:258` |
+| `informedConsentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento registrado con targetType=REFERRAL y targetId=<derivación>. | `src/modules/clinical_ext/dto/referral.dto.ts:270` |
+| `targetServiceCatalogId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio del catálogo del destino | `src/modules/clinical_ext/dto/referral.dto.ts:283` |
+| `transfer` | `ReferralTransferDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => ReferralTransferDto)` | — | `src/modules/clinical_ext/dto/referral.dto.ts:293` |
+| `transfer.required` | `boolean` | No | admite null | `@IsOptional()` `@IsBoolean()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:160` |
+| `transfer.transportMode` | `string` | No | valores: AMBULANCE_BASIC, AMBULANCE_ADVANCED, AIR_AMBULANCE, RIVER, PRIVATE_VEHICLE, PUBLIC_TRANSPORT, ON_FOOT, OTHER; admite null | `@IsOptional()` `@IsIn(TRANSPORT_MODES)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:166` |
+| `transfer.transportDetail` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:174` |
+| `transfer.companionName` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:182` |
+| `transfer.companionRelationship` | `string` | No | longitud mínima 1; longitud máxima 80; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(80)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:190` |
+| `transfer.companionPhone` | `string` | No | longitud mínima 1; longitud máxima 40; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(40)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:198` |
+| `transfer.escortProfessionalName` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:206` |
+| `transfer.escortProfessionalRole` | `string` | No | longitud mínima 1; longitud máxima 80; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(80)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:214` |
+| `transfer.departureCondition` | `string` | No | valores: STABLE, UNSTABLE, CRITICAL; admite null | `@IsOptional()` `@IsIn(DEPARTURE_CONDITIONS)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:220` |
+| `transfer.vitals` | `ReferralTransferVitalsDto` | No | admite null | `@IsOptional()` `@ValidateNested()` `@Type(() => ReferralTransferVitalsDto)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:227` |
+| `transfer.vitals.recordedAt` | `string` | No | formato date-time; admite null | — | — | sin fuente |
+| `transfer.vitals.systolicBp` | `number` | No | mínimo 40; máximo 300; admite null | — | — | sin fuente |
+| `transfer.vitals.diastolicBp` | `number` | No | mínimo 20; máximo 200; admite null | — | — | sin fuente |
+| `transfer.vitals.heartRate` | `number` | No | mínimo 20; máximo 300; admite null | — | — | sin fuente |
+| `transfer.vitals.respiratoryRate` | `number` | No | mínimo 4; máximo 80; admite null | — | — | sin fuente |
+| `transfer.vitals.temperatureC` | `number` | No | mínimo 30; máximo 45; admite null | — | — | sin fuente |
+| `transfer.vitals.oxygenSaturation` | `number` | No | mínimo 50; máximo 100; admite null | — | — | sin fuente |
+| `transfer.vitals.glasgow` | `number` | No | mínimo 3; máximo 15; admite null | — | — | sin fuente |
+| `transfer.receiverContacted` | `boolean` | No | admite null | `@IsOptional()` `@IsBoolean()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:233` |
+| `transfer.receiverContactName` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:241` |
+| `transfer.receiverContactedAt` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:247` |
+| `transfer.departedAt` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:253` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2411,7 +2438,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "clinicalSummary": "valor-ejemplo",
   "treatmentGivenText": "valor-ejemplo",
   "informedConsentId": "00000000-0000-4000-8000-000000000001",
-  "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001"
+  "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "transfer": {
+    "required": true,
+    "transportMode": "AMBULANCE_BASIC",
+    "transportDetail": "valor-ejemplo",
+    "companionName": "Nombre de ejemplo",
+    "companionRelationship": "valor-ejemplo",
+    "companionPhone": "+59170000000",
+    "escortProfessionalName": "Nombre de ejemplo",
+    "escortProfessionalRole": "valor-ejemplo",
+    "departureCondition": "STABLE",
+    "vitals": {
+      "recordedAt": "2026-07-31T12:00:00.000Z",
+      "systolicBp": 40,
+      "diastolicBp": 20,
+      "heartRate": 20,
+      "respiratoryRate": 4,
+      "temperatureC": 30,
+      "oxygenSaturation": 50,
+      "glasgow": 3
+    },
+    "receiverContacted": true,
+    "receiverContactName": "Nombre de ejemplo",
+    "receiverContactedAt": "2026-07-31T12:00:00.000Z",
+    "departedAt": "2026-07-31T12:00:00.000Z"
+  }
 }
 ```
 
@@ -2421,9 +2473,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
 | `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
 
 ### Respuestas posibles
 
@@ -2433,7 +2485,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: Servicio no encontrado; ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Sede destino no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: Organización destino no encontrada; ResourceNotFoundException: Servicio no encontrado; ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Sede destino no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
 | 409 | `CONFLICT` | ConflictException: Ya existe una referencia equivalente |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La derivación necesita un destino: profesional, organización, servicio, sede o destino externo.; PreconditionFailedException: Ese servicio está inactivo en el catálogo.; PreconditionFailedException: El servicio no pertenece a la organización destino.; PreconditionFailedException: El profesional destino no ofrece ese servicio.; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2444,7 +2496,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:47` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:52` |
 
 ### Flujos
 
@@ -2459,7 +2511,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.get` — `src/modules/clinical_ext/controllers/referrals.controller.ts:193`
+- **Implementación:** `ReferralsController.get` — `src/modules/clinical_ext/controllers/referrals.controller.ts:233`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2469,17 +2521,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals/{id}` la atiende `ReferralsController.get` (src/modules/clinical_ext/controllers/referrals.controller.ts:193). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
+`GET /referrals/{id}` la atiende `ReferralsController.get` (src/modules/clinical_ext/controllers/referrals.controller.ts:233). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:193` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:193` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:233` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:233` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2497,8 +2549,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:651` |
-| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:681` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ReferralsController.get → ReferralsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
@@ -2521,9 +2573,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
 | `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
 
 ### Respuestas posibles
 
@@ -2542,7 +2594,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:66` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:71` |
 
 ### Flujos
 
@@ -2550,14 +2602,139 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 24. PATCH /referrals/{id}/cancel
+## 24. PATCH /referrals/{id}/arrival
+
+- **Origen:** CONTRATO
+- **Nombre:** Registrar la llegada del paciente derivado
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReferralsController.recordArrival` — `src/modules/clinical_ext/controllers/referrals.controller.ts:164`
+
+### Qué es y para qué sirve (negocio)
+
+Registrar la llegada del paciente derivado. Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /referrals/{id}/arrival` la atiende `ReferralsController.recordArrival` (src/modules/clinical_ext/controllers/referrals.controller.ts:164). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReferralArrivalDto` (3 campos, 2 obligatorios). Delega en `ReferralsService.recordArrival`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:164` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:164` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.recordArrival → ReferralsService.recordArrival | `src/modules/clinical_ext/services/referrals.service.ts:728` |
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.recordArrival → ReferralsService.recordArrival → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ReferralArrivalDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `arrivedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:261` |
+| `arrivalCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL, DECEASED | `@IsIn(ARRIVAL_CONDITIONS)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:266` |
+| `arrivalNotes` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:274` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "arrivedAt": "2026-07-31T12:00:00.000Z",
+  "arrivalCondition": "STABLE"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "arrivedAt": "2026-07-31T12:00:00.000Z",
+  "arrivalCondition": "STABLE",
+  "arrivalNotes": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ReferralResponseDto>` · DTO `ReferralResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
+| `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Referencia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La derivación ya está cerrada; PreconditionFailedException: La llegada ya está registrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:97` |
+
+### Flujos
+
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. PATCH /referrals/{id}/cancel
 
 - **Origen:** CONTRATO
 - **Nombre:** Anular una derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.cancel` — `src/modules/clinical_ext/controllers/referrals.controller.ts:142`
+- **Implementación:** `ReferralsController.cancel` — `src/modules/clinical_ext/controllers/referrals.controller.ts:182`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2567,17 +2744,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/cancel` la atiende `ReferralsController.cancel` (src/modules/clinical_ext/controllers/referrals.controller.ts:142). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.cancel`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /referrals/{id}/cancel` la atiende `ReferralsController.cancel` (src/modules/clinical_ext/controllers/referrals.controller.ts:182). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.cancel`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:142` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:142` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:182` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:182` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2594,10 +2771,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
-| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.cancel → ReferralsService.cancel | `src/modules/clinical_ext/services/referrals.service.ts:557` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.cancel → ReferralsService.cancel | `src/modules/clinical_ext/services/referrals.service.ts:769` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:678` |
-| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:681` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.cancel → ReferralsService.cancel → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
@@ -2618,9 +2795,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
 | `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
 
 ### Respuestas posibles
 
@@ -2640,7 +2817,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:75` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:80` |
 
 ### Flujos
 
@@ -2648,14 +2825,14 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 25. PATCH /referrals/{id}/counter-referral
+## 26. PATCH /referrals/{id}/counter-referral
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar la contrarreferencia de una derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.counterReferral` — `src/modules/clinical_ext/controllers/referrals.controller.ts:125`
+- **Implementación:** `ReferralsController.counterReferral` — `src/modules/clinical_ext/controllers/referrals.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2665,19 +2842,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/counter-referral` la atiende `ReferralsController.counterReferral` (src/modules/clinical_ext/controllers/referrals.controller.ts:125). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CounterReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.counterReferral`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`PATCH /referrals/{id}/counter-referral` la atiende `ReferralsController.counterReferral` (src/modules/clinical_ext/controllers/referrals.controller.ts:127). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CounterReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.counterReferral`. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:125` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:127` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2694,10 +2871,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
-| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.counterReferral → ReferralsService.counterReferral | `src/modules/clinical_ext/services/referrals.service.ts:516` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.counterReferral → ReferralsService.counterReferral | `src/modules/clinical_ext/services/referrals.service.ts:603` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:651` |
-| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:681` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.counterReferral → ReferralsService.counterReferral → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
@@ -2714,7 +2891,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `counterReferralText` | `string` | Sí | longitud mínima 1; longitud máxima 8000 | `@IsString()` `@IsNotEmpty()` `@MaxLength(8000)` | Contrarreferencia | `src/modules/clinical_ext/dto/referral.dto.ts:425` |
+| `counterReferralText` | `string` | Sí | longitud mínima 1; longitud máxima 8000 | `@IsString()` `@IsNotEmpty()` `@MaxLength(8000)` | Contrarreferencia | `src/modules/clinical_ext/dto/referral.dto.ts:441` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2738,9 +2915,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
 | `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
 
 ### Respuestas posibles
 
@@ -2760,7 +2937,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:69` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:74` |
 
 ### Flujos
 
@@ -2768,14 +2945,14 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 26. PATCH /referrals/{id}/respond
+## 27. PATCH /referrals/{id}/respond
 
 - **Origen:** CONTRATO
 - **Nombre:** Responder / aceptar una referencia inter-tenant
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.respond` — `src/modules/clinical_ext/controllers/referrals.controller.ts:108`
+- **Implementación:** `ReferralsController.respond` — `src/modules/clinical_ext/controllers/referrals.controller.ts:110`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2785,27 +2962,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/respond` la atiende `ReferralsController.respond` (src/modules/clinical_ext/controllers/referrals.controller.ts:108). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RespondReferralDto` (2 campos, 1 obligatorio). Delega en `ReferralsService.respond`. Actualiza clinical_ext.referrals. Lee clinical_ext.referrals, directory.branches.
+`PATCH /referrals/{id}/respond` la atiende `ReferralsController.respond` (src/modules/clinical_ext/controllers/referrals.controller.ts:110). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RespondReferralDto` (2 campos, 1 obligatorio). Delega en `ReferralsService.respond`. Actualiza clinical_ext.referrals. Lee clinical_ext.referrals, directory.branches.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:108` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:110` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:110` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.respond → ReferralsService.respond | `src/modules/clinical_ext/services/referrals.service.ts:428` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.respond → ReferralsService.respond | `src/modules/clinical_ext/services/referrals.service.ts:515` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.respond → ReferralsService.respond → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.respond → ReferralsService.respond → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:651` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.respond → ReferralsService.respond → ReferralsService.isDestination | `src/modules/clinical_ext/services/referrals.service.ts:863` |
 
 ### Parámetros
 
@@ -2817,8 +2994,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: ACCEPT, REJECT | `@IsIn(['ACCEPT', 'REJECT'])` | Decisión del tenant destino | `src/modules/clinical_ext/dto/referral.dto.ts:401` |
-| `rejectReason` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Motivo del rechazo (obligatorio si REJECT) | `src/modules/clinical_ext/dto/referral.dto.ts:413` |
+| `decision` | `string` | Sí | valores: ACCEPT, REJECT | `@IsIn(['ACCEPT', 'REJECT'])` | Decisión del tenant destino | `src/modules/clinical_ext/dto/referral.dto.ts:417` |
+| `rejectReason` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Motivo del rechazo (obligatorio si REJECT) | `src/modules/clinical_ext/dto/referral.dto.ts:429` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2843,7 +3020,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | Siempre `true` cuando la operación se aplicó. | `src/modules/clinical_ext/dto/referral.dto.ts:651` |
+| `ok` | `boolean` | Sí | — | — | Siempre `true` cuando la operación se aplicó. | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
 
 ### Respuestas posibles
 
@@ -2863,7 +3040,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:54` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:59` |
 
 ### Flujos
 
@@ -2871,14 +3048,174 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 27. GET /referrals/me
+## 28. PATCH /referrals/{id}/transfer
+
+- **Origen:** CONTRATO
+- **Nombre:** Completar o corregir el traslado de una derivación
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReferralsController.updateTransfer` — `src/modules/clinical_ext/controllers/referrals.controller.ts:144`
+
+### Qué es y para qué sirve (negocio)
+
+Completar o corregir el traslado de una derivación. Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /referrals/{id}/transfer` la atiende `ReferralsController.updateTransfer` (src/modules/clinical_ext/controllers/referrals.controller.ts:144). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReferralTransferDto` (22 campos, 0 obligatorios). Delega en `ReferralsService.updateTransfer`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:144` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:144` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ReferralsService.findOrFail → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:99` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:893` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1057` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ReferralsController.updateTransfer → ReferralsService.updateTransfer → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1031` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ReferralTransferDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `required` | `boolean` | No | admite null | `@IsOptional()` `@IsBoolean()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:160` |
+| `transportMode` | `string` | No | valores: AMBULANCE_BASIC, AMBULANCE_ADVANCED, AIR_AMBULANCE, RIVER, PRIVATE_VEHICLE, PUBLIC_TRANSPORT, ON_FOOT, OTHER; admite null | `@IsOptional()` `@IsIn(TRANSPORT_MODES)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:166` |
+| `transportDetail` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:174` |
+| `companionName` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:182` |
+| `companionRelationship` | `string` | No | longitud mínima 1; longitud máxima 80; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(80)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:190` |
+| `companionPhone` | `string` | No | longitud mínima 1; longitud máxima 40; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(40)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:198` |
+| `escortProfessionalName` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:206` |
+| `escortProfessionalRole` | `string` | No | longitud mínima 1; longitud máxima 80; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(80)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:214` |
+| `departureCondition` | `string` | No | valores: STABLE, UNSTABLE, CRITICAL; admite null | `@IsOptional()` `@IsIn(DEPARTURE_CONDITIONS)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:220` |
+| `vitals` | `ReferralTransferVitalsDto` | No | admite null | `@IsOptional()` `@ValidateNested()` `@Type(() => ReferralTransferVitalsDto)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:227` |
+| `vitals.recordedAt` | `string` | No | formato date-time; admite null | — | — | sin fuente |
+| `vitals.systolicBp` | `number` | No | mínimo 40; máximo 300; admite null | — | — | sin fuente |
+| `vitals.diastolicBp` | `number` | No | mínimo 20; máximo 200; admite null | — | — | sin fuente |
+| `vitals.heartRate` | `number` | No | mínimo 20; máximo 300; admite null | — | — | sin fuente |
+| `vitals.respiratoryRate` | `number` | No | mínimo 4; máximo 80; admite null | — | — | sin fuente |
+| `vitals.temperatureC` | `number` | No | mínimo 30; máximo 45; admite null | — | — | sin fuente |
+| `vitals.oxygenSaturation` | `number` | No | mínimo 50; máximo 100; admite null | — | — | sin fuente |
+| `vitals.glasgow` | `number` | No | mínimo 3; máximo 15; admite null | — | — | sin fuente |
+| `receiverContacted` | `boolean` | No | admite null | `@IsOptional()` `@IsBoolean()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:233` |
+| `receiverContactName` | `string` | No | longitud mínima 1; longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:241` |
+| `receiverContactedAt` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:247` |
+| `departedAt` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601()` | — | `src/modules/clinical_ext/dto/referral-transfer.dto.ts:253` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "required": true,
+  "transportMode": "AMBULANCE_BASIC",
+  "transportDetail": "valor-ejemplo",
+  "companionName": "Nombre de ejemplo",
+  "companionRelationship": "valor-ejemplo",
+  "companionPhone": "+59170000000",
+  "escortProfessionalName": "Nombre de ejemplo",
+  "escortProfessionalRole": "valor-ejemplo",
+  "departureCondition": "STABLE",
+  "vitals": {
+    "recordedAt": "2026-07-31T12:00:00.000Z",
+    "systolicBp": 40,
+    "diastolicBp": 20,
+    "heartRate": 20,
+    "respiratoryRate": 4,
+    "temperatureC": 30,
+    "oxygenSaturation": 50,
+    "glasgow": 3
+  },
+  "receiverContacted": true,
+  "receiverContactName": "Nombre de ejemplo",
+  "receiverContactedAt": "2026-07-31T12:00:00.000Z",
+  "departedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ReferralResponseDto>` · DTO `ReferralResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
+| `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Referencia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La derivación ya está cerrada; PreconditionFailedException: La llegada ya está registrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:87` |
+
+### Flujos
+
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 29. GET /referrals/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis derivaciones
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.listMine` — `src/modules/clinical_ext/controllers/referrals.controller.ts:178`
+- **Implementación:** `ReferralsController.listMine` — `src/modules/clinical_ext/controllers/referrals.controller.ts:218`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2888,24 +3225,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals/me` la atiende `ReferralsController.listMine` (src/modules/clinical_ext/controllers/referrals.controller.ts:178). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ReferralsService.listMine`. Lee billing.service_catalog, clinical_ext.referrals, directory.branches, directory.tenants, profiles.patient_profiles, profiles.person_account_links.
+`GET /referrals/me` la atiende `ReferralsController.listMine` (src/modules/clinical_ext/controllers/referrals.controller.ts:218). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ReferralsService.listMine`. Lee billing.service_catalog, clinical_ext.referrals, directory.branches, directory.tenants, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical_ext/controllers/referrals.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical_ext/controllers/referrals.controller.ts:218` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsService.toListItems → SchedulingOfferingsRepository.findCatalogItems | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:116` |
-| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsRepository.findByPatient | `src/modules/clinical_ext/repositories/referrals.repository.ts:166` |
-| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsService.toListItems → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:678` |
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsRepository.findByPatient | `src/modules/clinical_ext/repositories/referrals.repository.ts:174` |
+| `directory.branches` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsService.toListItems → ReferralsService.resolveNames | `src/modules/clinical_ext/services/referrals.service.ts:890` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsService.toListItems → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:77` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
@@ -2918,45 +3255,45 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:441` |
-| `status` | `string` | Sí | valores: PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:449` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la referencia (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
-| `referralType` | `string` | Sí | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:465` |
-| `referralTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:471` |
-| `targetServiceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:477` |
-| `sourceEncounterId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:483` |
-| `referringProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:489` |
-| `targetProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:495` |
-| `targetTenantId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:501` |
-| `targetTenantName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:507` |
-| `targetBranchId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:513` |
-| `targetBranchName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:519` |
-| `targetExternalName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:525` |
-| `targetExternalContact` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:531` |
-| `specialtyConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:537` |
-| `serviceRequestId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:543` |
-| `requestedServiceText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:549` |
-| `requestedServiceConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:555` |
-| `reasonConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:561` |
-| `reasonText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:567` |
-| `diagnosisText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:573` |
-| `clinicalSummary` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:579` |
-| `treatmentGivenText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:585` |
-| `informedConsentId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:591` |
-| `priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:597` |
-| `validUntil` | `string` | No | formato date | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:603` |
-| `respondedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:609` |
-| `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:615` |
-| `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:621` |
-| `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:627` |
-| `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:633` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:639` |
-| `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
-| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:666` |
-| `rowVersion` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:670` |
-| `targetDisplayName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
-| `targetServiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:678` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:451` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:457` |
+| `status` | `string` | Sí | valores: PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:465` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la referencia (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:474` |
+| `referralType` | `string` | Sí | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:481` |
+| `referralTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:487` |
+| `targetServiceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:493` |
+| `sourceEncounterId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:499` |
+| `referringProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:505` |
+| `targetProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:511` |
+| `targetTenantId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:517` |
+| `targetTenantName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:523` |
+| `targetBranchId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:529` |
+| `targetBranchName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:535` |
+| `targetExternalName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:541` |
+| `targetExternalContact` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:547` |
+| `specialtyConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:553` |
+| `serviceRequestId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:559` |
+| `requestedServiceText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:565` |
+| `requestedServiceConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:571` |
+| `reasonConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:577` |
+| `reasonText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:583` |
+| `diagnosisText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:589` |
+| `clinicalSummary` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:595` |
+| `treatmentGivenText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:601` |
+| `informedConsentId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:607` |
+| `priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:613` |
+| `validUntil` | `string` | No | formato date | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:619` |
+| `respondedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:625` |
+| `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:631` |
+| `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:637` |
+| `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:643` |
+| `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:656` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
+| `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:685` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:689` |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:693` |
+| `targetDisplayName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:697` |
+| `targetServiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:701` |
 
 ### Respuestas posibles
 
@@ -2973,7 +3310,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:81` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:125` |
 
 ### Flujos
 
@@ -2981,14 +3318,14 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 28. GET /referrals/target-services
+## 30. GET /referrals/target-services
 
 - **Origen:** CONTRATO
 - **Nombre:** Servicios activos de un destino de derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.listTargetServices` — `src/modules/clinical_ext/controllers/referrals.controller.ts:97`
+- **Implementación:** `ReferralsController.listTargetServices` — `src/modules/clinical_ext/controllers/referrals.controller.ts:99`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2998,23 +3335,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals/target-services` la atiende `ReferralsController.listTargetServices` (src/modules/clinical_ext/controllers/referrals.controller.ts:97). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listTargetServices`. Lee billing.service_catalog, practice.practices, scheduling.practitioner_service_offerings, terminology.catalog_concepts.
+`GET /referrals/target-services` la atiende `ReferralsController.listTargetServices` (src/modules/clinical_ext/controllers/referrals.controller.ts:99). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listTargetServices`. Lee billing.service_catalog, directory.tenants, practice.practices, profiles.health_practitioner_profiles, scheduling.practitioner_service_offerings, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | Límite propio: Throttle(REFERRAL_TARGETS_RATE_LIMIT) | `src/modules/clinical_ext/controllers/referrals.controller.ts:97` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:99` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | Límite propio: Throttle(REFERRAL_TARGETS_RATE_LIMIT) | `src/modules/clinical_ext/controllers/referrals.controller.ts:99` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → SchedulingOfferingsRepository.findCatalogItems | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:116` |
+| `directory.tenants` | LEE | LEE | POR_SQL | ReferralsController.listTargetServices → ReferralsService.listTargetServices → ReferralTargetsRepository.isActiveTenant | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:231` |
 | `practice.practices` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | ReferralsController.listTargetServices → ReferralsService.listTargetServices → ReferralTargetsRepository.isListablePractitioner | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:205` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → SchedulingOfferingsRepository.listOfferings | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:74` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 
@@ -3033,15 +3372,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ReferralTargetServiceDto>` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:388` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:353` |
-| `items[].code` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:357` |
-| `items[].name` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:361` |
-| `items[].description` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:365` |
-| `items[].price` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:369` |
-| `items[].currency` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:373` |
-| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:377` |
-| `items[].practiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:381` |
+| `items` | `array<ReferralTargetServiceDto>` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:404` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:369` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:373` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:377` |
+| `items[].description` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:381` |
+| `items[].price` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:385` |
+| `items[].currency` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:389` |
+| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:393` |
+| `items[].practiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:397` |
 
 ### Respuestas posibles
 
@@ -3050,6 +3389,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Destino no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique targetProfileId o targetTenantId. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3059,7 +3399,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:95` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:139` |
 
 ### Flujos
 
@@ -3067,14 +3407,14 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 29. GET /referrals/targets
+## 31. GET /referrals/targets
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar destinos de derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.searchTargets` — `src/modules/clinical_ext/controllers/referrals.controller.ts:86`
+- **Implementación:** `ReferralsController.searchTargets` — `src/modules/clinical_ext/controllers/referrals.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3084,27 +3424,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals/targets` la atiende `ReferralsController.searchTargets` (src/modules/clinical_ext/controllers/referrals.controller.ts:86). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.searchTargets`. Lee directory.tenants, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.persons.
+`GET /referrals/targets` la atiende `ReferralsController.searchTargets` (src/modules/clinical_ext/controllers/referrals.controller.ts:88). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.searchTargets`. Lee directory.tenants, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.persons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | q (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | Límite propio: Throttle(REFERRAL_TARGETS_RATE_LIMIT) | `src/modules/clinical_ext/controllers/referrals.controller.ts:86` |
+| RATE_LIMIT | Límite propio: Throttle(REFERRAL_TARGETS_RATE_LIMIT) | `src/modules/clinical_ext/controllers/referrals.controller.ts:88` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenants` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchOrganizationTargets → ReferralTargetsRepository.searchOrganizations | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:150` |
-| `practice.practices` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:90` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:90` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:90` |
-| `profiles.persons` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:90` |
+| `directory.tenants` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:97` |
+| `practice.practices` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:97` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:97` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:97` |
+| `profiles.persons` | LEE | LEE | POR_SQL | ReferralsController.searchTargets → ReferralsService.searchTargets → ReferralsService.searchPractitionerTargets → ReferralTargetsRepository.searchPractitioners | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:97` |
 
 ### Parámetros
 
@@ -3121,12 +3461,12 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ReferralTargetDto>` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:346` |
-| `items[].kind` | `string` | Sí | valores: PRACTITIONER, ORGANIZATION | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:323` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:327` |
-| `items[].displayName` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:331` |
-| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:335` |
-| `items[].subtitle` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:339` |
+| `items` | `array<ReferralTargetDto>` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:362` |
+| `items[].kind` | `string` | Sí | valores: PRACTITIONER, ORGANIZATION | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:339` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:343` |
+| `items[].displayName` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:347` |
+| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:351` |
+| `items[].subtitle` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:355` |
 
 ### Respuestas posibles
 
@@ -3145,7 +3485,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:88` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:132` |
 
 ### Flujos
 
@@ -3153,7 +3493,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 30. POST /virtual-encounters
+## 32. POST /virtual-encounters
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar una sesión de telesalud
@@ -3178,10 +3518,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3189,8 +3529,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical_ext.virtual_encounters` | ESCRIBE | CREA | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersRepository.create | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:67` |
 | `clinical_ext.virtual_encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersRepository.findByEncounter | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:53` |
-| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:377` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 
 ### Cuerpo — DTO `CreateVirtualEncounterDto` · `application/json`
 
@@ -3257,7 +3597,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 31. PATCH /virtual-encounters/{id}/end
+## 33. PATCH /virtual-encounters/{id}/end
 
 - **Origen:** CONTRATO
 - **Nombre:** Finalizar una sesión de telesalud
@@ -3282,11 +3622,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3294,8 +3634,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical_ext.virtual_encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | VirtualEncountersController.end → VirtualEncountersService.end | `src/modules/clinical_ext/services/virtual-encounters.service.ts:158` |
 | `clinical_ext.virtual_encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersRepository.findById | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:45` |
-| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:377` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 
 ### Parámetros
 
@@ -3360,7 +3700,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ---
 
-## 32. PATCH /virtual-encounters/{id}/join
+## 34. PATCH /virtual-encounters/{id}/join
 
 - **Origen:** CONTRATO
 - **Nombre:** Unirse a una sesión de telesalud
@@ -3385,9 +3725,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:60` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3395,8 +3735,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical_ext.virtual_encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | VirtualEncountersController.join → VirtualEncountersService.join | `src/modules/clinical_ext/services/virtual-encounters.service.ts:123` |
 | `clinical_ext.virtual_encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersRepository.findById | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:45` |
-| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:377` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 
 ### Parámetros
 

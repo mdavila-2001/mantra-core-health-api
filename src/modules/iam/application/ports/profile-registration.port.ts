@@ -36,6 +36,18 @@ export interface ProfileRegistrationPort {
   createPersonProfile(tx: EntityManager, data: object): unknown;
   createPatientProfile(tx: EntityManager, data: object): { profileId: string };
   createAccountLink(tx: EntityManager, data: object): unknown;
+  /**
+   * Perfil de secretaria (`profiles.secretary_profiles`); su `profileId` es el
+   * id de la persona, igual que el del paciente.
+   */
+  createSecretaryProfile(
+    tx: EntityManager,
+    data: {
+      readonly profileId: string;
+      readonly roleConceptId?: string;
+      readonly actorUserId: string;
+    },
+  ): { profileId: string };
 
   findPractitionerByCode(tx: EntityManager, code: string): Promise<unknown>;
   createPractitionerProfile(

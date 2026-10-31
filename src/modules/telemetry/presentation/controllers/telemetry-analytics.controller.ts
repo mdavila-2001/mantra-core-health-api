@@ -1,9 +1,11 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiPropertyOptional,
   ApiTags,
+  PickType,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -16,7 +18,19 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { Roles, requireTenantId } from '../../../../common';
+import {
+  CurrentUser,
+  Roles,
+  getCurrentTenantId,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../../common';
+import { PlatformScopeOptional } from '../../../../common/tenant/platform-scope';
+import {
+  resolveAnalyticsScope,
+  type AnalyticsActorScope,
+} from '../../application/analytics-scope';
+import { AnalyticsDevicesResponseDto } from '../dto/analytics-devices.dto';
 import {
   PORTAL_CODES,
   TelemetryAnalyticsService,
@@ -67,7 +81,28 @@ export class AnalyticsWindowQueryDto {
   @IsOptional()
   @IsIn(PORTAL_CODES)
   portal?: PortalCode;
+
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: 1000,
+    description:
+      'Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor.',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  minSample?: number;
 }
+
+/** Ventana y portal de `/devices`: sin `interval`, que no tiene sentido sin serie. */
+export class DevicesQueryDto extends PickType(AnalyticsWindowQueryDto, [
+  'from',
+  'to',
+  'portal',
+  'minSample',
+] as const) {}
 
 export class WebVitalsQueryDto extends AnalyticsWindowQueryDto {
   @ApiPropertyOptional({
@@ -105,11 +140,28 @@ export class SessionsQueryDto extends AnalyticsWindowQueryDto {
 }
 
 /**
+ * Con tenant en el contexto, el tenant a secas (como siempre); sin él, sólo un
+ * rol de plataforma obtiene el alcance plataforma, y cualquier otro 412.
+ */
+function actorScope(
+  user: AuthenticatedUser | undefined,
+  minSample?: number,
+): string | AnalyticsActorScope {
+  return (
+    getCurrentTenantId() ??
+    resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, minSample)
+  );
+}
+
+/**
  * Analítica de producto y RUM para el portal administrativo. Sólo lectura, con
  * ventana obligatoria (máx. 92 días) y agregados calculados en el backend.
- * Toda lectura se acota al tenant que resolvió el guard (`requireTenantId()`):
- * no hay barrido global, ni siquiera para `SUPERADMIN`, que debe indicar
- * `X-Tenant-Id`.
+ * Toda lectura se acota al tenant que resolvió el guard. Las lecturas de
+ * AGREGADOS (`overview`, `timeseries`, `web-vitals`,
+ * `devices`) llevan `@PlatformScopeOptional()` a nivel de método: un rol de
+ * plataforma global sin `X-Tenant-Id` agrega entre organizaciones y los grupos con
+ * menos de `minSample` sujetos se suprimen (X-5). Las de nivel individuo
+ * (`sessions`, `funnels/:id/report`, `pipeline-health`) siguen exigiendo organización.
  * La ingesta sigue en `/telemetry/*`; esto no la sustituye.
  */
 @ApiTags('telemetry-analytics')
@@ -120,30 +172,57 @@ export class TelemetryAnalyticsController {
 
   @Get('overview')
   @Roles(...ANALYTICS_READ_ROLES)
+  @PlatformScopeOptional()
   @ApiOperation({
     summary: 'Totales, rutas y eventos principales de la ventana',
   })
-  overview(@Query() query: AnalyticsWindowQueryDto) {
-    return this.analytics.overview(query, requireTenantId());
+  overview(
+    @Query() query: AnalyticsWindowQueryDto,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.analytics.overview(query, actorScope(user, query.minSample));
+  }
+
+  @Get('devices')
+  @Roles(...ANALYTICS_READ_ROLES)
+  @PlatformScopeOptional()
+  @ApiOperation({
+    summary:
+      'Desglose de dispositivos (tipo, SO, navegador, versión de app); bots aparte; lo no medido se declara',
+  })
+  @ApiOkResponse({ type: AnalyticsDevicesResponseDto })
+  devices(
+    @Query() query: DevicesQueryDto,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.analytics.devices(query, actorScope(user, query.minSample));
   }
 
   @Get('timeseries')
   @Roles(...ANALYTICS_READ_ROLES)
+  @PlatformScopeOptional()
   @ApiOperation({
     summary: 'Eventos y sesiones por hora o día (UTC), cubos vacíos en 0',
   })
-  timeseries(@Query() query: AnalyticsWindowQueryDto) {
-    return this.analytics.timeseries(query, requireTenantId());
+  timeseries(
+    @Query() query: AnalyticsWindowQueryDto,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.analytics.timeseries(query, actorScope(user, query.minSample));
   }
 
   @Get('web-vitals')
   @Roles(...ANALYTICS_READ_ROLES)
+  @PlatformScopeOptional()
   @ApiOperation({
     summary:
       'p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra',
   })
-  webVitals(@Query() query: WebVitalsQueryDto) {
-    return this.analytics.webVitals(query, requireTenantId());
+  webVitals(
+    @Query() query: WebVitalsQueryDto,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.analytics.webVitals(query, actorScope(user, query.minSample));
   }
 
   @Get('funnels')

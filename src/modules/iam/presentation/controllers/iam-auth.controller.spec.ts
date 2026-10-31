@@ -34,6 +34,7 @@ function build() {
     requestReset: mockFn(),
     resetPassword: mockFn(),
   };
+  const supportStaffRegistrationService = { register: mockFn() };
   const controller = new IamAuthController(
     authService as any,
     assistedRegistrationService as any,
@@ -43,9 +44,11 @@ function build() {
     practitionerRegistrationService as any,
     passwordResetService as any,
     emailVerificationService as any,
+    supportStaffRegistrationService as any,
   );
   return {
     controller,
+    supportStaffRegistrationService,
     authService,
     assistedRegistrationService,
     selfRegistrationService,
@@ -67,6 +70,22 @@ function reqStub() {
 }
 
 describe('IamAuthController', () => {
+  it('delega el alta de la secretaria con la ip de origen', async () => {
+    const d = build();
+    const dto = { nationalId: '1234567' };
+    d.supportStaffRegistrationService.register.mockResolvedValue({
+      userId: 'u-1',
+      role: 'SUPPORT_STAFF',
+    });
+    await expect(
+      d.controller.registerSupportStaff(dto as any, '1.2.3.4'),
+    ).resolves.toEqual({ userId: 'u-1', role: 'SUPPORT_STAFF' });
+    expect(d.supportStaffRegistrationService.register).toHaveBeenCalledWith(
+      dto,
+      '1.2.3.4',
+    );
+  });
+
   it('delegates login with the client ip (UC-01-04)', async () => {
     const d = build();
     const dto = { email: 'a@x.io', password: 'password123' };

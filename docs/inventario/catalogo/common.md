@@ -10,13 +10,13 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 101 | COINCIDE |
-| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 48 | COINCIDE |
+| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 102 | COINCIDE |
+| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 49 | COINCIDE |
 | [file_derivatives](#file_derivatives) | Cataloga derivados de archivos —como representaciones o vistas procesadas— asociados al original. | 7 | 4 | 5 | COINCIDE |
 | [file_links](#file_links) | Vincula archivos con registros de negocio para reutilizar documentos sin duplicar su identidad. | 13 | 6 | 10 | COINCIDE |
 | [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 97 | COINCIDE |
 | [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 107 | COINCIDE |
-| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 11 | 61 | COINCIDE |
+| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 11 | 63 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -84,7 +84,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: addresses`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Addresses` — `src/modules/common/entities/addresses.entity.ts`
-- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 101 operaciones
+- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 102 operaciones
 
 #### Columnas
 
@@ -203,6 +203,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /public/pharmacies/open-now | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
+| GET /pharmacy-inventory/availability/medications | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
@@ -287,7 +288,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: contact_points`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `ContactPoints` — `src/modules/common/entities/contact_points.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 48 operaciones
+- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 49 operaciones
 
 #### Columnas
 
@@ -342,6 +343,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | CREA | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
@@ -1014,7 +1016,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: identifiers`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Identifiers` — `src/modules/common/entities/identifiers.entity.ts`
-- **Resumen:** 19 columnas · 11 índices · 9 FK salientes · 2 entrantes · 61 operaciones
+- **Resumen:** 19 columnas · 11 índices · 9 FK salientes · 2 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -1097,6 +1099,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
@@ -1105,6 +1108,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /insurance/portability/export | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
+| GET /pharmacy/prescription-shares/{token} | LEE | DIRECTA |
 | GET /admissions | LEE | DIRECTA |
 | GET /admissions/{id} | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |

@@ -26,6 +26,7 @@ class SystemApiClientModule {}
 class MockProviderClientModule {}
 class GoogleEmailClientModule {}
 class WorkerLifecycleService {}
+class WorkerHeartbeatService {}
 class LoggerToken {}
 class PinoLoggerToken {}
 
@@ -73,6 +74,9 @@ jest.unstable_mockModule('./google-email-client.module', () => ({
 }));
 jest.unstable_mockModule('./worker-lifecycle.service', () => ({
   WorkerLifecycleService,
+}));
+jest.unstable_mockModule('./worker-heartbeat.service', () => ({
+  WorkerHeartbeatService,
 }));
 jest.unstable_mockModule('./run-tick.util', () => ({ configureTicks }));
 jest.unstable_mockModule('./worker-health.registry', () => ({

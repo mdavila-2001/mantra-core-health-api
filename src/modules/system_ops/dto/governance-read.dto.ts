@@ -1,272 +1,416 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsIn,
   IsInt,
+  IsISO8601,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   Max,
   MaxLength,
   Min,
 } from 'class-validator';
 
-/** Tipos de política que el portal lista (una por tabla de `system_ops`). */
-export const GOVERNANCE_POLICY_TYPES = [
+/** Tope y valor por omisión de los listados de lectura de gobierno. */
+export const GOV_MAX_PAGE_SIZE = 200;
+export const GOV_DEFAULT_PAGE_SIZE = 50;
+/** Sin rango, la bitácora de cambios mira esta ventana: no tiene índice por fecha. */
+export const GOV_CHANGE_LOG_WINDOW_DAYS = 30;
+
+export const POLICY_TYPES = [
   'WRITE',
   'RETENTION',
   'ANONYMIZATION',
-  'CLASSIFICATION',
   'RESIDENCY',
 ] as const;
-export type GovernancePolicyType = (typeof GOVERNANCE_POLICY_TYPES)[number];
+export type PolicyType = (typeof POLICY_TYPES)[number];
 
-/** Niveles de sensibilidad que cuentan como dato personal o secreto en el inventario. */
-export const GOVERNANCE_PII_SENSITIVITIES = [
-  'PERSONAL',
-  'PHI_IDENTIFIER',
-  'PHI_SENSITIVE',
-  'PHI_SPECIAL',
-  'CREDENTIAL',
-] as const;
+export const POLICY_SORTS = ['code', 'updatedAt'] as const;
+export type PolicySort = (typeof POLICY_SORTS)[number];
 
-/** De dónde sale una fila del inventario de campos. */
-export const GOVERNANCE_PII_SOURCES = ['CATALOG', 'REGISTRY', 'BOTH'] as const;
+export const SORT_ORDERS = ['asc', 'desc'] as const;
+export type SortOrder = (typeof SORT_ORDERS)[number];
 
-/** Tope de filas por página de los listados de gobierno. */
-export const GOVERNANCE_MAX_PAGE_SIZE = 200;
-/** Filas por página si el cliente no pide un tamaño. */
-export const GOVERNANCE_DEFAULT_PAGE_SIZE = 50;
-
-const sinEspacios = ({ value }: { value: unknown }): unknown =>
+const recortar = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
-/** Paginación por cursor común a los listados de gobierno. */
-export class GovernancePageQueryDto {
-  /** Cursor opaco de la página anterior (`nextCursor`). */
-  @ApiPropertyOptional({
-    description: 'Cursor opaco de `nextCursor`',
-    maxLength: 600,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(600)
-  cursor?: string;
+/** Un código de concepto o de negocio: letras, dígitos y `_ . : -`. */
+const CODIGO = /^[A-Za-z0-9_.:-]{1,100}$/;
+/** Un schema o tabla de PostgreSQL. */
+const IDENTIFICADOR = /^[A-Za-z0-9_]{1,63}$/;
 
-  /** Filas por página. */
+/** Paginación por cursor opaco común a las lecturas de gobierno. */
+export class GovPageQueryDto {
   @ApiPropertyOptional({
-    description: 'Filas por página',
     minimum: 1,
-    maximum: GOVERNANCE_MAX_PAGE_SIZE,
-    default: GOVERNANCE_DEFAULT_PAGE_SIZE,
+    maximum: GOV_MAX_PAGE_SIZE,
+    default: GOV_DEFAULT_PAGE_SIZE,
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(GOVERNANCE_MAX_PAGE_SIZE)
+  @Max(GOV_MAX_PAGE_SIZE)
   limit?: number;
+
+  @ApiPropertyOptional({
+    maxLength: 600,
+    description: '`nextCursor` de la página anterior',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(600)
+  cursor?: string;
 }
 
-/** Filtros de `GET /admin/governance/policies`. */
-export class ListGovernancePoliciesQueryDto extends GovernancePageQueryDto {
-  /** Tipo de política. */
-  @ApiPropertyOptional({ enum: GOVERNANCE_POLICY_TYPES })
+export class PolicyListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({ enum: POLICY_TYPES })
   @IsOptional()
-  @IsIn(GOVERNANCE_POLICY_TYPES)
-  type?: GovernancePolicyType;
+  @IsIn(POLICY_TYPES)
+  type?: PolicyType;
 
-  /** Busca (sin tildes ni mayúsculas) en código y nombre. */
-  @ApiPropertyOptional({ maxLength: 120 })
+  @ApiPropertyOptional({
+    description: 'Código del estado (concepto), p. ej. `ACTIVE`',
+  })
   @IsOptional()
-  @Transform(sinEspacios)
+  @Matches(CODIGO)
+  state?: string;
+
+  @ApiPropertyOptional({
+    maxLength: 120,
+    description: 'Busca en código y nombre, sin mayúsculas',
+  })
+  @IsOptional()
+  @Transform(recortar)
   @IsString()
   @MaxLength(120)
   q?: string;
+
+  @ApiPropertyOptional({ enum: POLICY_SORTS, default: 'code' })
+  @IsOptional()
+  @IsIn(POLICY_SORTS)
+  sort?: PolicySort;
+
+  @ApiPropertyOptional({ enum: SORT_ORDERS, default: 'asc' })
+  @IsOptional()
+  @IsIn(SORT_ORDERS)
+  order?: SortOrder;
 }
 
-/** Filtros de `GET /admin/governance/pii-fields`. */
-export class ListGovernancePiiFieldsQueryDto extends GovernancePageQueryDto {
-  /** Busca (sin tildes ni mayúsculas) en esquema, tabla y columna. */
-  @ApiPropertyOptional({ maxLength: 120 })
-  @IsOptional()
-  @Transform(sinEspacios)
-  @IsString()
-  @MaxLength(120)
-  q?: string;
+export class PolicyParamDto {
+  @ApiProperty({ enum: POLICY_TYPES })
+  @IsIn(POLICY_TYPES)
+  policyType!: PolicyType;
 
-  /** Esquema exacto. */
-  @ApiPropertyOptional({ maxLength: 80 })
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  id!: string;
+}
+
+export class ChangeLogQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({
+    maxLength: 100,
+    description:
+      'Tipo de objeto cambiado (`entity_registry`, `write_policies`…)',
+  })
   @IsOptional()
-  @Matches(/^[A-Za-z0-9_]{1,80}$/)
+  @Transform(recortar)
+  @Matches(IDENTIFICADOR)
+  targetType?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Objeto cambiado' })
+  @IsOptional()
+  @IsUUID()
+  targetId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Actor del cambio' })
+  @IsOptional()
+  @IsUUID()
+  changedBy?: string;
+
+  @ApiPropertyOptional({
+    description: 'Desde (ISO 8601, incluido). Sin rango, los últimos 30 días',
+  })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  @ApiPropertyOptional({ description: 'Hasta (ISO 8601, excluido)' })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+}
+
+export class EntityRegistryQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({ description: 'Schema de PostgreSQL' })
+  @IsOptional()
+  @Matches(IDENTIFICADOR)
   schema?: string;
 
-  /** Nivel de sensibilidad que clasificó el catálogo. */
-  @ApiPropertyOptional({ enum: GOVERNANCE_PII_SENSITIVITIES })
+  @ApiPropertyOptional({
+    maxLength: 120,
+    description: 'Busca en `schema.tabla`, sin mayúsculas',
+  })
   @IsOptional()
-  @IsIn(GOVERNANCE_PII_SENSITIVITIES)
-  sensitivity?: (typeof GOVERNANCE_PII_SENSITIVITIES)[number];
+  @Transform(recortar)
+  @IsString()
+  @MaxLength(120)
+  q?: string;
 
-  /** Qué fuente respalda la fila. */
-  @ApiPropertyOptional({ enum: GOVERNANCE_PII_SOURCES })
+  @ApiPropertyOptional({ description: 'Código del dominio de datos' })
   @IsOptional()
-  @IsIn(GOVERNANCE_PII_SOURCES)
-  source?: (typeof GOVERNANCE_PII_SOURCES)[number];
+  @Matches(CODIGO)
+  domain?: string;
+
+  @ApiPropertyOptional({ description: 'Código de la clasificación' })
+  @IsOptional()
+  @Matches(CODIGO)
+  classification?: string;
+
+  @ApiPropertyOptional({
+    description: 'Sólo las entidades marcadas (o no) como PII',
+  })
+  @IsOptional()
+  // `enableImplicitConversion` convertiría "false" en `true`: se lee el valor crudo.
+  @Transform(({ obj }: { obj: { containsPii?: unknown } }) =>
+    obj.containsPii === 'true' || obj.containsPii === true
+      ? true
+      : obj.containsPii === 'false' || obj.containsPii === false
+        ? false
+        : obj.containsPii,
+  )
+  @IsBoolean()
+  containsPii?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Sólo las entidades marcadas (o no) como PHI',
+  })
+  @IsOptional()
+  @Transform(({ obj }: { obj: { containsPhi?: unknown } }) =>
+    obj.containsPhi === 'true' || obj.containsPhi === true
+      ? true
+      : obj.containsPhi === 'false' || obj.containsPhi === false
+        ? false
+        : obj.containsPhi,
+  )
+  @IsBoolean()
+  containsPhi?: boolean;
 }
 
-/** Una política en la lista. */
-export class GovernancePolicySummaryDto {
+export class EntityIdParamDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  id!: string;
+}
+
+// ---- respuestas --------------------------------------------------------------------------
+
+export class PolicySummaryDto {
+  @ApiProperty({ enum: POLICY_TYPES }) policyType!: string;
   @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ enum: GOVERNANCE_POLICY_TYPES }) type!: GovernancePolicyType;
   @ApiProperty() code!: string;
-  @ApiProperty({ nullable: true, type: String }) name!: string | null;
-  @ApiProperty({
+  @ApiPropertyOptional({ nullable: true }) name!: string | null;
+  @ApiPropertyOptional({
     nullable: true,
-    type: String,
-    description: 'Código del estado',
+    description: 'Código del concepto de estado',
   })
-  stateCode!: string | null;
-  @ApiProperty({
-    nullable: true,
-    type: String,
-    description: 'Texto del estado',
-  })
-  stateLabel!: string | null;
-  @ApiProperty({
-    description:
-      'Atributos escalares propios del tipo (modos de escritura, plazo de retención, etc.)',
-    type: 'object',
-    additionalProperties: true,
-  })
-  attributes!: Record<string, string | number | boolean | null>;
-  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
-  updatedAt!: string | null;
+  state!: string | null;
+  @ApiProperty() version!: number;
+  @ApiProperty({ type: String, format: 'date-time' }) updatedAt!: string;
 }
 
-/** Conteo de políticas por tipo, sobre el filtro entero (no sólo la página). */
-export class GovernancePolicyTypeCountDto {
-  @ApiProperty({ enum: GOVERNANCE_POLICY_TYPES }) type!: GovernancePolicyType;
-  @ApiProperty() total!: number;
-}
-
-export class GovernancePolicyPageDto {
-  @ApiProperty({ type: [GovernancePolicySummaryDto] })
-  items!: GovernancePolicySummaryDto[];
-  @ApiProperty({ nullable: true, type: String }) nextCursor!: string | null;
+export class PolicyPageDto {
+  @ApiProperty({ type: [PolicySummaryDto] }) items!: PolicySummaryDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
   @ApiProperty() limit!: number;
-  @ApiProperty({ description: 'Políticas que cumplen los filtros' })
-  total!: number;
-  @ApiProperty({ type: [GovernancePolicyTypeCountDto] })
-  byType!: GovernancePolicyTypeCountDto[];
+  @ApiProperty({ enum: POLICY_SORTS }) sort!: string;
+  @ApiProperty({ enum: SORT_ORDERS }) order!: string;
 }
 
-/** Destinos a los que se aplica una política. */
-export class GovernanceAppliesToDto {
-  @ApiProperty({ enum: ['ENTITY', 'FIELD', 'TENANT_BINDING'] })
-  kind!: 'ENTITY' | 'FIELD' | 'TENANT_BINDING';
+export class AppliedToItemDto {
+  @ApiProperty() schemaName!: string;
+  @ApiProperty() tableName!: string;
+  @ApiPropertyOptional({ nullable: true }) columnName!: string | null;
+}
+
+export class AppliedToDto {
   @ApiProperty() total!: number;
-  @ApiProperty({
-    type: [String],
-    description: 'Nombres calificados; recortada a 50',
-  })
-  items!: string[];
+  @ApiProperty({ type: [AppliedToItemDto] }) items!: AppliedToItemDto[];
   @ApiProperty() truncated!: boolean;
 }
 
-/** Un cambio de gobierno registrado sobre la política (sin las fotos antes/después). */
-export class GovernancePolicyChangeDto {
-  @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ nullable: true, type: String }) action!: string | null;
-  @ApiProperty({ format: 'uuid' }) changedByUserId!: string;
-  @ApiProperty({ nullable: true, type: String }) reason!: string | null;
-  @ApiProperty({ format: 'date-time' }) recordedAt!: string;
-}
-
-export class GovernancePolicyDetailDto extends GovernancePolicySummaryDto {
+export class PolicyDetailDto extends PolicySummaryDto {
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: string;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid' }) createdByUserId!:
+    string | null;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid' }) updatedByUserId!:
+    string | null;
   @ApiProperty({
-    nullable: true,
+    type: 'object',
+    additionalProperties: true,
     description:
-      'Parámetros de la regla de anonimización o reglas de manejo de la clasificación; null si el tipo no los tiene',
+      'Ajustes propios del tipo de política (modos de escritura, plazos, técnica, jurisdicción…). Códigos de concepto, nunca ids; de una regla de anonimización sólo los nombres de sus parámetros',
   })
-  configuration!: unknown;
-  @ApiProperty({ type: [GovernanceAppliesToDto] })
-  appliesTo!: GovernanceAppliesToDto[];
-  @ApiProperty({ type: [GovernancePolicyChangeDto] })
-  history!: GovernancePolicyChangeDto[];
+  settings!: Record<string, unknown>;
+  @ApiProperty({ type: AppliedToDto }) appliedTo!: AppliedToDto;
 }
 
-/** Datos del registro de gobierno sobre un campo. */
-export class GovernancePiiRegistryDto {
-  @ApiProperty({ nullable: true, type: Boolean }) isPii!: boolean | null;
-  @ApiProperty({ nullable: true, type: Boolean }) isPhi!: boolean | null;
-  @ApiProperty({ nullable: true, type: String }) classification!: string | null;
-  @ApiProperty({ nullable: true, type: String }) maskingStrategy!:
-    string | null;
-  @ApiProperty({ nullable: true, type: String }) anonymizationRule!:
-    string | null;
+export class ChangeLogEntryDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() targetType!: string;
+  @ApiProperty({ format: 'uuid' }) targetId!: string;
+  @ApiProperty({ description: 'Código del concepto de acción' })
+  action!: string;
+  @ApiProperty({ format: 'uuid' }) changedByUserId!: string;
+  @ApiPropertyOptional({ nullable: true }) reason!: string | null;
+  @ApiProperty({ type: String, format: 'date-time' }) recordedAt!: string;
 }
 
-export class GovernancePiiFieldDto {
+export class ChangeLogPageDto {
+  @ApiProperty({ type: [ChangeLogEntryDto] }) items!: ChangeLogEntryDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
+  @ApiProperty() limit!: number;
+  @ApiProperty({ example: 'recorded_at desc, id desc' }) order!: string;
+}
+
+export class RegistryRefDto {
+  @ApiProperty() code!: string;
+  @ApiPropertyOptional({ nullable: true }) name!: string | null;
+}
+
+export class EntityRegistryItemDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() schemaName!: string;
   @ApiProperty() tableName!: string;
-  @ApiProperty() columnName!: string;
-  @ApiProperty({
-    nullable: true,
-    type: String,
-    description:
-      'Nivel que clasificó el catálogo; null si sólo lo marca el registro de gobierno',
-  })
-  sensitivity!: string | null;
-  @ApiProperty({
-    nullable: true,
-    type: String,
-    description: 'Estado de revisión de la ficha de la columna en el catálogo',
-  })
-  reviewStatus!: string | null;
-  @ApiProperty({ enum: GOVERNANCE_PII_SOURCES })
-  source!: (typeof GOVERNANCE_PII_SOURCES)[number];
-  @ApiProperty({ nullable: true, type: GovernancePiiRegistryDto })
-  registry!: GovernancePiiRegistryDto | null;
+  @ApiPropertyOptional({ nullable: true, type: RegistryRefDto })
+  domain!: RegistryRefDto | null;
+  @ApiPropertyOptional({ nullable: true, type: RegistryRefDto })
+  classification!: RegistryRefDto | null;
+  @ApiPropertyOptional({ nullable: true }) ownerTeam!: string | null;
+  @ApiPropertyOptional({ nullable: true, type: Boolean }) containsPii!:
+    boolean | null;
+  @ApiPropertyOptional({ nullable: true, type: Boolean }) containsPhi!:
+    boolean | null;
+  @ApiProperty() isAppendOnly!: boolean;
+  @ApiProperty() isSoftDelete!: boolean;
+  @ApiProperty() hasHistory!: boolean;
+  @ApiPropertyOptional({ nullable: true }) retentionPolicyCode!: string | null;
+  @ApiPropertyOptional({ nullable: true }) writePolicyCode!: string | null;
+  @ApiProperty() fieldCount!: number;
+  @ApiProperty() personalFieldCount!: number;
 }
 
-export class GovernancePiiSummaryDto {
-  @ApiProperty({ description: 'Campos que cumplen los filtros' })
-  fields!: number;
-  @ApiProperty({ description: 'Tablas distintas entre esos campos' })
-  tables!: number;
-  @ApiProperty({ description: 'De ellos, con ficha aprobada en el catálogo' })
-  approved!: number;
-  @ApiProperty({
-    description:
-      'De ellos, sin ninguna regla de enmascarado ni anonimización en el registro',
-  })
-  withoutProtection!: number;
-  @ApiProperty({ type: 'object', additionalProperties: { type: 'number' } })
-  bySensitivity!: Record<string, number>;
-  @ApiProperty({ type: 'object', additionalProperties: { type: 'number' } })
-  bySource!: Record<string, number>;
+export class GovNotMeasuredDto {
+  @ApiProperty() field!: string;
+  @ApiProperty() reason!: string;
 }
 
-export class GovernancePiiSourcesDto {
-  @ApiProperty({
-    description:
-      'Columnas observadas en el catálogo de datos (cualquier sensibilidad)',
-  })
-  catalogColumns!: number;
-  @ApiProperty({
-    description: 'Campos dados de alta en el registro de gobierno',
-  })
-  registryFields!: number;
-}
-
-export class GovernancePiiPageDto {
-  @ApiProperty({ type: [GovernancePiiFieldDto] })
-  items!: GovernancePiiFieldDto[];
-  @ApiProperty({ nullable: true, type: String }) nextCursor!: string | null;
+export class EntityRegistryPageDto {
+  @ApiProperty({ type: [EntityRegistryItemDto] })
+  items!: EntityRegistryItemDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
   @ApiProperty() limit!: number;
-  @ApiProperty() total!: number;
-  @ApiProperty({ type: GovernancePiiSummaryDto })
-  summary!: GovernancePiiSummaryDto;
-  @ApiProperty({ type: GovernancePiiSourcesDto })
-  sources!: GovernancePiiSourcesDto;
+  @ApiProperty({ example: 'schema_name, table_name, id' }) order!: string;
+  @ApiProperty({
+    type: [GovNotMeasuredDto],
+    description: 'Lo que se pidió y no tiene fuente (p. ej. registro vacío)',
+  })
+  notMeasured!: GovNotMeasuredDto[];
+}
+
+export class FieldRegistryItemDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() columnName!: string;
+  @ApiPropertyOptional({ nullable: true }) classification!: string | null;
+  @ApiPropertyOptional({ nullable: true, type: Boolean }) isPii!:
+    boolean | null;
+  @ApiPropertyOptional({ nullable: true, type: Boolean }) isPhi!:
+    boolean | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Código del concepto de enmascaramiento',
+  })
+  maskingStrategy!: string | null;
+  @ApiPropertyOptional({ nullable: true }) anonymizationRuleCode!:
+    string | null;
+}
+
+export class FieldRegistryPageDto {
+  @ApiProperty({ type: [FieldRegistryItemDto] }) items!: FieldRegistryItemDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
+  @ApiProperty() limit!: number;
+  @ApiProperty({ example: 'column_name, id' }) order!: string;
+}
+
+// ---- dominios, retenciones legales y ejecuciones de retención ------------------------------
+
+/** Filtros de `GET /admin/governance/domains`. */
+export class DomainListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({
+    maxLength: 120,
+    description: 'Busca en código y nombre, sin mayúsculas',
+  })
+  @IsOptional()
+  @Transform(recortar)
+  @IsString()
+  @MaxLength(120)
+  q?: string;
+}
+
+/** Filtros de `GET /admin/governance/legal-holds`. */
+export class LegalHoldListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({
+    description: 'Código del estado (concepto), p. ej. `ACTIVE` o `RELEASED`',
+  })
+  @IsOptional()
+  @Matches(CODIGO)
+  status?: string;
+
+  @ApiPropertyOptional({
+    description: 'Código del tipo de objetivo (concepto)',
+  })
+  @IsOptional()
+  @Matches(CODIGO)
+  targetType?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Organización del hold' })
+  @IsOptional()
+  @IsUUID()
+  tenantId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Objetivo retenido' })
+  @IsOptional()
+  @IsUUID()
+  targetId?: string;
+}
+
+/** Filtros de `GET /admin/governance/retention-executions`. */
+export class RetentionExecutionListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({ format: 'uuid', description: 'Política de retención' })
+  @IsOptional()
+  @IsUUID()
+  policyId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Entidad del registro' })
+  @IsOptional()
+  @IsUUID()
+  entityRegistryId?: string;
+
+  @ApiPropertyOptional({ enum: ['RUNNING', 'SUCCEEDED', 'FAILED'] })
+  @IsOptional()
+  @IsIn(['RUNNING', 'SUCCEEDED', 'FAILED'])
+  status?: string;
+
+  @ApiPropertyOptional({ description: 'Registrada desde (ISO 8601, incluido)' })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  @ApiPropertyOptional({ description: 'Registrada hasta (ISO 8601, excluido)' })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
 }

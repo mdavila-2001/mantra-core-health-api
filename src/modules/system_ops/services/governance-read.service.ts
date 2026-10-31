@@ -1,127 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ResourceNotFoundException } from '../../../common';
 import {
-  coincide,
-  compararClaves,
-  paginar,
-} from '../../data_catalog/application/paginacion';
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+} from '../../../common/pagination/keyset-cursor';
 import {
-  GOVERNANCE_DEFAULT_PAGE_SIZE,
-  GOVERNANCE_POLICY_TYPES,
-  type GovernanceAppliesToDto,
-  type GovernancePiiFieldDto,
-  type GovernancePiiPageDto,
-  type GovernancePiiSummaryDto,
-  type GovernancePolicyDetailDto,
-  type GovernancePolicyPageDto,
-  type GovernancePolicySummaryDto,
-  type GovernancePolicyType,
-  type ListGovernancePiiFieldsQueryDto,
-  type ListGovernancePoliciesQueryDto,
+  assertOneOf,
+  invalidCursor,
+  readCursorFields,
+} from '../../../common/pagination/keyset-fields';
+import {
+  GOV_CHANGE_LOG_WINDOW_DAYS,
+  POLICY_TYPES,
+  GOV_DEFAULT_PAGE_SIZE,
+  type ChangeLogQueryDto,
+  type EntityRegistryQueryDto,
+  type GovPageQueryDto,
+  type PolicyListQueryDto,
+  type PolicyType,
 } from '../dto/governance-read.dto';
 import {
-  APPLIES_TO_LIMIT,
+  APPLIED_TO_LIMIT,
   GovernanceReadRepository,
-  type PiiFieldRow,
-  type PolicyRow,
 } from '../repositories/governance-read.repository';
 
-type Scalar = string | number | boolean | null;
-
-/** Sólo escalares viajan en `attributes`: un objeto anidado no tendría rótulo en la lista. */
-function scalars(attributes: Record<string, unknown>): Record<string, Scalar> {
-  const out: Record<string, Scalar> = {};
-  for (const [key, value] of Object.entries(attributes)) {
-    if (value === undefined || value === null) out[key] = null;
-    else if (
-      typeof value === 'string' ||
-      typeof value === 'number' ||
-      typeof value === 'boolean'
-    )
-      out[key] = value;
-  }
-  return out;
-}
-
-function toSummary(row: PolicyRow): GovernancePolicySummaryDto {
-  return {
-    id: row.id,
-    type: row.type as GovernancePolicyType,
-    code: row.code,
-    name: row.name,
-    stateCode: row.stateCode,
-    stateLabel: row.stateDisplay,
-    attributes: scalars(row.attributes),
-    updatedAt: row.updatedAt ? row.updatedAt.toISOString() : null,
-  };
-}
-
-const SECRET_KEY =
-  /salt|secret|pepper|password|passphrase|token|credential|api[_-]?key|private|(^|[_-])key($|[_-])/i;
-/** `hmacKey`, `signingKey`: la «K» mayúscula marca el final de la palabra (sin confundir «monkey»). */
-const CAMEL_KEY = /[a-z0-9]Key$/;
-/** Lo que se muestra en lugar de un valor que parece secreto. */
-export const REDACTED = '[oculto]';
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
 /**
- * Copia la configuración de una regla ocultando todo valor cuya clave parezca un secreto
- * (sal, pimienta, clave, token…). La configuración de una regla de anonimización puede llevar el
- * material con el que se enmascara, y quien lee el portal no tiene por qué verlo.
- */
-export function redactConfiguration(value: unknown, depth = 0): unknown {
-  if (depth > 8 || value === null || typeof value !== 'object') return value;
-  if (Array.isArray(value))
-    return value.map((v) => redactConfiguration(v, depth + 1));
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>).map(([k, v]) => [
-      k,
-      (SECRET_KEY.test(k) || CAMEL_KEY.test(k)) && v !== null && v !== undefined
-        ? REDACTED
-        : redactConfiguration(v, depth + 1),
-    ]),
-  );
-}
-
-/** Clave de orden y de cursor: tipo, código e id (el id desempata códigos repetidos). */
-const policyKey = (p: PolicyRow): string => `${p.type}|${p.code}|${p.id}`;
-
-function piiSource(row: PiiFieldRow): GovernancePiiFieldDto['source'] {
-  if (row.sensitivity && row.in_registry) return 'BOTH';
-  return row.sensitivity ? 'CATALOG' : 'REGISTRY';
-}
-
-function toPiiField(row: PiiFieldRow): GovernancePiiFieldDto {
-  return {
-    schemaName: row.schema_name,
-    tableName: row.table_name,
-    columnName: row.column_name,
-    sensitivity: row.sensitivity,
-    reviewStatus: row.review_status,
-    source: piiSource(row),
-    registry: row.in_registry
-      ? {
-          isPii: row.registry_is_pii,
-          isPhi: row.registry_is_phi,
-          classification: row.registry_classification,
-          maskingStrategy: row.registry_masking,
-          anonymizationRule: row.registry_anonymization_rule,
-        }
-      : null,
-  };
-}
-
-const piiKey = (f: GovernancePiiFieldDto): string =>
-  `${f.schemaName}|${f.tableName}|${f.columnName}`;
-
-/** Un campo está sin protección declarada si el registro no le asigna enmascarado ni anonimización. */
-const isUnprotected = (f: GovernancePiiFieldDto): boolean =>
-  !f.registry || (!f.registry.maskingStrategy && !f.registry.anonymizationRule);
-
-/**
- * Lecturas del gobierno de datos para el portal administrativo: políticas (escritura,
- * retención, anonimización, clasificación y residencia) y el inventario de campos con datos
- * personales. Sólo lee; la escritura sigue en {@link GovernanceCatalogService} y compañía.
+ * Lecturas de gobierno de datos de `system_ops`: políticas, bitácora de cambios y registro de
+ * entidades/campos. **Ninguna escribe**; los endpoints de escritura de gobierno siguen en
+ * {@link GovernanceCatalogService} y compañía, cada uno con su `@Audited`.
  */
 @Injectable()
 export class GovernanceReadService {
@@ -134,110 +43,258 @@ export class GovernanceReadService {
     return this.em.fork();
   }
 
-  async listPolicies(
-    query: ListGovernancePoliciesQueryDto,
-  ): Promise<GovernancePolicyPageDto> {
-    const all = await this.repo.listPolicies(this.db());
-    const searched = all.filter((p) => coincide(query.q, p.code, p.name));
-    const filtered = searched
-      .filter((p) => !query.type || p.type === query.type)
-      .sort((a, b) => compararClaves(policyKey(a), policyKey(b)));
-    const page = paginar(filtered, policyKey, {
-      cursor: query.cursor,
-      limit: query.limit ?? GOVERNANCE_DEFAULT_PAGE_SIZE,
+  private limit(q: GovPageQueryDto): number {
+    return q.limit ?? GOV_DEFAULT_PAGE_SIZE;
+  }
+
+  // ---- políticas -------------------------------------------------------------------------
+
+  async policies(q: PolicyListQueryDto) {
+    const limit = this.limit(q);
+    const sort = q.sort ?? 'code';
+    const order = q.order ?? 'asc';
+    let cursor: { k: string; t: string; i: string } | undefined;
+    if (q.cursor) {
+      const k = decodeKeysetCursor(q.cursor);
+      // El cursor lleva el orden con que se emitió: uno de otro orden saltaría filas en silencio.
+      if (k.m !== `${sort}:${order}`) throw invalidCursor();
+      const c = readCursorFields(k, {
+        k: sort === 'code' ? 'text' : 'timestamp',
+        t: 'text',
+        i: 'uuid',
+      });
+      assertOneOf(c.t, POLICY_TYPES);
+      cursor = c;
+    }
+    const filas = await this.repo.policies(this.db(), {
+      type: q.type,
+      state: q.state,
+      q: q.q,
+      sort,
+      order,
+      cursor,
+      limit,
     });
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina[pagina.length - 1];
     return {
-      items: page.items.map(toSummary),
-      nextCursor: page.nextCursor,
-      limit: page.limit,
-      total: page.total,
-      // Los conteos ignoran el filtro de tipo a propósito: sirven para ver qué hay en cada tipo.
-      byType: GOVERNANCE_POLICY_TYPES.map((type) => ({
-        type,
-        total: searched.filter((p) => p.type === type).length,
+      items: pagina.map((f) => ({
+        policyType: f.policy_type,
+        id: f.id,
+        code: f.code,
+        name: f.name,
+        state: f.state,
+        version: f.row_version,
+        updatedAt: f.updated_at,
       })),
+      nextCursor:
+        hayMas && ultima
+          ? encodeKeysetCursor({
+              m: `${sort}:${order}`,
+              k: sort === 'code' ? ultima.code : ultima.updated_at,
+              t: ultima.policy_type,
+              i: ultima.id,
+            })
+          : null,
+      limit,
+      sort,
+      order,
     };
   }
 
-  async getPolicy(id: string): Promise<GovernancePolicyDetailDto> {
+  async policy(type: PolicyType, id: string) {
     const em = this.db();
-    const row = await this.repo.findPolicy(em, id);
-    if (!row) {
-      throw new ResourceNotFoundException('Política no encontrada', {
-        policyId: id,
+    const fila = await this.repo.policyDetail(em, type, id);
+    if (!fila) throw new ResourceNotFoundException('Política no encontrada');
+    const aplicada = await this.repo.appliedTo(em, type, id);
+    const total = aplicada[0]?.total ?? 0;
+    return {
+      policyType: fila.policy_type,
+      id: fila.id,
+      code: fila.code,
+      name: fila.name,
+      state: fila.state,
+      version: fila.row_version,
+      createdAt: fila.created_at,
+      updatedAt: fila.updated_at,
+      createdByUserId: fila.created_by_user_id,
+      updatedByUserId: fila.updated_by_user_id,
+      settings: fila.settings,
+      appliedTo: {
+        total,
+        items: aplicada.map((a) => ({
+          schemaName: a.schema_name,
+          tableName: a.table_name,
+          columnName: a.column_name,
+        })),
+        truncated: total > APPLIED_TO_LIMIT,
+      },
+    };
+  }
+
+  // ---- bitácora de cambios ----------------------------------------------------------------
+
+  async changeLog(q: ChangeLogQueryDto, now: Date = new Date()) {
+    const limit = this.limit(q);
+    const from = q.from
+      ? new Date(q.from)
+      : new Date(now.getTime() - GOV_CHANGE_LOG_WINDOW_DAYS * MS_POR_DIA);
+    const to = q.to ? new Date(q.to) : undefined;
+    if (to && to <= from)
+      throw new BadRequestException('«to» debe ser posterior a «from»');
+    let cursor: { t: string; i: string } | undefined;
+    if (q.cursor) {
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        t: 'timestamp',
+        i: 'uuid',
       });
     }
-    const [configuration, appliesTo, history] = await Promise.all([
-      this.repo.policyConfiguration(em, row.type, row.id),
-      this.repo.appliesTo(em, row.type, row.id),
-      this.repo.history(em, row.id),
-    ]);
-    return {
-      ...toSummary(row),
-      configuration: redactConfiguration(configuration),
-      appliesTo: appliesTo.map((g): GovernanceAppliesToDto => ({
-        kind: g.kind,
-        total: g.total,
-        items: g.items,
-        truncated: g.total > Math.min(g.items.length, APPLIES_TO_LIMIT),
-      })),
-      history: history.map((h) => ({
-        id: h.id,
-        action: h.action_display ?? h.action_code,
-        changedByUserId: h.changed_by_user_id,
-        reason: h.reason,
-        recordedAt: new Date(h.recorded_at).toISOString(),
-      })),
-    };
-  }
-
-  async listPiiFields(
-    query: ListGovernancePiiFieldsQueryDto,
-  ): Promise<GovernancePiiPageDto> {
-    const em = this.db();
-    const [rows, sources] = await Promise.all([
-      this.repo.piiFields(em),
-      this.repo.piiSources(em),
-    ]);
-    const filtered = rows
-      .map(toPiiField)
-      .filter(
-        (f) =>
-          (!query.schema || f.schemaName === query.schema) &&
-          (!query.sensitivity || f.sensitivity === query.sensitivity) &&
-          (!query.source || f.source === query.source) &&
-          coincide(query.q, f.schemaName, f.tableName, f.columnName),
-      )
-      .sort((a, b) => compararClaves(piiKey(a), piiKey(b)));
-    const page = paginar(filtered, piiKey, {
-      cursor: query.cursor,
-      limit: query.limit ?? GOVERNANCE_DEFAULT_PAGE_SIZE,
+    const filas = await this.repo.changeLog(this.db(), {
+      from,
+      to,
+      targetType: q.targetType,
+      targetId: q.targetId,
+      changedBy: q.changedBy,
+      cursor,
+      limit,
     });
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina[pagina.length - 1];
     return {
-      items: page.items,
-      nextCursor: page.nextCursor,
-      limit: page.limit,
-      total: page.total,
-      summary: this.piiSummary(filtered),
-      sources,
+      items: pagina.map((f) => ({
+        id: f.id,
+        targetType: f.target_type,
+        targetId: f.target_id,
+        action: f.action ?? 'UNKNOWN',
+        changedByUserId: f.changed_by_user_id,
+        reason: f.reason,
+        recordedAt: f.recorded_at,
+      })),
+      nextCursor:
+        hayMas && ultima
+          ? encodeKeysetCursor({ t: ultima.recorded_at, i: ultima.id })
+          : null,
+      limit,
+      order: 'recorded_at desc, id desc',
     };
   }
 
-  private piiSummary(fields: GovernancePiiFieldDto[]): GovernancePiiSummaryDto {
-    const bySensitivity: Record<string, number> = {};
-    const bySource: Record<string, number> = {};
-    for (const f of fields) {
-      const level = f.sensitivity ?? 'SIN_NIVEL_EN_CATALOGO';
-      bySensitivity[level] = (bySensitivity[level] ?? 0) + 1;
-      bySource[f.source] = (bySource[f.source] ?? 0) + 1;
+  // ---- registro de entidades y campos ------------------------------------------------------
+
+  async entityRegistry(q: EntityRegistryQueryDto) {
+    const limit = this.limit(q);
+    let cursor: { s: string; t: string; i: string } | undefined;
+    if (q.cursor) {
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        s: 'text',
+        t: 'text',
+        i: 'uuid',
+      });
     }
+    const filas = await this.repo.entityRegistry(this.db(), {
+      schema: q.schema,
+      q: q.q,
+      domain: q.domain,
+      classification: q.classification,
+      containsPii: q.containsPii,
+      containsPhi: q.containsPhi,
+      cursor,
+      limit,
+    });
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina[pagina.length - 1];
+    const sinFiltros =
+      !q.schema &&
+      !q.q &&
+      !q.domain &&
+      !q.classification &&
+      q.containsPii === undefined &&
+      q.containsPhi === undefined &&
+      !q.cursor;
     return {
-      fields: fields.length,
-      tables: new Set(fields.map((f) => `${f.schemaName}.${f.tableName}`)).size,
-      approved: fields.filter((f) => f.reviewStatus === 'APPROVED').length,
-      withoutProtection: fields.filter(isUnprotected).length,
-      bySensitivity,
-      bySource,
+      items: pagina.map((f) => ({
+        id: f.id,
+        schemaName: f.schema_name,
+        tableName: f.table_name,
+        domain: f.domain_code
+          ? { code: f.domain_code, name: f.domain_name }
+          : null,
+        classification: f.classification_code
+          ? { code: f.classification_code, name: f.classification_name }
+          : null,
+        ownerTeam: f.owner_team,
+        containsPii: f.contains_pii,
+        containsPhi: f.contains_phi,
+        isAppendOnly: f.is_append_only,
+        isSoftDelete: f.is_soft_delete,
+        hasHistory: f.has_history,
+        retentionPolicyCode: f.retention_policy_code,
+        writePolicyCode: f.write_policy_code,
+        fieldCount: f.field_count,
+        personalFieldCount: f.personal_field_count,
+      })),
+      nextCursor:
+        hayMas && ultima
+          ? encodeKeysetCursor({
+              s: ultima.schema_name,
+              t: ultima.table_name,
+              i: ultima.id,
+            })
+          : null,
+      limit,
+      order: 'schema_name, table_name, id',
+      // Un registro vacío es un hecho, no un error: nadie ha declarado entidades todavía.
+      notMeasured:
+        sinFiltros && pagina.length === 0
+          ? [
+              {
+                field: 'entityRegistry',
+                reason:
+                  'system_ops.entity_registry está vacío: ninguna entidad se declaró con POST /admin/governance/entity-registry',
+              },
+            ]
+          : [],
+    };
+  }
+
+  async fieldRegistry(entityId: string, q: GovPageQueryDto) {
+    const limit = this.limit(q);
+    let cursor: { c: string; i: string } | undefined;
+    if (q.cursor) {
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        c: 'text',
+        i: 'uuid',
+      });
+    }
+    const em = this.db();
+    if (!(await this.repo.entityExists(em, entityId)))
+      throw new ResourceNotFoundException('Entidad del registro no encontrada');
+    const filas = await this.repo.fieldRegistry(em, entityId, {
+      cursor,
+      limit,
+    });
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina[pagina.length - 1];
+    return {
+      items: pagina.map((f) => ({
+        id: f.id,
+        columnName: f.column_name,
+        classification: f.classification,
+        isPii: f.is_pii,
+        isPhi: f.is_phi,
+        maskingStrategy: f.masking_strategy,
+        anonymizationRuleCode: f.anonymization_rule_code,
+      })),
+      nextCursor:
+        hayMas && ultima
+          ? encodeKeysetCursor({ c: ultima.column_name, i: ultima.id })
+          : null,
+      limit,
+      order: 'column_name, id',
     };
   }
 }

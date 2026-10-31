@@ -12,13 +12,13 @@
 |---|---|---|---|---|---|
 | [affiliation_invitation_uses](#affiliation_invitation_uses) | Deja rastro de cada uso, aceptado o rechazado, de una invitación de afiliación para auditar quién la canjeó y con qué resultado. | 6 | 6 | 0 | SIN_ENTIDAD |
 | [affiliation_invitations](#affiliation_invitations) | Conserva las invitaciones por enlace o QR con las que una organización afilia a un profesional o a personal de apoyo, guardando solo el hash del secreto, el tope de usos y el vencimiento. | 15 | 8 | 0 | SIN_ENTIDAD |
-| [branch_memberships](#branch_memberships) | Relaciona miembros con sedes específicas para representar su asignación operativa dentro de una organización. | 12 | 8 | 8 | DIVERGE |
-| [branches](#branches) | Identifica sedes de una organización sanitaria para ubicar prestación, operación y configuración local. | 16 | 7 | 22 | COINCIDE |
+| [branch_memberships](#branch_memberships) | Relaciona miembros con sedes específicas para representar su asignación operativa dentro de una organización. | 12 | 8 | 77 | COINCIDE |
+| [branches](#branches) | Identifica sedes de una organización sanitaria para ubicar prestación, operación y configuración local. | 16 | 7 | 25 | COINCIDE |
 | [tenant_affiliation_documents](#tenant_affiliation_documents) | Conserva documentos que respaldan afiliaciones de tenants con organizaciones o redes del sistema médico. | 23 | 8 | 13 | COINCIDE |
 | [tenant_legal_representatives](#tenant_legal_representatives) | Identifica representantes legales asociados a organizaciones para sostener trámites y responsabilidades institucionales. | 16 | 4 | 4 | COINCIDE |
-| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 18 | 14 | 194 | DIVERGE |
+| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 18 | 14 | 317 | DIVERGE |
 | [tenant_web_configs](#tenant_web_configs) | Almacena configuración web por tenant para presentar y dirigir servicios institucionales bajo sus dominios. | 18 | 3 | 0 | COINCIDE |
-| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 145 | COINCIDE |
+| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 171 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -284,7 +284,7 @@ Relaciona miembros con sedes específicas para representar su asignación operat
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: branch_memberships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `BranchMemberships` — `src/modules/directory/entities/branch_memberships.entity.ts`
-- **Resumen:** 12 columnas · 8 índices · 8 FK salientes · 0 entrantes · 8 operaciones
+- **Resumen:** 12 columnas · 8 índices · 8 FK salientes · 0 entrantes · 77 operaciones
 
 #### Columnas
 
@@ -300,8 +300,8 @@ Relaciona miembros con sedes específicas para representar su asignación operat
 | 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 10 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/directory/entities/branch_memberships.entity.ts:70`)_ | coincide |
-| 11 | `workday_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 12 | `responsible_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 11 | `workday_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 12 | `responsible_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -320,10 +320,10 @@ Relaciona miembros con sedes específicas para representar su asignación operat
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_branch_memberships_tenant_membership_id` | no | tenant_membership_id | Soporta la clave foránea fk_branch_memberships_tenant_membership_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_membership_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_branch_memberships_branch_id` | no | branch_id | Soporta la clave foránea fk_branch_memberships_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «branch_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_branch_memberships_tenant_membership_id` | no | tenant_membership_id | Soporta la clave foránea fk_branch_memberships_tenant_membership_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_membership_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_branch_memberships_branch_id` | no | branch_id | Soporta la clave foránea fk_branch_memberships_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «branch_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_branch_memberships_local_role_concept_id` | no | local_role_concept_id | Soporta la clave foránea fk_branch_memberships_local_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_branch_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_branch_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_branch_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_branch_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_branch_memberships_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_branch_memberships_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_branch_memberships_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_branch_memberships_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_branch_memberships_workday_concept_id` | no | workday_concept_id | Soporta la clave foránea fk_branch_memberships_workday_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -333,6 +333,40 @@ Relaciona miembros con sedes específicas para representar su asignación operat
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /accounting/cost-centers | LEE | DIRECTA |
+| POST /accounting/cost-centers/{id}/unit-link | LEE | DIRECTA |
+| GET /accounting/infrastructure-items | LEE | DIRECTA |
+| PATCH /accounting/infrastructure-items/{id} | LEE | DIRECTA |
+| GET /billing/bed-day/stays | LEE | DIRECTA |
+| POST /billing/charge-captures/{id}/void | LEE | DIRECTA |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | DIRECTA |
+| GET /billing/encounters/{encounterId}/pending-charges | LEE | DIRECTA |
+| GET /billing/space-tariffs | LEE | DIRECTA |
+| POST /billing/space-tariffs | LEE | DIRECTA |
+| POST /billing/space-tariffs/{id}/close | LEE | DIRECTA |
+| POST /internal/billing/bed-day-charges/run | LEE | DIRECTA |
+| POST /census-days/{id}/adjustments | LEE | DIRECTA |
+| POST /clinical/admissions | LEE | DIRECTA |
+| POST /clinical/bed-compatibility | LEE | DIRECTA |
+| POST /clinical/bed-swaps | LEE | DIRECTA |
+| POST /clinical/encounter-locations/{id}/cancel | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/bed-assignment | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/bed-compatibility | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/transfer | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
+| PATCH /clinical/placement-incidents/{id} | LEE | DIRECTA |
+| POST /internal/clinical/census-close-tick | LEE | DIRECTA |
+| GET /sites/{siteId}/attending-practitioners | LEE | DIRECTA |
+| GET /sites/{siteId}/census | LEE | DIRECTA |
+| POST /sites/{siteId}/census/{date}/close | LEE | DIRECTA |
+| GET /sites/{siteId}/inpatient-indicators | LEE | DIRECTA |
+| GET /sites/{siteId}/inpatients | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
+| PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | LEE | DIRECTA |
 | POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | CREA | DIRECTA |
 | POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | LEE | DIRECTA |
@@ -341,6 +375,41 @@ Relaciona miembros con sedes específicas para representar su asignación operat
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | ACTUALIZA | POR_TIPO |
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | CREA | DIRECTA |
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | LEE | DIRECTA |
+| PATCH /care-spaces/{id} | LEE | DIRECTA |
+| POST /care-spaces/{id}/availability | LEE | DIRECTA |
+| GET /care-spaces/{id}/blocks | LEE | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | DIRECTA |
+| POST /care-spaces/{id}/hygiene | LEE | DIRECTA |
+| POST /care-spaces/{id}/isolation | LEE | DIRECTA |
+| POST /care-spaces/{id}/lifecycle | LEE | DIRECTA |
+| POST /care-spaces/{id}/move | LEE | DIRECTA |
+| GET /care-spaces/{id}/operational-state | LEE | DIRECTA |
+| GET /care-spaces/{id}/status-events | LEE | DIRECTA |
+| GET /care-spaces/{id}/stock | LEE | DIRECTA |
+| POST /care-spaces/{id}/unit-assignments | LEE | DIRECTA |
+| DELETE /care-spaces/{id}/unit-assignments/{assignmentId} | LEE | DIRECTA |
+| PATCH /clinical-units/{id} | LEE | DIRECTA |
+| POST /clinical-units/{id}/lifecycle | LEE | DIRECTA |
+| GET /practice/infrastructure-access/me | LEE | DIRECTA |
+| GET /sites/{siteId}/bed-board | LEE | DIRECTA |
+| POST /sites/{siteId}/care-spaces | LEE | DIRECTA |
+| POST /sites/{siteId}/care-spaces/bulk | LEE | DIRECTA |
+| POST /sites/{siteId}/care-spaces/import | LEE | DIRECTA |
+| GET /sites/{siteId}/cleaning-orders | LEE | DIRECTA |
+| POST /sites/{siteId}/cleaning-orders | LEE | DIRECTA |
+| POST /sites/{siteId}/clinical-units | LEE | DIRECTA |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | DIRECTA |
+| GET /sites/{siteId}/regulatory | LEE | DIRECTA |
+| PATCH /sites/{siteId}/regulatory | LEE | DIRECTA |
+| POST /sites/{siteId}/regulatory/verify-snis | LEE | DIRECTA |
+| GET /sites/{siteId}/structure | LEE | DIRECTA |
+| POST /or-blocks/{id}/cancel | LEE | DIRECTA |
+| POST /or-blocks/{id}/release | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /sites/{siteId}/operating-rooms | LEE | DIRECTA |
+| GET /sites/{siteId}/or-blocks | LEE | DIRECTA |
+| POST /sites/{siteId}/or-blocks | LEE | DIRECTA |
+| GET /sites/{siteId}/or-utilization | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -365,7 +434,7 @@ Identifica sedes de una organización sanitaria para ubicar prestación, operaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: branches`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `Branches` — `src/modules/directory/entities/branches.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 5 FK salientes · 24 entrantes · 22 operaciones
+- **Resumen:** 16 columnas · 7 índices · 5 FK salientes · 24 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -441,9 +510,11 @@ Identifica sedes de una organización sanitaria para ubicar prestación, operaci
 | GET /referrals | LEE | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
 | GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
 | PATCH /referrals/{id}/cancel | LEE | DIRECTA |
 | PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
 | PATCH /referrals/{id}/respond | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /referrals/me | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants/{tenantId}/suspend | ACTUALIZA | POR_TIPO |
@@ -458,6 +529,7 @@ Identifica sedes de una organización sanitaria para ubicar prestación, operaci
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /insurance/portability/export | LEE | POR_SQL |
+| POST /practices/{practiceId}/sites | LEE | DIRECTA |
 | POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 
@@ -674,7 +746,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenant_memberships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `TenantMemberships` — `src/modules/directory/entities/tenant_memberships.entity.ts`
-- **Resumen:** 18 columnas · 14 índices · 12 FK salientes · 2 entrantes · 194 operaciones
+- **Resumen:** 18 columnas · 14 índices · 12 FK salientes · 2 entrantes · 317 operaciones
 
 #### Columnas
 
@@ -695,8 +767,8 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/directory/entities/tenant_memberships.entity.ts:100`)_ | coincide |
-| 16 | `workday_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.49 (ORG-PER-003 / INS-PER-003 / PHAR-PER-004, issue #58): jornada del integrante y quien responde por el. Nullable: los vinculos existentes no los declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_04_directory.puml:82`)_ | **AUSENTE_EN_ORM** |
-| 17 | `responsible_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 16 | `workday_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.49 (ORG-PER-003 / INS-PER-003 / PHAR-PER-004, issue #58): jornada del integrante y quien responde por el. Nullable: los vinculos existentes no los declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_04_directory.puml:82`)_ | coincide |
+| 17 | `responsible_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `origin_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.77 (revision de seguridad N10): origen de la membresia (directory:MEMBERSHIP_ORIGIN_*: creada por el dueno, anadida por un administrador, canje de invitacion, SOLO por un vinculo de apoyo, o desconocido). Nullable: las filas existentes quedan en NULL (= desconocido); NUNCA se marcan como solo-apoyo por backfill. Lo escribe la API al crear la membresia. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_04_directory.puml:86`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
@@ -722,11 +794,11 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_tenant_memberships_user_id` | no | user_id | Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 11 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_tenant_memberships_tenant_id` | no | tenant_id | Soporta la clave foránea fk_tenant_memberships_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 12 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_user_id` | no | user_id | Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 13 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_tenant_id` | no | tenant_id | Soporta la clave foránea fk_tenant_memberships_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 14 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_tenant_memberships_primary_branch_id` | no | primary_branch_id | Soporta la clave foránea fk_tenant_memberships_primary_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_tenant_memberships_tenant_role_concept_id` | no | tenant_role_concept_id | Soporta la clave foránea fk_tenant_memberships_tenant_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_role_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_tenant_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_tenant_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 11 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_tenant_role_concept_id` | no | tenant_role_concept_id | Soporta la clave foránea fk_tenant_memberships_tenant_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_role_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenant_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_tenant_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 13 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_tenant_memberships_access_scope_concept_id` | no | access_scope_concept_id | Soporta la clave foránea fk_tenant_memberships_access_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_invited_by_user_id` | no | invited_by_user_id | Soporta la clave foránea fk_tenant_memberships_invited_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_tenant_memberships_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -735,7 +807,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | `ix_tenant_memberships_workday_concept_id` | no | workday_concept_id | Soporta la clave foránea fk_tenant_memberships_workday_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_responsible_user_id` | no | responsible_user_id | Soporta la clave foránea fk_tenant_memberships_responsible_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenant_memberships_origin_concept_id` | no | origin_concept_id | Soporta la clave foránea fk_tenant_memberships_origin_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_tenant_memberships_active_user_tenant` | sí | user_id, tenant_id donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' | Garantiza que no se repita la combinación (user_id, tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' _(ESTRUCTURAL)_; 11 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_tenant_memberships_active_user_tenant` | sí | user_id, tenant_id donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' | Garantiza que no se repita la combinación (user_id, tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_tenant_memberships_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE status_concept_id = '13ca1b46-61d5-5c25-9d49-8247bcd7769c' _(ESTRUCTURAL)_; 13 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -747,11 +819,41 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /accounting/cost-centers | LEE | DIRECTA |
+| POST /accounting/cost-centers/{id}/unit-link | LEE | DIRECTA |
+| GET /accounting/infrastructure-items | LEE | DIRECTA |
+| PATCH /accounting/infrastructure-items/{id} | LEE | DIRECTA |
 | POST /authz/care-relationships | LEE | DIRECTA |
 | POST /authz/legal-representations | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
+| GET /billing/bed-day/stays | LEE | DIRECTA |
+| POST /billing/charge-captures/{id}/void | LEE | DIRECTA |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | DIRECTA |
+| GET /billing/encounters/{encounterId}/pending-charges | LEE | DIRECTA |
+| GET /billing/space-tariffs | LEE | DIRECTA |
+| POST /billing/space-tariffs | LEE | DIRECTA |
+| POST /billing/space-tariffs/{id}/close | LEE | DIRECTA |
+| POST /internal/billing/bed-day-charges/run | LEE | DIRECTA |
+| POST /census-days/{id}/adjustments | LEE | DIRECTA |
+| POST /clinical/admissions | LEE | DIRECTA |
+| POST /clinical/bed-compatibility | LEE | DIRECTA |
+| POST /clinical/bed-swaps | LEE | DIRECTA |
+| POST /clinical/encounter-locations/{id}/cancel | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/bed-assignment | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/bed-compatibility | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/transfer | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
+| PATCH /clinical/placement-incidents/{id} | LEE | DIRECTA |
+| POST /internal/clinical/census-close-tick | LEE | DIRECTA |
+| GET /sites/{siteId}/attending-practitioners | LEE | DIRECTA |
+| GET /sites/{siteId}/census | LEE | DIRECTA |
+| POST /sites/{siteId}/census/{date}/close | LEE | DIRECTA |
+| GET /sites/{siteId}/inpatient-indicators | LEE | DIRECTA |
+| GET /sites/{siteId}/inpatients | LEE | DIRECTA |
 | DELETE /community/blocks | LEE | DIRECTA |
 | GET /community/blocks | LEE | DIRECTA |
 | POST /community/blocks | LEE | DIRECTA |
@@ -808,7 +910,46 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
+| POST /me/practitioner/support-invitations | CREA | DIRECTA |
+| POST /me/practitioner/support-invitations | LEE | DIRECTA |
+| GET /me/practitioner/support-team | LEE | POR_SQL |
+| POST /me/practitioner/support-team/{id}/end | ACTUALIZA | POR_TIPO |
+| POST /me/practitioner/support-team/{id}/end | LEE | DIRECTA |
+| GET /me/support-access | LEE | POR_SQL |
+| GET /me/support-agenda | LEE | POR_SQL |
+| GET /me/support-engagements | LEE | POR_SQL |
+| POST /me/support-engagements/{id}/confirm | ACTUALIZA | POR_TIPO |
+| POST /me/support-engagements/{id}/confirm | CREA | DIRECTA |
+| POST /me/support-engagements/{id}/confirm | LEE | DIRECTA |
+| POST /me/support-engagements/{id}/decline | ACTUALIZA | POR_TIPO |
+| POST /me/support-engagements/{id}/decline | CREA | DIRECTA |
+| POST /me/support-engagements/{id}/decline | LEE | DIRECTA |
+| POST /me/support-engagements/{id}/leave | ACTUALIZA | POR_TIPO |
+| POST /me/support-engagements/{id}/leave | LEE | DIRECTA |
+| GET /org/support-catalog | LEE | POR_SQL |
+| GET /org/support-engagement-requests | LEE | POR_SQL |
+| POST /org/support-engagement-requests/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /org/support-engagement-requests/{id}/decision | CREA | DIRECTA |
+| POST /org/support-engagement-requests/{id}/decision | LEE | DIRECTA |
+| GET /org/support-engagements | LEE | POR_SQL |
+| POST /org/support-engagements/{id}/end | ACTUALIZA | POR_TIPO |
+| POST /org/support-engagements/{id}/end | LEE | DIRECTA |
+| POST /org/team/invitations | CREA | DIRECTA |
+| POST /org/team/invitations | LEE | DIRECTA |
+| PATCH /org/user-assignments/{id} | LEE | POR_SQL |
 | POST /practitioner-delegates | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/accept | ACTUALIZA | POR_TIPO |
+| POST /practitioner-delegates/{id}/accept | CREA | DIRECTA |
+| POST /practitioner-delegates/{id}/accept | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/reject | ACTUALIZA | POR_TIPO |
+| POST /practitioner-delegates/{id}/reject | CREA | DIRECTA |
+| POST /practitioner-delegates/{id}/reject | LEE | DIRECTA |
+| POST /support-engagement-requests | CREA | DIRECTA |
+| POST /support-engagement-requests | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id} | LEE | DIRECTA |
+| PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | DIRECTA |
+| POST /diagnostic-equipment/{id}/resource | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants/{tenantId}/suspend | ACTUALIZA | POR_TIPO |
 | POST /admin/tenants/{tenantId}/suspend | LEE | DIRECTA |
@@ -842,8 +983,11 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | CREA | DIRECTA |
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
 | POST /identity/checks/{id}/attempts | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
@@ -890,6 +1034,9 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /insurance/patients/conversation | LEE | DIRECTA |
 | GET /insurance/patients/options | LEE | DIRECTA |
 | POST /insurance/patients/search | LEE | DIRECTA |
+| GET /insurance/practitioner-requests | LEE | DIRECTA |
+| POST /insurance/practitioner-requests/{id}/approve | LEE | DIRECTA |
+| POST /insurance/practitioner-requests/{id}/reject | LEE | DIRECTA |
 | GET /insurance/received-claims | LEE | DIRECTA |
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | POST /practitioner-settlement-batches | LEE | DIRECTA |
@@ -904,6 +1051,27 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | GET /pharmacy/products | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
+| GET /care-spaces/{id} | LEE | DIRECTA |
+| PATCH /care-spaces/{id} | LEE | DIRECTA |
+| POST /care-spaces/{id}/availability | LEE | DIRECTA |
+| GET /care-spaces/{id}/blocks | LEE | DIRECTA |
+| GET /care-spaces/{id}/equipment | LEE | DIRECTA |
+| GET /care-spaces/{id}/history | LEE | DIRECTA |
+| POST /care-spaces/{id}/hygiene | LEE | DIRECTA |
+| POST /care-spaces/{id}/isolation | LEE | DIRECTA |
+| POST /care-spaces/{id}/lifecycle | LEE | DIRECTA |
+| POST /care-spaces/{id}/move | LEE | DIRECTA |
+| GET /care-spaces/{id}/operational-state | LEE | DIRECTA |
+| GET /care-spaces/{id}/retire-check | LEE | DIRECTA |
+| GET /care-spaces/{id}/status-events | LEE | DIRECTA |
+| GET /care-spaces/{id}/stock | LEE | DIRECTA |
+| POST /care-spaces/{id}/unit-assignments | LEE | DIRECTA |
+| DELETE /care-spaces/{id}/unit-assignments/{assignmentId} | LEE | DIRECTA |
+| POST /cleaning-orders/{id}/assign | LEE | POR_SQL |
+| GET /clinical-units/{id} | LEE | DIRECTA |
+| PATCH /clinical-units/{id} | LEE | DIRECTA |
+| POST /clinical-units/{id}/lifecycle | LEE | DIRECTA |
+| GET /practice/infrastructure-access/me | LEE | DIRECTA |
 | GET /practices | LEE | DIRECTA |
 | GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
@@ -911,11 +1079,38 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | GET /practices/{practiceId}/role-assignments | LEE | DIRECTA |
 | POST /practices/{practiceId}/role-assignments/invitations | LEE | DIRECTA |
 | GET /practices/{practiceId}/sites | LEE | DIRECTA |
+| POST /practices/{practiceId}/sites | LEE | DIRECTA |
+| DELETE /practices/{practiceId}/sites/{siteId} | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/approve | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/end | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/reject | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/suspend | LEE | DIRECTA |
+| PATCH /site-licenses/{id} | LEE | DIRECTA |
+| GET /sites/{siteId}/bed-board | LEE | DIRECTA |
+| GET /sites/{siteId}/capacity | LEE | DIRECTA |
+| POST /sites/{siteId}/care-spaces | LEE | DIRECTA |
+| POST /sites/{siteId}/care-spaces/bulk | LEE | DIRECTA |
+| POST /sites/{siteId}/care-spaces/import | LEE | DIRECTA |
+| GET /sites/{siteId}/cleaning-orders | LEE | DIRECTA |
+| POST /sites/{siteId}/cleaning-orders | LEE | DIRECTA |
+| GET /sites/{siteId}/clinical-units | LEE | DIRECTA |
+| POST /sites/{siteId}/clinical-units | LEE | DIRECTA |
+| POST /sites/{siteId}/declared-capacities | LEE | DIRECTA |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | DIRECTA |
+| GET /sites/{siteId}/licenses | LEE | DIRECTA |
+| POST /sites/{siteId}/licenses | LEE | DIRECTA |
+| GET /sites/{siteId}/regulatory | LEE | DIRECTA |
+| PATCH /sites/{siteId}/regulatory | LEE | DIRECTA |
+| POST /sites/{siteId}/regulatory/verify-snis | LEE | DIRECTA |
+| GET /sites/{siteId}/structure | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practices | LEE | DIRECTA |
+| POST /or-blocks/{id}/cancel | LEE | DIRECTA |
+| POST /or-blocks/{id}/release | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | DIRECTA |
+| GET /sites/{siteId}/operating-rooms | LEE | DIRECTA |
+| GET /sites/{siteId}/or-blocks | LEE | DIRECTA |
+| POST /sites/{siteId}/or-blocks | LEE | DIRECTA |
+| GET /sites/{siteId}/or-utilization | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /tenants/{tenantId}/practitioner-requests | LEE | DIRECTA |
@@ -1041,7 +1236,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenants`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `Tenants` — `src/modules/directory/entities/tenants.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 340 entrantes · 145 operaciones
+- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 340 entrantes · 171 operaciones
 
 #### Columnas
 
@@ -1452,13 +1647,18 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /patient-spending/me | LEE | POR_SQL |
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
 | GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
 | GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
 | PATCH /referrals/{id}/cancel | LEE | DIRECTA |
 | PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /referrals/me | LEE | DIRECTA |
+| GET /referrals/target-services | LEE | POR_SQL |
 | GET /referrals/targets | LEE | POR_SQL |
 | DELETE /community/blocks | LEE | DIRECTA |
 | GET /community/blocks | LEE | DIRECTA |
@@ -1511,8 +1711,29 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | GET /community/profiles/by-slug/{slug} | LEE | DIRECTA |
 | PUT /community/reactions | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| GET /me/practitioner/support-team | LEE | POR_SQL |
+| POST /me/practitioner/support-team/{id}/end | LEE | POR_SQL |
+| GET /me/support-access | LEE | POR_SQL |
+| GET /me/support-agenda | LEE | POR_SQL |
+| GET /me/support-catalog | LEE | POR_SQL |
+| GET /me/support-engagements | LEE | POR_SQL |
+| POST /me/support-engagements/{id}/confirm | LEE | POR_SQL |
+| POST /me/support-engagements/{id}/decline | LEE | POR_SQL |
+| POST /me/support-engagements/{id}/leave | LEE | POR_SQL |
+| GET /org/support-catalog | LEE | POR_SQL |
+| GET /org/support-engagement-requests | LEE | POR_SQL |
+| POST /org/support-engagement-requests/{id}/decision | LEE | POR_SQL |
+| GET /org/support-engagements | LEE | POR_SQL |
+| POST /org/support-engagements/{id}/end | LEE | POR_SQL |
+| POST /org/team/invitations | LEE | POR_SQL |
+| POST /practitioner-delegates/{id}/accept | LEE | POR_SQL |
+| POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
+| POST /support-engagement-requests | LEE | POR_SQL |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
+| GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
 | GET /admin/tenants | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |

@@ -10,14 +10,14 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [care_plan_activities](#care_plan_activities) | Detalla actividades que componen un plan de cuidado para facilitar su asignación y seguimiento. | 11 | 5 | 7 | COINCIDE |
-| [care_plans](#care_plans) | Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico de un paciente. | 16 | 10 | 7 | COINCIDE |
+| [care_plan_activities](#care_plan_activities) | Detalla actividades que componen un plan de cuidado para facilitar su asignación y seguimiento. | 11 | 5 | 8 | COINCIDE |
+| [care_plans](#care_plans) | Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico de un paciente. | 16 | 10 | 8 | COINCIDE |
 | [chart_template_assignments](#chart_template_assignments) | Asigna plantillas clínicas a los ámbitos o sujetos correspondientes para determinar qué estructura documental se usa. | 11 | 6 | 3 | COINCIDE |
-| [clinical_note_headers](#clinical_note_headers) | Representa la identidad y el estado actual de una nota clínica dentro del expediente del paciente. | 14 | 11 | 29 | COINCIDE |
+| [clinical_note_headers](#clinical_note_headers) | Representa la identidad y el estado actual de una nota clínica dentro del expediente del paciente. | 14 | 11 | 31 | COINCIDE |
 | [clinical_note_signatures](#clinical_note_signatures) | Registra firmas asociadas a notas clínicas para documentar su validación y autoría profesional. | 8 | 3 | 3 | COINCIDE |
-| [clinical_note_versions](#clinical_note_versions) | Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su contenido y cambios. | 20 | 10 | 17 | COINCIDE |
-| [document_record_files](#document_record_files) | Vincula archivos almacenados con registros documentales para resolver su ubicación y asociación clínica. | 7 | 4 | 8 | COINCIDE |
-| [document_records](#document_records) | Registra documentos clínicos y su clasificación dentro del expediente del paciente. | 18 | 12 | 15 | COINCIDE |
+| [clinical_note_versions](#clinical_note_versions) | Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su contenido y cambios. | 20 | 10 | 18 | COINCIDE |
+| [document_record_files](#document_record_files) | Vincula archivos almacenados con registros documentales para resolver su ubicación y asociación clínica. | 7 | 4 | 9 | COINCIDE |
+| [document_records](#document_records) | Registra documentos clínicos y su clasificación dentro del expediente del paciente. | 18 | 12 | 16 | COINCIDE |
 | [note_release_events](#note_release_events) | Conserva eventos de liberación de notas para representar cuándo pasan a estar disponibles en el flujo clínico previsto. | 9 | 8 | 2 | COINCIDE |
 | [physical_exam_findings](#physical_exam_findings) | Documenta hallazgos del examen físico asociados a la valoración clínica del paciente. | 8 | 4 | 1 | COINCIDE |
 | [specialty_chart_templates](#specialty_chart_templates) | Define plantillas de expediente o documentación adaptadas a especialidades clínicas. | 13 | 8 | 7 | COINCIDE |
@@ -165,7 +165,7 @@ Detalla actividades que componen un plan de cuidado para facilitar su asignació
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: care_plan_activities`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `CarePlanActivities` — `src/modules/chart/entities/care_plan_activities.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -214,6 +214,7 @@ Detalla actividades que componen un plan de cuidado para facilitar su asignació
 | GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -238,7 +239,7 @@ Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: care_plans`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `CarePlans` — `src/modules/chart/entities/care_plans.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 2 entrantes · 7 operaciones
+- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 2 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -303,6 +304,7 @@ Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico d
 | GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -398,7 +400,7 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: clinical_note_headers`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `ClinicalNoteHeaders` — `src/modules/chart/entities/clinical_note_headers.entity.ts`
-- **Resumen:** 14 columnas · 11 índices · 10 FK salientes · 3 entrantes · 29 operaciones
+- **Resumen:** 14 columnas · 11 índices · 10 FK salientes · 3 entrantes · 31 operaciones
 
 #### Columnas
 
@@ -477,6 +479,8 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 | GET /profiles/practitioners | LEE | POR_SQL |
@@ -576,7 +580,7 @@ Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: clinical_note_versions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `ClinicalNoteVersions` — `src/modules/chart/entities/clinical_note_versions.entity.ts`
-- **Resumen:** 20 columnas · 10 índices · 8 FK salientes · 6 entrantes · 17 operaciones
+- **Resumen:** 20 columnas · 10 índices · 8 FK salientes · 6 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -664,6 +668,7 @@ Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su
 | POST /charts/notes/versions/{versionId}/withhold | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -688,7 +693,7 @@ Vincula archivos almacenados con registros documentales para resolver su ubicaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: document_record_files`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `DocumentRecordFiles` — `src/modules/chart/entities/document_record_files.entity.ts`
-- **Resumen:** 7 columnas · 4 índices · 4 FK salientes · 0 entrantes · 8 operaciones
+- **Resumen:** 7 columnas · 4 índices · 4 FK salientes · 0 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -732,6 +737,7 @@ Vincula archivos almacenados con registros documentales para resolver su ubicaci
 | GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -756,7 +762,7 @@ Registra documentos clínicos y su clasificación dentro del expediente del paci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: document_records`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `DocumentRecords` — `src/modules/chart/entities/document_records.entity.ts`
-- **Resumen:** 18 columnas · 12 índices · 10 FK salientes · 3 entrantes · 15 operaciones
+- **Resumen:** 18 columnas · 12 índices · 10 FK salientes · 3 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -828,6 +834,7 @@ Registra documentos clínicos y su clasificación dentro del expediente del paci
 | GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/discharge | LEE | DIRECTA |
 | GET /profiles/practitioners | LEE | POR_SQL |
 | PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |

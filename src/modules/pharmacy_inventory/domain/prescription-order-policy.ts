@@ -1,0 +1,194 @@
+import { exceedsQuantity } from './prescription-balance';
+
+/**
+ * Motivos por los que un pedido no respeta la receta (FAR-03). Cada uno es el
+ * `reason` de un 422 `PRECONDITION_FAILED`.
+ */
+export type PrescriptionOrderReason =
+  | 'PRESCRIPTION_NOT_ACTIVE'
+  | 'PRESCRIPTION_EXPIRED'
+  | 'PRODUCT_NOT_PRESCRIBED'
+  | 'QUANTITY_EXCEEDS_PRESCRIPTION'
+  | 'PRESCRIPTION_ITEM_ALREADY_ORDERED'
+  | 'PRESCRIPTION_REQUIRED';
+
+/**
+ * Estado de un ítem de receta visto desde la farmacia. Lo calcula
+ * infraestructura con la regla única de `clinical/services/prescription-validity.ts`
+ * (`prescriptionItemState`); acá solo se lee, nunca se recalcula.
+ */
+export type PrescriptionItemStatus = 'ACTIVE' | 'EXPIRED' | 'NOT_ACTIVE';
+
+/**
+ * Un ítem de receta (`clinical.medication_requests`) traducido al módulo: lo
+ * que el pedido necesita saber de él, con el estado ya resuelto.
+ */
+export interface PrescriptionOrderItem {
+  id: string;
+  patientProfileId: string;
+  /** Encuentro que agrupa la receta; sin él, la receta es solo este ítem. */
+  encounterId: string | null;
+  medicationConceptId: string;
+  state: PrescriptionItemStatus;
+  /** Cantidad recetada; `null` si la receta no fija cantidad. */
+  quantity: number | null;
+  unitConceptId: string | null;
+}
+
+/**
+ * La receta del pedido tal como quedó bloqueada: el ítem referido y, del mismo
+ * conjunto de filas bloqueadas, sus hermanos `ACTIVE` del encuentro. Un ítem
+ * que aparece después del bloqueo no está acá y no autoriza nada en el pedido.
+ */
+export interface LockedPrescription {
+  item: PrescriptionOrderItem;
+  siblings: readonly PrescriptionOrderItem[];
+  /**
+   * Los originales `REPLACED` de los que descienden la referida y sus
+   * hermanos: lo entregado o pedido sobre ellos cuenta contra la receta.
+   */
+  replacedIds?: readonly string[];
+}
+
+/** Un fármaco de la receta con lo que queda de él. */
+export interface PrescribedDrug {
+  medicationConceptId: string;
+  /** Lo que queda (recetado − entregado − reservado); `null` = sin control de cantidad. */
+  remaining: number | null;
+  /**
+   * Cada ítem de este fármaco ya tiene una entrega o un pedido vivo. Solo
+   * decide donde no hay saldo (`remaining` nulo): donde lo hay, manda el saldo.
+   */
+  alreadyOrdered?: boolean;
+}
+
+/** La receta referida por el pedido, ya resuelta. */
+export interface PrescriptionOrderPrescription {
+  /** Estado de la receta referida. */
+  state: PrescriptionItemStatus;
+  /** Los fármacos de los ítems `ACTIVE` de la receta (la referida y sus hermanos). */
+  drugs: readonly PrescribedDrug[];
+}
+
+/** Una línea del pedido con lo que el catálogo dice de su producto. */
+export interface PrescriptionOrderLine {
+  productId: string;
+  medicationConceptId?: string | null;
+  /** `null` o ausente cuenta como venta libre. */
+  requiresPrescription?: boolean | null;
+  quantity: number;
+}
+
+export interface PrescriptionOrderPolicyInput {
+  /** `null` si el pedido no trae `medicationRequestId`. */
+  prescription: PrescriptionOrderPrescription | null;
+  lines: readonly PrescriptionOrderLine[];
+}
+
+/** El primer motivo encontrado y, si aplica, las líneas que lo causan. */
+export interface PrescriptionOrderViolation {
+  reason: PrescriptionOrderReason;
+  productIds?: string[];
+}
+
+/**
+ * ¿El pedido respeta la receta? Devuelve el primer motivo que lo impide, en
+ * este orden: `PRESCRIPTION_NOT_ACTIVE`, `PRESCRIPTION_EXPIRED`,
+ * `PRODUCT_NOT_PRESCRIBED` y, por fármaco, `QUANTITY_EXCEEDS_PRESCRIPTION` o
+ * `PRESCRIPTION_ITEM_ALREADY_ORDERED`. Sin receta, solo `PRESCRIPTION_REQUIRED`.
+ *
+ * Solo se validan las líneas con producto de receta obligatoria: las de venta
+ * libre pasan sin mirar la receta (D-4). Un producto de receta obligatoria sin
+ * fármaco declarado no puede ser el de ninguna receta. Las líneas del mismo
+ * fármaco suman contra su saldo. Sin saldo (D-5), un fármaco cuyos ítems ya
+ * tienen una entrega o un pedido vivo no se vuelve a pedir (D-6).
+ *
+ * @param input - La receta resuelta (o `null`) y las líneas del pedido.
+ * @returns `null` si el pedido pasa, o el primer motivo que lo impide.
+ */
+export function evaluatePrescriptionOrder(
+  input: PrescriptionOrderPolicyInput,
+): PrescriptionOrderViolation | null {
+  const controlled = input.lines.filter(
+    (line) => line.requiresPrescription === true,
+  );
+  const { prescription } = input;
+
+  if (!prescription) {
+    return controlled.length > 0
+      ? {
+          reason: 'PRESCRIPTION_REQUIRED',
+          productIds: controlled.map((line) => line.productId),
+        }
+      : null;
+  }
+  if (prescription.state === 'NOT_ACTIVE') {
+    return { reason: 'PRESCRIPTION_NOT_ACTIVE' };
+  }
+  if (prescription.state === 'EXPIRED') {
+    return { reason: 'PRESCRIPTION_EXPIRED' };
+  }
+
+  const remainingByDrug = new Map(
+    prescription.drugs.map((drug) => [
+      drug.medicationConceptId,
+      drug.remaining,
+    ]),
+  );
+  const orderedByDrug = new Map(
+    prescription.drugs.map((drug) => [
+      drug.medicationConceptId,
+      drug.alreadyOrdered === true,
+    ]),
+  );
+  const notPrescribed = controlled.filter(
+    (line) =>
+      !line.medicationConceptId ||
+      !remainingByDrug.has(line.medicationConceptId),
+  );
+  if (notPrescribed.length > 0) {
+    return {
+      reason: 'PRODUCT_NOT_PRESCRIBED',
+      productIds: notPrescribed.map((line) => line.productId),
+    };
+  }
+
+  // Un pedido hecho con la receta la consume también en las líneas del mismo
+  // fármaco cuyo producto no declara si es de receta (`null`): si no, el
+  // indicador sin cargar dejaría pedir la misma receta sin tope (D-6). Lo
+  // declarado de venta libre sigue sin mirar la receta (D-4).
+  const againstPrescription = input.lines.filter(
+    (line) =>
+      line.requiresPrescription === true ||
+      (line.requiresPrescription !== false &&
+        line.medicationConceptId !== undefined &&
+        line.medicationConceptId !== null &&
+        remainingByDrug.has(line.medicationConceptId)),
+  );
+  const linesByDrug = new Map<string, PrescriptionOrderLine[]>();
+  for (const line of againstPrescription) {
+    const conceptId = line.medicationConceptId as string;
+    linesByDrug.set(conceptId, [...(linesByDrug.get(conceptId) ?? []), line]);
+  }
+  for (const [conceptId, lines] of linesByDrug) {
+    const remaining = remainingByDrug.get(conceptId);
+    if (remaining === null || remaining === undefined) {
+      if (orderedByDrug.get(conceptId) === true) {
+        return {
+          reason: 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+          productIds: lines.map((line) => line.productId),
+        };
+      }
+      continue;
+    }
+    // Exacta: con decimales, `0.3 − 0.1` y un pedido de `0.2` no lo supera.
+    const requested = lines.map((line) => line.quantity);
+    if (exceedsQuantity(requested, remaining)) {
+      return {
+        reason: 'QUANTITY_EXCEEDS_PRESCRIPTION',
+        productIds: lines.map((line) => line.productId),
+      };
+    }
+  }
+  return null;
+}

@@ -12,6 +12,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  ValidateIf,
   Matches,
   Max,
   MaxLength,
@@ -398,6 +399,16 @@ export class CreateTemplateDto {
   /**
    * Valor de name mantenido por la instancia.
    */
+  /** F5d: consultorio (espacio físico) que ocupa la agenda. */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Consultorio de la agenda (F5d): CONSULTING_ROOM/PROCEDURE_ROOM/IMAGING_ROOM agendable de la práctica',
+  })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
+
   @ApiProperty({ maxLength: 200 })
   @IsString()
   @MaxLength(200)
@@ -492,6 +503,13 @@ export class CreateTemplateDto {
  */
 @ApiSchema({ name: 'SchedulingUpdateTemplateDto' })
 export class UpdateTemplateDto {
+  /** F5d: consultorio de la agenda; `null` lo quita. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @IsOptional()
+  @ValidateIf((_o, v) => v !== null)
+  @IsUUID()
+  careSpaceId?: string | null;
+
   @ApiPropertyOptional({ maxLength: 200 })
   @IsOptional()
   @IsString()
@@ -641,6 +659,10 @@ export class TemplateDetailDto {
     description: 'true cuando el horario es flexible, sin turnos fijos',
   })
   flexibleHours!: boolean;
+
+  /** F5d: consultorio de la plantilla, si tiene. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  careSpaceId?: string | null;
 
   /** Desde cuándo rige. */
   @ApiProperty({ required: false, format: 'date-time' })

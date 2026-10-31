@@ -122,7 +122,10 @@ defecto**: sin ella, «Sincronizar ahora» responde que la conexión no está
 configurada. Para probarla en local se apunta a este emulador
 (`PHARMACY_ERP_BASE_URL=http://127.0.0.1:4100`, con la misma clave que
 `MOCK_API_KEY` si se definió). El `siteCode` que pide la API es el código de
-su sede (`pharmacy_sites.code`).
+su sede (`pharmacy_sites.code`) y el `pharmacyCode`, el de su farmacia
+(`pharmacies.code`): el stock sale de los dos, así que dos farmacias con sedes
+del mismo código no comparten stock. Con `NODE_ENV=production` la API no
+arranca si `PHARMACY_ERP_BASE_URL` trae valor.
 
 ## Tests
 

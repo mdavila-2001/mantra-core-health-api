@@ -1,6 +1,7 @@
 import type { FilterQuery } from '@mikro-orm/core';
 import type { PharmacyProducts } from '../entities';
 import { PHARM } from '../pharmacy.concepts';
+import { PharmacyErrorReason } from '../pharmacy.error-reasons';
 
 /*
  * Reglas del catálogo que administra la propia farmacia (P47 §3-5). Puras:
@@ -42,6 +43,34 @@ export const DEFAULT_CATEGORY_NAMES = [
   'Dispositivos',
   'Bienestar',
 ] as const;
+
+/** Un aviso sobre un producto que se guarda igual. */
+export interface CatalogWarning {
+  readonly field: string;
+  readonly reason: PharmacyErrorReason;
+  readonly message: string;
+}
+
+/**
+ * Lo que hay que avisar de un producto **ya resuelto** (con lo que el servidor
+ * derivó del catálogo oficial, no con lo que mandó el cliente): uno que pide
+ * receta y no tiene medicamento vinculado nunca cruza con una receta.
+ */
+export function prescriptionWarnings(product: {
+  requiresPrescription?: boolean | null;
+  medicationConceptId?: string | null;
+}): CatalogWarning[] {
+  if (product.requiresPrescription !== true) return [];
+  if (product.medicationConceptId != null) return [];
+  return [
+    {
+      field: 'medicationConceptId',
+      reason: PharmacyErrorReason.MEDICATION_NOT_LINKED,
+      message:
+        'Pide receta y no tiene medicamento vinculado: ninguna receta lo va a encontrar. Vincúlelo desde la ficha del producto',
+    },
+  ];
+}
 
 /** Estado del producto tal como lo ve el portal. */
 export type CatalogStatus = 'PUBLISHED' | 'DRAFT' | 'WITHDRAWN';
@@ -136,12 +165,19 @@ export function isInStock(product: DeclaredStock): boolean {
 }
 
 /**
- * Filtro de MikroORM con la misma regla que {@link isInStock}: lo que pide
- * disponibilidad, precios de sede y un pedido nuevo.
+ * Filtro de MikroORM de lo que la farmacia **no** apagó para todas sus sedes:
+ * sin el «no tengo» del catálogo. Lo piden disponibilidad, precios de sede y
+ * un pedido nuevo.
+ *
+ * El conteo del catálogo (`stock_quantity`) no filtra acá: cuántas hay en
+ * cada sede lo decide la regla por sede (`siteProductAvailabilitySql`), que
+ * da el libro cuando el producto tiene posición en la sede y el conteo del
+ * catálogo cuando no. Filtrar por el conteo antes escondía un producto con
+ * catálogo en 0 que una sede marcó «Lo tengo»: el paciente lo veía en una
+ * pantalla y en otra no, y al pedirlo recibía 404.
  */
 export const SELLABLE_STOCK_FILTER = {
   outOfStockDeclared: false,
-  $or: [{ stockQuantity: null }, { stockQuantity: { $gt: 0 } }],
 } satisfies FilterQuery<PharmacyProducts>;
 
 /** Los cambios de existencias que pide una línea o un producto. */

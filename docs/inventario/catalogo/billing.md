@@ -28,7 +28,7 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 12 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 8 | 58 | COINCIDE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 8 | 66 | COINCIDE |
 | [siat_simulated_invoices](#siat_simulated_invoices) | sin propósito | 26 | 4 | 15 | COINCIDE |
 | [siat_simulated_outbox](#siat_simulated_outbox) | sin propósito | 8 | 1 | 2 | COINCIDE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
@@ -1811,7 +1811,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 18 columnas · 8 índices · 8 FK salientes · 7 entrantes · 58 operaciones
+- **Resumen:** 18 columnas · 8 índices · 8 FK salientes · 7 entrantes · 66 operaciones
 
 #### Columnas
 
@@ -1860,7 +1860,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_service_catalog_practice_id` | no | practice_id | Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_service_catalog_practice_id` | no | practice_id | Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_catalog_image_file_id` | no | image_file_id | Soporta la clave foránea fk_service_catalog_image_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_service_catalog_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_service_catalog_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1896,6 +1896,10 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs/{id}/close | LEE | POR_SQL |
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | GET /referrals | LEE | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
@@ -1906,7 +1910,11 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | GET /medical-groups | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/{id} | LEE | DIRECTA |
+| PATCH /medical-groups/{id} | LEE | DIRECTA |
 | PATCH /medical-groups/{id}/exercise-notes | LEE | DIRECTA |
+| POST /medical-groups/{id}/members | LEE | DIRECTA |
+| DELETE /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
+| PATCH /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
 | POST /medical-groups/{id}/members/{memberId}/respond | LEE | DIRECTA |
 | POST /medical-groups/{id}/reschedule-requests | LEE | DIRECTA |
 | POST /medical-groups/{id}/reschedule-requests/respond | LEE | DIRECTA |

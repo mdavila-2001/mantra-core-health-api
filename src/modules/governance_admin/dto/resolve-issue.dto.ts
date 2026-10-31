@@ -11,7 +11,8 @@ export class ResolveIssueDto {
   action!: ResolutionAction;
 
   @ApiProperty({
-    description: 'Motivo de la resolución o del descarte. Es obligatorio y queda en la incidencia.',
+    description:
+      'Motivo de la resolución o del descarte. Es obligatorio y queda en la incidencia.',
     minLength: 10,
     maxLength: 2000,
   })

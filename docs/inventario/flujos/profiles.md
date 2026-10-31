@@ -982,7 +982,7 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. GET /admissions
 
-
+Bandeja de admisiones
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1087,7 +1087,7 @@ flowchart TD
 
 #### 2. GET /admissions/{id}
 
-
+Detalle de una admisión
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1182,12 +1182,12 @@ flowchart TD
 
 #### 3. POST /admissions/{id}/claim
 
-
+Tomar la admisión para revisarla
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -1197,7 +1197,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.claim"]:::llamada
   n2 --> n3
@@ -1348,12 +1348,12 @@ flowchart TD
 
 #### 4. POST /admissions/{id}/decision
 
-
+Resolver la admisión: VERIFIED o REJECTED
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Cuatro ojos: la resolución debe hacerla una persona distinta de quien revisó |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -1363,7 +1363,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.decide"]:::llamada
   n2 --> n3
@@ -1512,7 +1512,7 @@ flowchart TD
 
 #### 5. GET /admissions/{id}/documents/{fileId}/content
 
-
+Contenido de un documento de la admisión (URL firmada)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1605,7 +1605,7 @@ flowchart TD
 
 #### 6. POST /admissions/{id}/documents/{fileId}/download-url
 
-
+URL firmada para abrir un documento de la admisión
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1672,12 +1672,12 @@ flowchart TD
 
 #### 7. POST /admissions/{id}/items/{itemId}/review
 
-
+Revisar un ítem del checklist
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Ítem de la admisión no encontrado; ResourceNotFoundException: Admisión no encontrada |
@@ -1688,7 +1688,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.reviewItem"]:::llamada
   n2 --> n3
@@ -1838,12 +1838,12 @@ flowchart TD
 
 #### 8. POST /admissions/{id}/reassign
 
-
+Pasar la revisión a otro revisor
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -1853,7 +1853,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.reassign"]:::llamada
   n2 --> n3
@@ -2015,12 +2015,12 @@ flowchart TD
 
 #### 9. POST /admissions/{id}/reinstate
 
-
+Reponer una verificación suspendida (devuelve el check)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -2030,7 +2030,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.reinstate"]:::llamada
   n2 --> n3
@@ -2180,12 +2180,12 @@ flowchart TD
 
 #### 10. POST /admissions/{id}/release
 
-
+Soltar una revisión tomada para que otro la tome
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -2195,7 +2195,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.release"]:::llamada
   n2 --> n3
@@ -2311,12 +2311,12 @@ flowchart TD
 
 #### 11. POST /admissions/{id}/request-info
 
-
+Pedir información al médico
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -2326,7 +2326,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.requestInfo"]:::llamada
   n2 --> n3
@@ -2490,12 +2490,12 @@ flowchart TD
 
 #### 12. POST /admissions/{id}/suspend
 
-
+Suspender una verificación (quita el check)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
@@ -2505,7 +2505,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.suspend"]:::llamada
   n2 --> n3
@@ -2655,7 +2655,7 @@ flowchart TD
 
 #### 13. POST /admissions/expire-sweep
 
-Declarada antes de `:id` para que `expire-sweep` no se lea como un id.
+Barrido de vencimientos
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -2744,11 +2744,12 @@ flowchart TD
 
 #### 14. POST /admissions/search
 
-
+Bandeja de admisiones con los filtros en el cuerpo
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2756,7 +2757,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsReadService.list"]:::llamada
   n2 --> n3
@@ -6452,7 +6453,7 @@ flowchart TD
 
 #### 55. GET /profiles/practitioners/me/admission
 
-
+Estado de mi verificación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -6510,11 +6511,12 @@ flowchart TD
 
 #### 56. POST /profiles/practitioners/me/admission/resubmit
 
-
+Reenviar mi solicitud
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: No tiene una solicitud de verificación; ResourceNotFoundException: Admisión no encontrada |
@@ -6524,7 +6526,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a PractitionerAdmissionsService.resubmit"]:::llamada
   n2 --> n3
@@ -6685,7 +6687,7 @@ flowchart TD
 
 #### 57. POST /profiles/practitioners/me/admission/withdraw
 
-
+Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
 
 | HTTP | Código | Cuándo |
 |---|---|---|

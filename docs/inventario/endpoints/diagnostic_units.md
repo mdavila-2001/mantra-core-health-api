@@ -3,47 +3,135 @@
 # Endpoints del módulo `diagnostic_units`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 21 (21 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 15 · BAJO 6
-- **Tablas distintas que tocan:** 17
+- **Operaciones:** 24 (24 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 14 · BAJO 8
+- **Tablas distintas que tocan:** 27
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/diagnostic-units.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | PATCH | `/diagnostic-equipment/{id}` | Actualizar estado/calibración de un equipo | MEDIO | 4 | SECURITY_ADMIN |
-| 2 | DELETE | `/diagnostic-study-offerings/{id}` | Retirar (soft-delete) una oferta de estudio | MEDIO | 3 | SECURITY_ADMIN |
-| 3 | POST | `/diagnostic-unit-accreditations/{id}/renew` | Renovar/registrar acreditación con evidencia | MEDIO | 4 | SECURITY_ADMIN |
-| 4 | PATCH | `/diagnostic-unit-sites/{siteId}` | Actualizar un sitio operativo de la unidad | MEDIO | 3 | SECURITY_ADMIN |
-| 5 | POST | `/diagnostic-unit-sites/{siteId}/equipment` | Registrar equipamiento y calibración del sitio | MEDIO | 5 | SECURITY_ADMIN |
-| 6 | GET | `/diagnostic-units` | Listar unidades diagnósticas publicadas | BAJO | 5 | sesión (sin roles) |
-| 7 | POST | `/diagnostic-units` | Alta de unidad diagnóstica con sitios y acreditaciones | MEDIO | 4 | SECURITY_ADMIN |
-| 8 | GET | `/diagnostic-units/{id}` | Consultar el perfil de una unidad diagnóstica | BAJO | 10 | sesión (sin roles) |
-| 9 | POST | `/diagnostic-units/{id}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 3 | SECURITY_ADMIN |
-| 10 | GET | `/diagnostic-units/{id}/administration` | Consola de administración de una unidad diagnóstica | BAJO | 11 | SECURITY_ADMIN |
-| 11 | POST | `/diagnostic-units/{id}/practitioner-assignments` | Asignar un especialista a la unidad/sitio | MEDIO | 6 | SECURITY_ADMIN |
-| 12 | POST | `/diagnostic-units/{id}/price-schedules` | Crear un cronograma de precios | MEDIO | 4 | SECURITY_ADMIN |
-| 13 | POST | `/diagnostic-units/{id}/reproject` | Reconstruir la proyección del perfil público | BAJO | 1 | SECURITY_ADMIN |
-| 14 | POST | `/diagnostic-units/{id}/sites` | Registrar un sitio operativo de la unidad | MEDIO | 2 | SECURITY_ADMIN |
-| 15 | PUT | `/diagnostic-units/{id}/specialties` | Declarar las especialidades de la unidad | MEDIO | 4 | SECURITY_ADMIN |
-| 16 | POST | `/diagnostic-units/{id}/study-offerings` | Publicar oferta de estudio con componentes (panel) | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 9 | SECURITY_ADMIN |
-| 18 | GET | `/diagnostic-units/administration` | Listar las unidades del tenant, publicadas o no | BAJO | 5 | SECURITY_ADMIN |
-| 19 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 10 | sesión (sin roles) |
-| 20 | POST | `/price-schedules/{scheduleId}/study-prices` | Fijar/versionar el precio de un estudio (append-only) | MEDIO | 6 | SECURITY_ADMIN |
-| 21 | POST | `/study-prices/{priceId}/close` | Cerrar una versión de precio vigente | MEDIO | 4 | SECURITY_ADMIN |
+| 1 | GET | `/diagnostic-equipment/{id}` | Detalle de un equipo con su sala (F5a) | BAJO | 12 | sesión (sin roles) |
+| 2 | PATCH | `/diagnostic-equipment/{id}` | Actualizar estado/calibración de un equipo | ALTO | 14 | sesión (sin roles) |
+| 3 | GET | `/diagnostic-equipment/{id}/mwl-station` | Estación MWL del equipo (F5a) | BAJO | 11 | sesión (sin roles) |
+| 4 | POST | `/diagnostic-equipment/{id}/resource` | Crear el recurso agendable del equipo (F5a) | ALTO | 16 | sesión (sin roles) |
+| 5 | DELETE | `/diagnostic-study-offerings/{id}` | Retirar (soft-delete) una oferta de estudio | MEDIO | 3 | SECURITY_ADMIN |
+| 6 | POST | `/diagnostic-unit-accreditations/{id}/renew` | Renovar/registrar acreditación con evidencia | MEDIO | 4 | SECURITY_ADMIN |
+| 7 | PATCH | `/diagnostic-unit-sites/{siteId}` | Actualizar un sitio operativo de la unidad | MEDIO | 3 | SECURITY_ADMIN |
+| 8 | POST | `/diagnostic-unit-sites/{siteId}/equipment` | Registrar equipamiento y calibración del sitio | MEDIO | 5 | SECURITY_ADMIN |
+| 9 | GET | `/diagnostic-units` | Listar unidades diagnósticas publicadas | BAJO | 5 | sesión (sin roles) |
+| 10 | POST | `/diagnostic-units` | Alta de unidad diagnóstica con sitios y acreditaciones | MEDIO | 4 | SECURITY_ADMIN |
+| 11 | GET | `/diagnostic-units/{id}` | Consultar el perfil de una unidad diagnóstica | BAJO | 10 | sesión (sin roles) |
+| 12 | POST | `/diagnostic-units/{id}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 3 | SECURITY_ADMIN |
+| 13 | GET | `/diagnostic-units/{id}/administration` | Consola de administración de una unidad diagnóstica | BAJO | 11 | SECURITY_ADMIN |
+| 14 | POST | `/diagnostic-units/{id}/practitioner-assignments` | Asignar un especialista a la unidad/sitio | MEDIO | 6 | SECURITY_ADMIN |
+| 15 | POST | `/diagnostic-units/{id}/price-schedules` | Crear un cronograma de precios | MEDIO | 4 | SECURITY_ADMIN |
+| 16 | POST | `/diagnostic-units/{id}/reproject` | Reconstruir la proyección del perfil público | BAJO | 1 | SECURITY_ADMIN |
+| 17 | POST | `/diagnostic-units/{id}/sites` | Registrar un sitio operativo de la unidad | MEDIO | 2 | SECURITY_ADMIN |
+| 18 | PUT | `/diagnostic-units/{id}/specialties` | Declarar las especialidades de la unidad | MEDIO | 4 | SECURITY_ADMIN |
+| 19 | POST | `/diagnostic-units/{id}/study-offerings` | Publicar oferta de estudio con componentes (panel) | MEDIO | 5 | SECURITY_ADMIN |
+| 20 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 9 | SECURITY_ADMIN |
+| 21 | GET | `/diagnostic-units/administration` | Listar las unidades del tenant, publicadas o no | BAJO | 5 | SECURITY_ADMIN |
+| 22 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 10 | sesión (sin roles) |
+| 23 | POST | `/price-schedules/{scheduleId}/study-prices` | Fijar/versionar el precio de un estudio (append-only) | MEDIO | 6 | SECURITY_ADMIN |
+| 24 | POST | `/study-prices/{priceId}/close` | Cerrar una versión de precio vigente | MEDIO | 4 | SECURITY_ADMIN |
 
 ---
 
-## 1. PATCH /diagnostic-equipment/{id}
+## 1. GET /diagnostic-equipment/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Detalle de un equipo con su sala (F5a)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `DiagnosticEquipmentController.detail` — `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:34`
+
+### Qué es y para qué sirve (negocio)
+
+Detalle de un equipo con su sala (F5a). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-equipment/{id}` la atiende `DiagnosticEquipmentController.detail` (src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:34). Exige sesión; el controlador no declara roles. Delega en `EquipmentF5aService.detail`. Lee delegated_access.organization_user_assignments, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branch_memberships, directory.tenant_memberships, practice.care_spaces, practice.clinical_units y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:34` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:34` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticEquipmentRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:62` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.practices` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:53` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpaceOpsRepository.unitsOf | `src/modules/practice/repositories/care-space-ops.repository.ts:146` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.detail → EquipmentF5aService.detail → EquipmentF5aService.view | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:269` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:501` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:DiagnosticEquipmentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. PATCH /diagnostic-equipment/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Actualizar estado/calibración de un equipo
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DiagnosticEquipmentController.updateEquipment` — `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:33`
+- **Implementación:** `DiagnosticEquipmentController.updateEquipment` — `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -53,28 +141,45 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Cómo se atiende (sistema)
 
-`PATCH /diagnostic-equipment/{id}` la atiende `DiagnosticEquipmentController.updateEquipment` (src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateEquipmentDto` (5 campos, 0 obligatorios). Delega en `DiagnosticEquipmentService.updateEquipment`. Actualiza diagnostic_units.diagnostic_equipment. Lee diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units.
+`PATCH /diagnostic-equipment/{id}` la atiende `DiagnosticEquipmentController.updateEquipment` (src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateEquipmentDto` (8 campos, 0 obligatorios). Delega en `DiagnosticEquipmentService.updateEquipment`. Crea filas en messaging.domain_events, messaging.outbox_messages. Lee delegated_access.organization_user_assignments, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branch_memberships, directory.tenant_memberships, messaging.outbox_messages, practice.care_spaces y 4 más. Publica diagnostic_units.equipment.located, diagnostic_units.equipment.status_changed.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:33` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_equipment` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment | `src/modules/diagnostic_units/services/diagnostic-equipment.service.ts:118` |
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → DiagnosticUnitScopeService.equipment → DiagnosticEquipmentRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:62` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticEquipmentRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:62` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.announceChanges → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.practices` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:53` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.updateEquipment → DiagnosticEquipmentService.updateEquipment → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpaceOpsRepository.unitsOf | `src/modules/practice/repositories/care-space-ops.repository.ts:146` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `diagnostic_units.equipment.located` | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:229` |
+| Evento de dominio | `diagnostic_units.equipment.status_changed` | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:242` |
 
 ### Parámetros
 
@@ -86,11 +191,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `manufacturer` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Fabricante | `src/modules/diagnostic_units/dto/equipment.dto.ts:105` |
-| `model` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Modelo | `src/modules/diagnostic_units/dto/equipment.dto.ts:114` |
-| `lastCalibrationAt` | `string` | No | formato date-time | `@IsOptional()` `@Type(() => Date)` `@IsDate()` | Última calibración | `src/modules/diagnostic_units/dto/equipment.dto.ts:127` |
-| `nextCalibrationDueAt` | `string` | No | formato date-time | `@IsOptional()` `@Type(() => Date)` `@IsDate()` | Próxima calibración | `src/modules/diagnostic_units/dto/equipment.dto.ts:140` |
-| `operationalStatusConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Estado operativo (concept id) | `src/modules/diagnostic_units/dto/equipment.dto.ts:151` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | `@IsOptional()` `@IsUUID()` | — | `src/modules/diagnostic_units/dto/equipment.dto.ts:102` |
+| `aeTitle` | `string` | No | longitud máxima 16; admite null | `@IsOptional()` `@IsString()` `@MaxLength(64)` | — | `src/modules/diagnostic_units/dto/equipment.dto.ts:109` |
+| `stationName` | `string` | No | longitud máxima 16; admite null | `@IsOptional()` `@IsString()` `@MaxLength(16)` | — | `src/modules/diagnostic_units/dto/equipment.dto.ts:116` |
+| `manufacturer` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Fabricante | `src/modules/diagnostic_units/dto/equipment.dto.ts:125` |
+| `model` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Modelo | `src/modules/diagnostic_units/dto/equipment.dto.ts:134` |
+| `lastCalibrationAt` | `string` | No | formato date-time | `@IsOptional()` `@Type(() => Date)` `@IsDate()` | Última calibración | `src/modules/diagnostic_units/dto/equipment.dto.ts:147` |
+| `nextCalibrationDueAt` | `string` | No | formato date-time | `@IsOptional()` `@Type(() => Date)` `@IsDate()` | Próxima calibración | `src/modules/diagnostic_units/dto/equipment.dto.ts:160` |
+| `operationalStatusConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Estado operativo (concept id) | `src/modules/diagnostic_units/dto/equipment.dto.ts:171` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -102,6 +210,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ```json
 {
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "aeTitle": "valor-ejemplo",
+  "stationName": "Nombre de ejemplo",
   "manufacturer": "valor-ejemplo",
   "model": "valor-ejemplo",
   "lastCalibrationAt": "2026-07-31T12:00:00.000Z",
@@ -119,6 +230,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:162` |
 | `diagnosticUnitSiteId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit site. | `src/modules/diagnostic_units/dto/responses.dto.ts:168` |
 | `operationalStatus` | `string` | Sí | formato uuid | — | Concept id de estado operativo | `src/modules/diagnostic_units/dto/responses.dto.ts:177` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | F5a: sala del equipo. | `src/modules/diagnostic_units/dto/responses.dto.ts:181` |
+| `aeTitle` | `string` | No | admite null | — | F5a: DICOM AE Title. | `src/modules/diagnostic_units/dto/responses.dto.ts:185` |
+| `stationName` | `string` | No | admite null | — | F5a: DICOM Station Name. | `src/modules/diagnostic_units/dto/responses.dto.ts:189` |
 
 ### Respuestas posibles
 
@@ -127,15 +241,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 409 | `CONFLICT` | ConflictException: El AE Title ya está en uso en la sede |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sala es de otra sede; PreconditionFailedException: El espacio no aloja equipos; PreconditionFailedException: AE Title inválido (≤ 16 caracteres ASCII, sin barra invertida) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:458` |
 
 ### Flujos
 
@@ -143,7 +261,187 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 2. DELETE /diagnostic-study-offerings/{id}
+## 3. GET /diagnostic-equipment/{id}/mwl-station
+
+- **Origen:** CONTRATO
+- **Nombre:** Estación MWL del equipo (F5a)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `DiagnosticEquipmentController.mwlStation` — `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:60`
+
+### Qué es y para qué sirve (negocio)
+
+Estación MWL del equipo (F5a). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostic-equipment/{id}/mwl-station` la atiende `DiagnosticEquipmentController.mwlStation` (src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:60). Exige sesión; el controlador no declara roles. Delega en `EquipmentF5aService.mwlStation`. Lee delegated_access.organization_user_assignments, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branch_memberships, directory.tenant_memberships, practice.care_spaces, practice.clinical_units y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:60` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticEquipmentRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:62` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.practices` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:53` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.mwlStation → EquipmentF5aService.mwlStation → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpaceOpsRepository.unitsOf | `src/modules/practice/repositories/care-space-ops.repository.ts:146` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:520` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:DiagnosticEquipmentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. POST /diagnostic-equipment/{id}/resource
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear el recurso agendable del equipo (F5a)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `DiagnosticEquipmentController.createResource` — `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44`
+
+### Qué es y para qué sirve (negocio)
+
+Crear el recurso agendable del equipo (F5a). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostic-equipment/{id}/resource` la atiende `DiagnosticEquipmentController.createResource` (src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44). Exige sesión; el controlador no declara roles. Delega en `EquipmentF5aService.createResource`. Crea filas en messaging.domain_events, messaging.outbox_messages, scheduling.schedulable_resources. Lee delegated_access.organization_user_assignments, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branch_memberships, directory.tenant_memberships, messaging.outbox_messages, practice.care_spaces y 5 más. Publica diagnostic_units.equipment.resource_linked.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticEquipmentRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:62` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → DiagnosticUnitScopeService.equipment → DiagnosticUnitScopeService.siteOrFail → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
+| `directory.branch_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:257` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
+| `practice.practices` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:53` |
+| `practice.space_unit_assignments` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource → EquipmentF5aService.authorize → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpaceOpsRepository.unitsOf | `src/modules/practice/repositories/care-space-ops.repository.ts:146` |
+| `scheduling.schedulable_resources` | ESCRIBE | CREA | POR_SQL | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:125` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | DiagnosticEquipmentController.createResource → EquipmentF5aService.createResource | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:108` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `diagnostic_units.equipment.resource_linked` | `src/modules/diagnostic_units/services/equipment-f5a.service.ts:147` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.CREATED`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 409 | `CONFLICT` | ConflictException: El equipo ya tiene un recurso agendable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:529` |
+
+### Flujos
+
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:DiagnosticEquipmentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. DELETE /diagnostic-study-offerings/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar (soft-delete) una oferta de estudio
@@ -168,9 +466,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -194,7 +492,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/diagnostic_units/dto/responses.dto.ts:249` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/diagnostic_units/dto/responses.dto.ts:261` |
 
 ### Respuestas posibles
 
@@ -219,7 +517,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 3. POST /diagnostic-unit-accreditations/{id}/renew
+## 6. POST /diagnostic-unit-accreditations/{id}/renew
 
 - **Origen:** CONTRATO
 - **Nombre:** Renovar/registrar acreditación con evidencia
@@ -244,11 +542,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:36` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -297,9 +595,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:186` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:198` |
 | `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | sin fuente |
-| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:195` |
+| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:207` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
 ### Respuestas posibles
@@ -324,7 +622,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. PATCH /diagnostic-unit-sites/{siteId}
+## 7. PATCH /diagnostic-unit-sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Actualizar un sitio operativo de la unidad
@@ -349,11 +647,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:49` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -430,7 +728,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. POST /diagnostic-unit-sites/{siteId}/equipment
+## 8. POST /diagnostic-unit-sites/{siteId}/equipment
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar equipamiento y calibración del sitio
@@ -455,11 +753,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:67` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -467,7 +765,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|---|---|---|
 | `diagnostic_units.diagnostic_equipment` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitSitesController.addEquipment → DiagnosticEquipmentService.addEquipment → DiagnosticEquipmentRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:85` |
 | `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitSitesController.addEquipment → DiagnosticEquipmentService.addEquipment → DiagnosticEquipmentRepository.findBySerial | `src/modules/diagnostic_units/repositories/diagnostic-equipment.repository.ts:71` |
-| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitSitesController.addEquipment → DiagnosticEquipmentService.addEquipment | `src/modules/diagnostic_units/services/diagnostic-equipment.service.ts:92` |
+| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitSitesController.addEquipment → DiagnosticEquipmentService.addEquipment | `src/modules/diagnostic_units/services/diagnostic-equipment.service.ts:102` |
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitSitesController.addEquipment → DiagnosticEquipmentService.addEquipment → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitSitesController.addEquipment → DiagnosticEquipmentService.addEquipment → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 
@@ -522,6 +820,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:162` |
 | `diagnosticUnitSiteId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit site. | `src/modules/diagnostic_units/dto/responses.dto.ts:168` |
 | `operationalStatus` | `string` | Sí | formato uuid | — | Concept id de estado operativo | `src/modules/diagnostic_units/dto/responses.dto.ts:177` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | F5a: sala del equipo. | `src/modules/diagnostic_units/dto/responses.dto.ts:181` |
+| `aeTitle` | `string` | No | admite null | — | F5a: DICOM AE Title. | `src/modules/diagnostic_units/dto/responses.dto.ts:185` |
+| `stationName` | `string` | No | admite null | — | F5a: DICOM Station Name. | `src/modules/diagnostic_units/dto/responses.dto.ts:189` |
 
 ### Respuestas posibles
 
@@ -547,7 +848,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. GET /diagnostic-units
+## 9. GET /diagnostic-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar unidades diagnósticas publicadas
@@ -572,8 +873,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -631,7 +932,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 7. POST /diagnostic-units
+## 10. POST /diagnostic-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de unidad diagnóstica con sitios y acreditaciones
@@ -656,10 +957,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:183` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -776,7 +1077,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 8. GET /diagnostic-units/{id}
+## 11. GET /diagnostic-units/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil de una unidad diagnóstica
@@ -801,9 +1102,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:153` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -928,7 +1229,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 9. POST /diagnostic-units/{id}/accreditations
+## 12. POST /diagnostic-units/{id}/accreditations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una acreditación con evidencia
@@ -953,11 +1254,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:311` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:311` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1013,9 +1314,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:186` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:198` |
 | `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | sin fuente |
-| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:195` |
+| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:207` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
 ### Respuestas posibles
@@ -1044,7 +1345,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 10. GET /diagnostic-units/{id}/administration
+## 13. GET /diagnostic-units/{id}/administration
 
 - **Origen:** CONTRATO
 - **Nombre:** Consola de administración de una unidad diagnóstica
@@ -1069,9 +1370,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:170` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1251,7 +1552,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 11. POST /diagnostic-units/{id}/practitioner-assignments
+## 14. POST /diagnostic-units/{id}/practitioner-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar un especialista a la unidad/sitio
@@ -1276,11 +1577,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:293` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:293` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1341,8 +1642,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:204` |
-| `status` | `string` | Sí | formato uuid | — | Concept id de estado | `src/modules/diagnostic_units/dto/responses.dto.ts:210` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:216` |
+| `status` | `string` | Sí | formato uuid | — | Concept id de estado | `src/modules/diagnostic_units/dto/responses.dto.ts:222` |
 
 ### Respuestas posibles
 
@@ -1371,7 +1672,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 12. POST /diagnostic-units/{id}/price-schedules
+## 15. POST /diagnostic-units/{id}/price-schedules
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un cronograma de precios
@@ -1396,11 +1697,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:275` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:275` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1492,7 +1793,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 13. POST /diagnostic-units/{id}/reproject
+## 16. POST /diagnostic-units/{id}/reproject
 
 - **Origen:** CONTRATO
 - **Nombre:** Reconstruir la proyección del perfil público
@@ -1517,9 +1818,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:329` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:329` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1541,8 +1842,8 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `diagnosticUnitId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit. | `src/modules/diagnostic_units/dto/responses.dto.ts:234` |
-| `projected` | `boolean` | Sí | — | — | true si se (re)proyectó el perfil público | `src/modules/diagnostic_units/dto/responses.dto.ts:240` |
+| `diagnosticUnitId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit. | `src/modules/diagnostic_units/dto/responses.dto.ts:246` |
+| `projected` | `boolean` | Sí | — | — | true si se (re)proyectó el perfil público | `src/modules/diagnostic_units/dto/responses.dto.ts:252` |
 
 ### Respuestas posibles
 
@@ -1568,7 +1869,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 14. POST /diagnostic-units/{id}/sites
+## 17. POST /diagnostic-units/{id}/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un sitio operativo de la unidad
@@ -1593,11 +1894,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:202` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1680,7 +1981,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 15. PUT /diagnostic-units/{id}/specialties
+## 18. PUT /diagnostic-units/{id}/specialties
 
 - **Origen:** CONTRATO
 - **Nombre:** Declarar las especialidades de la unidad
@@ -1705,11 +2006,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:237` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:237` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1765,8 +2066,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `active` | `number` | Sí | — | — | Nº de especialidades vigentes tras el cambio | `src/modules/diagnostic_units/dto/responses.dto.ts:219` |
-| `closed` | `number` | Sí | — | — | Nº de especialidades cerradas (soft) | `src/modules/diagnostic_units/dto/responses.dto.ts:225` |
+| `active` | `number` | Sí | — | — | Nº de especialidades vigentes tras el cambio | `src/modules/diagnostic_units/dto/responses.dto.ts:231` |
+| `closed` | `number` | Sí | — | — | Nº de especialidades cerradas (soft) | `src/modules/diagnostic_units/dto/responses.dto.ts:237` |
 
 ### Respuestas posibles
 
@@ -1793,7 +2094,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 16. POST /diagnostic-units/{id}/study-offerings
+## 19. POST /diagnostic-units/{id}/study-offerings
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar oferta de estudio con componentes (panel)
@@ -1818,11 +2119,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:255` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:255` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1862,7 +2163,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `components[].componentOfferingId` | `string` | No | formato uuid | `@IsUUID()` | Oferta que actúa como componente | `src/modules/diagnostic_units/dto/create-study-offering.dto.ts:26` |
 | `components[].componentRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Rol del componente (concept id) | `src/modules/diagnostic_units/dto/create-study-offering.dto.ts:37` |
 | `components[].quantity` | `string` | No | — | `@IsOptional()` `@IsString()` | Cantidad | `src/modules/diagnostic_units/dto/create-study-offering.dto.ts:45` |
-| `components[].ordinal` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Orden en el panel | `src/modules/diagnostic_units/dto/create-study-offering.dto.ts:54` |
+| `components[].ordinal` | `number` | No | — | `@IsOptional()` `@IsInt()` `@Min(0)` | Orden en el panel | `src/modules/diagnostic_units/dto/create-study-offering.dto.ts:54` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1941,7 +2242,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 17. POST /diagnostic-units/{id}/verify-and-publish
+## 20. POST /diagnostic-units/{id}/verify-and-publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar la unidad y publicar su perfil público
@@ -1966,9 +2267,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:220` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2033,7 +2334,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 18. GET /diagnostic-units/administration
+## 21. GET /diagnostic-units/administration
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las unidades del tenant, publicadas o no
@@ -2058,8 +2359,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2124,7 +2425,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 19. GET /diagnostic-units/search
+## 22. GET /diagnostic-units/search
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar centros de diagnóstico, laboratorio e imagen
@@ -2150,7 +2451,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:129` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2247,7 +2548,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 ---
 
-## 20. POST /price-schedules/{scheduleId}/study-prices
+## 23. POST /price-schedules/{scheduleId}/study-prices
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar/versionar el precio de un estudio (append-only)
@@ -2272,11 +2573,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: scheduleId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:50` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2366,7 +2667,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /study-prices/{priceId}/close
+## 24. POST /study-prices/{priceId}/close
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar una versión de precio vigente
@@ -2391,9 +2692,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: priceId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:70` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2418,7 +2719,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/diagnostic_units/dto/responses.dto.ts:249` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/diagnostic_units/dto/responses.dto.ts:261` |
 
 ### Respuestas posibles
 

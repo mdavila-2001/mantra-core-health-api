@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 26 · schema insurance
+-- SALUD v4.2.68 · módulo 26 · schema insurance
 -- Generado de diagram_26_insurance.puml — NO editar a mano.
 
 
@@ -209,6 +209,22 @@ CREATE TABLE IF NOT EXISTS "insurance"."network_provider_memberships" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_network_provider_memberships" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "insurance"."practitioner_insurer_requests" (
+    "id" uuid NOT NULL,
+    "practitioner_profile_id" uuid NOT NULL,
+    "insurance_carrier_id" uuid NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "decision_reason_text" varchar,
+    "decided_at" timestamptz,
+    "decided_by_user_id" uuid,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_practitioner_insurer_requests" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "insurance"."insurance_campaigns" (

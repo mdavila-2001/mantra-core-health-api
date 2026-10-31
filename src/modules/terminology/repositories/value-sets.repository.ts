@@ -8,6 +8,7 @@ import {
   ValueSetMembers,
 } from '../entities';
 import { createdBy } from '../../../common';
+import { containsPattern, sqlSearchKey } from './glossary-search.sql';
 
 /** Una fila de las facetas del glosario; ver `findGlossaryFacets`. */
 export interface GlossaryFacetRow {
@@ -640,16 +641,27 @@ export class ValueSetsRepository {
    * @param limit - Tope de filas a devolver.
    * @returns Miembros incluidos, ordenados por `(ordinal, concept_id)`.
    */
-  findMembersPage(
+  async findMembersPage(
     em: EntityManager,
     valueSetVersionId: string,
     after: { ordinal: number | null; conceptId: string } | undefined,
     limit: number,
+    filterTokens: string[] = [],
   ): Promise<ValueSetMembers[]> {
     const where: Record<string, unknown> = {
       valueSetVersionId,
       included: true,
     };
+
+    if (filterTokens.length > 0) {
+      const matching = await this.findMatchingConceptIds(
+        em,
+        valueSetVersionId,
+        filterTokens,
+      );
+      if (matching.length === 0) return [];
+      where.conceptId = { $in: matching };
+    }
 
     if (after) {
       where.$or =
@@ -668,5 +680,40 @@ export class ValueSetsRepository {
       orderBy: [{ ordinal: 'ASC' }, { conceptId: 'ASC' }],
       limit,
     });
+  }
+
+  /**
+   * Conceptos de la versión cuyo código, rótulo o alguna designación contiene
+   * todas las palabras del `filter` (parámetro `filter` de `ValueSet/$expand` de
+   * FHIR: texto libre, sin tildes ni mayúsculas).
+   *
+   * @param em - Contexto de persistencia.
+   * @param valueSetVersionId - Versión cuyos miembros incluidos se filtran.
+   * @param tokens - Palabras ya normalizadas con `normalizeSearchText`.
+   * @returns Ids de concepto, sin orden.
+   */
+  private async findMatchingConceptIds(
+    em: EntityManager,
+    valueSetVersionId: string,
+    tokens: string[],
+  ): Promise<string[]> {
+    const params: unknown[] = [valueSetVersionId];
+    const clauses = tokens.map((token) => {
+      const pattern = containsPattern(token);
+      params.push(pattern, pattern, pattern);
+      return `(${sqlSearchKey('cc.code')} LIKE ? ESCAPE '\\'
+        OR ${sqlSearchKey('cc.display')} LIKE ? ESCAPE '\\'
+        OR EXISTS (SELECT 1 FROM terminology.concept_designations d
+                    WHERE d.concept_id = cc.id AND ${sqlSearchKey('d.value')} LIKE ? ESCAPE '\\'))`;
+    });
+    const rows = await em.getConnection().execute<{ id: string }[]>(
+      `SELECT cc.id FROM terminology.value_set_members m
+         JOIN terminology.catalog_concepts cc ON cc.id = m.concept_id
+        WHERE m.value_set_version_id = ?::uuid AND m.included IS TRUE
+          AND ${clauses.join(' AND ')}`,
+      params,
+      'all',
+    );
+    return rows.map((r) => r.id);
   }
 }

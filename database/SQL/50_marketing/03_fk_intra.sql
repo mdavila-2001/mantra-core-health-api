@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 50 · schema marketing
+-- SALUD v4.2.68 · módulo 50 · schema marketing
 -- Generado de diagram_50_marketing.puml — NO editar a mano.
 
 
@@ -144,4 +144,46 @@ DO $$ BEGIN
     ALTER TABLE "marketing"."campaign_schedules"
         ADD CONSTRAINT "fk_campaign_schedules_journey_id" FOREIGN KEY ("journey_id")
         REFERENCES "marketing"."journeys" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_campaigns"
+        ADD CONSTRAINT "fk_insights_campaigns_marketing_campaign_id" FOREIGN KEY ("marketing_campaign_id")
+        REFERENCES "marketing"."marketing_campaigns" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_creatives"
+        ADD CONSTRAINT "fk_insights_creatives_campaign_id" FOREIGN KEY ("campaign_id")
+        REFERENCES "marketing"."insights_campaigns" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_milestones"
+        ADD CONSTRAINT "fk_insights_milestones_campaign_id" FOREIGN KEY ("campaign_id")
+        REFERENCES "marketing"."insights_campaigns" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_campaign_daily_facts"
+        ADD CONSTRAINT "fk_insights_campaign_daily_facts_campaign_id" FOREIGN KEY ("campaign_id")
+        REFERENCES "marketing"."insights_campaigns" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_campaign_daily_facts"
+        ADD CONSTRAINT "fk_insights_campaign_daily_facts_creative_id" FOREIGN KEY ("creative_id")
+        REFERENCES "marketing"."insights_creatives" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_campaign_hourly_facts"
+        ADD CONSTRAINT "fk_insights_campaign_hourly_facts_campaign_id" FOREIGN KEY ("campaign_id")
+        REFERENCES "marketing"."insights_campaigns" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "marketing"."insights_alert_transitions"
+        ADD CONSTRAINT "fk_insights_alert_transitions_alert_id" FOREIGN KEY ("alert_id")
+        REFERENCES "marketing"."insights_alerts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

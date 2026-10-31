@@ -3,3 +3,7 @@ export * from './delegated-permission-sets.controller';
 export * from './practitioner-delegates.controller';
 export * from './access-requests.controller';
 export * from './delegated-access-authz.controller';
+export * from './prescription-shares.controller';
+export * from './prescription-shares-public.controller';
+export * from './support-staff.controller';
+export * from './practitioner-support.controller';

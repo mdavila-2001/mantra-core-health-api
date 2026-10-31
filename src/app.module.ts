@@ -1,3 +1,4 @@
+import { admissionIdentityEnvSchema } from './modules/clinical/services/inpatient/admission-identity';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -15,6 +16,7 @@ import {
   telemetryEnvSchema,
 } from './observability';
 import { HttpSliModule } from './observability/http-sli/http-sli.module';
+import { SystemObservabilityModule } from './modules/observability/observability.module';
 import {
   AllExceptionsFilter,
   AuthModule,
@@ -47,9 +49,8 @@ import { AutomationModule } from './modules/automation/automation.module';
 import { GovernanceAdminModule } from './modules/governance_admin/governance_admin.module';
 import { RuntimePiecesModule } from './modules/platform_ops/runtime_pieces/runtime_pieces.module';
 import { UiVisibilityModule } from './modules/ui_visibility/ui_visibility.module';
-import { ClinicalImportModule } from './modules/clinical_import/clinical-import.module';
-import { AdminCatalogsModule } from './modules/admin_catalogs/admin-catalogs.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { BulkImportModule } from './modules/bulk_import/bulk-import.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ClinicalModule } from './modules/clinical/clinical.module';
 import { ClinicalExtModule } from './modules/clinical_ext/clinical_ext.module';
@@ -102,6 +103,7 @@ import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
 import { pharmacyErpEnvSchema } from './modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env';
+import { paymentsGatewayEnvSchema } from './modules/payments/gateway/payments-gateway.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -114,6 +116,7 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { PublicCacheStore } from './common/http/public-cache.store';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
+import { StudyCatalogModule } from './modules/study_catalog/study_catalog.module';
 
 /**
  * Configura las dependencias NestJS de app.
@@ -139,7 +142,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
         .concat(pharmacyErpEnvSchema)
+        .concat(paymentsGatewayEnvSchema)
         .concat(verificationBypassEnvSchema)
+        .concat(admissionIdentityEnvSchema)
         .concat(seedBootEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
@@ -169,6 +174,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // minuto lo que el middleware de `main.ts` agregó. Apagado por defecto
     // (`OBSERVABILITY_HTTP_SLI_ENABLED`).
     HttpSliModule,
+    SystemObservabilityModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,
@@ -198,9 +204,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AuthzModule,
     ConsentModule,
     AccountingModule,
-    AdminCatalogsModule,
     GovernanceAdminModule,
-    ClinicalImportModule,
     UiVisibilityModule,
     RuntimePiecesModule,
     AdsModule,
@@ -209,6 +213,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AuthProvidersModule,
     AutomationModule,
     BillingModule,
+    BulkImportModule,
     ChartModule,
     ClinicalModule,
     ClinicalExtModule,
@@ -268,6 +273,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     DocumentStoreModule,
     RedisRuntimeModule,
     SearchPlatformModule,
+    StudyCatalogModule,
   ],
   controllers: [AppController],
   providers: [

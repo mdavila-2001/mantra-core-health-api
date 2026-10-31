@@ -11,9 +11,6 @@ import {
   Min,
 } from 'class-validator';
 import {
-  DSAR_JURISDICTIONS,
-  DSAR_STATUSES,
-  DSAR_TYPES,
   ISSUE_STATUSES,
   MAX_PAGE_SIZE,
   SEVERITIES,
@@ -23,7 +20,10 @@ const trimmed = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
 export class PageQueryDto {
-  @ApiPropertyOptional({ description: 'Cursor opaco (`nextCursor`)', maxLength: 600 })
+  @ApiPropertyOptional({
+    description: 'Cursor opaco (`nextCursor`)',
+    maxLength: 600,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(600)
@@ -54,7 +54,11 @@ export class IssuesQueryDto extends PageQueryDto {
   @IsUUID()
   ruleId?: string;
 
-  @ApiPropertyOptional({ description: 'Busca en la ruta del campo, el código y el nombre de la regla', maxLength: 120 })
+  @ApiPropertyOptional({
+    description:
+      'Busca en la ruta del campo, el código y el nombre de la regla',
+    maxLength: 120,
+  })
   @IsOptional()
   @Transform(trimmed)
   @IsString()
@@ -68,36 +72,25 @@ export class RulesQueryDto extends PageQueryDto {
   @IsIn(SEVERITIES)
   severity?: (typeof SEVERITIES)[number];
 
-  @ApiPropertyOptional({ description: 'Código de la dimensión de calidad (concepto)', maxLength: 80 })
+  @ApiPropertyOptional({
+    description: 'Código de la dimensión de calidad (concepto)',
+    maxLength: 80,
+  })
   @IsOptional()
   @Transform(trimmed)
   @IsString()
   @MaxLength(80)
   dimension?: string;
 
-  @ApiPropertyOptional({ description: 'Busca en código y nombre', maxLength: 120 })
+  @ApiPropertyOptional({
+    description: 'Busca en código y nombre',
+    maxLength: 120,
+  })
   @IsOptional()
   @Transform(trimmed)
   @IsString()
   @MaxLength(120)
   q?: string;
-}
-
-export class PrivacyRequestsQueryDto extends PageQueryDto {
-  @ApiPropertyOptional({ enum: DSAR_STATUSES })
-  @IsOptional()
-  @IsIn(DSAR_STATUSES)
-  status?: (typeof DSAR_STATUSES)[number];
-
-  @ApiPropertyOptional({ enum: DSAR_TYPES })
-  @IsOptional()
-  @IsIn(DSAR_TYPES)
-  type?: (typeof DSAR_TYPES)[number];
-
-  @ApiPropertyOptional({ enum: DSAR_JURISDICTIONS })
-  @IsOptional()
-  @IsIn(DSAR_JURISDICTIONS)
-  jurisdiction?: (typeof DSAR_JURISDICTIONS)[number];
 }
 
 export class IdParamDto {

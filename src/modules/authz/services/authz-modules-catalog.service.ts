@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, type AuthenticatedUser } from '../../../common';
 import { AUTHZ } from '../authz.concepts';
 import { Permissions, RolePermissions, Roles } from '../entities';
-import { resolveGovernanceScope } from './authz-user-lifecycle.service';
+import { resolveGovernanceScope } from './authz-governance-scope';
 import type {
   CellCoverage,
   GapSeverity,

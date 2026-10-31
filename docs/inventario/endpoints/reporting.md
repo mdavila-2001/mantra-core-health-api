@@ -3,8 +3,8 @@
 # Endpoints del módulo `reporting`
 
 - **Bloque:** Auditoría y Reporting (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
-- **Operaciones:** 12 (12 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 12 · BAJO 0
+- **Operaciones:** 13 (13 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 12 · BAJO 1
 - **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/reporting.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -12,22 +12,92 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/reporting/dashboards` | Componer un tablero con sus widgets | MEDIO | 4 | REPORTING_ADMIN, REPORT_AUTHOR |
-| 2 | POST | `/reporting/data-sources` | Registrar una fuente de datos gobernada | MEDIO | 2 | REPORTING_ADMIN, DATA_STEWARD |
-| 3 | POST | `/reporting/definitions` | Autorar una definición con sus parámetros y columnas | MEDIO | 5 | REPORTING_ADMIN, REPORT_AUTHOR |
-| 4 | POST | `/reporting/definitions/{id}/deprecate` | Deprecar la definición y suspender sus programaciones | MEDIO | 3 | REPORTING_ADMIN |
-| 5 | POST | `/reporting/definitions/{id}/executions` | Encolar una corrida parametrizada | MEDIO | 4 | REPORTING_ADMIN, REPORT_VIEWER |
-| 6 | POST | `/reporting/definitions/{id}/schedules` | Programar la distribución periódica del reporte | MEDIO | 3 | REPORTING_ADMIN, REPORT_AUTHOR |
-| 7 | POST | `/reporting/definitions/{id}/versions/publish` | Publicar una versión del reporte | MEDIO | 4 | REPORTING_ADMIN, REPORT_AUTHOR |
-| 8 | POST | `/reporting/executions/{id}/distributions` | Crear las distribuciones del reporte por destinatario | MEDIO | 4 | SYSTEM, REPORTING_ADMIN |
-| 9 | POST | `/reporting/executions/{id}/retry` | Devolver a la cola una corrida fallida | MEDIO | 4 | SYSTEM, REPORTING_ADMIN |
-| 10 | POST | `/reporting/executions/{id}/snapshot` | Registrar el artefacto materializado y cerrar la corrida | MEDIO | 3 | SYSTEM |
-| 11 | POST | `/reporting/scheduler/tick` | Disparar las programaciones vencidas | MEDIO | 5 | SYSTEM |
-| 12 | POST | `/reporting/schedules/{id}/subscriptions` | Suscribirse a una programación | MEDIO | 4 | REPORT_VIEWER, REPORTING_ADMIN |
+| 1 | GET | `/admin/analytics/money` | Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara | BAJO | 0 | PLATFORM_ADMIN, SECURITY_ADMIN, PAYMENTS_ADMIN, ACCOUNTING_APPROVER |
+| 2 | POST | `/reporting/dashboards` | Componer un tablero con sus widgets | MEDIO | 4 | REPORTING_ADMIN, REPORT_AUTHOR |
+| 3 | POST | `/reporting/data-sources` | Registrar una fuente de datos gobernada | MEDIO | 2 | REPORTING_ADMIN, DATA_STEWARD |
+| 4 | POST | `/reporting/definitions` | Autorar una definición con sus parámetros y columnas | MEDIO | 5 | REPORTING_ADMIN, REPORT_AUTHOR |
+| 5 | POST | `/reporting/definitions/{id}/deprecate` | Deprecar la definición y suspender sus programaciones | MEDIO | 3 | REPORTING_ADMIN |
+| 6 | POST | `/reporting/definitions/{id}/executions` | Encolar una corrida parametrizada | MEDIO | 4 | REPORTING_ADMIN, REPORT_VIEWER |
+| 7 | POST | `/reporting/definitions/{id}/schedules` | Programar la distribución periódica del reporte | MEDIO | 3 | REPORTING_ADMIN, REPORT_AUTHOR |
+| 8 | POST | `/reporting/definitions/{id}/versions/publish` | Publicar una versión del reporte | MEDIO | 4 | REPORTING_ADMIN, REPORT_AUTHOR |
+| 9 | POST | `/reporting/executions/{id}/distributions` | Crear las distribuciones del reporte por destinatario | MEDIO | 4 | SYSTEM, REPORTING_ADMIN |
+| 10 | POST | `/reporting/executions/{id}/retry` | Devolver a la cola una corrida fallida | MEDIO | 4 | SYSTEM, REPORTING_ADMIN |
+| 11 | POST | `/reporting/executions/{id}/snapshot` | Registrar el artefacto materializado y cerrar la corrida | MEDIO | 3 | SYSTEM |
+| 12 | POST | `/reporting/scheduler/tick` | Disparar las programaciones vencidas | MEDIO | 5 | SYSTEM |
+| 13 | POST | `/reporting/schedules/{id}/subscriptions` | Suscribirse a una programación | MEDIO | 4 | REPORT_VIEWER, REPORTING_ADMIN |
 
 ---
 
-## 1. POST /reporting/dashboards
+## 1. GET /admin/analytics/money
+
+- **Origen:** CONTRATO
+- **Nombre:** Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara
+- **Bloque:** Auditoría y Reporting
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ReportingMoneyController.money` — `src/modules/reporting/controllers/reporting-money.controller.ts:53`
+
+### Qué es y para qué sirve (negocio)
+
+Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/analytics/money` la atiende `ReportingMoneyController.money` (src/modules/reporting/controllers/reporting-money.controller.ts:53). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, PAYMENTS_ADMIN, ACCOUNTING_APPROVER. Delega en `ReportingMoneyService.money`. No se determinaron tablas para esta operación.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, PAYMENTS_ADMIN, ACCOUNTING_APPROVER | `src/modules/reporting/controllers/reporting-money.controller.ts:53` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días de ventana. |
+| `to` | query | No | `string` | Por defecto: ahora |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `ctrl:ReportingMoneyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. POST /reporting/dashboards
 
 - **Origen:** CONTRATO
 - **Nombre:** Componer un tablero con sus widgets
@@ -52,10 +122,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -159,7 +229,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 2. POST /reporting/data-sources
+## 3. POST /reporting/data-sources
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una fuente de datos gobernada
@@ -184,10 +254,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, DATA_STEWARD | `src/modules/reporting/controllers/reporting.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -270,7 +340,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 3. POST /reporting/definitions
+## 4. POST /reporting/definitions
 
 - **Origen:** CONTRATO
 - **Nombre:** Autorar una definición con sus parámetros y columnas
@@ -295,10 +365,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -432,7 +502,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 4. POST /reporting/definitions/{id}/deprecate
+## 5. POST /reporting/definitions/{id}/deprecate
 
 - **Origen:** CONTRATO
 - **Nombre:** Deprecar la definición y suspender sus programaciones
@@ -457,11 +527,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:288` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:288` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -534,7 +604,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 5. POST /reporting/definitions/{id}/executions
+## 6. POST /reporting/definitions/{id}/executions
 
 - **Origen:** CONTRATO
 - **Nombre:** Encolar una corrida parametrizada
@@ -559,11 +629,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_VIEWER | `src/modules/reporting/controllers/reporting.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:125` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -640,7 +710,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 6. POST /reporting/definitions/{id}/schedules
+## 7. POST /reporting/definitions/{id}/schedules
 
 - **Origen:** CONTRATO
 - **Nombre:** Programar la distribución periódica del reporte
@@ -665,11 +735,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:169` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -758,7 +828,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 7. POST /reporting/definitions/{id}/versions/publish
+## 8. POST /reporting/definitions/{id}/versions/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar una versión del reporte
@@ -783,11 +853,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -860,7 +930,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 8. POST /reporting/executions/{id}/distributions
+## 9. POST /reporting/executions/{id}/distributions
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear las distribuciones del reporte por destinatario
@@ -885,11 +955,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:207` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:207` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -973,7 +1043,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 9. POST /reporting/executions/{id}/retry
+## 10. POST /reporting/executions/{id}/retry
 
 - **Origen:** CONTRATO
 - **Nombre:** Devolver a la cola una corrida fallida
@@ -998,11 +1068,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:267` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:267` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1074,7 +1144,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 10. POST /reporting/executions/{id}/snapshot
+## 11. POST /reporting/executions/{id}/snapshot
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el artefacto materializado y cerrar la corrida
@@ -1099,11 +1169,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:147` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:147` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1189,7 +1259,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 11. POST /reporting/scheduler/tick
+## 12. POST /reporting/scheduler/tick
 
 - **Origen:** CONTRATO
 - **Nombre:** Disparar las programaciones vencidas
@@ -1214,10 +1284,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:187` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1286,7 +1356,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 ---
 
-## 12. POST /reporting/schedules/{id}/subscriptions
+## 13. POST /reporting/schedules/{id}/subscriptions
 
 - **Origen:** CONTRATO
 - **Nombre:** Suscribirse a una programación
@@ -1311,11 +1381,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORT_VIEWER, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:228` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:228` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

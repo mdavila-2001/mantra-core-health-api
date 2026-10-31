@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   DomainException,
   ErrorCode,
@@ -44,8 +45,10 @@ import {
   ListReferralTargetServicesQueryDto,
   RespondReferralDto,
   RespondReferralResultDto,
+  ReferralArrivalDto,
   ReferralListItemDto,
   ReferralResponseDto,
+  ReferralTransferDto,
   ReferralTargetDto,
   ReferralTargetListDto,
   ReferralTargetServiceDto,
@@ -55,6 +58,14 @@ import {
 } from '../dto';
 import { CEXT } from '../clinical_ext.concepts';
 import type { ReferralStatus } from '../referral.enums';
+import {
+  applyTransfer,
+  assertArrivalAfterDeparture,
+  assertTransferRules,
+  mergeTransfer,
+  toTransferResponse,
+  type EffectiveTransfer,
+} from './referral-transfer';
 
 /** Estado legible por concepto de estado. */
 const STATUS_BY_CONCEPT: Record<string, ReferralStatus> = {
@@ -216,6 +227,13 @@ export class ReferralsService {
     // misma base de escritura que el resto de las rutas clínicas.
     await this.clinicalRead.assertCanWriteHistory(dto.patientProfileId, actor);
 
+    // v4274: el traslado se valida entero antes de abrir la transacción.
+    let transfer: EffectiveTransfer | undefined;
+    if (dto.transfer) {
+      transfer = mergeTransfer(undefined, dto.transfer);
+      assertTransferRules(transfer);
+    }
+
     // Sólo del token: un `referringProfileId` del cuerpo se puede falsear y
     // el aviso saldría a nombre de otro médico.
     const referringProfileId = actor.practitionerProfileId;
@@ -232,7 +250,9 @@ export class ReferralsService {
     ) {
       throw new PreconditionFailedException(
         'La derivación necesita un destino: profesional, organización, servicio, sede o destino externo.',
-        { reason: 'REFERRAL_TARGET_REQUIRED' },
+        // `details.reason` se conserva para los clientes que ya lo leían ahí.
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED },
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
       );
     }
     const referralType: ReferralType = dto.referralType ?? 'CONSULTATION';
@@ -242,6 +262,14 @@ export class ReferralsService {
       if (dto.targetProfileId) {
         await this.assertTargetIsPractitioner(tx, dto.targetProfileId);
       }
+      // El tenant indicado se valida antes que el servicio: contra un tenant
+      // inexistente o inactivo, «el servicio no es de esa organización» sería
+      // un motivo engañoso.
+      if (dto.targetTenantId) {
+        await this.assertTargetTenantActive(tx, dto.targetTenantId, {
+          targetTenantId: dto.targetTenantId,
+        });
+      }
       const targetTenantId = dto.targetServiceCatalogId
         ? await this.assertServiceOfTarget(tx, {
             targetServiceCatalogId: dto.targetServiceCatalogId,
@@ -249,6 +277,15 @@ export class ReferralsService {
             targetTenantId: dto.targetTenantId,
           })
         : dto.targetTenantId;
+      // El tenant derivado de la práctica del servicio se valida igual: una
+      // derivación a una organización que no la puede atender no se crea. El
+      // 404 repite el servicio que mandó quien llama, no el tenant derivado,
+      // que no conocía.
+      if (targetTenantId && targetTenantId !== dto.targetTenantId) {
+        await this.assertTargetTenantActive(tx, targetTenantId, {
+          targetServiceCatalogId: dto.targetServiceCatalogId,
+        });
+      }
       if (dto.sourceEncounterId) {
         await this.assertEncounterBelongsToPatient(
           tx,
@@ -258,19 +295,30 @@ export class ReferralsService {
         );
       }
 
+      // Derivación a la organización: sin profesional ni servicio, el tenant
+      // es el destino. Sin esta rama, un doble envío creaba dos derivaciones
+      // y dos avisos.
+      const toOrganizationOnly =
+        !dto.targetServiceCatalogId &&
+        !dto.targetProfileId &&
+        !!dto.targetTenantId;
       if (
         dto.sourceEncounterId &&
         (dto.targetServiceCatalogId ||
-          (dto.targetProfileId && dto.specialtyConceptId))
+          (dto.targetProfileId && dto.specialtyConceptId) ||
+          toOrganizationOnly)
       ) {
         // El DDL no impide el duplicado: se serializa a quien emite la misma
         // referencia para que el segundo vea la fila del primero. Con
         // servicio, el servicio identifica el destino; sin él, profesional y
-        // especialidad, como siempre. El tipo distingue «consulta» de
+        // especialidad, como siempre; sin ninguno de los dos, la organización.
+        // El tipo distingue «consulta» de
         // «tratamiento» al mismo destino.
         await lockLogicalKey(
           tx,
-          `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId ?? '-'}:${dto.targetServiceCatalogId ?? dto.specialtyConceptId}:${referralType}`,
+          toOrganizationOnly
+            ? `clinical_ext.referral:${dto.sourceEncounterId}:org:${dto.targetTenantId}:${referralType}`
+            : `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId ?? '-'}:${dto.targetServiceCatalogId ?? dto.specialtyConceptId}:${referralType}`,
         );
         const dup = await this.referralsRepo.findDuplicate(tx, {
           sourceEncounterId: dto.sourceEncounterId,
@@ -279,6 +327,7 @@ export class ReferralsService {
           targetProfileId: dto.targetProfileId,
           specialtyConceptId: dto.specialtyConceptId,
           targetServiceCatalogId: dto.targetServiceCatalogId,
+          targetTenantId: toOrganizationOnly ? dto.targetTenantId : undefined,
         });
         if (dup) {
           throw new ConflictException(
@@ -324,14 +373,20 @@ export class ReferralsService {
         treatmentGivenText: dto.treatmentGivenText,
         actorUserId: actor.id,
       });
+      if (transfer) applyTransfer(referral, transfer);
       await tx.flush();
 
       return toReferralResponse(referral);
     });
 
     // Después del commit, y sin poder romperlo: el aviso es de cortesía, la
-    // derivación ya existe.
-    if (dto.sourceEncounterId && dto.targetProfileId) {
+    // derivación ya existe. Avisa la derivación a un profesional y también la
+    // derivación a una organización (el tenant destino puede venir del
+    // servicio); sin encuentro no hay relación asistencial demostrada.
+    if (
+      dto.sourceEncounterId &&
+      (dto.targetProfileId || created.targetTenantId)
+    ) {
       await this.notifier.notifyRecommended(created.id);
     }
     return created;
@@ -344,9 +399,39 @@ export class ReferralsService {
   ): Promise<void> {
     const target = await this.practitionersRepo.findById(tx, targetProfileId);
     if (!target) {
-      throw new ResourceNotFoundException('Profesional no encontrado', {
-        targetProfileId,
-      });
+      throw new ResourceNotFoundException(
+        'Profesional no encontrado',
+        { targetProfileId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
+    }
+  }
+
+  /**
+   * El tenant destino tiene que existir y estar activo (`TENANT_ACTIVE`): una
+   * derivación a una organización que no la puede atender no se crea (#1201).
+   *
+   * Inexistente e inactivo responden igual, con el mismo cuerpo: distinguirlos
+   * permitiría sondear la existencia y el estado de tenants no públicos.
+   *
+   * @param em - Contexto de persistencia (la transacción, en `create`).
+   * @param targetTenantId - Tenant destino, indicado o derivado del servicio.
+   * @param details - Lo que repite el 404: sólo datos que mandó quien llama.
+   * @throws ResourceNotFoundException 404 `REFERRAL_TARGET_NOT_FOUND` si no
+   *   existe o no está activo.
+   */
+  private async assertTargetTenantActive(
+    em: EntityManager,
+    targetTenantId: string,
+    details: Record<string, string | undefined>,
+  ): Promise<void> {
+    const tenant = await this.tenantsRepo.findById(em, targetTenantId);
+    if (!tenant || tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
+      throw new ResourceNotFoundException(
+        'Organización destino no encontrada',
+        details,
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
     }
   }
 
@@ -367,9 +452,11 @@ export class ReferralsService {
       encounter.patientProfileId !== patientProfileId ||
       actor.tenantIds?.includes(encounter.tenantId) !== true
     ) {
-      throw new ResourceNotFoundException('Encuentro no encontrado', {
-        encounterId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuentro no encontrado',
+        { encounterId },
+        ClinicalExtErrorReason.REFERRAL_ENCOUNTER_NOT_FOUND,
+      );
     }
   }
 
@@ -517,6 +604,131 @@ export class ReferralsService {
       referral.counterReferralAt = now;
       referral.statusConceptId = CEXT.REFERRAL_COMPLETED;
       touch(referral, actor.id, now);
+      const names = await this.resolveNames(tx, [referral]);
+      return toReferralResponse(referral, names);
+    });
+  }
+
+  /**
+   * v4274: completa o corrige los datos de salida del traslado.
+   *
+   * Lo hace quien deriva, es decir, quien puede escribir la historia del
+   * paciente (la misma base que emitir o anular), mientras la derivación está
+   * pendiente o aceptada y sin llegada registrada. Un campo omitido conserva lo
+   * guardado y un `null` lo borra; las reglas se evalúan sobre el resultado.
+   *
+   * @param referralId - Derivación.
+   * @param dto - Datos de salida.
+   * @param actor - Profesional autenticado.
+   * @returns La derivación con el traslado actualizado.
+   */
+  async updateTransfer(
+    referralId: string,
+    dto: ReferralTransferDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.referral.transfer', referralId },
+      'Updating referral transfer',
+    );
+    return this.em.transactional(async (tx) => {
+      const referral = await this.findOrFail(tx, referralId);
+      await this.clinicalRead.assertCanWriteHistory(
+        referral.patientProfileId,
+        actor,
+      );
+      if (
+        referral.statusConceptId !== CEXT.REFERRAL_REQUESTED &&
+        referral.statusConceptId !== CEXT.REFERRAL_ACCEPTED
+      ) {
+        throw new PreconditionFailedException(
+          'La derivación ya está cerrada',
+          { referralId },
+          ClinicalExtErrorReason.REFERRAL_ALREADY_CLOSED,
+        );
+      }
+      if (referral.arrivedAt) {
+        throw new PreconditionFailedException(
+          'La llegada ya está registrada',
+          { referralId },
+          ClinicalExtErrorReason.REFERRAL_ARRIVAL_ALREADY_RECORDED,
+        );
+      }
+      const transfer = mergeTransfer(referral, dto);
+      assertTransferRules(transfer);
+      applyTransfer(referral, transfer);
+      touch(referral, actor.id);
+      const names = await this.resolveNames(tx, [referral]);
+      return toReferralResponse(referral, names);
+    });
+  }
+
+  /**
+   * v4274: registra la llegada del paciente al destino.
+   *
+   * La registra sólo el destino (misma regla que la respuesta y la
+   * contrarreferencia: profesional destino, o actor del tenant destino o del
+   * tenant de la sede, con `X-Tenant-Id`); cualquier otro recibe el 404 de una
+   * derivación inexistente. Si el destino es sólo externo, la transcribe quien
+   * puede escribir la historia del paciente.
+   *
+   * Se admite en derivaciones pendientes, aceptadas o completadas (la
+   * contrarreferencia puede anotarse antes que la llegada); rechazadas y
+   * anuladas no admiten traslado.
+   *
+   * @param referralId - Derivación.
+   * @param dto - Llegada.
+   * @param actor - Profesional autenticado.
+   * @returns La derivación con la llegada registrada.
+   */
+  async recordArrival(
+    referralId: string,
+    dto: ReferralArrivalDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.referral.arrival', referralId },
+      'Recording referral arrival',
+    );
+    return this.em.transactional(async (tx) => {
+      const referral = await this.findOrFail(tx, referralId);
+      if (isExternalOnly(referral)) {
+        await this.clinicalRead.assertCanWriteHistory(
+          referral.patientProfileId,
+          actor,
+        );
+      } else if (
+        !(await this.isDestination(tx, referral, actor, getCurrentTenantId()))
+      ) {
+        throw new ResourceNotFoundException(
+          'Referencia no encontrada',
+          undefined,
+          ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+        );
+      }
+      if (
+        referral.statusConceptId === CEXT.REFERRAL_REJECTED ||
+        referral.statusConceptId === CEXT.REFERRAL_CANCELLED
+      ) {
+        throw new PreconditionFailedException(
+          'La derivación ya está cerrada',
+          { referralId },
+          ClinicalExtErrorReason.REFERRAL_ALREADY_CLOSED,
+        );
+      }
+      if (referral.arrivedAt) {
+        throw new PreconditionFailedException(
+          'La llegada ya está registrada',
+          { referralId },
+          ClinicalExtErrorReason.REFERRAL_ARRIVAL_ALREADY_RECORDED,
+        );
+      }
+      const arrivedAt = new Date(dto.arrivedAt);
+      assertArrivalAfterDeparture(arrivedAt, referral.departedAt);
+      referral.arrivedAt = arrivedAt;
+      referral.arrivalCondition = dto.arrivalCondition;
+      referral.arrivalNotes = dto.arrivalNotes;
+      touch(referral, actor.id);
       const names = await this.resolveNames(tx, [referral]);
       return toReferralResponse(referral, names);
     });
@@ -729,17 +941,20 @@ export class ReferralsService {
       serviceCatalogId,
     );
     if (!service) {
-      throw new ResourceNotFoundException('Servicio no encontrado', {
-        targetServiceCatalogId: serviceCatalogId,
-      });
+      throw new ResourceNotFoundException(
+        'Servicio no encontrado',
+        { targetServiceCatalogId: serviceCatalogId },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_NOT_FOUND,
+      );
     }
     if (!service.isActive) {
       throw new PreconditionFailedException(
         'Ese servicio está inactivo en el catálogo.',
         {
           targetServiceCatalogId: serviceCatalogId,
-          reason: 'REFERRAL_SERVICE_INACTIVE',
+          reason: ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE,
         },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE,
       );
     }
 
@@ -750,8 +965,9 @@ export class ReferralsService {
         'El servicio no pertenece a la organización destino.',
         {
           targetServiceCatalogId: serviceCatalogId,
-          reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+          reason: ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
         },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
       );
     }
 
@@ -766,8 +982,9 @@ export class ReferralsService {
           'El profesional destino no ofrece ese servicio.',
           {
             targetServiceCatalogId: serviceCatalogId,
-            reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+            reason: ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
           },
+          ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
         );
       }
     }
@@ -789,7 +1006,8 @@ export class ReferralsService {
     if (q.length < 2) {
       throw new PreconditionFailedException(
         'La búsqueda necesita al menos dos caracteres.',
-        { reason: 'REFERRAL_TARGET_QUERY_TOO_SHORT' },
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT },
+        ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT,
       );
     }
     const em = this.em.fork();
@@ -874,8 +1092,15 @@ export class ReferralsService {
    * oferta activa, o los de las prácticas activas de la organización. Con los
    * dos parámetros, los del profesional en esa organización.
    *
+   * Sólo de destinos que {@link searchTargets} mostraría (vitrina pública
+   * activa y, para la organización, tenant activo): el catálogo y los precios
+   * de un destino no listable no se ven por ninguna otra pantalla (#1058).
+   *
    * @param query - `targetProfileId` y/o `targetTenantId`.
    * @returns Los servicios, por nombre.
+   * @throws ResourceNotFoundException si algún destino no es listable; el
+   *   mismo 404 que si no existiera. Un tenant inexistente, inactivo o sin
+   *   vitrina responde con el mismo cuerpo (#1201): no se distingue el caso.
    */
   async listTargetServices(
     query: ListReferralTargetServicesQueryDto,
@@ -884,10 +1109,31 @@ export class ReferralsService {
     if (!targetProfileId && !targetTenantId) {
       throw new PreconditionFailedException(
         'Indique targetProfileId o targetTenantId.',
-        { reason: 'REFERRAL_TARGET_REQUIRED' },
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED },
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
       );
     }
     const em = this.em.fork();
+    const [profileListable, tenantListable] = await Promise.all([
+      targetProfileId
+        ? this.targetsRepo.isListablePractitioner(em, targetProfileId)
+        : Promise.resolve(true),
+      // Con profesional, el tenant acota sus servicios a esa organización:
+      // basta con que esté activo, sin vitrina propia (así sale en la
+      // búsqueda de destinos). Sin profesional, el destino es la organización.
+      !targetTenantId
+        ? Promise.resolve(true)
+        : targetProfileId
+          ? this.targetsRepo.isActiveTenant(em, targetTenantId)
+          : this.targetsRepo.isListableOrganization(em, targetTenantId),
+    ]);
+    if (!profileListable || !tenantListable) {
+      throw new ResourceNotFoundException(
+        'Destino no encontrado',
+        { targetProfileId, targetTenantId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
+    }
 
     let services: ServiceCatalog[];
     if (targetProfileId) {
@@ -1138,6 +1384,7 @@ export function toReferralResponse(
     rejectReason: row.rejectReason,
     counterReferralText: row.counterReferralText,
     counterReferralAt: row.counterReferralAt,
+    transfer: toTransferResponse(row),
     updatedAt: row.updatedAt,
     createdAt: row.createdAt,
   };

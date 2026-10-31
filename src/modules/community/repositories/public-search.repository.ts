@@ -982,6 +982,35 @@ export class PublicSearchRepository {
   }
 
   /**
+   * La práctica (`practice.practices`) detrás de la ficha de una organización.
+   *
+   * La ficha pública de una organización apunta a su **tenant**
+   * (`public_profiles.target_id = tenant.id`), pero quien pide pertenecer a ella
+   * (`POST /practices/:practiceId/role-assignments/self-request`) necesita el
+   * identificador de la práctica. Si el tenant tiene exactamente una, ese es; con
+   * cero o con varias no hay una respuesta inequívoca y se devuelve `null`: es
+   * preferible que el cliente no ofrezca pedir a que mande la solicitud a una
+   * práctica que el profesional no eligió.
+   *
+   * @param em - Gestor de entidades de la lectura.
+   * @param tenantId - Tenant al que apunta la ficha.
+   * @returns Identificador de la única práctica del tenant, o `null`.
+   */
+  async practiceIdByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<string | null> {
+    const rows = await em
+      .getConnection()
+      .execute<{ id: string }[]>(
+        `SELECT id FROM practice.practices WHERE tenant_id = ? LIMIT 2`,
+        [tenantId],
+        'all',
+      );
+    return rows.length === 1 ? rows[0].id : null;
+  }
+
+  /**
    * Agenda publicada y primer día con hueco, por sujeto profesional.
    *
    * Es lo que hace verdadera la promesa `PAC-CITA-001` («puedo agendar con lo

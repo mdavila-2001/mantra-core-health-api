@@ -15,14 +15,14 @@
 | [capacity_plans](#capacity_plans) | Planifica capacidad requerida por componentes y servicios para sostener crecimiento y disponibilidad. | 14 | 5 | 1 | COINCIDE |
 | [change_approvals](#change_approvals) | Conserva aprobaciones requeridas para autorizar cambios de software e infraestructura. | 8 | 5 | 2 | COINCIDE |
 | [change_requests](#change_requests) | Gestiona solicitudes de cambios técnicos para revisar impacto antes de modificar componentes desplegados. | 23 | 12 | 6 | COINCIDE |
-| [component_tools](#component_tools) | Asocia herramientas con componentes para especificar dependencias técnicas de operación. | 12 | 5 | 0 | COINCIDE |
+| [component_tools](#component_tools) | Asocia herramientas con componentes para especificar dependencias técnicas de operación. | 12 | 5 | 2 | COINCIDE |
 | [deployments](#deployments) | Registra despliegues de componentes por entorno para reconstruir qué versión opera en cada ambiente. | 19 | 12 | 8 | COINCIDE |
 | [error_budget_burn_events](#error_budget_burn_events) | Traza consumo de presupuestos de error para detectar degradación de confiabilidad. | 10 | 4 | 2 | COINCIDE |
 | [error_budget_policies](#error_budget_policies) | Define presupuestos de error y reglas de consumo para equilibrar cambios y confiabilidad. | 14 | 6 | 2 | COINCIDE |
 | [escalation_policies](#escalation_policies) | Define rutas de escalamiento cuando incidentes requieren atención de distintos equipos o niveles. | 11 | 6 | 0 | COINCIDE |
 | [escalation_policy_steps](#escalation_policy_steps) | Detalla pasos, tiempos y destinatarios de políticas de escalamiento. | 14 | 8 | 0 | COINCIDE |
-| [health_check_runs](#health_check_runs) | Conserva ejecuciones de verificaciones para mantener historial de resultados de salud. | 14 | 7 | 2 | COINCIDE |
-| [health_checks](#health_checks) | Define verificaciones de salud usadas para observar disponibilidad y condiciones de componentes. | 21 | 10 | 1 | COINCIDE |
+| [health_check_runs](#health_check_runs) | Conserva ejecuciones de verificaciones para mantener historial de resultados de salud. | 14 | 7 | 4 | COINCIDE |
+| [health_checks](#health_checks) | Define verificaciones de salud usadas para observar disponibilidad y condiciones de componentes. | 21 | 10 | 3 | COINCIDE |
 | [health_incidents](#health_incidents) | Representa incidentes operativos derivados de fallas o degradación de componentes. | 19 | 10 | 10 | COINCIDE |
 | [incident_communications](#incident_communications) | Registra comunicaciones emitidas durante incidentes para mantener alineados equipos y usuarios afectados. | 9 | 5 | 1 | COINCIDE |
 | [incident_responders](#incident_responders) | Relaciona responsables con incidentes para identificar quién participó en la respuesta. | 8 | 4 | 3 | COINCIDE |
@@ -41,13 +41,13 @@
 | [runbook_executions](#runbook_executions) | Registra ejecuciones de runbooks para documentar acciones y resultados de operación. | 12 | 7 | 1 | COINCIDE |
 | [runbook_versions](#runbook_versions) | Preserva versiones de procedimientos operativos para conocer instrucciones vigentes en cada ejecución. | 9 | 4 | 3 | COINCIDE |
 | [runbooks](#runbooks) | Cataloga procedimientos de respuesta a incidentes y tareas operativas repetibles. | 14 | 10 | 2 | COINCIDE |
-| [service_components](#service_components) | Cataloga componentes lógicos de la plataforma médica para relacionar servicios, dependencias, criticidad y operación. | 15 | 8 | 10 | COINCIDE |
+| [service_components](#service_components) | Cataloga componentes lógicos de la plataforma médica para relacionar servicios, dependencias, criticidad y operación. | 15 | 8 | 12 | COINCIDE |
 | [service_dependencies](#service_dependencies) | Modela dependencias entre servicios para evaluar impacto de incidentes y cambios. | 14 | 8 | 0 | COINCIDE |
 | [service_level_indicators](#service_level_indicators) | Define indicadores observables que miden desempeño y disponibilidad de servicios. | 15 | 7 | 4 | COINCIDE |
 | [service_level_objectives](#service_level_objectives) | Establece objetivos cuantitativos de servicio para evaluar confiabilidad y calidad operativa. | 14 | 5 | 4 | COINCIDE |
 | [service_ownerships](#service_ownerships) | Asigna ownership de servicios a equipos para definir responsabilidad operativa. | 13 | 8 | 0 | COINCIDE |
 | [slo_measurements](#slo_measurements) | Registra mediciones de objetivos de servicio para comparar resultados con metas acordadas. | 11 | 4 | 5 | COINCIDE |
-| [tool_registry](#tool_registry) | Registra herramientas y tecnologías operativas disponibles para construir, desplegar y mantener servicios. | 17 | 8 | 6 | COINCIDE |
+| [tool_registry](#tool_registry) | Registra herramientas y tecnologías operativas disponibles para construir, desplegar y mantener servicios. | 17 | 8 | 8 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -846,7 +846,7 @@ Asocia herramientas con componentes para especificar dependencias técnicas de o
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: component_tools`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ComponentTools` — `src/modules/platform_ops/entities/component_tools.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -879,15 +879,18 @@ Asocia herramientas con componentes para especificar dependencias técnicas de o
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_component_tools_service_component_id` | no | service_component_id | Soporta la clave foránea fk_component_tools_service_component_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_component_tools_tool_id` | no | tool_id | Soporta la clave foránea fk_component_tools_tool_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_component_tools_service_component_id` | no | service_component_id | Soporta la clave foránea fk_component_tools_service_component_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «service_component_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_component_tools_tool_id` | no | tool_id | Soporta la clave foránea fk_component_tools_tool_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tool_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_component_tools_usage_concept_id` | no | usage_concept_id | Soporta la clave foránea fk_component_tools_usage_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_component_tools_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_component_tools_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_component_tools_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_component_tools_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tools/{code} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1312,7 +1315,7 @@ Conserva ejecuciones de verificaciones para mantener historial de resultados de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: health_check_runs`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `HealthCheckRuns` — `src/modules/platform_ops/entities/health_check_runs.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 1 entrantes · 2 operaciones
+- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -1349,18 +1352,20 @@ Conserva ejecuciones de verificaciones para mantener historial de resultados de 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_health_check_runs_health_check_id` | no | health_check_id | Soporta la clave foránea fk_health_check_runs_health_check_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «health_check_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_health_check_runs_health_check_id` | no | health_check_id | Soporta la clave foránea fk_health_check_runs_health_check_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «health_check_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_health_check_runs_service_component_id` | no | service_component_id | Soporta la clave foránea fk_health_check_runs_service_component_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_check_runs_deployment_id` | no | deployment_id | Soporta la clave foránea fk_health_check_runs_deployment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_check_runs_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_health_check_runs_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_check_runs_run_source_concept_id` | no | run_source_concept_id | Soporta la clave foránea fk_health_check_runs_run_source_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_check_runs_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_health_check_runs_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `brin_health_check_runs_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «recorded_at», la primera columna del índice _(CONSULTA)_ |
+| `brin_health_check_runs_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «recorded_at», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/tools | LEE | POR_SQL |
+| GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/health-checks/{id}/runs | CREA | DIRECTA |
 | POST /ops/health-checks/{id}/runs | LEE | DIRECTA |
 
@@ -1387,7 +1392,7 @@ Define verificaciones de salud usadas para observar disponibilidad y condiciones
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: health_checks`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `HealthChecks` — `src/modules/platform_ops/entities/health_checks.entity.ts`
-- **Resumen:** 21 columnas · 10 índices · 8 FK salientes · 2 entrantes · 1 operaciones
+- **Resumen:** 21 columnas · 10 índices · 8 FK salientes · 2 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -1434,9 +1439,9 @@ Define verificaciones de salud usadas para observar disponibilidad y condiciones
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_health_checks_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
+| `uq_health_checks_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_health_checks_tenant_id` | no | tenant_id | Soporta la clave foránea fk_health_checks_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_health_checks_service_component_id` | no | service_component_id | Soporta la clave foránea fk_health_checks_service_component_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_health_checks_service_component_id` | no | service_component_id | Soporta la clave foránea fk_health_checks_service_component_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «service_component_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_health_checks_check_type_concept_id` | no | check_type_concept_id | Soporta la clave foránea fk_health_checks_check_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_checks_target_kind_concept_id` | no | target_kind_concept_id | Soporta la clave foránea fk_health_checks_target_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_checks_severity_concept_id` | no | severity_concept_id | Soporta la clave foránea fk_health_checks_severity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1455,6 +1460,8 @@ Define verificaciones de salud usadas para observar disponibilidad y condiciones
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/health-checks/{id}/runs | LEE | DIRECTA |
 
 #### Gobierno
@@ -2870,7 +2877,7 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: service_components; BIZ note`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ServiceComponents` — `src/modules/platform_ops/entities/service_components.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 19 entrantes · 10 operaciones
+- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 19 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -2926,7 +2933,7 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_service_components_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
+| `uq_service_components_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_components_tenant_id` | no | tenant_id | Soporta la clave foránea fk_service_components_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_components_component_type_concept_id` | no | component_type_concept_id | Soporta la clave foránea fk_service_components_component_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_components_criticality_concept_id` | no | criticality_concept_id | Soporta la clave foránea fk_service_components_criticality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2949,6 +2956,8 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 | GET /admin/ops/incidents | LEE | POR_SQL |
 | GET /admin/ops/incidents/{id} | LEE | POR_SQL |
 | GET /admin/ops/readiness | LEE | POR_SQL |
+| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/artifacts | LEE | DIRECTA |
 | POST /ops/capacity-plans/{id}/measurements | LEE | DIRECTA |
 | POST /ops/change-requests | LEE | DIRECTA |
@@ -3361,7 +3370,7 @@ Registra herramientas y tecnologías operativas disponibles para construir, desp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: tool_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ToolRegistry` — `src/modules/platform_ops/entities/tool_registry.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 6 FK salientes · 2 entrantes · 6 operaciones
+- **Resumen:** 17 columnas · 8 índices · 6 FK salientes · 2 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -3402,7 +3411,7 @@ Registra herramientas y tecnologías operativas disponibles para construir, desp
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_tool_registry_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
+| `uq_tool_registry_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_tool_registry_tenant_id` | no | tenant_id | Soporta la clave foránea fk_tool_registry_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tool_registry_tool_type_concept_id` | no | tool_type_concept_id | Soporta la clave foránea fk_tool_registry_tool_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tool_registry_approved_by_user_id` | no | approved_by_user_id | Soporta la clave foránea fk_tool_registry_approved_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3426,6 +3435,8 @@ Registra herramientas y tecnologías operativas disponibles para construir, desp
 | POST /admin/ops/runtime-pieces/discover | CREA | POR_SQL |
 | POST /admin/ops/runtime-pieces/discover | ACTUALIZA | POR_SQL |
 | POST /admin/ops/runtime-pieces/discover | LEE | POR_SQL |
+| GET /admin/ops/tools | LEE | DIRECTA |
+| GET /admin/ops/tools/{code} | LEE | DIRECTA |
 | POST /ops/artifacts | LEE | DIRECTA |
 
 #### Gobierno

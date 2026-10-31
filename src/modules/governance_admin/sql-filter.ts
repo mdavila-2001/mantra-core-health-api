@@ -35,6 +35,10 @@ export function escapeLike(text: string): string {
   return text.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
-export function clampLimit(limit: number | undefined, def: number, max: number): number {
+export function clampLimit(
+  limit: number | undefined,
+  def: number,
+  max: number,
+): number {
   return Math.min(Math.max(Math.trunc(limit ?? def), 1), max);
 }

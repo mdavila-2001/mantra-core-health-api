@@ -27,12 +27,12 @@
 | [grant_usage_stats](#grant_usage_stats) | Acumula por hora el uso de cada permiso de apoyo (permitidos, negados, desafíos, fuera de horario y pacientes distintos) para certificar con evidencia y detectar anomalías. | 13 | 4 | 0 | SIN_ENTIDAD |
 | [handover_items](#handover_items) | Registra el traspaso del trabajo de quien se va o cambia de función: conversaciones, tareas, vínculos supervisados y citas pendientes, y a quién se reasignó cada uno. | 17 | 9 | 0 | SIN_ENTIDAD |
 | [lifecycle_cases](#lifecycle_cases) | Sigue el ingreso, el cambio, la baja, la suspensión y la reactivación de una persona de apoyo con su lista de pasos y su estado. | 18 | 9 | 0 | SIN_ENTIDAD |
-| [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 35 | 24 | 8 | DIVERGE |
+| [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 35 | 24 | 82 | DIVERGE |
 | [patient_restriction_flags](#patient_restriction_flags) | Marca por organización a los pacientes VIP, confidenciales, familiares del personal o protegidos para limitar quién del equipo de apoyo puede verlos; es una marca de acceso, no un dato clínico. | 13 | 7 | 0 | SIN_ENTIDAD |
 | [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 22 | 12 | 8 | DIVERGE |
 | [role_templates](#role_templates) | Define los paquetes de acciones por defecto de cada rol de apoyo (secretaria, recepción, central telefónica, etc.), de plataforma o propios de una organización, para conceder permisos sin repetirlos uno a uno. | 14 | 6 | 0 | SIN_ENTIDAD |
-| [shared_access_link_uses](#shared_access_link_uses) | sin propósito | 8 | 4 | 0 | SIN_ENTIDAD |
-| [shared_access_links](#shared_access_links) | sin propósito | 20 | 13 | 0 | SIN_ENTIDAD |
+| [shared_access_link_uses](#shared_access_link_uses) | sin propósito | 8 | 4 | 3 | COINCIDE |
+| [shared_access_links](#shared_access_links) | sin propósito | 20 | 13 | 7 | COINCIDE |
 | [sod_exceptions](#sod_exceptions) | Registra las excepciones justificadas y con vencimiento a una regla de separación de funciones, nacidas de una aprobación de cuatro ojos. | 17 | 9 | 0 | SIN_ENTIDAD |
 | [sod_rules](#sod_rules) | Define las reglas de separación de funciones (de plataforma y de cada organización) que impiden que una misma persona reúna permisos incompatibles, con su alcance, su acción y si admiten excepción. | 19 | 9 | 0 | SIN_ENTIDAD |
 | [support_grant_actions](#support_grant_actions) | Lista las acciones concretas que habilita cada permiso de apoyo, para que cada permiso tenga sus propias acciones granulares. | 10 | 5 | 0 | SIN_ENTIDAD |
@@ -1718,7 +1718,7 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: organization_user_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
 - **Entidad del ORM:** `OrganizationUserAssignments` — `src/modules/delegated_access/entities/organization_user_assignments.entity.ts`
-- **Resumen:** 35 columnas · 24 índices · 20 FK salientes · 8 entrantes · 8 operaciones
+- **Resumen:** 35 columnas · 24 índices · 20 FK salientes · 8 entrantes · 82 operaciones
 
 #### Columnas
 
@@ -1835,14 +1835,88 @@ Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actua
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /accounting/cost-centers | LEE | POR_SQL |
+| POST /accounting/cost-centers/{id}/unit-link | LEE | POR_SQL |
+| GET /accounting/infrastructure-items | LEE | POR_SQL |
+| PATCH /accounting/infrastructure-items/{id} | LEE | POR_SQL |
+| GET /billing/bed-day/stays | LEE | POR_SQL |
+| POST /billing/charge-captures/{id}/void | LEE | POR_SQL |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | POR_SQL |
+| GET /billing/encounters/{encounterId}/pending-charges | LEE | POR_SQL |
+| GET /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs/{id}/close | LEE | POR_SQL |
+| POST /internal/billing/bed-day-charges/run | LEE | POR_SQL |
+| POST /census-days/{id}/adjustments | LEE | POR_SQL |
+| POST /clinical/admissions | LEE | POR_SQL |
+| POST /clinical/bed-compatibility | LEE | POR_SQL |
+| POST /clinical/bed-swaps | LEE | POR_SQL |
+| POST /clinical/encounter-locations/{id}/cancel | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/bed-assignment | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/bed-compatibility | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/discharge | LEE | POR_SQL |
+| GET /clinical/encounters/{id}/stay | LEE | POR_SQL |
+| POST /clinical/encounters/{id}/transfer | LEE | POR_SQL |
+| GET /clinical/patients/{id}/inpatient-stay | LEE | POR_SQL |
+| PATCH /clinical/placement-incidents/{id} | LEE | POR_SQL |
+| POST /internal/clinical/census-close-tick | LEE | POR_SQL |
+| GET /sites/{siteId}/attending-practitioners | LEE | POR_SQL |
+| GET /sites/{siteId}/census | LEE | POR_SQL |
+| POST /sites/{siteId}/census/{date}/close | LEE | POR_SQL |
+| GET /sites/{siteId}/inpatient-indicators | LEE | POR_SQL |
+| GET /sites/{siteId}/inpatients | LEE | POR_SQL |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
 | POST /delegated-access/expiry-sweep | ACTUALIZA | POR_TIPO |
 | POST /delegated-access/expiry-sweep | LEE | DIRECTA |
+| POST /me/practitioner/support-invitations | CREA | POR_SQL |
+| POST /me/practitioner/support-invitations | LEE | POR_SQL |
+| GET /me/practitioner/support-team | LEE | POR_SQL |
+| POST /me/practitioner/support-team/{id}/end | LEE | DIRECTA |
+| GET /me/support-access | LEE | POR_SQL |
+| GET /me/support-agenda | LEE | POR_SQL |
+| GET /me/support-engagements | LEE | POR_SQL |
+| POST /me/support-engagements/{id}/confirm | LEE | DIRECTA |
+| POST /me/support-engagements/{id}/decline | LEE | DIRECTA |
+| POST /me/support-engagements/{id}/leave | LEE | DIRECTA |
 | POST /org/{tenantMembershipId}/user-assignments | CREA | DIRECTA |
 | POST /org/{tenantMembershipId}/user-assignments | LEE | DIRECTA |
+| GET /org/support-engagement-requests | LEE | POR_SQL |
+| POST /org/support-engagement-requests/{id}/decision | LEE | DIRECTA |
+| GET /org/support-engagements | LEE | POR_SQL |
+| POST /org/support-engagements/{id}/end | LEE | DIRECTA |
+| POST /org/team/invitations | CREA | POR_SQL |
+| POST /org/team/invitations | LEE | POR_SQL |
 | PATCH /org/user-assignments/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /org/user-assignments/{id} | LEE | DIRECTA |
 | POST /practitioner-delegates | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/accept | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/reject | LEE | DIRECTA |
+| POST /support-engagement-requests | CREA | POR_SQL |
+| POST /support-engagement-requests | LEE | POR_SQL |
+| GET /diagnostic-equipment/{id} | LEE | POR_SQL |
+| PATCH /diagnostic-equipment/{id} | LEE | POR_SQL |
+| GET /diagnostic-equipment/{id}/mwl-station | LEE | POR_SQL |
+| POST /diagnostic-equipment/{id}/resource | LEE | POR_SQL |
+| POST /care-spaces/{id}/availability | LEE | POR_SQL |
+| GET /care-spaces/{id}/blocks | LEE | POR_SQL |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| POST /care-spaces/{id}/hygiene | LEE | POR_SQL |
+| POST /care-spaces/{id}/isolation | LEE | POR_SQL |
+| GET /care-spaces/{id}/operational-state | LEE | POR_SQL |
+| GET /care-spaces/{id}/status-events | LEE | POR_SQL |
+| GET /care-spaces/{id}/stock | LEE | POR_SQL |
+| GET /practice/infrastructure-access/me | LEE | POR_SQL |
+| GET /sites/{siteId}/bed-board | LEE | POR_SQL |
+| GET /sites/{siteId}/cleaning-orders | LEE | POR_SQL |
+| POST /sites/{siteId}/cleaning-orders | LEE | POR_SQL |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
+| POST /or-blocks/{id}/cancel | LEE | POR_SQL |
+| POST /or-blocks/{id}/release | LEE | POR_SQL |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
+| GET /sites/{siteId}/operating-rooms | LEE | POR_SQL |
+| GET /sites/{siteId}/or-blocks | LEE | POR_SQL |
+| POST /sites/{siteId}/or-blocks | LEE | POR_SQL |
+| GET /sites/{siteId}/or-utilization | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -2128,21 +2202,21 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 8 columnas · 4 índices · 3 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `SharedAccessLinkUses` — `src/modules/delegated_access/entities/shared_access_link_uses.entity.ts`
+- **Resumen:** 8 columnas · 4 índices · 3 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `shared_access_link_id` | `uuid` | Clave foránea → delegated_access.shared_access_links.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `outcome_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `source_ip` | `inet` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `user_agent` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `shared_access_link_id` | `uuid` | Clave foránea → delegated_access.shared_access_links.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `action_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `outcome_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `source_ip` | `inet` | Opcional | _sin dato_ | coincide |
+| 6 | `user_agent` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `occurred_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2163,7 +2237,11 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /clinical/prescription-shares | LEE | POR_SQL |
+| GET /public/prescription-shares/{token} | CREA | DIRECTA |
+| GET /pharmacy/prescription-shares/{token} | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -2187,33 +2265,33 @@ _Sin propósito registrado._
 
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 20 columnas · 13 índices · 10 FK salientes · 1 entrantes · 0 operaciones
+- **Entidad del ORM:** `SharedAccessLinks` — `src/modules/delegated_access/entities/shared_access_links.entity.ts`
+- **Resumen:** 20 columnas · 13 índices · 10 FK salientes · 1 entrantes · 7 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `resource_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `resource_id` | `uuid` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `token_hash` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `scope_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `recipient_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `recipient_label` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `purpose_of_use_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `revoked_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `revoke_reason_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
+| 4 | `resource_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `resource_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 6 | `token_hash` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `scope_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 8 | `recipient_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 9 | `recipient_label` | `varchar` | Opcional | _sin dato_ | coincide |
+| 10 | `purpose_of_use_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 11 | `expires_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 12 | `revoked_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 13 | `revoked_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `revoke_reason_text` | `text` | Opcional | _sin dato_ | coincide |
+| 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2235,10 +2313,10 @@ _Sin propósito registrado._
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_shared_access_links_token_hash` | sí | token_hash | Garantiza que no se repita la combinación (token_hash) _(DOCUMENTO)_ |
+| `uq_shared_access_links_token_hash` | sí | token_hash | Garantiza que no se repita la combinación (token_hash) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «token_hash», la primera columna del índice _(CONSULTA)_ |
 | `ix_shared_access_links_tenant_id` | no | tenant_id | Soporta la clave foránea fk_shared_access_links_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_shared_access_links_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_shared_access_links_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_shared_access_links_resource` | no | resource_type_concept_id, resource_id | Soporta la clave foránea fk_shared_access_links_resource_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_shared_access_links_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_shared_access_links_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_shared_access_links_resource` | no | resource_type_concept_id, resource_id | Soporta la clave foránea fk_shared_access_links_resource_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «resource_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_shared_access_links_scope_concept_id` | no | scope_concept_id | Soporta la clave foránea fk_shared_access_links_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_shared_access_links_recipient_kind_concept_id` | no | recipient_kind_concept_id | Soporta la clave foránea fk_shared_access_links_recipient_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_shared_access_links_purpose_of_use_concept_id` | no | purpose_of_use_concept_id | Soporta la clave foránea fk_shared_access_links_purpose_of_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2257,7 +2335,15 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /clinical/prescription-shares | LEE | DIRECTA |
+| POST /clinical/prescription-shares | CREA | DIRECTA |
+| POST /clinical/prescription-shares/{shareId}/revoke | ACTUALIZA | POR_TIPO |
+| POST /clinical/prescription-shares/{shareId}/revoke | LEE | DIRECTA |
+| GET /clinical/prescription-shares/by-token/{token} | LEE | DIRECTA |
+| GET /public/prescription-shares/{token} | LEE | DIRECTA |
+| GET /pharmacy/prescription-shares/{token} | LEE | DIRECTA |
 
 #### Gobierno
 

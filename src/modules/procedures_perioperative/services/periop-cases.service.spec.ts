@@ -82,6 +82,13 @@ function build() {
     createCase: mockFn(),
     findCaseById: caseLookupMock(),
     findCaseForUpdate: caseLookupMock(),
+    // F4 (§F4.3): check-list OMS con las tres fases completas; los casos
+    // bloqueantes tienen su propia prueba.
+    findSafetyChecklistByCase: mockFn().mockResolvedValue({
+      signInCompletedAt: new Date(),
+      timeOutCompletedAt: new Date(),
+      signOutCompletedAt: new Date(),
+    }),
     findCaseByNumber: mockFn(),
     countCases: mockFn(),
     findOverlappingCases: mockFn(),
@@ -146,6 +153,27 @@ function build() {
   // el detalle con un actor clínico la conceden).
   const clinicalRead = {
     assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+    // Sin base clínica de escritura salvo que el test la conceda (#893).
+    assertCanWriteHistory: mockFn().mockRejectedValue(
+      new ForbiddenException('Sin acceso a la historia'),
+    ),
+  };
+  // El paciente tiene huella propia en el tenant, salvo que el test diga otra
+  // cosa (regla de `authz`, #893).
+  const clinicalScope = {
+    isPatientInTenant: mockFn().mockResolvedValue(true),
+  };
+  // F4: el validador del quirófano (solape de la ventana reservada, bloques,
+  // recurso) tiene su propia prueba; acá aprueba la sala.
+  const orValidator = {
+    validate: mockFn().mockResolvedValue({
+      schedulableResourceId: 'res-1',
+      operatingRoomBlockId: null,
+      prepMinutes: 0,
+      cleanupMinutes: 0,
+      reservedStartAt: new Date(),
+      reservedEndAt: new Date(),
+    }),
   };
   const service = new PeriopCasesService(
     em as any,
@@ -159,11 +187,15 @@ function build() {
     clinicalRead as any,
     new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
+    clinicalScope as any,
+    orValidator as any,
   );
   return {
+    orValidator,
     service: inTenant(service, TENANT_A),
     raw: service,
     clinicalRead,
+    clinicalScope,
     tx,
     casesRepo,
     preopRepo,
@@ -227,6 +259,7 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          tenantId: TENANT,
           eventTypeConceptId: CONCEPTS.OR_EVENT_RESERVED,
         }),
       );
@@ -277,6 +310,69 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createCase).not.toHaveBeenCalled();
     });
 
+    it('#893: un paciente sin huella en el tenant ni base clínica del actor responde 404 uniforme y no crea nada', async () => {
+      const d = build();
+      wire(d);
+      // `isPatientInTenant` no distingue «no existe» de «es de otro tenant»:
+      // los dos llegan como `false` y salen con el mismo 404.
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
+
+      const err: any = await d.service
+        .scheduleCase(scheduleDto(), actor)
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(err).toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+      });
+      expect(err.getResponse().details).toBeUndefined();
+      expect(d.clinicalScope.isPatientInTenant).toHaveBeenCalledWith(
+        d.tx,
+        PATIENT,
+        TENANT,
+      );
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        PATIENT,
+        actor,
+      );
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('#893: sin huella del paciente, alcanza la base clínica del actor (cirujano que lo atiende)', async () => {
+      const d = build();
+      wire(d);
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
+      d.clinicalRead.assertCanWriteHistory.mockResolvedValue(undefined);
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(d.casesRepo.createCase).toHaveBeenCalled();
+    });
+
+    it('#893: con huella del paciente no consulta la base clínica', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      expect(d.casesRepo.createCase).toHaveBeenCalled();
+    });
+
+    it('#893: un error que no es de autorización no se convierte en 404', async () => {
+      const d = build();
+      wire(d);
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+        new Error('base caída'),
+      );
+
+      await expect(
+        d.service.scheduleCase(scheduleDto(), actor),
+      ).rejects.toThrow('base caída');
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
     it('does not look up a procedure when none is sent', async () => {
       const d = build();
       wire(d);
@@ -301,13 +397,20 @@ describe('PeriopCasesService', () => {
     it('refuses to double-book the operating room', async () => {
       const d = build();
       wire(d);
-      d.casesRepo.findOverlappingCases.mockResolvedValue([
-        { id: 'other-case' },
-      ]);
+      // El solape de la ventana reservada lo detecta el validador de F4
+      // (operating-room.validator.spec.ts); el servicio no crea nada.
+      d.orValidator.validate.mockRejectedValue(
+        new ConflictException(
+          'El quirófano ya está reservado en esa ventana',
+          {},
+          'OPERATING_ROOM_SLOT_CONFLICT',
+        ),
+      );
 
       await expect(
         d.service.scheduleCase(scheduleDto(), actor as any),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
     });
 
     it('rejects a window that ends before it starts', async () => {
@@ -698,6 +801,31 @@ describe('PeriopCasesService', () => {
         patientChanged: true,
       });
       expect(surgicalCase.patientProfileId).toBe(NEW_PATIENT);
+    });
+
+    it('#893: no corrige el paciente a uno sin huella en el tenant del caso ni base clínica (404 uniforme)', async () => {
+      const d = build();
+      const surgicalCase = draftCase();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          practitionerProfileId: SURGEON,
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        },
+      ]);
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
+
+      await expect(
+        d.service.updateCase(CASE, { patientProfileId: NEW_PATIENT }, actor),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+      });
+      expect(d.clinicalScope.isPatientInTenant).toHaveBeenCalledWith(
+        d.tx,
+        NEW_PATIENT,
+        TENANT_A,
+      );
+      expect(surgicalCase.patientProfileId).toBe(PATIENT);
     });
 
     it('rejects changing the patient once past DRAFT (ready for surgery)', async () => {
@@ -1240,6 +1368,7 @@ describe('PeriopCasesService', () => {
       const d = build();
       const surgicalCase: any = {
         id: CASE,
+        custodianTenantId: TENANT,
         statusConceptId: CONCEPTS.CASE_SCHEDULED,
         operatingRoomId: ROOM,
       };
@@ -1257,6 +1386,7 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          tenantId: TENANT,
           eventTypeConceptId: CONCEPTS.OR_EVENT_SLOT_RELEASED,
         }),
       );
@@ -1350,6 +1480,41 @@ describe('PeriopCasesService', () => {
         ...overrides,
       };
     }
+
+    it('F5e: un cargo de sala (OR_TIME) → 422 ROOM_CHARGE_IS_AUTOMATIC y no se carga nada', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(completedCase());
+      d.casesRepo.findChargeItemsForUpdate.mockResolvedValue([]);
+      await expect(
+        d.service.postCharges(
+          CASE,
+          dto({
+            items: [
+              {
+                chargeType: 'OR_TIME',
+                billableItemId: BILLABLE,
+                quantity: '60',
+                unitPrice: '10.00',
+              },
+            ],
+          }),
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: 'ROOM_CHARGE_IS_AUTOMATIC' });
+      expect(d.casesRepo.createChargeItem).not.toHaveBeenCalled();
+    });
+
+    it('F4: sin la Salida OMS no se factura (422 CHECKLIST_SIGN_OUT_REQUIRED)', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(completedCase());
+      d.casesRepo.findSafetyChecklistByCase.mockResolvedValue({
+        signInCompletedAt: new Date(),
+        timeOutCompletedAt: new Date(),
+      });
+      await expect(
+        d.service.postCharges(CASE, dto(), actor),
+      ).rejects.toMatchObject({ reason: 'CHECKLIST_SIGN_OUT_REQUIRED' });
+    });
 
     it('posts the charges and totals them', async () => {
       const d = build();

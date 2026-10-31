@@ -670,6 +670,62 @@ export class ListCasesQueryDto {
 }
 
 /** Caso tal como aparece en la agenda quirúrgica. */
+/** Quirófano de un caso. */
+export class CaseOperatingRoomDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() code!: string;
+  @ApiProperty() name!: string;
+}
+
+/** Bloque de quirófano de un caso, con el dueño resuelto. */
+export class CaseBlockRefDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ description: 'Servicio (unidad) o cirujano dueño del bloque' })
+  label!: string;
+}
+
+/** Concepto `{code, display}`. */
+export class CaseConceptRefDto {
+  @ApiProperty() code!: string;
+  @ApiProperty() display!: string;
+}
+
+/** Fase del check-list OMS. */
+export class ChecklistPhaseDto {
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  completedAt!: string | null;
+}
+
+/** Check-list OMS del caso. */
+export class CaseChecklistDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ type: ChecklistPhaseDto }) signIn!: ChecklistPhaseDto;
+  @ApiProperty({ type: ChecklistPhaseDto }) timeOut!: ChecklistPhaseDto;
+  @ApiProperty({ type: ChecklistPhaseDto }) signOut!: ChecklistPhaseDto;
+}
+
+/** Evento de sala del caso. */
+export class CaseRoomEventDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({
+    description:
+      'PATIENT_IN_ROOM, ANESTHESIA_START, INCISION, CLOSURE, PATIENT_OUT_OF_ROOM, CLEANUP_START, CLEANUP_END, ROOM_READY',
+  })
+  eventCode!: string;
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  occurredAt!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  recordedByUserId!: string | null;
+}
+
+/** Orden de limpieza del recambio de sala (F2). */
+export class CaseTurnoverCleaningDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ nullable: true, type: String }) status!: string | null;
+  @ApiProperty() rowVersion!: number;
+  @ApiProperty({ type: [String] }) allowedTransitions!: string[];
+}
+
 export class CaseSummaryDto {
   /**
    * Identificador único de la instancia.
@@ -718,6 +774,40 @@ export class CaseSummaryDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   scheduledEndAt?: Date;
+
+  @ApiPropertyOptional({ type: () => CaseOperatingRoomDto, nullable: true })
+  operatingRoom?: CaseOperatingRoomDto | null;
+
+  @ApiPropertyOptional({ type: () => CaseBlockRefDto, nullable: true })
+  block?: CaseBlockRefDto | null;
+
+  @ApiPropertyOptional({ type: () => CaseConceptRefDto, nullable: true })
+  caseType?: CaseConceptRefDto | null;
+
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  encounterId?: string | null;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+    description: 'Inicio reservado (programado − preparación)',
+  })
+  reservedStartAt?: Date | null;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+    description: 'Fin reservado (programado + limpieza)',
+  })
+  reservedEndAt?: Date | null;
+
+  @ApiPropertyOptional({ nullable: true, type: Number })
+  prepMinutes?: number | null;
+
+  @ApiPropertyOptional({ nullable: true, type: Number })
+  cleanupMinutes?: number | null;
 }
 
 /** Página de la agenda quirúrgica. */
@@ -776,6 +866,15 @@ export class CaseDetailDto {
    */
   @ApiProperty({ type: CaseSummaryDto })
   case!: CaseSummaryDto;
+
+  @ApiProperty({ type: CaseChecklistDto, nullable: true })
+  checklist!: CaseChecklistDto | null;
+
+  @ApiProperty({ type: [CaseRoomEventDto] })
+  roomEvents!: CaseRoomEventDto[];
+
+  @ApiProperty({ type: CaseTurnoverCleaningDto, nullable: true })
+  turnoverCleaning!: CaseTurnoverCleaningDto | null;
 
   /**
    * Valor de diagnoses mantenido por la instancia.

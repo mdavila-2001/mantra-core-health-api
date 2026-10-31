@@ -2,11 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../../common';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
-import type { PharmacyIntegrationConnections } from '../../../pharmacy/entities';
 import { IntegrationReadRepository } from '../../infrastructure/repositories';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
-import { productByExternalCode } from '../../domain/sync/external-mapping';
+import { resolveExternalCodes } from '../../domain/sync/external-mapping';
 import type {
   ExternalCatalogListDto,
   IntegrationConnectionListDto,
@@ -33,6 +32,14 @@ const MAX_BATCHES = 20;
  * con su vínculo y los últimos lotes. Todo dentro del ámbito del actor: una
  * farmacia o una conexión ajena responde el mismo 404 que una inexistente.
  */
+/**
+ * La conexión tal como la lee el repositorio: la capa de aplicación no importa
+ * entidades de `pharmacy`, sólo `infrastructure/` habla con otros contextos.
+ */
+type FoundConnection = NonNullable<
+  Awaited<ReturnType<IntegrationReadRepository['findConnection']>>
+>;
+
 @Injectable()
 export class IntegrationReadService {
   constructor(
@@ -114,6 +121,7 @@ export class IntegrationReadService {
           productName: product
             ? (product.brandName ?? product.genericName ?? product.productCode)
             : null,
+          externalUnitCode: mapping.externalUnitCode ?? null,
           createdAt: mapping.createdAt.toISOString(),
         };
       }),
@@ -137,15 +145,29 @@ export class IntegrationReadService {
       }
       throw error;
     }
-    const byCode = productByExternalCode(mappings);
+    const byCode = resolveExternalCodes(mappings);
     return {
-      items: catalog.map((product) => ({
-        code: product.code,
-        name: product.name,
-        presentation: product.presentation ?? null,
-        unitCode: product.unitCode ?? null,
-        mappedProductId: byCode.get(product.code) ?? null,
-      })),
+      items: catalog.map((product) => {
+        const resolution = byCode.get(product.code);
+        return {
+          code: product.code,
+          name: product.name,
+          presentation: product.presentation ?? null,
+          unitCode: product.unitCode ?? null,
+          mappedProductId:
+            resolution?.status === 'MAPPED' ? resolution.productId : null,
+          mappingStatus: !resolution
+            ? 'UNMAPPED'
+            : resolution.status === 'MAPPED'
+              ? 'MAPPED'
+              : 'AMBIGUOUS',
+          mappedProductIds: !resolution
+            ? []
+            : resolution.status === 'MAPPED'
+              ? [resolution.productId]
+              : [...resolution.productIds],
+        };
+      }),
     };
   }
 
@@ -184,7 +206,7 @@ export class IntegrationReadService {
     em: EntityManager,
     ref: ConnectionRef,
     actor: AuthenticatedUser,
-  ): Promise<PharmacyIntegrationConnections> {
+  ): Promise<FoundConnection> {
     const pharmacy = await this.scope.requireManagedPharmacy(
       em,
       ref.pharmacyId,

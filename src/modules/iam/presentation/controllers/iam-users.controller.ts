@@ -8,11 +8,16 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { PlatformAdminScopeGuard } from '../../../../common/auth/platform-admin-scope.guard';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiPreconditionFailedResponse,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -57,6 +62,10 @@ import {
   ListMfaFactorsResponseDto,
   ListSessionsResponseDto,
   ListGlobalRolesResponseDto,
+  UserLifecycleReasonDto,
+  UserLifecycleResultDto,
+  UserLifecycleViewDto,
+  UserLifecycleHistoryQueryDto,
 } from '../dto';
 
 /** Tope de usuarios por página cuando el cliente no pide uno. */
@@ -65,6 +74,22 @@ const DEFAULT_USERS_PAGE_SIZE = 50;
 /**
  * Endpoints administrativos y de auto-servicio sobre `/iam/users`. Es una capa
  * fina: valida parámetros y delega en el servicio de dominio correspondiente.
+ *
+ * ## Contrato H5: ciclo de vida de la cuenta (todo `SECURITY_ADMIN`)
+ *
+ * | Ruta | Cuerpo / query | Respuesta |
+ * |---|---|---|
+ * | `POST /iam/users/:id/suspend` | `{ reason }` (obligatorio, ≤ 500) | 200 `{ id, state, changed, revokedSessions }` |
+ * | `POST /iam/users/:id/reactivate` | `{ reason }` | 200 igual |
+ * | `POST /iam/users/:id/deactivate` | `{ reason }` | 200 igual (la baja no borra; no se reactiva) |
+ * | `GET /iam/users/:id/lifecycle` | `?limit=1..100&cursor=` | 200 `{ userId, state, items[], nextCursor, limit }` |
+ *
+ * `state`: `ACTIVE | SUSPENDED | DEACTIVATED | ANONYMIZED`. Idempotentes: repetir la acción sobre
+ * la cuenta que ya está en ese estado responde 200 con `changed: false` y no escribe. Errores:
+ * 400 (`reason` ausente o vacío, clave no declarada), 404 `USER_NOT_FOUND`, 409
+ * `USER_LIFECYCLE_TRANSITION_INVALID`, 412 `USER_SELF_LIFECYCLE_FORBIDDEN` /
+ * `USER_LAST_SECURITY_ADMIN`, 401 sin token, 403 `ROLE_INSUFFICIENT`.
+ * Contrato completo: `docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H5-permisos-y-usuarios.md`.
  */
 @ApiTags('iam-users')
 @ApiBearerAuth()
@@ -268,6 +293,22 @@ export class IamUsersController {
     return this.usersReadService.listGlobalRoles(id);
   }
 
+  /** Estado de ciclo de vida de la cuenta y su historia (suspensiones, reactivaciones, bajas). */
+  @Get(':id/lifecycle')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @ApiOperation({
+    summary: 'Estado de ciclo de vida de la cuenta y su historia, paginada',
+  })
+  @ApiOkResponse({ type: UserLifecycleViewDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  lifecycle(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: UserLifecycleHistoryQueryDto,
+  ): Promise<UserLifecycleViewDto> {
+    return this.usersService.lifecycleOf(id, query);
+  }
+
   /**
    * C-18 / CAN-IDENT: registro asistido de un paciente. Devuelve el token de
    * activación de un solo uso para entregar al titular por canal seguro — NUNCA
@@ -431,6 +472,88 @@ export class IamUsersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     return this.usersService.lock(id, dto, actor);
+  }
+
+  /** Suspende la cuenta (reversible): bloquea el acceso y cierra sus sesiones. */
+  @Audited({
+    action: 'USER_SUSPENDED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
+  @Post(':id/suspend')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Suspender la cuenta con motivo (idempotente, cierra sus sesiones)',
+  })
+  @ApiOkResponse({ type: UserLifecycleResultDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  @ApiConflictResponse({ description: 'Transición inválida desde ese estado' })
+  @ApiPreconditionFailedResponse({
+    description: 'Cuenta propia o última cuenta administradora',
+  })
+  suspend(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UserLifecycleReasonDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.usersService.suspend(id, dto.reason, actor);
+  }
+
+  /** Reactiva una cuenta suspendida. */
+  @Audited({
+    action: 'USER_REACTIVATED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
+  @Post(':id/reactivate')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reactivar una cuenta suspendida con motivo (idempotente)',
+  })
+  @ApiOkResponse({ type: UserLifecycleResultDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  @ApiConflictResponse({
+    description: 'Una baja o una cuenta anonimizada no se reactiva',
+  })
+  reactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UserLifecycleReasonDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.usersService.reactivate(id, dto.reason, actor);
+  }
+
+  /** Da de baja la cuenta: no borra nada; revoca credenciales, roles globales y sesiones. */
+  @Audited({
+    action: 'USER_DEACTIVATED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
+  @Post(':id/deactivate')
+  @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Dar de baja la cuenta con motivo (sin borrado físico; idempotente)',
+  })
+  @ApiOkResponse({ type: UserLifecycleResultDto })
+  @ApiNotFoundResponse({ description: 'No existe el usuario' })
+  @ApiConflictResponse({ description: 'Transición inválida desde ese estado' })
+  @ApiPreconditionFailedResponse({
+    description: 'Cuenta propia o última cuenta administradora',
+  })
+  deactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UserLifecycleReasonDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.usersService.deactivate(id, dto.reason, actor);
   }
 
   /** UC-01-10. */

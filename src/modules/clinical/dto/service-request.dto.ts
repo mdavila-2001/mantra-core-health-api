@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayUnique,
@@ -11,11 +12,18 @@ import {
   MaxLength,
   MinLength,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
+import { IsConceptId } from './concept-id.validator';
 import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
 } from '../service-request-category';
+import {
+  ImagingDetailDto,
+  ServiceRequestComponentDto,
+  ServiceRequestImagingDto,
+} from './service-request-detail.dto';
 
 /** Tope de notas citadas por orden: más es un listado, no un motivo. */
 export const MAX_BASED_ON_NOTES = 20;
@@ -71,7 +79,7 @@ export class CreateServiceRequestDto {
     description: 'Código del servicio pedido (concept id)',
     format: 'uuid',
   })
-  @IsUUID()
+  @IsConceptId()
   codeConceptId!: string;
 
   /**
@@ -82,7 +90,7 @@ export class CreateServiceRequestDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   categoryConceptId?: string;
 
   /**
@@ -188,6 +196,59 @@ export class CreateServiceRequestDto {
   @IsOptional()
   @IsUUID()
   suggestedPracticeSiteId?: string;
+
+  /**
+   * v4.2.82: muestra pedida (laboratorio / anatomía patológica).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Muestra pedida (value set `specimen-type`). Sólo con laboratorio o anatomía patológica ' +
+      '(422 SPECIMEN_NOT_ALLOWED_FOR_CATEGORY / SPECIMEN_TYPE_NOT_IN_CATALOG, con details.reason)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsConceptId()
+  specimenTypeConceptId?: string;
+
+  /**
+   * v4.2.82: componentes marcados del panel.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Componentes MARCADOS del panel (conceptos `part-of` del estudio). Un panel desplegable exige ' +
+      'la lista y no vacía (422 COMPONENTS_EMPTY); un estudio que no es panel la prohíbe ' +
+      '(COMPONENTS_NOT_SELECTABLE); uno ajeno al panel: COMPONENT_NOT_IN_PANEL',
+    type: [String],
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(500)
+  @ArrayUnique()
+  @IsConceptId({ each: true })
+  componentConceptIds?: string[];
+
+  /**
+   * v4.2.82: modalidad, región, lateralidad y contraste de un estudio de imagen.
+   */
+  @ApiPropertyOptional({ type: () => ImagingDetailDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ImagingDetailDto)
+  imaging?: ImagingDetailDto;
+
+  /**
+   * F5b: punto de toma de muestra sugerido (espacio `SPACE_FN_SAMPLE_COLLECTION`
+   * de la sede sugerida). Sin él, en una orden de laboratorio se sugiere el
+   * primer punto disponible de la sede.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Punto de toma sugerido (F5b)',
+  })
+  @IsOptional()
+  @IsUUID()
+  suggestedCareSpaceId?: string;
 
   /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
@@ -324,6 +385,50 @@ export class ServiceRequestResponseDto {
    */
   @ApiProperty({ nullable: true, type: String })
   suggestedPracticeSiteName!: string | null;
+
+  /** F5b: punto de toma sugerido, o `null`. */
+  @ApiProperty({
+    nullable: true,
+    description: 'Punto de toma sugerido {id, code, name} (F5b)',
+  })
+  suggestedCareSpace!: { id: string; code: string; name: string } | null;
+
+  /**
+   * v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual).
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  requisitionId?: string | null;
+
+  /** v4.2.82: el estudio pedido. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  codeConceptId?: string;
+
+  /** v4.2.82: nombre legible del estudio. */
+  @ApiPropertyOptional()
+  codeDisplay?: string;
+
+  /** v4.2.82: muestra pedida (nulo = no se indicó). */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  specimenTypeConceptId?: string | null;
+
+  /** v4.2.82: nombre legible de la muestra. */
+  @ApiPropertyOptional({ nullable: true, type: String })
+  specimenTypeDisplay?: string | null;
+
+  /**
+   * v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo
+   * va vacío y significa «estudio completo, sin detalle» (órdenes anteriores).
+   */
+  @ApiPropertyOptional({ type: [ServiceRequestComponentDto] })
+  components?: ServiceRequestComponentDto[];
+
+  /** v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). */
+  @ApiPropertyOptional()
+  componentsSpecified?: boolean;
+
+  /** v4.2.82: detalle de imagen; `null` si la orden no lo trae. */
+  @ApiPropertyOptional({ type: () => ServiceRequestImagingDto, nullable: true })
+  imaging?: ServiceRequestImagingDto | null;
 
   /**
    * Fecha y hora en que se creó el registro.

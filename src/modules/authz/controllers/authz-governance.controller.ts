@@ -1,18 +1,20 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { PlatformAdminScopeGuard } from '../../../common/auth/platform-admin-scope.guard';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
+  ApiPreconditionFailedResponse,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -23,224 +25,198 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PlatformTenantOptional } from '../../../common/tenant/platform-tenant-optional.decorator';
+import { UserIdParamDto } from '../dto/authz-admin.dto';
 import {
+  AccessMapDto,
   AccessReviewDto,
-  AccessReviewDueQueryDto,
-  AccessReviewDuePageDto,
-  EndedResourceScopeGrantDto,
-  EndResourceScopeGrantDto,
-  LifecycleActionDto,
-  LifecycleResultDto,
-  RecordAccessReviewDto,
-  ResourceScopeGrantIdParamDto,
-  ResourceScopeGrantsPageDto,
-  ResourceScopeGrantsQueryDto,
-  RoleFieldPermissionsDto,
-  UserAccessReviewsDto,
-  UserLifecycleDto,
+  AccessReviewsPageDto,
+  DirectGrantsPageDto,
+  DueReviewsPageDto,
+  DueReviewsQueryDto,
+  GrantsQueryDto,
+  HoldersQueryDto,
+  PermissionHoldersPageDto,
+  PermissionIdParamDto,
+  RestrictedFieldsPageDto,
+  ReviewsQueryDto,
+  ScopeGrantsPageDto,
+  SimulateDecisionDto,
+  SimulationResultDto,
 } from '../dto/authz-governance.dto';
-import { AuthzAccessReviewsService } from '../services/authz-access-reviews.service';
-import { AuthzGovernanceReadService } from '../services/authz-governance-read.service';
-import { AuthzUserLifecycleService } from '../services/authz-user-lifecycle.service';
+import { AuthzGovernanceService } from '../services/authz-governance.service';
 
 /**
- * Gobierno de acceso de la consola: ciclo de vida de las cuentas internas, revisión periódica de
- * accesos y las lecturas de permisos por campo y por alcance de recurso. Todo es `SECURITY_ADMIN`.
- * Un actor de plataforma (sin ámbito de tenant) atraviesa tenants y no exige uno resuelto; uno con
- * alcance opera dentro de su tenant, y los servicios acotan a él cada consulta y escritura.
+ * Gobierno de accesos (H5): «quién puede qué», revisión periódica de accesos y simulador.
+ * Todo `SECURITY_ADMIN` (o `SUPERADMIN`). Es una vista de plataforma —atraviesa tenants—, así
+ * que no exige un tenant resuelto, igual que `AuthzAdminController`.
  *
- * Las rutas viven en archivos propios del módulo para no cruzarse con `AuthzAdminController`.
+ * ## Contrato de rutas (H5)
+ *
+ * Los listados son paginados por cursor opaco: `?limit=1..200` (50 por defecto) y `?cursor=` con
+ * el `nextCursor` de la página anterior; responden `{ items, nextCursor, limit }`. Un cursor
+ * inválido o un `limit` fuera de rango responde 400.
+ *
+ * | Ruta | Query / cuerpo | Respuesta |
+ * |---|---|---|
+ * | `GET /authz/users/:userId/access-map` | — | `{ user, globalRoles[], assignments[], counts, lastReview }` |
+ * | `GET /authz/users/:userId/permission-grants` | `show=EFFECTIVE\|ALL` | página de excepciones de permiso |
+ * | `GET /authz/users/:userId/resource-scope-grants` | `show=EFFECTIVE\|ALL` | página de grants por recurso |
+ * | `GET /authz/users/:userId/restricted-fields` | — | página de campos restringidos por sus roles |
+ * | `GET /authz/permissions/:permissionId/holders` | `source=ROLE\|USER\|RESOURCE`, `q` | página de titulares con sus fuentes |
+ * | `POST /authz/users/:userId/access-reviews` | sin cuerpo | 201 `{ id, userId, reviewerUserId, reviewedAt, … }` |
+ * | `GET /authz/access-reviews` | `userId`, `reviewerId` | página de revisiones |
+ * | `GET /authz/access-reviews/due` | `olderThanDays=1..3650` (90) | página de cuentas sin revisión reciente |
+ * | `POST /authz/simulations` | igual que `POST /authz/decisions/evaluate` | `{ simulated: true, decision }` |
+ *
+ * Errores: 401 sin token · 403 `ROLE_INSUFFICIENT` · 404 `GOVERNANCE_USER_NOT_FOUND` /
+ * `GOVERNANCE_PERMISSION_NOT_FOUND` · 422 `ACCESS_REVIEW_SELF_REVIEW_FORBIDDEN` (PreconditionFailedException responde 422) · 400 validación.
+ * Contrato completo: `docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H5-permisos-y-usuarios.md`.
+ *
+ * Las vistas «quién puede qué» son **orientativas**: no reproducen toda la evaluación del PDP
+ * (propósito de uso, alcance clínico por paciente, políticas ABAC). La decisión real la da el
+ * simulador.
  */
 @ApiTags('authz-governance')
 @ApiBearerAuth()
 @Controller('authz')
+@UseGuards(PlatformAdminScopeGuard)
 @PlatformTenantOptional('SECURITY_ADMIN', 'SUPERADMIN')
 export class AuthzGovernanceController {
-  constructor(
-    private readonly lifecycle: AuthzUserLifecycleService,
-    private readonly reviews: AuthzAccessReviewsService,
-    private readonly read: AuthzGovernanceReadService,
-  ) {}
+  constructor(private readonly governance: AuthzGovernanceService) {}
 
-  /* ---- ciclo de vida ------------------------------------------------------- */
-
-  @Get('users/:userId/lifecycle')
-  @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Estado de la cuenta y su historial de ciclo de vida' })
-  @ApiResponse({ status: 200, type: UserLifecycleDto })
-  @ApiResponse({ status: 404, description: 'USER_LIFECYCLE_USER_NOT_FOUND' })
-  lifecycleOf(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.lifecycle.lifecycleOf(userId, actor);
-  }
-
-  @Audited({
-    action: 'USER_SUSPENDED',
-    entity: 'user',
-    entityId: 'param:userId',
-  })
-  @Post('users/:userId/lifecycle/suspend')
-  @Roles('SECURITY_ADMIN')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Suspender la cuenta (corta sus sesiones; reversible)' })
-  @ApiResponse({ status: 200, type: LifecycleResultDto })
-  @ApiResponse({ status: 409, description: 'USER_LIFECYCLE_NOT_ACTIVE' })
-  @ApiResponse({ status: 403, description: 'GOVERNANCE_TARGET_REQUIRES_SUPERADMIN | GOVERNANCE_TARGET_REQUIRES_PLATFORM' })
-  @ApiResponse({ status: 404, description: 'USER_LIFECYCLE_USER_NOT_FOUND (también si la cuenta es de otra organización)' })
-  @ApiResponse({ status: 409, description: 'USER_LIFECYCLE_NOT_ACTIVE | USER_LIFECYCLE_MULTI_TENANT' })
-  @ApiResponse({ status: 422, description: 'USER_LIFECYCLE_SELF_ACTION | USER_LIFECYCLE_ANONYMIZED' })
-  suspend(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() dto: LifecycleActionDto,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.lifecycle.suspend(userId, dto, actor);
-  }
-
-  @Audited({
-    action: 'USER_REACTIVATED',
-    entity: 'user',
-    entityId: 'param:userId',
-  })
-  @Post('users/:userId/lifecycle/reactivate')
-  @Roles('SECURITY_ADMIN')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reactivar una cuenta suspendida (no una dada de baja)' })
-  @ApiResponse({ status: 200, type: LifecycleResultDto })
-  @ApiResponse({ status: 403, description: 'GOVERNANCE_TARGET_REQUIRES_SUPERADMIN | GOVERNANCE_TARGET_REQUIRES_PLATFORM' })
-  @ApiResponse({ status: 404, description: 'USER_LIFECYCLE_USER_NOT_FOUND (también si la cuenta es de otra organización)' })
-  @ApiResponse({
-    status: 409,
-    description: 'USER_LIFECYCLE_NOT_SUSPENDED | USER_LIFECYCLE_ALREADY_OFFBOARDED | USER_LIFECYCLE_MULTI_TENANT',
-  })
-  reactivate(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() dto: LifecycleActionDto,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.lifecycle.reactivate(userId, dto, actor);
-  }
-
-  @Audited({
-    action: 'USER_OFFBOARDED',
-    entity: 'user',
-    entityId: 'param:userId',
-  })
-  @Post('users/:userId/lifecycle/offboard')
-  @Roles('SECURITY_ADMIN')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Dar de baja: bloquea la cuenta, corta sesiones y revoca todos sus roles',
-  })
-  @ApiResponse({ status: 200, type: LifecycleResultDto })
-  @ApiResponse({ status: 403, description: 'GOVERNANCE_TARGET_REQUIRES_SUPERADMIN | GOVERNANCE_TARGET_REQUIRES_PLATFORM' })
-  @ApiResponse({ status: 404, description: 'USER_LIFECYCLE_USER_NOT_FOUND (también si la cuenta es de otra organización)' })
-  @ApiResponse({ status: 409, description: 'USER_LIFECYCLE_ALREADY_OFFBOARDED | USER_LIFECYCLE_NOT_ACTIVE | USER_LIFECYCLE_MULTI_TENANT' })
-  offboard(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() dto: LifecycleActionDto,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.lifecycle.offboard(userId, dto, actor);
-  }
-
-  /* ---- revisión periódica de accesos --------------------------------------- */
-
-  @Get('access-reviews/due')
+  @Get('users/:userId/access-map')
   @Roles('SECURITY_ADMIN')
   @ApiOperation({
-    summary: 'Cuentas con roles activos y la fecha de su última revisión',
+    summary:
+      '«Quién puede qué» de un usuario: roles, conteos y última revisión',
+  })
+  @ApiOkResponse({ type: AccessMapDto })
+  @ApiResponse({ status: 404, description: 'No existe el usuario' })
+  accessMap(@Param() p: UserIdParamDto): Promise<AccessMapDto> {
+    return this.governance.accessMap(p.userId);
+  }
+
+  @Get('users/:userId/permission-grants')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Excepciones de permiso por usuario, paginadas' })
+  @ApiOkResponse({ type: DirectGrantsPageDto })
+  @ApiResponse({ status: 404, description: 'No existe el usuario' })
+  directGrants(
+    @Param() p: UserIdParamDto,
+    @Query() q: GrantsQueryDto,
+  ): Promise<DirectGrantsPageDto> {
+    return this.governance.directGrants(p.userId, q);
+  }
+
+  @Get('users/:userId/resource-scope-grants')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary:
+      'Grants sobre un recurso concreto cuyo sujeto es el usuario, paginados',
+  })
+  @ApiOkResponse({ type: ScopeGrantsPageDto })
+  @ApiResponse({ status: 404, description: 'No existe el usuario' })
+  scopeGrants(
+    @Param() p: UserIdParamDto,
+    @Query() q: GrantsQueryDto,
+  ): Promise<ScopeGrantsPageDto> {
+    return this.governance.scopeGrants(p.userId, q);
+  }
+
+  @Get('users/:userId/restricted-fields')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary:
+      'Campos restringidos que alcanzan al usuario por sus roles efectivos',
     description:
-      'Con `olderThanDays`, sólo quienes no se revisaron en ese plazo o nunca. La cadencia la fija quien pregunta.',
+      'Sin lectura, sin escritura o enmascarados. Incluye las reglas de los roles padre que hereda.',
   })
-  @ApiResponse({ status: 200, type: AccessReviewDuePageDto })
-  due(
-    @Query() q: AccessReviewDueQueryDto,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.reviews.due(actor, q.olderThanDays);
+  @ApiOkResponse({ type: RestrictedFieldsPageDto })
+  @ApiResponse({ status: 404, description: 'No existe el usuario' })
+  restrictedFields(
+    @Param() p: UserIdParamDto,
+    @Query() q: GrantsQueryDto,
+  ): Promise<RestrictedFieldsPageDto> {
+    return this.governance.restrictedFields(p.userId, q);
   }
 
-  @Get('users/:userId/access-reviews')
+  @Get('permissions/:permissionId/holders')
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Historial de revisiones de accesos de una cuenta' })
-  @ApiResponse({ status: 200, type: UserAccessReviewsDto })
-  reviewsOf(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.reviews.historyOf(userId, actor);
+  @ApiOperation({
+    summary: 'Quiénes tienen un permiso, con el camino por el que lo tienen',
+    description:
+      'Por rol (propio o heredado), por excepción directa o por grant de recurso; sólo lo vigente. Una fila por usuario.',
+  })
+  @ApiOkResponse({ type: PermissionHoldersPageDto })
+  @ApiResponse({ status: 404, description: 'No existe el permiso' })
+  holders(
+    @Param() p: PermissionIdParamDto,
+    @Query() q: HoldersQueryDto,
+  ): Promise<PermissionHoldersPageDto> {
+    return this.governance.holdersOf(p.permissionId, q);
   }
 
   @Audited({
-    action: 'ACCESS_REVIEW_RECORDED',
+    action: 'ACCESS_REVIEWED',
     entity: 'user',
     entityId: 'param:userId',
   })
   @Post('users/:userId/access-reviews')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar la revisión de accesos de una cuenta' })
+  @ApiOperation({
+    summary: 'Registrar que revisaste los accesos de una cuenta',
+    description:
+      'Cada llamada suma una revisión (quién, a quién, cuándo). No cambia ningún permiso. Nadie revisa los propios.',
+  })
   @ApiResponse({ status: 201, type: AccessReviewDto })
-  @ApiResponse({ status: 403, description: 'GOVERNANCE_TARGET_REQUIRES_SUPERADMIN | GOVERNANCE_TARGET_REQUIRES_PLATFORM' })
-  @ApiResponse({ status: 404, description: 'ACCESS_REVIEW_USER_NOT_FOUND (también si la cuenta es de otra organización)' })
-  @ApiResponse({ status: 422, description: 'ACCESS_REVIEW_SELF_REVIEW | ACCESS_REVIEW_ASSIGNMENT_MISMATCH' })
+  @ApiResponse({ status: 404, description: 'No existe el usuario' })
+  @ApiPreconditionFailedResponse({ description: 'Es tu propia cuenta' })
   recordReview(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() dto: RecordAccessReviewDto,
+    @Param() p: UserIdParamDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.reviews.record(userId, dto, actor);
+  ): Promise<AccessReviewDto> {
+    return this.governance.recordReview(p.userId, actor);
   }
 
-  /* ---- permisos por campo y por alcance de recurso ------------------------- */
-
-  @Get('roles/:roleId/field-permissions')
+  // `access-reviews/due` se declara antes que cualquier ruta con parámetro bajo `access-reviews`.
+  @Get('access-reviews/due')
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Reglas de enmascaramiento de campos de un rol' })
-  @ApiResponse({ status: 200, type: RoleFieldPermissionsDto })
-  fieldPermissions(
-    @Param('roleId', ParseUUIDPipe) roleId: string,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.read.roleFieldPermissions(roleId, actor);
+  @ApiOperation({
+    summary: 'Cuentas con acceso administrativo sin revisión reciente',
+  })
+  @ApiOkResponse({ type: DueReviewsPageDto })
+  dueReviews(@Query() q: DueReviewsQueryDto): Promise<DueReviewsPageDto> {
+    return this.governance.dueReviews(q);
   }
 
-  @Get('resource-scope-grants')
+  @Get('access-reviews')
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Permisos por alcance de recurso, paginados' })
-  @ApiResponse({ status: 200, type: ResourceScopeGrantsPageDto })
-  scopeGrants(
-    @Query() q: ResourceScopeGrantsQueryDto,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.read.resourceScopeGrants(q, actor);
+  @ApiOperation({ summary: 'Historia de revisiones de accesos, paginada' })
+  @ApiOkResponse({ type: AccessReviewsPageDto })
+  reviews(@Query() q: ReviewsQueryDto): Promise<AccessReviewsPageDto> {
+    return this.governance.reviews(q);
   }
 
   @Audited({
-    action: 'RESOURCE_SCOPE_GRANT_ENDED',
-    entity: 'resource_scope_grant',
-    entityId: 'param:grantId',
+    action: 'ACCESS_DECISION_SIMULATED',
+    entity: 'user',
+    entityId: 'body.userId',
   })
-  @Delete('resource-scope-grants/:grantId')
+  @Post('simulations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Terminar la vigencia de un permiso por alcance de recurso',
+    summary: 'Simular una decisión de acceso con el PDP real',
     description:
-      'Un permiso de efecto DENY exige `reason` en el cuerpo (422 RESOURCE_SCOPE_GRANT_DENY_REASON_REQUIRED); en un ALLOW es opcional. Con alcance de tenant sólo se alcanzan los permisos del propio tenant.',
+      'Misma entrada y misma decisión que `POST /authz/decisions/evaluate`. No concede ni cambia nada.',
   })
-  @ApiResponse({ status: 200, type: EndedResourceScopeGrantDto })
-  @ApiResponse({ status: 404, description: 'RESOURCE_SCOPE_GRANT_NOT_FOUND (también si es de otro tenant)' })
-  @ApiResponse({ status: 409, description: 'RESOURCE_SCOPE_GRANT_ALREADY_ENDED' })
-  @ApiResponse({ status: 422, description: 'RESOURCE_SCOPE_GRANT_DENY_REASON_REQUIRED' })
-  endScopeGrant(
-    @Param() p: ResourceScopeGrantIdParamDto,
-    @Body() dto: EndResourceScopeGrantDto,
+  @ApiOkResponse({ type: SimulationResultDto })
+  @ApiResponse({ status: 404, description: 'No existe el usuario' })
+  simulate(
+    @Body() dto: SimulateDecisionDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    return this.read.endResourceScopeGrant(p.grantId, dto, actor);
+  ): Promise<SimulationResultDto> {
+    return this.governance.simulate(dto, actor);
   }
 }

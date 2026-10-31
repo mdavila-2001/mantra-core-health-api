@@ -1,3 +1,6 @@
+import { OperatingRoomValidator } from './or/operating-room.validator';
+import { CaseOrViewBuilder, type CaseOrFields } from './or/case-or-view';
+import { assertChecklistPhase } from './or/checklist-gates';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -58,9 +61,11 @@ import {
   type ChargeType,
 } from '../dto';
 import type { ProcedureCases } from '../entities';
+import { AuthzClinicalScopeService } from '../../authz/services/authz-clinical-scope.service';
 import { PERIOP } from '../procedures_perioperative.concepts';
 import {
   assertCaseInScope,
+  assertPatientInScope,
   assertProcedureOfCasePatient,
   loadCaseForUpdateInScope,
   periopCaseNotFound,
@@ -131,13 +136,6 @@ const CHARGE_TYPE_CONCEPT: Readonly<Record<ChargeType, string>> = {
   OR_TIME: CONCEPTS.CHARGE_TYPE_OR_TIME,
 };
 
-/** Estados en los que el caso todavía ocupa el quirófano reservado. */
-const BLOCKING_CASE_STATES: readonly string[] = [
-  CONCEPTS.CASE_SCHEDULED,
-  CONCEPTS.CASE_READY_FOR_SURGERY,
-  CONCEPTS.SURGICAL_CASE_IN_PROGRESS,
-];
-
 /** Estados desde los que todavía se puede cancelar. */
 const CANCELLABLE_CASE_STATES: readonly string[] = [
   CONCEPTS.CASE_SCHEDULED,
@@ -206,6 +204,7 @@ export class PeriopCasesService {
    * @param clinicalRead - Política de acceso al paciente (detalle del caso).
    * @param reacceptance - Invalidación de las aceptaciones del equipo.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalScope - Pertenencia del paciente al tenant (`authz`, #893).
    */
   constructor(
     private readonly em: EntityManager,
@@ -222,6 +221,12 @@ export class PeriopCasesService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly reacceptance: PeriopReacceptanceService,
     private readonly logger: PinoLogger,
+    // Regla de `authz` para el paciente del caso (#893).
+    private readonly clinicalScope: AuthzClinicalScopeService,
+    // F4 (§F4.3): validaciones 1–7 del quirófano (espacio real, recurso, bloques).
+    private readonly orValidator: OperatingRoomValidator,
+    // F4 (§F4.3): sala, bloque, check-list, eventos y recambio en las lecturas.
+    private readonly orView?: CaseOrViewBuilder,
   ) {
     this.logger.setContext(PeriopCasesService.name);
   }
@@ -270,6 +275,15 @@ export class PeriopCasesService {
     const custodianTenantId = requireTenantId();
 
     return this.em.transactional(async (tx) => {
+      // El paciente también lo manda el cliente: sin vínculo con este tenant
+      // ni base clínica del actor responde como inexistente (#893).
+      await assertPatientInScope(
+        { clinicalScope: this.clinicalScope, clinicalRead: this.clinicalRead },
+        tx,
+        dto.patientProfileId,
+        custodianTenantId,
+        actor,
+      );
       // El procedimiento principal lo manda el cliente: se cruza con el paciente
       // del caso y el tenant antes de enlazarlo (404 uniforme si no es suyo).
       if (dto.primaryProcedureId) {
@@ -280,23 +294,18 @@ export class PeriopCasesService {
           dto.patientProfileId,
         );
       }
-      const overlapping = await this.casesRepo.findOverlappingCases(
-        tx,
-        dto.operatingRoomId,
-        scheduledStartAt,
-        scheduledEndAt,
-        [...BLOCKING_CASE_STATES],
-      );
-      if (overlapping.length > 0) {
-        throw new ConflictException(
-          'El quirófano ya está reservado en esa franja',
-          {
-            operatingRoomId: dto.operatingRoomId,
-            conflictingCaseId: overlapping[0].id,
-          },
-          ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
-        );
-      }
+      // F4 (§F4.3): quirófano real del tenant, misma sede, función, ciclo de
+      // vida y bloqueos de F2, recurso agendable, bloques y solape de la
+      // ventana reservada (prep + limpieza; la escribe el trigger).
+      const room = await this.orValidator.validate(tx, {
+        operatingRoomId: dto.operatingRoomId,
+        practiceSiteId: dto.practiceSiteId,
+        start: scheduledStartAt,
+        end: scheduledEndAt,
+        caseType: dto.caseType,
+        specialtyConceptId: dto.surgicalSpecialtyConceptId,
+        surgeonProfileId: dto.primarySurgeonProfileId,
+      });
 
       const caseNumber = await this.nextCaseNumber(tx, custodianTenantId);
       const surgicalCase = this.casesRepo.createCase(tx, {
@@ -319,6 +328,13 @@ export class PeriopCasesService {
         urgencyReasonText: dto.urgencyReasonText,
         actorUserId: actor.id,
       });
+      // Foto de prep/limpieza de la sala y vínculos de F4; la ventana
+      // reservada la deriva el trigger de estas columnas.
+      surgicalCase.prepMinutes = room.prepMinutes;
+      surgicalCase.cleanupMinutes = room.cleanupMinutes;
+      surgicalCase.schedulableResourceId = room.schedulableResourceId;
+      surgicalCase.operatingRoomBlockId =
+        room.operatingRoomBlockId ?? undefined;
       // Las cuatro filas de abajo referencian el caso por una columna uuid
       // plana, no por una relación de MikroORM: el ORM no sabe que dependen de
       // él y puede insertarlas antes en el mismo flush, violando la FK. Sin este
@@ -347,6 +363,7 @@ export class PeriopCasesService {
       });
 
       this.casesRepo.createUtilizationEvent(tx, {
+        tenantId: dto.custodianTenantId,
         operatingRoomId: dto.operatingRoomId,
         procedureCaseId: surgicalCase.id,
         eventTypeConceptId: CONCEPTS.OR_EVENT_RESERVED,
@@ -456,6 +473,16 @@ export class PeriopCasesService {
             ProceduresPerioperativeErrorReason.PATIENT_CHANGE_BLOCKED_BY_DEPENDENCIES,
           );
         }
+        await assertPatientInScope(
+          {
+            clinicalScope: this.clinicalScope,
+            clinicalRead: this.clinicalRead,
+          },
+          tx,
+          dto.patientProfileId,
+          surgicalCase.custodianTenantId,
+          actor,
+        );
         surgicalCase.patientProfileId = dto.patientProfileId;
         patientChanged = true;
         relevantChanges.push('patientProfileId');
@@ -483,6 +510,31 @@ export class PeriopCasesService {
           { caseId },
           ProceduresPerioperativeErrorReason.SCHEDULE_END_BEFORE_START,
         );
+      }
+      // F4 (§F4.3): reprogramar valida otra vez el quirófano y la ventana
+      // reservada contra los demás casos (sin contar éste).
+      if (
+        (dto.scheduledStartAt || dto.scheduledEndAt) &&
+        surgicalCase.operatingRoomId &&
+        surgicalCase.scheduledStartAt &&
+        surgicalCase.scheduledEndAt
+      ) {
+        const room = await this.orValidator.validate(tx, {
+          operatingRoomId: surgicalCase.operatingRoomId,
+          practiceSiteId: surgicalCase.practiceSiteId,
+          start: surgicalCase.scheduledStartAt,
+          end: surgicalCase.scheduledEndAt,
+          caseType:
+            Object.entries(CASE_TYPE_CONCEPT).find(
+              ([, id]) => id === surgicalCase.caseTypeConceptId,
+            )?.[0] ?? 'ELECTIVE',
+          specialtyConceptId: surgicalCase.surgicalSpecialtyConceptId,
+          surgeonProfileId: surgicalCase.primarySurgeonProfileId,
+          excludeCaseId: surgicalCase.id,
+        });
+        surgicalCase.schedulableResourceId = room.schedulableResourceId;
+        surgicalCase.operatingRoomBlockId =
+          room.operatingRoomBlockId ?? undefined;
       }
 
       // Spec 227-230: una aceptación vale para **la versión que se aceptó**.
@@ -976,7 +1028,11 @@ export class PeriopCasesService {
       }),
       this.casesRepo.countCasesMatching(this.em, tenantId, filters),
     ]);
-    return { items: cases.map((c) => this.toSummary(c)), total };
+    const or = (await this.orView?.fields(cases, tenantId)) ?? new Map();
+    return {
+      items: cases.map((c) => this.toSummary(c, or.get(c.id))),
+      total,
+    };
   }
 
   /**
@@ -1059,8 +1115,15 @@ export class PeriopCasesService {
       }
     }
 
+    const or = (await this.orView?.fields([surgicalCase], tenantId))?.get(
+      surgicalCase.id,
+    );
+    const orDetail = this.orView
+      ? await this.orView.detail(surgicalCase, actor, tenantId)
+      : { checklist: null, roomEvents: [], turnoverCleaning: null };
     return {
-      case: this.toSummary(surgicalCase),
+      case: this.toSummary(surgicalCase, or),
+      ...orDetail,
       diagnoses: diagnoses.map((d) => ({
         id: d.id,
         conditionId: d.conditionId,
@@ -1206,17 +1269,37 @@ export class PeriopCasesService {
    * antiguas sin ellas, así que se proyectan como opcionales en vez de afirmar
    * algo que la tabla no garantiza.
    */
-  private toSummary(surgicalCase: {
-    id: string;
-    caseNumber: string;
-    patientProfileId: string;
-    primarySurgeonProfileId?: string;
-    operatingRoomId?: string;
-    statusConceptId: string;
-    scheduledStartAt?: Date;
-    scheduledEndAt?: Date;
-  }): CaseSummaryDto {
+  private toSummary(
+    surgicalCase: {
+      id: string;
+      caseNumber: string;
+      patientProfileId: string;
+      primarySurgeonProfileId?: string;
+      operatingRoomId?: string;
+      statusConceptId: string;
+      scheduledStartAt?: Date;
+      scheduledEndAt?: Date;
+      encounterId?: string;
+      reservedStartAt?: Date;
+      reservedEndAt?: Date;
+      prepMinutes?: number;
+      cleanupMinutes?: number;
+    },
+    or?: CaseOrFields,
+  ): CaseSummaryDto {
     return {
+      ...(or
+        ? {
+            operatingRoom: or.operatingRoom,
+            block: or.block,
+            caseType: or.caseType,
+            encounterId: surgicalCase.encounterId ?? null,
+            reservedStartAt: surgicalCase.reservedStartAt ?? null,
+            reservedEndAt: surgicalCase.reservedEndAt ?? null,
+            prepMinutes: surgicalCase.prepMinutes ?? null,
+            cleanupMinutes: surgicalCase.cleanupMinutes ?? null,
+          }
+        : {}),
       id: surgicalCase.id,
       caseNumber: surgicalCase.caseNumber,
       patientProfileId: surgicalCase.patientProfileId,
@@ -1546,6 +1629,7 @@ export class PeriopCasesService {
       let operatingRoomReleased = false;
       if (surgicalCase.operatingRoomId) {
         this.casesRepo.createUtilizationEvent(tx, {
+          tenantId: surgicalCase.custodianTenantId,
           operatingRoomId: surgicalCase.operatingRoomId,
           procedureCaseId: caseId,
           eventTypeConceptId: CONCEPTS.OR_EVENT_SLOT_RELEASED,
@@ -1589,6 +1673,18 @@ export class PeriopCasesService {
         tx,
         caseId,
       );
+      // F5e (§F5e): el uso de sala se devenga solo (quirófano por tiempo);
+      // cargarlo a mano lo cobraría dos veces. Cambio de comportamiento
+      // pedido por el contrato.
+      if (dto.items.some((item) => item.chargeType === 'OR_TIME')) {
+        throw new PreconditionFailedException(
+          'El cargo de sala se genera automáticamente al completar el caso',
+          { caseId },
+          ProceduresPerioperativeErrorReason.ROOM_CHARGE_IS_AUTOMATIC,
+        );
+      }
+      // F4 (§F4.3): facturar exige la Salida OMS.
+      await assertChecklistPhase(this.casesRepo, tx, caseId, 'SIGN_OUT');
       if (surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED) {
         throw new PreconditionFailedException(
           'Sólo se factura un caso completado',
@@ -1660,6 +1756,7 @@ export class PeriopCasesService {
         }
 
         this.casesRepo.createUtilizationEvent(tx, {
+          tenantId: surgicalCase.custodianTenantId,
           operatingRoomId: surgicalCase.operatingRoomId,
           procedureCaseId: caseId,
           eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_END,
@@ -1672,6 +1769,7 @@ export class PeriopCasesService {
 
         if (dto.turnoverSeconds !== undefined) {
           this.casesRepo.createUtilizationEvent(tx, {
+            tenantId: surgicalCase.custodianTenantId,
             operatingRoomId: surgicalCase.operatingRoomId,
             procedureCaseId: caseId,
             eventTypeConceptId: CONCEPTS.OR_EVENT_TURNOVER,
@@ -1701,7 +1799,13 @@ export class PeriopCasesService {
     const total = await this.casesRepo.countCases(tx, custodianTenantId);
     for (let attempt = 1; attempt <= 5; attempt += 1) {
       const candidate = `CQ-${String(total + attempt).padStart(6, '0')}`;
-      if (!(await this.casesRepo.findCaseByNumber(tx, candidate)))
+      if (
+        !(await this.casesRepo.findCaseByNumber(
+          tx,
+          candidate,
+          custodianTenantId,
+        ))
+      )
         return candidate;
     }
     throw new ConflictException(

@@ -30,8 +30,35 @@ export enum ClinicalExtErrorReason {
   VIRTUAL_ENCOUNTER_ALREADY_EXISTS = 'VIRTUAL_ENCOUNTER_ALREADY_EXISTS',
 
   // --- Derivación a servicios específicos (v4266) ---
-  /** Una derivación tipada necesita al menos un destino. */
+  /**
+   * La derivación necesita al menos un destino. Responde 400 en una derivación
+   * tipada sin destino y 422 en `POST /referrals` y en
+   * `GET /referrals/target-services` sin destino.
+   */
   REFERRAL_TARGET_REQUIRED = 'REFERRAL_TARGET_REQUIRED',
+  /**
+   * 404: el profesional destino (`targetProfileId`) no existe en el padrón; el
+   * tenant destino (`targetTenantId`, indicado o derivado del servicio) no
+   * existe o no está activo, con el mismo cuerpo en los dos casos; o el
+   * destino de `GET /referrals/target-services` no es listable.
+   */
+  REFERRAL_TARGET_NOT_FOUND = 'REFERRAL_TARGET_NOT_FOUND',
+  /** 404: el servicio destino (`targetServiceCatalogId`) no existe. */
+  REFERRAL_SERVICE_NOT_FOUND = 'REFERRAL_SERVICE_NOT_FOUND',
+  /**
+   * 404: el encuentro de origen no existe, es de otro paciente o de una
+   * organización ajena al actor. Los tres casos responden igual a propósito.
+   */
+  REFERRAL_ENCOUNTER_NOT_FOUND = 'REFERRAL_ENCOUNTER_NOT_FOUND',
+  /** 422: el servicio destino está inactivo en el catálogo. */
+  REFERRAL_SERVICE_INACTIVE = 'REFERRAL_SERVICE_INACTIVE',
+  /**
+   * 422: el servicio no es de la organización destino, o el profesional
+   * destino no lo ofrece con una oferta activa.
+   */
+  REFERRAL_SERVICE_TARGET_MISMATCH = 'REFERRAL_SERVICE_TARGET_MISMATCH',
+  /** 422: la búsqueda de destinos necesita al menos dos caracteres. */
+  REFERRAL_TARGET_QUERY_TOO_SHORT = 'REFERRAL_TARGET_QUERY_TOO_SHORT',
   /** Una derivación tipada necesita resumen clínico y servicio pedido. */
   REFERRAL_SERVICE_INFORMATION_INCOMPLETE = 'REFERRAL_SERVICE_INFORMATION_INCOMPLETE',
   /** La sede destino no existe. */
@@ -49,4 +76,26 @@ export enum ClinicalExtErrorReason {
    * consentimiento registrado con `targetType='REFERRAL'` sobre la derivación.
    */
   REFERRAL_CONSENT_LINK_NOT_ALLOWED = 'REFERRAL_CONSENT_LINK_NOT_ALLOWED',
+
+  // --- Datos de traslado (v4274) ---
+  /** Con `required=true` hacen falta `transportMode` y `departureCondition`. */
+  TRANSFER_INCOMPLETE = 'TRANSFER_INCOMPLETE',
+  /**
+   * Paciente inestable o crítico sin ambulancia (básica, avanzada o aérea) o
+   * sin personal de salud que acompañe.
+   */
+  TRANSFER_UNSAFE_TRANSPORT = 'TRANSFER_UNSAFE_TRANSPORT',
+  /**
+   * Paciente inestable o crítico sin aviso previo al receptor
+   * (`receiverContacted=true` y `receiverContactName`).
+   */
+  TRANSFER_RECEIVER_NOT_CONTACTED = 'TRANSFER_RECEIVER_NOT_CONTACTED',
+  /** Signo vital fuera de rango, o diastólica no menor que la sistólica. */
+  TRANSFER_VITALS_OUT_OF_RANGE = 'TRANSFER_VITALS_OUT_OF_RANGE',
+  /** `transportMode=OTHER` sin `transportDetail`. */
+  TRANSFER_DETAIL_REQUIRED = 'TRANSFER_DETAIL_REQUIRED',
+  /** La llegada es anterior a la salida registrada. */
+  TRANSFER_ARRIVAL_BEFORE_DEPARTURE = 'TRANSFER_ARRIVAL_BEFORE_DEPARTURE',
+  /** La llegada ya está registrada: el traslado no se corrige ni se repite. */
+  REFERRAL_ARRIVAL_ALREADY_RECORDED = 'REFERRAL_ARRIVAL_ALREADY_RECORDED',
 }

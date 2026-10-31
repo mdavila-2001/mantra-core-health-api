@@ -50,6 +50,23 @@ export class PharmacyExternalProductMappingsRepository {
     });
   }
 
+  /** Un vínculo de una conexión; `null` si no existe o es de otra. */
+  findInConnection(
+    em: EntityManager,
+    connectionId: string,
+    mappingId: string,
+  ): Promise<PharmacyExternalProductMappings | null> {
+    return em.findOne(PharmacyExternalProductMappings, {
+      id: mappingId,
+      pharmacyIntegrationConnectionId: connectionId,
+    });
+  }
+
+  /** Borra el vínculo en la unidad de trabajo (sin flush). */
+  remove(em: EntityManager, mapping: PharmacyExternalProductMappings): void {
+    em.remove(mapping);
+  }
+
   /** Mapeos vigentes (no inactivos) de un producto (para retiro en cascada). */
   findActiveByProduct(
     em: EntityManager,

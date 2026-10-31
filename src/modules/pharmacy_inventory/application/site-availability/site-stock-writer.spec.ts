@@ -35,12 +35,11 @@ function position(overrides: Partial<Position> = {}): Position {
 
 function build(options: {
   location?: { id: string } | null;
-  missing?: {
-    productId: string;
-    stockQuantity: number | null;
-    outOfStockDeclared: boolean;
-  }[];
   existing?: Position | null;
+  /** Ubicaciones activas de la sede, además de la por defecto. */
+  otherLocations?: { id: string }[];
+  /** Posiciones sin lote en esas otras ubicaciones. */
+  elsewhere?: Position[];
 }) {
   const tx = {
     execute: jest.fn(async () => []),
@@ -51,13 +50,17 @@ function build(options: {
       options.location === undefined ? { id: 'loc-1' } : options.location,
     ),
     create: jest.fn(() => ({ id: 'loc-new' })),
+    findActiveInSite: jest.fn(async () => [
+      ...(options.location === null
+        ? []
+        : [options.location ?? { id: 'loc-1' }]),
+      ...(options.otherLocations ?? []),
+    ]),
   };
   const created: Position[] = [];
   const positions = {
-    findProductsWithoutPositionInSite: jest.fn(
-      async () => options.missing ?? [],
-    ),
     findByKeyForUpdate: jest.fn(async () => options.existing ?? null),
+    findLooseForUpdate: jest.fn(async () => options.elsewhere ?? []),
     create: jest.fn((_tx: unknown, data: Partial<Position>) => {
       const row = position({
         onHandQuantity: '0',
@@ -102,23 +105,103 @@ describe('SiteStockWriter', () => {
     );
   });
 
-  it('initialises a site with no positions: one position and one entry per product, then applies the request', async () => {
-    const d = build({
-      missing: [
-        { productId: 'product-a', stockQuantity: 5, outOfStockDeclared: false },
-        {
-          productId: 'product-b',
-          stockQuantity: null,
-          outOfStockDeclared: false,
-        },
-        { productId: 'product-c', stockQuantity: 0, outOfStockDeclared: false },
-        {
-          productId: 'product-d',
-          stockQuantity: null,
-          outOfStockDeclared: true,
-        },
+  it('locks every position of the write before the ledger: site → positions → ledger', async () => {
+    const d = build({});
+    const order: string[] = [];
+    d.tx.execute.mockImplementation((async (_sql: string, params: string[]) => {
+      order.push(params[0]);
+      return [];
+    }) as any);
+    d.positions.findByKeyForUpdate.mockImplementation((async (
+      _tx: unknown,
+      key: { pharmacyProductId: string },
+    ) => {
+      order.push(`position:${key.pharmacyProductId}`);
+      return null;
+    }) as any);
+    d.ledger.nextSequence.mockImplementation(async () => {
+      order.push('ledger');
+      return '41';
+    });
+
+    await d.writer.write(
+      d.tx as any,
+      SITE,
+      [
+        { productId: 'product-a', availableQuantity: 2 },
+        { productId: 'product-b', availableQuantity: 5 },
       ],
-      existing: position({ onHandQuantity: '5', availableQuantity: '5' }),
+      movement,
+    );
+
+    expect(order).toEqual([
+      'pharmacy_inventory.site:site-1',
+      'position:product-a',
+      'position:product-b',
+      'ledger',
+    ]);
+  });
+
+  it('lockSite takes the same site lock as a write', async () => {
+    const d = build({});
+    await d.writer.lockSite(d.tx as any, 'site-9');
+    expect(d.tx.execute).toHaveBeenCalledWith(
+      'select pg_advisory_xact_lock(hashtext(?))',
+      ['pharmacy_inventory.site:site-9'],
+    );
+  });
+
+  it('writes only the requested products: a product without a position stays on the catalogue', async () => {
+    const d = build({});
+
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 0 }],
+      movement,
+    );
+
+    expect(d.created.map((p) => p.pharmacyProductId)).toEqual(['product-a']);
+    expect(result.position.availableQuantity).toBe('0');
+  });
+
+  it('the first «No lo tengo» on a product without a position leaves an entry', async () => {
+    const d = build({});
+
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 0 }],
+      movement,
+    );
+
+    // No mueve unidades, pero desde ahí la sede lo lleva por el libro: queda
+    // el asiento de quién y cuándo lo decidió.
+    expect(d.ledger.append).toHaveBeenCalledTimes(1);
+    expect(d.ledger.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        pharmacyProductId: 'product-a',
+        quantityDelta: '0',
+        movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
+        recordedByUserId: 'user-1',
+      }),
+    );
+    expect(result.changed).toBe(true);
+    expect(result.position.lastLedgerSequence).toBe('41');
+  });
+
+  it('«No lo tengo» also zeroes the loose stock left in another active location', async () => {
+    const other = position({
+      inventoryLocationId: 'loc-2',
+      onHandQuantity: '5',
+      reservedQuantity: '1',
+      availableQuantity: '4',
+    });
+    const d = build({
+      existing: position({ onHandQuantity: '2', availableQuantity: '2' }),
+      otherLocations: [{ id: 'loc-2' }],
+      elsewhere: [other],
     });
 
     const [result] = await d.writer.write(
@@ -128,50 +211,48 @@ describe('SiteStockWriter', () => {
       movement,
     );
 
-    expect(
-      d.created.map((p) => [p.pharmacyProductId, p.onHandQuantity]),
-    ).toEqual([
-      ['product-a', '5'],
-      ['product-b', '1'],
-      ['product-c', '0'],
-      ['product-d', '0'],
-    ]);
-    // Asientos solo donde hay existencia: A (5), B (1) y el cambio pedido de A (−5).
-    expect(
-      d.ledger.append.mock.calls.map(([, e]: any) => [
-        e.pharmacyProductId,
-        e.quantityDelta,
-        e.ledgerSequence,
-      ]),
-    ).toEqual([
-      ['product-a', '5', '41'],
-      ['product-b', '1', '42'],
-      ['product-a', '-5', '43'],
-    ]);
-    expect(d.ledger.nextSequence).toHaveBeenCalledTimes(1);
-    expect(result.changed).toBe(true);
+    // Solo se buscan las otras ubicaciones, y con bloqueo.
+    expect(d.positions.findLooseForUpdate).toHaveBeenCalledWith(
+      d.tx,
+      ['loc-2'],
+      ['product-a'],
+    );
     expect(result.position.availableQuantity).toBe('0');
+    // Lo reservado por un pedido sigue en pie; lo vendible queda en cero.
+    expect(other.onHandQuantity).toBe('1');
+    expect(other.availableQuantity).toBe('0');
+    expect(d.ledger.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        inventoryLocationId: 'loc-2',
+        quantityDelta: '-4',
+      }),
+    );
+    expect(d.ledger.append).toHaveBeenCalledTimes(2);
+    expect(result.changed).toBe(true);
   });
 
-  it('only fills in what is missing on a site that already keeps its own stock', async () => {
-    const d = build({
-      missing: [
-        { productId: 'product-g', stockQuantity: 2, outOfStockDeclared: false },
-      ],
-      existing: position({
-        onHandQuantity: '1',
-        availableQuantity: '1',
-        pharmacyProductId: 'product-b',
-      }),
+  it('«Lo tengo, 3» leaves 3 for sale in the site, not 3 plus what another location held', async () => {
+    const other = position({
+      inventoryLocationId: 'loc-2',
+      onHandQuantity: '4',
+      availableQuantity: '4',
     });
-    await d.writer.write(
+    const d = build({
+      existing: position({ onHandQuantity: '0', availableQuantity: '0' }),
+      otherLocations: [{ id: 'loc-2' }],
+      elsewhere: [other],
+    });
+
+    const [result] = await d.writer.write(
       d.tx as any,
       SITE,
-      [{ productId: 'product-b', availableQuantity: 2 }],
+      [{ productId: 'product-a', availableQuantity: 3 }],
       movement,
     );
-    expect(d.created.map((p) => p.pharmacyProductId)).toEqual(['product-g']);
-    expect(d.ledger.append).toHaveBeenCalledTimes(2);
+
+    expect(result.position.availableQuantity).toBe('3');
+    expect(other.availableQuantity).toBe('0');
   });
 
   it('creates the general location when the site has none', async () => {
@@ -241,22 +322,13 @@ describe('SiteStockWriter', () => {
     expect(d.ledger.nextSequence).not.toHaveBeenCalled();
   });
 
-  it('asks for one sequence even when it initialises 500 products', async () => {
-    const missing = Array.from({ length: 500 }, (_, i) => ({
+  it('asks for one sequence even when it writes 500 products', async () => {
+    const d = build({});
+    const targets = Array.from({ length: 500 }, (_, i) => ({
       productId: `product-${i}`,
-      stockQuantity: 3,
-      outOfStockDeclared: false,
+      availableQuantity: 3,
     }));
-    const d = build({
-      missing,
-      existing: position({ onHandQuantity: '3', availableQuantity: '3' }),
-    });
-    await d.writer.write(
-      d.tx as any,
-      SITE,
-      [{ productId: 'product-0', availableQuantity: 3 }],
-      movement,
-    );
+    await d.writer.write(d.tx as any, SITE, targets, movement);
     expect(d.ledger.nextSequence).toHaveBeenCalledTimes(1);
     expect(d.ledger.append).toHaveBeenCalledTimes(500);
     const sequences = d.ledger.append.mock.calls.map(

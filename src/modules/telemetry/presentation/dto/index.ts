@@ -10,3 +10,4 @@ export * from './web-vital.dto';
 export * from './funnel.dto';
 export * from './conversion-event.dto';
 export * from './session-journey.dto';
+export * from './client-error.dto';

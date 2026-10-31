@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles, TenantAgnostic } from '../../../../common';
-import { PORTAL_READ_ROLES } from '../../../data_catalog/data_catalog.constants';
+import { GOVERNANCE_VIEW_ROLES } from '../../../../common/auth/governance-read.roles';
 import {
   ListMutabilityQueryDto,
   MutabilityDetailDto,
@@ -20,7 +20,7 @@ import { MutabilityCatalogService } from '../services/mutability-catalog.service
  * Gobierno de mutabilidad: qué tablas son append-only, cuáles se pueden borrar, cuáles se purgan por
  * retención y cuáles aceptan un legal hold, cada dato con su nivel de evidencia y su fuente.
  *
- * Sólo lectura. Los roles son los del portal de datos (`PORTAL_READ_ROLES`, los mismos de
+ * Sólo lectura. Los roles son los de lectura de gobierno (`GOVERNANCE_VIEW_ROLES`, los mismos de
  * `GovernanceReadController`); cualquier otro recibe 403. Registrar o cambiar una política de escritura
  * sigue siendo `GovernanceCatalogController`.
  */
@@ -32,7 +32,7 @@ export class MutabilityController {
   constructor(private readonly service: MutabilityCatalogService) {}
 
   @Get()
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...GOVERNANCE_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)',
@@ -44,7 +44,7 @@ export class MutabilityController {
 
   // Va antes de `:schema/:table`: son rutas de distinta profundidad, pero así no hay ambigüedad.
   @Get('summary')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...GOVERNANCE_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos',
@@ -55,7 +55,7 @@ export class MutabilityController {
   }
 
   @Get(':schema/:table')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...GOVERNANCE_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver',

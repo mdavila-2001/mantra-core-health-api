@@ -50,6 +50,126 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'LOC_COMPLETED',
       display: 'Encounter location completed',
     },
+    // --- F3 internación / ADT (CONTRATO-F2-F5 §F3.1–F3.2) ----------------------
+    // `LOCATION_RESERVED` y `CENSUS_CLOSED` los fija el modelo por literal
+    // (patch f3_clinical, «Desvíos» M-F3): no se renombran.
+    LOCATION_RESERVED: {
+      code: 'LOC_RESERVED',
+      display: 'Encounter location reserved',
+    },
+    LOCATION_CANCELLED: {
+      code: 'LOC_CANCELLED',
+      display: 'Encounter location cancelled',
+    },
+    ENCOUNTER_CLASS_INPATIENT: {
+      code: 'ENC_IMP',
+      display: 'Inpatient encounter (HL7 IMP)',
+    },
+    ADT_ADMIT: { code: 'ADT_ADMIT', display: 'Ingreso a cama (A01)' },
+    ADT_TRANSFER: { code: 'ADT_TRANSFER', display: 'Traslado (A02)' },
+    ADT_SWAP: { code: 'ADT_SWAP', display: 'Intercambio (A17)' },
+    ADT_RESERVE: { code: 'ADT_RESERVE', display: 'Reserva de cama' },
+    ADT_END_DISCHARGE: { code: 'ADT_END_DISCHARGE', display: 'Fin por egreso' },
+    ADT_END_TRANSFER_OUT: {
+      code: 'ADT_END_TRANSFER_OUT',
+      display: 'Fin por traslado',
+    },
+    ADT_END_SWAP: { code: 'ADT_END_SWAP', display: 'Fin por intercambio' },
+    ADT_END_RESERVATION_CANCELLED: {
+      code: 'ADT_END_RESERVATION_CANCELLED',
+      display: 'Reserva cancelada',
+    },
+    ADT_END_TRANSFER_CANCELLED: {
+      code: 'ADT_END_TRANSFER_CANCELLED',
+      display: 'Traslado anulado (A12)',
+    },
+    ADT_END_RESERVATION_CONVERTED: {
+      code: 'ADT_END_RESERVATION_CONVERTED',
+      display: 'Reserva convertida en ocupación',
+    },
+    LOC_CARE_GENERAL: { code: 'LOC_CARE_GENERAL', display: 'Cuidado general' },
+    LOC_CARE_INTERMEDIATE: {
+      code: 'LOC_CARE_INTERMEDIATE',
+      display: 'Cuidado intermedio',
+    },
+    LOC_CARE_ICU: { code: 'LOC_CARE_ICU', display: 'Terapia intensiva' },
+    LOC_CARE_NEONATAL_ICU: {
+      code: 'LOC_CARE_NEONATAL_ICU',
+      display: 'Terapia intensiva neonatal',
+    },
+    // --- Admisión crea el vínculo (patient_admission_footprints) ---
+    ADM_ORIGIN_EMERGENCY: {
+      code: 'ADM_ORIGIN_EMERGENCY',
+      display: 'Ingreso por emergencia',
+    },
+    ADM_ORIGIN_REFERRAL: {
+      code: 'ADM_ORIGIN_REFERRAL',
+      display: 'Ingreso por derivación',
+    },
+    ADM_ORIGIN_SCHEDULED: {
+      code: 'ADM_ORIGIN_SCHEDULED',
+      display: 'Ingreso programado',
+    },
+    ADM_ORIGIN_TRANSFER_IN: {
+      code: 'ADM_ORIGIN_TRANSFER_IN',
+      display: 'Ingreso por traslado',
+    },
+    IDV_CI: { code: 'IDV_CI', display: 'Cédula de identidad' },
+    IDV_PASSPORT: { code: 'IDV_PASSPORT', display: 'Pasaporte' },
+    IDV_FOREIGN_ID: { code: 'IDV_FOREIGN_ID', display: 'Documento extranjero' },
+    IDV_BIRTH_CERT: {
+      code: 'IDV_BIRTH_CERT',
+      display: 'Certificado de nacimiento',
+    },
+    IDV_OTHER: { code: 'IDV_OTHER', display: 'Otro documento' },
+    ADM_SRC_EMERGENCY: {
+      code: 'ADM_SRC_EMERGENCY',
+      display: 'Desde emergencias',
+    },
+    ADM_SRC_OUTPATIENT: {
+      code: 'ADM_SRC_OUTPATIENT',
+      display: 'Desde consulta externa',
+    },
+    ADM_SRC_REFERRAL: { code: 'ADM_SRC_REFERRAL', display: 'Por referencia' },
+    ADM_SRC_BIRTH: { code: 'ADM_SRC_BIRTH', display: 'Nacimiento' },
+    ADM_SRC_TRANSFER_IN: {
+      code: 'ADM_SRC_TRANSFER_IN',
+      display: 'Traslado desde otro establecimiento',
+    },
+    DISP_HOME: { code: 'DISP_HOME', display: 'Alta a domicilio' },
+    DISP_TRANSFER: {
+      code: 'DISP_TRANSFER',
+      display: 'Traslado a otro establecimiento',
+    },
+    DISP_DEATH: { code: 'DISP_DEATH', display: 'Fallecimiento' },
+    DISP_AGAINST_ADVICE: {
+      code: 'DISP_AGAINST_ADVICE',
+      display: 'Alta voluntaria',
+    },
+    DISP_OTHER: { code: 'DISP_OTHER', display: 'Otro destino' },
+    PLC_INC_OPEN: {
+      code: 'PLC_INC_OPEN',
+      display: 'Incidente de ubicación abierto',
+    },
+    PLC_INC_REVIEWED: {
+      code: 'PLC_INC_REVIEWED',
+      display: 'Incidente de ubicación revisado',
+    },
+    PLC_INC_CLOSED: {
+      code: 'PLC_INC_CLOSED',
+      display: 'Incidente de ubicación cerrado',
+    },
+    CENSUS_OPEN: { code: 'CENSUS_OPEN', display: 'Censo abierto' },
+    CENSUS_CLOSED: { code: 'CENSUS_CLOSED', display: 'Censo cerrado' },
+    CEN_PRESENT: { code: 'CEN_PRESENT', display: 'Presente al corte' },
+    CEN_ADMITTED: { code: 'CEN_ADMITTED', display: 'Ingreso del día' },
+    CEN_DISCHARGED: { code: 'CEN_DISCHARGED', display: 'Egreso del día' },
+    CEN_TRANSFER_IN: { code: 'CEN_TRANSFER_IN', display: 'Traslado entrante' },
+    CEN_TRANSFER_OUT: {
+      code: 'CEN_TRANSFER_OUT',
+      display: 'Traslado saliente',
+    },
+    CEN_SAME_DAY: { code: 'CEN_SAME_DAY', display: 'Estancia del mismo día' },
 
     // --- observations ----------------------------------------------------------
     OBSERVATION_PRELIMINARY: {

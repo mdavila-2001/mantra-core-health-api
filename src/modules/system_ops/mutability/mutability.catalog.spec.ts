@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import catalogJson from './data/mutability.catalog.json';
 import { CODE_FACTS, verifyCodeFact } from './extractor/code-facts';
+import { findApiLine } from './extractor/extract-model';
 import {
   EVIDENCE_LEVELS,
   compareLevel,
@@ -94,10 +95,18 @@ describe('hechos de código: siguen siendo ciertos', () => {
   );
 
   it('el módulo sigue sin ejecutores de retención genéricos (de ahí HOLD_CAPABLE_NOT_ENFORCED)', () => {
-    const line = readFileSync(
-      join(apiRoot, 'src/modules/system_ops/system_ops.module.ts'),
-      'utf8',
-    ).split('\n')[78];
-    expect(line).toContain('RETENTION_DISPOSITION_EXECUTORS, useValue: []');
+    const file = 'src/modules/system_ops/system_ops.module.ts';
+    const contains = 'RETENTION_DISPOSITION_EXECUTORS, useValue: []';
+    const line = findApiLine(apiRoot, file, contains);
+    expect(line).not.toBeNull();
+    // El catálogo cita esa misma línea: si el módulo se movió, hay que regenerarlo.
+    const cited = new Set(
+      catalog.records.flatMap((r) =>
+        r.evidence
+          .filter((e) => e.source.startsWith(`${file}:`))
+          .map((e) => e.source),
+      ),
+    );
+    expect([...cited]).toEqual([`${file}:${line}`]);
   });
 });

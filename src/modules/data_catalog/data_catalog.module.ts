@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { AdminCatalogController } from './presentation/controllers/admin-catalog.controller';
+import { GovernanceQueueController } from './presentation/controllers/governance-queue.controller';
+import { GovernanceQueueRepository } from './infrastructure/repositories/governance-queue.repository';
+import { GovernanceQueueService } from './application/governance-queue.service';
 import { AdminPortalController } from './presentation/controllers/admin-portal.controller';
 import {
   InternalCatalogInventoryController,
@@ -9,10 +12,12 @@ import {
 import * as entities from './entities';
 import { InventoryRepository } from './infrastructure/repositories/inventory.repository';
 import { RouteIndexModule } from '../../observability/route-index/route-index.module';
+import { CatalogInsightsRepository } from './infrastructure/repositories/catalog-insights.repository';
 import { CatalogInventoryRepository } from './infrastructure/repositories/catalog-inventory.repository';
 import { CatalogRepository } from './infrastructure/repositories/catalog.repository';
 import { CatalogClassificationService } from './application/catalog-classification.service';
 import { CatalogGovernanceService } from './application/catalog-governance.service';
+import { CatalogInsightsService } from './application/catalog-insights.service';
 import { CatalogReadService } from './application/catalog-read.service';
 import { CatalogScanService } from './application/catalog-scan.service';
 import { InventoryImportService } from './application/inventory-import.service';
@@ -54,6 +59,7 @@ import {
   controllers: [
     AdminPortalController,
     AdminCatalogController,
+    GovernanceQueueController,
     InternalCatalogScansController,
     InternalCatalogInventoryController,
     AdminCatalogFitController,
@@ -64,6 +70,10 @@ import {
     PortalInventoryService,
     CatalogRepository,
     CatalogInventoryRepository,
+    CatalogInsightsRepository,
+    CatalogInsightsService,
+    GovernanceQueueRepository,
+    GovernanceQueueService,
     CatalogReadService,
     CatalogGovernanceService,
     CatalogClassificationService,

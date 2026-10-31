@@ -2,6 +2,10 @@ import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Params } from 'nestjs-pino';
 import { loadLoggingEnv } from './logging.env';
+import {
+  REDACTED_SHARE_TOKEN,
+  redactShareTokenInReferer,
+} from './share-token-redaction';
 import { currentTraceContext } from '../observability/trace-context.service';
 
 /**
@@ -34,7 +38,130 @@ const REDACT_PATHS = [
   'req.body.refreshToken',
   'req.body.secret',
   'req.body.otp',
+  // «Admisión crea el vínculo»: el número del documento nunca va a los logs.
+  'req.body.identityVerification',
 ];
+
+export {
+  REDACTED_SHARE_TOKEN,
+  redactShareTokenInReferer,
+  redactShareTokenInUrl,
+} from './share-token-redaction';
+
+/** La forma de `req` que deja el serializador estándar de pino. */
+interface SerializedRequest {
+  url?: unknown;
+  params?: unknown;
+  headers?: unknown;
+  [key: string]: unknown;
+}
+
+/**
+ * Serializador de `req` de pino-http: recibe la petición ya serializada por
+ * `pino-std-serializers` y le saca el token del enlace compartido de `url`
+ * (ruta y query), de `params` (`token` y el comodín `path` de nestjs-pino), de
+ * `query` y del `Referer`.
+ *
+ * El `Referer` se redacta en vez de quitarse: en el resto de las páginas sigue
+ * diciendo desde dónde vino la petición, que es lo que se busca en el log, y
+ * solo cambia el segmento del token. `params`, `query` y `headers` se copian:
+ * los objetos originales son los de Express y los siguen leyendo los handlers.
+ *
+ * La comparación por valor (un parámetro que es el token) se limita a
+ * `params` de una ruta con token: aplicada a cualquier campo, un tramo corto
+ * borraría también la IP o el método de la línea.
+ *
+ * @param req - Petición serializada.
+ * @returns La misma petición, sin el token en claro.
+ */
+export function serializeRequest(req: SerializedRequest): SerializedRequest {
+  if (typeof req.url === 'string') {
+    const url = redactShareTokenInReferer(req.url);
+    const shareRoute =
+      url !== req.url || url.includes(`/${REDACTED_SHARE_TOKEN}`);
+    req.url = url;
+    if (shareRoute) {
+      req.params = redactParams(req.params);
+    }
+  }
+  if (isRecord(req.query)) {
+    req.query = redactValues(req.query);
+  }
+  // Otras formas de la ruta que agregue un serializador (`originalUrl`,
+  // `path`): se redactan como texto, nunca por comparación de valor.
+  for (const key of Object.keys(req)) {
+    const value = req[key];
+    if (!SERIALIZED_ELSEWHERE.has(key) && typeof value === 'string') {
+      req[key] = redactShareTokenInReferer(value);
+    }
+  }
+  const headers = req.headers;
+  if (isRecord(headers)) {
+    const referer = headers.referer;
+    if (typeof referer === 'string') {
+      const redacted = redactShareTokenInReferer(referer);
+      if (redacted !== referer) {
+        req.headers = { ...headers, referer: redacted };
+      }
+    }
+  }
+  return req;
+}
+
+/** Campos de `req` que `serializeRequest` ya trata uno por uno. */
+const SERIALIZED_ELSEWHERE = new Set(['url', 'params', 'query', 'headers']);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Los `params` de una ruta con token. `token` es el token; `path` (el comodín
+ * de nestjs-pino, un arreglo de segmentos o una cadena) se redacta como ruta;
+ * cualquier otro valor se redacta como texto.
+ */
+function redactParams(params: unknown): unknown {
+  if (!isRecord(params)) return params;
+  const copy: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (key === 'token' && typeof value === 'string') {
+      copy[key] = REDACTED_SHARE_TOKEN;
+    } else if (Array.isArray(value)) {
+      const segments = value.map(String);
+      copy[key] = redactShareTokenInReferer(`/${segments.join('/')}`)
+        .slice(1)
+        .split('/');
+    } else if (typeof value === 'string') {
+      copy[key] = redactShareTokenInReferer(
+        value.startsWith('/') ? value : `/${value}`,
+      ).slice(value.startsWith('/') ? 0 : 1);
+    } else {
+      copy[key] = value;
+    }
+  }
+  return copy;
+}
+
+/** Una copia de `query` con el token redactado en cada valor de texto. */
+function redactValues(
+  values: Record<string, unknown>,
+): Record<string, unknown> {
+  let changed = false;
+  const copy: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(values)) {
+    const redacted =
+      typeof value === 'string'
+        ? redactShareTokenInReferer(value)
+        : Array.isArray(value)
+          ? (value as unknown[]).map((item): unknown =>
+              typeof item === 'string' ? redactShareTokenInReferer(item) : item,
+            )
+          : value;
+    changed ||= JSON.stringify(redacted) !== JSON.stringify(value);
+    copy[key] = redacted;
+  }
+  return changed ? copy : values;
+}
 
 /**
  * Comprueba si `pino-pretty` está instalado.
@@ -101,6 +228,7 @@ export function buildPinoOptions(): Params {
       level: env.level,
       genReqId,
       redact: { paths: REDACT_PATHS, remove: true },
+      serializers: { req: serializeRequest },
 
       // Correlación log ↔ traza. `mixin` se evalúa en CADA línea de log y añade
       // el contexto de traza activo en ese instante, de modo que buscar

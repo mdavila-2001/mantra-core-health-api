@@ -25,7 +25,7 @@
 | [field_value_audit](#field_value_audit) | Preserva cambios de valores dinámicos para atribuir quién los modificó y reconstruir respuestas previas. | 9 | 6 | 3 | COINCIDE |
 | [field_value_provenance](#field_value_provenance) | Registra procedencia de valores dinámicos para conocer origen, actor o proceso de captura. | 14 | 7 | 1 | COINCIDE |
 | [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 35 | 12 | 10 | COINCIDE |
-| [form_instances](#form_instances) | Representa instancias concretas de formularios completadas o en curso por pacientes y usuarios. | 12 | 5 | 16 | COINCIDE |
+| [form_instances](#form_instances) | Representa instancias concretas de formularios completadas o en curso por pacientes y usuarios. | 12 | 5 | 17 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1459,7 +1459,7 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: form_instances`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `FormInstances` — `src/modules/forms/entities/form_instances.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 5 entrantes · 16 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 5 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -1509,6 +1509,7 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 |---|---|---|
 | POST /charts/care-plans | LEE | DIRECTA |
 | POST /clinical/medication-requests | LEE | DIRECTA |
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | GET /forms/instances | LEE | DIRECTA |
 | POST /forms/instances | CREA | DIRECTA |

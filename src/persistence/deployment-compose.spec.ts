@@ -60,6 +60,25 @@ describe('docker-compose.coolify.yml', () => {
     expect(serviceBlock(compose, 'worker-messaging')).toContain('<<: *worker');
   });
 
+  it('el sistema de la farmacia externa llega a la API por x-app-env, vacío por defecto', () => {
+    const appEnv = compose.slice(
+      compose.indexOf('\nx-app-env: &app-env\n'),
+      compose.indexOf('\nservices:\n'),
+    );
+    expect(appEnv).toMatch(
+      /\n {2}PHARMACY_ERP_BASE_URL: \$\{PHARMACY_ERP_BASE_URL:-\}\n/,
+    );
+    expect(appEnv).toMatch(
+      /\n {2}PHARMACY_ERP_API_KEY: \$\{PHARMACY_ERP_API_KEY:-\}\n/,
+    );
+    expect(appEnv).toMatch(
+      /\n {2}PHARMACY_ERP_TIMEOUT_MS: \$\{PHARMACY_ERP_TIMEOUT_MS:-5000\}\n/,
+    );
+    // El emulador de identidad sigue vacío: no se reutiliza para esto.
+    expect(appEnv).toContain('MOCK_PROVIDER_BASE_URL: ""');
+    expect(serviceBlock(compose, 'api')).toContain('<<: *app-env');
+  });
+
   it('el proceso que sirve HTTP no sincroniza el esquema con el rol dueño', () => {
     expect(compose).toMatch(/\n {2}ORM_SCHEMA_SYNC: "off"\n/);
   });

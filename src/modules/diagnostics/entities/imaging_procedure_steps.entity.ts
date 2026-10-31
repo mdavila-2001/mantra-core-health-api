@@ -123,4 +123,34 @@ export class ImagingProcedureSteps {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a scheduled equipment.
+   */
+  @Property({
+    fieldName: 'scheduled_equipment_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  scheduledEquipmentId?: string;
+
+  /**
+   * Identificador asociado a scheduled care space.
+   */
+  @Property({
+    fieldName: 'scheduled_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  scheduledCareSpaceId?: string;
+
+  /**
+   * Valor de scheduled start at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'scheduled_start_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  scheduledStartAt?: Date;
 }

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `clinical_ext`
 
-- **Tablas:** 14 · **Columnas:** 249 (62 con descripción: 24.9 %) · **Índices:** 112
+- **Tablas:** 14 · **Columnas:** 249 (86 con descripción: 34.5 %) · **Índices:** 112
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -22,7 +22,7 @@
 | [order_sets](#order_sets) | Define conjuntos reutilizables de órdenes clínicas para apoyar flujos frecuentes de atención con componentes coordinados. | 14 | 7 | 3 | COINCIDE |
 | [prescription_favorites](#prescription_favorites) | Guarda selecciones frecuentes de prescripción para facilitar la captura de órdenes recurrentes por profesionales autorizados. | 16 | 8 | 5 | COINCIDE |
 | [reference_ranges](#reference_ranges) | Conserva rangos de referencia clínicos para contextualizar la interpretación de mediciones y resultados. | 18 | 6 | 0 | COINCIDE |
-| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 57 | 19 | 15 | DIVERGE |
+| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 57 | 19 | 19 | COINCIDE |
 | [virtual_encounters](#virtual_encounters) | Representa encuentros clínicos realizados por canales virtuales y conserva su contexto dentro de la atención del paciente. | 14 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -1081,7 +1081,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: referrals`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `Referrals` — `src/modules/clinical_ext/entities/referrals.entity.ts`
-- **Resumen:** 57 columnas · 19 índices · 17 FK salientes · 1 entrantes · 15 operaciones
+- **Resumen:** 57 columnas · 19 índices · 17 FK salientes · 1 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -1115,35 +1115,35 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | 26 | `reject_reason` | `text` | Opcional | Motivo del rechazo del destino. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:199`)_ | coincide |
 | 27 | `counter_referral_text` | `text` | Opcional | Contrarreferencia: lo que el destino devuelve. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:205`)_ | coincide |
 | 28 | `counter_referral_at` | `timestamptz` | Opcional | Cuándo se registró la contrarreferencia. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:215`)_ | coincide |
-| 29 | `transfer_required` | `boolean` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 30 | `transport_mode` | `varchar(24)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 31 | `transport_detail` | `varchar(200)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 32 | `companion_name` | `varchar(200)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 33 | `companion_relationship` | `varchar(80)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 34 | `companion_phone` | `varchar(40)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 35 | `escort_professional_name` | `varchar(200)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 36 | `escort_professional_role` | `varchar(80)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 37 | `departure_condition` | `varchar(16)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 38 | `vitals_recorded_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 39 | `vital_systolic_bp` | `smallint` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 40 | `vital_diastolic_bp` | `smallint` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 41 | `vital_heart_rate` | `smallint` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 42 | `vital_respiratory_rate` | `smallint` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 43 | `vital_temperature_c` | `numeric(4,1)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 44 | `vital_oxygen_saturation` | `smallint` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 45 | `vital_glasgow` | `smallint` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 46 | `receiver_contacted` | `boolean` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 47 | `receiver_contact_name` | `varchar(200)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 48 | `receiver_contacted_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 49 | `departed_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 50 | `arrived_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 51 | `arrival_condition` | `varchar(16)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 52 | `arrival_notes` | `text` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 53 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:225`)_ | coincide |
-| 54 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:231`)_ | coincide |
+| 29 | `transfer_required` | `boolean` | Opcional | ¿El paciente se traslada físicamente? (v4274) _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:225`)_ | coincide |
+| 30 | `transport_mode` | `varchar(24)` | Opcional | Medio de transporte (CHECK ck_referrals_transport_mode). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:235`)_ | coincide |
+| 31 | `transport_detail` | `varchar(200)` | Opcional | Placa o identificación de la unidad, o el detalle de OTHER. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:245`)_ | coincide |
+| 32 | `companion_name` | `varchar(200)` | Opcional | Familiar o acompañante. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:255`)_ | coincide |
+| 33 | `companion_relationship` | `varchar(80)` | Opcional | Parentesco del acompañante. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:265`)_ | coincide |
+| 34 | `companion_phone` | `varchar(40)` | Opcional | Teléfono del acompañante. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:275`)_ | coincide |
+| 35 | `escort_professional_name` | `varchar(200)` | Opcional | Personal de salud que acompaña. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:285`)_ | coincide |
+| 36 | `escort_professional_role` | `varchar(80)` | Opcional | Rol del personal de salud que acompaña. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:295`)_ | coincide |
+| 37 | `departure_condition` | `varchar(16)` | Opcional | Estado del paciente al salir (STABLE, UNSTABLE, CRITICAL). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:305`)_ | coincide |
+| 38 | `vitals_recorded_at` | `timestamptz` | Opcional | Momento de la toma de signos vitales. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:315`)_ | coincide |
+| 39 | `vital_systolic_bp` | `smallint` | Opcional | Presión sistólica (mmHg), 40–300. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:325`)_ | coincide |
+| 40 | `vital_diastolic_bp` | `smallint` | Opcional | Presión diastólica (mmHg), 20–200, menor que la sistólica. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:335`)_ | coincide |
+| 41 | `vital_heart_rate` | `smallint` | Opcional | Frecuencia cardiaca (lpm), 20–300. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:345`)_ | coincide |
+| 42 | `vital_respiratory_rate` | `smallint` | Opcional | Frecuencia respiratoria (rpm), 4–80. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:355`)_ | coincide |
+| 43 | `vital_temperature_c` | `numeric(4,1)` | Opcional | Temperatura (°C), 30.0–45.0. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:365`)_ | coincide |
+| 44 | `vital_oxygen_saturation` | `smallint` | Opcional | Saturación de oxígeno (%), 50–100. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:375`)_ | coincide |
+| 45 | `vital_glasgow` | `smallint` | Opcional | Escala de Glasgow, 3–15. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:385`)_ | coincide |
+| 46 | `receiver_contacted` | `boolean` | Opcional | Se avisó al receptor antes de salir. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:395`)_ | coincide |
+| 47 | `receiver_contact_name` | `varchar(200)` | Opcional | Quién recibió el aviso. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:405`)_ | coincide |
+| 48 | `receiver_contacted_at` | `timestamptz` | Opcional | Cuándo se avisó al receptor. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:415`)_ | coincide |
+| 49 | `departed_at` | `timestamptz` | Opcional | Salida del paciente. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:425`)_ | coincide |
+| 50 | `arrived_at` | `timestamptz` | Opcional | Llegada del paciente (la registra el destino). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:435`)_ | coincide |
+| 51 | `arrival_condition` | `varchar(16)` | Opcional | Estado del paciente al llegar (STABLE, UNSTABLE, CRITICAL, DECEASED). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:445`)_ | coincide |
+| 52 | `arrival_notes` | `text` | Opcional | Observaciones de la llegada. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:455`)_ | coincide |
+| 53 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:465`)_ | coincide |
+| 54 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:471`)_ | coincide |
 | 55 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 56 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 57 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:249`)_ | coincide |
+| 57 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:489`)_ | coincide |
 
 #### Relaciones
 
@@ -1214,16 +1214,20 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/admissions | LEE | POR_SQL |
 | GET /referrals | LEE | DIRECTA |
 | POST /referrals | CREA | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
 | GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | ACTUALIZA | POR_TIPO |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
 | PATCH /referrals/{id}/cancel | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/cancel | LEE | DIRECTA |
 | PATCH /referrals/{id}/counter-referral | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
 | PATCH /referrals/{id}/respond | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/respond | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /referrals/me | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | ACTUALIZA | POR_TIPO |
 | POST /consent/treatment-informed-consents | ACTUALIZA | POR_TIPO |

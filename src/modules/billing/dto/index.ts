@@ -10,6 +10,7 @@ export * from './dunning.dto';
 export * from './payment-plan.dto';
 export * from './kpi-snapshot.dto';
 export * from './service-catalog.dto';
+export * from './admin-service-catalog.dto';
 export * from './procedure-nomenclature.dto';
 export * from './billing-simulated.dto';
 export * from './procedure-import.dto';

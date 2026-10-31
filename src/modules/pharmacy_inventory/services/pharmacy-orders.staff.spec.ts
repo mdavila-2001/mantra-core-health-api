@@ -11,6 +11,8 @@ import {
   PICKUP_CODE_UNIQUE_INDEX,
 } from '../application/pharmacy-orders/pharmacy-orders.service';
 import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
+import { PendingOrderLines } from '../application/pharmacy-orders/pending-order-lines';
+import { SiteStockWriter } from '../application/site-availability/site-stock-writer';
 import { pharmacyInventoryIndexes } from '../../../orm/catalog/indexes/pharmacy_inventory.idx';
 import { PINV } from '../domain/pharmacy_inventory.concepts';
 
@@ -98,7 +100,7 @@ function orderLine(extra: Record<string, unknown> = {}) {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  const tx = { flush: mockFn(), execute: mockFn(async () => []) };
   const fork = {};
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
@@ -184,6 +186,57 @@ function build() {
     findActiveByPerson: mockFn(async () => ({ userId: 'user-1' })),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  // El escritor por sede de verdad, sobre una sede en memoria: una ubicación
+  // (`loc-1`) y las posiciones que se le escriban (`sitePositions`). Las
+  // lecturas de inventario de la confirmación y el candado de la reserva leen
+  // de ahí cuando un test lo pide (`withSiteInMemory`).
+  const sitePositions: any[] = [];
+  const byKey = (key: any) =>
+    sitePositions.find(
+      (p) =>
+        p.inventoryLocationId === key.inventoryLocationId &&
+        p.pharmacyProductId === key.pharmacyProductId &&
+        (p.inventoryLotId ?? null) === (key.inventoryLotId ?? null),
+    ) ?? null;
+  const writerLocations = {
+    findFirstActiveInSite: mockFn(async () => ({ id: 'loc-1' })),
+    findActiveInSite: mockFn(async () => [{ id: 'loc-1' }]),
+    create: mockFn(),
+  };
+  const writerPositions = {
+    findByKeyForUpdate: mockFn(async (_tx: unknown, key: any) => byKey(key)),
+    findLooseForUpdate: mockFn(async () => []),
+    create: mockFn((_tx: unknown, data: any) => {
+      const row = {
+        onHandQuantity: '0',
+        reservedQuantity: '0',
+        quarantineQuantity: '0',
+        availableQuantity: '0',
+        lastLedgerSequence: '0',
+        updatedAt: new Date(),
+        ...data,
+      };
+      sitePositions.push(row);
+      return row;
+    }),
+  };
+  const siteStockWriter = new SiteStockWriter(
+    writerLocations as any,
+    writerPositions as any,
+    ledgerRepo as any,
+  );
+  const withSiteInMemory = () => {
+    inventoryReadRepo.findActiveLocationsBySites.mockResolvedValue([
+      { id: 'loc-1', pharmacySiteId: 'site-1' },
+    ]);
+    inventoryReadRepo.findStockPositions.mockImplementation(
+      async (_tx: unknown, _locations: unknown, ids: readonly string[]) =>
+        sitePositions.filter((p) => ids.includes(p.pharmacyProductId)),
+    );
+    stockRepo.findByKeyForUpdate.mockImplementation(
+      async (_tx: unknown, key: any) => byKey(key),
+    );
+  };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
@@ -202,6 +255,10 @@ function build() {
     tenantAdministration as any,
     orderChat as any,
     accountLinks as any,
+    // El alta del pedido no se ejercita acá: el guard de receta no se usa.
+    {} as any,
+    // Las líneas «por confirmar», con el escritor por sede doblado.
+    new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
@@ -224,6 +281,9 @@ function build() {
     reservationsService,
     outbox,
     orderNotifications,
+    sitePositions,
+    writerPositions,
+    withSiteInMemory,
   };
 }
 
@@ -539,6 +599,269 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.outbox.publish).not.toHaveBeenCalled();
     });
+  });
+
+  describe('confirm · líneas «por confirmar» (D-5)', () => {
+    /** Una línea «por confirmar» de `prod-1`, 3 pedidas. */
+    const pendingLine = (extra: Record<string, unknown> = {}) =>
+      orderLine({
+        requestedQuantity: '3',
+        reservedQuantity: '0',
+        statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        unitPriceAmount: '12.50',
+        currencyConceptId: 'cur-bob',
+        ...extra,
+      });
+
+    function confirmWith(d: ReturnType<typeof build>, adjustments?: any[]) {
+      return runWithTenant('tenant-a', () =>
+        d.service.confirm('order-1', adjustments ? { adjustments } : {}, staff),
+      );
+    }
+
+    /** El error de la promesa. */
+    async function failure(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('se esperaba un rechazo');
+    }
+
+    it('without adjustment the pharmacy confirms the requested quantity: position, ledger entry and reservation', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d);
+
+      // La posición nace en la sede con lo pedido y queda reservada entera.
+      expect(d.sitePositions).toHaveLength(1);
+      expect(d.sitePositions[0]).toMatchObject({
+        inventoryLocationId: 'loc-1',
+        pharmacyProductId: 'prod-1',
+        onHandQuantity: '3',
+        reservedQuantity: '3',
+        availableQuantity: '0',
+      });
+      // El libro: el alta de la existencia (con el pedido como origen) y la reserva.
+      expect(d.ledgerRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
+          quantityDelta: '3',
+          sourceId: 'order-1',
+          pharmacySiteId: 'site-1',
+        }),
+      );
+      expect(d.ledgerRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          movementTypeConceptId: PINV.MV_RESERVE,
+          reservationDelta: '3',
+          sourceId: 'order-1',
+        }),
+      );
+      // La misma línea pasa a reservada: no se crea otra que sume dos veces.
+      expect(d.reservationsRepo.createLine).not.toHaveBeenCalled();
+      expect(line).toMatchObject({
+        statusConceptId: PINV.RES_LINE_CONFIRMED,
+        requestedQuantity: '3',
+        reservedQuantity: '3',
+        inventoryLocationId: 'loc-1',
+        unitPriceAmount: '12.50',
+      });
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      // El total se vuelve a sellar con la línea ya reservada.
+      expect(live.totalAmount).toBe('37.50');
+    });
+
+    it('takes the site lock before the ledger lock, like «Lo tengo»', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([pendingLine()]);
+
+      await confirmWith(d);
+
+      expect(d.tx.execute).toHaveBeenCalledWith(
+        'select pg_advisory_xact_lock(hashtext(?))',
+        ['pharmacy_inventory.site:site-1'],
+      );
+      expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+        d.ledgerRepo.nextSequence.mock.invocationCallOrder[0],
+      );
+    });
+
+    it('CONFIRMAR_STOCK writes what the site has and reserves what was requested', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 5 },
+      ]);
+
+      expect(d.sitePositions[0]).toMatchObject({
+        onHandQuantity: '5',
+        reservedQuantity: '3',
+        availableQuantity: '2',
+      });
+      expect(line.statusConceptId).toBe(PINV.RES_LINE_CONFIRMED);
+    });
+
+    it('fewer units than requested: the site keeps them and the line stays out of stock', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 1 },
+      ]);
+
+      expect(d.sitePositions[0]).toMatchObject({
+        onHandQuantity: '1',
+        reservedQuantity: '0',
+        availableQuantity: '1',
+      });
+      expect(line).toMatchObject({
+        statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        reservedQuantity: '0',
+        requestedQuantity: '3',
+      });
+      const reserves = d.ledgerRepo.append.mock.calls.filter(
+        ([, entry]: any) => entry.movementTypeConceptId === PINV.MV_RESERVE,
+      );
+      expect(reserves).toHaveLength(0);
+    });
+
+    it('NO_DISPONIBLE leaves the line out of stock without writing the site', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'NO_DISPONIBLE' },
+      ]);
+
+      expect(line).toMatchObject({
+        statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        reservedQuantity: '0',
+      });
+      expect(d.sitePositions).toHaveLength(0);
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      expect(
+        d.reservationsService.releaseConfirmedLines,
+      ).not.toHaveBeenCalled();
+      expect(d.outbox.publish).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          payloadJson: expect.objectContaining({ unavailableLineCount: 1 }),
+        }),
+      );
+    });
+
+    it('a generic can be proposed on it: the original reserves nothing and the proposal is kept', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+      d.ordersRepo.findProductsByIds.mockResolvedValue([PRODUCT, GENERIC]);
+
+      await confirmWith(d, [
+        {
+          productId: 'prod-1',
+          decision: 'PROPONER_GENERICO',
+          proposedProductId: 'prod-gen',
+        },
+      ]);
+
+      expect(line.statusConceptId).toBe(PINV.RES_LINE_OUT_OF_STOCK);
+      expect(d.sitePositions).toHaveLength(0);
+      expect(d.substitutionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          inventoryReservationLineId: 'line-1',
+          proposedPharmacyProductId: 'prod-gen',
+        }),
+      );
+      expect(live.reservationStatusConceptId).toBe(
+        PINV.ORDER_ACEPTACION_PENDIENTE,
+      );
+    });
+
+    it('a product that got a position meanwhile is governed by the ledger: no write', async () => {
+      const d = build();
+      d.withSiteInMemory();
+      d.sitePositions.push({
+        inventoryLocationId: 'loc-1',
+        pharmacyProductId: 'prod-1',
+        onHandQuantity: '4',
+        reservedQuantity: '0',
+        quarantineQuantity: '0',
+        availableQuantity: '4',
+      });
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+      const line = pendingLine();
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+
+      await confirmWith(d, [
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 9 },
+      ]);
+
+      // Lo que dice el libro manda: 4 en la sede, 3 reservadas.
+      expect(d.writerPositions.findByKeyForUpdate).not.toHaveBeenCalled();
+      expect(d.sitePositions[0]).toMatchObject({
+        onHandQuantity: '4',
+        reservedQuantity: '3',
+        availableQuantity: '1',
+      });
+      expect(line.statusConceptId).toBe(PINV.RES_LINE_CONFIRMED);
+    });
+
+    it.each([
+      [
+        'on a line that is not pending',
+        [orderLine()],
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 2 },
+      ],
+      [
+        'without the quantity',
+        [pendingLine()],
+        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK' },
+      ],
+    ])(
+      'CONFIRMAR_STOCK %s answers 422 without writing',
+      async (_name, lines, adjustment) => {
+        const d = build();
+        d.withSiteInMemory();
+        d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+        d.ordersRepo.findLinesByReservationIds.mockResolvedValue(lines);
+
+        const error = await failure(confirmWith(d, [adjustment]));
+
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect(error.getResponse()).toEqual(
+          expect.objectContaining({
+            reason: 'ORDER_LINE_NOT_PENDING_CONFIRMATION',
+          }),
+        );
+        expect(d.sitePositions).toHaveLength(0);
+        expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('confirm', () => {

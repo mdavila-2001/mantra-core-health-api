@@ -474,7 +474,8 @@
         "src/modules/insurance/application/services/insurance-campaigns.service.ts",
         "src/modules/insurance/application/services/insurance-portability.service.ts#assertOwnership",
         "src/modules/insurance/application/services/insurance-analytics.service.ts#getLossRatioAnalytics",
-        "src/modules/insurance/application/services/my-claims.service.ts"
+        "src/modules/insurance/application/services/my-claims.service.ts",
+        "src/modules/insurance/application/services/practitioner-insurer-requests.service.ts#listReceived"
       ],
       "routes": [
         "GET /insurance-campaigns",
@@ -490,6 +491,7 @@
         "GET /insurance/patients/options",
         "GET /insurance/portability/certificates/:certificateId/json",
         "GET /insurance/portability/certificates/:certificateId/pdf",
+        "GET /insurance/practitioner-requests",
         "GET /insurance/received-claims",
         "GET /practitioner-settlement-batches",
         "GET /practitioner-settlement-batches/:id",
@@ -510,6 +512,8 @@
         "POST /insurance/patients/conversation",
         "POST /insurance/patients/search",
         "POST /insurance/portability/export",
+        "POST /insurance/practitioner-requests/:id/approve",
+        "POST /insurance/practitioner-requests/:id/reject",
         "POST /insurance/received-claims/:id/decision",
         "POST /practitioner-settlement-batches",
         "POST /prior-authorization-requests",
@@ -609,9 +613,11 @@
       ]
     },
     {
-      "reason": "Corrección del perfil profesional (P28): el servicio exige ser el titular del perfil (`assertOwnsPractitionerProfile`) o plataforma; cualquier otro actor recibe 403. Un `@Roles` global no distingue de quién es el perfil.",
+      "reason": "Corrección del perfil profesional por `:profileId`: `ProfileOwnershipService.assertOwnsPractitionerProfile` exige ser el titular del perfil o tener SECURITY_ADMIN/SUPERADMIN **global** (un rol concedido dentro de una organización no cuenta: `isPlatform` lo evalúa con `roleAuthorizesInTenant` sin tenant); a cualquier otro, 403. Un `@Roles` de plataforma dejaría fuera al titular.",
       "evidence": [
-        "src/modules/profiles/application/services/profiles-practitioners.service.ts#updatePractitionerProfile"
+        "src/modules/profiles/application/services/profiles-practitioners.service.ts#updatePractitionerProfile",
+        "src/modules/profiles/application/services/profile-ownership.service.ts#assertOwnsPractitionerProfile",
+        "src/modules/profiles/application/services/profile-ownership.service.ts#isPlatform"
       ],
       "routes": [
         "PATCH /profiles/practitioners/:profileId"
@@ -629,6 +635,80 @@
         "POST /tenants/:tenantId/affiliation-documents",
         "GET /tenants/:tenantId/laboratory-readiness",
         "GET /tenants/:tenantId/pharmacy-readiness"
+      ]
+    },
+    {
+      "reason": "Libreta de direcciones y médico de cabecera del paciente de la sesión: las rutas son `me`, la persona sale del vínculo activo de la cuenta (`resolveOwnPersonId`) y cada `:id` se busca entre las direcciones de esa persona (`findOwn`), así que un id ajeno responde el mismo 404 que uno inexistente. La lista de pacientes que eligieron al profesional sale del perfil profesional de la sesión. Un rol global dejaría fuera al paciente, que es quien las usa.",
+      "evidence": [
+        "src/modules/profiles/application/services/patient-address-book.service.ts#resolveOwnPersonId",
+        "src/modules/profiles/application/services/patient-address-book.service.ts#findOwn",
+        "src/modules/profiles/application/services/primary-practitioner.service.ts#resolveOwnPatientId",
+        "src/modules/profiles/application/services/primary-practitioner.service.ts#resolveOwnPractitionerId"
+      ],
+      "routes": [
+        "DELETE /profiles/patients/me/addresses/:id",
+        "DELETE /profiles/patients/me/primary-practitioner",
+        "GET /profiles/patients/me/addresses",
+        "GET /profiles/patients/me/primary-practitioner",
+        "GET /profiles/practitioners/me/primary-patients",
+        "PATCH /profiles/patients/me/addresses/:id",
+        "POST /profiles/patients/me/addresses",
+        "PUT /profiles/patients/me/addresses/:id/preferred",
+        "PUT /profiles/patients/me/primary-practitioner"
+      ]
+    },
+    {
+      "reason": "Chat del pedido de farmacia: lo abre el paciente titular del pedido o el PHARMACY_STAFF con el rol vigente en el tenant activo (`roleAuthorizesInTenant`) cuando la farmacia del pedido es de ese tenant; cualquier otro recibe el mismo 404 que un pedido inexistente.",
+      "evidence": [
+        "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts#openConversation"
+      ],
+      "routes": [
+        "POST /pharmacy/orders/:id/conversation"
+      ]
+    },
+    {
+      "reason": "Vitrinas de organización que la sesión puede atender en la mensajería: el sujeto sale de la sesión y la lista se arma con la misma regla que autoriza actuar como la vitrina (`mayAttendTargetType` y las membresías del actor); no recibe identificadores y sólo devuelve vitrinas públicas de organizaciones.",
+      "evidence": [
+        "src/modules/community/services/community-social-read.service.ts#listAttendableOrganizationShowcases"
+      ],
+      "routes": [
+        "GET /community/profiles/organization-showcases/me"
+      ]
+    },
+    {
+      "reason": "Especialidades del arancel del profesional de la sesión: se calculan desde `actor.practitionerProfileId` (vacío si la cuenta no es profesional); no recibe identificadores y devuelve sólo nombres del arancel con su recuento, sin PHI.",
+      "evidence": [
+        "src/modules/billing/services/procedure-import.service.ts#listMySpecialties"
+      ],
+      "routes": [
+        "GET /billing/service-catalog/procedure-specialties/mine"
+      ]
+    },
+    {
+      "reason": "Admisión del propio médico: las rutas son `me`, la admisión sale del perfil profesional del vínculo SELF y ACTIVO de la cuenta (`currentOf`/`ownLocked`), nunca de la URL ni del cuerpo, así que nadie lee, reenvía ni retira la de otro; sin perfil profesional responde 404. Un rol global dejaría fuera al médico en verificación, que es quien la usa.",
+      "evidence": [
+        "src/modules/profiles/application/services/practitioner-admissions-read.service.ts#currentOf",
+        "src/modules/profiles/application/services/practitioner-admissions.service.ts#ownLocked"
+      ],
+      "routes": [
+        "GET /profiles/practitioners/me/admission",
+        "POST /profiles/practitioners/me/admission/resubmit",
+        "POST /profiles/practitioners/me/admission/withdraw"
+      ]
+    },
+    {
+      "reason": "Personal de apoyo (secretarias) del hospital activo: OWNER/ADMIN activo de ese tenant o un rol de plataforma que lo alcance (`assertOrganizationAdmin`). Un rol global no distingue de qué hospital es: los dueños de una organización entran con `USER`.",
+      "evidence": [
+        "src/modules/delegated_access/services/support-staff.service.ts#assertOrganizationAdmin",
+        "src/modules/delegated_access/services/support-staff.service.ts#decideForOrganization"
+      ],
+      "routes": [
+        "GET /org/support-catalog",
+        "GET /org/support-engagement-requests",
+        "GET /org/support-engagements",
+        "POST /org/support-engagement-requests/:id/decision",
+        "POST /org/support-engagements/:id/end",
+        "POST /org/team/invitations"
       ]
     }
   ]

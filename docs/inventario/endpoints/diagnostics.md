@@ -3,9 +3,9 @@
 # Endpoints del módulo `diagnostics`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 31 (31 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 9 · MEDIO 11 · BAJO 11
-- **Tablas distintas que tocan:** 61
+- **Operaciones:** 33 (33 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 9 · MEDIO 11 · BAJO 13
+- **Tablas distintas que tocan:** 65
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/diagnostics.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -18,7 +18,7 @@
 | 4 | GET | `/diagnostic-results/me/{reportId}/shares` | Con quién está compartido un resultado | BAJO | 4 | PATIENT |
 | 5 | POST | `/diagnostic-results/me/{reportId}/shares` | Compartir temporalmente un resultado con un profesional | MEDIO | 11 | PATIENT |
 | 6 | POST | `/diagnostic-results/me/{reportId}/shares/{shareId}/revoke` | Dejar de compartir un resultado | MEDIO | 5 | PATIENT |
-| 7 | GET | `/diagnostic-results/me/orders` | Órdenes de laboratorio e imagen del titular | BAJO | 27 | PATIENT |
+| 7 | GET | `/diagnostic-results/me/orders` | Órdenes de laboratorio e imagen del titular | BAJO | 29 | PATIENT |
 | 8 | POST | `/diagnostics/accessions` | Acesionar especímenes recibidos en laboratorio | ALTO | 6 | sesión (sin roles) |
 | 9 | GET | `/diagnostics/accessions/{id}` | Detalle de una acesión (especímenes, contenedores y custodia) | BAJO | 5 | sesión (sin roles) |
 | 10 | POST | `/diagnostics/analyzer-runs` | Abrir una corrida de analizador (soporte para ingesta) | ALTO | 1 | sesión (sin roles) |
@@ -31,18 +31,20 @@
 | 17 | POST | `/diagnostics/imaging-endpoints` | Registrar un endpoint DICOM (soporte para STOW-RS) | MEDIO | 1 | CLINICIAN, PRACTITIONER |
 | 18 | POST | `/diagnostics/imaging-studies/{id}/dose-events` | Registrar evento de dosis de radiación | MEDIO | 3 | CLINICIAN, PRACTITIONER |
 | 19 | GET | `/diagnostics/patients/{patientProfileId}/imaging-studies` | Listar los estudios de imagen del paciente | BAJO | 4 | CLINICIAN, PRACTITIONER |
-| 20 | GET | `/diagnostics/patients/{patientProfileId}/orders` | Órdenes de laboratorio e imagenología del paciente, con sus informes | BAJO | 4 | CLINICIAN, PRACTITIONER |
+| 20 | GET | `/diagnostics/patients/{patientProfileId}/orders` | Órdenes de laboratorio e imagenología del paciente, con sus informes | BAJO | 5 | CLINICIAN, PRACTITIONER |
 | 21 | POST | `/diagnostics/reports/{reportId}/versions` | Crear/enmendar versión de informe diagnóstico | MEDIO | 7 | CLINICIAN, PRACTITIONER |
 | 22 | POST | `/diagnostics/reports/{reportId}/versions/{versionId}/release` | Validar y liberar una versión del informe | MEDIO | 5 | CLINICIAN, PRACTITIONER |
 | 23 | POST | `/diagnostics/results/{observationId}/verifications` | Verificar (técnica/facultativa) un resultado | ALTO | 3 | sesión (sin roles) |
-| 24 | POST | `/diagnostics/service-requests/inbox` | Bandeja de órdenes de laboratorio por recibir | BAJO | 10 | sesión (sin roles) |
-| 25 | POST | `/diagnostics/specimens` | Registrar un espécimen (soporte para acesión) | ALTO | 3 | sesión (sin roles) |
-| 26 | GET | `/diagnostics/specimens/{id}` | Detalle de un espécimen (con su cadena de custodia) | BAJO | 3 | sesión (sin roles) |
-| 27 | POST | `/diagnostics/specimens/{id}/containers` | Registrar un contenedor de espécimen (soporte para custodia) | ALTO | 3 | sesión (sin roles) |
-| 28 | POST | `/diagnostics/specimens/{id}/rejection` | Rechazar espécimen y solicitar recolección | ALTO | 5 | sesión (sin roles) |
-| 29 | GET | `/diagnostics/work-orders` | Listar las órdenes de trabajo del laboratorio | BAJO | 1 | sesión (sin roles) |
-| 30 | POST | `/diagnostics/work-orders` | Abrir orden de trabajo y desglosar pruebas | ALTO | 6 | sesión (sin roles) |
-| 31 | POST | `/dicomweb/studies` | Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto | MEDIO | 8 | CLINICIAN, PRACTITIONER |
+| 24 | GET | `/diagnostics/service-requests/{id}` | Detalle de una orden dirigida al tenant activo | BAJO | 11 | sesión (sin roles) |
+| 25 | POST | `/diagnostics/service-requests/inbox` | Bandeja de órdenes de laboratorio por recibir | BAJO | 12 | sesión (sin roles) |
+| 26 | POST | `/diagnostics/service-requests/worklist` | Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado | BAJO | 11 | sesión (sin roles) |
+| 27 | POST | `/diagnostics/specimens` | Registrar un espécimen (soporte para acesión) | ALTO | 4 | sesión (sin roles) |
+| 28 | GET | `/diagnostics/specimens/{id}` | Detalle de un espécimen (con su cadena de custodia) | BAJO | 3 | sesión (sin roles) |
+| 29 | POST | `/diagnostics/specimens/{id}/containers` | Registrar un contenedor de espécimen (soporte para custodia) | ALTO | 3 | sesión (sin roles) |
+| 30 | POST | `/diagnostics/specimens/{id}/rejection` | Rechazar espécimen y solicitar recolección | ALTO | 5 | sesión (sin roles) |
+| 31 | GET | `/diagnostics/work-orders` | Listar las órdenes de trabajo del laboratorio | BAJO | 6 | sesión (sin roles) |
+| 32 | POST | `/diagnostics/work-orders` | Abrir orden de trabajo y desglosar pruebas | ALTO | 6 | sesión (sin roles) |
+| 33 | POST | `/dicomweb/studies` | Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto | MEDIO | 8 | CLINICIAN, PRACTITIONER |
 
 ---
 
@@ -71,8 +73,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:82` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -100,28 +102,28 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente leído. | `src/modules/diagnostics/dto/patient-results.dto.ts:99` |
-| `items` | `array<PatientDiagnosticResultDto>` | Sí | — | — | Resultados liberados, del más nuevo al más viejo. | `src/modules/diagnostics/dto/patient-results.dto.ts:103` |
-| `items[].reportId` | `string` | Sí | formato uuid | — | Informe (`clinical.diagnostic_reports`). | `src/modules/diagnostics/dto/patient-results.dto.ts:49` |
-| `items[].versionId` | `string` | Sí | formato uuid | — | Versión liberada que se está mostrando. | `src/modules/diagnostics/dto/patient-results.dto.ts:52` |
-| `items[].versionNumber` | `number` | Sí | — | — | Número de esa versión; una enmienda posterior tiene un número mayor. | `src/modules/diagnostics/dto/patient-results.dto.ts:55` |
-| `items[].serviceRequestId` | `string` | No | formato uuid | — | Orden que lo originó, si cuelga de una. | `src/modules/diagnostics/dto/patient-results.dto.ts:58` |
-| `items[].codeConceptId` | `string` | Sí | formato uuid | — | Qué informa (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:61` |
-| `items[].categoryConceptId` | `string` | No | formato uuid | — | Laboratorio o imagenología (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:64` |
-| `items[].custodianTenantId` | `string` | Sí | formato uuid | — | Organización que lo emitió y lo custodia. | `src/modules/diagnostics/dto/patient-results.dto.ts:67` |
-| `items[].conclusionText` | `string` | No | — | — | Conclusión firmada, si la versión la trae. | `src/modules/diagnostics/dto/patient-results.dto.ts:70` |
-| `items[].issuedAt` | `string` | No | formato date-time | — | Cuándo se emitió la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:73` |
-| `items[].releasedAt` | `string` | Sí | formato date-time | — | Cuándo se liberó al paciente. | `src/modules/diagnostics/dto/patient-results.dto.ts:76` |
-| `items[].clinicalStatusConceptId` | `string` | Sí | formato uuid | — | Estado clínico de la versión (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:79` |
-| `items[].observationIds` | `array<string>` | Sí | formato uuid | — | Observaciones enlazadas a la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:83` |
-| `items[].files` | `array<DiagnosticResultFileDto>` | Sí | — | — | Archivos descargables de la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:87` |
-| `items[].files[].id` | `string` | Sí | formato uuid | — | Identificador del enlace informe↔archivo. | `src/modules/diagnostics/dto/patient-results.dto.ts:23` |
-| `items[].files[].fileId` | `string` | Sí | formato uuid | — | Archivo en `common.files`; se descarga por `/common/files/{id}/content`. | `src/modules/diagnostics/dto/patient-results.dto.ts:26` |
-| `items[].files[].contentRoleConceptId` | `string` | Sí | formato uuid | — | Qué es el archivo dentro del informe (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:29` |
-| `items[].files[].presentationFormatConceptId` | `string` | No | formato uuid | — | Formato de presentación (concept id), si se declaró. | `src/modules/diagnostics/dto/patient-results.dto.ts:33` |
-| `items[].files[].ordinal` | `number` | No | — | — | Posición dentro del informe. | `src/modules/diagnostics/dto/patient-results.dto.ts:36` |
-| `limit` | `number` | Sí | — | — | Tope aplicado. | `src/modules/diagnostics/dto/patient-results.dto.ts:106` |
-| `truncated` | `boolean` | Sí | — | — | La lista quedó recortada por el tope. | `src/modules/diagnostics/dto/patient-results.dto.ts:109` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente leído. | `src/modules/diagnostics/dto/patient-results.dto.ts:103` |
+| `items` | `array<PatientDiagnosticResultDto>` | Sí | — | — | Resultados liberados, del más nuevo al más viejo. | `src/modules/diagnostics/dto/patient-results.dto.ts:107` |
+| `items[].reportId` | `string` | Sí | formato uuid | — | Informe (`clinical.diagnostic_reports`). | `src/modules/diagnostics/dto/patient-results.dto.ts:53` |
+| `items[].versionId` | `string` | Sí | formato uuid | — | Versión liberada que se está mostrando. | `src/modules/diagnostics/dto/patient-results.dto.ts:56` |
+| `items[].versionNumber` | `number` | Sí | — | — | Número de esa versión; una enmienda posterior tiene un número mayor. | `src/modules/diagnostics/dto/patient-results.dto.ts:59` |
+| `items[].serviceRequestId` | `string` | No | formato uuid | — | Orden que lo originó, si cuelga de una. | `src/modules/diagnostics/dto/patient-results.dto.ts:62` |
+| `items[].codeConceptId` | `string` | Sí | formato uuid | — | Qué informa (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:65` |
+| `items[].categoryConceptId` | `string` | No | formato uuid | — | Laboratorio o imagenología (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:68` |
+| `items[].custodianTenantId` | `string` | Sí | formato uuid | — | Organización que lo emitió y lo custodia. | `src/modules/diagnostics/dto/patient-results.dto.ts:71` |
+| `items[].conclusionText` | `string` | No | — | — | Conclusión firmada, si la versión la trae. | `src/modules/diagnostics/dto/patient-results.dto.ts:74` |
+| `items[].issuedAt` | `string` | No | formato date-time | — | Cuándo se emitió la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:77` |
+| `items[].releasedAt` | `string` | Sí | formato date-time | — | Cuándo se liberó al paciente. | `src/modules/diagnostics/dto/patient-results.dto.ts:80` |
+| `items[].clinicalStatusConceptId` | `string` | Sí | formato uuid | — | Estado clínico de la versión (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:83` |
+| `items[].observationIds` | `array<string>` | Sí | formato uuid | — | Observaciones enlazadas a la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:87` |
+| `items[].files` | `array<DiagnosticResultFileDto>` | Sí | — | — | Archivos descargables de la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:91` |
+| `items[].files[].id` | `string` | Sí | formato uuid | — | Identificador del enlace informe↔archivo. | `src/modules/diagnostics/dto/patient-results.dto.ts:27` |
+| `items[].files[].fileId` | `string` | Sí | formato uuid | — | Archivo en `common.files`; se descarga por `/common/files/{id}/content`. | `src/modules/diagnostics/dto/patient-results.dto.ts:30` |
+| `items[].files[].contentRoleConceptId` | `string` | Sí | formato uuid | — | Qué es el archivo dentro del informe (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:33` |
+| `items[].files[].presentationFormatConceptId` | `string` | No | formato uuid | — | Formato de presentación (concept id), si se declaró. | `src/modules/diagnostics/dto/patient-results.dto.ts:37` |
+| `items[].files[].ordinal` | `number` | No | — | — | Posición dentro del informe. | `src/modules/diagnostics/dto/patient-results.dto.ts:40` |
+| `limit` | `number` | Sí | — | — | Tope aplicado. | `src/modules/diagnostics/dto/patient-results.dto.ts:110` |
+| `truncated` | `boolean` | Sí | — | — | La lista quedó recortada por el tope. | `src/modules/diagnostics/dto/patient-results.dto.ts:113` |
 
 ### Respuestas posibles
 
@@ -172,9 +174,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:144` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -202,24 +204,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reportId` | `string` | Sí | formato uuid | — | Informe (`clinical.diagnostic_reports`). | `src/modules/diagnostics/dto/patient-results.dto.ts:49` |
-| `versionId` | `string` | Sí | formato uuid | — | Versión liberada que se está mostrando. | `src/modules/diagnostics/dto/patient-results.dto.ts:52` |
-| `versionNumber` | `number` | Sí | — | — | Número de esa versión; una enmienda posterior tiene un número mayor. | `src/modules/diagnostics/dto/patient-results.dto.ts:55` |
-| `serviceRequestId` | `string` | No | formato uuid | — | Orden que lo originó, si cuelga de una. | `src/modules/diagnostics/dto/patient-results.dto.ts:58` |
-| `codeConceptId` | `string` | Sí | formato uuid | — | Qué informa (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:61` |
-| `categoryConceptId` | `string` | No | formato uuid | — | Laboratorio o imagenología (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:64` |
-| `custodianTenantId` | `string` | Sí | formato uuid | — | Organización que lo emitió y lo custodia. | `src/modules/diagnostics/dto/patient-results.dto.ts:67` |
-| `conclusionText` | `string` | No | — | — | Conclusión firmada, si la versión la trae. | `src/modules/diagnostics/dto/patient-results.dto.ts:70` |
-| `issuedAt` | `string` | No | formato date-time | — | Cuándo se emitió la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:73` |
-| `releasedAt` | `string` | Sí | formato date-time | — | Cuándo se liberó al paciente. | `src/modules/diagnostics/dto/patient-results.dto.ts:76` |
-| `clinicalStatusConceptId` | `string` | Sí | formato uuid | — | Estado clínico de la versión (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:79` |
-| `observationIds` | `array<string>` | Sí | formato uuid | — | Observaciones enlazadas a la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:83` |
-| `files` | `array<DiagnosticResultFileDto>` | Sí | — | — | Archivos descargables de la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:87` |
-| `files[].id` | `string` | Sí | formato uuid | — | Identificador del enlace informe↔archivo. | `src/modules/diagnostics/dto/patient-results.dto.ts:23` |
-| `files[].fileId` | `string` | Sí | formato uuid | — | Archivo en `common.files`; se descarga por `/common/files/{id}/content`. | `src/modules/diagnostics/dto/patient-results.dto.ts:26` |
-| `files[].contentRoleConceptId` | `string` | Sí | formato uuid | — | Qué es el archivo dentro del informe (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:29` |
-| `files[].presentationFormatConceptId` | `string` | No | formato uuid | — | Formato de presentación (concept id), si se declaró. | `src/modules/diagnostics/dto/patient-results.dto.ts:33` |
-| `files[].ordinal` | `number` | No | — | — | Posición dentro del informe. | `src/modules/diagnostics/dto/patient-results.dto.ts:36` |
+| `reportId` | `string` | Sí | formato uuid | — | Informe (`clinical.diagnostic_reports`). | `src/modules/diagnostics/dto/patient-results.dto.ts:53` |
+| `versionId` | `string` | Sí | formato uuid | — | Versión liberada que se está mostrando. | `src/modules/diagnostics/dto/patient-results.dto.ts:56` |
+| `versionNumber` | `number` | Sí | — | — | Número de esa versión; una enmienda posterior tiene un número mayor. | `src/modules/diagnostics/dto/patient-results.dto.ts:59` |
+| `serviceRequestId` | `string` | No | formato uuid | — | Orden que lo originó, si cuelga de una. | `src/modules/diagnostics/dto/patient-results.dto.ts:62` |
+| `codeConceptId` | `string` | Sí | formato uuid | — | Qué informa (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:65` |
+| `categoryConceptId` | `string` | No | formato uuid | — | Laboratorio o imagenología (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:68` |
+| `custodianTenantId` | `string` | Sí | formato uuid | — | Organización que lo emitió y lo custodia. | `src/modules/diagnostics/dto/patient-results.dto.ts:71` |
+| `conclusionText` | `string` | No | — | — | Conclusión firmada, si la versión la trae. | `src/modules/diagnostics/dto/patient-results.dto.ts:74` |
+| `issuedAt` | `string` | No | formato date-time | — | Cuándo se emitió la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:77` |
+| `releasedAt` | `string` | Sí | formato date-time | — | Cuándo se liberó al paciente. | `src/modules/diagnostics/dto/patient-results.dto.ts:80` |
+| `clinicalStatusConceptId` | `string` | Sí | formato uuid | — | Estado clínico de la versión (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:83` |
+| `observationIds` | `array<string>` | Sí | formato uuid | — | Observaciones enlazadas a la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:87` |
+| `files` | `array<DiagnosticResultFileDto>` | Sí | — | — | Archivos descargables de la versión. | `src/modules/diagnostics/dto/patient-results.dto.ts:91` |
+| `files[].id` | `string` | Sí | formato uuid | — | Identificador del enlace informe↔archivo. | `src/modules/diagnostics/dto/patient-results.dto.ts:27` |
+| `files[].fileId` | `string` | Sí | formato uuid | — | Archivo en `common.files`; se descarga por `/common/files/{id}/content`. | `src/modules/diagnostics/dto/patient-results.dto.ts:30` |
+| `files[].contentRoleConceptId` | `string` | Sí | formato uuid | — | Qué es el archivo dentro del informe (concept id). | `src/modules/diagnostics/dto/patient-results.dto.ts:33` |
+| `files[].presentationFormatConceptId` | `string` | No | formato uuid | — | Formato de presentación (concept id), si se declaró. | `src/modules/diagnostics/dto/patient-results.dto.ts:37` |
+| `files[].ordinal` | `number` | No | — | — | Posición dentro del informe. | `src/modules/diagnostics/dto/patient-results.dto.ts:40` |
 
 ### Respuestas posibles
 
@@ -270,9 +272,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:173` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId, fileId | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:173` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -353,9 +355,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:247` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:247` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -380,15 +382,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reportId` | `string` | Sí | formato uuid | — | Informe consultado. | `src/modules/diagnostics/dto/patient-results.dto.ts:302` |
-| `items` | `array<DiagnosticResultShareDto>` | Sí | — | — | Los compartidos, del más nuevo al más viejo. | `src/modules/diagnostics/dto/patient-results.dto.ts:306` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador del grant. | `src/modules/diagnostics/dto/patient-results.dto.ts:275` |
-| `items[].reportId` | `string` | Sí | formato uuid | — | Informe compartido. | `src/modules/diagnostics/dto/patient-results.dto.ts:278` |
-| `items[].practitionerUserId` | `string` | Sí | formato uuid | — | Cuenta del profesional con quien se compartió. | `src/modules/diagnostics/dto/patient-results.dto.ts:281` |
-| `items[].practitionerName` | `string` | No | — | — | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `src/modules/diagnostics/dto/patient-results.dto.ts:287` |
-| `items[].validFrom` | `string` | Sí | formato date-time | — | Desde cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:290` |
-| `items[].validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:293` |
-| `items[].active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:296` |
+| `reportId` | `string` | Sí | formato uuid | — | Informe consultado. | `src/modules/diagnostics/dto/patient-results.dto.ts:336` |
+| `items` | `array<DiagnosticResultShareDto>` | Sí | — | — | Los compartidos, del más nuevo al más viejo. | `src/modules/diagnostics/dto/patient-results.dto.ts:340` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador del grant. | `src/modules/diagnostics/dto/patient-results.dto.ts:309` |
+| `items[].reportId` | `string` | Sí | formato uuid | — | Informe compartido. | `src/modules/diagnostics/dto/patient-results.dto.ts:312` |
+| `items[].practitionerUserId` | `string` | Sí | formato uuid | — | Cuenta del profesional con quien se compartió. | `src/modules/diagnostics/dto/patient-results.dto.ts:315` |
+| `items[].practitionerName` | `string` | No | — | — | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `src/modules/diagnostics/dto/patient-results.dto.ts:321` |
+| `items[].validFrom` | `string` | Sí | formato date-time | — | Desde cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:324` |
+| `items[].validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:327` |
+| `items[].active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:330` |
 
 ### Respuestas posibles
 
@@ -441,18 +443,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:220` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.care_relationships` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.shareOwnResult → DiagnosticsPatientResultsService.shareOwnResult → CareRelationshipsRepository.findActive | `src/modules/authz/repositories/care-relationships.repository.ts:68` |
-| `authz.resource_scope_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsPatientResultsController.shareOwnResult → DiagnosticsPatientResultsService.shareOwnResult | `src/modules/diagnostics/services/diagnostics-patient-results.service.ts:525` |
+| `authz.resource_scope_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsPatientResultsController.shareOwnResult → DiagnosticsPatientResultsService.shareOwnResult | `src/modules/diagnostics/services/diagnostics-patient-results.service.ts:546` |
 | `authz.resource_scope_grants` | ESCRIBE | CREA | DIRECTA | DiagnosticsPatientResultsController.shareOwnResult → DiagnosticsPatientResultsService.shareOwnResult → ResourceScopeGrantsRepository.create | `src/modules/authz/repositories/resource-scope-grants.repository.ts:132` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.shareOwnResult → DiagnosticsPatientResultsService.shareOwnResult → ResourceScopeGrantsRepository.findExisting | `src/modules/authz/repositories/resource-scope-grants.repository.ts:60` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.shareOwnResult → DiagnosticsPatientResultsService.shareOwnResult → DiagnosticsPatientResultsService.requireOwnReport → DiagnosticOrdersRepository.findReportById | `src/modules/diagnostics/repositories/diagnostic-orders.repository.ts:235` |
@@ -473,8 +475,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/diagnostics/dto/patient-results.dto.ts:263` |
-| `validUntil` | `string` | Sí | formato date-time | `@Type(() => Date)` `@IsDate()` | — | `src/modules/diagnostics/dto/patient-results.dto.ts:269` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/diagnostics/dto/patient-results.dto.ts:297` |
+| `validUntil` | `string` | Sí | formato date-time | `@Type(() => Date)` `@IsDate()` | — | `src/modules/diagnostics/dto/patient-results.dto.ts:303` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -500,13 +502,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del grant. | `src/modules/diagnostics/dto/patient-results.dto.ts:275` |
-| `reportId` | `string` | Sí | formato uuid | — | Informe compartido. | `src/modules/diagnostics/dto/patient-results.dto.ts:278` |
-| `practitionerUserId` | `string` | Sí | formato uuid | — | Cuenta del profesional con quien se compartió. | `src/modules/diagnostics/dto/patient-results.dto.ts:281` |
-| `practitionerName` | `string` | No | — | — | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `src/modules/diagnostics/dto/patient-results.dto.ts:287` |
-| `validFrom` | `string` | Sí | formato date-time | — | Desde cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:290` |
-| `validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:293` |
-| `active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:296` |
+| `id` | `string` | Sí | formato uuid | — | Identificador del grant. | `src/modules/diagnostics/dto/patient-results.dto.ts:309` |
+| `reportId` | `string` | Sí | formato uuid | — | Informe compartido. | `src/modules/diagnostics/dto/patient-results.dto.ts:312` |
+| `practitionerUserId` | `string` | Sí | formato uuid | — | Cuenta del profesional con quien se compartió. | `src/modules/diagnostics/dto/patient-results.dto.ts:315` |
+| `practitionerName` | `string` | No | — | — | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `src/modules/diagnostics/dto/patient-results.dto.ts:321` |
+| `validFrom` | `string` | Sí | formato date-time | — | Desde cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:324` |
+| `validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:327` |
+| `active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:330` |
 
 ### Respuestas posibles
 
@@ -559,15 +561,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:273` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId, shareId | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:273` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.resource_scope_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsPatientResultsController.revokeOwnResultShare → DiagnosticsPatientResultsService.revokeOwnResultShare | `src/modules/diagnostics/services/diagnostics-patient-results.service.ts:660` |
+| `authz.resource_scope_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsPatientResultsController.revokeOwnResultShare → DiagnosticsPatientResultsService.revokeOwnResultShare | `src/modules/diagnostics/services/diagnostics-patient-results.service.ts:681` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.revokeOwnResultShare → DiagnosticsPatientResultsService.revokeOwnResultShare → ResourceScopeGrantsRepository.findByIdForResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:118` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.revokeOwnResultShare → DiagnosticsPatientResultsService.revokeOwnResultShare → DiagnosticsPatientResultsService.requireOwnReport → DiagnosticOrdersRepository.findReportById | `src/modules/diagnostics/repositories/diagnostic-orders.repository.ts:235` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.revokeOwnResultShare → DiagnosticsPatientResultsService.revokeOwnResultShare → DiagnosticsPatientResultsService.requireOwnReport → DiagnosticsPatientResultsService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
@@ -588,13 +590,13 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del grant. | `src/modules/diagnostics/dto/patient-results.dto.ts:275` |
-| `reportId` | `string` | Sí | formato uuid | — | Informe compartido. | `src/modules/diagnostics/dto/patient-results.dto.ts:278` |
-| `practitionerUserId` | `string` | Sí | formato uuid | — | Cuenta del profesional con quien se compartió. | `src/modules/diagnostics/dto/patient-results.dto.ts:281` |
-| `practitionerName` | `string` | No | — | — | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `src/modules/diagnostics/dto/patient-results.dto.ts:287` |
-| `validFrom` | `string` | Sí | formato date-time | — | Desde cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:290` |
-| `validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:293` |
-| `active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:296` |
+| `id` | `string` | Sí | formato uuid | — | Identificador del grant. | `src/modules/diagnostics/dto/patient-results.dto.ts:309` |
+| `reportId` | `string` | Sí | formato uuid | — | Informe compartido. | `src/modules/diagnostics/dto/patient-results.dto.ts:312` |
+| `practitionerUserId` | `string` | Sí | formato uuid | — | Cuenta del profesional con quien se compartió. | `src/modules/diagnostics/dto/patient-results.dto.ts:315` |
+| `practitionerName` | `string` | No | — | — | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `src/modules/diagnostics/dto/patient-results.dto.ts:321` |
+| `validFrom` | `string` | Sí | formato date-time | — | Desde cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:324` |
+| `validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:327` |
+| `active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:330` |
 
 ### Respuestas posibles
 
@@ -638,7 +640,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /diagnostic-results/me/orders` la atiende `DiagnosticsPatientResultsController.listOwnOrders` (src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:116). Exige sesión con alguno de los roles PATIENT. Delega en `DiagnosticsPatientResultsService.listOwnOrders`. Lee clinical.diagnostic_reports, clinical.service_requests, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_units, diagnostics.diagnostic_release_events, diagnostics.diagnostic_report_files, diagnostics.diagnostic_report_results, diagnostics.diagnostic_report_versions y 19 más.
+`GET /diagnostic-results/me/orders` la atiende `DiagnosticsPatientResultsController.listOwnOrders` (src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:116). Exige sesión con alguno de los roles PATIENT. Delega en `DiagnosticsPatientResultsService.listOwnOrders`. Lee clinical.diagnostic_reports, clinical.service_request_components, clinical.service_requests, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_units, diagnostics.diagnostic_release_events, diagnostics.diagnostic_report_files, diagnostics.diagnostic_report_results y 21 más.
 
 ### Requerimientos
 
@@ -646,14 +648,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → DiagnosticsPatientResultsService.releasedReportByOrder → DiagnosticOrdersRepository.findReportsByServiceRequests | `src/modules/diagnostics/repositories/diagnostic-orders.repository.ts:172` |
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
 | `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → DiagnosticOrdersRepository.findOrdersForPatientPortal | `src/modules/diagnostics/repositories/diagnostic-orders.repository.ts:143` |
 | `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → PatientSettlementService.forOrders → PatientSettlementRepository.load | `src/modules/insurance/infrastructure/repositories/patient-settlement.repository.ts:137` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → PatientSettlementService.forOrders → LinkedClaimOrderService.loadSnapshots → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findDiagnosticUnits | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:139` |
@@ -680,6 +683,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → DiagnosticsPatientResultsService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → DiagnosticsPatientResultsService.resolveOwnPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → PatientSettlementService.forOrders → PatientSettlementRepository.ownedOrders | `src/modules/insurance/infrastructure/repositories/patient-settlement.repository.ts:63` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | DiagnosticsPatientResultsController.listOwnOrders → DiagnosticsPatientResultsService.listOwnOrders → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 
 ### Parámetros
 
@@ -695,9 +699,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:214` |
-| `items` | `array<PatientOrderSummaryDto>` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:218` |
-| `items[].insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:134` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:248` |
+| `items` | `array<PatientOrderSummaryDto>` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:252` |
+| `items[].insuranceSettlement` | `PatientInsuranceSettlementDto` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:138` |
 | `items[].insuranceSettlement.claimId` | `string` | Sí | formato uuid | — | — | sin fuente |
 | `items[].insuranceSettlement.claimIdentifier` | `string` | Sí | — | — | — | sin fuente |
 | `items[].insuranceSettlement.adjudicationVersionId` | `string` | Sí | formato uuid | — | — | sin fuente |
@@ -718,24 +722,43 @@ La operación no recibe cuerpo.
 | `items[].insuranceSettlement.exclusions[].amount` | `string` | Sí | — | — | Importe decimal exacto excluido | sin fuente |
 | `items[].insuranceSettlement.exclusions[].policyClauseReference` | `string` | Sí | — | — | — | sin fuente |
 | `items[].insuranceSettlement.exclusions[].denialRationale` | `string` | Sí | admite null | — | — | sin fuente |
-| `items[].insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:139` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:142` |
-| `items[].encounterId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:145` |
-| `items[].codeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:148` |
-| `items[].categoryConceptId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:151` |
-| `items[].category` | `string` | No | valores: LAB, IMAGING, OTHER | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:159` |
-| `items[].statusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:162` |
-| `items[].priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:165` |
-| `items[].performerSelectionConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:173` |
-| `items[].performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:177` |
-| `items[].suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:181` |
-| `items[].suggestedPracticeSiteName` | `string` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:185` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:188` |
-| `items[].preparationInstructions` | `string` | No | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:198` |
-| `items[].hasReleasedResult` | `boolean` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:201` |
-| `items[].reportId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:204` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:221` |
-| `truncated` | `boolean` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:224` |
+| `items[].insuranceSettlementAvailability` | `string` | Sí | valores: AVAILABLE, PENDING_PUBLICATION, UNDER_REVIEW, NOT_AVAILABLE | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:143` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:146` |
+| `items[].requisitionId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:150` |
+| `items[].codeDisplay` | `string` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:154` |
+| `items[].specimenTypeConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:158` |
+| `items[].specimenTypeDisplay` | `string` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:162` |
+| `items[].components` | `array<ServiceRequestComponentDto>` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:166` |
+| `items[].components[].conceptId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:51` |
+| `items[].components[].display` | `string` | Sí | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:54` |
+| `items[].components[].ordinal` | `number` | Sí | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:59` |
+| `items[].componentsSpecified` | `boolean` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:169` |
+| `items[].imaging` | `ServiceRequestImagingDto` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:173` |
+| `items[].imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
+| `items[].imaging.modalityDisplay` | `string` | No | admite null | — | — | sin fuente |
+| `items[].imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
+| `items[].imaging.bodySiteDisplay` | `string` | No | admite null | — | — | sin fuente |
+| `items[].imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
+| `items[].imaging.lateralityDisplay` | `string` | No | admite null | — | — | sin fuente |
+| `items[].imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
+| `items[].imaging.contrastDisplay` | `string` | No | admite null | — | — | sin fuente |
+| `items[].summary` | `string` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:176` |
+| `items[].encounterId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:179` |
+| `items[].codeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:182` |
+| `items[].categoryConceptId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:185` |
+| `items[].category` | `string` | No | valores: LAB, IMAGING, OTHER | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:193` |
+| `items[].statusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:196` |
+| `items[].priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:199` |
+| `items[].performerSelectionConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:207` |
+| `items[].performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:211` |
+| `items[].suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:215` |
+| `items[].suggestedPracticeSiteName` | `string` | Sí | admite null | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:219` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:222` |
+| `items[].preparationInstructions` | `string` | No | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:232` |
+| `items[].hasReleasedResult` | `boolean` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:235` |
+| `items[].reportId` | `string` | No | formato uuid | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:238` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:255` |
+| `truncated` | `boolean` | Sí | — | — | — | `src/modules/diagnostics/dto/patient-results.dto.ts:258` |
 
 ### Respuestas posibles
 
@@ -790,10 +813,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -803,19 +826,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `diagnostics.accession_specimens` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.accession → DiagnosticsSpecimensService.accession → SpecimensRepository.addAccessionSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:352` |
 | `diagnostics.laboratory_accessions` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.accession → DiagnosticsSpecimensService.accession → SpecimensRepository.createAccession | `src/modules/diagnostics/repositories/specimens.repository.ts:307` |
 | `diagnostics.specimen_chain_of_custody_events` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.accession → DiagnosticsSpecimensService.accession → SpecimensRepository.recordCustodyEvent | `src/modules/diagnostics/repositories/specimens.repository.ts:407` |
-| `diagnostics.specimens` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsSpecimensController.accession → DiagnosticsSpecimensService.accession | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:171` |
+| `diagnostics.specimens` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsSpecimensController.accession → DiagnosticsSpecimensService.accession | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:207` |
 | `diagnostics.specimens` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.accession → DiagnosticsSpecimensService.accession → DiagnosticsScopeService.specimen → SpecimensRepository.findSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:168` |
 
 ### Cuerpo — DTO `CreateAccessionDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente dueño de la acesión | `src/modules/diagnostics/dto/specimens.dto.ts:104` |
-| `custodianTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404 | `src/modules/diagnostics/dto/specimens.dto.ts:116` |
-| `specimenIds` | `array<string>` | Sí | formato uuid | `@IsArray()` `@ArrayNotEmpty()` `@IsUUID('4', { each: true })` | Especímenes a acesionar | `src/modules/diagnostics/dto/specimens.dto.ts:129` |
-| `accessionNumber` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Nº de acesión (se genera si se omite) | `src/modules/diagnostics/dto/specimens.dto.ts:138` |
-| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:149` |
-| `serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/diagnostics/dto/specimens.dto.ts:157` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente dueño de la acesión | `src/modules/diagnostics/dto/specimens.dto.ts:110` |
+| `custodianTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404 | `src/modules/diagnostics/dto/specimens.dto.ts:122` |
+| `specimenIds` | `array<string>` | Sí | formato uuid | `@IsArray()` `@ArrayNotEmpty()` `@IsUUID('4', { each: true })` | Especímenes a acesionar | `src/modules/diagnostics/dto/specimens.dto.ts:135` |
+| `accessionNumber` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | Nº de acesión (se genera si se omite) | `src/modules/diagnostics/dto/specimens.dto.ts:144` |
+| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:155` |
+| `serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/diagnostics/dto/specimens.dto.ts:163` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -906,9 +929,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:78` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -934,38 +957,38 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:437` |
-| `custodianTenantId` | `string` | Sí | formato uuid | — | Tenant custodio (el laboratorio que la recibió). | `src/modules/diagnostics/dto/specimens.dto.ts:440` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño de la acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:443` |
-| `accessionNumber` | `string` | Sí | — | — | Número de acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:446` |
-| `receivedAt` | `string` | Sí | formato date-time | — | Cuándo se recibió. | `src/modules/diagnostics/dto/specimens.dto.ts:449` |
-| `priorityConceptId` | `string` | Sí | formato uuid | — | Prioridad (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:452` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la acesión (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:455` |
-| `specimens` | `array<AccessionSpecimenDetailDto>` | Sí | — | — | Los especímenes acesionados, con su contenedor y su custodia. | `src/modules/diagnostics/dto/specimens.dto.ts:459` |
-| `specimens[].accessionSpecimenId` | `string` | Sí | formato uuid | — | Identificador del item de acesión (`accession_specimens`). | `src/modules/diagnostics/dto/specimens.dto.ts:418` |
-| `specimens[].sequenceNumber` | `number` | Sí | — | — | Posición dentro de la acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:421` |
-| `specimens[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del item dentro de la acesión (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:424` |
-| `specimens[].specimen` | `SpecimenDetailDto` | Sí | — | — | El espécimen, con sus contenedores y su custodia. | `src/modules/diagnostics/dto/specimens.dto.ts:427` |
-| `specimens[].specimen.id` | `string` | Sí | formato uuid | — | Identificador del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:387` |
-| `specimens[].specimen.patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:390` |
-| `specimens[].specimen.specimenTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:393` |
-| `specimens[].specimen.statusConceptId` | `string` | Sí | formato uuid | — | Estado del espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:396` |
-| `specimens[].specimen.collectedAt` | `string` | No | formato date-time | — | Cuándo se recolectó, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:400` |
-| `specimens[].specimen.receivedAt` | `string` | No | formato date-time | — | Cuándo se recibió en el laboratorio, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:404` |
-| `specimens[].specimen.containers` | `array<SpecimenContainerDto>` | Sí | — | — | Sus contenedores. | `src/modules/diagnostics/dto/specimens.dto.ts:408` |
-| `specimens[].specimen.containers[].id` | `string` | Sí | formato uuid | — | Identificador del contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:372` |
-| `specimens[].specimen.containers[].containerIdentifier` | `string` | Sí | — | — | Identificador físico del contenedor (etiqueta/código). | `src/modules/diagnostics/dto/specimens.dto.ts:375` |
-| `specimens[].specimen.containers[].containerTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:378` |
-| `specimens[].specimen.containers[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:381` |
-| `specimens[].specimen.custodyEvents` | `array<SpecimenCustodyEventDto>` | Sí | — | — | Su cadena de custodia, del evento más viejo al más nuevo. | `src/modules/diagnostics/dto/specimens.dto.ts:412` |
-| `specimens[].specimen.custodyEvents[].id` | `string` | Sí | formato uuid | — | Identificador del evento. | `src/modules/diagnostics/dto/specimens.dto.ts:345` |
-| `specimens[].specimen.custodyEvents[].specimenContainerId` | `string` | No | formato uuid | — | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:348` |
-| `specimens[].specimen.custodyEvents[].custodyEventTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `src/modules/diagnostics/dto/specimens.dto.ts:351` |
-| `specimens[].specimen.custodyEvents[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:354` |
-| `specimens[].specimen.custodyEvents[].fromPartyTypeConceptId` | `string` | No | formato uuid | — | De qué tipo de parte salió (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:357` |
-| `specimens[].specimen.custodyEvents[].toPartyTypeConceptId` | `string` | No | formato uuid | — | A qué tipo de parte llegó (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:360` |
-| `specimens[].specimen.custodyEvents[].sealIdentifier` | `string` | No | — | — | Sello de custodia, si se usó uno. | `src/modules/diagnostics/dto/specimens.dto.ts:363` |
-| `specimens[].specimen.custodyEvents[].signedByUserId` | `string` | No | formato uuid | — | Quién firmó el evento. | `src/modules/diagnostics/dto/specimens.dto.ts:366` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:443` |
+| `custodianTenantId` | `string` | Sí | formato uuid | — | Tenant custodio (el laboratorio que la recibió). | `src/modules/diagnostics/dto/specimens.dto.ts:446` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño de la acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:449` |
+| `accessionNumber` | `string` | Sí | — | — | Número de acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:452` |
+| `receivedAt` | `string` | Sí | formato date-time | — | Cuándo se recibió. | `src/modules/diagnostics/dto/specimens.dto.ts:455` |
+| `priorityConceptId` | `string` | Sí | formato uuid | — | Prioridad (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:458` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la acesión (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:461` |
+| `specimens` | `array<AccessionSpecimenDetailDto>` | Sí | — | — | Los especímenes acesionados, con su contenedor y su custodia. | `src/modules/diagnostics/dto/specimens.dto.ts:465` |
+| `specimens[].accessionSpecimenId` | `string` | Sí | formato uuid | — | Identificador del item de acesión (`accession_specimens`). | `src/modules/diagnostics/dto/specimens.dto.ts:424` |
+| `specimens[].sequenceNumber` | `number` | Sí | — | — | Posición dentro de la acesión. | `src/modules/diagnostics/dto/specimens.dto.ts:427` |
+| `specimens[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del item dentro de la acesión (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:430` |
+| `specimens[].specimen` | `SpecimenDetailDto` | Sí | — | — | El espécimen, con sus contenedores y su custodia. | `src/modules/diagnostics/dto/specimens.dto.ts:433` |
+| `specimens[].specimen.id` | `string` | Sí | formato uuid | — | Identificador del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:393` |
+| `specimens[].specimen.patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:396` |
+| `specimens[].specimen.specimenTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:399` |
+| `specimens[].specimen.statusConceptId` | `string` | Sí | formato uuid | — | Estado del espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:402` |
+| `specimens[].specimen.collectedAt` | `string` | No | formato date-time | — | Cuándo se recolectó, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:406` |
+| `specimens[].specimen.receivedAt` | `string` | No | formato date-time | — | Cuándo se recibió en el laboratorio, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:410` |
+| `specimens[].specimen.containers` | `array<SpecimenContainerDto>` | Sí | — | — | Sus contenedores. | `src/modules/diagnostics/dto/specimens.dto.ts:414` |
+| `specimens[].specimen.containers[].id` | `string` | Sí | formato uuid | — | Identificador del contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:378` |
+| `specimens[].specimen.containers[].containerIdentifier` | `string` | Sí | — | — | Identificador físico del contenedor (etiqueta/código). | `src/modules/diagnostics/dto/specimens.dto.ts:381` |
+| `specimens[].specimen.containers[].containerTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:384` |
+| `specimens[].specimen.containers[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:387` |
+| `specimens[].specimen.custodyEvents` | `array<SpecimenCustodyEventDto>` | Sí | — | — | Su cadena de custodia, del evento más viejo al más nuevo. | `src/modules/diagnostics/dto/specimens.dto.ts:418` |
+| `specimens[].specimen.custodyEvents[].id` | `string` | Sí | formato uuid | — | Identificador del evento. | `src/modules/diagnostics/dto/specimens.dto.ts:351` |
+| `specimens[].specimen.custodyEvents[].specimenContainerId` | `string` | No | formato uuid | — | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:354` |
+| `specimens[].specimen.custodyEvents[].custodyEventTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `src/modules/diagnostics/dto/specimens.dto.ts:357` |
+| `specimens[].specimen.custodyEvents[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:360` |
+| `specimens[].specimen.custodyEvents[].fromPartyTypeConceptId` | `string` | No | formato uuid | — | De qué tipo de parte salió (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:363` |
+| `specimens[].specimen.custodyEvents[].toPartyTypeConceptId` | `string` | No | formato uuid | — | A qué tipo de parte llegó (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:366` |
+| `specimens[].specimen.custodyEvents[].sealIdentifier` | `string` | No | — | — | Sello de custodia, si se usó uno. | `src/modules/diagnostics/dto/specimens.dto.ts:369` |
+| `specimens[].specimen.custodyEvents[].signedByUserId` | `string` | No | formato uuid | — | Quién firmó el evento. | `src/modules/diagnostics/dto/specimens.dto.ts:372` |
 
 ### Respuestas posibles
 
@@ -1018,16 +1041,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostics.analyzer_runs` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.createAnalyzerRun → DiagnosticsLabService.createAnalyzerRun → LabWorkRepository.createAnalyzerRun | `src/modules/diagnostics/repositories/lab-work.repository.ts:264` |
+| `diagnostics.analyzer_runs` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.createAnalyzerRun → DiagnosticsLabService.createAnalyzerRun → LabWorkRepository.createAnalyzerRun | `src/modules/diagnostics/repositories/lab-work.repository.ts:325` |
 
 ### Cuerpo — DTO `CreateAnalyzerRunDto` · `application/json`
 
@@ -1119,11 +1142,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:109` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1131,12 +1154,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|---|---|---|
 | `clinical.observations` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → DiagnosticsScopeService.observation → ClinicalRefsRepository.findObservation | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:35` |
 | `common.files` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → DiagnosticsScopeService.file → ClinicalRefsRepository.findFile | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:40` |
-| `diagnostics.analyzer_result_messages` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.recordMessage | `src/modules/diagnostics/repositories/lab-work.repository.ts:334` |
-| `diagnostics.analyzer_result_messages` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findMessageByControlId | `src/modules/diagnostics/repositories/lab-work.repository.ts:286` |
-| `diagnostics.analyzer_runs` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findAnalyzerRun | `src/modules/diagnostics/repositories/lab-work.repository.ts:197` |
-| `diagnostics.laboratory_work_order_tests` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage | `src/modules/diagnostics/services/diagnostics-lab.service.ts:259` |
-| `diagnostics.laboratory_work_order_tests` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findWorkOrderTest | `src/modules/diagnostics/repositories/lab-work.repository.ts:186` |
-| `diagnostics.laboratory_work_orders` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findWorkOrder | `src/modules/diagnostics/repositories/lab-work.repository.ts:172` |
+| `diagnostics.analyzer_result_messages` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.recordMessage | `src/modules/diagnostics/repositories/lab-work.repository.ts:395` |
+| `diagnostics.analyzer_result_messages` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findMessageByControlId | `src/modules/diagnostics/repositories/lab-work.repository.ts:347` |
+| `diagnostics.analyzer_runs` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findAnalyzerRun | `src/modules/diagnostics/repositories/lab-work.repository.ts:258` |
+| `diagnostics.laboratory_work_order_tests` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage | `src/modules/diagnostics/services/diagnostics-lab.service.ts:265` |
+| `diagnostics.laboratory_work_order_tests` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findWorkOrderTest | `src/modules/diagnostics/repositories/lab-work.repository.ts:247` |
+| `diagnostics.laboratory_work_orders` | LEE | LEE | DIRECTA | DiagnosticsLabController.ingestMessage → DiagnosticsLabService.ingestMessage → LabWorkRepository.findWorkOrder | `src/modules/diagnostics/repositories/lab-work.repository.ts:233` |
 
 ### Parámetros
 
@@ -1236,10 +1259,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1368,11 +1391,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:156` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:156` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1380,7 +1403,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|---|---|---|
 | `diagnostics.specimen_chain_of_custody_events` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.custodyEvent → DiagnosticsSpecimensService.recordCustodyEvent → SpecimensRepository.recordCustodyEvent | `src/modules/diagnostics/repositories/specimens.repository.ts:407` |
 | `diagnostics.specimen_container_events` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.custodyEvent → DiagnosticsSpecimensService.recordCustodyEvent → SpecimensRepository.recordContainerEvent | `src/modules/diagnostics/repositories/specimens.repository.ts:531` |
-| `diagnostics.specimen_containers` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsSpecimensController.custodyEvent → DiagnosticsSpecimensService.recordCustodyEvent | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:322` |
+| `diagnostics.specimen_containers` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsSpecimensController.custodyEvent → DiagnosticsSpecimensService.recordCustodyEvent | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:358` |
 | `diagnostics.specimen_containers` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.custodyEvent → DiagnosticsSpecimensService.recordCustodyEvent → DiagnosticsScopeService.container → SpecimensRepository.findContainer | `src/modules/diagnostics/repositories/specimens.repository.ts:196` |
 | `diagnostics.specimens` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.custodyEvent → DiagnosticsSpecimensService.recordCustodyEvent → DiagnosticsScopeService.container → SpecimensRepository.findSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:168` |
 
@@ -1394,15 +1417,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `specimenId` | `string` | Sí | formato uuid | `@IsUUID()` | Espécimen asociado al contenedor | `src/modules/diagnostics/dto/specimens.dto.ts:260` |
-| `eventTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de evento de contenedor (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:271` |
-| `toPartyTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de parte destino (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:282` |
-| `toPartyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id de parte destino | `src/modules/diagnostics/dto/specimens.dto.ts:290` |
-| `temperatureCelsius` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | Temperatura en °C | `src/modules/diagnostics/dto/specimens.dto.ts:299` |
-| `sealIdentifier` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Sello de custodia | `src/modules/diagnostics/dto/specimens.dto.ts:308` |
-| `evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash de evidencia | `src/modules/diagnostics/dto/specimens.dto.ts:317` |
-| `destinationStatusConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Estado destino del contenedor (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:328` |
-| `notes` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Notas del traslado | `src/modules/diagnostics/dto/specimens.dto.ts:337` |
+| `specimenId` | `string` | Sí | formato uuid | `@IsUUID()` | Espécimen asociado al contenedor | `src/modules/diagnostics/dto/specimens.dto.ts:266` |
+| `eventTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de evento de contenedor (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:277` |
+| `toPartyTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de parte destino (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:288` |
+| `toPartyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id de parte destino | `src/modules/diagnostics/dto/specimens.dto.ts:296` |
+| `temperatureCelsius` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | Temperatura en °C | `src/modules/diagnostics/dto/specimens.dto.ts:305` |
+| `sealIdentifier` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Sello de custodia | `src/modules/diagnostics/dto/specimens.dto.ts:314` |
+| `evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash de evidencia | `src/modules/diagnostics/dto/specimens.dto.ts:323` |
+| `destinationStatusConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Estado destino del contenedor (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:334` |
+| `notes` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Notas del traslado | `src/modules/diagnostics/dto/specimens.dto.ts:343` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1487,10 +1510,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1596,11 +1619,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:95` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1698,10 +1721,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1811,10 +1834,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1909,11 +1932,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:144` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2021,11 +2044,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | offset (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:67` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2100,7 +2123,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /diagnostics/patients/{patientProfileId}/orders` la atiende `DiagnosticsOrdersController.getPatientOrders` (src/modules/diagnostics/controllers/diagnostics-orders.controller.ts:50). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `DiagnosticsOrdersService.getPatientOrders`. Lee clinical.diagnostic_reports, clinical.service_request_notes, clinical.service_requests, practice.practice_sites.
+`GET /diagnostics/patients/{patientProfileId}/orders` la atiende `DiagnosticsOrdersController.getPatientOrders` (src/modules/diagnostics/controllers/diagnostics-orders.controller.ts:50). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `DiagnosticsOrdersService.getPatientOrders`. Lee clinical.diagnostic_reports, clinical.service_request_notes, clinical.service_requests, practice.care_spaces, practice.practice_sites.
 
 ### Requerimientos
 
@@ -2108,9 +2131,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-orders.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/diagnostics/controllers/diagnostics-orders.controller.ts:50` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2119,6 +2142,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | DiagnosticsOrdersController.getPatientOrders → DiagnosticsOrdersService.getPatientOrders → DiagnosticOrdersRepository.findReportsByPatient | `src/modules/diagnostics/repositories/diagnostic-orders.repository.ts:80` |
 | `clinical.service_request_notes` | LEE | LEE | DIRECTA | DiagnosticsOrdersController.getPatientOrders → DiagnosticsOrdersService.getPatientOrders → ServiceRequestNotesService.noteIdsFor | `src/modules/clinical/services/service-request-notes.service.ts:160` |
 | `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsOrdersController.getPatientOrders → DiagnosticsOrdersService.getPatientOrders → DiagnosticOrdersRepository.findOrdersByPatient | `src/modules/diagnostics/repositories/diagnostic-orders.repository.ts:49` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | DiagnosticsOrdersController.getPatientOrders → DiagnosticsOrdersService.getPatientOrders | `src/modules/diagnostics/services/diagnostics-orders.service.ts:99` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticsOrdersController.getPatientOrders → DiagnosticsOrdersService.getPatientOrders → SuggestedSiteNamesReader.namesFor | `src/modules/clinical/services/suggested-site-names.reader.ts:31` |
 
 ### Parámetros
@@ -2136,8 +2160,8 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente leído. | `src/modules/diagnostics/dto/orders.dto.ts:139` |
-| `orders` | `array<DiagnosticOrderSummaryDto>` | Sí | — | — | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `src/modules/diagnostics/dto/orders.dto.ts:143` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente leído. | `src/modules/diagnostics/dto/orders.dto.ts:146` |
+| `orders` | `array<DiagnosticOrderSummaryDto>` | Sí | — | — | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `src/modules/diagnostics/dto/orders.dto.ts:150` |
 | `orders[].id` | `string` | Sí | formato uuid | — | Identificador de la orden. | `src/modules/diagnostics/dto/orders.dto.ts:18` |
 | `orders[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente al que pertenece. | `src/modules/diagnostics/dto/orders.dto.ts:21` |
 | `orders[].encounterId` | `string` | No | formato uuid | — | Encuentro en el que se pidió, si se pidió durante uno. | `src/modules/diagnostics/dto/orders.dto.ts:24` |
@@ -2153,23 +2177,27 @@ La operación no recibe cuerpo.
 | `orders[].performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor («lo hago yo»), o `null`. | `src/modules/diagnostics/dto/orders.dto.ts:58` |
 | `orders[].suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/diagnostics/dto/orders.dto.ts:62` |
 | `orders[].suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida, o `null`. | `src/modules/diagnostics/dto/orders.dto.ts:66` |
-| `orders[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se pidió. | `src/modules/diagnostics/dto/orders.dto.ts:69` |
-| `orders[].previousDiagnosticReportId` | `string` | No | formato uuid | — | El informe previo que satisface este pedido (antiduplicación, v4.2.17). Presente cuando el médico eligió reutilizar o repetir un estudio duplicado; `undefined` en cualquier otro caso. | `src/modules/diagnostics/dto/orders.dto.ts:76` |
-| `orders[].duplicateOverrideReason` | `string` | No | — | — | Justificación del médico si repitió un estudio duplicado (antiduplicación). | `src/modules/diagnostics/dto/orders.dto.ts:79` |
-| `reports` | `array<DiagnosticReportSummaryDto>` | Sí | — | — | Informes diagnósticos, de la más nueva a la más vieja. | `src/modules/diagnostics/dto/orders.dto.ts:147` |
-| `reports[].id` | `string` | Sí | formato uuid | — | Identificador del informe. | `src/modules/diagnostics/dto/orders.dto.ts:92` |
-| `reports[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente al que pertenece. | `src/modules/diagnostics/dto/orders.dto.ts:95` |
-| `reports[].serviceRequestId` | `string` | No | formato uuid | — | Orden que lo originó, si cuelga de una. | `src/modules/diagnostics/dto/orders.dto.ts:98` |
-| `reports[].encounterId` | `string` | No | formato uuid | — | Encuentro asociado, si lo hay. | `src/modules/diagnostics/dto/orders.dto.ts:101` |
-| `reports[].codeConceptId` | `string` | Sí | formato uuid | — | Qué informa (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:104` |
-| `reports[].categoryConceptId` | `string` | No | formato uuid | — | Categoría (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:107` |
-| `reports[].lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Estado del ciclo de vida (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:110` |
-| `reports[].currentVersionId` | `string` | No | formato uuid | — | Versión vigente, esté liberada o no. | `src/modules/diagnostics/dto/orders.dto.ts:113` |
-| `reports[].currentReleasedVersionId` | `string` | No | formato uuid | — | Versión liberada al paciente, si alguna lo está. | `src/modules/diagnostics/dto/orders.dto.ts:116` |
-| `reports[].resultReleaseStatusConceptId` | `string` | No | formato uuid | — | Estado de liberación de resultados (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:120` |
-| `reports[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se emitió. | `src/modules/diagnostics/dto/orders.dto.ts:123` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque. | `src/modules/diagnostics/dto/orders.dto.ts:150` |
-| `truncated` | `array<string>` | Sí | — | — | Bloques que quedaron recortados por el tope. | `src/modules/diagnostics/dto/orders.dto.ts:153` |
+| `orders[].suggestedCareSpace` | `object` | No | admite null | — | Punto de toma sugerido (F5b) | `src/modules/diagnostics/dto/orders.dto.ts:73` |
+| `orders[].suggestedCareSpace.id` | `string` | No | — | — | — | sin fuente |
+| `orders[].suggestedCareSpace.code` | `string` | No | — | — | — | sin fuente |
+| `orders[].suggestedCareSpace.name` | `string` | No | — | — | — | sin fuente |
+| `orders[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se pidió. | `src/modules/diagnostics/dto/orders.dto.ts:76` |
+| `orders[].previousDiagnosticReportId` | `string` | No | formato uuid | — | El informe previo que satisface este pedido (antiduplicación, v4.2.17). Presente cuando el médico eligió reutilizar o repetir un estudio duplicado; `undefined` en cualquier otro caso. | `src/modules/diagnostics/dto/orders.dto.ts:83` |
+| `orders[].duplicateOverrideReason` | `string` | No | — | — | Justificación del médico si repitió un estudio duplicado (antiduplicación). | `src/modules/diagnostics/dto/orders.dto.ts:86` |
+| `reports` | `array<DiagnosticReportSummaryDto>` | Sí | — | — | Informes diagnósticos, de la más nueva a la más vieja. | `src/modules/diagnostics/dto/orders.dto.ts:154` |
+| `reports[].id` | `string` | Sí | formato uuid | — | Identificador del informe. | `src/modules/diagnostics/dto/orders.dto.ts:99` |
+| `reports[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente al que pertenece. | `src/modules/diagnostics/dto/orders.dto.ts:102` |
+| `reports[].serviceRequestId` | `string` | No | formato uuid | — | Orden que lo originó, si cuelga de una. | `src/modules/diagnostics/dto/orders.dto.ts:105` |
+| `reports[].encounterId` | `string` | No | formato uuid | — | Encuentro asociado, si lo hay. | `src/modules/diagnostics/dto/orders.dto.ts:108` |
+| `reports[].codeConceptId` | `string` | Sí | formato uuid | — | Qué informa (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:111` |
+| `reports[].categoryConceptId` | `string` | No | formato uuid | — | Categoría (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:114` |
+| `reports[].lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Estado del ciclo de vida (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:117` |
+| `reports[].currentVersionId` | `string` | No | formato uuid | — | Versión vigente, esté liberada o no. | `src/modules/diagnostics/dto/orders.dto.ts:120` |
+| `reports[].currentReleasedVersionId` | `string` | No | formato uuid | — | Versión liberada al paciente, si alguna lo está. | `src/modules/diagnostics/dto/orders.dto.ts:123` |
+| `reports[].resultReleaseStatusConceptId` | `string` | No | formato uuid | — | Estado de liberación de resultados (concept id). | `src/modules/diagnostics/dto/orders.dto.ts:127` |
+| `reports[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se emitió. | `src/modules/diagnostics/dto/orders.dto.ts:130` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque. | `src/modules/diagnostics/dto/orders.dto.ts:157` |
+| `truncated` | `array<string>` | Sí | — | — | Bloques que quedaron recortados por el tope. | `src/modules/diagnostics/dto/orders.dto.ts:160` |
 
 ### Respuestas posibles
 
@@ -2221,11 +2249,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:44` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2357,11 +2385,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: reportId, versionId | `src/modules/diagnostics/controllers/diagnostics-reports.controller.ts:61` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2466,19 +2494,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: observationId | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:128` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical.observations` | LEE | LEE | DIRECTA | DiagnosticsLabController.verifyResult → DiagnosticsLabService.verifyResult → DiagnosticsScopeService.observation → ClinicalRefsRepository.findObservation | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:35` |
-| `diagnostics.laboratory_work_order_tests` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticsLabController.verifyResult → DiagnosticsLabService.verifyResult → LabWorkRepository.markTestsVerifiedForObservation | `src/modules/diagnostics/repositories/lab-work.repository.ts:418` |
-| `diagnostics.result_verifications` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.verifyResult → DiagnosticsLabService.verifyResult → LabWorkRepository.recordVerification | `src/modules/diagnostics/repositories/lab-work.repository.ts:394` |
+| `diagnostics.laboratory_work_order_tests` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticsLabController.verifyResult → DiagnosticsLabService.verifyResult → LabWorkRepository.markTestsVerifiedForObservation | `src/modules/diagnostics/repositories/lab-work.repository.ts:479` |
+| `diagnostics.result_verifications` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.verifyResult → DiagnosticsLabService.verifyResult → LabWorkRepository.recordVerification | `src/modules/diagnostics/repositories/lab-work.repository.ts:455` |
 
 ### Parámetros
 
@@ -2553,14 +2581,101 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 24. POST /diagnostics/service-requests/inbox
+## 24. GET /diagnostics/service-requests/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Detalle de una orden dirigida al tenant activo
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `DiagnosticsReceptionController.getServiceRequest` — `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:101`
+
+### Qué es y para qué sirve (negocio)
+
+Detalle de una orden dirigida al tenant activo. Dentro del módulo (descripción del modelo, en inglés): «Connects laboratory and imaging workflows to the patient chart while the heavy binary content remains in PACS/VNA or governed object storage.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_20_diagnostics.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /diagnostics/service-requests/{id}` la atiende `DiagnosticsReceptionController.getServiceRequest` (src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:101). Exige sesión; el controlador no declara roles. Delega en `DiagnosticsWorklistService.getById`. Lee clinical.service_request_components, clinical.service_requests, diagnostics.specimen_chain_of_custody_events, diagnostics.specimen_containers, diagnostics.specimens, directory.tenants, profiles.patient_profiles, profiles.person_profiles y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:101` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:101` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById | `src/modules/diagnostics/services/diagnostics-worklist.service.ts:160` |
+| `diagnostics.specimen_chain_of_custody_events` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → SpecimensRepository.findCustodyEventsBySpecimenIds | `src/modules/diagnostics/repositories/specimens.repository.ts:261` |
+| `diagnostics.specimen_containers` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → SpecimensRepository.findContainersBySpecimenIds | `src/modules/diagnostics/repositories/specimens.repository.ts:248` |
+| `diagnostics.specimens` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → LabReceptionRepository.findSpecimensForServiceRequests | `src/modules/diagnostics/repositories/lab-reception.repository.ts:122` |
+| `directory.tenants` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → LabReceptionRepository.findTenantNames | `src/modules/diagnostics/repositories/lab-reception.repository.ts:206` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:152` |
+| `profiles.person_profiles` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:151` |
+| `profiles.persons` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:155` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → LabReceptionRepository.findConceptDisplays | `src/modules/diagnostics/repositories/lab-reception.repository.ts:188` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.getServiceRequest → DiagnosticsWorklistService.getById → DiagnosticsReceptionService.toItems → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<WorklistItemDto>` · DTO `WorklistItemDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `state` | `object` | Sí | — | — | Derivado, no guardado: PENDING (sin acesión ni estudio), RECEIVED (acesión, muestra recibida o estudio de imagen), IN_PROCESS (orden de trabajo abierta; en imagen, informe en curso), REPORTED (informe liberado), CANCELLED (revocada o satisfecha por informe previo) | `src/modules/diagnostics/dto/worklist.dto.ts:88` |
+| `scope` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof WORKLIST_SCOPES)[number] | `src/modules/diagnostics/dto/worklist.dto.ts:91` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostics/controllers/diagnostics-reception.controller.spec.ts:57` |
+
+### Flujos
+
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsReceptionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. POST /diagnostics/service-requests/inbox
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de órdenes de laboratorio por recibir
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DiagnosticsReceptionController.listInbox` — `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:38`
+- **Implementación:** `DiagnosticsReceptionController.listInbox` — `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:53`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2570,23 +2685,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /diagnostics/service-requests/inbox` la atiende `DiagnosticsReceptionController.listInbox` (src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:38). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabInboxQueryDto` (3 campos, 0 obligatorios). Delega en `DiagnosticsReceptionService.listInbox`. Lee clinical.service_requests, diagnostics.laboratory_accessions, diagnostics.specimen_chain_of_custody_events, diagnostics.specimen_containers, diagnostics.specimens, directory.tenants, profiles.patient_profiles, profiles.person_profiles y 2 más.
+`POST /diagnostics/service-requests/inbox` la atiende `DiagnosticsReceptionController.listInbox` (src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:53). Exige sesión; el controlador no declara roles. Valida el cuerpo como `LabInboxQueryDto` (3 campos, 0 obligatorios). Delega en `DiagnosticsReceptionService.listInbox`. Lee clinical.service_request_components, clinical.service_requests, diagnostics.laboratory_accessions, diagnostics.specimen_chain_of_custody_events, diagnostics.specimen_containers, diagnostics.specimens, directory.tenants, profiles.patient_profiles y 4 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:53` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → DiagnosticsReceptionService.toItems → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
 | `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → LabReceptionRepository.findInboxCandidates | `src/modules/diagnostics/repositories/lab-reception.repository.ts:76` |
 | `diagnostics.laboratory_accessions` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → LabReceptionRepository.findAccessionedServiceRequestIds | `src/modules/diagnostics/repositories/lab-reception.repository.ts:97` |
 | `diagnostics.specimen_chain_of_custody_events` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → DiagnosticsReceptionService.toItems → SpecimensRepository.findCustodyEventsBySpecimenIds | `src/modules/diagnostics/repositories/specimens.repository.ts:261` |
@@ -2597,14 +2713,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.person_profiles` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:151` |
 | `profiles.persons` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:155` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → DiagnosticsReceptionService.toItems → LabReceptionRepository.findConceptDisplays | `src/modules/diagnostics/repositories/lab-reception.repository.ts:188` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listInbox → DiagnosticsReceptionService.listInbox → DiagnosticsReceptionService.toItems → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 
 ### Cuerpo — DTO `LabInboxQueryDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `cursor` | `string` | No | longitud máxima 512 | `@IsOptional()` `@IsString()` `@MaxLength(512)` | Cursor opaco devuelto por la página anterior (`nextCursor`) | `src/modules/diagnostics/dto/reception.dto.ts:32` |
-| `limit` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(100)` | — | `src/modules/diagnostics/dto/reception.dto.ts:41` |
-| `patientQuery` | `string` | No | longitud mínima 2; longitud máxima 80 | `@IsOptional()` `@Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value, )` `@IsString()` `@MinLength(2)` `@MaxLength(80)` | Nombre o código del paciente (sin distinguir mayúsculas ni tildes) | `src/modules/diagnostics/dto/reception.dto.ts:60` |
+| `cursor` | `string` | No | longitud máxima 512 | `@IsOptional()` `@IsString()` `@MaxLength(512)` | Cursor opaco devuelto por la página anterior (`nextCursor`) | `src/modules/diagnostics/dto/reception.dto.ts:36` |
+| `limit` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(100)` | — | `src/modules/diagnostics/dto/reception.dto.ts:45` |
+| `patientQuery` | `string` | No | longitud mínima 2; longitud máxima 80 | `@IsOptional()` `@Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value, )` `@IsString()` `@MinLength(2)` `@MaxLength(80)` | Nombre o código del paciente (sin distinguir mayúsculas ni tildes) | `src/modules/diagnostics/dto/reception.dto.ts:64` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2628,44 +2745,62 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<LabInboxItemDto>` | Sí | — | — | Las órdenes de la página, de la más vieja a la más nueva. | `src/modules/diagnostics/dto/reception.dto.ts:122` |
-| `items[].serviceRequestId` | `string` | Sí | formato uuid | — | La orden de servicio (`clinical.service_requests`). | `src/modules/diagnostics/dto/reception.dto.ts:66` |
-| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente de la orden. | `src/modules/diagnostics/dto/reception.dto.ts:69` |
-| `items[].patientDisplayName` | `string` | Sí | admite null | — | Nombre pintable del paciente, si se conoce. | `src/modules/diagnostics/dto/reception.dto.ts:73` |
-| `items[].patientCode` | `string` | Sí | admite null | — | Código de paciente (historia clínica), si se conoce. | `src/modules/diagnostics/dto/reception.dto.ts:76` |
-| `items[].codeConceptId` | `string` | Sí | formato uuid | — | Estudio pedido (concept id). | `src/modules/diagnostics/dto/reception.dto.ts:79` |
-| `items[].codeDisplay` | `string` | Sí | admite null | — | Nombre del estudio pedido, del catálogo. | `src/modules/diagnostics/dto/reception.dto.ts:82` |
-| `items[].categoryConceptId` | `string` | Sí | formato uuid; admite null | — | Categoría de la orden (laboratorio o anatomía patológica). | `src/modules/diagnostics/dto/reception.dto.ts:86` |
-| `items[].priorityConceptId` | `string` | Sí | formato uuid; admite null | — | Prioridad de la orden (concept id). | `src/modules/diagnostics/dto/reception.dto.ts:90` |
-| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado de la orden (concept id). | `src/modules/diagnostics/dto/reception.dto.ts:93` |
-| `items[].requesterProfileId` | `string` | Sí | formato uuid; admite null | — | Profesional que pidió el estudio, si consta. | `src/modules/diagnostics/dto/reception.dto.ts:97` |
-| `items[].requestingTenantId` | `string` | Sí | formato uuid | — | Organización que emitió la orden (su custodio). | `src/modules/diagnostics/dto/reception.dto.ts:100` |
-| `items[].requestingTenantName` | `string` | Sí | admite null | — | Nombre de la organización que emitió la orden. | `src/modules/diagnostics/dto/reception.dto.ts:104` |
-| `items[].requestedAt` | `string` | Sí | formato date-time | — | Cuándo se emitió la orden. | `src/modules/diagnostics/dto/reception.dto.ts:107` |
-| `items[].specimens` | `array<SpecimenDetailDto>` | Sí | — | — | Muestras que este laboratorio ya recibió para la orden y todavía no acesionó, con sus contenedores y su cadena de custodia. Vacío mientras nadie recibió nada; un espécimen rechazado sigue acá con su estado, para que se vea por qué hace falta otra muestra. | `src/modules/diagnostics/dto/reception.dto.ts:116` |
-| `items[].specimens[].id` | `string` | Sí | formato uuid | — | Identificador del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:387` |
-| `items[].specimens[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:390` |
-| `items[].specimens[].specimenTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:393` |
-| `items[].specimens[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:396` |
-| `items[].specimens[].collectedAt` | `string` | No | formato date-time | — | Cuándo se recolectó, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:400` |
-| `items[].specimens[].receivedAt` | `string` | No | formato date-time | — | Cuándo se recibió en el laboratorio, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:404` |
-| `items[].specimens[].containers` | `array<SpecimenContainerDto>` | Sí | — | — | Sus contenedores. | `src/modules/diagnostics/dto/specimens.dto.ts:408` |
-| `items[].specimens[].containers[].id` | `string` | Sí | formato uuid | — | Identificador del contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:372` |
-| `items[].specimens[].containers[].containerIdentifier` | `string` | Sí | — | — | Identificador físico del contenedor (etiqueta/código). | `src/modules/diagnostics/dto/specimens.dto.ts:375` |
-| `items[].specimens[].containers[].containerTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:378` |
-| `items[].specimens[].containers[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:381` |
-| `items[].specimens[].custodyEvents` | `array<SpecimenCustodyEventDto>` | Sí | — | — | Su cadena de custodia, del evento más viejo al más nuevo. | `src/modules/diagnostics/dto/specimens.dto.ts:412` |
-| `items[].specimens[].custodyEvents[].id` | `string` | Sí | formato uuid | — | Identificador del evento. | `src/modules/diagnostics/dto/specimens.dto.ts:345` |
-| `items[].specimens[].custodyEvents[].specimenContainerId` | `string` | No | formato uuid | — | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:348` |
-| `items[].specimens[].custodyEvents[].custodyEventTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `src/modules/diagnostics/dto/specimens.dto.ts:351` |
-| `items[].specimens[].custodyEvents[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:354` |
-| `items[].specimens[].custodyEvents[].fromPartyTypeConceptId` | `string` | No | formato uuid | — | De qué tipo de parte salió (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:357` |
-| `items[].specimens[].custodyEvents[].toPartyTypeConceptId` | `string` | No | formato uuid | — | A qué tipo de parte llegó (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:360` |
-| `items[].specimens[].custodyEvents[].sealIdentifier` | `string` | No | — | — | Sello de custodia, si se usó uno. | `src/modules/diagnostics/dto/specimens.dto.ts:363` |
-| `items[].specimens[].custodyEvents[].signedByUserId` | `string` | No | formato uuid | — | Quién firmó el evento. | `src/modules/diagnostics/dto/specimens.dto.ts:366` |
-| `count` | `number` | Sí | — | — | Cuántas filas trae la página. | `src/modules/diagnostics/dto/reception.dto.ts:125` |
-| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/diagnostics/dto/reception.dto.ts:128` |
-| `nextCursor` | `string` | Sí | admite null | — | Cursor de la página siguiente, o `null` si no hay más. | `src/modules/diagnostics/dto/reception.dto.ts:131` |
+| `items` | `array<LabInboxItemDto>` | Sí | — | — | Las órdenes de la página, de la más vieja a la más nueva. | `src/modules/diagnostics/dto/reception.dto.ts:157` |
+| `items[].serviceRequestId` | `string` | Sí | formato uuid | — | La orden de servicio (`clinical.service_requests`). | `src/modules/diagnostics/dto/reception.dto.ts:70` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente de la orden. | `src/modules/diagnostics/dto/reception.dto.ts:73` |
+| `items[].patientDisplayName` | `string` | Sí | admite null | — | Nombre pintable del paciente, si se conoce. | `src/modules/diagnostics/dto/reception.dto.ts:77` |
+| `items[].patientCode` | `string` | Sí | admite null | — | Código de paciente (historia clínica), si se conoce. | `src/modules/diagnostics/dto/reception.dto.ts:80` |
+| `items[].codeConceptId` | `string` | Sí | formato uuid | — | Estudio pedido (concept id). | `src/modules/diagnostics/dto/reception.dto.ts:83` |
+| `items[].codeDisplay` | `string` | Sí | admite null | — | Nombre del estudio pedido, del catálogo. | `src/modules/diagnostics/dto/reception.dto.ts:86` |
+| `items[].categoryConceptId` | `string` | Sí | formato uuid; admite null | — | Categoría de la orden (laboratorio o anatomía patológica). | `src/modules/diagnostics/dto/reception.dto.ts:90` |
+| `items[].priorityConceptId` | `string` | Sí | formato uuid; admite null | — | Prioridad de la orden (concept id). | `src/modules/diagnostics/dto/reception.dto.ts:94` |
+| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado de la orden (concept id). | `src/modules/diagnostics/dto/reception.dto.ts:97` |
+| `items[].requesterProfileId` | `string` | Sí | formato uuid; admite null | — | Profesional que pidió el estudio, si consta. | `src/modules/diagnostics/dto/reception.dto.ts:101` |
+| `items[].requestingTenantId` | `string` | Sí | formato uuid | — | Organización que emitió la orden (su custodio). | `src/modules/diagnostics/dto/reception.dto.ts:104` |
+| `items[].requestingTenantName` | `string` | Sí | admite null | — | Nombre de la organización que emitió la orden. | `src/modules/diagnostics/dto/reception.dto.ts:108` |
+| `items[].requestedAt` | `string` | Sí | formato date-time | — | Cuándo se emitió la orden. | `src/modules/diagnostics/dto/reception.dto.ts:111` |
+| `items[].requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los estudios pedidos juntos; `null` = alta individual. | `src/modules/diagnostics/dto/reception.dto.ts:115` |
+| `items[].specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida por el médico; `null` = no se indicó. | `src/modules/diagnostics/dto/reception.dto.ts:119` |
+| `items[].specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra pedida. | `src/modules/diagnostics/dto/reception.dto.ts:123` |
+| `items[].components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados del panel, en el orden en que se marcaron. | `src/modules/diagnostics/dto/reception.dto.ts:127` |
+| `items[].components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:51` |
+| `items[].components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:54` |
+| `items[].components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:59` |
+| `items[].componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes («estudio completo»). | `src/modules/diagnostics/dto/reception.dto.ts:131` |
+| `items[].imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: modalidad, región, lateralidad y contraste; `null` si no es imagen o no los trae. | `src/modules/diagnostics/dto/reception.dto.ts:135` |
+| `items[].imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:65` |
+| `items[].imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:67` |
+| `items[].imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:69` |
+| `items[].imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:71` |
+| `items[].imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:73` |
+| `items[].imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:75` |
+| `items[].imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:77` |
+| `items[].imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:79` |
+| `items[].summary` | `string` | No | — | — | v4.2.82: resumen legible armado por el servidor, p. ej. «Hemograma · 3 componentes» o «Radiografía de mano · Mano · Izquierda · sin contraste». | `src/modules/diagnostics/dto/reception.dto.ts:142` |
+| `items[].specimens` | `array<SpecimenDetailDto>` | Sí | — | — | Muestras que este laboratorio ya recibió para la orden y todavía no acesionó, con sus contenedores y su cadena de custodia. Vacío mientras nadie recibió nada; un espécimen rechazado sigue acá con su estado, para que se vea por qué hace falta otra muestra. | `src/modules/diagnostics/dto/reception.dto.ts:151` |
+| `items[].specimens[].id` | `string` | Sí | formato uuid | — | Identificador del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:393` |
+| `items[].specimens[].patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:396` |
+| `items[].specimens[].specimenTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:399` |
+| `items[].specimens[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:402` |
+| `items[].specimens[].collectedAt` | `string` | No | formato date-time | — | Cuándo se recolectó, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:406` |
+| `items[].specimens[].receivedAt` | `string` | No | formato date-time | — | Cuándo se recibió en el laboratorio, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:410` |
+| `items[].specimens[].containers` | `array<SpecimenContainerDto>` | Sí | — | — | Sus contenedores. | `src/modules/diagnostics/dto/specimens.dto.ts:414` |
+| `items[].specimens[].containers[].id` | `string` | Sí | formato uuid | — | Identificador del contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:378` |
+| `items[].specimens[].containers[].containerIdentifier` | `string` | Sí | — | — | Identificador físico del contenedor (etiqueta/código). | `src/modules/diagnostics/dto/specimens.dto.ts:381` |
+| `items[].specimens[].containers[].containerTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:384` |
+| `items[].specimens[].containers[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:387` |
+| `items[].specimens[].custodyEvents` | `array<SpecimenCustodyEventDto>` | Sí | — | — | Su cadena de custodia, del evento más viejo al más nuevo. | `src/modules/diagnostics/dto/specimens.dto.ts:418` |
+| `items[].specimens[].custodyEvents[].id` | `string` | Sí | formato uuid | — | Identificador del evento. | `src/modules/diagnostics/dto/specimens.dto.ts:351` |
+| `items[].specimens[].custodyEvents[].specimenContainerId` | `string` | No | formato uuid | — | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:354` |
+| `items[].specimens[].custodyEvents[].custodyEventTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `src/modules/diagnostics/dto/specimens.dto.ts:357` |
+| `items[].specimens[].custodyEvents[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:360` |
+| `items[].specimens[].custodyEvents[].fromPartyTypeConceptId` | `string` | No | formato uuid | — | De qué tipo de parte salió (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:363` |
+| `items[].specimens[].custodyEvents[].toPartyTypeConceptId` | `string` | No | formato uuid | — | A qué tipo de parte llegó (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:366` |
+| `items[].specimens[].custodyEvents[].sealIdentifier` | `string` | No | — | — | Sello de custodia, si se usó uno. | `src/modules/diagnostics/dto/specimens.dto.ts:369` |
+| `items[].specimens[].custodyEvents[].signedByUserId` | `string` | No | formato uuid | — | Quién firmó el evento. | `src/modules/diagnostics/dto/specimens.dto.ts:372` |
+| `count` | `number` | Sí | — | — | Cuántas filas trae la página. | `src/modules/diagnostics/dto/reception.dto.ts:160` |
+| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/diagnostics/dto/reception.dto.ts:163` |
+| `nextCursor` | `string` | Sí | admite null | — | Cursor de la página siguiente, o `null` si no hay más. | `src/modules/diagnostics/dto/reception.dto.ts:166` |
 
 ### Respuestas posibles
 
@@ -2684,7 +2819,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:121` |
-| CONTROLADOR | `src/modules/diagnostics/controllers/diagnostics-reception.controller.spec.ts:26` |
+| CONTROLADOR | `src/modules/diagnostics/controllers/diagnostics-reception.controller.spec.ts:30` |
 
 ### Flujos
 
@@ -2692,7 +2827,122 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 25. POST /diagnostics/specimens
+## 26. POST /diagnostics/service-requests/worklist
+
+- **Origen:** CONTRATO
+- **Nombre:** Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `DiagnosticsReceptionController.listWorklist` — `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:77`
+
+### Qué es y para qué sirve (negocio)
+
+Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado. Dentro del módulo (descripción del modelo, en inglés): «Connects laboratory and imaging workflows to the patient chart while the heavy binary content remains in PACS/VNA or governed object storage.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_20_diagnostics.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /diagnostics/service-requests/worklist` la atiende `DiagnosticsReceptionController.listWorklist` (src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:77). Exige sesión; el controlador no declara roles. Valida el cuerpo como `WorklistQueryDto` (5 campos, 1 obligatorio). Delega en `DiagnosticsWorklistService.list`. Lee clinical.service_request_components, clinical.service_requests, diagnostics.specimen_chain_of_custody_events, diagnostics.specimen_containers, diagnostics.specimens, directory.tenants, profiles.patient_profiles, profiles.person_profiles y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:77` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list | `src/modules/diagnostics/services/diagnostics-worklist.service.ts:104` |
+| `diagnostics.specimen_chain_of_custody_events` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → SpecimensRepository.findCustodyEventsBySpecimenIds | `src/modules/diagnostics/repositories/specimens.repository.ts:261` |
+| `diagnostics.specimen_containers` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → SpecimensRepository.findContainersBySpecimenIds | `src/modules/diagnostics/repositories/specimens.repository.ts:248` |
+| `diagnostics.specimens` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → LabReceptionRepository.findSpecimensForServiceRequests | `src/modules/diagnostics/repositories/lab-reception.repository.ts:122` |
+| `directory.tenants` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → LabReceptionRepository.findTenantNames | `src/modules/diagnostics/repositories/lab-reception.repository.ts:206` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:152` |
+| `profiles.person_profiles` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:151` |
+| `profiles.persons` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.loadLabels → LabReceptionRepository.findPatientLabels | `src/modules/diagnostics/repositories/lab-reception.repository.ts:155` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → LabReceptionRepository.findConceptDisplays | `src/modules/diagnostics/repositories/lab-reception.repository.ts:188` |
+| `terminology.concept_designations` | LEE | LEE | DIRECTA | DiagnosticsReceptionController.listWorklist → DiagnosticsWorklistService.list → DiagnosticsReceptionService.toItems → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
+
+### Cuerpo — DTO `WorklistQueryDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `scope` | `string` | Sí | valores: LAB, IMAGING | `@IsIn(WORKLIST_SCOPES)` | — | `src/modules/diagnostics/dto/worklist.dto.ts:37` |
+| `states` | `array<string>` | No | máximo 5 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(5)` `@ArrayUnique()` `@IsIn(STATES, { each: true })` | Estados derivados a incluir. Omitido = todos (PENDING, RECEIVED, IN_PROCESS, REPORTED, CANCELLED) | `src/modules/diagnostics/dto/worklist.dto.ts:50` |
+| `cursor` | `string` | No | longitud máxima 512 | `@IsOptional()` `@IsString()` `@MaxLength(512)` | Cursor opaco (`nextCursor`) | `src/modules/diagnostics/dto/worklist.dto.ts:56` |
+| `limit` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(100)` | — | `src/modules/diagnostics/dto/worklist.dto.ts:64` |
+| `patientQuery` | `string` | No | longitud mínima 2; longitud máxima 80 | `@IsOptional()` `@Transform(({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value, )` `@IsString()` `@MinLength(2)` `@MaxLength(80)` | Nombre o código del paciente (sin tildes ni mayúsculas) | `src/modules/diagnostics/dto/worklist.dto.ts:78` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "scope": "LAB"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "scope": "LAB",
+  "states": [
+    "PENDING"
+  ],
+  "cursor": "valor-ejemplo",
+  "limit": 25,
+  "patientQuery": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<WorklistPageDto>` · DTO `WorklistPageDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<WorklistItemDto>` | Sí | — | — | — | `src/modules/diagnostics/dto/worklist.dto.ts:95` |
+| `items[].state` | `object` | Sí | — | — | Derivado, no guardado: PENDING (sin acesión ni estudio), RECEIVED (acesión, muestra recibida o estudio de imagen), IN_PROCESS (orden de trabajo abierta; en imagen, informe en curso), REPORTED (informe liberado), CANCELLED (revocada o satisfecha por informe previo) | `src/modules/diagnostics/dto/worklist.dto.ts:88` |
+| `items[].scope` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof WORKLIST_SCOPES)[number] | `src/modules/diagnostics/dto/worklist.dto.ts:91` |
+| `count` | `number` | Sí | — | — | — | `src/modules/diagnostics/dto/worklist.dto.ts:96` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/diagnostics/dto/worklist.dto.ts:97` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/diagnostics/dto/worklist.dto.ts:98` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/diagnostics/controllers/diagnostics-reception.controller.spec.ts:56` |
+
+### Flujos
+
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsReceptionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. POST /diagnostics/specimens
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un espécimen (soporte para acesión)
@@ -2709,7 +2959,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /diagnostics/specimens` la atiende `DiagnosticsSpecimensController.createSpecimen` (src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:57). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateSpecimenDto` (8 campos, 2 obligatorios). Delega en `DiagnosticsSpecimensService.createSpecimen`. Crea filas en diagnostics.specimens. Lee clinical.encounters, clinical.service_requests.
+`POST /diagnostics/specimens` la atiende `DiagnosticsSpecimensController.createSpecimen` (src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:57). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateSpecimenDto` (9 campos, 2 obligatorios). Delega en `DiagnosticsSpecimensService.createSpecimen`. Crea filas en diagnostics.specimen_collection_events, diagnostics.specimens. Lee clinical.encounters, clinical.service_requests.
 
 ### Requerimientos
 
@@ -2717,10 +2967,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2728,6 +2978,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.encounters` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.createSpecimen → DiagnosticsSpecimensService.createSpecimen → DiagnosticsScopeService.encounter → ClinicalRefsRepository.findEncounter | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:22` |
 | `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.createSpecimen → DiagnosticsSpecimensService.createSpecimen → DiagnosticsScopeService.serviceRequest → ClinicalRefsRepository.findServiceRequest | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:30` |
+| `diagnostics.specimen_collection_events` | ESCRIBE | CREA | POR_SQL | DiagnosticsSpecimensController.createSpecimen → DiagnosticsSpecimensService.createSpecimen | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:120` |
 | `diagnostics.specimens` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.createSpecimen → DiagnosticsSpecimensService.createSpecimen → SpecimensRepository.createSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:276` |
 
 ### Cuerpo — DTO `CreateSpecimenDto` · `application/json`
@@ -2742,6 +2993,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio anatómico (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:72` |
 | `collectionMethodConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Método de recolección (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:83` |
 | `collectorProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que recolecta | `src/modules/diagnostics/dto/specimens.dto.ts:94` |
+| `collectionCareSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Punto de toma (F5b) | `src/modules/diagnostics/dto/specimens.dto.ts:100` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2763,7 +3015,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "encounterId": "00000000-0000-4000-8000-000000000001",
   "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
   "collectionMethodConceptId": "00000000-0000-4000-8000-000000000001",
-  "collectorProfileId": "00000000-0000-4000-8000-000000000001"
+  "collectorProfileId": "00000000-0000-4000-8000-000000000001",
+  "collectionCareSpaceId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -2784,7 +3037,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: Espacio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espacio no es un punto de toma disponible |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
@@ -2794,6 +3048,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:320` |
+| INTEGRACION | `test/integration/infrastructure-f5b.int-spec.ts:113` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:228` |
 | CONTROLADOR | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.spec.ts:39` |
 
@@ -2803,7 +3058,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 26. GET /diagnostics/specimens/{id}
+## 28. GET /diagnostics/specimens/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Detalle de un espécimen (con su cadena de custodia)
@@ -2828,9 +3083,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:91` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2854,26 +3109,26 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:387` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:390` |
-| `specimenTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:393` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado del espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:396` |
-| `collectedAt` | `string` | No | formato date-time | — | Cuándo se recolectó, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:400` |
-| `receivedAt` | `string` | No | formato date-time | — | Cuándo se recibió en el laboratorio, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:404` |
-| `containers` | `array<SpecimenContainerDto>` | Sí | — | — | Sus contenedores. | `src/modules/diagnostics/dto/specimens.dto.ts:408` |
-| `containers[].id` | `string` | Sí | formato uuid | — | Identificador del contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:372` |
-| `containers[].containerIdentifier` | `string` | Sí | — | — | Identificador físico del contenedor (etiqueta/código). | `src/modules/diagnostics/dto/specimens.dto.ts:375` |
-| `containers[].containerTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:378` |
-| `containers[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:381` |
-| `custodyEvents` | `array<SpecimenCustodyEventDto>` | Sí | — | — | Su cadena de custodia, del evento más viejo al más nuevo. | `src/modules/diagnostics/dto/specimens.dto.ts:412` |
-| `custodyEvents[].id` | `string` | Sí | formato uuid | — | Identificador del evento. | `src/modules/diagnostics/dto/specimens.dto.ts:345` |
-| `custodyEvents[].specimenContainerId` | `string` | No | formato uuid | — | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:348` |
-| `custodyEvents[].custodyEventTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `src/modules/diagnostics/dto/specimens.dto.ts:351` |
-| `custodyEvents[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:354` |
-| `custodyEvents[].fromPartyTypeConceptId` | `string` | No | formato uuid | — | De qué tipo de parte salió (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:357` |
-| `custodyEvents[].toPartyTypeConceptId` | `string` | No | formato uuid | — | A qué tipo de parte llegó (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:360` |
-| `custodyEvents[].sealIdentifier` | `string` | No | — | — | Sello de custodia, si se usó uno. | `src/modules/diagnostics/dto/specimens.dto.ts:363` |
-| `custodyEvents[].signedByUserId` | `string` | No | formato uuid | — | Quién firmó el evento. | `src/modules/diagnostics/dto/specimens.dto.ts:366` |
+| `id` | `string` | Sí | formato uuid | — | Identificador del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:393` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente dueño del espécimen. | `src/modules/diagnostics/dto/specimens.dto.ts:396` |
+| `specimenTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:399` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado del espécimen (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:402` |
+| `collectedAt` | `string` | No | formato date-time | — | Cuándo se recolectó, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:406` |
+| `receivedAt` | `string` | No | formato date-time | — | Cuándo se recibió en el laboratorio, si ya ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:410` |
+| `containers` | `array<SpecimenContainerDto>` | Sí | — | — | Sus contenedores. | `src/modules/diagnostics/dto/specimens.dto.ts:414` |
+| `containers[].id` | `string` | Sí | formato uuid | — | Identificador del contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:378` |
+| `containers[].containerIdentifier` | `string` | Sí | — | — | Identificador físico del contenedor (etiqueta/código). | `src/modules/diagnostics/dto/specimens.dto.ts:381` |
+| `containers[].containerTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:384` |
+| `containers[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del contenedor (concept id). | `src/modules/diagnostics/dto/specimens.dto.ts:387` |
+| `custodyEvents` | `array<SpecimenCustodyEventDto>` | Sí | — | — | Su cadena de custodia, del evento más viejo al más nuevo. | `src/modules/diagnostics/dto/specimens.dto.ts:418` |
+| `custodyEvents[].id` | `string` | Sí | formato uuid | — | Identificador del evento. | `src/modules/diagnostics/dto/specimens.dto.ts:351` |
+| `custodyEvents[].specimenContainerId` | `string` | No | formato uuid | — | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `src/modules/diagnostics/dto/specimens.dto.ts:354` |
+| `custodyEvents[].custodyEventTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `src/modules/diagnostics/dto/specimens.dto.ts:357` |
+| `custodyEvents[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió. | `src/modules/diagnostics/dto/specimens.dto.ts:360` |
+| `custodyEvents[].fromPartyTypeConceptId` | `string` | No | formato uuid | — | De qué tipo de parte salió (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:363` |
+| `custodyEvents[].toPartyTypeConceptId` | `string` | No | formato uuid | — | A qué tipo de parte llegó (concept id), si se registró. | `src/modules/diagnostics/dto/specimens.dto.ts:366` |
+| `custodyEvents[].sealIdentifier` | `string` | No | — | — | Sello de custodia, si se usó uno. | `src/modules/diagnostics/dto/specimens.dto.ts:369` |
+| `custodyEvents[].signedByUserId` | `string` | No | formato uuid | — | Quién firmó el evento. | `src/modules/diagnostics/dto/specimens.dto.ts:372` |
 
 ### Respuestas posibles
 
@@ -2901,7 +3156,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 27. POST /diagnostics/specimens/{id}/containers
+## 29. POST /diagnostics/specimens/{id}/containers
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un contenedor de espécimen (soporte para custodia)
@@ -2926,11 +3181,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:137` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2950,10 +3205,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `containerIdentifier` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@IsString()` `@IsNotEmpty()` `@MaxLength(120)` | Identificador del contenedor | `src/modules/diagnostics/dto/specimens.dto.ts:221` |
-| `containerTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de contenedor (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:231` |
-| `additiveConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Aditivo (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:239` |
-| `parentContainerId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contenedor padre | `src/modules/diagnostics/dto/specimens.dto.ts:247` |
+| `containerIdentifier` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@IsString()` `@IsNotEmpty()` `@MaxLength(120)` | Identificador del contenedor | `src/modules/diagnostics/dto/specimens.dto.ts:227` |
+| `containerTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de contenedor (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:237` |
+| `additiveConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Aditivo (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:245` |
+| `parentContainerId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contenedor padre | `src/modules/diagnostics/dto/specimens.dto.ts:253` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3010,7 +3265,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 28. POST /diagnostics/specimens/{id}/rejection
+## 30. POST /diagnostics/specimens/{id}/rejection
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar espécimen y solicitar recolección
@@ -3035,11 +3290,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:120` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3048,7 +3303,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.reject → DiagnosticsSpecimensService.reject → DiagnosticsScopeService.serviceRequest → ClinicalRefsRepository.findServiceRequest | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:30` |
 | `diagnostics.laboratory_work_order_tests` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticsSpecimensController.reject → DiagnosticsSpecimensService.reject → SpecimensRepository.cancelTestsForSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:553` |
 | `diagnostics.specimen_rejection_events` | ESCRIBE | CREA | DIRECTA | DiagnosticsSpecimensController.reject → DiagnosticsSpecimensService.reject → SpecimensRepository.recordRejection | `src/modules/diagnostics/repositories/specimens.repository.ts:459` |
-| `diagnostics.specimens` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsSpecimensController.reject → DiagnosticsSpecimensService.reject | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:229` |
+| `diagnostics.specimens` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsSpecimensController.reject → DiagnosticsSpecimensService.reject | `src/modules/diagnostics/services/diagnostics-specimens.service.ts:265` |
 | `diagnostics.specimens` | LEE | LEE | DIRECTA | DiagnosticsSpecimensController.reject → DiagnosticsSpecimensService.reject → DiagnosticsScopeService.specimen → SpecimensRepository.findSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:168` |
 
 ### Parámetros
@@ -3061,11 +3316,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `rejectionReasonConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Motivo de rechazo (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:170` |
-| `notes` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Notas del rechazo | `src/modules/diagnostics/dto/specimens.dto.ts:179` |
-| `recollectionRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requiere nueva recolección? | `src/modules/diagnostics/dto/specimens.dto.ts:187` |
-| `recollectionServiceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nueva orden de recolección | `src/modules/diagnostics/dto/specimens.dto.ts:198` |
-| `rejectedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que rechaza | `src/modules/diagnostics/dto/specimens.dto.ts:209` |
+| `rejectionReasonConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Motivo de rechazo (concept id) | `src/modules/diagnostics/dto/specimens.dto.ts:176` |
+| `notes` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Notas del rechazo | `src/modules/diagnostics/dto/specimens.dto.ts:185` |
+| `recollectionRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requiere nueva recolección? | `src/modules/diagnostics/dto/specimens.dto.ts:193` |
+| `recollectionServiceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nueva orden de recolección | `src/modules/diagnostics/dto/specimens.dto.ts:204` |
+| `rejectedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que rechaza | `src/modules/diagnostics/dto/specimens.dto.ts:215` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3122,7 +3377,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 29. GET /diagnostics/work-orders
+## 31. GET /diagnostics/work-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las órdenes de trabajo del laboratorio
@@ -3139,7 +3394,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /diagnostics/work-orders` la atiende `DiagnosticsLabController.listWorkOrders` (src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:63). Exige sesión; el controlador no declara roles. Delega en `DiagnosticsLabService.listWorkOrders`. Lee diagnostics.laboratory_work_orders.
+`GET /diagnostics/work-orders` la atiende `DiagnosticsLabController.listWorkOrders` (src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:63). Exige sesión; el controlador no declara roles. Delega en `DiagnosticsLabService.listWorkOrders`. Lee clinical.service_requests, diagnostics.laboratory_accessions, diagnostics.laboratory_work_orders, diagnostics.specimen_collection_events, diagnostics.specimens, practice.care_spaces.
 
 ### Requerimientos
 
@@ -3147,14 +3402,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostics.laboratory_work_orders` | LEE | LEE | DIRECTA | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.findWorkOrders | `src/modules/diagnostics/repositories/lab-work.repository.ts:161` |
+| `clinical.service_requests` | LEE | LEE | POR_SQL | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.findWorkOrders | `src/modules/diagnostics/repositories/lab-work.repository.ts:174` |
+| `diagnostics.laboratory_accessions` | LEE | LEE | POR_SQL | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.findWorkOrders | `src/modules/diagnostics/repositories/lab-work.repository.ts:174` |
+| `diagnostics.laboratory_work_orders` | LEE | LEE | DIRECTA | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.findWorkOrders | `src/modules/diagnostics/repositories/lab-work.repository.ts:188` |
+| `diagnostics.specimen_collection_events` | LEE | LEE | POR_SQL | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.findWorkOrders | `src/modules/diagnostics/repositories/lab-work.repository.ts:174` |
+| `diagnostics.specimens` | LEE | LEE | POR_SQL | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.findWorkOrders | `src/modules/diagnostics/repositories/lab-work.repository.ts:174` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | DiagnosticsLabController.listWorkOrders → DiagnosticsLabService.listWorkOrders → LabWorkRepository.collectionPointsOf | `src/modules/diagnostics/repositories/lab-work.repository.ts:210` |
 
 ### Parámetros
 
@@ -3163,6 +3423,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `laboratoryAccessionId` | query | No | `string` | Accesión de laboratorio |
 | `statusConceptId` | query | No | `string` | Estado de la orden |
 | `assignedProfileId` | query | No | `string` | Profesional asignado |
+| `collectionCareSpaceId` | query | No | `string` | Punto de toma (F5b) |
 | `limit` | query | No | `number` | — |
 | `offset` | query | No | `number` | — |
 
@@ -3174,14 +3435,18 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la orden. | `src/modules/diagnostics/dto/lab.dto.ts:363` |
-| `workOrderNumber` | `string` | Sí | — | — | Número legible de la orden. | `src/modules/diagnostics/dto/lab.dto.ts:365` |
-| `laboratoryAccessionId` | `string` | Sí | formato uuid | — | Accesión de laboratorio de la que cuelga. | `src/modules/diagnostics/dto/lab.dto.ts:367` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la orden. | `src/modules/diagnostics/dto/lab.dto.ts:369` |
-| `priorityConceptId` | `string` | Sí | formato uuid | — | Prioridad. | `src/modules/diagnostics/dto/lab.dto.ts:371` |
-| `assignedProfileId` | `string` | No | formato uuid | — | Profesional asignado, si lo hay. | `src/modules/diagnostics/dto/lab.dto.ts:373` |
-| `scheduledAt` | `string` | No | formato date-time | — | Cuándo está programada. | `src/modules/diagnostics/dto/lab.dto.ts:376` |
-| `completedAt` | `string` | No | formato date-time | — | Cuándo se completó. | `src/modules/diagnostics/dto/lab.dto.ts:379` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la orden. | `src/modules/diagnostics/dto/lab.dto.ts:369` |
+| `workOrderNumber` | `string` | Sí | — | — | Número legible de la orden. | `src/modules/diagnostics/dto/lab.dto.ts:371` |
+| `laboratoryAccessionId` | `string` | Sí | formato uuid | — | Accesión de laboratorio de la que cuelga. | `src/modules/diagnostics/dto/lab.dto.ts:373` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la orden. | `src/modules/diagnostics/dto/lab.dto.ts:375` |
+| `priorityConceptId` | `string` | Sí | formato uuid | — | Prioridad. | `src/modules/diagnostics/dto/lab.dto.ts:377` |
+| `assignedProfileId` | `string` | No | formato uuid | — | Profesional asignado, si lo hay. | `src/modules/diagnostics/dto/lab.dto.ts:379` |
+| `scheduledAt` | `string` | No | formato date-time | — | Cuándo está programada. | `src/modules/diagnostics/dto/lab.dto.ts:382` |
+| `completedAt` | `string` | No | formato date-time | — | Cuándo se completó. | `src/modules/diagnostics/dto/lab.dto.ts:385` |
+| `collectionPoint` | `object` | No | admite null | — | Punto de toma {id, code, name} (F5b) | `src/modules/diagnostics/dto/lab.dto.ts:391` |
+| `collectionPoint.id` | `string` | No | — | — | — | sin fuente |
+| `collectionPoint.code` | `string` | No | — | — | — | sin fuente |
+| `collectionPoint.name` | `string` | No | — | — | — | sin fuente |
 
 ### Respuestas posibles
 
@@ -3196,7 +3461,9 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/infrastructure-f5b.int-spec.ts:146` |
 
 ### Flujos
 
@@ -3204,7 +3471,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /diagnostics/work-orders
+## 32. POST /diagnostics/work-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir orden de trabajo y desglosar pruebas
@@ -3229,20 +3496,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical.service_requests` | LEE | LEE | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → DiagnosticsScopeService.serviceRequest → ClinicalRefsRepository.findServiceRequest | `src/modules/diagnostics/repositories/clinical-refs.repository.ts:30` |
-| `diagnostics.laboratory_accessions` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder | `src/modules/diagnostics/services/diagnostics-lab.service.ts:148` |
+| `diagnostics.laboratory_accessions` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder | `src/modules/diagnostics/services/diagnostics-lab.service.ts:154` |
 | `diagnostics.laboratory_accessions` | LEE | LEE | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → DiagnosticsScopeService.accession → SpecimensRepository.findAccession | `src/modules/diagnostics/repositories/specimens.repository.ts:182` |
-| `diagnostics.laboratory_work_order_tests` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → LabWorkRepository.createWorkOrderTest | `src/modules/diagnostics/repositories/lab-work.repository.ts:237` |
-| `diagnostics.laboratory_work_orders` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → LabWorkRepository.createWorkOrder | `src/modules/diagnostics/repositories/lab-work.repository.ts:211` |
+| `diagnostics.laboratory_work_order_tests` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → LabWorkRepository.createWorkOrderTest | `src/modules/diagnostics/repositories/lab-work.repository.ts:298` |
+| `diagnostics.laboratory_work_orders` | ESCRIBE | CREA | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → LabWorkRepository.createWorkOrder | `src/modules/diagnostics/repositories/lab-work.repository.ts:272` |
 | `diagnostics.specimens` | LEE | LEE | DIRECTA | DiagnosticsLabController.createWorkOrder → DiagnosticsLabService.createWorkOrder → DiagnosticsScopeService.specimenOfPatient → DiagnosticsScopeService.specimen → SpecimensRepository.findSpecimen | `src/modules/diagnostics/repositories/specimens.repository.ts:168` |
 
 ### Cuerpo — DTO `CreateWorkOrderDto` · `application/json`
@@ -3331,7 +3598,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
 
 ---
 
-## 31. POST /dicomweb/studies
+## 33. POST /dicomweb/studies
 
 - **Origen:** CONTRATO
 - **Nombre:** Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
@@ -3356,10 +3623,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
