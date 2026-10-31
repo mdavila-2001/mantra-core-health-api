@@ -1,3 +1,9 @@
+import { translateInfraWriteError } from '../../practice/services/ops/ops-errors';
+import { DELEG } from '../delegated_access.concepts';
+import {
+  assertAssignmentTargets,
+  assertSingleUnitHead,
+} from './assignment-targets';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -68,6 +74,22 @@ export class OrgUserAssignmentsService {
     const scopeConceptId = ACCESS_SCOPE_CONCEPT[dto.accessScope ?? 'TENANT'];
 
     return this.em.transactional(async (tx) => {
+      // F5g (CONTRATO-F2-F5 §F5g): destino del tenant de la membresía (404),
+      // coherencia de alcance (422) y jefe de unidad único (409).
+      await assertAssignmentTargets(
+        tx,
+        tenantMembershipId,
+        dto.accessScope ?? 'TENANT',
+        dto,
+      );
+      if (roleConceptId === DELEG.ASSIGN_ROLE_UNIT_HEAD && dto.clinicalUnitId) {
+        await assertSingleUnitHead(
+          tx,
+          dto.clinicalUnitId,
+          dto.validFrom,
+          dto.validTo,
+        );
+      }
       const overlap = await this.assignmentsRepo.findActiveOverlap(
         tx,
         tenantMembershipId,
@@ -107,7 +129,11 @@ export class OrgUserAssignmentsService {
         statusConceptId: STATUS.ACTIVE,
         actorUserId: actor.id,
       });
-      await tx.flush();
+      try {
+        await tx.flush();
+      } catch (error) {
+        throw translateInfraWriteError(error);
+      }
 
       this.logger.info(
         {

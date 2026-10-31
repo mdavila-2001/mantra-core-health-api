@@ -43,6 +43,8 @@ channels:
         $ref: '#/components/messages/AdtEvent'
       operatingRoomEvent:
         $ref: '#/components/messages/OperatingRoomEvent'
+      spaceBillingEvent:
+        $ref: '#/components/messages/SpaceBillingEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -197,6 +199,18 @@ components:
         orden de limpieza (el recambio de sala alimenta a F2); nunca datos del paciente.
       payload:
         $ref: '#/components/schemas/OperatingRoomEventPayload'
+
+    SpaceBillingEvent:
+      name: SpaceBillingEvent
+      title: Cargos de espacio (billing, F5e)
+      summary: >
+        Tarifas de espacio creadas o cerradas y cargos devengados (día-cama por la regla
+        de medianoche, quirófano por tiempo) creados, sin tarifa vigente o anulados
+        (CONTRATO-F2-F5 §F5e). Se publican en la misma transacción. El payload lleva
+        ids, la clave de idempotencia, la fecha de servicio y el espacio; nunca datos
+        del paciente.
+      payload:
+        $ref: '#/components/schemas/SpaceBillingEventPayload'
 
     OutboxMessage:
       name: OutboxMessage
@@ -454,6 +468,33 @@ components:
             - procedures_perioperative.surgical_safety_checklists
             - procedures_perioperative.procedure_cases
             - procedures_perioperative.operating_room_blocks
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+
+    SpaceBillingEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - billing.space_tariff.created
+            - billing.space_tariff.closed
+            - billing.charge_capture.created
+            - billing.charge_capture.tariff_missing
+            - billing.charge_capture.voided
+        aggregateType:
+          type: string
+          enum:
+            - billing.space_tariffs
+            - billing.charge_captures
         aggregateId:
           type: string
           format: uuid

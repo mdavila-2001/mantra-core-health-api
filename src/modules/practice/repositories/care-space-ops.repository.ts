@@ -447,12 +447,24 @@ export class CareSpaceOpsRepository {
     em: EntityManager,
     siteId: string,
   ): Promise<{
-    spaces: { id: string; parent_space_id: string | null; space_type_concept_id: string; clinical_unit_id: string | null }[];
+    spaces: {
+      id: string;
+      parent_space_id: string | null;
+      space_type_concept_id: string;
+      clinical_unit_id: string | null;
+    }[];
     links: { care_space_id: string; clinical_unit_id: string }[];
     units: { id: string; parent_unit_id: string | null }[];
   }> {
     const [spaces, links, units] = await Promise.all([
-      em.execute<{ id: string; parent_space_id: string | null; space_type_concept_id: string; clinical_unit_id: string | null }[]>(
+      em.execute<
+        {
+          id: string;
+          parent_space_id: string | null;
+          space_type_concept_id: string;
+          clinical_unit_id: string | null;
+        }[]
+      >(
         'SELECT id, parent_space_id, space_type_concept_id, clinical_unit_id FROM practice.care_spaces WHERE practice_site_id = ?',
         [siteId],
         'all',

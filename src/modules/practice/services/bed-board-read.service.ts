@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import {
-  ResourceNotFoundException,
-  type AuthenticatedUser,
-} from '../../../common';
+import { type AuthenticatedUser } from '../../../common';
 import {
   CareSpaces,
   CleaningOrders,

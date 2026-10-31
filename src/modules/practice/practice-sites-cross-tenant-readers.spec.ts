@@ -18,6 +18,10 @@ import { join, relative, sep } from 'node:path';
  * decisiones están pendientes del orquestador (REPORTE de F1, «Riesgos»).
  */
 const KNOWN_READERS: Record<string, string> = {
+  'billing/services/space-charges.service.ts':
+    'F5e: zona horaria y práctica de la sede del encuentro, dentro del tenant (las sedes se autorizan antes con scopeFilter); en el worker, con app.system_context en su transacción.',
+  'delegated_access/services/assignment-targets.ts':
+    'F5g: comprueba que la sede de una asignación sea del tenant de la membresía (compara tenant_id; 404 si no).',
   'clinical/services/inpatient/inpatient-read.use-cases.ts':
     'F3: sede de la sucursal de un encuentro sin movimientos (filtra por tenant_id del tenant activo) para autorizar la ficha de estancia.',
   'clinical/repositories/inpatient.repository.ts':

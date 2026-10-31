@@ -31288,6 +31288,279 @@ paths:
       summary: Registro de activos fijos de una práctica
       tags:
         - accounting-cockpit
+  /billing/space-tariffs:
+    get:
+      operationId: BillingSpaceChargesController_list
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Tarifas de espacios
+      tags:
+        - billing-space-charges
+      description: >-
+        Tarifas de espacios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+    post:
+      operationId: BillingSpaceChargesController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSpaceTariffDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear una tarifa de espacio
+      tags:
+        - billing-space-charges
+      description: >-
+        Crear una tarifa de espacio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /billing/space-tariffs/{id}/close:
+    post:
+      operationId: BillingSpaceChargesController_close
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseSpaceTariffDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cerrar la vigencia de una tarifa
+      tags:
+        - billing-space-charges
+      description: >-
+        Cerrar la vigencia de una tarifa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /billing/encounters/{encounterId}/pending-charges:
+    get:
+      operationId: BillingSpaceChargesController_pending
+      parameters:
+        - name: encounterId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cargos devengados pendientes
+      tags:
+        - billing-space-charges
+      description: >-
+        Cargos devengados pendientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /billing/encounters/{encounterId}/bed-day-charges/run:
+    post:
+      operationId: BillingSpaceChargesController_run
+      parameters:
+        - name: encounterId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Devengar los días-cama de un encuentro
+      tags:
+        - billing-space-charges
+      description: >-
+        Devengar los días-cama de un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /billing/charge-captures/{id}/void:
+    post:
+      operationId: BillingSpaceChargesController_void
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoidChargeDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Anular un cargo devengado
+      tags:
+        - billing-space-charges
+      description: >-
+        Anular un cargo devengado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /internal/billing/bed-day-charges/run:
+    post:
+      operationId: BillingSpaceChargesController_runInternal
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunBedDayDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Devengar día-cama y quirófano (worker)
+      tags:
+        - billing-space-charges
+      description: >-
+        Devengar día-cama y quirófano (worker). Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /billing/invoices:
     get:
       operationId: BillingReceivablesController_listInvoices
@@ -72950,6 +73223,10 @@ tags:
     description: >-
       Operaciones del dominio funcional billing simulated. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: billing-space-charges
+    description: >-
+      Operaciones del dominio funcional billing space charges. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: chart-care-plans
     description: >-
       Operaciones del dominio funcional chart care plans. Consulte el catálogo Markdown de endpoints para payloads
@@ -92122,6 +92399,18 @@ components:
     UpdateEquipmentDto:
       type: object
       properties:
+        careSpaceId:
+          type: string
+          format: uuid
+          nullable: true
+        aeTitle:
+          type: string
+          maxLength: 16
+          nullable: true
+        stationName:
+          type: string
+          maxLength: 16
+          nullable: true
         manufacturer:
           type: string
           description: Fabricante
@@ -95761,6 +96050,73 @@ components:
         - pendingTotal
         - periodCharge
         - count
+    CreateSpaceTariffDto:
+      type: object
+      properties:
+        practiceId:
+          type: string
+          format: uuid
+        tariffKind:
+          type: string
+          enum:
+            - BED_DAY
+            - OR_TIME
+        bedCategoryCode:
+          type: string
+          description: BED_CAT_*
+        careSpaceId:
+          type: string
+          format: uuid
+        serviceCatalogId:
+          type: string
+          format: uuid
+        unitMinutes:
+          type: number
+        minimumUnits:
+          type: number
+        unitPrice:
+          type: string
+          example: '350.00'
+        currencyConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          example: '2026-11-01'
+        validTo:
+          type: string
+          example: '2027-01-01'
+      required:
+        - practiceId
+        - tariffKind
+        - serviceCatalogId
+        - unitPrice
+        - validFrom
+      additionalProperties: false
+    CloseSpaceTariffDto:
+      type: object
+      properties:
+        validTo:
+          type: string
+          example: '2026-12-01'
+      required:
+        - validTo
+      additionalProperties: false
+    VoidChargeDto:
+      type: object
+      properties:
+        reason:
+          type: string
+      required:
+        - reason
+      additionalProperties: false
+    RunBedDayDto:
+      type: object
+      properties:
+        date:
+          type: string
+          example: '2026-10-31'
+      additionalProperties: false
     InvoiceLineInputDto:
       type: object
       properties:
@@ -100626,6 +100982,14 @@ components:
             - ASSISTANT
             - NURSE
             - BILLING
+            - NURSE_SUPERVISOR
+            - ADMISSION
+            - HOUSEKEEPING
+            - HOUSEKEEPING_SUPERVISOR
+            - MAINTENANCE
+            - OR_MANAGER
+            - INFECTION_CONTROL
+            - UNIT_HEAD
         accessScope:
           type: string
           description: Alcance de acceso
@@ -100634,6 +100998,7 @@ components:
             - PRACTICE
             - SITE
             - UNIT
+            - SPACE
         practiceId:
           type: string
           description: 'Nodo de scope: práctica'
@@ -100686,6 +101051,7 @@ components:
             - PRACTICE
             - SITE
             - UNIT
+            - SPACE
         suspend:
           type: boolean
           description: Suspender la asignación (cascada a delegaciones)
@@ -112930,13 +113296,13 @@ components:
       type: object
       properties:
         weekdays:
-          description: Días ISO 1–7
+          description: Días ISO 1–7, sin repetir
           type: array
           items:
             type: number
         until:
           type: string
-          description: yyyy-mm-dd
+          description: yyyy-mm-dd, como mucho un año después del inicio
       required:
         - weekdays
         - until
@@ -112970,6 +113336,7 @@ components:
           type: string
         releaseHours:
           type: number
+          maximum: 720
         recurrence:
           $ref: '#/components/schemas/OrBlockRecurrenceDto'
       required:
