@@ -7,6 +7,11 @@
  */
 export enum PharmacyInventoryErrorReason {
   /**
+   * Una fila de la carga por sucursal nombra un código que el catálogo de la
+   * farmacia no tiene. Misma clave que la carga del catálogo de `pharmacy`.
+   */
+  PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
+  /**
    * La farmacia, sede, ubicación, producto, lote, proveedor, orden, reserva,
    * dispensación, conteo, recall, paciente o receta no existe o no pertenece
    * al ámbito del actor. Ambos casos responden igual a propósito.

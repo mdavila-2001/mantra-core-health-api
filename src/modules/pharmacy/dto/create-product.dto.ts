@@ -24,7 +24,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Tipos de identificador soportados. */
 export type IdentifierTypeCode = 'GTIN' | 'NDC';

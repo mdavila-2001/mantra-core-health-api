@@ -6,7 +6,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/sites` (UC-24-02). */
 @ApiSchema({ name: 'PharmacyCreateSiteDto' })

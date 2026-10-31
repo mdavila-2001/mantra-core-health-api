@@ -11,12 +11,12 @@ import { PHARM } from '../../../pharmacy/pharmacy.concepts';
 import {
   InventoryScopeRepository,
   StockPositionsRepository,
+  type InventoryProduct,
 } from '../../infrastructure/repositories';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { numericQuantity } from '../../domain/counting/stock-quantity';
 import { defaultAvailableQuantity } from '../../domain/site-availability/initial-quantity';
 import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
-import type { PharmacyProducts } from '../../../pharmacy/entities';
 import type {
   SetSiteAvailabilityDto,
   SiteAvailabilityResponseDto,
@@ -109,7 +109,7 @@ export class SetSiteProductAvailabilityUseCase {
   async writeInSite(
     tx: EntityManager,
     site: SiteScope,
-    product: PharmacyProducts,
+    product: InventoryProduct,
     dto: SetSiteAvailabilityDto,
     actor: AuthenticatedUser,
   ): Promise<{ response: SiteAvailabilityResponseDto; changed: boolean }> {
