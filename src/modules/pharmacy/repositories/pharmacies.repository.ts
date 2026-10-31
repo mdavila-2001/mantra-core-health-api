@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Pharmacies } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
+import { COMM } from '../../community/community.concepts';
 
 /** Datos mínimos para dar de alta una farmacia (UC-24-01). */
 export interface CreatePharmacyData {
@@ -60,6 +61,27 @@ export class PharmaciesRepository {
     tenantId: string,
   ): Promise<Pharmacies | null> {
     return em.findOne(Pharmacies, { id, tenantId });
+  }
+
+  /**
+   * La vitrina **publicada** de la organización dueña de la farmacia: el perfil
+   * público que proyectó la verificación del tenant, visible y activo. `null`
+   * si el tenant todavía no tiene vitrina publicada; acá no se crea ninguna.
+   */
+  async findTenantShowcaseId(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<string | null> {
+    const rows = await em.execute<{ id: string }[]>(
+      `select prof.id
+         from community.public_profiles prof
+        where prof.target_id = ?
+          and prof.visibility_concept_id = ?
+          and prof.status_concept_id = ?
+        limit 1`,
+      [tenantId, COMM.PROFILE_VISIBILITY_PUBLIC, CONCEPTS.STATE_ACTIVE],
+    );
+    return rows?.[0]?.id ?? null;
   }
 
   /** Busca una farmacia por (tenant, code) para validar unicidad. */
