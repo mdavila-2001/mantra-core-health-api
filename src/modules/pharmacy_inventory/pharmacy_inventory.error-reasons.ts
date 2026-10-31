@@ -29,6 +29,12 @@ export enum PharmacyInventoryErrorReason {
    * entregado − reservado), cuando la unidad recetada es comparable.
    */
   QUANTITY_EXCEEDS_PRESCRIPTION = 'QUANTITY_EXCEEDS_PRESCRIPTION',
+  /**
+   * Lo pedido de un fármaco sin saldo comparable ya se pidió: cada ítem de la
+   * receta de ese fármaco tiene una entrega o un pedido vivo. Un pedido
+   * cancelado, rechazado o vencido no cuenta. El estado clínico no cambia.
+   */
+  PRESCRIPTION_ITEM_ALREADY_ORDERED = 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
   /** Un pedido sin receta trae un producto de receta obligatoria. */
   PRESCRIPTION_REQUIRED = 'PRESCRIPTION_REQUIRED',
   /**

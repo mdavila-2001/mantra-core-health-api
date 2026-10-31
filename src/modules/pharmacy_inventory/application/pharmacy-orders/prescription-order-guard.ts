@@ -30,6 +30,8 @@ export const PRESCRIPTION_ORDER_MESSAGES: Readonly<
     'Uno de los productos no es el medicamento de su receta. Quítelo del pedido para continuar.',
   QUANTITY_EXCEEDS_PRESCRIPTION:
     'Está pidiendo más de lo que le queda en su receta.',
+  PRESCRIPTION_ITEM_ALREADY_ORDERED:
+    'Este medicamento de su receta ya tiene un pedido en curso o ya se entregó. Si necesita más, pida a su médico una receta nueva.',
   PRESCRIPTION_REQUIRED:
     'Uno de los productos se vende solo con receta. Elíjalo desde «Mis recetas».',
 };
@@ -43,6 +45,8 @@ const REASON_CODES: Readonly<
   PRODUCT_NOT_PRESCRIBED: PharmacyInventoryErrorReason.PRODUCT_NOT_PRESCRIBED,
   QUANTITY_EXCEEDS_PRESCRIPTION:
     PharmacyInventoryErrorReason.QUANTITY_EXCEEDS_PRESCRIPTION,
+  PRESCRIPTION_ITEM_ALREADY_ORDERED:
+    PharmacyInventoryErrorReason.PRESCRIPTION_ITEM_ALREADY_ORDERED,
   PRESCRIPTION_REQUIRED: PharmacyInventoryErrorReason.PRESCRIPTION_REQUIRED,
 };
 
@@ -176,7 +180,12 @@ export class PrescriptionOrderGuard {
     const controlled = prescribed.filter(
       (drug) => drug.quantity !== null && isComparableUnit(drug.unit),
     );
-    const requestIds = items.map((item) => item.id);
+    // Lo entregado o pedido sobre el original que un ítem reemplaza sigue
+    // contando: reemplazar corrige la receta, no reinicia su saldo.
+    const requestIds = [
+      ...items.map((item) => item.id),
+      ...(request.replacedIds ?? []),
+    ];
     const conceptIds = controlled.map((drug) => drug.conceptId);
     // Entregado y reservado en una sola sentencia: la misma foto de la base.
     const { dispensed, reserved } = await this.balances.balanceByConcept(
@@ -196,6 +205,41 @@ export class PrescriptionOrderGuard {
         drug.unit,
       ),
     }));
-    return { state, drugs };
+    return {
+      state,
+      drugs: await this.markAlreadyOrdered(em, requestIds, items, drugs),
+    };
+  }
+
+  /**
+   * D-6: sin saldo comparable, la receta no es una carta libre. Un fármaco
+   * está consumido cuando cada uno de sus ítems vigentes ya tiene una entrega
+   * o un pedido vivo: se cuentan las veces que se pidió (por pedido) contra
+   * los ítems. Una renovación del mismo encuentro es un ítem más y deja pedir
+   * una vez más. No se toca el estado clínico de la receta.
+   */
+  private async markAlreadyOrdered(
+    em: EntityManager,
+    requestIds: readonly string[],
+    items: readonly PrescriptionOrderItem[],
+    drugs: readonly PrescribedDrug[],
+  ): Promise<PrescribedDrug[]> {
+    const uncontrolled = drugs
+      .filter((drug) => drug.remaining === null)
+      .map((drug) => drug.medicationConceptId);
+    if (uncontrolled.length === 0) return [...drugs];
+    const ordered = await this.balances.orderedCountByConcept(
+      em,
+      requestIds,
+      uncontrolled,
+    );
+    return drugs.map((drug) => {
+      if (drug.remaining !== null) return drug;
+      const itemCount = items.filter(
+        (item) => item.medicationConceptId === drug.medicationConceptId,
+      ).length;
+      const times = ordered.get(drug.medicationConceptId) ?? 0;
+      return { ...drug, alreadyOrdered: times >= itemCount };
+    });
   }
 }

@@ -9,6 +9,7 @@ export type PrescriptionOrderReason =
   | 'PRESCRIPTION_EXPIRED'
   | 'PRODUCT_NOT_PRESCRIBED'
   | 'QUANTITY_EXCEEDS_PRESCRIPTION'
+  | 'PRESCRIPTION_ITEM_ALREADY_ORDERED'
   | 'PRESCRIPTION_REQUIRED';
 
 /**
@@ -42,6 +43,11 @@ export interface PrescriptionOrderItem {
 export interface LockedPrescription {
   item: PrescriptionOrderItem;
   siblings: readonly PrescriptionOrderItem[];
+  /**
+   * Los originales `REPLACED` de los que descienden la referida y sus
+   * hermanos: lo entregado o pedido sobre ellos cuenta contra la receta.
+   */
+  replacedIds?: readonly string[];
 }
 
 /** Un fármaco de la receta con lo que queda de él. */
@@ -49,6 +55,11 @@ export interface PrescribedDrug {
   medicationConceptId: string;
   /** Lo que queda (recetado − entregado − reservado); `null` = sin control de cantidad. */
   remaining: number | null;
+  /**
+   * Cada ítem de este fármaco ya tiene una entrega o un pedido vivo. Solo
+   * decide donde no hay saldo (`remaining` nulo): donde lo hay, manda el saldo.
+   */
+  alreadyOrdered?: boolean;
 }
 
 /** La receta referida por el pedido, ya resuelta. */
@@ -83,13 +94,14 @@ export interface PrescriptionOrderViolation {
 /**
  * ¿El pedido respeta la receta? Devuelve el primer motivo que lo impide, en
  * este orden: `PRESCRIPTION_NOT_ACTIVE`, `PRESCRIPTION_EXPIRED`,
- * `PRODUCT_NOT_PRESCRIBED`, `QUANTITY_EXCEEDS_PRESCRIPTION`. Sin receta, solo
- * `PRESCRIPTION_REQUIRED`.
+ * `PRODUCT_NOT_PRESCRIBED` y, por fármaco, `QUANTITY_EXCEEDS_PRESCRIPTION` o
+ * `PRESCRIPTION_ITEM_ALREADY_ORDERED`. Sin receta, solo `PRESCRIPTION_REQUIRED`.
  *
  * Solo se validan las líneas con producto de receta obligatoria: las de venta
  * libre pasan sin mirar la receta (D-4). Un producto de receta obligatoria sin
  * fármaco declarado no puede ser el de ninguna receta. Las líneas del mismo
- * fármaco suman contra su saldo; un saldo `null` no se controla (D-5).
+ * fármaco suman contra su saldo. Sin saldo (D-5), un fármaco cuyos ítems ya
+ * tienen una entrega o un pedido vivo no se vuelve a pedir (D-6).
  *
  * @param input - La receta resuelta (o `null`) y las líneas del pedido.
  * @returns `null` si el pedido pasa, o el primer motivo que lo impide.
@@ -123,6 +135,12 @@ export function evaluatePrescriptionOrder(
       drug.remaining,
     ]),
   );
+  const orderedByDrug = new Map(
+    prescription.drugs.map((drug) => [
+      drug.medicationConceptId,
+      drug.alreadyOrdered === true,
+    ]),
+  );
   const notPrescribed = controlled.filter(
     (line) =>
       !line.medicationConceptId ||
@@ -142,7 +160,15 @@ export function evaluatePrescriptionOrder(
   }
   for (const [conceptId, lines] of linesByDrug) {
     const remaining = remainingByDrug.get(conceptId);
-    if (remaining === null || remaining === undefined) continue;
+    if (remaining === null || remaining === undefined) {
+      if (orderedByDrug.get(conceptId) === true) {
+        return {
+          reason: 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+          productIds: lines.map((line) => line.productId),
+        };
+      }
+      continue;
+    }
     // Exacta: con decimales, `0.3 − 0.1` y un pedido de `0.2` no lo supera.
     const requested = lines.map((line) => line.quantity);
     if (exceedsQuantity(requested, remaining)) {

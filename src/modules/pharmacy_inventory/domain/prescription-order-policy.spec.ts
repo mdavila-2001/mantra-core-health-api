@@ -223,4 +223,63 @@ describe('evaluatePrescriptionOrder', () => {
       ).toBe('PRODUCT_NOT_PRESCRIBED');
     });
   });
+
+  describe('D-6: un fármaco ya pedido', () => {
+    it('sin saldo y ya pedido → PRESCRIPTION_ITEM_ALREADY_ORDERED con sus líneas', () => {
+      expect(
+        evaluatePrescriptionOrder({
+          prescription: rx({
+            drugs: [
+              { medicationConceptId: X, remaining: 2 },
+              { medicationConceptId: Y, remaining: null, alreadyOrdered: true },
+            ],
+          }),
+          lines: [line('prod-x', X), line('prod-y', Y), line('prod-y2', Y)],
+        }),
+      ).toEqual({
+        reason: 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+        productIds: ['prod-y', 'prod-y2'],
+      });
+    });
+
+    it('con saldo manda el saldo aunque esté marcado como pedido', () => {
+      expect(
+        evaluatePrescriptionOrder({
+          prescription: rx({
+            drugs: [
+              { medicationConceptId: X, remaining: 2, alreadyOrdered: true },
+            ],
+          }),
+          lines: [line('prod-x', X, 2)],
+        }),
+      ).toBeNull();
+    });
+
+    it('otro fármaco de la receta ya pedido no bloquea este', () => {
+      expect(
+        evaluatePrescriptionOrder({
+          prescription: rx({
+            drugs: [
+              { medicationConceptId: X, remaining: null, alreadyOrdered: true },
+              { medicationConceptId: Y, remaining: null },
+            ],
+          }),
+          lines: [line('prod-y', Y)],
+        }),
+      ).toBeNull();
+    });
+
+    it('un producto de venta libre no mira si la receta ya se pidió', () => {
+      expect(
+        evaluatePrescriptionOrder({
+          prescription: rx({
+            drugs: [
+              { medicationConceptId: Y, remaining: null, alreadyOrdered: true },
+            ],
+          }),
+          lines: [line('prod-y', Y, 1, false)],
+        }),
+      ).toBeNull();
+    });
+  });
 });

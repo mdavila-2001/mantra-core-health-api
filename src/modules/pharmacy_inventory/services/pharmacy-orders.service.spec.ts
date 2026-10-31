@@ -184,6 +184,7 @@ function build() {
       dispensed: new Map(),
       reserved: new Map(),
     })),
+    orderedCountByConcept: mockFn(async () => new Map()),
   };
   const prescriptionGuard = new PrescriptionOrderGuard(balances as any);
   const logger = { setContext: mockFn(), info: mockFn() };
@@ -841,6 +842,26 @@ describe('PharmacyOrdersService', () => {
         d.tx,
         ['rx-1'],
         ['concept-amoxi'],
+      );
+      expectNoEffects(d);
+    });
+
+    it('una receta en comprimidos ya pedida → 422 PRESCRIPTION_ITEM_ALREADY_ORDERED, sin efectos', async () => {
+      const d = build();
+      // 21 comprimidos: sin saldo comparable. Ya tiene un pedido vivo.
+      d.balances.lockRequest.mockResolvedValue(
+        rxLocked({ quantityDecimal: '21', unitConceptId: 'unit-tablet' }),
+      );
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
+      d.balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-amoxi', 1]]),
+      );
+
+      expect422(
+        await failureOf(createOrder(d, 1)),
+        'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+        'Este medicamento de su receta ya tiene un pedido en curso o ya se entregó. Si necesita más, pida a su médico una receta nueva.',
+        { medicationRequestId: 'rx-1', productIds: ['prod-1'] },
       );
       expectNoEffects(d);
     });

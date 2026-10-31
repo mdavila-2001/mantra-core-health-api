@@ -48,6 +48,9 @@ export const NON_RESERVING_LINE_STATUS_IDS: readonly string[] = [
   PINV.RES_LINE_PENDING_CONFIRMATION,
 ];
 
+/** Saltos máximos al seguir la cadena de reemplazos de un ítem. */
+const MAX_REPLACED_HOPS = 20;
+
 /** Lo entregado y lo reservado de una receta, por fármaco. */
 export interface PrescriptionBalanceByConcept {
   dispensed: Map<string, number>;
@@ -119,7 +122,8 @@ export class PrescriptionBalanceRepository {
    * @param id - `medication_request_id` del pedido.
    * @param patientProfileId - Paciente del token.
    * @param now - Instante contra el que se mide el vencimiento.
-   * @returns La referida con su estado y sus hermanos `ACTIVE`, o `null`.
+   * @returns La referida con su estado, sus hermanos `ACTIVE` y los originales
+   * que reemplazan, o `null`.
    */
   async lockRequest(
     em: EntityManager,
@@ -146,10 +150,57 @@ export class PrescriptionBalanceRepository {
     const items = locked.map((row) => toPrescriptionOrderItem(row, now));
     const item = items.find((row) => row.id === id);
     if (!item) return null;
-    return {
-      item,
-      siblings: items.filter((row) => row.id !== id && row.state === 'ACTIVE'),
-    };
+    const siblings = items.filter(
+      (row) => row.id !== id && row.state === 'ACTIVE',
+    );
+    const replacedIds = await this.replacedAncestorIds(
+      em,
+      locked,
+      [item, ...siblings].map((row) => row.id),
+      patientProfileId,
+    );
+    return { item, siblings, replacedIds };
+  }
+
+  /**
+   * Los originales que los ítems dados reemplazan, siguiendo
+   * `replaces_request_id` hacia atrás. Un reemplazo corrige la receta, no la
+   * renueva: lo entregado o pedido sobre el original sigue contando contra el
+   * reemplazo. El reemplazo conserva el encuentro, así que el original suele
+   * estar entre las filas ya bloqueadas; si no (receta sin encuentro), se lee
+   * sin lock: un original `REPLACED` ya no admite pedidos.
+   */
+  private async replacedAncestorIds(
+    em: EntityManager,
+    locked: readonly MedicationRequests[],
+    itemIds: readonly string[],
+    patientProfileId: string,
+  ): Promise<string[]> {
+    const byId = new Map(locked.map((row) => [row.id, row]));
+    const seen = new Set<string>(itemIds);
+    const ancestors: string[] = [];
+    for (const itemId of itemIds) {
+      let next = byId.get(itemId)?.replacesRequestId;
+      // Tope de saltos: una cadena circular no puede colgar el alta.
+      for (
+        let hop = 0;
+        next && !seen.has(next) && hop < MAX_REPLACED_HOPS;
+        hop++
+      ) {
+        seen.add(next);
+        const row =
+          byId.get(next) ??
+          (await em.findOne(MedicationRequests, {
+            id: next,
+            patientProfileId,
+          }));
+        if (!row) break;
+        byId.set(row.id, row);
+        ancestors.push(row.id);
+        next = row.replacesRequestId;
+      }
+    }
+    return ancestors;
   }
 
   /**
@@ -249,6 +300,87 @@ export class PrescriptionBalanceRepository {
   }
 
   /**
+   * Cuántas veces se pidió cada fármaco de la receta, en **una sola sentencia
+   * SQL**: los pedidos vivos y las entregas, contados una vez por pedido.
+   *
+   * - Un pedido en un estado de `activeStatusIds` cuenta por cada fármaco que
+   *   tenga en sus líneas, en cualquier estado de línea: una línea «por
+   *   confirmar» o sin stock sigue siendo parte de un pedido vivo.
+   * - Una dispensación `DISPENSED` cuenta por cada fármaco del que entregó una
+   *   cantidad mayor que cero: en un pedido retirado en parte, lo no entregado
+   *   no consume nada. Una revertida no cuenta.
+   * - La dispensación de un pedido y el pedido son la misma vez
+   *   (`inventory_reservation_id`); una dispensación de mostrador sin pedido
+   *   cuenta por sí sola.
+   *
+   * Un pedido cancelado, rechazado o vencido sin entrega no aparece: libera la
+   * receta.
+   *
+   * @param em - EntityManager de la transacción del alta.
+   * @param requestIds - Ítems de la receta (y los originales que reemplazan).
+   * @param conceptIds - Fármacos (`medication_concept_id`) a contar.
+   * @param activeStatusIds - Estados de pedido vivos.
+   * @returns Cuántas veces se pidió cada fármaco; uno sin pedidos no aparece.
+   */
+  async orderedCountByConcept(
+    em: EntityManager,
+    requestIds: readonly string[],
+    conceptIds: readonly string[],
+    activeStatusIds: readonly string[] = RESERVING_ORDER_STATUS_IDS,
+  ): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (
+      requestIds.length === 0 ||
+      conceptIds.length === 0 ||
+      activeStatusIds.length === 0
+    ) {
+      return counts;
+    }
+    const list = (values: readonly string[]): string =>
+      values.map(() => '?').join(', ');
+    const rows: PrescriptionOrderedRow[] = await em.getConnection().execute(
+      `SELECT movement.concept_id AS "conceptId",
+              COUNT(DISTINCT movement.source_id)::text AS "times"
+         FROM (
+           SELECT product.medication_concept_id AS concept_id,
+                  COALESCE(dispensation.inventory_reservation_id, dispensation.id) AS source_id
+             FROM pharmacy_inventory.medication_dispensation_lines line
+             JOIN pharmacy_inventory.medication_dispensations dispensation
+               ON dispensation.id = line.medication_dispensation_id
+             JOIN pharmacy.pharmacy_products product
+               ON product.id = line.pharmacy_product_id
+            WHERE dispensation.medication_request_id IN (${list(requestIds)})
+              AND dispensation.dispensation_status_concept_id = ?
+              AND line.dispensed_quantity > 0
+              AND product.medication_concept_id IN (${list(conceptIds)})
+           UNION ALL
+           SELECT product.medication_concept_id AS concept_id,
+                  reservation.id AS source_id
+             FROM pharmacy_inventory.inventory_reservation_lines line
+             JOIN pharmacy_inventory.inventory_reservations reservation
+               ON reservation.id = line.inventory_reservation_id
+             JOIN pharmacy.pharmacy_products product
+               ON product.id = line.pharmacy_product_id
+            WHERE reservation.medication_request_id IN (${list(requestIds)})
+              AND reservation.reservation_status_concept_id IN (${list(activeStatusIds)})
+              AND product.medication_concept_id IN (${list(conceptIds)})
+         ) movement
+        GROUP BY movement.concept_id`,
+      [
+        ...requestIds,
+        PINV.DISPENSE_DISPENSED,
+        ...conceptIds,
+        ...requestIds,
+        ...activeStatusIds,
+        ...conceptIds,
+      ],
+      'all',
+    );
+    for (const row of rows) counts.set(row.conceptId, toNumber(row.times));
+    return counts;
+  }
+
+  /**
    * Lo entregado por fármaco. Envoltorio de {@link balanceByConcept}: quien
    * necesite entregado **y** reservado juntos usa esa, para leerlos en la
    * misma foto.
@@ -283,6 +415,12 @@ interface PrescriptionBalanceRow {
   readonly conceptId: string;
   readonly kind: 'DISPENSED' | 'RESERVED';
   readonly quantity: string | null;
+}
+
+/** Una fila de {@link PrescriptionBalanceRepository.orderedCountByConcept}. */
+interface PrescriptionOrderedRow {
+  readonly conceptId: string;
+  readonly times: string | null;
 }
 
 /** `numeric` de Postgres (texto) a número; nulo o no numérico cuenta 0. */
