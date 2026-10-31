@@ -16,6 +16,7 @@ import {
 import {
   TelemetryAnalyticsRepository,
   type AnalyticsScope,
+  type DeviceBreakdownRow,
 } from '../../infrastructure/repositories/telemetry-analytics.repository';
 import { TELE } from '../../telemetry.concepts';
 import { TelemetryErrorReason } from '../../telemetry.error-reasons';
@@ -399,6 +400,68 @@ export class TelemetryAnalyticsService {
           reason:
             'Un lote inválido se rechaza entero con 4xx; no hay contador de rechazos.',
         },
+      ],
+    };
+  }
+
+  /**
+   * Desglose de dispositivos (tipo, SO, navegador, versión de app) a partir de
+   * los contextos de cliente. Los bots se cuentan aparte; una etiqueta sólo se
+   * muestra si hay concepto que la respalde, si no, `label = code`.
+   */
+  async devices(query: WindowQuery, tenantId: string) {
+    const scope = this.scope(query, tenantId);
+    const result = await this.repo.devices(scope);
+    const botUnknown = result.totals?.bot_unknown ?? 0;
+    const view = (rows: readonly DeviceBreakdownRow[]) =>
+      [...rows]
+        .map((row) => ({
+          code: row.code,
+          label: row.label || row.code,
+          contexts: Number(row.contexts),
+        }))
+        // Mismo orden que la consulta (contexts desc, code asc), por código
+        // de unidad: el orden no depende de la colación de la base.
+        .sort(
+          (a, b) =>
+            b.contexts - a.contexts ||
+            (a.code < b.code ? -1 : a.code > b.code ? 1 : 0),
+        );
+    return {
+      window: this.windowView(scope, query),
+      totals: {
+        contexts: result.totals?.contexts ?? 0,
+        bots: result.totals?.bots ?? 0,
+      },
+      byDeviceType: view(result.byDeviceType),
+      byOsFamily: view(result.byOsFamily),
+      byBrowserFamily: view(result.byBrowserFamily),
+      byAppVersion: view(result.byAppVersion),
+      lastContextAt: iso(result.totals?.last_context_at),
+      notMeasured: [
+        {
+          metric: 'trackingConsent',
+          reason:
+            'La captura del contexto de cliente no pasa por el gate de consentimiento de tracking (sí lo hacen los eventos): no se puede separar dispositivos con y sin consentimiento.',
+        },
+        {
+          metric: 'uniqueDevices',
+          reason:
+            'Cada fila es una captura de contexto, no un dispositivo: un mismo dispositivo con varias sesiones cuenta varias veces y no hay identificador de dispositivo.',
+        },
+        {
+          metric: 'contextsWithoutSession',
+          reason:
+            'Un contexto sin sesión no es atribuible a un tenant y queda fuera de todos los conteos.',
+        },
+        ...(botUnknown > 0
+          ? [
+              {
+                metric: 'botClassification',
+                reason: `${botUnknown} contexto(s) sin is_bot informado: no se pudo demostrar que sean bots y entran en los desgloses.`,
+              },
+            ]
+          : []),
       ],
     };
   }
