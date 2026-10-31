@@ -390,4 +390,53 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
       expect(committedUses[0].userAgent).toHaveLength(512);
     });
   });
+
+  describe('lo emitido después de compartir no se comparte (FAR-01 B4)', () => {
+    const context = { sourceIp: '203.0.113.7', userAgent: 'agente-prueba' };
+
+    it('un enlace de encuentro no muestra a la farmacia un ítem emitido después de crearlo', async () => {
+      const { service, repo } = build();
+      const { token } = issueShareToken();
+      const createdAt = new Date(Date.now() - DAY);
+      repo.findByTokenHash.mockResolvedValue(link({ createdAt }));
+      const shared = item({ issuedAt: new Date(createdAt.getTime() - 1) });
+      const later = item({
+        prescriberProfileId: 'otro-medico',
+        issuedAt: new Date(createdAt.getTime() + 1),
+      });
+      repo.findItemsByEncounter.mockResolvedValue([shared, later]);
+
+      const opened = await service.openForPharmacy(token, context);
+      expect(opened.items).toEqual([shared]);
+
+      const view = await service.readPublic(token);
+      expect(view.itemCount).toBe(1);
+    });
+
+    it('si solo queda lo emitido después, el enlace ya no tiene ítems vigentes', async () => {
+      const { service, repo } = build();
+      const { token } = issueShareToken();
+      const createdAt = new Date(Date.now() - DAY);
+      repo.findByTokenHash.mockResolvedValue(link({ createdAt }));
+      repo.findItemsByEncounter.mockResolvedValue([
+        item({ issuedAt: new Date(createdAt.getTime() + 1) }),
+      ]);
+
+      const view = await service.readPublic(token);
+      expect(view.itemCount).toBe(0);
+      expect(view.status).toBe('EXPIRED');
+    });
+
+    it('emitido en el mismo instante en que se compartió sí se comparte', async () => {
+      const { service, repo } = build();
+      const { token } = issueShareToken();
+      const createdAt = new Date(Date.now() - DAY);
+      repo.findByTokenHash.mockResolvedValue(link({ createdAt }));
+      const shared = item({ issuedAt: new Date(createdAt) });
+      repo.findItemsByEncounter.mockResolvedValue([shared]);
+
+      const opened = await service.openForPharmacy(token, context);
+      expect(opened.items).toEqual([shared]);
+    });
+  });
 });

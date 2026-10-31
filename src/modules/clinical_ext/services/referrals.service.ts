@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   DomainException,
   ErrorCode,
@@ -249,7 +250,9 @@ export class ReferralsService {
     ) {
       throw new PreconditionFailedException(
         'La derivación necesita un destino: profesional, organización, servicio, sede o destino externo.',
-        { reason: 'REFERRAL_TARGET_REQUIRED' },
+        // `details.reason` se conserva para los clientes que ya lo leían ahí.
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED },
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
       );
     }
     const referralType: ReferralType = dto.referralType ?? 'CONSULTATION';
@@ -259,6 +262,14 @@ export class ReferralsService {
       if (dto.targetProfileId) {
         await this.assertTargetIsPractitioner(tx, dto.targetProfileId);
       }
+      // El tenant indicado se valida antes que el servicio: contra un tenant
+      // inexistente o inactivo, «el servicio no es de esa organización» sería
+      // un motivo engañoso.
+      if (dto.targetTenantId) {
+        await this.assertTargetTenantActive(tx, dto.targetTenantId, {
+          targetTenantId: dto.targetTenantId,
+        });
+      }
       const targetTenantId = dto.targetServiceCatalogId
         ? await this.assertServiceOfTarget(tx, {
             targetServiceCatalogId: dto.targetServiceCatalogId,
@@ -266,6 +277,15 @@ export class ReferralsService {
             targetTenantId: dto.targetTenantId,
           })
         : dto.targetTenantId;
+      // El tenant derivado de la práctica del servicio se valida igual: una
+      // derivación a una organización que no la puede atender no se crea. El
+      // 404 repite el servicio que mandó quien llama, no el tenant derivado,
+      // que no conocía.
+      if (targetTenantId && targetTenantId !== dto.targetTenantId) {
+        await this.assertTargetTenantActive(tx, targetTenantId, {
+          targetServiceCatalogId: dto.targetServiceCatalogId,
+        });
+      }
       if (dto.sourceEncounterId) {
         await this.assertEncounterBelongsToPatient(
           tx,
@@ -275,19 +295,30 @@ export class ReferralsService {
         );
       }
 
+      // Derivación a la organización: sin profesional ni servicio, el tenant
+      // es el destino. Sin esta rama, un doble envío creaba dos derivaciones
+      // y dos avisos.
+      const toOrganizationOnly =
+        !dto.targetServiceCatalogId &&
+        !dto.targetProfileId &&
+        !!dto.targetTenantId;
       if (
         dto.sourceEncounterId &&
         (dto.targetServiceCatalogId ||
-          (dto.targetProfileId && dto.specialtyConceptId))
+          (dto.targetProfileId && dto.specialtyConceptId) ||
+          toOrganizationOnly)
       ) {
         // El DDL no impide el duplicado: se serializa a quien emite la misma
         // referencia para que el segundo vea la fila del primero. Con
         // servicio, el servicio identifica el destino; sin él, profesional y
-        // especialidad, como siempre. El tipo distingue «consulta» de
+        // especialidad, como siempre; sin ninguno de los dos, la organización.
+        // El tipo distingue «consulta» de
         // «tratamiento» al mismo destino.
         await lockLogicalKey(
           tx,
-          `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId ?? '-'}:${dto.targetServiceCatalogId ?? dto.specialtyConceptId}:${referralType}`,
+          toOrganizationOnly
+            ? `clinical_ext.referral:${dto.sourceEncounterId}:org:${dto.targetTenantId}:${referralType}`
+            : `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId ?? '-'}:${dto.targetServiceCatalogId ?? dto.specialtyConceptId}:${referralType}`,
         );
         const dup = await this.referralsRepo.findDuplicate(tx, {
           sourceEncounterId: dto.sourceEncounterId,
@@ -296,6 +327,7 @@ export class ReferralsService {
           targetProfileId: dto.targetProfileId,
           specialtyConceptId: dto.specialtyConceptId,
           targetServiceCatalogId: dto.targetServiceCatalogId,
+          targetTenantId: toOrganizationOnly ? dto.targetTenantId : undefined,
         });
         if (dup) {
           throw new ConflictException(
@@ -348,8 +380,13 @@ export class ReferralsService {
     });
 
     // Después del commit, y sin poder romperlo: el aviso es de cortesía, la
-    // derivación ya existe.
-    if (dto.sourceEncounterId && dto.targetProfileId) {
+    // derivación ya existe. Avisa la derivación a un profesional y también la
+    // derivación a una organización (el tenant destino puede venir del
+    // servicio); sin encuentro no hay relación asistencial demostrada.
+    if (
+      dto.sourceEncounterId &&
+      (dto.targetProfileId || created.targetTenantId)
+    ) {
       await this.notifier.notifyRecommended(created.id);
     }
     return created;
@@ -362,9 +399,39 @@ export class ReferralsService {
   ): Promise<void> {
     const target = await this.practitionersRepo.findById(tx, targetProfileId);
     if (!target) {
-      throw new ResourceNotFoundException('Profesional no encontrado', {
-        targetProfileId,
-      });
+      throw new ResourceNotFoundException(
+        'Profesional no encontrado',
+        { targetProfileId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
+    }
+  }
+
+  /**
+   * El tenant destino tiene que existir y estar activo (`TENANT_ACTIVE`): una
+   * derivación a una organización que no la puede atender no se crea (#1201).
+   *
+   * Inexistente e inactivo responden igual, con el mismo cuerpo: distinguirlos
+   * permitiría sondear la existencia y el estado de tenants no públicos.
+   *
+   * @param em - Contexto de persistencia (la transacción, en `create`).
+   * @param targetTenantId - Tenant destino, indicado o derivado del servicio.
+   * @param details - Lo que repite el 404: sólo datos que mandó quien llama.
+   * @throws ResourceNotFoundException 404 `REFERRAL_TARGET_NOT_FOUND` si no
+   *   existe o no está activo.
+   */
+  private async assertTargetTenantActive(
+    em: EntityManager,
+    targetTenantId: string,
+    details: Record<string, string | undefined>,
+  ): Promise<void> {
+    const tenant = await this.tenantsRepo.findById(em, targetTenantId);
+    if (!tenant || tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
+      throw new ResourceNotFoundException(
+        'Organización destino no encontrada',
+        details,
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
     }
   }
 
@@ -385,9 +452,11 @@ export class ReferralsService {
       encounter.patientProfileId !== patientProfileId ||
       actor.tenantIds?.includes(encounter.tenantId) !== true
     ) {
-      throw new ResourceNotFoundException('Encuentro no encontrado', {
-        encounterId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuentro no encontrado',
+        { encounterId },
+        ClinicalExtErrorReason.REFERRAL_ENCOUNTER_NOT_FOUND,
+      );
     }
   }
 
@@ -872,17 +941,20 @@ export class ReferralsService {
       serviceCatalogId,
     );
     if (!service) {
-      throw new ResourceNotFoundException('Servicio no encontrado', {
-        targetServiceCatalogId: serviceCatalogId,
-      });
+      throw new ResourceNotFoundException(
+        'Servicio no encontrado',
+        { targetServiceCatalogId: serviceCatalogId },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_NOT_FOUND,
+      );
     }
     if (!service.isActive) {
       throw new PreconditionFailedException(
         'Ese servicio está inactivo en el catálogo.',
         {
           targetServiceCatalogId: serviceCatalogId,
-          reason: 'REFERRAL_SERVICE_INACTIVE',
+          reason: ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE,
         },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE,
       );
     }
 
@@ -893,8 +965,9 @@ export class ReferralsService {
         'El servicio no pertenece a la organización destino.',
         {
           targetServiceCatalogId: serviceCatalogId,
-          reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+          reason: ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
         },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
       );
     }
 
@@ -909,8 +982,9 @@ export class ReferralsService {
           'El profesional destino no ofrece ese servicio.',
           {
             targetServiceCatalogId: serviceCatalogId,
-            reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+            reason: ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
           },
+          ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
         );
       }
     }
@@ -932,7 +1006,8 @@ export class ReferralsService {
     if (q.length < 2) {
       throw new PreconditionFailedException(
         'La búsqueda necesita al menos dos caracteres.',
-        { reason: 'REFERRAL_TARGET_QUERY_TOO_SHORT' },
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT },
+        ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT,
       );
     }
     const em = this.em.fork();
@@ -1024,7 +1099,8 @@ export class ReferralsService {
    * @param query - `targetProfileId` y/o `targetTenantId`.
    * @returns Los servicios, por nombre.
    * @throws ResourceNotFoundException si algún destino no es listable; el
-   *   mismo 404 que si no existiera.
+   *   mismo 404 que si no existiera. Un tenant inexistente, inactivo o sin
+   *   vitrina responde con el mismo cuerpo (#1201): no se distingue el caso.
    */
   async listTargetServices(
     query: ListReferralTargetServicesQueryDto,
@@ -1033,7 +1109,8 @@ export class ReferralsService {
     if (!targetProfileId && !targetTenantId) {
       throw new PreconditionFailedException(
         'Indique targetProfileId o targetTenantId.',
-        { reason: 'REFERRAL_TARGET_REQUIRED' },
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED },
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
       );
     }
     const em = this.em.fork();
@@ -1051,10 +1128,11 @@ export class ReferralsService {
           : this.targetsRepo.isListableOrganization(em, targetTenantId),
     ]);
     if (!profileListable || !tenantListable) {
-      throw new ResourceNotFoundException('Destino no encontrado', {
-        targetProfileId,
-        targetTenantId,
-      });
+      throw new ResourceNotFoundException(
+        'Destino no encontrado',
+        { targetProfileId, targetTenantId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
     }
 
     let services: ServiceCatalog[];

@@ -1,5 +1,64 @@
 openapi: 3.0.0
 paths:
+  /pharmacy-inventory/availability/medications:
+    get:
+      description: >-
+        Por cada medicamento del vademécum considera todos los productos publicados y vendibles de todas las farmacias
+        visibles, con la regla de existencias por sede. Cada sede devuelve un producto por medicamento que tiene
+        disponible (el de menor precio para el paciente) y nombra los medicamentos que le faltan. Orden: las que tienen
+        todos primero; después distancia, total y nombre, como la disponibilidad por producto.
+      operationId: PharmacyInventoryReadController_availabilityByMedication
+      parameters:
+        - name: medications
+          required: true
+          in: query
+          description: 'Medicamentos solicitados (`medication_concept_id`): UUIDs separados por coma'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: lat
+          required: false
+          in: query
+          description: Latitud WGS84 desde donde medir distancia (va con lng)
+          schema:
+            type: string
+        - name: lng
+          required: false
+          in: query
+          description: Longitud WGS84 desde donde medir distancia (va con lat)
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Tope de sedes servidas (por defecto 20)
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationAvailabilityResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Consultar qué sedes de la red pueden surtir unos medicamentos
+      tags:
+        - pharmacy-inventory-directory
   /:
     get:
       operationId: AppController_getHello
@@ -55717,8 +55776,10 @@ paths:
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
     post:
       description: >-
-        El paciente sale del token. Reserva parcial: una línea sin stock queda SIN_STOCK y no tumba el pedido. Repetir
-        la misma idempotencyKey devuelve el pedido ya creado.
+        El paciente sale del token. Reserva parcial: una línea sin stock queda SIN_STOCK y no tumba el pedido. Un
+        producto que la sede ofrece por su catálogo, sin existencia propia, entra por confirmar
+        (PINV_RES_LINE_PENDING_CONFIRMATION) sin reservar. Si ninguna línea tiene stock ni queda por confirmar: 422
+        PRODUCT_OUT_OF_STOCK y no se escribe nada. Repetir la misma idempotencyKey devuelve el pedido ya creado.
       operationId: PharmacyOrdersController_create
       parameters: []
       requestBody:
@@ -55944,7 +56005,10 @@ paths:
       description: >-
         Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea. PROPONER_GENERICO (con proposedProductId del
         mismo medicamento) persiste la propuesta con sus precios congelados y deja el pedido en ACEPTACION_PENDIENTE:
-        decide el paciente.
+        decide el paciente. Una línea por confirmar (PINV_RES_LINE_PENDING_CONFIRMATION) se confirma con lo pedido, o
+        con CONFIRMAR_STOCK y quantity (lo que la sede tiene para vender): se escribe la existencia de la sede y se
+        reserva; con NO_DISPONIBLE o PROPONER_GENERICO queda sin stock. CONFIRMAR_STOCK sobre otra línea o sin quantity:
+        422 ORDER_LINE_NOT_PENDING_CONFIRMATION.
       operationId: PharmacyOrdersController_confirm
       parameters:
         - name: id
@@ -75829,6 +75893,135 @@ components:
         Token de acceso JWT emitido por `POST /auth/login` (`TokenService`). Los endpoints marcados `@Public()` no lo
         requieren.
   schemas:
+    MedicationAvailabilityResponseDto:
+      type: object
+      properties:
+        requestedMedicationConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        unpublishedMedicationConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationAvailabilitySiteDto'
+        count:
+          type: number
+      required:
+        - requestedMedicationConceptIds
+        - unpublishedMedicationConceptIds
+        - items
+        - count
+    MedicationAvailabilitySiteDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        pharmacyId:
+          type: string
+          format: uuid
+        pharmacyName:
+          type: string
+        addressText:
+          type: object
+          nullable: true
+        latitude:
+          type: object
+          nullable: true
+        longitude:
+          type: object
+          nullable: true
+        distanceKm:
+          type: object
+          nullable: true
+        homeDeliveryAvailable:
+          type: object
+          nullable: true
+        pickupAvailable:
+          type: object
+          nullable: true
+        complete:
+          type: boolean
+        availableCount:
+          type: number
+        totalAmount:
+          type: object
+          nullable: true
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        stockUpdatedAt:
+          type: string
+          nullable: true
+        missingMedicationConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationAvailabilityProductDto'
+      required:
+        - siteId
+        - siteName
+        - pharmacyId
+        - pharmacyName
+        - complete
+        - availableCount
+        - missingMedicationConceptIds
+        - products
+    MedicationAvailabilityProductDto:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        productCode:
+          type: string
+        brandName:
+          type: object
+          nullable: true
+        genericName:
+          type: object
+          nullable: true
+        strengthText:
+          type: object
+          nullable: true
+        packageSizeText:
+          type: object
+          nullable: true
+        medication:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InventoryConceptDto'
+        availableQuantity:
+          type: number
+          nullable: true
+        price:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AvailabilityPriceDto'
+        medicationConceptId:
+          type: string
+          format: uuid
+      required:
+        - productId
+        - productCode
+        - availableQuantity
+        - medicationConceptId
     CreateCodeSystemDto:
       type: object
       properties:
@@ -112585,10 +112778,16 @@ components:
           enum:
             - NO_DISPONIBLE
             - PROPONER_GENERICO
+            - CONFIRMAR_STOCK
         proposedProductId:
           type: string
           format: uuid
           description: Producto propuesto (mismo concepto del vademécum)
+        quantity:
+          type: number
+          minimum: 1
+          maximum: 1000000
+          description: Unidades que la sede tiene para vender (con CONFIRMAR_STOCK, sobre una línea por confirmar)
       required:
         - productId
         - decision
@@ -125450,6 +125649,4782 @@ components:
           format: date-time
         path:
           type: string
+    SearchUsersBodyDto:
+      type: object
+      properties:
+        q:
+          type: string
+          description: Texto a buscar en el nombre visible o en el correo de acceso
+        status:
+          type: string
+          format: uuid
+          description: Concepto de estado al que acotar
+        cursor:
+          type: string
+          description: Cursor opaco devuelto por la página anterior
+        limit:
+          type: integer
+          description: Tope de resultados (por defecto 50)
+          default: 50
+          minimum: 1
+          maximum: 500
+      additionalProperties: false
+    UserListItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        statusConceptId:
+          type: string
+          format: uuid
+        mfaStatusConceptId:
+          type: string
+          format: uuid
+        emailVerified:
+          type: boolean
+        phoneVerified:
+          type: boolean
+        lastLoginAt:
+          type: object
+          nullable: true
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - displayName
+        - statusConceptId
+        - emailVerified
+        - phoneVerified
+        - createdAt
+    SearchUsersResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserListItemDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: object
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+    DiagnosticUnitBranchDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 200
+          example: Sucursal Equipetrol
+        address:
+          $ref: '#/components/schemas/OwnSiteAddressDto'
+        description:
+          type: string
+          maxLength: 1000
+          example: Frente al mercado
+        locationUrl:
+          type: string
+          maxLength: 2000
+          example: https://maps.google.com/?q=-17.78,-63.18
+      required:
+        - name
+      additionalProperties: false
+    MedicalDirectorDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Ana
+        middleName:
+          type: string
+          maxLength: 100
+          example: Lucía
+        lastName:
+          type: string
+          maxLength: 100
+          example: Rojas
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Paz
+        professionalLicenseNumber:
+          type: string
+          description: Matrícula profesional del director médico
+          minLength: 3
+          maxLength: 50
+          example: MAT-12345
+        email:
+          type: string
+          format: email
+          maxLength: 320
+          example: dir@clinica.bo
+        phone:
+          type: string
+          maxLength: 30
+          example: +591 70012345
+      required:
+        - name
+        - lastName
+        - professionalLicenseNumber
+        - email
+      additionalProperties: false
+    MedicalFacilityHeadquartersDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          default: Casa central
+        addressLines:
+          minItems: 1
+          maxItems: 10
+          example:
+            - Av. San Martín 123
+          type: array
+          items:
+            type: string
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.78
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.18
+      required:
+        - addressLines
+      additionalProperties: false
+    MedicalFacilitySiteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          example: Sucursal Equipetrol
+        addressLines:
+          minItems: 1
+          maxItems: 10
+          example:
+            - Av. San Martín 123
+          type: array
+          items:
+            type: string
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.78
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.18
+      required:
+        - name
+        - addressLines
+      additionalProperties: false
+    MedicalFacilityDto:
+      type: object
+      properties:
+        taxIdentifierNumber:
+          type: string
+          description: NIT del establecimiento (número, sin el certificado)
+          pattern: ^[0-9][0-9-]{3,19}$
+          example: '1023456789'
+        healthFacilityRegistrationNumber:
+          type: string
+          description: Número de registro del establecimiento ante la autoridad sanitaria (SEDES en Bolivia)
+          minLength: 3
+          maxLength: 50
+          pattern: ^[A-Za-z0-9./-]+$
+          example: SEDES-SC-2020-0412
+        medicalDirector:
+          $ref: '#/components/schemas/MedicalDirectorDto'
+        headquarters:
+          $ref: '#/components/schemas/MedicalFacilityHeadquartersDto'
+        branches:
+          maxItems: 50
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalFacilitySiteDto'
+      required:
+        - taxIdentifierNumber
+        - healthFacilityRegistrationNumber
+        - medicalDirector
+      additionalProperties: false
+    AdmissionCodeLabelDto:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+      required:
+        - code
+        - label
+    OwnAdmissionItemDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - LICENSE
+            - CREDENTIAL
+            - SPECIALTY
+            - PROFILE
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+        state:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        reasonText:
+          type: string
+          nullable: true
+        reasonCode:
+          type: string
+          nullable: true
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+      required:
+        - type
+        - id
+        - label
+        - state
+    AdmissionResubmissionsDto:
+      type: object
+      properties:
+        used:
+          type: number
+          description: Reenvíos ya hechos.
+          minimum: 0
+        max:
+          type: number
+          description: Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`).
+          minimum: 0
+        remaining:
+          type: number
+          description: 'Reenvíos que quedan: `max - used`, nunca negativo.'
+          minimum: 0
+      required:
+        - used
+        - max
+        - remaining
+    OwnAdmissionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        submittedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        infoRequestedText:
+          type: string
+          nullable: true
+        infoDueAt:
+          type: string
+          nullable: true
+        decisionReasonText:
+          type: string
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnAdmissionItemDto'
+        resubmissionCount:
+          type: number
+          description: Reenvíos hechos (igual a `resubmissions.used`; se conserva).
+        resubmissions:
+          $ref: '#/components/schemas/AdmissionResubmissionsDto'
+        canResubmit:
+          type: boolean
+          description: 'El servidor decide: el estado admite reenviar y no se llegó al tope.'
+        canWithdraw:
+          type: boolean
+          description: 'El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran.'
+      required:
+        - id
+        - status
+        - submittedAt
+        - dueAt
+        - items
+        - resubmissionCount
+        - resubmissions
+        - canResubmit
+        - canWithdraw
+    ResubmitAdmissionDto:
+      type: object
+      properties:
+        attested:
+          type: boolean
+          description: 'Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED.'
+        attestationVersion:
+          type: string
+          description: Versión del texto de la declaración que se mostró.
+          maxLength: 32
+          example: 2026-10
+      required:
+        - attested
+        - attestationVersion
+      additionalProperties: false
+    AdmissionItemsSummaryDto:
+      type: object
+      properties:
+        licenses:
+          type: number
+        credentials:
+          type: number
+        specialties:
+          type: number
+      required:
+        - licenses
+        - credentials
+        - specialties
+    AdmissionRequirementsSummaryDto:
+      type: object
+      properties:
+        total:
+          type: number
+        verified:
+          type: number
+        rejected:
+          type: number
+        pending:
+          type: number
+      required:
+        - total
+        - verified
+        - rejected
+        - pending
+    AdmissionActorDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
+    AdmissionPractitionerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        profession:
+          type: string
+          nullable: true
+        maskedNationalId:
+          type: string
+          nullable: true
+      required:
+        - id
+        - fullName
+    AdmissionSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        status:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        itemsSummary:
+          $ref: '#/components/schemas/AdmissionItemsSummaryDto'
+        requirementsSummary:
+          $ref: '#/components/schemas/AdmissionRequirementsSummaryDto'
+        submittedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        overdue:
+          type: boolean
+          description: Venció su plazo y la plataforma le debe una respuesta.
+        assignedTo:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        rowVersion:
+          type: number
+          description: Versión de la fila; se manda como expectedRowVersion.
+        practitioner:
+          $ref: '#/components/schemas/AdmissionPractitionerSummaryDto'
+      required:
+        - id
+        - type
+        - status
+        - itemsSummary
+        - requirementsSummary
+        - submittedAt
+        - dueAt
+        - overdue
+        - assignedTo
+        - rowVersion
+        - practitioner
+    AdmissionListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionSummaryDto'
+        nextCursor:
+          type: string
+          nullable: true
+        counts:
+          type: object
+          description: Cantidad por código de estado, con los filtros menos el de estado.
+          additionalProperties:
+            type: number
+      required:
+        - items
+        - nextCursor
+        - counts
+    ListAdmissionsQueryDto:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Tipo de admisión; hoy ALTA_DE_DOCTOR.
+          default: ALTA_DE_DOCTOR
+        status:
+          type: string
+          enum:
+            - ENVIADA
+            - EN_REVISION
+            - INFORMACION_REQUERIDA
+            - VERIFICADA
+            - RECHAZADA
+            - SUSPENDIDA
+            - EXPIRADA
+            - RETIRADA
+            - ABANDONADA
+        assignedTo:
+          type: string
+          description: Cuenta asignada, o `me`, o `none` (sin asignar).
+        overdue:
+          type: boolean
+          description: true = sólo vencidas.
+        q:
+          type: string
+          description: Nombre, cédula o matrícula (2 a 80 caracteres).
+          maxLength: 80
+        cursor:
+          type: string
+          description: Cursor opaco de la página anterior.
+        limit:
+          type: number
+          minimum: 1
+          maximum: 100
+          default: 25
+        sort:
+          type: string
+          enum:
+            - due_at
+          default: due_at
+      additionalProperties: false
+    AdmissionSweepResultDto:
+      type: object
+      properties:
+        expired:
+          type: number
+          description: Verificaciones vencidas (VERIFICADA a EXPIRADA).
+        abandoned:
+          type: number
+          description: Solicitudes cerradas por falta de respuesta (a ABANDONADA).
+        skipped:
+          type: boolean
+          description: '`true` si no corrió porque otro nodo tenía el barrido en curso (no es un error: repetir es
+            inocuo).'
+      required:
+        - expired
+        - abandoned
+        - skipped
+    AdmissionPractitionerDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        profession:
+          type: string
+          nullable: true
+        maskedNationalId:
+          type: string
+          nullable: true
+        nationalId:
+          type: string
+          nullable: true
+        nationalIdIssuer:
+          type: string
+          nullable: true
+        birthDate:
+          type: string
+          nullable: true
+        age:
+          type: number
+          nullable: true
+        occupation:
+          type: string
+          nullable: true
+        personalMobile:
+          type: string
+          nullable: true
+        personalEmail:
+          type: string
+          nullable: true
+        workMobile:
+          type: string
+          nullable: true
+        workPhone:
+          type: string
+          nullable: true
+        workEmail:
+          type: string
+          nullable: true
+      required:
+        - id
+        - fullName
+    AdmissionLicenseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        number:
+          type: string
+        jurisdiction:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        fileId:
+          type: string
+          nullable: true
+          format: uuid
+        verifiedAt:
+          type: string
+          nullable: true
+        verificationSourceUri:
+          type: string
+          nullable: true
+        rejectionReasonText:
+          type: string
+          nullable: true
+      required:
+        - id
+        - requirementCode
+        - number
+        - state
+    AdmissionCredentialDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        level:
+          type: string
+        title:
+          type: string
+          nullable: true
+        institution:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        fileId:
+          type: string
+          nullable: true
+          format: uuid
+        verifiedAt:
+          type: string
+          nullable: true
+        verificationSourceUri:
+          type: string
+          nullable: true
+        rejectionReasonText:
+          type: string
+          nullable: true
+      required:
+        - id
+        - requirementCode
+        - level
+        - state
+    AdmissionSpecialtyDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        name:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        supportingCredentialId:
+          type: string
+          nullable: true
+          format: uuid
+      required:
+        - id
+        - requirementCode
+        - state
+    AdmissionEventDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        fromStatus:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        toStatus:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        itemType:
+          type: string
+          nullable: true
+        itemId:
+          type: string
+          nullable: true
+          format: uuid
+        requirementCode:
+          type: string
+          nullable: true
+        verificationSourceUri:
+          type: string
+          nullable: true
+        reasonCode:
+          type: string
+          nullable: true
+        reasonText:
+          type: string
+          nullable: true
+        actor:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        actorRole:
+          type: string
+          nullable: true
+        occurredAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - occurredAt
+    AdmissionChecklistItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+          format: uuid
+          description: >-
+            Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión
+            y se materializa.
+        itemId:
+          type: string
+          format: uuid
+          description: 'La ficha: matrícula, título, especialidad o perfil.'
+        itemType:
+          type: string
+          enum:
+            - LICENSE
+            - CREDENTIAL
+            - SPECIALTY
+            - PROFILE
+        label:
+          type: string
+        state:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        fileId:
+          type: string
+          nullable: true
+          format: uuid
+        verificationSourceUri:
+          type: string
+          nullable: true
+        sourceType:
+          type: string
+          nullable: true
+          enum:
+            - REGISTRO_MINSALUD
+            - COLEGIO_MEDICO
+            - COLEGIO_ODONTOLOGOS
+            - SEDES
+            - SEGIP
+            - DOCUMENTO_APORTADO
+            - OTRO
+        sourceRef:
+          type: string
+          nullable: true
+        sourceConsultedAt:
+          type: string
+          nullable: true
+        reasonCode:
+          type: string
+          nullable: true
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        reasonText:
+          type: string
+          nullable: true
+        internalNote:
+          type: string
+          nullable: true
+          description: Sólo para el personal; nunca llega al médico.
+        reviewedBy:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        reviewedAt:
+          type: string
+          nullable: true
+        evidenceChanged:
+          type: boolean
+          description: 'El dato o el archivo cambió después de revisarse: la revisión ya no vale.'
+        evidenceSha256:
+          type: string
+          description: >-
+            Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el
+            ítem: así el servidor sabe qué vio el revisor.
+        rowVersion:
+          type: number
+          nullable: true
+          description: expectedRowVersion del ítem.
+      required:
+        - itemId
+        - itemType
+        - label
+        - state
+        - evidenceChanged
+        - evidenceSha256
+    AdmissionChecklistRequirementDto:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+          nullable: true
+        required:
+          type: boolean
+        evidenceKind:
+          type: string
+          enum:
+            - DOCUMENT
+            - DATA
+        requiresSource:
+          type: boolean
+          description: Verificar un ítem exige declarar la fuente consultada.
+        professionGroup:
+          type: string
+          nullable: true
+          enum:
+            - MEDICO
+            - ODONTOLOGO
+        minItems:
+          type: number
+          nullable: true
+        maxItems:
+          type: number
+          nullable: true
+        state:
+          type: string
+          enum:
+            - NOT_PROVIDED
+            - MISSING
+            - PENDING
+            - INFO_REQUIRED
+            - VERIFIED
+            - REJECTED
+        satisfied:
+          type: boolean
+          description: El requisito está cumplido.
+        blockedBy:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionChecklistItemDto'
+      required:
+        - code
+        - label
+        - required
+        - evidenceKind
+        - requiresSource
+        - state
+        - satisfied
+        - items
+    AdmissionBlockerDto:
+      type: object
+      properties:
+        requirementCode:
+          type: string
+        label:
+          type: string
+        reason:
+          type: string
+          enum:
+            - MISSING
+            - REJECTED
+            - PENDING
+            - INFO_REQUIRED
+            - BELOW_MINIMUM
+      required:
+        - requirementCode
+        - label
+        - reason
+    AdmissionDocumentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        fileId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        mimeType:
+          type: string
+        sizeBytes:
+          type: number
+        uploadedAt:
+          type: string
+          format: date-time
+        pages:
+          type: number
+          nullable: true
+        reviewState:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        evidenceSha256:
+          type: string
+          description: Huella (sha256) de la evidencia del ítem al que pertenece el archivo.
+      required:
+        - id
+        - requirementCode
+        - fileId
+        - name
+        - mimeType
+        - sizeBytes
+        - uploadedAt
+        - reviewState
+        - evidenceSha256
+    AdmissionDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        status:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        itemsSummary:
+          $ref: '#/components/schemas/AdmissionItemsSummaryDto'
+        requirementsSummary:
+          $ref: '#/components/schemas/AdmissionRequirementsSummaryDto'
+        submittedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        overdue:
+          type: boolean
+          description: Venció su plazo y la plataforma le debe una respuesta.
+        assignedTo:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        rowVersion:
+          type: number
+          description: Versión de la fila; se manda como expectedRowVersion.
+        practitioner:
+          $ref: '#/components/schemas/AdmissionPractitionerDetailDto'
+        licenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionLicenseDto'
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionCredentialDto'
+        specialties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionSpecialtyDto'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionEventDto'
+        infoRequestedText:
+          type: string
+          nullable: true
+        infoDueAt:
+          type: string
+          nullable: true
+        decisionReasonText:
+          type: string
+          nullable: true
+        decisionReasonCode:
+          type: string
+          nullable: true
+        internalNote:
+          type: string
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+          description: YYYY-MM-DD, inclusive, fin de día en America/La_Paz.
+        resubmissionCount:
+          type: number
+        attestedAt:
+          type: string
+          nullable: true
+        fourEyesRequired:
+          type: boolean
+          description: La configuración exige un aprobador distinto de los revisores.
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionChecklistRequirementDto'
+        blockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionBlockerDto'
+        canVerify:
+          type: boolean
+          description: Hoy se podría resolver VERIFICADA (lo decide el servidor).
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionDocumentDto'
+        submittedForm:
+          type: object
+          description: El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`.
+          additionalProperties: true
+        submittedFormSource:
+          type: string
+          enum:
+            - SNAPSHOT
+            - LIVE
+          description: >-
+            SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej.
+            las del backfill).
+      required:
+        - id
+        - type
+        - status
+        - itemsSummary
+        - requirementsSummary
+        - submittedAt
+        - dueAt
+        - overdue
+        - assignedTo
+        - rowVersion
+        - practitioner
+        - licenses
+        - credentials
+        - specialties
+        - events
+        - resubmissionCount
+        - fourEyesRequired
+        - requirements
+        - blockers
+        - canVerify
+        - documents
+        - submittedForm
+        - submittedFormSource
+    ClaimAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+      required:
+        - expectedRowVersion
+      additionalProperties: false
+    ReassignAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        toUserId:
+          type: string
+          format: uuid
+          description: Cuenta del revisor que recibe la admisión.
+      required:
+        - expectedRowVersion
+        - toUserId
+      additionalProperties: false
+    AdmissionItemRefDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - LICENSE
+            - CREDENTIAL
+            - SPECIALTY
+            - PROFILE
+        id:
+          type: string
+          format: uuid
+          description: La ficha (matrícula, título, especialidad o perfil).
+      required:
+        - type
+        - id
+      additionalProperties: false
+    RequestAdmissionInfoDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        reason:
+          type: string
+          maxLength: 500
+          description: Qué debe corregir o aportar el médico.
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        items:
+          description: Ítems puntuales; los marca INFO_REQUIRED.
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionItemRefDto'
+      required:
+        - expectedRowVersion
+        - reason
+      additionalProperties: false
+    ReviewAdmissionItemDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        reason:
+          type: string
+          maxLength: 500
+          description: Obligatorio si no es VERIFIED. Lo ve el médico.
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+          description: Motivo estructurado; por omisión OTRO.
+        internalNote:
+          type: string
+          maxLength: 1000
+          description: 'Nota interna: nunca llega al médico.'
+        sourceType:
+          type: string
+          enum:
+            - REGISTRO_MINSALUD
+            - COLEGIO_MEDICO
+            - COLEGIO_ODONTOLOGOS
+            - SEDES
+            - SEGIP
+            - DOCUMENTO_APORTADO
+            - OTRO
+          description: Fuente consultada (tipo).
+        sourceRef:
+          type: string
+          maxLength: 500
+          description: Nº de trámite, comprobante o URL de la fuente.
+        sourceConsultedAt:
+          type: string
+          format: date-time
+          description: Cuándo se consultó la fuente (por omisión, ahora).
+        verificationSourceUri:
+          type: string
+          maxLength: 2000
+          description: >-
+            URL de la fuente consultada. Compatibilidad: con VERIFIED alcanza como fuente (se registra como tipo OTRO
+            si no viene `sourceType`).
+        evidenceSha256:
+          type: string
+          description: >-
+            Huella (`evidenceSha256`) del ítem tal como la entregó `GET /admissions/:id`: lo que el revisor tuvo delante.
+            OBLIGATORIA para VERIFIED; si ya no coincide con la evidencia viva responde 409 ADMISSION_EVIDENCE_CHANGED
+            y no cambia nada.
+          pattern: ^[0-9a-f]{64}$
+        expectedRowVersion:
+          type: number
+          description: Versión del ÍTEM (`rowVersion` del item del checklist).
+          minimum: 1
+      required:
+        - decision
+        - expectedRowVersion
+      additionalProperties: false
+    DecideAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        decision:
+          type: string
+          enum:
+            - VERIFIED
+            - REJECTED
+        reason:
+          type: string
+          maxLength: 500
+          description: Obligatorio al rechazar. Lo ve el médico.
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        internalNote:
+          type: string
+          maxLength: 1000
+          description: 'Nota interna: nunca llega al médico.'
+        items:
+          deprecated: true
+          description: >-
+            YA NO SE ACEPTA: el estado de cada ítem lo fija `.../items/:itemId/review` y el servidor lo deriva de
+            las revisiones. Mandarlo responde 422 ADMISSION_DECISION_ITEMS_NOT_ACCEPTED.
+          type: array
+          items:
+            type: string
+      required:
+        - expectedRowVersion
+        - decision
+      additionalProperties: false
+    SuspendAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        reason:
+          type: string
+          maxLength: 500
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        internalNote:
+          type: string
+          maxLength: 1000
+      required:
+        - expectedRowVersion
+        - reason
+      additionalProperties: false
+    AdmissionDocumentUrlDto:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Ruta de la API para abrir el documento (vida corta, atada al actor).
+        expiresAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+        mimeType:
+          type: string
+      required:
+        - url
+        - expiresAt
+        - name
+        - mimeType
+    PatientAddressDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+            - HOME
+            - WORK
+            - SAVED
+        label:
+          type: string
+          description: 'Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo.'
+        lines:
+          type: string
+          description: Calle, número y referencia
+        city:
+          type: string
+          description: Ciudad, derivada del municipio
+        municipalityConceptId:
+          type: string
+          format: uuid
+          description: Municipio (VS_BO_MUNICIPALITY)
+        administrativeArea2ConceptId:
+          type: string
+          format: uuid
+          description: Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio
+        district:
+          type: string
+          description: Distrito o zona, tal como lo dio el mapa
+        latitude:
+          type: number
+        longitude:
+          type: number
+          description: Viaja siempre junto a la latitud
+        isPreferred:
+          type: boolean
+          description: Si es la que se ofrece primero
+      required:
+        - id
+        - kind
+        - label
+        - isPreferred
+    CreatePatientAddressDto:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 60
+          example: Casa de mi mamá
+        municipalityConceptId:
+          type: string
+          format: uuid
+          description: Municipio (VS_BO_MUNICIPALITY)
+        lines:
+          type: string
+          maxLength: 300
+        district:
+          type: string
+          maxLength: 200
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        isPreferred:
+          type: boolean
+          description: Marcarla como la que se ofrece primero
+      required:
+        - label
+        - municipalityConceptId
+      additionalProperties: false
+    UpdatePatientAddressDto:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 60
+          description: 'Sólo para las guardadas: domicilio y trabajo tienen nombre fijo.'
+        municipalityConceptId:
+          type: string
+          format: uuid
+        lines:
+          type: string
+          maxLength: 300
+          description: Vacío para quitarla
+        district:
+          type: string
+          maxLength: 200
+          description: Vacío para quitarlo
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+      additionalProperties: false
+    PrimaryPractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+          description: Con este id se abre su ficha en la guía
+        displayName:
+          type: string
+          description: Nombre visible del profesional
+        professionalTitle:
+          type: string
+          description: Título profesional declarado
+        since:
+          type: string
+          format: date-time
+          description: Desde cuándo es su médico de cabecera
+      required:
+        - practitionerProfileId
+        - since
+    OwnPrimaryPractitionerDto:
+      type: object
+      properties:
+        current:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PrimaryPractitionerDto'
+    SetPrimaryPractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+          description: Perfil profesional que el paciente elige como médico de cabecera
+      required:
+        - practitionerProfileId
+      additionalProperties: false
+    PrimaryPatientDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          description: Nombre visible del paciente
+        patientCode:
+          type: string
+          description: Código de paciente
+        since:
+          type: string
+          format: date-time
+          description: Desde cuándo lo tiene como médico de cabecera
+      required:
+        - patientProfileId
+        - since
+    PrimaryPatientsPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimaryPatientDto'
+        total:
+          type: number
+          description: Pacientes de cabecera vigentes, en total
+        limit:
+          type: number
+        offset:
+          type: number
+      required:
+        - items
+        - total
+        - limit
+        - offset
+    PractitionerVerificationDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VERIFIED
+            - IN_REVIEW
+            - UNVERIFIED
+            - SUSPENDED
+            - EXPIRED
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+      required:
+        - status
+        - verifiedAt
+        - validUntil
+    UserRoleAssignmentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+          description: Código que exige `@Roles(...)`
+        roleName:
+          type: string
+        roleScope:
+          type: string
+          nullable: true
+          enum:
+            - SELF
+            - BRANCH
+            - TENANT
+            - GLOBAL
+        tenantId:
+          type: object
+          nullable: true
+          format: uuid
+        branchId:
+          type: object
+          nullable: true
+          format: uuid
+        practiceId:
+          type: object
+          nullable: true
+          format: uuid
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - REVOKED
+            - EXPIRED
+            - OTHER
+        validFrom:
+          type: string
+          nullable: true
+          format: date-time
+        validTo:
+          type: string
+          nullable: true
+          format: date-time
+        isEffective:
+          type: boolean
+          description: >-
+            `true` si la asignación está activa y su vigencia cubre el instante de la consulta: es la que llega al
+            token
+        appliesGlobally:
+          type: boolean
+          description: >-
+            `true` si el rol es de ámbito global y se asignó sin tenant, sede ni consultorio: autoriza en las rutas
+            sin tenant. Un rol global asignado con tenant no autoriza ahí
+        assignedByUserId:
+          type: object
+          nullable: true
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - roleId
+        - roleCode
+        - roleName
+        - status
+        - isEffective
+        - appliesGlobally
+        - createdAt
+    UserRoleAssignmentsDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoleAssignmentDto'
+      required:
+        - userId
+        - items
+    RevokedAssignmentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - REVOKED
+        note:
+          type: string
+          description: >-
+            El rol deja de llegar al token en su próxima renovación; las sesiones ya emitidas lo conservan hasta entonces
+      required:
+        - id
+        - status
+        - note
+    PermissionSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        resource:
+          type: string
+        categoryId:
+          type: object
+          nullable: true
+          format: uuid
+        isDangerous:
+          type: boolean
+        isFieldLevel:
+          type: boolean
+        isRoleRestricted:
+          type: boolean
+          description: Sólo lo concede un rol, no una excepción por usuario
+      required:
+        - id
+        - code
+        - name
+        - resource
+        - isDangerous
+        - isFieldLevel
+        - isRoleRestricted
+    PermissionsPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionSummaryDto'
+        nextCursor:
+          type: object
+          nullable: true
+        limit:
+          type: number
+      required:
+        - items
+        - limit
+    RolePermissionDto:
+      type: object
+      properties:
+        permissionId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        resource:
+          type: string
+        effect:
+          type: string
+          enum:
+            - ALLOW
+            - DENY
+            - OTHER
+        scope:
+          type: string
+          nullable: true
+          enum:
+            - SELF
+            - BRANCH
+            - TENANT
+            - GLOBAL
+      required:
+        - permissionId
+        - code
+        - name
+        - resource
+        - effect
+    RolePermissionsDto:
+      type: object
+      properties:
+        roleId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolePermissionDto'
+      required:
+        - roleId
+        - roleCode
+        - items
+    InternalUserAssignmentDto:
+      type: object
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+        roleName:
+          type: string
+        tenantId:
+          type: object
+          nullable: true
+          format: uuid
+        validTo:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+        - assignmentId
+        - roleCode
+        - roleName
+    InternalUserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        statusConceptId:
+          type: string
+          format: uuid
+        lastLoginAt:
+          type: string
+          nullable: true
+          format: date-time
+        globalRoles:
+          description: Roles globales de `iam` activos (`SECURITY_ADMIN`, `SUPERADMIN`, …)
+          type: array
+          items:
+            type: string
+        assignments:
+          description: Asignaciones de rol activas de `authz`
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalUserAssignmentDto'
+      required:
+        - id
+        - displayName
+        - statusConceptId
+        - globalRoles
+        - assignments
+    InternalUsersPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalUserDto'
+        nextCursor:
+          type: object
+          nullable: true
+        limit:
+          type: number
+      required:
+        - items
+        - limit
+    DataAccessorDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - SELF
+            - PRACTITIONER
+            - OTHER
+          description: >-
+            `SELF` es el propio titular; `PRACTITIONER`, un profesional de la salud; `OTHER`, cualquier otra cuenta
+        displayName:
+          type: object
+          nullable: true
+          description: Nombre a mostrar de la persona vinculada a la cuenta; `null` si no tiene o si es el propio
+            titular
+      required:
+        - kind
+    MyDataAccessEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador del registro
+        accessedAt:
+          type: string
+          format: date-time
+        accessor:
+          $ref: '#/components/schemas/DataAccessorDto'
+        operation:
+          type: string
+          enum:
+            - READ
+            - CREATE
+            - UPDATE
+            - DELETE
+            - EXPORT
+        resourceType:
+          type: object
+          nullable: true
+          description: Tipo de dato al que se accedió (código, p. ej. `DIAGNOSTIC_RESULTS`)
+        purpose:
+          type: object
+          nullable: true
+          description: Finalidad con que se declaró el acceso (código, p. ej. `TREATMENT`, `PATIENT_ACCESS`)
+      required:
+        - id
+        - accessedAt
+        - accessor
+        - operation
+    MyDataAccessPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyDataAccessEntryDto'
+        nextCursor:
+          type: object
+          nullable: true
+        limit:
+          type: number
+      required:
+        - items
+        - limit
+    AuditLogEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: object
+          nullable: true
+          format: uuid
+        action:
+          type: string
+          description: Código de negocio o `HTTP <VERBO> <plantilla>`
+        entity:
+          type: string
+        entityId:
+          type: object
+          nullable: true
+          format: uuid
+        result:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+            - UNKNOWN
+        ip:
+          type: object
+          nullable: true
+        method:
+          type: string
+          nullable: true
+          enum:
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+          description: Derivado de la acción; `null` si no se pudo derivar
+        route:
+          type: object
+          nullable: true
+          description: Plantilla de la ruta, derivada de la acción; `null` si no se pudo derivar
+        healthRisk:
+          type: string
+          enum:
+            - CRITICAL
+            - HIGH
+            - MEDIUM
+            - LOW
+          description: Riesgo para la seguridad de la salud, derivado al leer (no se guarda)
+        recordedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - action
+        - entity
+        - result
+        - healthRisk
+        - recordedAt
+    AuditLogPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogEntryDto'
+        nextCursor:
+          type: object
+          nullable: true
+        limit:
+          type: number
+      required:
+        - items
+        - limit
+    DataAccessEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: object
+          nullable: true
+          format: uuid
+        patientProfileId:
+          type: object
+          nullable: true
+          format: uuid
+        operation:
+          type: string
+          enum:
+            - READ
+            - CREATE
+            - UPDATE
+            - DELETE
+            - EXPORT
+        resourceType:
+          type: object
+          nullable: true
+        resourceId:
+          type: object
+          nullable: true
+          format: uuid
+        purpose:
+          type: object
+          nullable: true
+        healthRisk:
+          type: string
+          enum:
+            - CRITICAL
+            - HIGH
+            - MEDIUM
+            - LOW
+        recordedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - operation
+        - healthRisk
+        - recordedAt
+    DataAccessPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataAccessEntryDto'
+        nextCursor:
+          type: object
+          nullable: true
+        limit:
+          type: number
+      required:
+        - items
+        - limit
+    WebPushKeysDto:
+      type: object
+      properties:
+        p256dh:
+          type: string
+          description: Clave pública ECDH (base64url)
+        auth:
+          type: string
+          description: Secreto de autenticación (base64url)
+      required:
+        - p256dh
+        - auth
+      additionalProperties: false
+    WebPushSubscriptionDto:
+      type: object
+      properties:
+        endpoint:
+          type: string
+          description: Dirección HTTPS del servicio de push del navegador
+        keys:
+          $ref: '#/components/schemas/WebPushKeysDto'
+      required:
+        - endpoint
+        - keys
+      additionalProperties: false
+    WebPushUnsubscribeDto:
+      type: object
+      properties:
+        endpoint:
+          type: string
+      required:
+        - endpoint
+      additionalProperties: false
+    CompleteAffiliationDocumentsDto:
+      type: object
+      properties:
+        constitutionFileId:
+          type: string
+          format: uuid
+        taxIdentifierFileId:
+          type: string
+          format: uuid
+        commerceRegistryFileId:
+          type: string
+          format: uuid
+        operatingLicenseFileId:
+          type: string
+          format: uuid
+        healthAuthorityCertificateFileId:
+          type: string
+          format: uuid
+        powerOfAttorneyFileId:
+          type: string
+          format: uuid
+        taxIdentifier:
+          type: string
+          maxLength: 50
+          example: '1023456029'
+      additionalProperties: false
+    PendingProcedureDto:
+      type: object
+      properties:
+        serviceRequestId:
+          type: string
+          format: uuid
+        conceptId:
+          type: string
+          format: uuid
+        categoryConceptId:
+          type: string
+          format: uuid
+        requestedAt:
+          format: date-time
+          type: string
+      required:
+        - serviceRequestId
+        - conceptId
+        - categoryConceptId
+        - requestedAt
+    ProcedureCenterDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        practiceId:
+          type: string
+          format: uuid
+        practiceName:
+          type: string
+        siteName:
+          type: string
+        complete:
+          type: boolean
+        missingProcedureConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        distanceKm:
+          type: number
+          nullable: true
+        addressText:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+      required:
+        - siteId
+        - practiceId
+        - practiceName
+        - siteName
+        - complete
+        - missingProcedureConceptIds
+        - distanceKm
+        - addressText
+        - latitude
+        - longitude
+    ProcedureCentersResponseDto:
+      type: object
+      properties:
+        procedures:
+          type: array
+          items:
+            $ref: '#/components/schemas/PendingProcedureDto'
+        centers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcedureCenterDto'
+        total:
+          type: number
+        limit:
+          type: number
+      required:
+        - procedures
+        - centers
+        - total
+        - limit
+    PrescriptionExpirySweepDto:
+      type: object
+      properties:
+        limit:
+          type: number
+          description: Tamaño máximo del lote
+          minimum: 1
+          maximum: 500
+          default: 200
+      additionalProperties: false
+    PrescriptionExpirySweepResultDto:
+      type: object
+      properties:
+        scanned:
+          type: number
+          description: Recetas por vencer sin aviso previo que se consideraron
+        notified:
+          type: number
+          description: Avisos entregados a la bandeja del paciente
+        suppressed:
+          type: number
+          description: Avisos que la preferencia del paciente detuvo; quedan registrados y no se reintentan
+        failed:
+          type: number
+          description: Avisos que no se pudieron emitir; el siguiente barrido los reintenta
+        skipped:
+          type: boolean
+          description: '`true` si otro barrido estaba en curso y éste no hizo nada'
+      required:
+        - scanned
+        - notified
+        - suppressed
+        - failed
+        - skipped
+    MyClaimBreakdownLineDto:
+      type: object
+      properties:
+        key:
+          type: string
+          format: uuid
+        service:
+          type: string
+        billedAmount:
+          type: string
+        coveragePercent:
+          type: string
+        copayAmount:
+          type: string
+        patientAmount:
+          type: string
+        insurerAmount:
+          type: string
+        chargeKind:
+          type: string
+          enum:
+            - INSURED_SHARE
+            - PRIVATE_FULL
+        authorizationStatus:
+          type: string
+          enum:
+            - NOT_REQUIRED
+            - APPROVED
+            - MISSING
+            - PENDING
+            - DENIED
+            - EXPIRED
+            - MISMATCH
+            - AMOUNT_EXCEEDED
+          nullable: true
+      required:
+        - key
+        - service
+        - billedAmount
+        - coveragePercent
+        - copayAmount
+        - patientAmount
+        - insurerAmount
+        - chargeKind
+        - authorizationStatus
+    MyClaimBreakdownDto:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          nullable: true
+        patientTotal:
+          type: string
+        insurerTotal:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyClaimBreakdownLineDto'
+      required:
+        - currencyCode
+        - patientTotal
+        - insurerTotal
+        - lines
+    MyClaimObjectionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+            - AMOUNT_DIFFERS
+            - SERVICE_NOT_RECEIVED
+            - NOT_INFORMED
+        submittedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - OPEN
+            - RESOLVED
+      required:
+        - id
+        - reason
+        - submittedAt
+        - status
+    PatientCoverageOptionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        insuranceCarrierId:
+          type: string
+          format: uuid
+        carrierName:
+          type: string
+        planName:
+          type: string
+          nullable: true
+        validityStatus:
+          type: string
+          enum:
+            - CURRENT
+            - UPCOMING
+            - EXPIRED
+            - INACTIVE
+            - UNKNOWN
+        currencyCode:
+          type: string
+          nullable: true
+      required:
+        - id
+        - insuranceCarrierId
+        - carrierName
+        - planName
+        - validityStatus
+        - currencyCode
+    PatientCoverageOptionListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientCoverageOptionDto'
+      required:
+        - items
+    ClaimQuoteDto:
+      type: object
+      properties:
+        insuranceCarrierId:
+          type: string
+          format: uuid
+        patientCoverageId:
+          type: string
+          format: uuid
+        priorAuthorizationRequestId:
+          type: string
+          format: uuid
+          description: Aprobación previa que se piensa vincular al cobro
+        lines:
+          description: '1..N líneas. `patientResponsibilityAmount` se ignora: lo calcula el servidor.'
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimLineDto'
+      required:
+        - insuranceCarrierId
+        - patientCoverageId
+        - lines
+      additionalProperties: false
+    ClaimQuoteLineResultDto:
+      type: object
+      properties:
+        lineSequence:
+          type: number
+          example: 1
+        serviceConceptId:
+          type: object
+          format: uuid
+          nullable: true
+        billedAmount:
+          type: string
+          example: '500.00'
+        covered:
+          type: boolean
+          description: >-
+            El plan cubre el servicio y el reparto se pudo calcular. No implica que el cobro se pueda enviar: mire
+            `reason`.
+        coveragePercent:
+          type: object
+          example: '80'
+          nullable: true
+        copayAmount:
+          type: object
+          example: '50.00'
+          nullable: true
+        deductibleAmount:
+          type: object
+          example: '25.00'
+          nullable: true
+          description: 'Informativo: el deducible todavía no se aplica al reparto (decisión del propietario).'
+        requiresPriorAuthorization:
+          type: boolean
+        priorAuthorizationStatus:
+          type: string
+          enum:
+            - NOT_REQUIRED
+            - APPROVED
+            - MISSING
+            - PENDING
+            - DENIED
+            - EXPIRED
+            - MISMATCH
+            - AMOUNT_EXCEEDED
+          nullable: true
+          description: '`null` si el servicio no tiene beneficio vigente.'
+        patientAmount:
+          type: object
+          example: '140.00'
+          nullable: true
+        insurerAmount:
+          type: object
+          example: '360.00'
+          nullable: true
+        reason:
+          type: object
+          nullable: true
+          description: >-
+            Motivo tipificado por el que esta línea no se podría cobrar (por ejemplo `PRIOR_AUTHORIZATION_REQUIRED`).
+        message:
+          type: object
+          nullable: true
+      required:
+        - lineSequence
+        - billedAmount
+        - covered
+        - requiresPriorAuthorization
+    ClaimQuoteResultDto:
+      type: object
+      properties:
+        canSubmit:
+          type: boolean
+          description: >-
+            Todas las líneas se podrían enviar hoy. Si es `false`, el botón «Enviar a la aseguradora» debe quedar
+            deshabilitado y explicar el motivo.
+        currencyConceptId:
+          type: object
+          format: uuid
+          nullable: true
+        totalBilledAmount:
+          type: object
+          example: '500.00'
+          nullable: true
+          description: '`null` si algún monto no es un decimal válido.'
+        totalPatientAmount:
+          type: object
+          example: '140.00'
+          nullable: true
+          description: '`null` mientras alguna línea no tenga reparto calculable.'
+        totalInsurerAmount:
+          type: object
+          example: '360.00'
+          nullable: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimQuoteLineResultDto'
+      required:
+        - canSubmit
+        - lines
+    IssuePatientInvoiceDto:
+      type: object
+      properties:
+        claimLineId:
+          type: string
+          format: uuid
+          description: Línea del reclamo que se le factura al paciente
+        patientAmount:
+          type: string
+          example: '140.00'
+          description: >-
+            Confirmación del importe mostrado. Nunca se usa como monto: si difiere del cálculo del servidor, 422.
+        description:
+          type: string
+          maxLength: 200
+          description: Texto de la línea de factura; por defecto lo arma el servidor.
+      required:
+        - claimLineId
+      additionalProperties: false
+    PatientInvoiceIssuedDto:
+      type: object
+      properties:
+        invoiceId:
+          type: string
+          format: uuid
+        invoiceLineId:
+          type: string
+          format: uuid
+        invoiceNumber:
+          type: string
+          example: INV-1761300000000-1a2b3c4d
+        claimId:
+          type: string
+          format: uuid
+        claimLineId:
+          type: string
+          format: uuid
+        chargeKind:
+          type: string
+          enum:
+            - INSURED_SHARE
+            - PRIVATE_FULL
+        billedAmount:
+          type: string
+          example: '500.00'
+        coveragePercent:
+          type: object
+          example: '80'
+          nullable: true
+        copayAmount:
+          type: object
+          example: '50.00'
+          nullable: true
+        patientAmount:
+          type: string
+          example: '140.00'
+          description: Lo que paga el paciente
+        insurerAmount:
+          type: string
+          example: '360.00'
+          description: Lo que paga la aseguradora
+        currencyConceptId:
+          type: object
+          format: uuid
+          nullable: true
+      required:
+        - invoiceId
+        - invoiceLineId
+        - invoiceNumber
+        - claimId
+        - claimLineId
+        - chargeKind
+        - billedAmount
+        - patientAmount
+        - insurerAmount
+    ClaimDisputeDto:
+      type: object
+      properties:
+        claimAdjudicationVersionId:
+          type: string
+          format: uuid
+          description: Versión de adjudicación disputada
+        initiatedBy:
+          type: string
+          enum:
+            - PROVIDER
+            - PATIENT
+          description: Parte que inicia
+        initiatedByEntityId:
+          type: string
+          format: uuid
+        filingDeadline:
+          type: string
+          format: date
+          description: Fecha límite de presentación
+        objectionReason:
+          type: string
+          enum:
+            - AMOUNT_DIFFERS
+            - SERVICE_NOT_RECEIVED
+            - NOT_INFORMED
+          description: Motivo de la objeción del paciente. Por defecto, NOT_INFORMED. Lo ignora la apelación del prestador.
+      required:
+        - initiatedBy
+      additionalProperties: false
+    HealthcareServiceOfferDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        serviceConceptId:
+          type: string
+          format: uuid
+        serviceDisplay:
+          type: string
+        serviceCatalogId:
+          type: string
+          format: uuid
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        currencyConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        referencePrice:
+          type: number
+          nullable: true
+        referenceUnit:
+          type: string
+          enum:
+            - UMA
+            - USD
+          nullable: true
+        overMargin:
+          type: boolean
+          nullable: true
+        visibleInSearch:
+          type: boolean
+        active:
+          type: boolean
+      required:
+        - id
+        - practiceSiteId
+        - serviceConceptId
+        - serviceDisplay
+        - serviceCatalogId
+        - price
+        - currencyConceptId
+        - referencePrice
+        - referenceUnit
+        - overMargin
+        - visibleInSearch
+        - active
+    HealthcareServiceOffersResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthcareServiceOfferDto'
+      required:
+        - items
+    UpdateHealthcareServiceDto:
+      type: object
+      properties:
+        serviceCatalogId:
+          type: string
+          description: Nuevo ítem del catálogo de precios de la práctica; su concepto debe coincidir con el del servicio
+          format: uuid
+        active:
+          type: boolean
+          description: ¿El procedimiento está activo?
+      additionalProperties: false
+    SetSiteLogoDto:
+      type: object
+      properties:
+        fileId:
+          type: object
+          format: uuid
+          nullable: true
+          description: Imagen del logo ya subida, o null para quitarlo
+      required:
+        - fileId
+      additionalProperties: false
+    CreateOrganizationPracticeSiteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la sede
+          maxLength: 200
+        addressText:
+          type: string
+          description: Dirección en una línea
+          maxLength: 500
+          example: Av. San Martín 123
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.7833
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.1821
+        cityText:
+          type: string
+          maxLength: 255
+          example: Santa Cruz de la Sierra
+      required:
+        - name
+        - addressText
+        - latitude
+        - longitude
+      additionalProperties: false
+    CreateOrganizationPracticeDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del centro médico
+          maxLength: 200
+        site:
+          $ref: '#/components/schemas/CreateOrganizationPracticeSiteDto'
+      required:
+        - name
+        - site
+      additionalProperties: false
+    InvitePractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        healthcareServiceIds:
+          minItems: 1
+          maxItems: 50
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - practitionerProfileId
+        - practiceSiteId
+        - healthcareServiceIds
+      additionalProperties: false
+    PharmacyCategoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        productCount:
+          type: number
+      required:
+        - id
+        - name
+        - productCount
+    PharmacyCategoryNameDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+      required:
+        - name
+      additionalProperties: false
+    PharmacyInventoryLineDto:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        stock:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        minStock:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        inStock:
+          type: boolean
+      required:
+        - productId
+      additionalProperties: false
+    PharmacyUpdateInventoryDto:
+      type: object
+      properties:
+        lines:
+          minItems: 1
+          maxItems: 500
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyInventoryLineDto'
+      required:
+        - lines
+      additionalProperties: false
+    InventoryUpdatedDto:
+      type: object
+      properties:
+        updated:
+          type: number
+      required:
+        - updated
+    PharmacyOnCallShiftDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        startsAtLocal:
+          type: string
+          example: '2026-10-26T20:00:00-04:00'
+        endsAtLocal:
+          type: string
+          example: '2026-10-27T08:00:00-04:00'
+        timeZone:
+          type: string
+          example: America/La_Paz
+        source:
+          type: string
+          enum:
+            - PHARMACY
+            - PLATFORM
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - CANCELLED
+        current:
+          type: boolean
+      required:
+        - id
+        - siteId
+        - startsAt
+        - endsAt
+        - startsAtLocal
+        - endsAtLocal
+        - timeZone
+        - source
+        - status
+        - current
+    PharmacySiteOpeningHoursDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        timeZone:
+          type: string
+          example: America/La_Paz
+        open24h:
+          type: boolean
+          nullable: true
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyOnCallShiftDto'
+      required:
+        - siteId
+        - siteName
+        - timeZone
+        - open24h
+        - shifts
+    PharmacyOpeningHoursDto:
+      type: object
+      properties:
+        pharmacyId:
+          type: string
+          format: uuid
+        asOf:
+          type: string
+          format: date-time
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacySiteOpeningHoursDto'
+      required:
+        - pharmacyId
+        - asOf
+        - sites
+    PharmacySetOpen24hDto:
+      type: object
+      properties:
+        open24h:
+          type: boolean
+          nullable: true
+          description: '`true`: abre las 24 h · `false`: no · `null`: retira la declaración (vuelve a «no declarado»)'
+      required:
+        - open24h
+      additionalProperties: false
+    PharmacyCreateOnCallShiftDto:
+      type: object
+      properties:
+        startsAt:
+          type: string
+          description: Inicio, ISO-8601 con desplazamiento obligatorio (p. ej. `2026-10-26T20:00:00-04:00`)
+          example: '2026-10-26T20:00:00-04:00'
+        endsAt:
+          type: string
+          description: Fin (exclusivo), ISO-8601 con desplazamiento obligatorio. Como mucho 72 h después del inicio
+          example: '2026-10-27T08:00:00-04:00'
+      required:
+        - startsAt
+        - endsAt
+      additionalProperties: false
+    PublicOnCallNowDto:
+      type: object
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        endsAtLocal:
+          type: string
+          example: '2026-10-27T08:00:00-04:00'
+        source:
+          type: string
+          enum:
+            - PHARMACY
+            - PLATFORM
+      required:
+        - startsAt
+        - endsAt
+        - endsAtLocal
+        - source
+    PublicOpenNowItemDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        pharmacyName:
+          type: string
+        pharmacySlug:
+          type: string
+        addressText:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+        distanceKm:
+          type: number
+          nullable: true
+        open24h:
+          type: boolean
+        onCall:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PublicOnCallNowDto'
+        timeZone:
+          type: string
+          example: America/La_Paz
+      required:
+        - siteId
+        - siteName
+        - pharmacyName
+        - pharmacySlug
+        - open24h
+        - timeZone
+    PublicOpenNowPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicOpenNowItemDto'
+        nextCursor:
+          type: string
+          nullable: true
+        asOf:
+          type: string
+          format: date-time
+        asOfLocal:
+          type: string
+          example: '2026-10-26T03:00:00-04:00'
+        timeZone:
+          type: string
+          example: America/La_Paz
+      required:
+        - items
+        - asOf
+        - asOfLocal
+        - timeZone
+    BulkRequestDto:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - CREATE
+            - UPDATE
+            - UPSERT
+        dryRun:
+          type: boolean
+          default: false
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          minItems: 1
+          maxItems: 1000
+      required:
+        - mode
+        - rows
+      additionalProperties: false
+    BulkRowErrorDto:
+      type: object
+      properties:
+        field:
+          type: string
+        reason:
+          type: string
+        message:
+          type: string
+      required:
+        - field
+        - reason
+    BulkRowResultDto:
+      type: object
+      properties:
+        row:
+          type: number
+        outcome:
+          type: string
+          enum:
+            - CREATED
+            - UPDATED
+            - REJECTED
+            - UNCHANGED
+        id:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkRowErrorDto'
+      required:
+        - row
+        - outcome
+    BulkResponseDto:
+      type: object
+      properties:
+        dryRun:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkRowResultDto'
+      required:
+        - dryRun
+        - results
+    WithdrawTreatmentInformedConsentDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Motivo de la revocación
+          maxLength: 4000
+      required:
+        - reason
+      additionalProperties: false
+    PostEmergencyInformationDto:
+      type: object
+      properties:
+        informedAt:
+          type: string
+          format: date-time
+      required:
+        - informedAt
+      additionalProperties: false
+    RecordTreatmentConsentEvidenceDto:
+      type: object
+      properties:
+        evidenceTypeConceptId:
+          type: string
+          description: Tipo de evidencia (concept id); por defecto firma
+        documentFileId:
+          type: string
+          description: Documento firmado (file id)
+          format: uuid
+        signatureId:
+          type: string
+          description: Firma clínica asociada (signature id)
+          format: uuid
+        capturedChannelConceptId:
+          type: string
+          description: Canal de captura (concept id)
+          format: uuid
+        policySnapshotHash:
+          type: string
+          description: Hash del snapshot de política
+        evidenceHash:
+          type: string
+          description: Hash de la evidencia (integridad reproducible)
+      additionalProperties: false
+    CreateSimpleAccountDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        accountClass:
+          type: string
+          enum:
+            - ASSET
+            - LIABILITY
+            - EQUITY
+            - INCOME
+            - EXPENSE
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - name
+        - accountClass
+        - practiceId
+      additionalProperties: false
+    SimpleAccountInputDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        accountClass:
+          type: string
+          enum:
+            - ASSET
+            - LIABILITY
+            - EQUITY
+            - INCOME
+            - EXPENSE
+      required:
+        - name
+        - accountClass
+      additionalProperties: false
+    CreateSimpleRecordDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - ASSET
+            - DEBT
+        date:
+          type: string
+          format: date
+        accountId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 160
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - kind
+        - date
+        - accountId
+        - description
+        - amount
+        - practiceId
+      additionalProperties: false
+    SimpleRecordInputDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - ASSET
+            - DEBT
+        date:
+          type: string
+          format: date
+        accountId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 160
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+      required:
+        - kind
+        - date
+        - accountId
+        - description
+        - amount
+      additionalProperties: false
+    CreateSimpleTransactionDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 160
+        debitAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del debe.
+        creditAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del haber; distinta de la del debe.
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - date
+        - description
+        - debitAccountId
+        - creditAccountId
+        - amount
+        - practiceId
+      additionalProperties: false
+    SimpleTransactionInputDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 160
+        debitAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del debe.
+        creditAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del haber; distinta de la del debe.
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+      required:
+        - date
+        - description
+        - debitAccountId
+        - creditAccountId
+        - amount
+      additionalProperties: false
+    ImportProceduresDto:
+      type: object
+      properties:
+        practiceId:
+          type: string
+          description: Práctica (practice.practices) cuyo catálogo recibe los servicios
+          format: uuid
+        specialties:
+          description: Nombres exactos de especialidad del arancel (`GET procedure-specialties`)
+          example:
+            - Cardiología
+          type: array
+          items:
+            type: string
+        codes:
+          description: Códigos del arancel (`procedure:...`) a importar
+          example:
+            - procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL
+          type: array
+          items:
+            type: string
+        q:
+          type: string
+          description: Texto a buscar en el nombre del procedimiento; sin tildes ni mayúsculas, todas las palabras
+      required:
+        - practiceId
+      additionalProperties: false
+    PatientSpendingConceptDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: SPEND_CONSULTATION
+        display:
+          type: string
+          example: Consultations
+      required:
+        - code
+        - display
+    PatientSpendingMovementDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        occurredAt:
+          type: string
+          example: '2026-10-20T14:05:00.000Z'
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/PatientSpendingConceptDto'
+        providerName:
+          type: string
+          nullable: true
+        grossAmount:
+          type: string
+          example: '300.00'
+        coveredAmount:
+          type: string
+          example: '150.00'
+        discountAmount:
+          type: string
+          example: '0.00'
+        paidAmount:
+          type: string
+          example: '150.00'
+      required:
+        - id
+        - occurredAt
+        - description
+        - category
+        - providerName
+        - grossAmount
+        - coveredAmount
+        - discountAmount
+        - paidAmount
+    PatientSpendingResponseDto:
+      type: object
+      properties:
+        currency:
+          type: string
+          example: BOB
+        from:
+          type: string
+          example: '2025-01-01'
+        to:
+          type: string
+          example: '2026-10-26'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientSpendingMovementDto'
+        truncated:
+          type: boolean
+      required:
+        - currency
+        - from
+        - to
+        - items
+        - truncated
+    ChartNoteEntryDto:
+      type: object
+      properties:
+        label:
+          type: string
+          example: Presión arterial
+        value:
+          type: string
+          example: 120/80
+      required:
+        - label
+        - value
+    NoteEntryInputDto:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 60
+          example: Presión arterial
+          description: Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota
+        value:
+          type: string
+          maxLength: 500
+          example: 120/80
+          description: Valor de la fila; se recorta
+      required:
+        - label
+        - value
+      additionalProperties: false
+    ReferralTargetDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - PRACTITIONER
+            - ORGANIZATION
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+      required:
+        - kind
+        - id
+        - displayName
+        - tenantId
+        - subtitle
+    ReferralTargetListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferralTargetDto'
+      required:
+        - items
+    ReferralTargetServiceDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        currency:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        practiceName:
+          type: string
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - description
+        - price
+        - currency
+        - tenantId
+        - practiceName
+    ReferralTargetServiceListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferralTargetServiceDto'
+      required:
+        - items
+    CounterReferralDto:
+      type: object
+      properties:
+        counterReferralText:
+          type: string
+          description: Contrarreferencia
+          maxLength: 8000
+      required:
+        - counterReferralText
+      additionalProperties: false
+    ReferralListItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patientProfileId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - COMPLETED
+            - CANCELLED
+        statusConceptId:
+          type: string
+          format: uuid
+          description: Estado de la referencia (concept id)
+        referralType:
+          type: string
+          enum:
+            - TREATMENT
+            - CONSULTATION
+            - DIAGNOSTIC_STUDY
+            - PROCEDURE
+            - SECOND_OPINION
+            - THERAPY
+            - HOSPITALIZATION
+            - OTHER
+          nullable: true
+        referralTypeConceptId:
+          type: string
+          format: uuid
+        targetServiceCatalogId:
+          type: string
+          format: uuid
+          nullable: true
+        sourceEncounterId:
+          type: string
+          format: uuid
+        referringProfileId:
+          type: string
+          format: uuid
+        targetProfileId:
+          type: string
+          format: uuid
+        targetTenantId:
+          type: string
+          format: uuid
+        targetTenantName:
+          type: string
+        targetBranchId:
+          type: string
+          format: uuid
+        targetBranchName:
+          type: string
+        targetExternalName:
+          type: string
+        targetExternalContact:
+          type: string
+        specialtyConceptId:
+          type: string
+          format: uuid
+        serviceRequestId:
+          type: string
+          format: uuid
+        requestedServiceText:
+          type: string
+        requestedServiceConceptId:
+          type: string
+          format: uuid
+        reasonConceptId:
+          type: string
+          format: uuid
+        reasonText:
+          type: string
+        diagnosisText:
+          type: string
+        clinicalSummary:
+          type: string
+        treatmentGivenText:
+          type: string
+        informedConsentId:
+          type: string
+          format: uuid
+        priorityConceptId:
+          type: string
+          format: uuid
+        validUntil:
+          type: string
+          format: date
+        respondedAt:
+          type: string
+          format: date-time
+        rejectReason:
+          type: string
+        counterReferralText:
+          type: string
+        counterReferralAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        createdByUserId:
+          type: string
+          format: uuid
+        updatedByUserId:
+          type: string
+          format: uuid
+        rowVersion:
+          type: number
+        targetDisplayName:
+          type: string
+          nullable: true
+        targetServiceName:
+          type: string
+          nullable: true
+      required:
+        - id
+        - patientProfileId
+        - status
+        - statusConceptId
+        - referralType
+        - targetServiceCatalogId
+        - createdAt
+        - rowVersion
+        - targetDisplayName
+        - targetServiceName
+    CreatePrescriptionShareDto:
+      type: object
+      properties:
+        encounterId:
+          type: string
+          format: uuid
+          description: Encuentro de la receta. Excluye a `medicationRequestId`.
+        medicationRequestId:
+          type: string
+          format: uuid
+          description: Fármaco suelto. Excluye a `encounterId`.
+      additionalProperties: false
+    PrescriptionShareCreatedDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        url:
+          type: string
+          description: 'Enlace para compartir: `<web>/rx/<token>`'
+        token:
+          type: string
+          description: Token en claro; se devuelve una sola vez
+        expiresAt:
+          type: string
+          format: date-time
+        itemCount:
+          type: number
+      required:
+        - shareId
+        - url
+        - token
+        - expiresAt
+        - itemCount
+    PrescriptionShareSummaryDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        resourceType:
+          type: string
+          enum:
+            - PRESCRIPTION_ENCOUNTER
+            - MEDICATION_REQUEST
+        resourceId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - VALID
+            - EXPIRED
+            - REVOKED
+        endedReason:
+          type: string
+          enum:
+            - LINK_EXPIRED
+            - PRESCRIPTION_NOT_ACTIVE
+          nullable: true
+        uses:
+          type: number
+      required:
+        - shareId
+        - resourceType
+        - resourceId
+        - createdAt
+        - expiresAt
+        - status
+        - endedReason
+        - uses
+    PrescriptionShareOwnershipDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        resourceType:
+          type: string
+          enum:
+            - PRESCRIPTION_ENCOUNTER
+            - MEDICATION_REQUEST
+        resourceId:
+          type: string
+          format: uuid
+      required:
+        - shareId
+        - resourceType
+        - resourceId
+    PublicPrescriptionShareDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VALID
+            - EXPIRED
+            - REVOKED
+        endedReason:
+          type: string
+          enum:
+            - LINK_EXPIRED
+            - PRESCRIPTION_NOT_ACTIVE
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        prescriberName:
+          type: string
+          nullable: true
+        prescriberLicense:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PrescriberLicenseDto'
+        itemCount:
+          type: number
+      required:
+        - status
+        - endedReason
+        - issuedAt
+        - itemCount
+    MedicalCenterOfferDto:
+      type: object
+      properties:
+        procedureConceptId:
+          type: string
+          format: uuid
+        procedureDisplay:
+          type: string
+        price:
+          type: number
+        currencyConceptId:
+          type: string
+          format: uuid
+        referencePrice:
+          type: number
+          nullable: true
+        referenceUnit:
+          type: string
+          enum:
+            - UMA
+            - USD
+          nullable: true
+        overMargin:
+          type: boolean
+          nullable: true
+      required:
+        - procedureConceptId
+        - procedureDisplay
+        - price
+        - currencyConceptId
+        - referencePrice
+        - referenceUnit
+        - overMargin
+    MedicalCenterItemDto:
+      type: object
+      properties:
+        practiceId:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        addressText:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+        distanceKm:
+          type: number
+          nullable: true
+        complete:
+          type: boolean
+        missingProcedureConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalCenterOfferDto'
+        totalPrice:
+          type: number
+          nullable: true
+        practitionerWorksHere:
+          type: boolean
+        suggestedByPractitioner:
+          type: boolean
+      required:
+        - practiceId
+        - practiceSiteId
+        - name
+        - addressText
+        - latitude
+        - longitude
+        - distanceKm
+        - complete
+        - missingProcedureConceptIds
+        - offers
+        - totalPrice
+    MedicalCenterPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalCenterItemDto'
+        total:
+          type: number
+        limit:
+          type: number
+        offset:
+          type: number
+      required:
+        - items
+        - total
+        - limit
+        - offset
+    ReverseGeocodingRequestDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+      required:
+        - latitude
+        - longitude
+      additionalProperties: false
+    ReverseGeocodingAdminAreasDto:
+      type: object
+      properties:
+        level1:
+          type: string
+          description: 'Nivel 1: departamento, estado o región'
+          example: Santa Cruz
+        level2:
+          type: string
+          description: 'Nivel 2: provincia o condado'
+          example: Provincia Andrés Ibáñez
+        level3:
+          type: string
+          description: 'Nivel 3: municipio o ciudad'
+          example: Santa Cruz de la Sierra
+        district:
+          type: string
+          description: Distrito o zona dentro del municipio
+          example: Equipetrol
+    ReverseGeocodingResponseDto:
+      type: object
+      properties:
+        found:
+          type: boolean
+          description: '`false` si no se conoce ninguna calle en ese punto'
+        line:
+          type: string
+          example: Calle Guapay 3861, Equipetrol
+        road:
+          type: string
+        houseNumber:
+          type: string
+        neighbourhood:
+          type: string
+        city:
+          type: string
+        countryCode:
+          type: string
+          description: País del punto, ISO 3166-1 alfa-2 en mayúsculas
+          example: BO
+        adminAreas:
+          $ref: '#/components/schemas/ReverseGeocodingAdminAreasDto'
+        attribution:
+          type: string
+          description: Atribución que exige la licencia de los datos
+      required:
+        - found
+        - attribution
+    IssueTrackedLinkTokenDto:
+      type: object
+      properties:
+        memberType:
+          type: string
+          enum:
+            - CONTACT
+            - PATIENT
+        memberRefId:
+          type: string
+          format: uuid
+        ttlSeconds:
+          type: number
+          minimum: 60
+          maximum: 2592000
+          default: 604800
+      required:
+        - memberType
+        - memberRefId
+      additionalProperties: false
+    ReconcileGatewayDispatchDto:
+      type: object
+      properties:
+        paymentMethodType:
+          type: string
+          description: >-
+            El MISMO medio de pago con el que se intentó el cobro la primera vez (no se persiste): con otro, la pasarela
+            contesta `idempotency_key_reused`.
+          enum:
+            - qr
+            - card
+            - bank_transfer
+            - wallet
+      required:
+        - paymentMethodType
+      additionalProperties: false
+    CloseGatewayDispatchDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: >-
+            Motivo del cierre, obligatorio: qué se comprobó contra la pasarela. Sin datos personales ni de pacientes.
+          minLength: 10
+          maxLength: 300
+      required:
+        - reason
+      additionalProperties: false
+    PharmacyOrderConversationDto:
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        pharmacyProfileId:
+          type: string
+          format: uuid
+      required:
+        - conversationId
+        - pharmacyProfileId
+    PharmacyPrescriptionLicenseDto:
+      type: object
+      properties:
+        number:
+          type: string
+        authority:
+          type: string
+          nullable: true
+        state:
+          type: string
+          enum:
+            - ACTIVE
+            - PENDING
+      required:
+        - number
+        - state
+    PharmacyPrescriptionPrescriberDto:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        license:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PharmacyPrescriptionLicenseDto'
+    PharmacyPrescriptionPatientDto:
+      type: object
+      properties:
+        maskedName:
+          type: string
+          nullable: true
+          example: L. P. Q.
+        documentLast3:
+          type: string
+          nullable: true
+          example: '123'
+    PharmacyPrescriptionSiteDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        available:
+          type: boolean
+        quantity:
+          type: number
+          nullable: true
+        stockUpdatedAt:
+          type: string
+          nullable: true
+      required:
+        - siteId
+        - siteName
+        - available
+    PharmacyPrescriptionMatchDto:
+      type: object
+      properties:
+        pharmacyId:
+          type: string
+          format: uuid
+        pharmacyProductId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: string
+          nullable: true
+        currencyCode:
+          type: string
+          nullable: true
+        requiresPrescription:
+          type: boolean
+        outOfStockDeclared:
+          type: boolean
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyPrescriptionSiteDto'
+      required:
+        - pharmacyId
+        - pharmacyProductId
+        - name
+        - requiresPrescription
+        - outOfStockDeclared
+        - sites
+    PharmacyPrescriptionItemDto:
+      type: object
+      properties:
+        medicationRequestId:
+          type: string
+          format: uuid
+        medicationConceptId:
+          type: string
+          format: uuid
+        display:
+          type: string
+          nullable: true
+        dosageText:
+          type: string
+          nullable: true
+        prescribedQuantity:
+          type: number
+          nullable: true
+        unitCode:
+          type: string
+          nullable: true
+        dispensedQuantity:
+          type: number
+          nullable: true
+        remainingQuantity:
+          type: number
+          nullable: true
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyPrescriptionMatchDto'
+      required:
+        - medicationRequestId
+        - medicationConceptId
+        - matches
+    PharmacyPrescriptionShareDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        issuedAt:
+          type: string
+          nullable: true
+        validTo:
+          type: string
+          nullable: true
+        prescriber:
+          $ref: '#/components/schemas/PharmacyPrescriptionPrescriberDto'
+        patient:
+          $ref: '#/components/schemas/PharmacyPrescriptionPatientDto'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyPrescriptionItemDto'
+      required:
+        - shareId
+        - prescriber
+        - patient
+        - items
+    SetSiteAvailabilityDto:
+      type: object
+      properties:
+        available:
+          type: boolean
+          description: «Lo tengo» en esta sucursal
+        quantity:
+          type: number
+          minimum: 0
+          maximum: 1000000
+      required:
+        - available
+      additionalProperties: false
+    SiteAvailabilityResponseDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        available:
+          type: boolean
+        quantity:
+          type: number
+        stockUpdatedAt:
+          type: string
+          format: date-time
+      required:
+        - siteId
+        - productId
+        - available
+        - quantity
+        - stockUpdatedAt
+    UnmappedExternalProductDto:
+      type: object
+      properties:
+        externalCode:
+          type: string
+        name:
+          type: string
+      required:
+        - externalCode
+        - name
+    IntegrationSyncResponseDto:
+      type: object
+      properties:
+        batchId:
+          type: string
+          format: uuid
+        received:
+          type: number
+        mapped:
+          type: number
+        unmapped:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnmappedExternalProductDto'
+        applied:
+          type: number
+      required:
+        - batchId
+        - received
+        - mapped
+        - unmapped
+        - applied
+    IntegrationConnectionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pharmacySiteId:
+          type: object
+          format: uuid
+          nullable: true
+        siteName:
+          type: object
+          nullable: true
+        integrationMode:
+          type: string
+          enum:
+            - BATCH
+            - REALTIME
+        supportsStockQuery:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        providerConfigured:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - integrationMode
+        - supportsStockQuery
+        - status
+        - providerConfigured
+        - createdAt
+    IntegrationConnectionListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationConnectionDto'
+        providerConfigured:
+          type: boolean
+      required:
+        - items
+        - providerConfigured
+    IntegrationMappingDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        externalProductCode:
+          type: string
+        pharmacyProductId:
+          type: string
+          format: uuid
+        productCode:
+          type: object
+          nullable: true
+        productName:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - externalProductCode
+        - pharmacyProductId
+        - createdAt
+    IntegrationMappingListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationMappingDto'
+      required:
+        - items
+    ExternalCatalogProductDto:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        presentation:
+          type: object
+          nullable: true
+        unitCode:
+          type: object
+          nullable: true
+        mappedProductId:
+          type: object
+          format: uuid
+          nullable: true
+      required:
+        - code
+        - name
+    ExternalCatalogListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalCatalogProductDto'
+      required:
+        - items
+    IntegrationSyncBatchDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - RECEIVED
+            - COMPLETED
+        receivedAt:
+          type: object
+          format: date-time
+          nullable: true
+        completedAt:
+          type: object
+          format: date-time
+          nullable: true
+        itemCount:
+          type: number
+        discrepancies:
+          type: number
+      required:
+        - id
+        - status
+        - itemCount
+        - discrepancies
+    IntegrationSyncBatchListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationSyncBatchDto'
+      required:
+        - items
+    PublicPrescriptionAvailabilityDto:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 20
+          example:
+            - Paracetamol 500 mg
+            - Losartán
+          description: >-
+            Texto libre: una receta de papel no trae ids de producto. Vacíos y repetidos (sin tildes) se ignoran.
+          type: array
+          items:
+            type: string
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.78
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.18
+      required:
+        - items
+      additionalProperties: false
+    UploadPaymentReceiptDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+          description: Archivo del comprobante (png, jpeg, webp o pdf, hasta 5 MB), subido por quien lo adjunta.
+        amount:
+          type: string
+          description: Monto declarado, como texto decimal con hasta dos decimales
+          example: '150.00'
+        paidAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 500
+      required:
+        - fileId
+      additionalProperties: false
+    PaymentReceiptActorDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          example: Ana Pérez
+      required:
+        - userId
+        - displayName
+    PaymentReceiptDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        fileId:
+          type: string
+          format: uuid
+        mimeType:
+          type: string
+          enum:
+            - image/png
+            - image/jpeg
+            - image/webp
+            - application/pdf
+        originalName:
+          type: string
+          nullable: true
+        amount:
+          type: string
+          nullable: true
+          example: '150.00'
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        uploadedAt:
+          type: string
+          format: date-time
+        uploadedBy:
+          $ref: '#/components/schemas/PaymentReceiptActorDto'
+        status:
+          type: string
+          enum:
+            - PENDING
+            - CONFIRMED
+            - REJECTED
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reviewedBy:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PaymentReceiptActorDto'
+        rejectionReason:
+          type: string
+          nullable: true
+      required:
+        - id
+        - bookingId
+        - fileId
+        - mimeType
+        - originalName
+        - amount
+        - paidAt
+        - note
+        - uploadedAt
+        - uploadedBy
+        - status
+        - reviewedAt
+        - reviewedBy
+        - rejectionReason
+    RejectPaymentReceiptDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: 'Motivo del rechazo. Obligatorio: el paciente lo lee para saber qué volver a subir.'
+          minLength: 3
+          maxLength: 500
+      required:
+        - reason
+      additionalProperties: false
+    CreateFlexibleHoldDto:
+      type: object
+      properties:
+        startAt:
+          type: string
+          format: date-time
+          description: La hora que pidió el paciente, en un minuto entero, dentro de una franja flexible
+        patientProfileId:
+          type: string
+          format: uuid
+          description: Paciente para el que se reserva
+      required:
+        - startAt
+      additionalProperties: false
+    ClassificationRecordDto:
+      type: object
+      properties:
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        classifiedBy:
+          type: string
+          description: Identidad y versión del clasificador
+        ruleId:
+          type: string
+        basis:
+          type: string
+          description: Norma o identificador que sustenta la regla
+      required:
+        - confidence
+        - classifiedBy
+        - ruleId
+        - basis
+    ClassificationRunDto:
+      type: object
+      properties:
+        schema:
+          type: string
+          description: Limita la corrida a un schema
+      additionalProperties: false
+    ClassificationRunResultDto:
+      type: object
+      properties:
+        examined:
+          type: number
+          description: Columnas observadas que se miraron
+        unclassified:
+          type: number
+          description: 'Columnas que ninguna regla reconoció: quedan sin clasificar'
+        created:
+          type: number
+          description: Fichas nuevas
+        raised:
+          type: number
+          description: Fichas de la máquina subidas a un nivel más alto
+        sentToReview:
+          type: number
+          description: De las creadas o subidas, las que quedaron en NEEDS_REVIEW por duda
+        skippedManual:
+          type: number
+          description: 'No tocadas: las escribió una persona'
+        skippedReviewed:
+          type: number
+          description: 'No tocadas: ya salieron de AUTO_DETECTED'
+        skippedNotHigher:
+          type: number
+          description: 'No tocadas: la propuesta no era más alta (nunca baja)'
+        conflicts:
+          type: number
+          description: 'No escritas: otra petición cambió la ficha antes'
+      required:
+        - examined
+        - unclassified
+        - created
+        - raised
+        - sentToReview
+        - skippedManual
+        - skippedReviewed
+        - skippedNotHigher
+        - conflicts
+    RoutesSummaryDto:
+      type: object
+      properties:
+        total:
+          type: number
+        public:
+          type: number
+        withRoles:
+          type: number
+        withoutRoles:
+          type: number
+          description: 'Autenticadas sin `@Roles`: las pasa cualquier sesión'
+      required:
+        - total
+        - public
+        - withRoles
+        - withoutRoles
+    DriftRouteRefDto:
+      type: object
+      properties:
+        method:
+          type: string
+          example: GET
+        template:
+          type: string
+          example: /admin/catalog/objects/:id
+        controller:
+          type: string
+        handler:
+          type: string
+      required:
+        - method
+        - template
+        - controller
+        - handler
+    UsedNotSeededDto:
+      type: object
+      properties:
+        role:
+          type: string
+        routeCount:
+          type: number
+          description: Cuántas rutas lo exigen
+        inDatabase:
+          type: object
+          nullable: true
+          description: Si hay fila en `authz.roles`; `null` si no se consultó
+        sample:
+          type: array
+          items:
+            $ref: '#/components/schemas/DriftRouteRefDto'
+      required:
+        - role
+        - routeCount
+        - sample
+    PermissionDriftDto:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        routes:
+          $ref: '#/components/schemas/RoutesSummaryDto'
+        usedNotSeeded:
+          description: >-
+            Roles que una ruta exige y la API no siembra: sólo `SUPERADMIN` (por comodín) ejerce esas rutas hasta
+            que exista el rol
+          type: array
+          items:
+            $ref: '#/components/schemas/UsedNotSeededDto'
+        seededNotUsed:
+          description: Roles sembrados que ninguna ruta exige
+          type: array
+          items:
+            type: string
+        routesWithoutRoles:
+          description: Rutas autenticadas sin `@Roles` ni `@Public` (recortada)
+          type: array
+          items:
+            $ref: '#/components/schemas/DriftRouteRefDto'
+        routesWithoutRolesTruncated:
+          type: boolean
+          description: '`true` si `routesWithoutRoles` se recortó; el total está en `routes.withoutRoles`'
+      required:
+        - generatedAt
+        - routes
+        - usedNotSeeded
+        - seededNotUsed
+        - routesWithoutRoles
+        - routesWithoutRolesTruncated
+    RunNextResultDto:
+      type: object
+      properties:
+        claimed:
+          type: number
+          enum:
+            - 0
+            - 1
+          description: 1 si este tick tomó un escaneo; 0 si no había nada que hacer
+        scanId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - QUEUED
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - CANCELLED
+        fenced:
+          type: boolean
+          description: '`true` si el escaneo perdió su lease y no se pisó lo que otro proceso cerró'
+      required:
+        - claimed
+    InventoryImportSourceDto:
+      type: object
+      properties:
+        hash:
+          type: string
+          description: Huella del inventario (la misma de `GET /admin/portal/version`)
+        operaciones:
+          type: number
+        procesos:
+          type: number
+      required:
+        - hash
+        - operaciones
+        - procesos
+    InventoryImportOperationsDto:
+      type: object
+      properties:
+        added:
+          type: number
+          description: Operaciones nuevas en la base
+        changed:
+          type: number
+          description: Operaciones cuya huella técnica cambió
+        reappeared:
+          type: number
+          description: Operaciones `NOT_OBSERVED` que volvieron a aparecer
+        unchanged:
+          type: number
+          description: 'Operaciones que no cambiaron: no se tocó su fila'
+        notObserved:
+          type: number
+          description: Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran)
+      required:
+        - added
+        - changed
+        - reappeared
+        - unchanged
+        - notObserved
+    InventoryImportImpactsDto:
+      type: object
+      properties:
+        written:
+          type: number
+          description: Impactos escritos en esta corrida
+        skippedNotCataloged:
+          type: number
+          description: >-
+            Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta
+            corrida)
+        skippedUnresolved:
+          type: number
+          description: >-
+            Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar
+      required:
+        - written
+        - skippedNotCataloged
+        - skippedUnresolved
+    InventoryImportProcessesDto:
+      type: object
+      properties:
+        added:
+          type: number
+        changed:
+          type: number
+        unchanged:
+          type: number
+      required:
+        - added
+        - changed
+        - unchanged
+    InventoryImportStepsDto:
+      type: object
+      properties:
+        written:
+          type: number
+          description: Etapas escritas en esta corrida
+      required:
+        - written
+    InventoryImportStepOperationsDto:
+      type: object
+      properties:
+        written:
+          type: number
+          description: Enlaces etapa-operación escritos
+        skippedUnresolved:
+          type: number
+          description: Enlaces cuya operación no está en el inventario de endpoints
+      required:
+        - written
+        - skippedUnresolved
+    InventoryImportResultDto:
+      type: object
+      properties:
+        inventory:
+          $ref: '#/components/schemas/InventoryImportSourceDto'
+        operations:
+          $ref: '#/components/schemas/InventoryImportOperationsDto'
+        impacts:
+          $ref: '#/components/schemas/InventoryImportImpactsDto'
+        processes:
+          $ref: '#/components/schemas/InventoryImportProcessesDto'
+        steps:
+          $ref: '#/components/schemas/InventoryImportStepsDto'
+        stepOperations:
+          $ref: '#/components/schemas/InventoryImportStepOperationsDto'
+      required:
+        - inventory
+        - operations
+        - impacts
+        - processes
+        - steps
+        - stepOperations
+    OnboardingEventDto:
+      type: object
+      properties:
+        eventType:
+          type: string
+          enum:
+            - start
+            - step_view
+            - field_interaction
+            - field_error
+            - abandon
+            - complete
+        formType:
+          type: string
+        draftId:
+          type: string
+        stepIndex:
+          type: number
+        stepKey:
+          type: string
+        fieldKey:
+          type: string
+        interactionType:
+          type: string
+          enum:
+            - focus
+            - blur
+            - change
+            - error
+        errorCategory:
+          type: string
+        durationMs:
+          type: number
+        timestamp:
+          type: string
+      required:
+        - eventType
+        - formType
+        - draftId
+        - stepIndex
+        - timestamp
+      additionalProperties: false
+    IngestOnboardingEventsDto:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingEventDto'
+      required:
+        - events
+      additionalProperties: false
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

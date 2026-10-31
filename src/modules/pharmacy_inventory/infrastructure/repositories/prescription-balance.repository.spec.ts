@@ -269,6 +269,177 @@ describe('PrescriptionBalanceRepository', () => {
     });
   });
 
+  describe('lockRequest · originales reemplazados', () => {
+    it('sigue replaces_request_id entre las filas bloqueadas del encuentro', async () => {
+      const em = fakeEm(
+        new Map([
+          [
+            MedicationRequests,
+            [
+              requestRow({
+                id: 'rx-0',
+                statusConceptId: CLIN.MEDICATION_REQUEST_REPLACED,
+              }),
+              requestRow({
+                id: 'rx-1',
+                statusConceptId: CLIN.MEDICATION_REQUEST_REPLACED,
+                replacesRequestId: 'rx-0',
+              }),
+              requestRow({ id: 'rx-2', replacesRequestId: 'rx-1' }),
+              requestRow({ id: 'rx-3', medicationConceptId: 'concept-y' }),
+            ],
+          ],
+        ]),
+      );
+
+      const locked = await repo.lockRequest(em, 'rx-2', 'pat-1', NOW);
+
+      expect(locked?.siblings.map((row) => row.id)).toEqual(['rx-3']);
+      expect(locked?.replacedIds).toEqual(['rx-1', 'rx-0']);
+      // Sin otra lectura: los originales ya estaban bloqueados.
+      expect(em.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('sin encuentro lee el original del mismo paciente, sin lock', async () => {
+      const em = fakeEm(
+        new Map([
+          [
+            MedicationRequests,
+            [
+              requestRow({
+                id: 'rx-0',
+                encounterId: undefined,
+                statusConceptId: CLIN.MEDICATION_REQUEST_REPLACED,
+              }),
+              requestRow({
+                id: 'rx-9',
+                encounterId: undefined,
+                replacesRequestId: 'rx-0',
+              }),
+            ],
+          ],
+        ]),
+      );
+
+      const locked = await repo.lockRequest(em, 'rx-9', 'pat-1', NOW);
+
+      expect(locked?.replacedIds).toEqual(['rx-0']);
+      expect(em.findOne).toHaveBeenLastCalledWith(MedicationRequests, {
+        id: 'rx-0',
+        patientProfileId: 'pat-1',
+      });
+    });
+
+    it('sin reemplazos no hay originales; una cadena circular termina', async () => {
+      const plain = fakeEm(new Map([[MedicationRequests, [requestRow()]]]));
+      expect(
+        (await repo.lockRequest(plain, 'rx-1', 'pat-1', NOW))?.replacedIds,
+      ).toEqual([]);
+
+      const loop = fakeEm(
+        new Map([
+          [
+            MedicationRequests,
+            [
+              requestRow({ id: 'rx-1', replacesRequestId: 'rx-0' }),
+              requestRow({
+                id: 'rx-0',
+                statusConceptId: CLIN.MEDICATION_REQUEST_REPLACED,
+                replacesRequestId: 'rx-1',
+              }),
+            ],
+          ],
+        ]),
+      );
+      expect(
+        (await repo.lockRequest(loop, 'rx-1', 'pat-1', NOW))?.replacedIds,
+      ).toEqual(['rx-0']);
+    });
+  });
+
+  describe('orderedCountByConcept', () => {
+    function sqlEm(rows: Row[] = []) {
+      const execute = mockFn(async () => rows);
+      return { em: { getConnection: () => ({ execute }) } as any, execute };
+    }
+    const sqlOf = (execute: any): string =>
+      (execute.mock.calls[0][0] as string).replace(/\s+/g, ' ');
+
+    it('cuenta una vez por pedido las entregas y los pedidos vivos, por fármaco', async () => {
+      const { em, execute } = sqlEm([
+        { conceptId: X, times: '2' },
+        { conceptId: Y, times: '1' },
+      ]);
+
+      const counts = await repo.orderedCountByConcept(em, ['rx-1'], [X, Y]);
+
+      expect(counts).toEqual(
+        new Map([
+          [X, 2],
+          [Y, 1],
+        ]),
+      );
+      expect(execute).toHaveBeenCalledTimes(1);
+      const sql = sqlOf(execute);
+      expect(sql).toContain('COUNT(DISTINCT movement.source_id)');
+      // La entrega de un pedido y el pedido son la misma vez.
+      expect(sql).toContain(
+        'COALESCE(dispensation.inventory_reservation_id, dispensation.id) AS source_id',
+      );
+      expect(sql).toContain('reservation.id AS source_id');
+    });
+
+    it('entrega parcial: solo consume lo que entregó una cantidad mayor que cero, y nunca una revertida', async () => {
+      const { em, execute } = sqlEm();
+
+      await repo.orderedCountByConcept(em, ['rx-1'], [X]);
+
+      const sql = sqlOf(execute);
+      expect(sql).toContain(
+        'AND dispensation.dispensation_status_concept_id = ? AND line.dispensed_quantity > 0',
+      );
+      const params = execute.mock.calls[0][1] as string[];
+      expect(params.slice(0, 3)).toEqual(['rx-1', PINV.DISPENSE_DISPENSED, X]);
+      expect(params).not.toContain(PINV.DISPENSE_REVERSED);
+    });
+
+    it('un pedido vivo cuenta con cualquier línea, también «por confirmar»; uno terminado no', async () => {
+      const { em, execute } = sqlEm();
+
+      await repo.orderedCountByConcept(em, ['rx-1'], [X]);
+
+      const sql = sqlOf(execute);
+      expect(sql).not.toContain('line.status_concept_id');
+      const params = execute.mock.calls[0][1] as string[];
+      expect(params.slice(3)).toEqual([
+        'rx-1',
+        ...RESERVING_ORDER_STATUS_IDS,
+        X,
+      ]);
+      for (const terminal of [
+        PINV.ORDER_RETIRADO,
+        PINV.ORDER_RECHAZADO,
+        PINV.ORDER_VENCIDO,
+        PINV.ORDER_CANCELADO,
+      ]) {
+        expect(params).not.toContain(terminal);
+      }
+    });
+
+    it('sin recetas, sin fármacos o sin estados no consulta', async () => {
+      const { em, execute } = sqlEm();
+
+      for (const counts of [
+        await repo.orderedCountByConcept(em, [], [X]),
+        await repo.orderedCountByConcept(em, ['rx-1'], []),
+        await repo.orderedCountByConcept(em, ['rx-1'], [X], []),
+      ]) {
+        expect(counts).toEqual(new Map());
+      }
+      expect(execute).not.toHaveBeenCalled();
+    });
+  });
+
   describe('balanceByConcept', () => {
     /** Un `EntityManager` doble cuya conexión devuelve las filas dadas. */
     function sqlEm(rows: Row[] = []) {
@@ -333,7 +504,7 @@ describe('PrescriptionBalanceRepository', () => {
         'GREATEST( 0, line.requested_quantity - COALESCE(line.fulfilled_quantity, 0) )',
       );
       expect(sql).toContain(
-        `WHERE reservation.medication_request_id IN (?) AND reservation.reservation_status_concept_id IN (${RESERVING_ORDER_STATUS_IDS.map(() => '?').join(', ')}) AND line.status_concept_id NOT IN (?, ?) AND product.medication_concept_id IN (?)`,
+        `WHERE reservation.medication_request_id IN (?) AND reservation.reservation_status_concept_id IN (${RESERVING_ORDER_STATUS_IDS.map(() => '?').join(', ')}) AND line.status_concept_id NOT IN (?, ?, ?) AND product.medication_concept_id IN (?)`,
       );
       const params = execute.mock.calls[0][1] as string[];
       expect(params.slice(3)).toEqual([
@@ -341,6 +512,7 @@ describe('PrescriptionBalanceRepository', () => {
         ...RESERVING_ORDER_STATUS_IDS,
         PINV.RES_LINE_OUT_OF_STOCK,
         PINV.RES_LINE_RELEASED,
+        PINV.RES_LINE_PENDING_CONFIRMATION,
         X,
       ]);
       for (const terminal of [
@@ -353,7 +525,7 @@ describe('PrescriptionBalanceRepository', () => {
       }
     });
 
-    it('las líneas SIN_STOCK y RELEASED de un pedido vivo no retienen nada (contrato §2)', async () => {
+    it('las líneas SIN_STOCK, RELEASED y POR_CONFIRMAR de un pedido vivo no retienen nada (contrato §2)', async () => {
       const { em, execute } = sqlEm();
 
       await repo.balanceByConcept(em, ['rx-1'], [X]);
@@ -362,27 +534,33 @@ describe('PrescriptionBalanceRepository', () => {
       // Solo la rama del reservado filtra por estado de línea: lo entregado
       // ya es una dispensación, no una línea de pedido.
       expect(
-        sql.match(/line\.status_concept_id NOT IN \(\?, \?\)/g),
+        sql.match(/line\.status_concept_id NOT IN \(\?, \?, \?\)/g),
       ).toHaveLength(1);
       expect(sql.indexOf('line.status_concept_id NOT IN')).toBeGreaterThan(
         sql.indexOf('FROM pharmacy_inventory.inventory_reservation_lines line'),
       );
       const params = execute.mock.calls[0][1] as string[];
-      // Los dos `?` del NOT IN van justo después de los estados vivos del
-      // pedido y antes del fármaco: SIN_STOCK y RELEASED (la línea original
+      // Los tres `?` del NOT IN van justo después de los estados vivos del
+      // pedido y antes del fármaco: SIN_STOCK, RELEASED (la línea original
       // que libera la aceptación del genérico; su total ya está reservado
-      // sobre el genérico).
+      // sobre el genérico) y POR_CONFIRMAR (la farmacia todavía no dijo si lo
+      // tiene: no hay nada reservado).
       const notInAt = 3 + 1 + RESERVING_ORDER_STATUS_IDS.length;
-      expect(params.slice(notInAt, notInAt + 3)).toEqual([
+      expect(params.slice(notInAt, notInAt + 4)).toEqual([
         PINV.RES_LINE_OUT_OF_STOCK,
         PINV.RES_LINE_RELEASED,
+        PINV.RES_LINE_PENDING_CONFIRMATION,
         X,
       ]);
       // Las líneas que sí retienen (o ya se entregaron) siguen contando.
       expect(params).not.toContain(PINV.RES_LINE_CONFIRMED);
       expect(params).not.toContain(PINV.RES_LINE_FULFILLED);
       expect([...NON_RESERVING_LINE_STATUS_IDS].sort()).toEqual(
-        [PINV.RES_LINE_OUT_OF_STOCK, PINV.RES_LINE_RELEASED].sort(),
+        [
+          PINV.RES_LINE_OUT_OF_STOCK,
+          PINV.RES_LINE_RELEASED,
+          PINV.RES_LINE_PENDING_CONFIRMATION,
+        ].sort(),
       );
     });
 

@@ -137,6 +137,15 @@ export const { seeds: PHARMACY_INVENTORY_CONCEPT_SEEDS, ids: PINV } =
       code: 'PINV_RES_LINE_OUT_OF_STOCK',
       display: 'Reservation line out of stock',
     },
+    // Línea de pedido de un producto que la sede ofrece por lo declarado en el
+    // catálogo, sin posición en el libro: entra «por confirmar», con
+    // reserved_quantity = 0 y sin asiento. Al confirmar, la farmacia dice si lo
+    // tiene y con cuánto; recién ahí se escribe la posición y se reserva, o la
+    // línea queda sin stock.
+    RES_LINE_PENDING_CONFIRMATION: {
+      code: 'PINV_RES_LINE_PENDING_CONFIRMATION',
+      display: 'Reservation line pending pharmacy confirmation',
+    },
 
     // --- Pedidos de paciente (FAR-E1) ---
     // El pedido se materializa sobre `inventory_reservations`; lo que lo
