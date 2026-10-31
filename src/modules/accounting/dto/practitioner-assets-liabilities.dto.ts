@@ -261,6 +261,62 @@ export class LiabilityScheduleResponseDto {
   schedule!: readonly LiabilityScheduleDto[];
 }
 
+/** Una depreciación registrada de un activo, con su período fiscal. */
+export class AssetDepreciationDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  fiscalPeriodId!: string;
+
+  /** Código del período fiscal (p. ej. `2026-10`), si el período existe. */
+  @ApiPropertyOptional({ nullable: true })
+  fiscalPeriodCode!: string | null;
+
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  periodStartDate!: string | null;
+
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  periodEndDate!: string | null;
+
+  @ApiProperty({ example: '83.33' })
+  amount!: string;
+
+  @ApiPropertyOptional({ example: '4916.67', nullable: true })
+  bookValueAfter!: string | null;
+
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  transactionId!: string | null;
+
+  @ApiProperty({ format: 'date-time' })
+  registeredAt!: string;
+}
+
+/**
+ * Respuesta de `GET /accounting/practitioner/assets/:id/depreciations`
+ * (T26 · criterio 6): el histórico de depreciación de un activo propio, en
+ * orden de registro, junto con su valor en libros actual.
+ */
+export class AssetDepreciationHistoryResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  assetId!: string;
+
+  @ApiProperty()
+  code!: string;
+
+  @ApiPropertyOptional({ example: '5000.00', nullable: true })
+  acquisitionCost!: string | null;
+
+  @ApiPropertyOptional({ example: '83.33', nullable: true })
+  accumulatedDepreciation!: string | null;
+
+  @ApiPropertyOptional({ example: '4916.67', nullable: true })
+  bookValue!: string | null;
+
+  @ApiProperty({ type: [AssetDepreciationDto] })
+  depreciations!: readonly AssetDepreciationDto[];
+}
+
 /** Cuerpo de `POST /accounting/practitioner/assets/:id/progress`. */
 export class RegisterAssetProgressDto {
   @ApiProperty({

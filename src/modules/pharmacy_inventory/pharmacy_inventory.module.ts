@@ -5,6 +5,16 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+// FAR-02: la apertura del enlace de receta y el documento del paciente.
+import { DelegatedAccessModule } from '../delegated_access/delegated_access.module';
+import { CommonModule } from '../common/common.module';
+// El chat del pedido (hilo paciente ↔ vitrina de la farmacia). No hay ciclo:
+// `community` no importa este módulo.
+import { CommunityModule } from '../community/community.module';
+import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
+import { EXTERNAL_PHARMACY_CATALOG_PORT } from './application/ports/external-pharmacy-catalog.port';
+import { HttpExternalPharmacyCatalogAdapter } from './infrastructure/adapters/http-external-pharmacy-catalog.adapter';
+import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { INSURANCE_PATIENT_SETTLEMENT_PORT } from './application/ports/insurance-patient-settlement.port';
 import { PHARMACY_DIRECTORY_PORT } from './application/ports/pharmacy-directory.port';
@@ -17,6 +27,16 @@ import { PharmacyDirectoryAdapter } from './infrastructure/adapters/pharmacy-dir
 import { MessagingDomainEventAdapter } from './infrastructure/adapters/messaging-domain-event.adapter';
 import { MessagingInAppNotificationAdapter } from './infrastructure/adapters/messaging-in-app-notification.adapter';
 import { ProfilesPersonAccountLinksAdapter } from './infrastructure/adapters/profiles-person-account-links.adapter';
+import { PHARMACY_PRESCRIPTION_SHARES_PORT } from './application/ports/pharmacy-prescription-shares.port';
+import { PATIENT_IDENTITY_PORT } from './application/ports/patient-identity.port';
+import { DelegatedAccessPrescriptionSharesAdapter } from './infrastructure/adapters/delegated-access-prescription-shares.adapter';
+import { ProfilesPatientIdentityAdapter } from './infrastructure/adapters/profiles-patient-identity.adapter';
+import { PrescriptionShareReadRepository } from './infrastructure/repositories/prescription-share-read.repository';
+import { OpenPrescriptionShareUseCase } from './application/prescription-shares/open-prescription-share.use-case';
+import { PharmacyPrescriptionSharesController } from './presentation/controllers/pharmacy-prescription-shares.controller';
+import { PRESCRIPTION_SHARE_ACCESS_LOG_PORT } from './application/ports/prescription-share-access-log.port';
+import { AuditPrescriptionShareAccessLogAdapter } from './infrastructure/adapters/audit-prescription-share-access-log.adapter';
+import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
 import * as entities from './entities';
 import { ApproveInventoryCountUseCase } from './application/inventory-count/approve-inventory-count.use-case';
 import { OpenInventoryCountUseCase } from './application/inventory-count/open-inventory-count.use-case';
@@ -28,13 +48,19 @@ import { ExpireInventoryReservationsUseCase } from './application/inventory-rese
 import { ReleaseConfirmedReservationLinesUseCase } from './application/inventory-reservations/release-confirmed-reservation-lines.use-case';
 import { CreateInventorySyncBatchUseCase } from './application/inventory-sync/create-inventory-sync-batch.use-case';
 import { ReconcileInventorySyncBatchUseCase } from './application/inventory-sync/reconcile-inventory-sync-batch.use-case';
+import { SyncExternalPharmacyCatalogUseCase } from './application/inventory-sync/sync-external-pharmacy-catalog.use-case';
+import { IntegrationReadService } from './application/inventory-sync/integration-read.service';
 import { TransferInventoryUseCase } from './application/inventory-transfers/transfer-inventory.use-case';
 import { DispenseMedicationUseCase } from './application/medication-dispensations/dispense-medication.use-case';
 import { ReverseMedicationDispensationUseCase } from './application/medication-dispensations/reverse-medication-dispensation.use-case';
+import { PrescriptionBalanceRepository } from './infrastructure/repositories/prescription-balance.repository';
+import { PrescriptionOrderGuard } from './application/pharmacy-orders/prescription-order-guard';
 import { ReadPharmacyInventoryUseCase } from './application/pharmacy-inventory-read/read-pharmacy-inventory.use-case';
 import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notifications/notify-pharmacy-order.use-case';
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
 import { PharmacyProcurementUseCases } from './application/pharmacy-procurement/pharmacy-procurement.use-cases';
+import { SetSiteProductAvailabilityUseCase } from './application/site-availability/set-site-product-availability.use-case';
+import { SiteStockWriter } from './application/site-availability/site-stock-writer';
 import {
   PharmacyProcurementController,
   PharmacyInventoryController,
@@ -42,6 +68,8 @@ import {
   PharmacyDispensingController,
   PharmacyInventoryInternalController,
   PharmacyInventoryReadController,
+  PharmacySiteAvailabilityController,
+  PharmacyIntegrationSyncController,
 } from './presentation/controllers';
 import {
   InventoryLocationsService,
@@ -73,7 +101,10 @@ import {
   SerialsRepository,
   SyncRepository,
   InventoryReadRepository,
+  InventoryScopeRepository,
+  IntegrationReadRepository,
 } from './infrastructure/repositories';
+import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inventory-scope.policy';
 
 /**
  * Módulo 25 — Pharmacy Inventory, Supply and Dispensing.
@@ -96,14 +127,20 @@ import {
     // (enviado, cancelado, vencido) en la misma transacción del cambio.
     MessagingModule,
     ProfilesModule,
+    CommonModule,
+    DelegatedAccessModule,
+    CommunityModule,
   ],
   controllers: [
     PharmacyProcurementController,
     PharmacyInventoryController,
     PharmacyOrdersController,
+    PharmacyPrescriptionSharesController,
     PharmacyDispensingController,
     PharmacyInventoryInternalController,
     PharmacyInventoryReadController,
+    PharmacySiteAvailabilityController,
+    PharmacyIntegrationSyncController,
   ],
   providers: [
     // Repositorios
@@ -116,6 +153,7 @@ import {
     GoodsReceiptsRepository,
     ReservationsRepository,
     PharmacyOrdersRepository,
+    PrescriptionBalanceRepository,
     DispensationsRepository,
     PharmacyOrderSubstitutionsRepository,
     CountSessionsRepository,
@@ -123,6 +161,9 @@ import {
     SerialsRepository,
     SyncRepository,
     InventoryReadRepository,
+    InventoryScopeRepository,
+    IntegrationReadRepository,
+    PharmacyInventoryScopePolicy,
     DirectoryTenantAdministrationAdapter,
     {
       provide: DIRECTORY_TENANT_ADMINISTRATION_PORT,
@@ -137,6 +178,23 @@ import {
     {
       provide: PHARMACY_DIRECTORY_PORT,
       useExisting: PharmacyDirectoryAdapter,
+    },
+    PrescriptionShareReadRepository,
+    DelegatedAccessPrescriptionSharesAdapter,
+    {
+      provide: PHARMACY_PRESCRIPTION_SHARES_PORT,
+      useExisting: DelegatedAccessPrescriptionSharesAdapter,
+    },
+    ProfilesPatientIdentityAdapter,
+    {
+      provide: PATIENT_IDENTITY_PORT,
+      useExisting: ProfilesPatientIdentityAdapter,
+    },
+    DataAccessLogRepository,
+    AuditPrescriptionShareAccessLogAdapter,
+    {
+      provide: PRESCRIPTION_SHARE_ACCESS_LOG_PORT,
+      useExisting: AuditPrescriptionShareAccessLogAdapter,
     },
     MessagingDomainEventAdapter,
     {
@@ -153,6 +211,17 @@ import {
       provide: PERSON_ACCOUNT_LINKS_PORT,
       useExisting: ProfilesPersonAccountLinksAdapter,
     },
+    CommunityPharmacyOrderChatAdapter,
+    {
+      provide: PHARMACY_ORDER_CHAT_PORT,
+      useExisting: CommunityPharmacyOrderChatAdapter,
+    },
+    // FAR-07: el sistema de gestión de una farmacia externa, por HTTP.
+    HttpExternalPharmacyCatalogAdapter,
+    {
+      provide: EXTERNAL_PHARMACY_CATALOG_PORT,
+      useExisting: HttpExternalPharmacyCatalogAdapter,
+    },
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,
@@ -168,13 +237,19 @@ import {
     TransferInventoryUseCase,
     DispenseMedicationUseCase,
     ReverseMedicationDispensationUseCase,
+    OpenPrescriptionShareUseCase,
     ReadPharmacyInventoryUseCase,
     NotifyPharmacyOrderUseCase,
     PharmacyOrdersUseCases,
     PharmacyProcurementUseCases,
+    SiteStockWriter,
+    SetSiteProductAvailabilityUseCase,
+    SyncExternalPharmacyCatalogUseCase,
+    IntegrationReadService,
     PharmacyProcurementService,
     InventoryReservationsService,
     PharmacyOrdersService,
+    PrescriptionOrderGuard,
     PharmacyOrderNotificationsService,
     MedicationDispensationsService,
     InventoryCountService,

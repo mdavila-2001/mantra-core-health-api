@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  ResourceNotFoundException,
-  touch,
-  type AuthenticatedUser,
-} from '../../../common';
+import { touch, type AuthenticatedUser } from '../../../common';
 import {
   DelegatedAccessGrantsRepository,
   PractitionerDelegateAssignmentsRepository,
@@ -24,6 +20,8 @@ import {
   RESOURCE_TYPE_CONCEPT,
   STATUS,
 } from './concept-maps';
+import { DelegationScopeService } from './delegation-scope.service';
+import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
 
 /**
  * UC-29-08 (barrido de expiración de delegaciones y grants vencidos) y UC-29-09
@@ -41,6 +39,7 @@ export class DelegatedAccessEvaluationService {
    * @param orgAssignmentsRepo - Valor de org assignments repo requerido por la operación.
    * @param itemsRepo - Valor de items repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param scope - Política común de tenant y alcance de la delegación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -50,6 +49,7 @@ export class DelegatedAccessEvaluationService {
     private readonly orgAssignmentsRepo: OrganizationUserAssignmentsRepository,
     private readonly itemsRepo: DelegatedPermissionSetItemsRepository,
     private readonly eventsRepo: DelegationEventsRepository,
+    private readonly scope: DelegationScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DelegatedAccessEvaluationService.name);
@@ -124,7 +124,16 @@ export class DelegatedAccessEvaluationService {
     });
   }
 
-  /** UC-29-09: evalúa el actor efectivo por propósito; puede exigir step-up. */
+  /**
+   * UC-29-09: evalúa el actor efectivo por propósito; puede exigir step-up.
+   *
+   * La delegación se carga dentro del tenant activo (una ajena responde 404
+   * uniforme) y el sujeto evaluado tiene que ser el titular de la asignación
+   * del delegado: `dto.effectiveUserId` si el administrador lo declara para
+   * diagnosticar, o el propio actor autenticado si no. Un sujeto que no es el
+   * delegado nunca recibe `allowed: true`, de modo que el resultado no se puede
+   * reutilizar para habilitar a otra persona.
+   */
   async evaluate(
     dto: EvaluateActorDto,
     actor: AuthenticatedUser,
@@ -138,15 +147,37 @@ export class DelegatedAccessEvaluationService {
       },
       'Evaluating effective actor',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
-      const delegate = await this.delegatesRepo.findById(
+      const { delegate } = await this.scope.loadDelegationInTenant(
         tx,
         dto.practitionerDelegateAssignmentId,
+        tenantId,
       );
-      if (!delegate) {
-        throw new ResourceNotFoundException('Delegación no encontrada', {
-          delegateId: dto.practitionerDelegateAssignmentId,
+
+      const subjectUserId = dto.effectiveUserId ?? actor.id;
+      const orgAssignment = await this.orgAssignmentsRepo.findById(
+        tx,
+        delegate.delegateUserAssignmentId,
+      );
+      const membership = orgAssignment
+        ? await this.scope.membershipOfAssignment(tx, orgAssignment)
+        : null;
+      if (
+        !membership ||
+        membership.tenantId !== tenantId ||
+        membership.userId !== subjectUserId
+      ) {
+        this.eventsRepo.record(tx, {
+          practitionerDelegateAssignmentId: delegate.id,
+          eventTypeConceptId: DELEG.EVENT_ACCESS_EVALUATED,
+          actorUserId: actor.id,
         });
+        return {
+          allowed: false,
+          requiresStepUp: false,
+          reason: DelegatedAccessErrorReason.DELEGATED_SUBJECT_MISMATCH,
+        };
       }
 
       const now = new Date();

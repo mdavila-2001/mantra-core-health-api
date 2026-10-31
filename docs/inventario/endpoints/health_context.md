@@ -35,7 +35,7 @@
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.createAgent` — `src/modules/health_context/controllers/health-context.controller.ts:64`
+- **Implementación:** `HealthContextController.createAgent` — `src/modules/health_context/controllers/health-context.controller.ts:69`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -45,18 +45,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/agents` la atiende `HealthContextController.createAgent` (src/modules/health_context/controllers/health-context.controller.ts:64). Exige sesión con alguno de los roles SOURCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateAgentDto` (6 campos, 3 obligatorios). Delega en `ContextCollectionService.createAgent`. Crea filas en health_context.context_agents. Lee health_context.context_agents.
+`POST /health-context/agents` la atiende `HealthContextController.createAgent` (src/modules/health_context/controllers/health-context.controller.ts:69). Exige sesión con alguno de los roles SOURCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateAgentDto` (6 campos, 3 obligatorios). Delega en `ContextCollectionService.createAgent`. Crea filas en health_context.context_agents. Lee health_context.context_agents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SOURCE_ADMIN, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SOURCE_ADMIN, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:69` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -117,7 +117,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe un agente con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/health_context.md).
@@ -141,7 +140,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.startCollectionRun` — `src/modules/health_context/controllers/health-context.controller.ts:137`
+- **Implementación:** `HealthContextController.startCollectionRun` — `src/modules/health_context/controllers/health-context.controller.ts:166`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -151,18 +150,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/collection-runs` la atiende `HealthContextController.startCollectionRun` (src/modules/health_context/controllers/health-context.controller.ts:137). Exige sesión con alguno de los roles SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `StartCollectionRunDto` (6 campos, 2 obligatorios). Delega en `ContextCollectionService.startCollectionRun`. Crea filas en health_context.context_collection_runs. Actualiza health_context.country_context_schedules. Lee health_context.context_agents, health_context.context_collection_runs, health_context.country_context_schedules.
+`POST /health-context/collection-runs` la atiende `HealthContextController.startCollectionRun` (src/modules/health_context/controllers/health-context.controller.ts:166). Exige sesión con alguno de los roles SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `StartCollectionRunDto` (6 campos, 2 obligatorios). Delega en `ContextCollectionService.startCollectionRun`. Crea filas en health_context.context_collection_runs. Actualiza health_context.country_context_schedules. Lee health_context.context_agents, health_context.context_collection_runs, health_context.country_context_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:166` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -171,7 +170,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `health_context.context_agents` | LEE | LEE | DIRECTA | HealthContextController.startCollectionRun → ContextCollectionService.startCollectionRun → HealthContextRepository.findAgentById | `src/modules/health_context/repositories/health-context.repository.ts:197` |
 | `health_context.context_collection_runs` | ESCRIBE | CREA | DIRECTA | HealthContextController.startCollectionRun → ContextCollectionService.startCollectionRun → HealthContextRepository.createCollectionRun | `src/modules/health_context/repositories/health-context.repository.ts:676` |
 | `health_context.context_collection_runs` | LEE | LEE | DIRECTA | HealthContextController.startCollectionRun → ContextCollectionService.startCollectionRun → HealthContextRepository.findRunByIdempotencyKey | `src/modules/health_context/repositories/health-context.repository.ts:730` |
-| `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.startCollectionRun → ContextCollectionService.startCollectionRun | `src/modules/health_context/services/context-collection.service.ts:402` |
+| `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.startCollectionRun → ContextCollectionService.startCollectionRun | `src/modules/health_context/services/context-collection.service.ts:460` |
 | `health_context.country_context_schedules` | LEE | LEE | DIRECTA | HealthContextController.startCollectionRun → ContextCollectionService.startCollectionRun → HealthContextRepository.findScheduleForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:374` |
 
 ### Cuerpo — DTO `StartCollectionRunDto` · `application/json`
@@ -181,9 +180,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia de la corrida | `src/modules/health_context/dto/health-context.dto.ts:504` |
 | `trigger` | `string` | Sí | valores: SCHEDULED, MANUAL | `@IsIn(COLLECTION_TRIGGERS)` | — | `src/modules/health_context/dto/health-context.dto.ts:511` |
 | `scheduleId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Programación que la dispara | `src/modules/health_context/dto/health-context.dto.ts:522` |
-| `agentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Agente; por defecto, el de la programación | `src/modules/health_context/dto/health-context.dto.ts:533` |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | País; por defecto, el de la programación | `src/modules/health_context/dto/health-context.dto.ts:544` |
-| `nextRunAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Próxima ejecución recalculada | `src/modules/health_context/dto/health-context.dto.ts:555` |
+| `agentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Agente. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH) | `src/modules/health_context/dto/health-context.dto.ts:534` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | País. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH) | `src/modules/health_context/dto/health-context.dto.ts:546` |
+| `nextRunAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Próxima ejecución recalculada | `src/modules/health_context/dto/health-context.dto.ts:557` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -213,9 +212,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:566` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:572` |
-| `duplicate` | `boolean` | Sí | — | — | true si la clave ya se había usado y se devuelve la corrida previa | `src/modules/health_context/dto/health-context.dto.ts:581` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:568` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:574` |
+| `duplicate` | `boolean` | Sí | — | — | true si la clave ya se había usado y se devuelve la corrida previa | `src/modules/health_context/dto/health-context.dto.ts:583` |
 
 ### Respuestas posibles
 
@@ -226,7 +225,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Programación no encontrada; ResourceNotFoundException: Agente no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa; PreconditionFailedException: La corrida necesita agente y país, o una programación de la que salgan; PreconditionFailedException: El agente no está activo |
+| 409 | `CONFLICT` | ConflictException: No se pudo resolver la corrida de esa clave de idempotencia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa; PreconditionFailedException: El agente y el país de la corrida deben coincidir con los de la programación; PreconditionFailedException: La corrida necesita agente y país, o una programación de la que salgan; PreconditionFailedException: El agente no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/health_context.md).
@@ -250,7 +250,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.finishCollectionRun` — `src/modules/health_context/controllers/health-context.controller.ts:217`
+- **Implementación:** `HealthContextController.finishCollectionRun` — `src/modules/health_context/controllers/health-context.controller.ts:271`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -260,28 +260,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/collection-runs/{id}/finish` la atiende `HealthContextController.finishCollectionRun` (src/modules/health_context/controllers/health-context.controller.ts:217). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `FinishCollectionRunDto` (3 campos, 1 obligatorio). Delega en `ContextCollectionService.finishCollectionRun`. Actualiza health_context.context_collection_runs, health_context.country_context_schedules. Lee health_context.context_collection_runs, health_context.context_source_observations, health_context.country_context_schedules.
+`POST /health-context/collection-runs/{id}/finish` la atiende `HealthContextController.finishCollectionRun` (src/modules/health_context/controllers/health-context.controller.ts:271). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `FinishCollectionRunDto` (3 campos, 1 obligatorio). Delega en `ContextCollectionService.finishCollectionRun`. Actualiza health_context.context_collection_runs, health_context.country_context_schedules. Lee health_context.context_collection_runs, health_context.context_source_observations, health_context.country_context_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:217` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:217` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:271` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:271` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_context.context_collection_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun | `src/modules/health_context/services/context-collection.service.ts:586` |
+| `health_context.context_collection_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun | `src/modules/health_context/services/context-collection.service.ts:702` |
 | `health_context.context_collection_runs` | LEE | LEE | DIRECTA | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun → HealthContextRepository.findRunForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:718` |
 | `health_context.context_source_observations` | LEE | LEE | DIRECTA | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun → HealthContextRepository.findObservationsByRun | `src/modules/health_context/repositories/health-context.repository.ts:784` |
-| `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun | `src/modules/health_context/services/context-collection.service.ts:601` |
+| `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun | `src/modules/health_context/services/context-collection.service.ts:717` |
 | `health_context.country_context_schedules` | LEE | LEE | DIRECTA | HealthContextController.finishCollectionRun → ContextCollectionService.finishCollectionRun → HealthContextRepository.findScheduleForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:374` |
 
 ### Parámetros
@@ -294,9 +294,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `outcome` | `string` | Sí | valores: SUCCEEDED, PARTIAL, FAILED | `@IsIn(RUN_OUTCOMES)` | — | `src/modules/health_context/dto/health-context.dto.ts:1087` |
-| `continuationCursorJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Cursor para continuar donde se quedó | `src/modules/health_context/dto/health-context.dto.ts:1095` |
-| `errorSummary` | `string` | No | — | `@IsOptional()` `@IsString()` | Qué salió mal; obligatorio si la corrida falla | `src/modules/health_context/dto/health-context.dto.ts:1105` |
+| `outcome` | `string` | Sí | valores: SUCCEEDED, PARTIAL, FAILED | `@IsIn(RUN_OUTCOMES)` | — | `src/modules/health_context/dto/health-context.dto.ts:1089` |
+| `continuationCursorJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Cursor para continuar donde se quedó | `src/modules/health_context/dto/health-context.dto.ts:1097` |
+| `errorSummary` | `string` | No | — | `@IsOptional()` `@IsString()` | Qué salió mal; obligatorio si la corrida falla | `src/modules/health_context/dto/health-context.dto.ts:1107` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -322,12 +322,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1116` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:1122` |
-| `observationsRead` | `string` | Sí | — | — | Observaciones leídas, conciliadas contra la tabla | `src/modules/health_context/dto/health-context.dto.ts:1130` |
-| `observationsAccepted` | `string` | Sí | — | — | Valor de observations accepted mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1136` |
-| `observationsRejected` | `string` | Sí | — | — | Valor de observations rejected mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1142` |
-| `sourceCount` | `number` | Sí | — | — | Fuentes distintas que aportaron observaciones | `src/modules/health_context/dto/health-context.dto.ts:1148` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1118` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:1124` |
+| `observationsRead` | `string` | Sí | — | — | Observaciones leídas, conciliadas contra la tabla | `src/modules/health_context/dto/health-context.dto.ts:1132` |
+| `observationsAccepted` | `string` | Sí | — | — | Valor de observations accepted mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1138` |
+| `observationsRejected` | `string` | Sí | — | — | Valor de observations rejected mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1144` |
+| `sourceCount` | `number` | Sí | — | — | Fuentes distintas que aportaron observaciones | `src/modules/health_context/dto/health-context.dto.ts:1150` |
 
 ### Respuestas posibles
 
@@ -363,7 +363,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.recordObservation` — `src/modules/health_context/controllers/health-context.controller.ts:153`
+- **Implementación:** `HealthContextController.recordObservation` — `src/modules/health_context/controllers/health-context.controller.ts:187`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -373,25 +373,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/collection-runs/{id}/observations` la atiende `HealthContextController.recordObservation` (src/modules/health_context/controllers/health-context.controller.ts:153). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RecordObservationDto` (9 campos, 3 obligatorios). Delega en `ContextCollectionService.recordObservation`. Crea filas en health_context.context_source_observations. Actualiza health_context.context_collection_runs. Lee health_context.context_collection_runs, health_context.context_source_observations, health_context.health_context_sources.
+`POST /health-context/collection-runs/{id}/observations` la atiende `HealthContextController.recordObservation` (src/modules/health_context/controllers/health-context.controller.ts:187). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RecordObservationDto` (9 campos, 3 obligatorios). Delega en `ContextCollectionService.recordObservation`. Crea filas en health_context.context_source_observations. Actualiza health_context.context_collection_runs. Lee health_context.context_collection_runs, health_context.context_source_observations, health_context.health_context_sources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:153` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:187` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:187` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_context.context_collection_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.recordObservation → ContextCollectionService.recordObservation | `src/modules/health_context/services/context-collection.service.ts:520` |
+| `health_context.context_collection_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.recordObservation → ContextCollectionService.recordObservation | `src/modules/health_context/services/context-collection.service.ts:636` |
 | `health_context.context_collection_runs` | LEE | LEE | DIRECTA | HealthContextController.recordObservation → ContextCollectionService.recordObservation → HealthContextRepository.findRunForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:718` |
 | `health_context.context_source_observations` | ESCRIBE | CREA | DIRECTA | HealthContextController.recordObservation → ContextCollectionService.recordObservation → HealthContextRepository.createObservation | `src/modules/health_context/repositories/health-context.repository.ts:740` |
 | `health_context.context_source_observations` | LEE | LEE | DIRECTA | HealthContextController.recordObservation → ContextCollectionService.recordObservation → HealthContextRepository.findObservationByHash | `src/modules/health_context/repositories/health-context.repository.ts:767` |
@@ -407,15 +407,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `sourceId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_context/dto/health-context.dto.ts:595` |
-| `contentHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del contenido recogido; permite deduplicar | `src/modules/health_context/dto/health-context.dto.ts:605` |
-| `status` | `string` | Sí | valores: ACCEPTED, REJECTED | `@IsIn(OBSERVATION_STATUSES)` | — | `src/modules/health_context/dto/health-context.dto.ts:612` |
-| `sourceLocator` | `string` | No | — | `@IsOptional()` `@IsString()` | Dónde se encontró el dato | `src/modules/health_context/dto/health-context.dto.ts:620` |
-| `publishedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo lo publicó la fuente | `src/modules/health_context/dto/health-context.dto.ts:631` |
-| `retrievedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo se recogió; por defecto, ahora | `src/modules/health_context/dto/health-context.dto.ts:642` |
-| `mediaType` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/health_context/dto/health-context.dto.ts:651` |
-| `rawPayloadFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo con el payload crudo | `src/modules/health_context/dto/health-context.dto.ts:662` |
-| `extractedPayloadJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Datos extraídos. Sólo agregado de país: nunca datos de paciente. | `src/modules/health_context/dto/health-context.dto.ts:673` |
+| `sourceId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_context/dto/health-context.dto.ts:597` |
+| `contentHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del contenido recogido; permite deduplicar | `src/modules/health_context/dto/health-context.dto.ts:607` |
+| `status` | `string` | Sí | valores: ACCEPTED, REJECTED | `@IsIn(OBSERVATION_STATUSES)` | — | `src/modules/health_context/dto/health-context.dto.ts:614` |
+| `sourceLocator` | `string` | No | — | `@IsOptional()` `@IsString()` | Dónde se encontró el dato | `src/modules/health_context/dto/health-context.dto.ts:622` |
+| `publishedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo lo publicó la fuente | `src/modules/health_context/dto/health-context.dto.ts:633` |
+| `retrievedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo se recogió; por defecto, ahora | `src/modules/health_context/dto/health-context.dto.ts:644` |
+| `mediaType` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/health_context/dto/health-context.dto.ts:653` |
+| `rawPayloadFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo con el payload crudo | `src/modules/health_context/dto/health-context.dto.ts:664` |
+| `extractedPayloadJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Datos extraídos. Sólo agregado de país: nunca datos de paciente. | `src/modules/health_context/dto/health-context.dto.ts:675` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -449,9 +449,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:684` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:690` |
-| `duplicate` | `boolean` | Sí | — | — | true si ya se había recogido el mismo contenido en la corrida | `src/modules/health_context/dto/health-context.dto.ts:699` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:686` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:692` |
+| `duplicate` | `boolean` | Sí | — | — | true si ya se había recogido el mismo contenido en la corrida | `src/modules/health_context/dto/health-context.dto.ts:701` |
 
 ### Respuestas posibles
 
@@ -462,7 +462,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Fuente no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida ya no está en curso; PreconditionFailedException: La fuente no está activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida ya no está en curso; PreconditionFailedException: La fuente no está activa; PreconditionFailedException: La fuente no es elegible para esta observación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/health_context.md).
@@ -486,7 +486,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.createContext` — `src/modules/health_context/controllers/health-context.controller.ts:122`
+- **Implementación:** `HealthContextController.createContext` — `src/modules/health_context/controllers/health-context.controller.ts:146`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -496,18 +496,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/contexts` la atiende `HealthContextController.createContext` (src/modules/health_context/controllers/health-context.controller.ts:122). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `CreateContextDto` (5 campos, 4 obligatorios). Delega en `CountryContextService.createContext`. Crea filas en health_context.country_health_contexts. Lee health_context.country_health_contexts.
+`POST /health-context/contexts` la atiende `HealthContextController.createContext` (src/modules/health_context/controllers/health-context.controller.ts:146). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `CreateContextDto` (5 campos, 4 obligatorios). Delega en `CountryContextService.createContext`. Crea filas en health_context.country_health_contexts. Lee health_context.country_health_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:146` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -567,7 +567,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe ese contexto para el país y el dominio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/health_context.md).
@@ -591,7 +590,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.draftContextVersion` — `src/modules/health_context/controllers/health-context.controller.ts:170`
+- **Implementación:** `HealthContextController.draftContextVersion` — `src/modules/health_context/controllers/health-context.controller.ts:209`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -601,19 +600,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/contexts/{id}/versions` la atiende `HealthContextController.draftContextVersion` (src/modules/health_context/controllers/health-context.controller.ts:170). Exige sesión con alguno de los roles SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `DraftContextVersionDto` (21 campos, 8 obligatorios). Delega en `CountryContextService.draftVersion`. Crea filas en health_context.context_fact_evidence, health_context.country_health_context_versions, health_context.health_context_facts. Lee health_context.context_collection_runs, health_context.context_source_observations, health_context.country_health_context_versions, health_context.country_health_contexts.
+`POST /health-context/contexts/{id}/versions` la atiende `HealthContextController.draftContextVersion` (src/modules/health_context/controllers/health-context.controller.ts:209). Exige sesión con alguno de los roles SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `DraftContextVersionDto` (21 campos, 8 obligatorios). Delega en `CountryContextService.draftVersion`. Crea filas en health_context.context_fact_evidence, health_context.country_health_context_versions, health_context.health_context_facts. Lee health_context.context_collection_runs, health_context.context_source_observations, health_context.country_health_context_versions, health_context.country_health_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:170` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:209` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:209` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -637,27 +636,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `collectionRunId` | `string` | Sí | formato uuid | `@IsUUID()` | Corrida de la que salen las observaciones | `src/modules/health_context/dto/health-context.dto.ts:842` |
-| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/health_context/dto/health-context.dto.ts:851` |
-| `summary` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/health_context/dto/health-context.dto.ts:860` |
-| `contextPayloadJson` | `object` | Sí | — | `@IsObject()` | Contenido del contexto en esta versión | `src/modules/health_context/dto/health-context.dto.ts:867` |
-| `observedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | A qué momento corresponde lo observado | `src/modules/health_context/dto/health-context.dto.ts:878` |
-| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo caduca la vigencia | `src/modules/health_context/dto/health-context.dto.ts:889` |
-| `confidenceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Confianza global, como cadena decimal | `src/modules/health_context/dto/health-context.dto.ts:897` |
-| `facts` | `array<ContextFactDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ContextFactDto)` | Hechos con su evidencia | `src/modules/health_context/dto/health-context.dto.ts:910` |
-| `facts[].factKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave del hecho dentro de la versión | `src/modules/health_context/dto/health-context.dto.ts:761` |
-| `facts[].valueType` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | Tipo técnico del valor | `src/modules/health_context/dto/health-context.dto.ts:769` |
-| `facts[].valueJson` | `object` | Sí | — | `@IsObject()` | Valor del hecho | `src/modules/health_context/dto/health-context.dto.ts:776` |
-| `facts[].metricConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_context/dto/health-context.dto.ts:784` |
-| `facts[].unitConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_context/dto/health-context.dto.ts:792` |
-| `facts[].periodStart` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_context/dto/health-context.dto.ts:800` |
-| `facts[].periodEnd` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_context/dto/health-context.dto.ts:808` |
-| `facts[].confidenceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Confianza, como cadena decimal | `src/modules/health_context/dto/health-context.dto.ts:816` |
-| `facts[].evidence` | `array<FactEvidenceDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => FactEvidenceDto)` | Un hecho sin evidencia retenida no se acepta | `src/modules/health_context/dto/health-context.dto.ts:829` |
-| `facts[].evidence[].sourceObservationId` | `string` | Sí | formato uuid | `@IsUUID()` | Observación que respalda el hecho | `src/modules/health_context/dto/health-context.dto.ts:718` |
-| `facts[].evidence[].evidenceLocatorJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Dónde dentro de la observación está la evidencia | `src/modules/health_context/dto/health-context.dto.ts:728` |
-| `facts[].evidence[].relevanceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Relevancia, como cadena decimal | `src/modules/health_context/dto/health-context.dto.ts:736` |
-| `facts[].evidence[].evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/health_context/dto/health-context.dto.ts:745` |
+| `collectionRunId` | `string` | Sí | formato uuid | `@IsUUID()` | Corrida de la que salen las observaciones | `src/modules/health_context/dto/health-context.dto.ts:844` |
+| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/health_context/dto/health-context.dto.ts:853` |
+| `summary` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/health_context/dto/health-context.dto.ts:862` |
+| `contextPayloadJson` | `object` | Sí | — | `@IsObject()` | Contenido del contexto en esta versión | `src/modules/health_context/dto/health-context.dto.ts:869` |
+| `observedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | A qué momento corresponde lo observado | `src/modules/health_context/dto/health-context.dto.ts:880` |
+| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo caduca la vigencia | `src/modules/health_context/dto/health-context.dto.ts:891` |
+| `confidenceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Confianza global, como cadena decimal | `src/modules/health_context/dto/health-context.dto.ts:899` |
+| `facts` | `array<ContextFactDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => ContextFactDto)` | Hechos con su evidencia | `src/modules/health_context/dto/health-context.dto.ts:912` |
+| `facts[].factKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave del hecho dentro de la versión | `src/modules/health_context/dto/health-context.dto.ts:763` |
+| `facts[].valueType` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | Tipo técnico del valor | `src/modules/health_context/dto/health-context.dto.ts:771` |
+| `facts[].valueJson` | `object` | Sí | — | `@IsObject()` | Valor del hecho | `src/modules/health_context/dto/health-context.dto.ts:778` |
+| `facts[].metricConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_context/dto/health-context.dto.ts:786` |
+| `facts[].unitConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_context/dto/health-context.dto.ts:794` |
+| `facts[].periodStart` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_context/dto/health-context.dto.ts:802` |
+| `facts[].periodEnd` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_context/dto/health-context.dto.ts:810` |
+| `facts[].confidenceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Confianza, como cadena decimal | `src/modules/health_context/dto/health-context.dto.ts:818` |
+| `facts[].evidence` | `array<FactEvidenceDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => FactEvidenceDto)` | Un hecho sin evidencia retenida no se acepta | `src/modules/health_context/dto/health-context.dto.ts:831` |
+| `facts[].evidence[].sourceObservationId` | `string` | Sí | formato uuid | `@IsUUID()` | Observación que respalda el hecho | `src/modules/health_context/dto/health-context.dto.ts:720` |
+| `facts[].evidence[].evidenceLocatorJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Dónde dentro de la observación está la evidencia | `src/modules/health_context/dto/health-context.dto.ts:730` |
+| `facts[].evidence[].relevanceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Relevancia, como cadena decimal | `src/modules/health_context/dto/health-context.dto.ts:738` |
+| `facts[].evidence[].evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/health_context/dto/health-context.dto.ts:747` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -720,12 +719,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:921` |
-| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:927` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:933` |
-| `contentHash` | `string` | Sí | — | — | Valor de content hash mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:939` |
-| `factIds` | `array<string>` | Sí | formato uuid | — | Valor de fact ids mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:945` |
-| `evidenceCount` | `number` | Sí | — | — | Enlaces hecho → observación creados | `src/modules/health_context/dto/health-context.dto.ts:951` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:923` |
+| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:929` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:935` |
+| `contentHash` | `string` | Sí | — | — | Valor de content hash mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:941` |
+| `factIds` | `array<string>` | Sí | formato uuid | — | Valor de fact ids mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:947` |
+| `evidenceCount` | `number` | Sí | — | — | Enlaces hecho → observación creados | `src/modules/health_context/dto/health-context.dto.ts:953` |
 
 ### Respuestas posibles
 
@@ -760,7 +759,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.resolveContext` — `src/modules/health_context/controllers/health-context.controller.ts:250`
+- **Implementación:** `HealthContextController.resolveContext` — `src/modules/health_context/controllers/health-context.controller.ts:314`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -770,19 +769,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /health-context/contexts/resolve` la atiende `HealthContextController.resolveContext` (src/modules/health_context/controllers/health-context.controller.ts:250). Exige sesión con alguno de los roles CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN. Delega en `CountryContextService.resolveContext`. Lee health_context.context_fact_evidence, health_context.country_health_context_versions, health_context.country_health_contexts, health_context.health_context_facts.
+`GET /health-context/contexts/resolve` la atiende `HealthContextController.resolveContext` (src/modules/health_context/controllers/health-context.controller.ts:314). Exige sesión con alguno de los roles CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN. Delega en `CountryContextService.resolveContext`. Lee health_context.context_fact_evidence, health_context.country_health_context_versions, health_context.country_health_contexts, health_context.health_context_facts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:314` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_QUERY | country (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | domain (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | key (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -809,22 +808,22 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `contextId` | `string` | Sí | formato uuid | — | Identificador asociado a context. | `src/modules/health_context/dto/health-context.dto.ts:1290` |
-| `versionId` | `string` | Sí | formato uuid | — | Identificador asociado a version. | `src/modules/health_context/dto/health-context.dto.ts:1296` |
-| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1302` |
-| `contextPayloadJson` | `object` | Sí | — | — | Contenido de la versión vigente | `src/modules/health_context/dto/health-context.dto.ts:1308` |
-| `observedAt` | `string` | No | formato date-time | — | Valor de observed at mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1314` |
-| `expiresAt` | `string` | No | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1320` |
-| `stale` | `boolean` | Sí | — | — | true si la versión vigente ya caducó | `src/modules/health_context/dto/health-context.dto.ts:1326` |
-| `facts` | `array<ResolvedFactDto>` | Sí | — | — | Valor de facts mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1332` |
-| `facts[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1233` |
-| `facts[].factKey` | `string` | Sí | — | — | Valor de fact key mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1239` |
-| `facts[].valueType` | `string` | Sí | — | — | Valor de value type mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1245` |
-| `facts[].valueJson` | `object` | Sí | — | — | Valor del hecho | `src/modules/health_context/dto/health-context.dto.ts:1251` |
-| `facts[].metricConceptId` | `string` | No | formato uuid | — | Identificador asociado a metric concept. | `src/modules/health_context/dto/health-context.dto.ts:1257` |
-| `facts[].unitConceptId` | `string` | No | formato uuid | — | Identificador asociado a unit concept. | `src/modules/health_context/dto/health-context.dto.ts:1263` |
-| `facts[].confidenceScore` | `string` | No | — | — | Valor de confidence score mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1269` |
-| `facts[].evidenceObservationIds` | `array<string>` | Sí | formato uuid | — | Observaciones que respaldan el hecho | `src/modules/health_context/dto/health-context.dto.ts:1279` |
+| `contextId` | `string` | Sí | formato uuid | — | Identificador asociado a context. | `src/modules/health_context/dto/health-context.dto.ts:1292` |
+| `versionId` | `string` | Sí | formato uuid | — | Identificador asociado a version. | `src/modules/health_context/dto/health-context.dto.ts:1298` |
+| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1304` |
+| `contextPayloadJson` | `object` | Sí | — | — | Contenido de la versión vigente | `src/modules/health_context/dto/health-context.dto.ts:1310` |
+| `observedAt` | `string` | No | formato date-time | — | Valor de observed at mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1316` |
+| `expiresAt` | `string` | No | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1322` |
+| `stale` | `boolean` | Sí | — | — | true si la versión vigente ya caducó | `src/modules/health_context/dto/health-context.dto.ts:1328` |
+| `facts` | `array<ResolvedFactDto>` | Sí | — | — | Valor de facts mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1334` |
+| `facts[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1235` |
+| `facts[].factKey` | `string` | Sí | — | — | Valor de fact key mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1241` |
+| `facts[].valueType` | `string` | Sí | — | — | Valor de value type mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1247` |
+| `facts[].valueJson` | `object` | Sí | — | — | Valor del hecho | `src/modules/health_context/dto/health-context.dto.ts:1253` |
+| `facts[].metricConceptId` | `string` | No | formato uuid | — | Identificador asociado a metric concept. | `src/modules/health_context/dto/health-context.dto.ts:1259` |
+| `facts[].unitConceptId` | `string` | No | formato uuid | — | Identificador asociado a unit concept. | `src/modules/health_context/dto/health-context.dto.ts:1265` |
+| `facts[].confidenceScore` | `string` | No | — | — | Valor de confidence score mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1271` |
+| `facts[].evidenceObservationIds` | `array<string>` | Sí | formato uuid | — | Observaciones que respaldan el hecho | `src/modules/health_context/dto/health-context.dto.ts:1281` |
 
 ### Respuestas posibles
 
@@ -859,7 +858,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.runDueSchedules` — `src/modules/health_context/controllers/health-context.controller.ts:107`
+- **Implementación:** `HealthContextController.runDueSchedules` — `src/modules/health_context/controllers/health-context.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -869,18 +868,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/internal/schedules/run-due` la atiende `HealthContextController.runDueSchedules` (src/modules/health_context/controllers/health-context.controller.ts:107). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `HealthContextRunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `ContextCollectionService.runDueSchedules`. Crea filas en health_context.context_collection_runs. Actualiza health_context.country_context_schedules. Lee health_context.context_agents, health_context.context_collection_runs, health_context.country_context_schedules.
+`POST /health-context/internal/schedules/run-due` la atiende `HealthContextController.runDueSchedules` (src/modules/health_context/controllers/health-context.controller.ts:127). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `HealthContextRunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `ContextCollectionService.runDueSchedules`. Crea filas en health_context.context_collection_runs. Actualiza health_context.country_context_schedules. Lee health_context.context_agents, health_context.context_collection_runs, health_context.country_context_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/health_context/controllers/health-context.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM | `src/modules/health_context/controllers/health-context.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -889,7 +888,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `health_context.context_agents` | LEE | LEE | DIRECTA | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → ContextCollectionService.runDueSchedule → HealthContextRepository.findAgentById | `src/modules/health_context/repositories/health-context.repository.ts:197` |
 | `health_context.context_collection_runs` | ESCRIBE | CREA | DIRECTA | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → ContextCollectionService.runDueSchedule → HealthContextRepository.createCollectionRun | `src/modules/health_context/repositories/health-context.repository.ts:676` |
 | `health_context.context_collection_runs` | LEE | LEE | DIRECTA | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → ContextCollectionService.runDueSchedule → HealthContextRepository.findRunByIdempotencyKey | `src/modules/health_context/repositories/health-context.repository.ts:730` |
-| `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → ContextCollectionService.runDueSchedule | `src/modules/health_context/services/context-collection.service.ts:308` |
+| `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → ContextCollectionService.runDueSchedule | `src/modules/health_context/services/context-collection.service.ts:344` |
 | `health_context.country_context_schedules` | LEE | LEE | DIRECTA | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → HealthContextRepository.claimDueSchedules | `src/modules/health_context/repositories/health-context.repository.ts:352` |
 
 ### Cuerpo — DTO `HealthContextRunDueSchedulesDto` · `application/json`
@@ -959,7 +958,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.createSchedule` — `src/modules/health_context/controllers/health-context.controller.ts:91`
+- **Implementación:** `HealthContextController.createSchedule` — `src/modules/health_context/controllers/health-context.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -969,18 +968,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/schedules` la atiende `HealthContextController.createSchedule` (src/modules/health_context/controllers/health-context.controller.ts:91). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `HealthContextCreateScheduleDto` (7 campos, 3 obligatorios). Delega en `ContextCollectionService.createSchedule`. Crea filas en health_context.country_context_schedules. Lee health_context.context_agents.
+`POST /health-context/schedules` la atiende `HealthContextController.createSchedule` (src/modules/health_context/controllers/health-context.controller.ts:106). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `HealthContextCreateScheduleDto` (7 campos, 3 obligatorios). Delega en `ContextCollectionService.createSchedule`. Crea filas en health_context.country_context_schedules. Lee health_context.context_agents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1069,7 +1068,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.createSource` — `src/modules/health_context/controllers/health-context.controller.ts:76`
+- **Implementación:** `HealthContextController.createSource` — `src/modules/health_context/controllers/health-context.controller.ts:86`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1079,18 +1078,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/sources` la atiende `HealthContextController.createSource` (src/modules/health_context/controllers/health-context.controller.ts:76). Exige sesión con alguno de los roles SOURCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateSourceDto` (8 campos, 4 obligatorios). Delega en `ContextCollectionService.createSource`. Crea filas en health_context.health_context_sources. Lee health_context.health_context_sources.
+`POST /health-context/sources` la atiende `HealthContextController.createSource` (src/modules/health_context/controllers/health-context.controller.ts:86). Exige sesión con alguno de los roles SOURCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateSourceDto` (8 campos, 4 obligatorios). Delega en `ContextCollectionService.createSource`. Crea filas en health_context.health_context_sources. Lee health_context.health_context_sources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SOURCE_ADMIN, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SOURCE_ADMIN, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:86` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1156,7 +1155,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe una fuente con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/health_context.md).
@@ -1180,7 +1178,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.publishVersion` — `src/modules/health_context/controllers/health-context.controller.ts:202`
+- **Implementación:** `HealthContextController.publishVersion` — `src/modules/health_context/controllers/health-context.controller.ts:251`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1190,25 +1188,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/versions/{id}/publish` la atiende `HealthContextController.publishVersion` (src/modules/health_context/controllers/health-context.controller.ts:202). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Delega en `CountryContextService.publishVersion`. Actualiza health_context.country_health_context_versions, health_context.country_health_contexts. Lee health_context.country_health_context_versions, health_context.country_health_contexts.
+`POST /health-context/versions/{id}/publish` la atiende `HealthContextController.publishVersion` (src/modules/health_context/controllers/health-context.controller.ts:251). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Delega en `CountryContextService.publishVersion`. Actualiza health_context.country_health_context_versions, health_context.country_health_contexts. Lee health_context.country_health_context_versions, health_context.country_health_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:202` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:251` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_context.country_health_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.publishVersion → CountryContextService.publishVersion | `src/modules/health_context/services/country-context.service.ts:369` |
+| `health_context.country_health_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.publishVersion → CountryContextService.publishVersion | `src/modules/health_context/services/country-context.service.ts:381` |
 | `health_context.country_health_context_versions` | LEE | LEE | DIRECTA | HealthContextController.publishVersion → CountryContextService.publishVersion → HealthContextRepository.findVersionForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:592` |
-| `health_context.country_health_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.publishVersion → CountryContextService.publishVersion | `src/modules/health_context/services/country-context.service.ts:377` |
+| `health_context.country_health_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.publishVersion → CountryContextService.publishVersion | `src/modules/health_context/services/country-context.service.ts:389` |
 | `health_context.country_health_contexts` | LEE | LEE | DIRECTA | HealthContextController.publishVersion → CountryContextService.publishVersion → HealthContextRepository.findContextForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:457` |
 
 ### Parámetros
@@ -1225,7 +1223,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Id de la versión publicada | `src/modules/health_context/dto/health-context.dto.ts:1043` |
+| `id` | `string` | Sí | — | — | Id de la versión publicada | `src/modules/health_context/dto/health-context.dto.ts:1045` |
 | `state` | `string` | Sí | — | — | Estado del ciclo de vida tras la publicación (código de concepto) | sin fuente |
 | `publishedAt` | `string` | Sí | formato date-time | — | Instante de publicación | sin fuente |
 
@@ -1262,7 +1260,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.recordQualityReview` — `src/modules/health_context/controllers/health-context.controller.ts:186`
+- **Implementación:** `HealthContextController.recordQualityReview` — `src/modules/health_context/controllers/health-context.controller.ts:230`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1272,26 +1270,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/versions/{id}/quality-reviews` la atiende `HealthContextController.recordQualityReview` (src/modules/health_context/controllers/health-context.controller.ts:186). Exige sesión con alguno de los roles QUALITY_REVIEWER, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RecordQualityReviewDto` (5 campos, 2 obligatorios). Delega en `CountryContextService.recordQualityReview`. Crea filas en health_context.context_quality_reviews. Actualiza health_context.country_health_context_versions. Lee health_context.country_health_context_versions.
+`POST /health-context/versions/{id}/quality-reviews` la atiende `HealthContextController.recordQualityReview` (src/modules/health_context/controllers/health-context.controller.ts:230). Exige sesión con alguno de los roles QUALITY_REVIEWER, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RecordQualityReviewDto` (5 campos, 2 obligatorios). Delega en `CountryContextService.recordQualityReview`. Crea filas en health_context.context_quality_reviews. Actualiza health_context.country_health_context_versions. Lee health_context.country_health_context_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QUALITY_REVIEWER, SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:186` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: QUALITY_REVIEWER, SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:230` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:230` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `health_context.context_quality_reviews` | ESCRIBE | CREA | DIRECTA | HealthContextController.recordQualityReview → CountryContextService.recordQualityReview → HealthContextRepository.createQualityReview | `src/modules/health_context/repositories/health-context.repository.ts:991` |
-| `health_context.country_health_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.recordQualityReview → CountryContextService.recordQualityReview | `src/modules/health_context/services/country-context.service.ts:301` |
+| `health_context.country_health_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.recordQualityReview → CountryContextService.recordQualityReview | `src/modules/health_context/services/country-context.service.ts:313` |
 | `health_context.country_health_context_versions` | LEE | LEE | DIRECTA | HealthContextController.recordQualityReview → CountryContextService.recordQualityReview → HealthContextRepository.findVersionForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:592` |
 
 ### Parámetros
@@ -1304,11 +1302,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reviewTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de revisión (catálogo abierto) | `src/modules/health_context/dto/health-context.dto.ts:968` |
-| `outcome` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(REVIEW_OUTCOMES)` | — | `src/modules/health_context/dto/health-context.dto.ts:975` |
-| `reviewerAgentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Agente revisor, si la revisión es automática | `src/modules/health_context/dto/health-context.dto.ts:986` |
-| `issuesJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Problemas encontrados | `src/modules/health_context/dto/health-context.dto.ts:994` |
-| `notes` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/health_context/dto/health-context.dto.ts:1002` |
+| `reviewTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de revisión (catálogo abierto) | `src/modules/health_context/dto/health-context.dto.ts:970` |
+| `outcome` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(REVIEW_OUTCOMES)` | — | `src/modules/health_context/dto/health-context.dto.ts:977` |
+| `reviewerAgentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Agente revisor, si la revisión es automática | `src/modules/health_context/dto/health-context.dto.ts:988` |
+| `issuesJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Problemas encontrados | `src/modules/health_context/dto/health-context.dto.ts:996` |
+| `notes` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/health_context/dto/health-context.dto.ts:1004` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1337,9 +1335,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1013` |
-| `contextVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a context version. | `src/modules/health_context/dto/health-context.dto.ts:1019` |
-| `versionStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda la versión | `src/modules/health_context/dto/health-context.dto.ts:1028` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1015` |
+| `contextVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a context version. | `src/modules/health_context/dto/health-context.dto.ts:1021` |
+| `versionStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda la versión | `src/modules/health_context/dto/health-context.dto.ts:1030` |
 
 ### Respuestas posibles
 
@@ -1374,7 +1372,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthContextController.supersedeVersion` — `src/modules/health_context/controllers/health-context.controller.ts:234`
+- **Implementación:** `HealthContextController.supersedeVersion` — `src/modules/health_context/controllers/health-context.controller.ts:293`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1384,27 +1382,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/versions/{id}/supersede` la atiende `HealthContextController.supersedeVersion` (src/modules/health_context/controllers/health-context.controller.ts:234). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `SupersedeVersionDto` (3 campos, 2 obligatorios). Delega en `CountryContextService.supersedeVersion`. Actualiza health_context.country_health_context_versions, health_context.country_health_contexts. Lee health_context.country_health_context_versions, health_context.country_health_contexts.
+`POST /health-context/versions/{id}/supersede` la atiende `HealthContextController.supersedeVersion` (src/modules/health_context/controllers/health-context.controller.ts:293). Exige sesión con alguno de los roles CONTEXT_CURATOR, PLATFORM_ADMIN. Valida el cuerpo como `SupersedeVersionDto` (3 campos, 2 obligatorios). Delega en `CountryContextService.supersedeVersion`. Actualiza health_context.country_health_context_versions, health_context.country_health_contexts. Lee health_context.country_health_context_versions, health_context.country_health_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:234` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:234` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:293` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:293` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_context.country_health_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.supersedeVersion → CountryContextService.supersedeVersion | `src/modules/health_context/services/country-context.service.ts:477` |
+| `health_context.country_health_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.supersedeVersion → CountryContextService.supersedeVersion | `src/modules/health_context/services/country-context.service.ts:489` |
 | `health_context.country_health_context_versions` | LEE | LEE | DIRECTA | HealthContextController.supersedeVersion → CountryContextService.supersedeVersion → HealthContextRepository.findVersionForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:592` |
-| `health_context.country_health_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.supersedeVersion → CountryContextService.supersedeVersion | `src/modules/health_context/services/country-context.service.ts:490` |
+| `health_context.country_health_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.supersedeVersion → CountryContextService.supersedeVersion | `src/modules/health_context/services/country-context.service.ts:502` |
 | `health_context.country_health_contexts` | LEE | LEE | DIRECTA | HealthContextController.supersedeVersion → CountryContextService.supersedeVersion → HealthContextRepository.findContextForUpdate | `src/modules/health_context/repositories/health-context.repository.ts:457` |
 
 ### Parámetros
@@ -1417,9 +1415,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `mode` | `string` | Sí | valores: SUPERSEDED, EXPIRED | `@IsIn(SUPERSEDE_MODES)` | `EXPIRED` retira sin reemplazo y deja el contexto obsoleto | `src/modules/health_context/dto/health-context.dto.ts:1165` |
-| `reason` | `string` | Sí | — | `@IsString()` | Por qué se retira | `src/modules/health_context/dto/health-context.dto.ts:1172` |
-| `replacementVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Versión que la sustituye; obligatoria en modo SUPERSEDED | `src/modules/health_context/dto/health-context.dto.ts:1183` |
+| `mode` | `string` | Sí | valores: SUPERSEDED, EXPIRED | `@IsIn(SUPERSEDE_MODES)` | `EXPIRED` retira sin reemplazo y deja el contexto obsoleto | `src/modules/health_context/dto/health-context.dto.ts:1167` |
+| `reason` | `string` | Sí | — | `@IsString()` | Por qué se retira | `src/modules/health_context/dto/health-context.dto.ts:1174` |
+| `replacementVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Versión que la sustituye; obligatoria en modo SUPERSEDED | `src/modules/health_context/dto/health-context.dto.ts:1185` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1446,10 +1444,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Versión retirada | `src/modules/health_context/dto/health-context.dto.ts:1194` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:1200` |
-| `currentVersionId` | `string` | No | formato uuid | — | Versión que queda vigente | `src/modules/health_context/dto/health-context.dto.ts:1209` |
-| `contextStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el contexto | `src/modules/health_context/dto/health-context.dto.ts:1218` |
+| `id` | `string` | Sí | formato uuid | — | Versión retirada | `src/modules/health_context/dto/health-context.dto.ts:1196` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:1202` |
+| `currentVersionId` | `string` | No | formato uuid | — | Versión que queda vigente | `src/modules/health_context/dto/health-context.dto.ts:1211` |
+| `contextStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el contexto | `src/modules/health_context/dto/health-context.dto.ts:1220` |
 
 ### Respuestas posibles
 

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PracticeInventoryService } from '../services';
 import { CreateMovementDto, MovementResponseDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class InventoryItemsController {
   constructor(private readonly inventoryService: PracticeInventoryService) {}
 
   /** UC-14-11. */
+  @Audited({
+    action: 'PRACTICE_INVENTORY_MOVEMENT_RECORDED',
+    entity: 'inventory_movement',
+    entityId: 'result.id',
+  })
   @Post(':itemId/movements')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

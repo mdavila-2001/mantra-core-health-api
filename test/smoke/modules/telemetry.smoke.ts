@@ -68,7 +68,6 @@ export const TELEMETRY_SMOKE: SmokeCase[] = [
     path: (c) => '/telemetry/tracking-consents',
     body: (c) => ({
       purposeDefinitionId: c.vars.telePurposeId,
-      userId: c.adminUserId,
       jurisdictionConceptId: C,
       consentVersion: '1.0',
       evidenceHash: 'a'.repeat(64),
@@ -86,7 +85,6 @@ export const TELEMETRY_SMOKE: SmokeCase[] = [
     path: () => '/telemetry/tracking-consents',
     body: (c) => ({
       purposeDefinitionId: UUID_ABSENT,
-      userId: c.adminUserId,
       consentVersion: '1.0',
       evidenceHash: 'a'.repeat(64),
     }),

@@ -109,6 +109,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientDiagnosticResultsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -268,6 +269,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientDiagnosticResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientDiagnosticResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -420,6 +422,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No es del titular, no está liberado, o el archivo no cuelga del informe | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -524,6 +527,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DiagnosticResultSharesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DiagnosticResultSharesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DiagnosticResultSharesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DiagnosticResultSharesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticResultSharesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -673,6 +677,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticResultShareDto`. Ejemplo completo derivado de ese DTO:
 
@@ -805,6 +810,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosticResultShareDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticResultShareDto`. Ejemplo completo derivado de ese DTO:
 
@@ -928,6 +934,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientOwnOrdersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientOwnOrdersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -966,8 +973,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "encounterId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
       "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "category": "LAB",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+      "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+      "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+      "suggestedPracticeSiteName": "Nombre de ejemplo",
       "createdAt": "2026-07-31T12:00:00.000Z",
       "preparationInstructions": "valor-ejemplo",
       "hasReleasedResult": true,
@@ -984,7 +996,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<PatientOrderSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":"LAB","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","preparationInstructions":"valor-ejemplo","hasReleasedResult":true,"reportId":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].insuranceSettlement` | Sí | `PatientInsuranceSettlementDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]}` |
 | `items[].insuranceSettlement.claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].insuranceSettlement.claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1011,8 +1023,13 @@ Campos de la respuesta:
 | `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].codeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].categoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].category` | No | `string` | valores: `LAB`, `IMAGING`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `LAB` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].priorityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerSelectionConceptId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].suggestedPracticeSiteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `items[].preparationInstructions` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].hasReleasedResult` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -1098,7 +1115,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño de la acesión | `00000000-0000-4000-8000-000000000001` |
-| `custodianTenantId` | No | `string` | formato `uuid` | Tenant custodio (por defecto el del token) | `00000000-0000-4000-8000-000000000001` |
+| `custodianTenantId` | No | `string` | formato `uuid` | Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `specimenIds` | Sí | `array<string>` | formato `uuid` | Especímenes a acesionar | `["00000000-0000-4000-8000-000000000001"]` |
 | `accessionNumber` | No | `string` | longitud máxima 120 | Nº de acesión (se genera si se omite) | `valor-ejemplo` |
 | `priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -1139,6 +1156,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccessionCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccessionCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccessionCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccessionCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessionCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1170,6 +1188,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El espécimen está rechazado y no puede acesionarse | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1254,6 +1273,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessionDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1454,6 +1474,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1480,8 +1501,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Falta el tenant custodio de la corrida | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1589,6 +1610,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1615,7 +1637,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida de analizador no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 409 | `CONFLICT` | El mensaje ya fue ingerido para esta corrida | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1746,6 +1768,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1772,9 +1795,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 409 | `CONFLICT` | El archivo ya está adjunto como media clínica | Excepción explícita en src/modules/diagnostics/services/diagnostics-media-quality.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Falta el tenant custodio de la media | Excepción explícita en src/modules/diagnostics/services/diagnostics-media-quality.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1888,6 +1911,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2023,6 +2047,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2049,9 +2074,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 409 | `CONFLICT` | Ya existe una notificación crítica para la observación | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Falta el tenant custodio de la notificación | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2152,6 +2177,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2178,7 +2204,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Notificación crítica no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 409 | `CONFLICT` | La notificación ya fue reconocida | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2292,6 +2317,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2318,8 +2344,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Falta el tenant custodio del evento de calidad | Excepción explícita en src/modules/diagnostics/services/diagnostics-media-quality.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2420,6 +2446,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2446,7 +2473,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Falta el tenant del endpoint de imagen | Excepción explícita en src/modules/diagnostics/services/diagnostics-imaging.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2558,6 +2585,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2584,7 +2612,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Estudio de imagen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-imaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2614,7 +2641,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Listar los estudios de imagen del paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Exige un vínculo asistencial vigente entre el profesional y el paciente: sin él responde 404, igual que un paciente inexistente.
 
 Contexto declarado en el controlador: Estudios de imagen de un paciente. Es la lectura que cierra el circuito: quien pidió la prueba puede encontrar su resultado sin conocer de antemano el uuid del estudio.
 
@@ -2671,6 +2698,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImagingStudySummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2699,6 +2727,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2783,6 +2812,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientDiagnosticOrdersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2797,9 +2827,17 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "formInstanceId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
       "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "category": {},
+      "basedOnNoteIds": [
+        "valor-ejemplo"
+      ],
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "priorityConceptId": "00000000-0000-4000-8000-000000000001",
       "requesterProfileId": "00000000-0000-4000-8000-000000000001",
+      "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+      "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+      "suggestedPracticeSiteName": "Nombre de ejemplo",
       "createdAt": "2026-07-31T12:00:00.000Z",
       "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
       "duplicateOverrideReason": "Texto descriptivo de ejemplo"
@@ -2832,16 +2870,22 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
+| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","category":{},"basedOnNoteIds":["valor-ejemplo"],"statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","performerSelectionConceptId":"00000000-0000-4000-8000-000000000001","performerPractitionerProfileId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteId":"00000000-0000-4000-8000-000000000001","suggestedPracticeSiteName":"Nombre de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
 | `orders[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].formInstanceId` | No | `string` | formato `uuid` | P43: instancia del formulario médico de la que salió la orden, si salió de uno. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].codeConceptId` | Sí | `string` | formato `uuid` | Qué se pidió (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].categoryConceptId` | No | `string` | formato `uuid` | Laboratorio o imagenología (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `orders[].category` | No | `object` | Sin restricción adicional declarada | P40: categoría de análisis derivada del concepto; ausente = sin clasificar. | `{}` |
+| `orders[].basedOnNoteIds` | Sí | `array<string>` | formato `uuid` | P40: notas médicas que motivan la orden, en el orden en que se citaron. | `["valor-ejemplo"]` |
 | `orders[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].requesterProfileId` | No | `string` | formato `uuid` | Profesional que la solicitó. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].performerSelectionConceptId` | Sí | `string` | formato `uuid`; admite null | Modo de ejecutor recomendado (concept id); `null` en una orden anterior a ese dato. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Médico ejecutor («lo hago yo»), o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sede sugerida, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].suggestedPracticeSiteName` | Sí | `string` | admite null | Nombre de la sede sugerida, o `null`. | `Nombre de ejemplo` |
 | `orders[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
 | `orders[].previousDiagnosticReportId` | No | `string` | formato `uuid` | El informe previo que satisface este pedido (antiduplicación, v4.2.17). Presente cuando el médico eligió reutilizar o repetir un estudio duplicado; `undefined` en cualquier otro caso. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].duplicateOverrideReason` | No | `string` | Sin restricción adicional declarada | Justificación del médico si repitió un estudio duplicado (antiduplicación). | `Texto descriptivo de ejemplo` |
@@ -2997,6 +3041,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3024,8 +3069,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | La versión que se enmienda no existe en este informe | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Falta el tenant custodio del informe | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3127,6 +3172,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3154,6 +3200,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Versión de informe no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 409 | `CONFLICT` | La versión ya fue liberada | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La versión no es elegible para liberación | Excepción explícita en src/modules/diagnostics/services/diagnostics-reports.service.ts |
@@ -3265,6 +3312,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3291,8 +3339,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Falta el tenant custodio de la verificación | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3389,6 +3437,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabInboxPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3552,7 +3601,6 @@ Content-Type: application/json
 
 {
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
-  "custodianTenantId": "00000000-0000-4000-8000-000000000001",
   "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -3567,7 +3615,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño del espécimen | `00000000-0000-4000-8000-000000000001` |
-| `custodianTenantId` | Sí | `string` | formato `uuid` | Tenant custodio | `00000000-0000-4000-8000-000000000001` |
+| `custodianTenantId` | No | `string` | formato `uuid` | Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `specimenTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de espécimen (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `serviceRequestId` | No | `string` | formato `uuid` | Orden clínica de origen | `00000000-0000-4000-8000-000000000001` |
 | `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3610,6 +3658,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3636,6 +3685,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3719,6 +3769,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SpecimenDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3893,6 +3944,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3919,7 +3971,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
+| 404 | `NOT_FOUND` | Contenedor no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4026,6 +4078,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4052,7 +4105,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El espécimen ya está rechazado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -4139,6 +4192,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkOrderSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -4292,6 +4346,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkOrderCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkOrderCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkOrderCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkOrderCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkOrderCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4322,7 +4377,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Acesión no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4469,6 +4524,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ImagingStudyStoredDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImagingStudyStoredDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImagingStudyStoredDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImagingStudyStoredDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImagingStudyStoredDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4499,7 +4555,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Endpoint de imagen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-imaging.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostics/services/diagnostics-scope.service.ts |
 | 409 | `CONFLICT` | El estudio DICOM ya fue almacenado | Excepción explícita en src/modules/diagnostics/services/diagnostics-imaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

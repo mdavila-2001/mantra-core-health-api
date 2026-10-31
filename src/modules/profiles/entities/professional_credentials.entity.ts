@@ -147,6 +147,16 @@ export class ProfessionalCredentials {
   verifiedAt?: Date;
 
   /**
+   * Por qué se rechazó el título.
+   */
+  @Property({
+    fieldName: 'rejection_reason_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  rejectionReasonText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

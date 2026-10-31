@@ -120,6 +120,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArchiveJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -272,6 +273,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MovementJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MovementJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MovementJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MovementJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MovementJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -414,6 +416,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeletionRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeletionRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeletionRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeletionRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeletionRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -542,6 +545,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CloseDeletionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CloseDeletionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CloseDeletionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CloseDeletionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CloseDeletionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -676,6 +680,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReplayResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReplayResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReplayResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReplayResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReplayResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -852,6 +857,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProjectionDefinitionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProjectionDefinitionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProjectionDefinitionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProjectionDefinitionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProjectionDefinitionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -996,6 +1002,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RepairJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RepairJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RepairJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RepairJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RepairJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1162,6 +1169,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReconciliationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReconciliationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1305,6 +1313,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CacheInvalidationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CacheInvalidationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CacheInvalidationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CacheInvalidationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheInvalidationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1452,6 +1461,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExpandDeletionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpandDeletionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpandDeletionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpandDeletionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpandDeletionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1587,6 +1597,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeletionExecutionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeletionExecutionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeletionExecutionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeletionExecutionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeletionExecutionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1729,6 +1740,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerificationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerificationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerificationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerificationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerificationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1841,6 +1853,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ExecutedDeletionTargetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ExecutedDeletionTargetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ExecutedDeletionTargetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ExecutedDeletionTargetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExecutedDeletionTargetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1961,6 +1974,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingDeletionTargetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingDeletionTargetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingDeletionTargetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingDeletionTargetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingDeletionTargetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2100,6 +2114,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeadLetterResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeadLetterResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeadLetterResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeadLetterResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeadLetterResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2247,6 +2262,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeliveryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeliveryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeliveryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeliveryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeliveryResponseDto`. Ejemplo completo derivado de ese DTO:
 

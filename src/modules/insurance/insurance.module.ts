@@ -1,5 +1,6 @@
 import { MyClaimsController } from './presentation/controllers/my-claims.controller';
 import { MyClaimsService } from './application/services/my-claims.service';
+import { PatientChargeBreakdownService } from './application/services/patient-charge-breakdown.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
@@ -14,6 +15,12 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // transaccional. `MessagingModule` sólo importa MikroORM, así que no cierra
 // ningún ciclo con `insurance`.
 import { MessagingModule } from '../messaging/messaging.module';
+// Carril 16 — la factura al paciente se persiste con el repositorio de `billing`,
+// alcanzado sólo desde su adaptador de infraestructura. Se provee directo (como
+// `PersonAccountLinksRepository` más abajo) y no se importa `BillingModule`: el
+// import cambiaba el orden en que Nest descubre los módulos y, con él, el de todo
+// el contrato OpenAPI. El repositorio no tiene dependencias.
+import { InvoicesRepository } from '../billing/repositories';
 import * as entities from './entities';
 import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
 import { LinkedClaimAccessService } from './application/services/linked-claim-access.service';
@@ -47,6 +54,11 @@ import {
   PriorAuthReadService,
   ClaimsService,
   ClaimCoveragePolicy,
+  ClaimCareRelationshipGate,
+  ClaimQuoteService,
+  ClaimPatientInvoiceService,
+  PatientConsentValidator,
+  PatientChargeObjectionService,
   ClaimsReadService,
   AppealsService,
   ReconciliationService,
@@ -102,8 +114,17 @@ import { DsarRequestsRepository } from '../audit/repositories/dsar-requests.repo
 import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
 import { PractitionerInsuranceNetworksController } from './presentation/controllers/practitioner-insurance-networks.controller';
 import { PractitionerInsuranceNetworksService } from './application/services/practitioner-insurance-networks.service';
+import {
+  InsurerPractitionerRequestsController,
+  PractitionerInsurerRequestsController,
+} from './presentation/controllers/practitioner-insurer-requests.controller';
+import { PractitionerInsurerRequestsService } from './application/services/practitioner-insurer-requests.service';
+import { PractitionerInsurerRequestsRepository } from './infrastructure/repositories/practitioner-insurer-requests.repository';
 import { DirectoryTenantAdministrationAdapter } from './infrastructure/adapters/directory-tenant-administration.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
+import { PatientCareRelationshipAdapter } from './infrastructure/adapters/patient-care-relationship.adapter';
+import { PATIENT_CARE_RELATIONSHIP_PORT } from './application/ports/patient-care-relationship.port';
+import { CareRelationshipsRepository } from '../authz/repositories/care-relationships.repository';
 import { PracticeTenantLookupAdapter } from './infrastructure/adapters/practice-tenant-lookup.adapter';
 import { INSURANCE_PRACTICE_TENANT_LOOKUP_PORT } from './application/ports/practice-tenant-lookup.port';
 import { DuplicateStudyDescriptionAdapter } from './infrastructure/adapters/duplicate-study-description.adapter';
@@ -112,6 +133,12 @@ import { ClaimDecisionPublisherAdapter } from './infrastructure/adapters/claim-d
 import { CLAIM_DECISION_PUBLISHER_PORT } from './application/ports/claim-decision-publisher.port';
 import { PatientOwnershipAdapter } from './infrastructure/adapters/patient-ownership.adapter';
 import { PATIENT_OWNERSHIP_PORT } from './application/ports/patient-ownership.port';
+import { BillingPatientInvoiceAdapter } from './infrastructure/adapters/billing-patient-invoice.adapter';
+import { PATIENT_BILLING_PORT } from './application/ports/patient-billing.port';
+import { NoPatientChargeAcceptanceAdapter } from './infrastructure/adapters/no-patient-charge-acceptance.adapter';
+import { PATIENT_CHARGE_ACCEPTANCE_PORT } from './application/ports/patient-charge-acceptance.port';
+import { PatientNoticeAdapter } from './infrastructure/adapters/patient-notice.adapter';
+import { PATIENT_NOTICE_PORT } from './application/ports/patient-notice.port';
 import { AuditTrailAdapter } from './infrastructure/adapters/audit-trail.adapter';
 import { INSURANCE_AUDIT_TRAIL_PORT } from './application/ports/audit-trail.port';
 import { InsurancePortabilitySupportAdapter } from './infrastructure/adapters/insurance-portability-support.adapter';
@@ -147,6 +174,8 @@ import {
   ],
   controllers: [
     PractitionerInsuranceNetworksController,
+    PractitionerInsurerRequestsController,
+    InsurerPractitionerRequestsController,
     MyClaimsController,
     InsuranceBackboneController,
     CoverageController,
@@ -167,6 +196,14 @@ import {
     InsurerPatientsController,
   ],
   providers: [
+    // Repositorio sin estado (recibe el `EntityManager`): no hace falta importar
+    // `AuthzModule` entero para preguntar por la relación asistencial.
+    CareRelationshipsRepository,
+    PatientCareRelationshipAdapter,
+    {
+      provide: PATIENT_CARE_RELATIONSHIP_PORT,
+      useExisting: PatientCareRelationshipAdapter,
+    },
     PracticeTenantLookupAdapter,
     {
       provide: INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
@@ -184,6 +221,21 @@ import {
     },
     PatientOwnershipAdapter,
     { provide: PATIENT_OWNERSHIP_PORT, useExisting: PatientOwnershipAdapter },
+    InvoicesRepository,
+    BillingPatientInvoiceAdapter,
+    {
+      provide: PATIENT_BILLING_PORT,
+      useExisting: BillingPatientInvoiceAdapter,
+    },
+    // REQ-16-030: sin tabla de aceptaciones en el modelo, el cobro particular
+    // falla cerrado hasta que llegue el PR del modelo (ver el puerto).
+    NoPatientChargeAcceptanceAdapter,
+    {
+      provide: PATIENT_CHARGE_ACCEPTANCE_PORT,
+      useExisting: NoPatientChargeAcceptanceAdapter,
+    },
+    PatientNoticeAdapter,
+    { provide: PATIENT_NOTICE_PORT, useExisting: PatientNoticeAdapter },
     AuditTrailAdapter,
     { provide: INSURANCE_AUDIT_TRAIL_PORT, useExisting: AuditTrailAdapter },
     InsurancePortabilitySupportAdapter,
@@ -211,7 +263,10 @@ import {
       useExisting: DirectoryTenantAdministrationAdapter,
     },
     PractitionerInsuranceNetworksService,
+    PractitionerInsurerRequestsService,
+    PractitionerInsurerRequestsRepository,
     MyClaimsService,
+    PatientChargeBreakdownService,
     // Repositorios
     CatalogRepository,
     InsuranceReadRepository,
@@ -247,6 +302,11 @@ import {
     PriorAuthReadService,
     ClaimsService,
     ClaimCoveragePolicy,
+    ClaimCareRelationshipGate,
+    ClaimQuoteService,
+    ClaimPatientInvoiceService,
+    PatientConsentValidator,
+    PatientChargeObjectionService,
     ClaimsReadService,
     AppealsService,
     ReconciliationService,
@@ -272,7 +332,10 @@ import {
   // `DeclaredCoveragesReader` lo leen `profiles` (GET /profiles/patients/me)
   // y `clinical` (el PDF oficial de receta, subtarea B.3): es la misma
   // consulta de coberturas declaradas y no puede tener dos dueños.
+  // `PractitionerInsurerRequestsService` lo usa `iam`: el alta del profesional
+  // pide sus aseguradoras dentro de su propia transacción.
   exports: [
+    PractitionerInsurerRequestsService,
     InsuranceBackboneService,
     CatalogRepository,
     CoverageRepository,

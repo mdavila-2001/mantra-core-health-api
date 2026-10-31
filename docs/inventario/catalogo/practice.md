@@ -11,15 +11,15 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [care_spaces](#care_spaces) | Cataloga consultorios, salas u otros espacios de cuidado disponibles para prestar atención. | 15 | 8 | 7 | COINCIDE |
-| [clinical_units](#clinical_units) | Representa unidades clínicas que organizan áreas o equipos asistenciales dentro de una práctica o institución. | 14 | 8 | 7 | COINCIDE |
-| [healthcare_services](#healthcare_services) | Define servicios de salud ofrecidos por una práctica para relacionar prestaciones con profesionales, sedes y procesos de atención. | 15 | 8 | 4 | COINCIDE |
-| [inventory_items](#inventory_items) | Cataloga insumos y bienes administrados por una práctica sanitaria para sostener su operación cotidiana. | 15 | 6 | 4 | COINCIDE |
+| [clinical_units](#clinical_units) | Representa unidades clínicas que organizan áreas o equipos asistenciales dentro de una práctica o institución. | 14 | 8 | 9 | COINCIDE |
+| [healthcare_services](#healthcare_services) | Define servicios de salud ofrecidos por una práctica para relacionar prestaciones con profesionales, sedes y procesos de atención. | 15 | 8 | 18 | DIVERGE |
+| [inventory_items](#inventory_items) | Cataloga insumos y bienes administrados por una práctica sanitaria para sostener su operación cotidiana. | 15 | 6 | 3 | COINCIDE |
 | [inventory_movements](#inventory_movements) | Registra entradas, salidas y ajustes de inventario de una práctica para preservar trazabilidad de existencias. | 9 | 4 | 1 | COINCIDE |
-| [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 4 | COINCIDE |
+| [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 3 | COINCIDE |
 | [practice_settings](#practice_settings) | Almacena opciones operativas de una práctica para adaptar su funcionamiento dentro del sistema médico. | 10 | 4 | 3 | COINCIDE |
-| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 54 | COINCIDE |
-| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 94 | COINCIDE |
-| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 68 | COINCIDE |
+| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 103 | DIVERGE |
+| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 179 | COINCIDE |
+| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 119 | COINCIDE |
 | [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 13 | 8 | 1 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -257,7 +257,7 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: clinical_units`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `ClinicalUnits` — `src/modules/practice/entities/clinical_units.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 8 FK salientes · 8 entrantes · 7 operaciones
+- **Resumen:** 14 columnas · 8 índices · 8 FK salientes · 8 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -316,8 +316,10 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /orgext/hospitals/{id}/service-lines | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments | LEE | DIRECTA |
 | DELETE /practices/{practiceId}/sites/{siteId} | ACTUALIZA | POR_TIPO |
 | DELETE /practices/{practiceId}/sites/{siteId} | LEE | DIRECTA |
 | POST /sites/{siteId}/care-spaces | LEE | DIRECTA |
@@ -347,7 +349,7 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: healthcare_services`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `HealthcareServices` — `src/modules/practice/entities/healthcare_services.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 8 FK salientes · 3 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 8 índices · 8 FK salientes · 3 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -363,11 +365,11 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 | 8 | `appointment_required` | `boolean` | Opcional | _sin dato_ | coincide |
 | 9 | `telehealth_available` | `boolean` | Opcional | _sin dato_ | coincide |
 | 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:80`)_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:86`)_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:83`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:89`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/healthcare_services.entity.ts:104`)_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/healthcare_services.entity.ts:107`)_ | coincide |
 
 #### Relaciones
 
@@ -390,11 +392,11 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_healthcare_services_practice_id` | no | practice_id | Soporta la clave foránea fk_healthcare_services_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_healthcare_services_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_healthcare_services_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_healthcare_services_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_healthcare_services_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_healthcare_services_clinical_unit_id` | no | clinical_unit_id | Soporta la clave foránea fk_healthcare_services_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_healthcare_services_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_healthcare_services_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_healthcare_services_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_healthcare_services_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «service_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_healthcare_services_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_healthcare_services_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_healthcare_services_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_healthcare_services_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_healthcare_services_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_healthcare_services_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_healthcare_services_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_healthcare_services_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_healthcare_services_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_healthcare_services_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -402,10 +404,24 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /clinical/me/procedure-centers | LEE | DIRECTA |
+| POST /clinical/service-requests | LEE | DIRECTA |
+| GET /medical-centers/search | LEE | DIRECTA |
+| GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
+| POST /orgext/affiliations | LEE | DIRECTA |
+| POST /orgext/hospitals/{id}/service-lines | LEE | DIRECTA |
+| GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | CREA | DIRECTA |
+| POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
+| PATCH /practices/{practiceId}/healthcare-services/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/invitations | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/self-request | LEE | DIRECTA |
 | DELETE /practices/{practiceId}/sites/{siteId} | ACTUALIZA | POR_TIPO |
 | DELETE /practices/{practiceId}/sites/{siteId} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -430,7 +446,7 @@ Cataloga insumos y bienes administrados por una práctica sanitaria para sostene
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: inventory_items`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `InventoryItems` — `src/modules/practice/entities/inventory_items.entity.ts`
-- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 1 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -479,7 +495,6 @@ Cataloga insumos y bienes administrados por una práctica sanitaria para sostene
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /inventory-items/{itemId}/movements | ACTUALIZA | POR_TIPO |
 | POST /inventory-items/{itemId}/movements | LEE | DIRECTA |
 | POST /practices/{practiceId}/inventory-items | CREA | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
@@ -569,7 +584,7 @@ Conserva acreditaciones de una práctica sanitaria para documentar reconocimient
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practice_accreditations`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PracticeAccreditations` — `src/modules/practice/entities/practice_accreditations.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 8 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 16 columnas · 8 índices · 8 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -622,7 +637,6 @@ Conserva acreditaciones de una práctica sanitaria para documentar reconocimient
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /accreditations/{id}/verify | ACTUALIZA | POR_TIPO |
 | POST /accreditations/{id}/verify | LEE | DIRECTA |
 | POST /practices/{practiceId}/accreditations | CREA | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
@@ -716,7 +730,7 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practice_sites`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PracticeSites` — `src/modules/practice/entities/practice_sites.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 11 FK salientes · 19 entrantes · 54 operaciones
+- **Resumen:** 18 columnas · 11 índices · 11 FK salientes · 19 entrantes · 103 operaciones
 
 #### Columnas
 
@@ -735,11 +749,11 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | 11 | `managing_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
 | 12 | `bank_qr_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | Archivo del QR de cobro bancario de la sede, en `common.files`. Nulo si la sede no cobra por QR. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:87`)_ | coincide |
 | 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:99`)_ | coincide |
-| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:105`)_ | coincide |
+| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:105`)_ | coincide |
+| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:111`)_ | coincide |
 | 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:123`)_ | coincide |
+| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:129`)_ | coincide |
 
 #### Relaciones
 
@@ -780,14 +794,14 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_practice_sites_practice_id` | no | practice_id | Soporta la clave foránea fk_practice_sites_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practice_sites_practice_id` | no | practice_id | Soporta la clave foránea fk_practice_sites_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practice_sites_branch_id` | no | branch_id | Soporta la clave foránea fk_practice_sites_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_site_type_concept_id` | no | site_type_concept_id | Soporta la clave foránea fk_practice_sites_site_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_physical_type_concept_id` | no | physical_type_concept_id | Soporta la clave foránea fk_practice_sites_physical_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_operational_status_concept_id` | no | operational_status_concept_id | Soporta la clave foránea fk_practice_sites_operational_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_address_id` | no | address_id | Soporta la clave foránea fk_practice_sites_address_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_managing_tenant_id` | no | managing_tenant_id | Soporta la clave foránea fk_practice_sites_managing_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «managing_tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_practice_sites_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practice_sites_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practice_sites_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practice_sites_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practice_sites_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practice_sites_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_bank_qr_file_id` | no | bank_qr_file_id | Soporta la clave foránea fk_practice_sites_bank_qr_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -796,6 +810,10 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /patient-spending/me | LEE | POR_SQL |
+| GET /clinical/me/procedure-centers | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
+| POST /clinical/service-requests | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
 | GET /o/{slug} | LEE | POR_SQL |
@@ -805,23 +823,44 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |
+| POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | LEE | DIRECTA |
+| GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
+| GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| GET /medical-centers/search | LEE | DIRECTA |
+| GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
+| POST /orgext/affiliations | LEE | DIRECTA |
+| POST /orgext/facility-licenses | LEE | DIRECTA |
+| POST /orgext/hospitals/{id}/activate | LEE | DIRECTA |
+| POST /orgext/hospitals/{id}/service-lines | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/opening-hours | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/sites | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 | GET /pharmacy/sites | LEE | DIRECTA |
+| GET /public/pharmacies/open-now | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | POST /practices/{practiceId}/accreditations | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
 | POST /practices/{practiceId}/role-assignments | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/invitations | LEE | DIRECTA |
 | POST /practices/{practiceId}/role-assignments/self-request | LEE | DIRECTA |
 | GET /practices/{practiceId}/sites | LEE | DIRECTA |
 | POST /practices/{practiceId}/sites | CREA | DIRECTA |
@@ -835,20 +874,44 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | PATCH /practitioners/me/sites/{siteId} | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | ACTUALIZA | POR_TIPO |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | GET /sites/{siteId}/care-spaces | LEE | DIRECTA |
-| POST /sites/{siteId}/care-spaces | LEE | DIRECTA |
-| POST /sites/{siteId}/clinical-units | LEE | DIRECTA |
+| POST /tenants/{tenantId}/practices | CREA | DIRECTA |
+| POST /tenants/{tenantId}/practices | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| GET /admissions/{id}/documents/{fileId}/content | LEE | DIRECTA |
+| POST /admissions/{id}/documents/{fileId}/download-url | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /profiles/practitioners | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /tenants/{tenantId}/practitioner-requests | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
+| GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | LEE | POR_SQL |
 | POST /scheduling/appointments/walk-in | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/accept | LEE | POR_SQL |
 | GET /scheduling/resources | LEE | DIRECTA |
 | POST /scheduling/resources | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/flexible-holds | LEE | POR_SQL |
 | POST /scheduling/service-offerings/{id}/holds | LEE | POR_SQL |
 
 #### Gobierno
@@ -874,7 +937,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practices`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `Practices` — `src/modules/practice/entities/practices.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 94 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 179 operaciones
 
 #### Columnas
 
@@ -962,11 +1025,11 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_practices_tenant_id` | no | tenant_id | Soporta la clave foránea fk_practices_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practices_tenant_id` | no | tenant_id | Soporta la clave foránea fk_practices_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_practices_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_admin_user_id` | no | admin_user_id | Soporta la clave foránea fk_practices_admin_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admin_user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_practices_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_practices_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practices_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practices_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practices_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practices_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practices_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practices_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practices_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -976,18 +1039,58 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /accounting/accounts | LEE | DIRECTA |
+| POST /accounting/accounts | LEE | DIRECTA |
 | GET /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accruals/run | LEE | DIRECTA |
 | GET /accounting/assets | LEE | DIRECTA |
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
 | GET /accounting/balance-sheet | LEE | DIRECTA |
 | POST /accounting/clearing-documents | LEE | DIRECTA |
+| POST /accounting/depreciation/run | LEE | DIRECTA |
 | GET /accounting/dimensions | LEE | DIRECTA |
+| POST /accounting/fiscal-periods/{id}/lock | LEE | DIRECTA |
 | GET /accounting/fiscal-years | LEE | DIRECTA |
+| POST /accounting/fiscal-years | LEE | DIRECTA |
 | GET /accounting/general-ledger | LEE | DIRECTA |
 | GET /accounting/income-statement | LEE | DIRECTA |
 | GET /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions | LEE | DIRECTA |
 | GET /accounting/journal-transactions/{id} | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/approve | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/classify | LEE | DIRECTA |
 | GET /accounting/journal-transactions/{id}/document-flow | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/files | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/post | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/reverse | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/submit-review | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
 | GET /accounting/open-items | LEE | DIRECTA |
+| POST /accounting/open-items | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
+| PATCH /accounting/practitioner/assets/{id}/automation | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
+| POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities | LEE | DIRECTA |
+| PATCH /accounting/practitioner/liabilities/{id}/automation | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
+| GET /accounting/practitioner/liabilities/{id}/schedule | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/accounts | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/accounts | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/records | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/records | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/summary | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/transactions | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/transactions | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
 | GET /accounting/trial-balance | LEE | DIRECTA |
 | POST /billing/internal/dunning-runs/run-due | LEE | DIRECTA |
 | GET /billing/invoices | LEE | DIRECTA |
@@ -995,6 +1098,8 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /billing/patient-statements | LEE | DIRECTA |
 | POST /billing/service-catalog | LEE | DIRECTA |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
+| GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
+| POST /billing/service-catalog/import-procedures | LEE | DIRECTA |
 | GET /billing/simulated/charges | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
@@ -1006,6 +1111,11 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /billing/simulated/my-invoices | LEE | POR_SQL |
 | GET /billing/simulated/my-invoices/{invoiceId} | LEE | POR_SQL |
 | GET /billing/simulated/status | LEE | POR_SQL |
+| GET /patient-spending/me | LEE | POR_SQL |
+| GET /clinical/me/procedure-centers | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/target-services | LEE | DIRECTA |
+| GET /referrals/targets | LEE | POR_SQL |
 | GET /community/ratings | LEE | DIRECTA |
 | PUT /community/ratings | LEE | DIRECTA |
 | GET /community/ratings/mine | LEE | DIRECTA |
@@ -1016,34 +1126,56 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| POST /practitioner-delegates | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
+| POST /erp/bills/{billId}/invoice-match-runs | LEE | DIRECTA |
+| POST /erp/employees/{id}/time-off | LEE | DIRECTA |
+| POST /erp/employees/{id}/time-off/{reqId}/approve | LEE | DIRECTA |
+| POST /erp/employees/onboard | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | GET /insurance-claims | LEE | DIRECTA |
+| POST /insurance-claims | LEE | DIRECTA |
 | GET /insurance-claims/{id} | LEE | DIRECTA |
+| POST /insurance-claims/{id}/adjudications | LEE | DIRECTA |
 | POST /insurance-claims/{id}/disputes | LEE | DIRECTA |
+| POST /insurance-claims/{id}/eob | LEE | DIRECTA |
+| POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
+| POST /insurance-claims/{id}/reversals | LEE | DIRECTA |
 | GET /insurance/my-claims | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | POR_SQL |
 | GET /insurance/received-claims | LEE | DIRECTA |
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | GET /practitioner-settlement-batches | LEE | DIRECTA |
 | GET /practitioner-settlement-batches/{id} | LEE | DIRECTA |
+| POST /reconciliation-batches | LEE | DIRECTA |
+| POST /reconciliation-batches/{id}/items | LEE | DIRECTA |
+| GET /medical-centers/search | LEE | DIRECTA |
+| GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
+| GET /medical-groups/eligible-members | LEE | DIRECTA |
+| POST /orgext/affiliations | LEE | DIRECTA |
+| POST /orgext/facility-licenses | LEE | DIRECTA |
+| POST /orgext/hospitals | LEE | DIRECTA |
+| POST /orgext/hospitals/{id}/activate | LEE | DIRECTA |
+| POST /orgext/hospitals/{id}/service-lines | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/sites | LEE | DIRECTA |
+| POST /accreditations/{id}/verify | LEE | DIRECTA |
+| POST /inventory-items/{itemId}/movements | LEE | DIRECTA |
 | GET /practices | LEE | DIRECTA |
 | POST /practices | CREA | DIRECTA |
-| POST /practices/{practiceId}/accreditations | LEE | DIRECTA |
+| GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
+| PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
 | GET /practices/{practiceId}/role-assignments | LEE | DIRECTA |
-| POST /practices/{practiceId}/role-assignments | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/invitations | LEE | DIRECTA |
 | POST /practices/{practiceId}/role-assignments/self-request | LEE | DIRECTA |
-| PUT /practices/{practiceId}/settings/{settingKey} | LEE | DIRECTA |
 | GET /practices/{practiceId}/sites | LEE | DIRECTA |
-| POST /practices/{practiceId}/sites | LEE | DIRECTA |
 | GET /practitioners/{profileId}/sites | LEE | DIRECTA |
 | GET /practitioners/me/role-assignments | LEE | DIRECTA |
 | POST /practitioners/me/sites | CREA | DIRECTA |
@@ -1051,7 +1183,15 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | PATCH /practitioners/me/sites/{siteId} | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/approve | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/end | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/reject | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/support-assignments | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/suspend | LEE | DIRECTA |
 | GET /sites/{siteId}/care-spaces | LEE | DIRECTA |
+| POST /tenants/{tenantId}/practices | CREA | DIRECTA |
+| POST /tenants/{tenantId}/practices | LEE | DIRECTA |
 | GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1061,14 +1201,22 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | POST /scheduling/bookings/{id}/accept | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/cancel | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/delay | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/reject | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/reschedule | LEE | POR_SQL |
 | POST /scheduling/holds/{holdToken}/request | LEE | POR_SQL |
 | POST /scheduling/internal/dispatch-reminders | LEE | POR_SQL |
 | GET /scheduling/resources | LEE | DIRECTA |
 | POST /scheduling/resources | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/close-slots | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/exceptions | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/flexible-holds | LEE | POR_SQL |
 | POST /scheduling/resources/{id}/shift-slots | LEE | POR_SQL |
 | POST /scheduling/service-offerings/{id}/holds | LEE | POR_SQL |
+| DELETE /scheduling/templates/{id} | LEE | POR_SQL |
+| POST /surveys/assignments | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1093,7 +1241,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_role_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PractitionerRoleAssignments` — `src/modules/practice/entities/practitioner_role_assignments.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 68 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 119 operaciones
 
 #### Columnas
 
@@ -1147,15 +1295,15 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_practitioner_role_assignments_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_role_assignments_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_role_assignments_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_role_assignments_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_practice_id` | no | practice_id | Soporta la clave foránea fk_practitioner_role_assignments_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_practitioner_role_assignments_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_practitioner_role_assignments_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_role_assignments_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_practitioner_role_assignments_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_clinical_unit_id` | no | clinical_unit_id | Soporta la clave foránea fk_practitioner_role_assignments_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_practitioner_role_assignments_healthcare_service_id` | no | healthcare_service_id | Soporta la clave foránea fk_practitioner_role_assignments_healthcare_service_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_role_assignments_healthcare_service_id` | no | healthcare_service_id | Soporta la clave foránea fk_practitioner_role_assignments_healthcare_service_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «healthcare_service_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_role_concept_id` | no | role_concept_id | Soporta la clave foránea fk_practitioner_role_assignments_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_role_assignments_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_practitioner_role_assignments_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_role_assignments_supervisor_practition_4d201e89` | no | supervisor_practitioner_profile_id | Soporta la clave foránea fk_practitioner_role_assignments_supervisor_practition_9edea495: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_practitioner_role_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practitioner_role_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_role_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practitioner_role_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_role_assignments_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_role_assignments_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_role_assignments_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gist_practitioner_role_assignments_effective_period` | no | (daterange(valid_from, valid_to, '[)')) | GiST para periodos, no solapamiento y geografía _(DOCUMENTO)_ |
@@ -1164,6 +1312,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /accounting/accounts | LEE | DIRECTA |
 | GET /accounting/accrual-objects | LEE | DIRECTA |
 | GET /accounting/assets | LEE | DIRECTA |
 | GET /accounting/balance-sheet | LEE | DIRECTA |
@@ -1171,6 +1320,8 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | GET /accounting/fiscal-years | LEE | DIRECTA |
 | GET /accounting/general-ledger | LEE | DIRECTA |
 | GET /accounting/income-statement | LEE | DIRECTA |
+| GET /accounting/journal-transactions | LEE | DIRECTA |
+| GET /accounting/journal-transactions/{id} | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/approve | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/classify | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/files | LEE | DIRECTA |
@@ -1180,6 +1331,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | GET /accounting/practitioner/assets | LEE | DIRECTA |
 | POST /accounting/practitioner/assets | LEE | DIRECTA |
 | PATCH /accounting/practitioner/assets/{id}/automation | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
@@ -1189,8 +1341,23 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 | GET /accounting/practitioner/liabilities/{id}/schedule | LEE | DIRECTA |
 | GET /accounting/practitioner/paid-consultations | LEE | DIRECTA |
-| POST /billing/service-catalog | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/accounts | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/accounts | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/records | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/records | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/summary | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/transactions | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/transactions | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
+| GET /accounting/trial-balance | LEE | DIRECTA |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
+| POST /clinical/service-requests | LEE | DIRECTA |
+| GET /referrals/targets | LEE | POR_SQL |
 | PUT /community/ratings | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
@@ -1198,19 +1365,35 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| POST /practitioner-delegates | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /practitioners/{profileId}/insurance-networks | LEE | POR_SQL |
+| GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
+| GET /medical-groups/eligible-members | LEE | DIRECTA |
+| GET /practices | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
 | GET /practices/{practiceId}/role-assignments | LEE | DIRECTA |
 | POST /practices/{practiceId}/role-assignments | CREA | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/invitations | CREA | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/invitations | LEE | DIRECTA |
 | POST /practices/{practiceId}/role-assignments/self-request | CREA | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/self-request | LEE | DIRECTA |
 | DELETE /practices/{practiceId}/sites/{siteId} | ACTUALIZA | POR_TIPO |
 | DELETE /practices/{practiceId}/sites/{siteId} | LEE | DIRECTA |
 | GET /practitioners/{profileId}/sites | LEE | DIRECTA |
 | GET /practitioners/me/role-assignments | LEE | DIRECTA |
+| POST /practitioners/me/role-assignments/{roleId}/accept | ACTUALIZA | POR_TIPO |
+| POST /practitioners/me/role-assignments/{roleId}/accept | LEE | DIRECTA |
+| POST /practitioners/me/role-assignments/{roleId}/decline | ACTUALIZA | POR_TIPO |
+| POST /practitioners/me/role-assignments/{roleId}/decline | LEE | DIRECTA |
 | POST /practitioners/me/sites | CREA | DIRECTA |
 | DELETE /practitioners/me/sites/{siteId} | ACTUALIZA | POR_TIPO |
 | DELETE /practitioners/me/sites/{siteId} | LEE | DIRECTA |
@@ -1218,15 +1401,31 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | ACTUALIZA | POR_TIPO |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
-| POST /role-assignments/{roleId}/approve | ACTUALIZA | POR_TIPO |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/approve | LEE | DIRECTA |
-| POST /role-assignments/{roleId}/end | ACTUALIZA | POR_TIPO |
 | POST /role-assignments/{roleId}/end | LEE | DIRECTA |
-| POST /role-assignments/{roleId}/reject | ACTUALIZA | POR_TIPO |
 | POST /role-assignments/{roleId}/reject | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/support-assignments | LEE | DIRECTA |
-| POST /role-assignments/{roleId}/suspend | ACTUALIZA | POR_TIPO |
 | POST /role-assignments/{roleId}/suspend | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| GET /admissions/{id}/documents/{fileId}/content | LEE | DIRECTA |
+| POST /admissions/{id}/documents/{fileId}/download-url | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /profiles/practitioners | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
 | GET /quotations/{id} | LEE | DIRECTA |

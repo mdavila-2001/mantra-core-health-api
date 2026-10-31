@@ -33,6 +33,37 @@ import type {
 } from '../dto';
 import { LEDGER_DEFAULT_LIMIT } from '../dto';
 
+/** Código del estado del asiento en la máquina C-17, tal como lo lee la pantalla. */
+export type JournalStatusCode =
+  | 'DRAFT'
+  | 'AUTO_CLASSIFIED'
+  | 'PENDING_REVIEW'
+  | 'APPROVED'
+  | 'POSTED'
+  | 'REVERSED';
+
+/**
+ * Del concepto de estado (`status_concept_id`) a su código. El listado lo
+ * publica para que la pantalla distinga un borrador de un asiento
+ * contabilizado o reversado sin deducirlo de `postedAt`: un asiento reversado
+ * conserva su fecha de posteo y se leía como «posteado».
+ */
+const JOURNAL_STATUS_BY_CONCEPT: Readonly<Record<string, JournalStatusCode>> = {
+  [ACCT.TXN_DRAFT]: 'DRAFT',
+  [ACCT.TXN_AUTO_CLASSIFIED]: 'AUTO_CLASSIFIED',
+  [ACCT.TXN_PENDING_REVIEW]: 'PENDING_REVIEW',
+  [ACCT.TXN_APPROVED]: 'APPROVED',
+  [ACCT.TXN_POSTED]: 'POSTED',
+  [ACCT.TXN_REVERSED]: 'REVERSED',
+};
+
+/** Código del estado, o `null` si el concepto no es uno de la máquina C-17. */
+export function journalStatusCode(
+  statusConceptId: string,
+): JournalStatusCode | null {
+  return JOURNAL_STATUS_BY_CONCEPT[statusConceptId] ?? null;
+}
+
 /**
  * La cara de **lectura** del mayor: plan de cuentas, libro diario, el asiento
  * con sus líneas, y el balance de sumas y saldos.
@@ -178,9 +209,11 @@ export class LedgerReadService {
    */
   async chartOfAccounts(
     practiceId: string,
+    actor: AuthenticatedUser,
     limit = LEDGER_DEFAULT_LIMIT,
   ): Promise<ChartOfAccountsResponseDto> {
     await this.verifyPracticeTenant(practiceId);
+    await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
     const accounts = await this.accountsRepo.findByPractice(
@@ -212,8 +245,10 @@ export class LedgerReadService {
    */
   async listJournal(
     query: ListJournalQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<ListJournalResponseDto> {
     await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
 
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
     const em = this.em.fork();
@@ -241,6 +276,7 @@ export class LedgerReadService {
         transactionDate: a.transactionDate,
         fiscalPeriodId: a.fiscalPeriodId ?? null,
         statusConceptId: a.statusConceptId,
+        status: journalStatusCode(a.statusConceptId),
         transactionTypeConceptId: a.transactionTypeConceptId ?? null,
         currencyConceptId: a.currencyConceptId ?? null,
         totalAmount: a.totalAmount ?? null,
@@ -260,6 +296,7 @@ export class LedgerReadService {
    */
   async getJournalTransaction(
     transactionId: string,
+    actor: AuthenticatedUser,
   ): Promise<JournalTransactionDetailDto> {
     const em = this.em.fork();
     const entry = await this.journalRepo.findTransactionById(em, transactionId);
@@ -275,10 +312,19 @@ export class LedgerReadService {
     // Acá la práctica se conoce recién al cargar el asiento, así que la
     // comprobación va después de la carga y antes de devolver nada.
     await this.verifyPracticeTenant(entry.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, entry.practiceId);
 
     const lines = await this.journalRepo.findEntriesByTransaction(
       em,
       transactionId,
+    );
+    const assignmentByEntry = new Map(
+      (
+        await this.journalRepo.assignmentsForEntries(
+          em,
+          lines.map((l) => l.id),
+        )
+      ).map((a) => [a.ledgerEntryId, a]),
     );
 
     return {
@@ -288,6 +334,7 @@ export class LedgerReadService {
       transactionDate: entry.transactionDate,
       fiscalPeriodId: entry.fiscalPeriodId ?? null,
       statusConceptId: entry.statusConceptId,
+      status: journalStatusCode(entry.statusConceptId),
       currencyConceptId: entry.currencyConceptId ?? null,
       totalAmount: entry.totalAmount ?? null,
       postedAt: entry.postedAt ?? null,
@@ -298,6 +345,8 @@ export class LedgerReadService {
         directionConceptId: l.directionConceptId,
         amountBase: amountInBase(l),
         costCenterId: l.costCenterId ?? null,
+        profitCenterId: assignmentByEntry.get(l.id)?.profitCenterId ?? null,
+        assetId: assignmentByEntry.get(l.id)?.assetId ?? null,
         currencyConceptId: l.currencyConceptId ?? null,
       })),
     };
@@ -320,8 +369,10 @@ export class LedgerReadService {
    */
   async trialBalance(
     query: TrialBalanceQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<TrialBalanceResponseDto> {
     await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
 
     const em = this.em.fork();
 

@@ -7,11 +7,27 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
+  roleAuthorizesInTenant,
+  UnauthorizedException,
   touch,
+  verifySignature,
   type AuthenticatedUser,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { TrackingRepository } from '../repositories';
-import { TrackableSubjects } from '../entities';
+import { TrackingErrorReason } from '../tracking.error-reasons';
+import {
+  isWithinReplayWindow,
+  parseWebhookTimestamp,
+} from '../../../common/crypto/webhook-timestamp';
+import { TrackableSubjects, type TrackingCarriers } from '../entities';
+import {
+  carrierSignedString,
+  carrierWebhookSecrets,
+  normalizeCarrierSignature,
+  type CarrierWebhookAuth,
+} from '../tracking-webhook-auth';
 import {
   OpenSubjectDto,
   SubjectResponseDto,
@@ -106,6 +122,16 @@ const LIVE_SHIPMENT_STATES: readonly string[] = [
   CONCEPTS.TRACK_RETRY_SCHEDULED,
 ];
 
+/**
+ * Roles que operan cualquier envío de su tenant. Un `COURIER` sólo opera los
+ * que tiene asignados: ver `assertMayOperate`.
+ */
+const SHIPMENT_MANAGER_ROLES: readonly string[] = [
+  'LOGISTICS_OPERATOR',
+  'TRACKING_ADMIN',
+  'SYSTEM',
+];
+
 const DEFAULT_SCAN_BATCH = 100;
 const TRACKING_NUMBER_BYTES = 8;
 
@@ -147,12 +173,15 @@ export class TrackingService {
       'Opening trackable subject',
     );
 
+    // El tenant es el del contexto verificado, nunca el del cuerpo.
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const open = await this.trackingRepo.findOpenSubjectByRef(
         tx,
         dto.subjectRefType,
         dto.subjectRefId,
         CONCEPTS.SUBJECT_OPEN,
+        tenantId,
       );
       if (open) {
         throw new ConflictException(
@@ -186,7 +215,7 @@ export class TrackingService {
 
       const trackingNumber = await this.generateTrackingNumber(tx);
       const subject = this.trackingRepo.createSubject(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         subjectTypeConceptId: SUBJECT_TYPE_CONCEPT[dto.subjectType],
         subjectRefType: dto.subjectRefType,
         subjectRefId: dto.subjectRefId,
@@ -201,7 +230,7 @@ export class TrackingService {
       const shipment = this.trackingRepo.createShipment(tx, {
         trackableSubjectId: subject.id,
         carrierId: dto.carrierId,
-        tenantId: dto.tenantId,
+        tenantId,
         shipmentNumber,
         originAddressId: dto.originAddressId,
         destinationAddressId: dto.destinationAddressId,
@@ -246,12 +275,15 @@ export class TrackingService {
       );
     }
 
+    // Los hitos que define un administrador son del tenant activo: uno global
+    // cambiaría el catálogo de todas las organizaciones.
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.trackingRepo.findMilestonesBySubjectType(
         tx,
         subjectTypeConceptId,
         CONCEPTS.STATE_ACTIVE,
-        dto.tenantId,
+        tenantId,
       );
       const existingCodes = new Set(existing.map((m) => m.code));
       const existingTerminals = existing.filter((m) => m.isTerminal).length;
@@ -275,7 +307,7 @@ export class TrackingService {
         }
         ordinal += 1;
         const created = this.trackingRepo.createMilestoneDefinition(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           subjectTypeConceptId,
           code: milestone.code,
           name: milestone.name,
@@ -310,16 +342,16 @@ export class TrackingService {
       'Dispatching shipment',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (shipment.statusConceptId !== CONCEPTS.TRACK_PREPARING) {
         throw new PreconditionFailedException(
           'El envío no está en preparación',
@@ -345,12 +377,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const dispatchedAt = new Date();
       shipment.statusConceptId = CONCEPTS.TRACK_IN_TRANSIT;
@@ -396,15 +425,21 @@ export class TrackingService {
       'Recording tracking event',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         subjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          subjectId,
-        });
+      if (!subject) throw this.subjectNotFound();
+      if (!this.isShipmentManager(actor, tenantId)) {
+        const shipment = await this.trackingRepo.findShipmentBySubject(
+          tx,
+          subject.id,
+        );
+        this.assertMayOperate(actor, tenantId, shipment);
       }
       if (subject.stateConceptId === CONCEPTS.SUBJECT_CLOSED) {
         throw new PreconditionFailedException(
@@ -473,42 +508,67 @@ export class TrackingService {
    * UC-37-05: ingerir el webhook del transportista. Es idempotente por el
    * identificador del evento externo: los transportistas reentregan, y el
    * timeline no debe duplicarse por eso.
+   *
+   * La ruta es pública, así que el emisor se autentica antes de tocar nada:
+   * HMAC-SHA256 con el secreto propio del transportista sobre la marca de
+   * tiempo y todos los campos del evento, comparado en tiempo constante, y la
+   * marca dentro de la ventana anti-replay. Después se exige que el envío del
+   * número de seguimiento sea de ese transportista (y de su tenant, si el
+   * transportista es de un tenant): un transportista autenticado no mueve
+   * envíos ajenos.
    */
   async ingestCarrierWebhook(
     carrierCode: string,
     dto: CarrierWebhookDto,
+    auth: CarrierWebhookAuth = {},
   ): Promise<WebhookResponseDto> {
-    this.logger.info(
-      {
-        operation: 'tracking.webhook.ingest',
-        carrierCode,
-        externalStatusCode: dto.externalStatusCode,
-      },
-      'Ingesting carrier webhook',
-    );
-
     return this.em.transactional(async (tx) => {
-      const carrier = await this.trackingRepo.findCarrierByCode(
-        tx,
+      const carrier = this.authenticateCarrierWebhook(
+        await this.trackingRepo.findCarrierByCode(tx, carrierCode),
         carrierCode,
+        dto,
+        auth,
       );
-      if (!carrier) {
-        throw new ResourceNotFoundException('Transportista no encontrado', {
+
+      this.logger.info(
+        {
+          operation: 'tracking.webhook.ingest',
           carrierCode,
-        });
-      }
+          externalStatusCode: dto.externalStatusCode,
+        },
+        'Ingesting carrier webhook',
+      );
 
       const subject = await this.trackingRepo.findSubjectByTrackingNumber(
         tx,
         dto.trackingNumber,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException(
-          'Número de seguimiento desconocido',
-          {
-            trackingNumber: dto.trackingNumber,
-          },
-        );
+      if (!subject) throw this.unknownTrackingNumber(dto.trackingNumber);
+
+      // El sujeto es el agregado del timeline: se bloquea ANTES de decidir si el
+      // evento es una reentrega. Con la comprobación antes del bloqueo, dos
+      // entregas simultáneas del mismo evento pasaban las dos y duplicaban el
+      // timeline.
+      const locked = await this.trackingRepo.lockSubjectById(tx, subject.id);
+      if (!locked) {
+        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
+          subjectId: subject.id,
+        });
+      }
+
+      // El transportista autenticado sólo opera sobre envíos que tiene
+      // asignados y, si es de un tenant, sobre sujetos de ese tenant. Mismo 404
+      // que un número desconocido: no revela que el número existe.
+      const shipment = await this.trackingRepo.findShipmentBySubjectForUpdate(
+        tx,
+        locked.id,
+      );
+      if (
+        !shipment ||
+        shipment.carrierId !== carrier.id ||
+        (carrier.tenantId && locked.tenantId !== carrier.tenantId)
+      ) {
+        throw this.unknownTrackingNumber(dto.trackingNumber);
       }
 
       const reference = this.externalReference(
@@ -517,27 +577,17 @@ export class TrackingService {
       );
       const previous = await this.trackingRepo.findEventByExternalReference(
         tx,
-        subject.id,
+        locked.id,
         reference,
       );
       if (previous) {
         return {
           eventId: previous.id,
-          trackableSubjectId: subject.id,
+          trackableSubjectId: locked.id,
           currentStatusConceptId:
-            subject.currentStatusConceptId ?? CONCEPTS.TRACK_CREATED,
+            locked.currentStatusConceptId ?? CONCEPTS.TRACK_CREATED,
           duplicate: true,
         };
-      }
-
-      const locked = await this.trackingRepo.findSubjectForUpdate(
-        tx,
-        subject.id,
-      );
-      if (!locked) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          subjectId: subject.id,
-        });
       }
 
       const mapped = EXTERNAL_STATUS_MAP[dto.externalStatusCode.toUpperCase()];
@@ -567,11 +617,7 @@ export class TrackingService {
 
       // El envío sigue al sujeto sólo mientras siga vivo: un envío entregado o
       // cancelado no vuelve atrás por un webhook tardío.
-      const shipment = await this.trackingRepo.findShipmentBySubjectForUpdate(
-        tx,
-        locked.id,
-      );
-      if (shipment && LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
+      if (LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         shipment.statusConceptId = statusConceptId;
         if (statusConceptId === CONCEPTS.TRACK_DELIVERED)
           shipment.deliveredAt = new Date();
@@ -605,16 +651,16 @@ export class TrackingService {
       'Recording shipment handoff',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         throw new PreconditionFailedException(
           'El envío ya no admite traspasos',
@@ -698,16 +744,16 @@ export class TrackingService {
       'Recomputing ETA',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         throw new PreconditionFailedException(
           'El envío ya no admite estimaciones',
@@ -743,6 +789,7 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
       if (subject) touch(subject, actor.id);
 
@@ -788,16 +835,16 @@ export class TrackingService {
       );
     }
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (shipment.statusConceptId === CONCEPTS.TRACK_DELIVERED) {
         throw new ConflictException('El envío ya está entregado', {
           shipmentId,
@@ -831,12 +878,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const proof = this.trackingRepo.createDeliveryProof(tx, {
         shipmentId,
@@ -909,16 +953,16 @@ export class TrackingService {
       'Recording shipment exception',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         throw new PreconditionFailedException(
           'El envío ya no admite excepciones',
@@ -932,12 +976,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const statusConceptId = dto.scheduleRetry
         ? CONCEPTS.TRACK_RETRY_SCHEDULED
@@ -995,16 +1036,16 @@ export class TrackingService {
       'Cancelling shipment',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (shipment.statusConceptId === CONCEPTS.TRACK_CANCELLED) {
         throw new ConflictException('El envío ya está cancelado', {
           shipmentId,
@@ -1021,12 +1062,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const cancelledAt = new Date();
       shipment.statusConceptId = CONCEPTS.TRACK_CANCELLED;
@@ -1133,6 +1171,59 @@ export class TrackingService {
 
   // --- Apoyo ---
 
+  /** Envío inexistente o de otro tenant: la misma respuesta, sin `details`. */
+  private shipmentNotFound(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      'Envío no encontrado',
+      undefined,
+      TrackingErrorReason.SHIPMENT_NOT_FOUND,
+    );
+  }
+
+  /** Sujeto inexistente o de otro tenant: la misma respuesta, sin `details`. */
+  private subjectNotFound(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      'Sujeto rastreable no encontrado',
+      undefined,
+      TrackingErrorReason.SUBJECT_NOT_FOUND,
+    );
+  }
+
+  /** Si el actor opera cualquier envío de su tenant (operador, administrador, sistema). */
+  private isShipmentManager(
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): boolean {
+    if (actor.roles.includes('SUPERADMIN')) return true;
+    return SHIPMENT_MANAGER_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+  }
+
+  /**
+   * Política de recurso del envío, ya dentro del tenant: el operador, el
+   * administrador y el sistema operan cualquiera; un mensajero sólo el que
+   * tiene asignado. Cualquier otro caso es 403 sin escribir nada.
+   */
+  private assertMayOperate(
+    actor: AuthenticatedUser,
+    tenantId: string,
+    shipment: { assignedCourierUserId?: string } | null,
+  ): void {
+    if (this.isShipmentManager(actor, tenantId)) return;
+    if (
+      shipment?.assignedCourierUserId === actor.id &&
+      roleAuthorizesInTenant(actor, 'COURIER', tenantId)
+    ) {
+      return;
+    }
+    throw new InsufficientRoleException(
+      'No tiene acceso a este envío',
+      undefined,
+      TrackingErrorReason.SHIPMENT_ACCESS_DENIED,
+    );
+  }
+
   /**
    * Hito que el sujeto debería estar alcanzando: el siguiente al actual por
    * ordinal, o el primero si aún no alcanzó ninguno.
@@ -1190,6 +1281,70 @@ export class TrackingService {
       return CONCEPTS.TRACK_PRIORITY_CRITICAL;
     }
     return CONCEPTS.TRACK_PRIORITY_HIGH;
+  }
+
+  /**
+   * Autentica al emisor del webhook (fail-closed). Cualquier fallo de firma
+   * —transportista inexistente, inactivo o sin secreto, cabecera ausente o mal
+   * formada, HMAC que no verifica— responde igual, para no revelar qué
+   * transportistas existen. Sólo una firma válida con la marca de tiempo
+   * vencida se distingue (`WEBHOOK_REPLAY_REJECTED`).
+   */
+  private authenticateCarrierWebhook(
+    carrier: TrackingCarriers | null,
+    carrierCode: string,
+    dto: CarrierWebhookDto,
+    auth: CarrierWebhookAuth,
+  ): TrackingCarriers {
+    const reject = (reason: TrackingErrorReason, message: string): never => {
+      this.logger.warn(
+        {
+          operation: 'tracking.webhook.ingest',
+          carrierCode: carrierCode.slice(0, 64),
+          reason,
+        },
+        'Rejected carrier webhook',
+      );
+      throw new UnauthorizedException(message, undefined, reason);
+    };
+
+    const secrets =
+      carrier && carrier.stateConceptId === CONCEPTS.STATE_ACTIVE
+        ? carrierWebhookSecrets(carrier.code)
+        : null;
+    const signature = normalizeCarrierSignature(auth.signature);
+    const timestamp = auth.timestamp;
+    if (!carrier || !secrets || !signature || !timestamp) {
+      return reject(
+        TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        'Webhook de transportista no autenticado',
+      );
+    }
+
+    const signed = carrierSignedString(timestamp, carrier.code, dto);
+    if (!secrets.some((secret) => verifySignature(secret, signed, signature))) {
+      return reject(
+        TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        'Webhook de transportista no autenticado',
+      );
+    }
+
+    const sentAt = parseWebhookTimestamp(timestamp);
+    if (!sentAt || !isWithinReplayWindow(sentAt, new Date())) {
+      return reject(
+        TrackingErrorReason.WEBHOOK_REPLAY_REJECTED,
+        'Webhook de transportista fuera de la ventana de validez',
+      );
+    }
+    return carrier;
+  }
+
+  private unknownTrackingNumber(
+    trackingNumber: string,
+  ): ResourceNotFoundException {
+    return new ResourceNotFoundException('Número de seguimiento desconocido', {
+      trackingNumber,
+    });
   }
 
   /** Referencia estable del evento externo, con la que se deduplica. */

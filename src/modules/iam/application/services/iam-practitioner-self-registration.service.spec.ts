@@ -4,6 +4,14 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { IamPractitionerSelfRegistrationService } from './iam-practitioner-self-registration.service';
 import { TracingService } from '../../../../observability';
+import { CommonRegistrationFilesAdapter } from '../../infrastructure/adapters/common-registration-files.adapter';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
+import { PracticeOwnSiteProvisioningAdapter } from '../../infrastructure/adapters/practice-own-site-provisioning.adapter';
+import {
+  commonRecords,
+  directoryRegistration,
+  profilesRegistration,
+} from './iam-registration.testing';
 import {
   CONCEPTS,
   ConflictException,
@@ -61,7 +69,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
-      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
       createPassword: fn(),
       // El alta administrativa reserva el login sin secreto: la contraseña la
       // fija el titular al consumir el token de activación.
@@ -134,6 +143,21 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const administrativeAreas = {
       assertIsAdministrativeArea: fn().mockResolvedValue(undefined),
     };
+    // Instituciones y aseguradoras elegidas en el alta (2026-10-28). Por
+    // defecto no pide nada: el caso interesante es que se llame con lo elegido,
+    // dentro de la transacción, y que el aviso salga después.
+    const workplaces = {
+      request: fn().mockResolvedValue({
+        affiliations: [],
+        insurerRequestIds: [],
+      }),
+      notify: fn().mockResolvedValue(undefined),
+    };
+
+    // v4.2.67: la solicitud de admisión nace en la misma transacción del alta.
+    const admissions = {
+      openForRegistration: fn().mockResolvedValue({ id: 'adm-1' }),
+    };
 
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
@@ -144,32 +168,41 @@ describe('IamPractitionerSelfRegistrationService', () => {
       rolesRepo as never,
       emailVerificationsRepo as never,
       eventsRepo as never,
-      personsRepo as never,
-      personProfilesRepo as never,
-      practitionersRepo as never,
-      specialtiesRepo as never,
-      specialtyCatalog as never,
-      authorizationsRepo as never,
-      professionalCredentialsRepo as never,
-      languagesRepo as never,
-      accountLinksRepo as never,
-      identifiersRepo as never,
-      contactPointsRepo as never,
-      addressesRepo as never,
-      catalogConceptsRepo as never,
-      tenantMembershipsRepo as never,
+      profilesRegistration({
+        persons: personsRepo,
+        personProfiles: personProfilesRepo,
+        practitioners: practitionersRepo,
+        specialties: specialtiesRepo,
+        specialtyCatalog,
+        authorizations: authorizationsRepo,
+        credentials: professionalCredentialsRepo,
+        languages: languagesRepo,
+        accountLinks: accountLinksRepo,
+        administrativeAreas,
+        admissions,
+      }),
+      commonRecords({
+        identifiers: identifiersRepo,
+        contactPoints: contactPointsRepo,
+        addresses: addressesRepo,
+        catalogConcepts: catalogConceptsRepo,
+      }),
+      directoryRegistration({ memberships: tenantMembershipsRepo }),
       effectiveRoles as never,
-      notificationsService as never,
+      new MessagingEmailNoticeAdapter(notificationsService as never),
       logger as never,
       new TracingService(),
-      ownSiteProvisioning as never,
-      administrativeAreas as never,
-      attachableFileService as never,
-      fileUploadService as never,
+      new PracticeOwnSiteProvisioningAdapter(ownSiteProvisioning as never),
+      new CommonRegistrationFilesAdapter(
+        fileUploadService as never,
+        attachableFileService as never,
+      ),
+      workplaces as never,
     );
     return {
       service,
       em,
+      admissions,
       effectiveRoles,
       specialtiesRepo,
       specialtyCatalog,
@@ -195,6 +228,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       attachableFileService,
       ownSiteProvisioning,
       administrativeAreas,
+      workplaces,
     };
   }
 
@@ -376,6 +410,57 @@ describe('IamPractitionerSelfRegistrationService', () => {
     });
   });
 
+  describe('la solicitud de admisión nace con el alta (verificación del alta de doctor)', () => {
+    it('abre la admisión del perfil recién creado dentro de LA MISMA transacción, a nombre de la cuenta', async () => {
+      const d = build();
+      await d.service.registerPractitioner(dto);
+      expect(d.admissions.openForRegistration).toHaveBeenCalledTimes(1);
+      const [txUsed, data] = d.admissions.openForRegistration.mock.calls[0];
+      expect(txUsed).toBe(d.tx);
+      expect(data).toMatchObject({
+        practitionerProfileId: 'person-1',
+        actorUserId: 'user-1',
+      });
+      expect(data.attestation).toBeUndefined();
+    });
+
+    it('si no se puede abrir, el alta entera falla: no queda un profesional pendiente que nadie ve', async () => {
+      const d = build();
+      d.admissions.openForRegistration.mockRejectedValue(
+        new Error('base caída'),
+      );
+      await expect(d.service.registerPractitioner(dto)).rejects.toThrow(
+        'base caída',
+      );
+      // Lo que va después de la admisión (verificación del correo) no se alcanzó.
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+      expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
+    });
+
+    it('la atestación aceptada se guarda con la versión del texto que se aceptó', async () => {
+      const d = build();
+      await d.service.registerPractitioner({
+        ...dto,
+        attestationAccepted: true,
+        attestationTextVersion: 'v1',
+      } as RegisterPractitionerDto);
+      const [, data] = d.admissions.openForRegistration.mock.calls[0];
+      expect(data.attestation).toMatchObject({ textVersion: 'v1' });
+      expect(data.attestation.acceptedAt).toBeInstanceOf(Date);
+    });
+
+    it('aceptar la atestación sin decir qué texto se aceptó se rechaza antes de abrir nada', async () => {
+      const d = build();
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          attestationAccepted: true,
+        } as RegisterPractitionerDto),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.admissions.openForRegistration).not.toHaveBeenCalled();
+    });
+  });
+
   it('creates the account, the person and the practitioner profile in one call', async () => {
     const d = build();
 
@@ -451,6 +536,233 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // Y no nace ninguna credencial: era el defecto que hacía que el padrón
     // real mostrara «Título universitario · T.I. 538/14».
     expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
+  });
+
+  describe('los respaldos de la matrícula y del SEDES (P29)', () => {
+    const base = () => ({
+      ...PROFESSIONAL_IDENTITY,
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+    });
+
+    it('reclama el PDF de la matrícula y lo deja en su fila', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...base(),
+        licenseFileId: 'file-license-1',
+      });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-license-1',
+        { tenantId: SEED.tenantId, ownerUserId: 'user-1' },
+        expect.objectContaining({
+          allowedMimeTypes: ['application/pdf'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          operation: 'iam.practitioner.self-register.license',
+        }),
+        expect.objectContaining({ subject: 'La matrícula profesional' }),
+      );
+      expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          jurisdictionConceptId: PROF.JURISDICTION_NATIONAL,
+          licenseNumber: dto.licenseNumber,
+          fileId: 'file-license-1',
+          stateConceptId: PROF.AUTH_PENDING,
+        }),
+      );
+    });
+
+    it('cada habilitación se lleva SU archivo, no el de la otra', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...base(),
+        licenseFileId: 'file-license-1',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseFileId: 'file-sedes-1',
+      });
+
+      const filas: Record<string, unknown>[] =
+        d.authorizationsRepo.create.mock.calls.map(
+          (call: unknown[]) => call[1] as Record<string, unknown>,
+        );
+      expect(
+        filas.map((fila) => [fila.jurisdictionConceptId, fila.fileId]),
+      ).toEqual([
+        [PROF.JURISDICTION_NATIONAL, 'file-license-1'],
+        [PROF.JURISDICTION_SEDES_SANTA_CRUZ, 'file-sedes-1'],
+      ]);
+    });
+
+    it('sin archivo la matrícula nace sin respaldo y no reclama nada', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(base());
+
+      expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ fileId: undefined }),
+      );
+      expect(
+        d.attachableFileService.claimAnonymousUpload,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('si el PDF no se puede reclamar, la matrícula no nace', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('El documento ya fue reclamado'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          licenseFileId: 'file-ajeno',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el archivo del SEDES sin su número se rechaza antes de escribir nada', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          sedesLicenseFileId: 'file-sedes-1',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      expect(
+        d.attachableFileService.claimAnonymousUpload,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('cada habilitación lleva SU fecha de inscripción', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...base(),
+        licenseIssueDate: '2015-03-02',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseIssueDate: '2016-07-11',
+        collegeLicenseNumber: 'CMB-4410',
+        collegeLicenseIssueDate: '2015-09-20',
+      });
+
+      const filas: Record<string, unknown>[] =
+        d.authorizationsRepo.create.mock.calls.map(
+          (call: unknown[]) => call[1] as Record<string, unknown>,
+        );
+      expect(
+        filas.map((fila) => [
+          fila.jurisdictionConceptId,
+          (fila.validFrom as Date | undefined)?.toISOString().slice(0, 10),
+        ]),
+      ).toEqual([
+        [PROF.JURISDICTION_NATIONAL, '2015-03-02'],
+        [PROF.JURISDICTION_SEDES_SANTA_CRUZ, '2016-07-11'],
+        [PROF.JURISDICTION_PROFESSIONAL_COLLEGE, '2015-09-20'],
+      ]);
+    });
+
+    it('el registro del colegio nace como tercera habilitación, con su colegio y su archivo', async () => {
+      const d = build();
+
+      const respuesta = await d.service.registerPractitioner({
+        ...base(),
+        collegeLicenseNumber: 'CMB-4410',
+        collegeName: 'Colegio Médico de Bolivia',
+        collegeLicenseFileId: 'file-college-1',
+      });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-college-1',
+        { tenantId: SEED.tenantId, ownerUserId: 'user-1' },
+        expect.anything(),
+        expect.objectContaining({ subject: 'El registro del colegio' }),
+      );
+      expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+          licenseNumber: 'CMB-4410',
+          regulatoryAuthority: 'Colegio Médico de Bolivia',
+          fileId: 'file-college-1',
+          stateConceptId: PROF.AUTH_PENDING,
+        }),
+      );
+      expect(respuesta).toHaveProperty('collegeLicenseId');
+    });
+
+    it('sin número del colegio no nace su fila ni viaja su id', async () => {
+      const d = build();
+
+      const respuesta = await d.service.registerPractitioner(base());
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+        }),
+      );
+      expect(respuesta).not.toHaveProperty('collegeLicenseId');
+    });
+
+    it.each([
+      ['sedesLicenseIssueDate', { sedesLicenseIssueDate: '2016-07-11' }],
+      ['collegeName', { collegeName: 'Colegio Médico de Bolivia' }],
+      ['collegeLicenseIssueDate', { collegeLicenseIssueDate: '2015-09-20' }],
+      ['collegeLicenseFileId', { collegeLicenseFileId: 'file-college-1' }],
+    ])(
+      '%s sin el número de su habilitación se rechaza antes de escribir nada',
+      async (_campo, extra) => {
+        const d = build();
+
+        await expect(
+          d.service.registerPractitioner({ ...base(), ...extra }),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('el colegio no comparte archivo con la matrícula ni con el SEDES', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          licenseFileId: 'file-1',
+          collegeLicenseNumber: 'CMB-4410',
+          collegeLicenseFileId: 'file-1',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un mismo archivo no respalda las dos habilitaciones', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          licenseFileId: 'file-1',
+          sedesLicenseNumber: 'T.I. 538/14',
+          sedesLicenseFileId: 'file-1',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
   });
 
   it('still creates the degree credential when a real credential number is sent', async () => {
@@ -1206,7 +1518,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
   it('rejects an email that already has a live credential', async () => {
     const d = build();
-    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
       id: 'cred-existing',
     });
 
@@ -1214,6 +1526,21 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ConflictException,
     );
     expect(d.usersRepo.create).not.toHaveBeenCalled();
+  });
+
+  // #1000: cerrojo por correo antes de comprobarlo, sin distinguir mayúsculas.
+  it('locks the email before checking it case-insensitively', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
+    expect(lock).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(check).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
   });
 
   it('registers the practitioner even if the verification email cannot be queued', async () => {
@@ -1448,6 +1775,103 @@ describe('IamPractitionerSelfRegistrationService', () => {
    * el alta lo llama con los datos correctos, en el orden correcto dentro
    * de la transacción, y que un fallo suyo tumba el alta entera.
    */
+  describe('instituciones y aseguradoras elegidas en el alta', () => {
+    const institutionSlugs = ['clinica-foianini', 'hospital-japones'];
+    const insurerCarrierIds = ['11111111-1111-4111-8111-111111111111'];
+
+    it('las pide dentro de la transacción, a nombre del perfil recién creado', async () => {
+      const d = build();
+      d.workplaces.request.mockResolvedValue({
+        affiliations: [
+          {
+            id: 'af-1',
+            practiceId: 'pr-1',
+            practiceSiteId: 'site-1',
+            statusConceptId: 'pend',
+          },
+          {
+            id: 'af-2',
+            practiceId: 'pr-2',
+            practiceSiteId: null,
+            statusConceptId: 'decl',
+          },
+        ],
+        insurerRequestIds: ['ir-1'],
+      });
+
+      const res = await d.service.registerPractitioner({
+        ...dto,
+        institutionSlugs,
+        insurerCarrierIds,
+      });
+
+      expect(d.workplaces.request).toHaveBeenCalledWith(d.tx, {
+        practitionerProfileId: res.practitionerProfileId,
+        institutionSlugs,
+        insurerCarrierIds,
+        actorUserId: 'user-1',
+      });
+      expect(res).toMatchObject({
+        affiliationIds: ['af-1', 'af-2'],
+        insurerRequestIds: ['ir-1'],
+      });
+    });
+
+    it('avisa a las organizaciones DESPUÉS de confirmar el alta', async () => {
+      const d = build();
+      const affiliations = [
+        {
+          id: 'af-1',
+          practiceId: 'pr-1',
+          practiceSiteId: 'site-1',
+          statusConceptId: 'pend',
+        },
+      ];
+      d.workplaces.request.mockResolvedValue({
+        affiliations,
+        insurerRequestIds: [],
+      });
+
+      await d.service.registerPractitioner({ ...dto, institutionSlugs });
+
+      expect(d.workplaces.notify).toHaveBeenCalledWith(
+        expect.any(String),
+        affiliations,
+      );
+      expect(d.workplaces.request.mock.invocationCallOrder[0]).toBeLessThan(
+        d.workplaces.notify.mock.invocationCallOrder[0],
+      );
+    });
+
+    it('sin elegir nada: pide listas vacías y la respuesta no inventa las claves', async () => {
+      const d = build();
+
+      const res = await d.service.registerPractitioner(dto);
+
+      expect(d.workplaces.request).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          institutionSlugs: [],
+          insurerCarrierIds: [],
+        }),
+      );
+      expect(res).not.toHaveProperty('affiliationIds');
+      expect(res).not.toHaveProperty('insurerRequestIds');
+    });
+
+    it('un slug o una aseguradora inválidos tumban el alta y no se avisa a nadie', async () => {
+      const d = build();
+      d.workplaces.request.mockRejectedValue(
+        new Error('institución no disponible'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({ ...dto, institutionSlugs }),
+      ).rejects.toThrow('institución no disponible');
+      expect(d.workplaces.notify).not.toHaveBeenCalled();
+    });
+  });
+
   describe('ownSite en el alta (P20)', () => {
     const ownSite = {
       name: 'Consultorio Rojas',
@@ -1515,6 +1939,89 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
       expect(d.eventsRepo.record).not.toHaveBeenCalled();
       expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
+    });
+
+    it('con logo: lo reclama en la transacción del alta, como imagen, antes de la persona', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+        file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+        version: { sizeBytes: String(1024 * 1024) },
+      });
+      const conLogo = {
+        name: 'Consultorio Rojas',
+        logoFileId: 'file-logo',
+      } as never;
+
+      await d.service.registerPractitioner({ ...dto, ownSite: conLogo });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-logo',
+        { ownerUserId: 'user-1', tenantId: SEED.tenantId },
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        }),
+        expect.anything(),
+      );
+      const claimOrder = d.attachableFileService.claimAnonymousUpload.mock
+        .invocationCallOrder as number[];
+      expect(claimOrder[claimOrder.length - 1]).toBeLessThan(
+        d.personsRepo.create.mock.invocationCallOrder[0],
+      );
+      expect(d.ownSiteProvisioning.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.anything(),
+        conLogo,
+        'user-1',
+      );
+    });
+
+    it.each([
+      ['PHI', { sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI }, '1024'],
+      [
+        'de 3 MB',
+        { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+        String(3 * 1024 * 1024),
+      ],
+    ])(
+      'con un logo %s: 422, sin sede, y nada después del punto de fallo',
+      async (_label, file, sizeBytes) => {
+        const d = build();
+        d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+          file,
+          version: { sizeBytes },
+        });
+
+        await expect(
+          d.service.registerPractitioner({
+            ...dto,
+            ownSite: { name: 'Consultorio Rojas', logoFileId: 'file-logo' },
+          } as never),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        // La transacción se aborta en el reclamo: ni la persona, ni la sede,
+        // ni nada de lo que viene después llega a escribirse.
+        expect(d.personsRepo.create).not.toHaveBeenCalled();
+        expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
+        expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.record).not.toHaveBeenCalled();
+      },
+    );
+
+    it('si el reclamo del logo falla, el error sale del alta y no se provisiona', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('no corresponde'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          ownSite: { name: 'Consultorio Rojas', logoFileId: 'file-logo' },
+        } as never),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
     });
 
     it('en el alta asistida, el autor de las filas es el administrador (C-18)', async () => {

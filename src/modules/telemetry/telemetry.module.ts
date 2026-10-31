@@ -6,19 +6,21 @@ import {
   TelemetryConsentController,
   TelemetryEventsController,
   TelemetryAnalyticsController,
-} from './controllers';
+} from './presentation/controllers';
+import { TelemetryOnboardingAnalyticsController } from './presentation/controllers/telemetry-onboarding-analytics.controller';
 import {
   TelemetryGovernanceService,
   TelemetryConsentService,
   TelemetryEventsService,
   TelemetryWebAnalyticsService,
   TelemetryAnalyticsService,
-} from './services';
+} from './application/services';
+import { TelemetryOnboardingAnalyticsService } from './application/services/telemetry-onboarding-analytics.service';
 import { WEB_ANALYTICS_PORT } from './domain/web-analytics.port';
-import { DisabledWebAnalyticsAdapter } from './infrastructure/disabled-web-analytics.adapter';
-import { GoogleAnalyticsAdapter } from './infrastructure/google-analytics/google-analytics.adapter';
-import { GoogleAnalyticsHttpClient } from './infrastructure/google-analytics/google-analytics-http.client';
-import { selectWebAnalyticsAdapter } from './infrastructure/web-analytics.factory';
+import { DisabledWebAnalyticsAdapter } from './infrastructure/adapters/disabled-web-analytics.adapter';
+import { GoogleAnalyticsAdapter } from './infrastructure/adapters/google-analytics/google-analytics.adapter';
+import { GoogleAnalyticsHttpClient } from './infrastructure/adapters/google-analytics/google-analytics-http.client';
+import { selectWebAnalyticsAdapter } from './infrastructure/adapters/web-analytics.factory';
 import {
   TrackingPurposeDefinitionsRepository,
   ActivityEventSchemaDefinitionsRepository,
@@ -35,7 +37,8 @@ import {
   FunnelStepsRepository,
   ConversionEventsRepository,
   TelemetryAnalyticsRepository,
-} from './repositories';
+  ActorSessionsRepository,
+} from './infrastructure/repositories';
 
 /**
  * Módulo Telemetry (28): actividad consent-aware, eventos, sesiones/journeys,
@@ -55,6 +58,7 @@ import {
     TelemetryConsentController,
     TelemetryEventsController,
     TelemetryAnalyticsController,
+    TelemetryOnboardingAnalyticsController,
   ],
   providers: [
     // Repositorios
@@ -73,6 +77,7 @@ import {
     FunnelStepsRepository,
     ConversionEventsRepository,
     TelemetryAnalyticsRepository,
+    ActorSessionsRepository,
     // Analítica web externa: adaptadores concretos y selección por entorno.
     DisabledWebAnalyticsAdapter,
     GoogleAnalyticsHttpClient,
@@ -91,7 +96,12 @@ import {
     TelemetryWebAnalyticsService,
     TelemetryEventsService,
     TelemetryAnalyticsService,
+    TelemetryOnboardingAnalyticsService,
   ],
-  exports: [WEB_ANALYTICS_PORT, TelemetryWebAnalyticsService],
+  exports: [
+    WEB_ANALYTICS_PORT,
+    TelemetryWebAnalyticsService,
+    TelemetryOnboardingAnalyticsService,
+  ],
 })
 export class TelemetryModule {}

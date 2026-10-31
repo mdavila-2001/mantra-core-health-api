@@ -14,3 +14,7 @@ export * from './care-spaces-admin.service';
 export * from './clinical-units-admin.service';
 export * from './site-establishment.service';
 export * from './infrastructure-read.service';
+export * from './organization-practice-provisioning.service';
+export * from './practice-administration.service';
+export * from './healthcare-service-offers.service';
+export * from './practice-affiliation-invitations.service';

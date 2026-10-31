@@ -107,4 +107,24 @@ describe('ProfileOwnershipService', () => {
     expect(practitionersRepo.findById).not.toHaveBeenCalled();
     expect(patientsRepo.findById).not.toHaveBeenCalled();
   });
+
+  it('un rol de plataforma concedido dentro de una organización no administra perfiles ajenos', async () => {
+    const { service, tx } = build({
+      link: { personId: 'person-admin' },
+    });
+
+    for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+      const scopedAdmin = {
+        id: 'admin-org',
+        roles: ['USER', role],
+        scopedRoles: { 'tenant-a': [role] },
+      } as any;
+      await expect(
+        service.assertOwnsPractitionerProfile(tx, 'person-1', scopedAdmin),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        service.assertOwnsPatientProfile(tx, 'person-1', scopedAdmin),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    }
+  });
 });

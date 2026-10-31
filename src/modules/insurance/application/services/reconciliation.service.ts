@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  requireTenantId,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../common';
+import {
+  INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
+  type InsurancePracticeTenantLookupPort,
+} from '../ports/practice-tenant-lookup.port';
+import { InsuranceErrorReason } from '../../domain/insurance.error-reasons';
 import {
   SettlementRepository,
   ClaimRepository,
@@ -32,6 +38,7 @@ export class ReconciliationService {
    * @param repo - Valor de repo requerido por la operación.
    * @param claims - Valor de claims requerido por la operación.
    * @param catalog - Valor de catalog requerido por la operación.
+   * @param practiceLookup - Tenant dueño de cada práctica prestadora.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -39,6 +46,8 @@ export class ReconciliationService {
     private readonly repo: SettlementRepository,
     private readonly claims: ClaimRepository,
     private readonly catalog: CatalogRepository,
+    @Inject(INSURANCE_PRACTICE_TENANT_LOOKUP_PORT)
+    private readonly practiceLookup: InsurancePracticeTenantLookupPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReconciliationService.name);
@@ -49,15 +58,17 @@ export class ReconciliationService {
     dto: CreateReconciliationBatchDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceStatusDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const carrier = await this.catalog.findCarrier(
+      // Aseguradora y prestador del lote se resuelven con la misma regla de
+      // alcance: el tenant activo tiene que ser una de las dos partes. Un lote
+      // entre dos terceros, o con una parte inexistente, responde 404 uniforme.
+      await this.assertPartyOfRelation(
         tx,
+        tenantId,
         dto.insuranceCarrierId,
+        dto.providerEntityId,
       );
-      if (!carrier)
-        throw new ResourceNotFoundException('Aseguradora no encontrada', {
-          carrierId: dto.insuranceCarrierId,
-        });
 
       const batch = this.repo.createBatch(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
@@ -87,29 +98,35 @@ export class ReconciliationService {
     dto: CreateReconciliationItemDto,
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const batch = await this.repo.findBatch(tx, batchId);
-      if (!batch)
-        throw new ResourceNotFoundException(
-          'Lote de conciliación no encontrado',
-          { batchId },
-        );
+      if (!batch) throw this.notAvailable('Lote de conciliación no encontrado');
+      await this.assertPartyOfRelation(
+        tx,
+        tenantId,
+        batch.insuranceCarrierId,
+        batch.providerEntityId,
+        'Lote de conciliación no encontrado',
+      );
       const claim = await this.claims.findClaim(tx, dto.insuranceClaimId);
-      if (!claim)
-        throw new ResourceNotFoundException('Reclamo no encontrado', {
-          claimId: dto.insuranceClaimId,
-        });
+      // El reclamo tiene que ser de la misma aseguradora y del mismo prestador
+      // que el lote; si no, no se concilia en él.
+      if (
+        !claim ||
+        claim.insuranceCarrierId !== batch.insuranceCarrierId ||
+        claim.billingProviderEntityId !== batch.providerEntityId ||
+        claim.billingProviderTypeConceptId !==
+          INS.BILLING_PROVIDER_TYPE_PRACTICE ||
+        batch.providerTypeConceptId !== INS.RECON_PROVIDER_TYPE_PRACTICE
+      )
+        throw this.notAvailable('Reclamo no encontrado');
       const version = await this.claims.findVersion(
         tx,
         dto.claimAdjudicationVersionId,
       );
-      if (!version || version.insuranceClaimId !== dto.insuranceClaimId) {
-        throw new ResourceNotFoundException(
-          'Versión de adjudicación no encontrada',
-          {
-            versionId: dto.claimAdjudicationVersionId,
-          },
-        );
+      if (!version || version.insuranceClaimId !== claim.id) {
+        throw this.notAvailable('Versión de adjudicación no encontrada');
       }
 
       const expected =
@@ -133,5 +150,48 @@ export class ReconciliationService {
       await tx.flush();
       return { id: item.id };
     });
+  }
+
+  /**
+   * Exige que el tenant activo sea parte de la relación aseguradora–prestador:
+   * dueño de la aseguradora o de la práctica prestadora. Ambos recursos deben
+   * existir; cualquier otro caso responde como inexistente.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo (`requireTenantId()`).
+   * @param carrierId - Aseguradora del lote.
+   * @param providerEntityId - Práctica prestadora del lote.
+   * @param message - Mensaje de "no existe" con el que se informa.
+   * @throws ResourceNotFoundException uniforme si no es parte o no existen.
+   */
+  private async assertPartyOfRelation(
+    tx: EntityManager,
+    tenantId: string,
+    carrierId: string,
+    providerEntityId: string,
+    message = 'Aseguradora no encontrada',
+  ): Promise<void> {
+    const carrier = await this.catalog.findCarrier(tx, carrierId);
+    const practiceTenantId =
+      await this.practiceLookup.findTenantOfPractice(providerEntityId);
+    const isParty =
+      carrier !== null &&
+      practiceTenantId !== null &&
+      (carrier.tenantId === tenantId || practiceTenantId === tenantId);
+    if (!isParty) throw this.notAvailable(message);
+  }
+
+  /**
+   * 404 uniforme de la conciliación: mismo `reason` y sin `details`.
+   *
+   * @param message - Mensaje de "no existe".
+   * @returns La excepción a lanzar.
+   */
+  private notAvailable(message: string): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      message,
+      undefined,
+      InsuranceErrorReason.RECONCILIATION_RESOURCE_NOT_AVAILABLE,
+    );
   }
 }

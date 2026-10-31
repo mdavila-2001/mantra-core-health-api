@@ -337,6 +337,18 @@ export class OwnAddressDto {
   })
   municipalityConceptId?: string;
 
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio',
+  })
+  administrativeArea2ConceptId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Distrito o zona, tal como lo dio el mapa',
+  })
+  district?: string;
+
   @ApiPropertyOptional({ description: 'Latitud, si marcó el punto en el mapa' })
   latitude?: number;
 

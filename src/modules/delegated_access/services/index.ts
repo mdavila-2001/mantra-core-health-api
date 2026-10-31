@@ -3,3 +3,7 @@ export * from './permission-sets.service';
 export * from './practitioner-delegates.service';
 export * from './access-requests.service';
 export * from './delegated-access-evaluation.service';
+export * from './delegation-scope.service';
+export * from './prescription-shares.service';
+export * from './prescription-share-token';
+export * from './prescription-share-expiry';

@@ -5,6 +5,7 @@ import { SchedulingBookingsService } from './application/bookings/scheduling-boo
 import { SchedulingCatalogService } from './application/catalog/scheduling-catalog.service';
 import { SchedulingWalkInService } from './application/walk-in/scheduling-walk-in.service';
 import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
+import { BOOKING_COMPLETED_PORT } from './application/ports/booking-completed.port';
 import { BOOKING_HISTORY_PORT } from './application/ports/booking-history.port';
 import { CLINICAL_APPOINTMENTS_PORT } from './application/ports/clinical-appointments.port';
 import { CLINICAL_ENCOUNTERS_PORT } from './application/ports/clinical-encounters.port';
@@ -44,6 +45,7 @@ describe('SchedulingModule · grafo de inyección', () => {
     );
     for (const token of [
       AGENDA_NOTICE_PORT,
+      BOOKING_COMPLETED_PORT,
       BOOKING_HISTORY_PORT,
       CLINICAL_APPOINTMENTS_PORT,
       CLINICAL_ENCOUNTERS_PORT,

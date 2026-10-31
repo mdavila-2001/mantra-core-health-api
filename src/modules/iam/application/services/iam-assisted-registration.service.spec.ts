@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import { IamAssistedRegistrationService } from './iam-assisted-registration.service';
+import { profilesRegistration } from './iam-registration.testing';
 import { CONCEPTS, ConflictException } from '../../../../common';
 
 const actor = { id: 'clinician-1', roles: ['CLINICIAN'] };
@@ -31,13 +32,18 @@ function build() {
   };
   const usersRepo = { create: mockFn(), findById: mockFn() };
   const credentialsRepo = {
-    findLivePasswordBySubject: mockFn(),
+    findLivePasswordByEmail: mockFn(),
+    lockEmailForRegistration: mockFn().mockResolvedValue(undefined),
     createPendingPassword: mockFn(),
     findPendingPasswordByUser: mockFn(),
   };
   const rolesRepo = { create: mockFn() };
   const activationsRepo = { create: mockFn(), findByTokenHash: mockFn() };
   const eventsRepo = { record: mockFn() };
+  const personsRepo = { create: mockFn(() => ({ id: 'person-1' })) };
+  const personProfilesRepo = { create: mockFn() };
+  const patientProfilesRepo = { create: mockFn() };
+  const accountLinksRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new IamAssistedRegistrationService(
@@ -48,6 +54,12 @@ function build() {
     rolesRepo as any,
     activationsRepo,
     eventsRepo as any,
+    profilesRegistration({
+      persons: personsRepo,
+      personProfiles: personProfilesRepo,
+      patientProfiles: patientProfilesRepo,
+      accountLinks: accountLinksRepo,
+    }),
     logger as any,
   );
   return {
@@ -60,6 +72,10 @@ function build() {
     rolesRepo,
     activationsRepo,
     eventsRepo,
+    personsRepo,
+    personProfilesRepo,
+    patientProfilesRepo,
+    accountLinksRepo,
   };
 }
 
@@ -67,7 +83,7 @@ describe('IamAssistedRegistrationService', () => {
   describe('assistedRegistration (C-18)', () => {
     it('creates a pending account, returns a one-time token and NEVER a password', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
       d.usersRepo.create.mockReturnValue({ id: 'u1' });
 
       const res = await d.service.assistedRegistration(
@@ -118,9 +134,79 @@ describe('IamAssistedRegistrationService', () => {
       );
     });
 
+    it('creates the person, its patient profile and the SELF account link in the same transaction (#820)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
+      d.usersRepo.create.mockReturnValue({ id: 'u1' });
+
+      await d.service.assistedRegistration(
+        {
+          name: 'Lucía',
+          middleName: 'Andrea',
+          lastName: 'Mamani',
+          motherLastName: 'Quispe',
+          email: 'paciente@x.io',
+          reason: 'paciente sin acceso digital',
+        },
+        actor,
+      );
+
+      // La persona lleva las partes del nombre y las mismas que la cuenta.
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          name: 'Lucía',
+          middleName: 'Andrea',
+          lastName: 'Mamani',
+          motherLastName: 'Quispe',
+          displayName: 'Lucía Andrea Mamani Quispe',
+          actorUserId: actor.id,
+        }),
+      );
+      expect(d.personProfilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ personId: 'person-1' }),
+      );
+      expect(d.patientProfilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          profileId: 'person-1',
+          patientCode: expect.stringMatching(/^PAT-/),
+        }),
+      );
+      // Sin este vínculo la cuenta choca con ACCOUNT_WITHOUT_LINKED_PERSON al
+      // abrir su propio perfil.
+      expect(d.accountLinksRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          personId: 'person-1',
+          userId: 'u1',
+          actorUserId: actor.id,
+        }),
+      );
+      // Todo en la misma transacción que la cuenta.
+      expect(d.em.transactional).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not create any person when the identifier is already in use (#820)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+        id: 'c1',
+      });
+
+      await expect(
+        d.service.assistedRegistration(
+          { name: 'A', lastName: 'B', email: 'x@x.io', reason: 'r' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+      expect(d.accountLinksRepo.create).not.toHaveBeenCalled();
+    });
+
     it('keeps honouring displayName for clients that still send it', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
       d.usersRepo.create.mockReturnValue({ id: 'u1' });
 
       await d.service.assistedRegistration(
@@ -141,7 +227,7 @@ describe('IamAssistedRegistrationService', () => {
 
     it('rejects when the verified identifier already exists (prefer invitation)', async () => {
       const d = build();
-      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
         id: 'c1',
       });
 
@@ -155,6 +241,30 @@ describe('IamAssistedRegistrationService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo correo con otras mayúsculas choca igual, bajo el cerrojo (#1000)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+        id: 'c1',
+      });
+
+      await expect(
+        d.service.assistedRegistration(
+          { name: 'A', lastName: 'B', email: 'Paciente@X.io', reason: 'r' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.credentialsRepo.lockEmailForRegistration).toHaveBeenCalledWith(
+        d.tx,
+        'Paciente@X.io',
+      );
+      expect(
+        d.credentialsRepo.lockEmailForRegistration.mock.invocationCallOrder[0],
+      ).toBeLessThan(
+        d.credentialsRepo.findLivePasswordByEmail.mock.invocationCallOrder[0],
+      );
       expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
   });

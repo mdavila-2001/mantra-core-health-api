@@ -28,6 +28,13 @@ import { AUTHZ } from '../authz.concepts';
 import { EFFECT_CONCEPT } from './authz-policies.service';
 import { SCOPE_CONCEPT } from './authz-catalog.service';
 import { AuthzErrorReason } from '../authz.error-reasons';
+import { ROLE_CONCEPT_BY_CODE } from '../../iam/domain/role-mapping';
+
+/** Códigos que sólo pueden existir como rol de plataforma, nunca creados vía API. */
+const RESERVED_ROLE_CODES: ReadonlySet<string> = new Set([
+  ...Object.keys(ROLE_CONCEPT_BY_CODE),
+  'SYSTEM',
+]);
 
 const BASE_ROLE_CONCEPT: Record<BaseRole, string> = {
   CLINICAL: AUTHZ.BASE_ROLE_CLINICAL,
@@ -100,6 +107,17 @@ export class AuthzRolesService {
       { operation: 'authz.role.create', code: dto.code },
       'Creating role',
     );
+    // Los códigos de plataforma viajan en el claim `roles` del token y hay
+    // lógica que los trata como privilegio (`SUPERADMIN` es comodín de RBAC,
+    // `SYSTEM` habilita el barrido entre tenants). Un rol de negocio con uno de
+    // esos códigos, asignado a un usuario, lo elevaría.
+    if (RESERVED_ROLE_CODES.has(dto.code.trim().toUpperCase())) {
+      throw new ConflictException(
+        'El código de rol está reservado por la plataforma',
+        { code: dto.code },
+        AuthzErrorReason.ROLE_CODE_RESERVED,
+      );
+    }
     return this.em.transactional(async (tx) => {
       const clash = await this.rolesRepo.findByCode(tx, dto.code);
       if (clash)

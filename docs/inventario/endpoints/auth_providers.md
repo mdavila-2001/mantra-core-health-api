@@ -34,7 +34,7 @@
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.requestAccountLink` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:211`
+- **Implementación:** `AuthProvidersController.requestAccountLink` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:261`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -44,18 +44,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/account-link-requests` la atiende `AuthProvidersController.requestAccountLink` (src/modules/auth_providers/controllers/auth-providers.controller.ts:211). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `RequestAccountLinkDto` (3 campos, 2 obligatorios). Delega en `FederatedLoginService.requestAccountLink`. Crea filas en auth_providers.account_link_requests. Lee auth_providers.account_link_requests, auth_providers.federated_identities, auth_providers.identity_providers.
+`POST /auth-providers/account-link-requests` la atiende `AuthProvidersController.requestAccountLink` (src/modules/auth_providers/controllers/auth-providers.controller.ts:261). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `RequestAccountLinkDto` (3 campos, 2 obligatorios). Delega en `FederatedLoginService.requestAccountLink`. Crea filas en auth_providers.account_link_requests. Lee auth_providers.account_link_requests, auth_providers.federated_identities, auth_providers.identity_providers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:261` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -138,7 +138,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.completeAccountLink` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:227`
+- **Implementación:** `AuthProvidersController.completeAccountLink` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:282`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -148,18 +148,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/account-link-requests/complete` la atiende `AuthProvidersController.completeAccountLink` (src/modules/auth_providers/controllers/auth-providers.controller.ts:227). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `CompleteAccountLinkDto` (4 campos, 1 obligatorio). Delega en `FederatedLoginService.completeAccountLink`. Crea filas en auth_providers.federated_identities, auth_providers.federated_login_attempts. Actualiza auth_providers.account_link_requests, auth_providers.federated_identities. Lee auth_providers.account_link_requests, auth_providers.federated_identities.
+`POST /auth-providers/account-link-requests/complete` la atiende `AuthProvidersController.completeAccountLink` (src/modules/auth_providers/controllers/auth-providers.controller.ts:282). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `CompleteAccountLinkDto` (4 campos, 1 obligatorio). Delega en `FederatedLoginService.completeAccountLink`. Crea filas en auth_providers.federated_identities, auth_providers.federated_login_attempts. Actualiza auth_providers.account_link_requests, auth_providers.federated_identities. Lee auth_providers.account_link_requests, auth_providers.federated_identities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:227` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -245,7 +245,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.unlinkIdentity` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:239`
+- **Implementación:** `AuthProvidersController.unlinkIdentity` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:299`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -255,19 +255,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/federated-identities/{id}/unlink` la atiende `AuthProvidersController.unlinkIdentity` (src/modules/auth_providers/controllers/auth-providers.controller.ts:239). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `UnlinkIdentityDto` (1 campo, 1 obligatorio). Delega en `FederatedLoginService.unlinkIdentity`. Crea filas en auth_providers.federated_login_attempts. Actualiza auth_providers.federated_identities. Lee auth_providers.federated_identities.
+`POST /auth-providers/federated-identities/{id}/unlink` la atiende `AuthProvidersController.unlinkIdentity` (src/modules/auth_providers/controllers/auth-providers.controller.ts:299). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `UnlinkIdentityDto` (1 campo, 1 obligatorio). Delega en `FederatedLoginService.unlinkIdentity`. Crea filas en auth_providers.federated_login_attempts. Actualiza auth_providers.federated_identities. Lee auth_providers.federated_identities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:239` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:239` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:299` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -348,7 +348,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.createProvider` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:65`
+- **Implementación:** `AuthProvidersController.createProvider` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -358,18 +358,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers` la atiende `AuthProvidersController.createProvider` (src/modules/auth_providers/controllers/auth-providers.controller.ts:65). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `CreateProviderDto` (7 campos, 4 obligatorios). Delega en `AuthProvidersConfigService.createProvider`. Crea filas en auth_providers.identity_providers. Lee auth_providers.identity_providers.
+`POST /auth-providers/identity-providers` la atiende `AuthProvidersController.createProvider` (src/modules/auth_providers/controllers/auth-providers.controller.ts:70). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `CreateProviderDto` (7 campos, 4 obligatorios). Delega en `AuthProvidersConfigService.createProvider`. Crea filas en auth_providers.identity_providers. Lee auth_providers.identity_providers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -460,7 +460,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.setAttributeMappings` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:128`
+- **Implementación:** `AuthProvidersController.setAttributeMappings` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:153`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -470,19 +470,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`PUT /auth-providers/identity-providers/{id}/attribute-mappings` la atiende `AuthProvidersController.setAttributeMappings` (src/modules/auth_providers/controllers/auth-providers.controller.ts:128). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `SetAttributeMappingsDto` (6 campos, 3 obligatorios). Delega en `AuthProvidersConfigService.setAttributeMappings`. Crea filas en auth_providers.provider_attribute_mappings. Borra de auth_providers.provider_attribute_mappings. Lee auth_providers.identity_providers, auth_providers.provider_attribute_mappings.
+`PUT /auth-providers/identity-providers/{id}/attribute-mappings` la atiende `AuthProvidersController.setAttributeMappings` (src/modules/auth_providers/controllers/auth-providers.controller.ts:153). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `SetAttributeMappingsDto` (6 campos, 3 obligatorios). Delega en `AuthProvidersConfigService.setAttributeMappings`. Crea filas en auth_providers.provider_attribute_mappings. Borra de auth_providers.provider_attribute_mappings. Lee auth_providers.identity_providers, auth_providers.provider_attribute_mappings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:128` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:153` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:153` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -583,7 +583,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.configureProtocol` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:81`
+- **Implementación:** `AuthProvidersController.configureProtocol` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:91`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -593,19 +593,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers/{id}/protocol-configs` la atiende `AuthProvidersController.configureProtocol` (src/modules/auth_providers/controllers/auth-providers.controller.ts:81). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `ConfigureProtocolDto` (20 campos, 1 obligatorio). Delega en `AuthProvidersConfigService.configureProtocol`. Crea filas en auth_providers.provider_protocol_configs, auth_providers.provider_signing_keys. Actualiza auth_providers.identity_providers, auth_providers.provider_protocol_configs. Lee auth_providers.identity_providers, auth_providers.provider_protocol_configs, auth_providers.provider_signing_keys.
+`POST /auth-providers/identity-providers/{id}/protocol-configs` la atiende `AuthProvidersController.configureProtocol` (src/modules/auth_providers/controllers/auth-providers.controller.ts:91). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `ConfigureProtocolDto` (20 campos, 1 obligatorio). Delega en `AuthProvidersConfigService.configureProtocol`. Crea filas en auth_providers.provider_protocol_configs, auth_providers.provider_signing_keys. Actualiza auth_providers.identity_providers, auth_providers.provider_protocol_configs. Lee auth_providers.identity_providers, auth_providers.provider_protocol_configs, auth_providers.provider_signing_keys.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:91` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:91` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -733,7 +733,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.createProvisioningRule` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:161`
+- **Implementación:** `AuthProvidersController.createProvisioningRule` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:196`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -743,19 +743,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers/{id}/provisioning-rules` la atiende `AuthProvidersController.createProvisioningRule` (src/modules/auth_providers/controllers/auth-providers.controller.ts:161). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `CreateProvisioningRuleDto` (6 campos, 2 obligatorios). Delega en `AuthProvidersConfigService.createProvisioningRule`. Crea filas en auth_providers.provisioning_rules. Lee auth_providers.identity_providers, auth_providers.provisioning_rules.
+`POST /auth-providers/identity-providers/{id}/provisioning-rules` la atiende `AuthProvidersController.createProvisioningRule` (src/modules/auth_providers/controllers/auth-providers.controller.ts:196). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `CreateProvisioningRuleDto` (6 campos, 2 obligatorios). Delega en `AuthProvidersConfigService.createProvisioningRule`. Crea filas en auth_providers.provisioning_rules. Lee auth_providers.identity_providers, auth_providers.provisioning_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:161` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:196` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:196` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -849,7 +849,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.publishSigningKey` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:98`
+- **Implementación:** `AuthProvidersController.publishSigningKey` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -859,19 +859,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers/{id}/signing-keys` la atiende `AuthProvidersController.publishSigningKey` (src/modules/auth_providers/controllers/auth-providers.controller.ts:98). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `PublishSigningKeyDto` (6 campos, 3 obligatorios). Delega en `AuthProvidersConfigService.publishSigningKey`. Crea filas en auth_providers.provider_signing_keys. Lee auth_providers.identity_providers, auth_providers.provider_signing_keys.
+`POST /auth-providers/identity-providers/{id}/signing-keys` la atiende `AuthProvidersController.publishSigningKey` (src/modules/auth_providers/controllers/auth-providers.controller.ts:113). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `PublishSigningKeyDto` (6 campos, 3 obligatorios). Delega en `AuthProvidersConfigService.publishSigningKey`. Crea filas en auth_providers.provider_signing_keys. Lee auth_providers.identity_providers, auth_providers.provider_signing_keys.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:98` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:113` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:113` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -965,7 +965,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.rotateSigningKey` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:111`
+- **Implementación:** `AuthProvidersController.rotateSigningKey` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -975,19 +975,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers/{id}/signing-keys/rotate` la atiende `AuthProvidersController.rotateSigningKey` (src/modules/auth_providers/controllers/auth-providers.controller.ts:111). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `RotateSigningKeyDto` (7 campos, 3 obligatorios). Delega en `AuthProvidersConfigService.rotateSigningKey`. Crea filas en auth_providers.provider_signing_keys. Actualiza auth_providers.provider_signing_keys. Lee auth_providers.identity_providers, auth_providers.provider_signing_keys.
+`POST /auth-providers/identity-providers/{id}/signing-keys/rotate` la atiende `AuthProvidersController.rotateSigningKey` (src/modules/auth_providers/controllers/auth-providers.controller.ts:131). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `RotateSigningKeyDto` (7 campos, 3 obligatorios). Delega en `AuthProvidersConfigService.rotateSigningKey`. Crea filas en auth_providers.provider_signing_keys. Actualiza auth_providers.provider_signing_keys. Lee auth_providers.identity_providers, auth_providers.provider_signing_keys.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:131` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:131` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1083,7 +1083,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.startLogin` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:177`
+- **Implementación:** `AuthProvidersController.startLogin` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:217`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1093,18 +1093,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers/by-code/{code}/authorize` la atiende `AuthProvidersController.startLogin` (src/modules/auth_providers/controllers/auth-providers.controller.ts:177). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `StartLoginDto` (4 campos, 0 obligatorios). Delega en `FederatedLoginService.startLogin`. Crea filas en auth_providers.federated_login_attempts. Lee auth_providers.identity_providers, auth_providers.provider_protocol_configs, auth_providers.provider_tenant_bindings.
+`POST /auth-providers/identity-providers/by-code/{code}/authorize` la atiende `AuthProvidersController.startLogin` (src/modules/auth_providers/controllers/auth-providers.controller.ts:217). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `StartLoginDto` (4 campos, 0 obligatorios). Delega en `FederatedLoginService.startLogin`. Crea filas en auth_providers.federated_login_attempts. Lee auth_providers.identity_providers, auth_providers.provider_protocol_configs, auth_providers.provider_tenant_bindings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:177` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:217` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1192,7 +1192,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.processCallback` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:194`
+- **Implementación:** `AuthProvidersController.processCallback` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:239`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1202,18 +1202,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/identity-providers/by-code/{code}/callback` la atiende `AuthProvidersController.processCallback` (src/modules/auth_providers/controllers/auth-providers.controller.ts:194). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `ProcessCallbackDto` (7 campos, 3 obligatorios). Delega en `FederatedLoginService.processCallback`. Crea filas en auth_providers.account_link_requests, auth_providers.federated_identities, auth_providers.federated_login_attempts. Actualiza auth_providers.federated_identities. Lee auth_providers.federated_identities, auth_providers.federated_login_attempts, auth_providers.identity_providers, auth_providers.provider_attribute_mappings, auth_providers.provider_tenant_bindings, auth_providers.provisioning_rules.
+`POST /auth-providers/identity-providers/by-code/{code}/callback` la atiende `AuthProvidersController.processCallback` (src/modules/auth_providers/controllers/auth-providers.controller.ts:239). Exige sesión con alguno de los roles IDENTITY_ADMIN, AUTH_SERVICE. Valida el cuerpo como `ProcessCallbackDto` (7 campos, 3 obligatorios). Delega en `FederatedLoginService.processCallback`. Crea filas en auth_providers.account_link_requests, auth_providers.federated_identities, auth_providers.federated_login_attempts. Actualiza auth_providers.federated_identities. Lee auth_providers.federated_identities, auth_providers.federated_login_attempts, auth_providers.identity_providers, auth_providers.provider_attribute_mappings, auth_providers.provider_tenant_bindings, auth_providers.provisioning_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:239` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1319,7 +1319,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AuthProvidersController.bindTenant` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:145`
+- **Implementación:** `AuthProvidersController.bindTenant` — `src/modules/auth_providers/controllers/auth-providers.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1329,18 +1329,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Cómo se atiende (sistema)
 
-`POST /auth-providers/tenant-bindings` la atiende `AuthProvidersController.bindTenant` (src/modules/auth_providers/controllers/auth-providers.controller.ts:145). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `BindTenantDto` (7 campos, 2 obligatorios). Delega en `AuthProvidersConfigService.bindTenant`. Crea filas en auth_providers.provider_tenant_bindings. Actualiza auth_providers.provider_tenant_bindings. Lee auth_providers.identity_providers, auth_providers.provider_tenant_bindings.
+`POST /auth-providers/tenant-bindings` la atiende `AuthProvidersController.bindTenant` (src/modules/auth_providers/controllers/auth-providers.controller.ts:175). Exige sesión con alguno de los roles IDENTITY_ADMIN. Valida el cuerpo como `BindTenantDto` (7 campos, 2 obligatorios). Delega en `AuthProvidersConfigService.bindTenant`. Crea filas en auth_providers.provider_tenant_bindings. Actualiza auth_providers.provider_tenant_bindings. Lee auth_providers.identity_providers, auth_providers.provider_tenant_bindings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 

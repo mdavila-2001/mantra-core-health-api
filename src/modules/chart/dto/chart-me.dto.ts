@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChartDocumentFileItemDto } from './chart-read.dto';
+import { ChartDocumentFileItemDto, ChartNoteEntryDto } from './chart-read.dto';
 
 /**
  * BR-15 (CL-30): una nota tal como la lee el **titular** en `GET
@@ -30,6 +30,12 @@ export class MyChartNoteItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   noteTypeConceptId?: string;
+
+  /**
+   * P39: filas campo/valor de la versión liberada. Ausente si no tiene.
+   */
+  @ApiPropertyOptional({ type: [ChartNoteEntryDto] })
+  entries?: ChartNoteEntryDto[];
 
   /**
    * Motivo de consulta de la versión liberada.

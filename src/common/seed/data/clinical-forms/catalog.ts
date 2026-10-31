@@ -1,5 +1,6 @@
 import type { TechnicalDataType } from '../../../../modules/forms/dto';
 
+import citaMedica from './transversal/cita-medica.json';
 import anamnesisGeneral from './transversal/anamnesis-historia-clinica-general.json';
 import examenFisico from './transversal/examen-fisico-general.json';
 import consentimientoInformado from './transversal/consentimiento-informado.json';
@@ -349,6 +350,8 @@ function validateCondition(
  * import acá. Nada más.
  */
 export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
+  // 2026-10-29 — la ficha por defecto de toda cita.
+  citaMedica,
   anamnesisGeneral,
   examenFisico,
   consentimientoInformado,

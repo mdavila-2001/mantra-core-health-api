@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { ClinicalModule } from '../clinical/clinical.module';
 import {
   OrgUserAssignmentsController,
   DelegatedPermissionSetsController,
   PractitionerDelegatesController,
   AccessRequestsController,
   DelegatedAccessAuthzController,
+  PrescriptionSharesController,
+  PrescriptionSharesPublicController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -14,6 +17,8 @@ import {
   PractitionerDelegatesService,
   AccessRequestsService,
   DelegatedAccessEvaluationService,
+  DelegationScopeService,
+  PrescriptionSharesService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -23,6 +28,8 @@ import {
   DelegatedAccessApprovalRequestsRepository,
   DelegatedAccessGrantsRepository,
   DelegationEventsRepository,
+  DelegationScopeRepository,
+  SharedAccessLinksRepository,
 } from './repositories';
 
 /**
@@ -33,13 +40,16 @@ import {
  * efectivo. Auth vía guard global; `TokenService` llega por `AuthModule` (global).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  // `ClinicalModule` da el lector del prescriptor del enlace de receta.
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), ClinicalModule],
   controllers: [
     OrgUserAssignmentsController,
     DelegatedPermissionSetsController,
     PractitionerDelegatesController,
     AccessRequestsController,
     DelegatedAccessAuthzController,
+    PrescriptionSharesController,
+    PrescriptionSharesPublicController,
   ],
   providers: [
     // Repositorios
@@ -50,12 +60,18 @@ import {
     DelegatedAccessApprovalRequestsRepository,
     DelegatedAccessGrantsRepository,
     DelegationEventsRepository,
+    DelegationScopeRepository,
+    SharedAccessLinksRepository,
     // Servicios
+    DelegationScopeService,
     OrgUserAssignmentsService,
     PermissionSetsService,
     PractitionerDelegatesService,
     AccessRequestsService,
     DelegatedAccessEvaluationService,
+    PrescriptionSharesService,
   ],
+  // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
+  exports: [PrescriptionSharesService],
 })
 export class DelegatedAccessModule {}

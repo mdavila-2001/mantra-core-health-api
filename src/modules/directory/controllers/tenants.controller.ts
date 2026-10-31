@@ -28,6 +28,7 @@ import {
   DirectoryMembershipsService,
   DirectoryReadService,
   DirectoryTenantsService,
+  TenantDocumentCompletionService,
 } from '../services';
 import {
   BranchAssignmentDto,
@@ -49,6 +50,10 @@ import {
   TenantDetailResponseDto,
   MyOrganizationsResponseDto,
   UpdateTenantDto,
+  CompleteAffiliationDocumentsDto,
+  CompleteAffiliationDocumentsResponseDto,
+  LaboratoryReadinessResponseDto,
+  PharmacyReadinessResponseDto,
 } from '../dto';
 
 /** Tope de filas por página cuando el cliente no pide uno. */
@@ -75,6 +80,7 @@ export class TenantsController {
     private readonly branchesService: DirectoryBranchesService,
     private readonly membershipsService: DirectoryMembershipsService,
     private readonly readService: DirectoryReadService,
+    private readonly documentCompletion: TenantDocumentCompletionService,
   ) {}
 
   /**
@@ -120,6 +126,11 @@ export class TenantsController {
    * Sólo owner o admin **de esa** organización (o la plataforma): un `staff`
    * la ve y no la edita.
    */
+  @Audited({
+    action: 'TENANT_UPDATED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Patch(':tenantId')
   @ApiOperation({ summary: 'Editar los datos de la propia organización' })
   updateTenant(
@@ -128,6 +139,66 @@ export class TenantsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TenantResponseDto> {
     return this.tenantsService.updateTenant(tenantId, dto, actor);
+  }
+
+  /**
+   * P50: completar después del alta los papeles que el alta pública dejó
+   * opcionales (los seis PDF que una farmacia necesita para operar).
+   *
+   * Sólo owner o admin **de esa** organización (o la plataforma), y sólo
+   * mientras está pendiente de verificación.
+   */
+  @Audited({
+    action: 'TENANT_AFFILIATION_DOCUMENTS_COMPLETED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
+  @Post(':tenantId/affiliation-documents')
+  @ApiOperation({
+    summary: 'Completar los documentos legales de la organización',
+    description:
+      'Vincula PDF ya subidos con POST /iam/auth/upload-registration-document. ' +
+      '422 sin documentos, fuera de PENDING, con archivo repetido o sin representante para el poder; ' +
+      '409 si ese papel ya está presentado; 403 si no administra la organización.',
+  })
+  completeAffiliationDocuments(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Body() dto: CompleteAffiliationDocumentsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CompleteAffiliationDocumentsResponseDto> {
+    return this.documentCompletion.complete(tenantId, dto, actor);
+  }
+
+  /**
+   * P50: lo que le falta a una farmacia para que la plataforma pueda
+   * verificarla (los seis papeles y el punto de la casa central).
+   */
+  @Get(':tenantId/pharmacy-readiness')
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que la farmacia opere',
+  })
+  getPharmacyReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyReadinessResponseDto> {
+    return this.documentCompletion.pharmacyReadiness(tenantId, actor);
+  }
+
+  /**
+   * P51: lo que le falta a un laboratorio para que la plataforma pueda
+   * verificarlo (SEPREC, licencia de funcionamiento y SEDES).
+   */
+  @Get(':tenantId/laboratory-readiness')
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que el laboratorio opere',
+    description:
+      '403 si no pertenece a la organización; 422 si no es un laboratorio.',
+  })
+  getLaboratoryReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LaboratoryReadinessResponseDto> {
+    return this.documentCompletion.laboratoryReadiness(tenantId, actor);
   }
 
   @Get(':tenantId')
@@ -208,6 +279,11 @@ export class TenantsController {
   }
 
   /** UC-04-03. */
+  @Audited({
+    action: 'CHILD_TENANT_CREATED',
+    entity: 'tenant',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/child-tenants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -221,6 +297,11 @@ export class TenantsController {
   }
 
   /** UC-04-04. */
+  @Audited({
+    action: 'BRANCH_CREATED',
+    entity: 'branch',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/branches')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -252,6 +333,11 @@ export class TenantsController {
   }
 
   /** UC-04-05. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_INVITED',
+    entity: 'tenant_membership',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/memberships')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Incorporar un usuario al tenant (membership)' })
@@ -264,6 +350,11 @@ export class TenantsController {
   }
 
   /** UC-04-06. */
+  @Audited({
+    action: 'BRANCH_MEMBERSHIP_ASSIGNED',
+    entity: 'branch_membership',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/memberships/:membershipId/branch-assignments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Asignar la membresía a una branch' })
@@ -282,6 +373,11 @@ export class TenantsController {
   }
 
   /** UC-04-07. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_TRANSFERRED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Post(':tenantId/memberships/:membershipId/transfer')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transferir la membresía entre branches' })
@@ -295,6 +391,11 @@ export class TenantsController {
   }
 
   /** UC-04-08. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_ROLE_CHANGED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Patch(':tenantId/memberships/:membershipId/role')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cambiar rol / scope de la membresía' })
@@ -313,6 +414,11 @@ export class TenantsController {
   }
 
   /** UC-04-09. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_OFFBOARDED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Post(':tenantId/memberships/:membershipId/offboard')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revocar / offboarding de un miembro' })

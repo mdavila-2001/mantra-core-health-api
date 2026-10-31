@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsReadService } from './forms-read.service';
 import { FORMS } from '../forms.concepts';
+import { ForbiddenException } from '@nestjs/common';
+import { FormsErrorReason } from '../forms.error-reasons';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -19,6 +21,9 @@ const TENANT = 'tenant-1';
 
 /** Una sesión con perfil de paciente, para el autoservicio. */
 const PATIENT = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+
+/** Un clínico del tenant que lee formularios por la ruta clínica. */
+const CLINICIAN = { id: 'c-1', roles: ['CLINICIAN'] } as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -56,6 +61,9 @@ function build() {
     findByResourceIds: mockFn().mockResolvedValue([]),
   };
   const valuesRepo = { findCurrentByInstance: mockFn().mockResolvedValue([]) };
+  const clinicalRead = {
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new FormsReadService(
     em as any,
@@ -64,10 +72,12 @@ function build() {
     assignmentsRepo as any,
     instancesRepo as any,
     valuesRepo as any,
+    clinicalRead as any,
     logger as any,
   );
   return {
     service,
+    clinicalRead,
     emFork,
     setsRepo,
     fieldsRepo,
@@ -212,7 +222,7 @@ describe('FormsReadService', () => {
       d.emFork.findOne.mockResolvedValue(null);
       await expect(
         runWithTenant(TENANT, () =>
-          d.service.listInstancesByEncounter('enc-x', 50),
+          d.service.listInstancesByEncounter('enc-x', 50, CLINICIAN),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -225,7 +235,7 @@ describe('FormsReadService', () => {
       });
       await expect(
         runWithTenant(TENANT, () =>
-          d.service.listInstancesByEncounter('enc-1', 50),
+          d.service.listInstancesByEncounter('enc-1', 50, CLINICIAN),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -233,7 +243,7 @@ describe('FormsReadService', () => {
     it('requires a tenant in the context', async () => {
       const d = build();
       await expect(
-        d.service.listInstancesByEncounter('enc-1', 50),
+        d.service.listInstancesByEncounter('enc-1', 50, CLINICIAN),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -257,7 +267,7 @@ describe('FormsReadService', () => {
         },
       ]);
       const res = await runWithTenant(TENANT, () =>
-        d.service.listInstancesByEncounter('enc-1', 1),
+        d.service.listInstancesByEncounter('enc-1', 1, CLINICIAN),
       );
       expect(d.instancesRepo.findByResourceId).toHaveBeenCalledWith(
         d.emFork,
@@ -288,7 +298,9 @@ describe('FormsReadService', () => {
       const d = build();
       d.instancesRepo.findById.mockResolvedValue(null);
       await expect(
-        runWithTenant(TENANT, () => d.service.getInstance('missing')),
+        runWithTenant(TENANT, () =>
+          d.service.getInstance('missing', CLINICIAN),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -300,7 +312,7 @@ describe('FormsReadService', () => {
       });
       d.emFork.findOne.mockResolvedValue(null);
       await expect(
-        runWithTenant(TENANT, () => d.service.getInstance('i1')),
+        runWithTenant(TENANT, () => d.service.getInstance('i1', CLINICIAN)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -315,7 +327,7 @@ describe('FormsReadService', () => {
         tenantId: 'tenant-ajeno',
       });
       await expect(
-        runWithTenant(TENANT, () => d.service.getInstance('i1')),
+        runWithTenant(TENANT, () => d.service.getInstance('i1', CLINICIAN)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -334,7 +346,7 @@ describe('FormsReadService', () => {
       ]);
 
       const res = await runWithTenant(TENANT, () =>
-        d.service.getInstance('i1'),
+        d.service.getInstance('i1', CLINICIAN),
       );
 
       expect(d.valuesRepo.findCurrentByInstance).toHaveBeenCalledWith(
@@ -359,7 +371,7 @@ describe('FormsReadService', () => {
       d.fieldsRepo.findFieldsByIds.mockResolvedValue([]);
 
       const res = await runWithTenant(TENANT, () =>
-        d.service.getInstance('i1'),
+        d.service.getInstance('i1', CLINICIAN),
       );
       expect(res.values[0].dataType).toBeUndefined();
       expect(res.values[0].value).toBe('Nota larga');
@@ -381,7 +393,7 @@ describe('FormsReadService', () => {
       ]);
 
       const res = await runWithTenant(TENANT, () =>
-        d.service.getInstance('i1'),
+        d.service.getInstance('i1', CLINICIAN),
       );
 
       expect(d.fieldsRepo.findActiveAccessRulesByFieldIds).toHaveBeenCalledWith(
@@ -395,6 +407,114 @@ describe('FormsReadService', () => {
       expect(sensible.value).toBeNull();
       expect(free.masked).toBe(false);
       expect(free.value).toBe('ok');
+    });
+  });
+
+  describe('lectura clínica: puerta de la historia del paciente (FORM-01)', () => {
+    const OUT_OF_SCOPE = {
+      status: 404,
+      code: 'NOT_FOUND',
+      reason: FormsErrorReason.FORM_INSTANCE_OUT_OF_SCOPE,
+    };
+
+    /** Encuentro propio del tenant, de un paciente concreto. */
+    function withEncounter(d: ReturnType<typeof build>) {
+      d.emFork.findOne.mockResolvedValue({
+        id: 'enc-1',
+        tenantId: TENANT,
+        patientProfileId: 'pp-9',
+      });
+      d.instancesRepo.findById.mockResolvedValue({
+        id: 'i1',
+        resourceId: 'enc-1',
+        resourceTypeConceptId: FORMS.RESOURCE_TYPE_PATIENT,
+        schemaVersion: 1,
+        stateConceptId: FORMS.INSTANCE_CLOSED,
+        createdAt: new Date('2026-01-03'),
+      });
+    }
+
+    it('correcto: el clínico con acceso vigente lee la lista y la instancia', async () => {
+      const d = build();
+      withEncounter(d);
+      const list = await runWithTenant(TENANT, () =>
+        d.service.listInstancesByEncounter('enc-1', 50, CLINICIAN),
+      );
+      expect(list.encounterId).toBe('enc-1');
+      const detail = await runWithTenant(TENANT, () =>
+        d.service.getInstance('i1', CLINICIAN),
+      );
+      expect(detail.id).toBe('i1');
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+        'pp-9',
+        CLINICIAN,
+      );
+    });
+
+    it('límite: mismo tenant sin relación clínica => 404 uniforme y no toca instancias ni valores', async () => {
+      const d = build();
+      withEncounter(d);
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+        new ForbiddenException('Sólo puede consultar su propia historia'),
+      );
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.listInstancesByEncounter('enc-1', 50, CLINICIAN),
+        ),
+      ).rejects.toMatchObject({
+        ...OUT_OF_SCOPE,
+        response: { message: 'Encuentro no encontrado' },
+      });
+      await expect(
+        runWithTenant(TENANT, () => d.service.getInstance('i1', CLINICIAN)),
+      ).rejects.toMatchObject({
+        ...OUT_OF_SCOPE,
+        response: { message: 'Instancia no encontrada' },
+      });
+      expect(d.instancesRepo.findByResourceId).not.toHaveBeenCalled();
+      expect(d.valuesRepo.findCurrentByInstance).not.toHaveBeenCalled();
+    });
+
+    it('error: la denegación es indistinta de la instancia inexistente y no expone ids', async () => {
+      const d = build();
+      withEncounter(d);
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+        new ForbiddenException('x'),
+      );
+      const denied = await runWithTenant(TENANT, () =>
+        d.service.getInstance('i1', CLINICIAN),
+      ).catch((e) => e);
+      d.instancesRepo.findById.mockResolvedValue(null);
+      const missing = await runWithTenant(TENANT, () =>
+        d.service.getInstance('zzz', CLINICIAN),
+      ).catch((e) => e);
+      expect(denied.getResponse()).toEqual(missing.getResponse());
+      expect(denied.details).toBeUndefined();
+      expect(JSON.stringify(denied.getResponse())).not.toContain('enc-1');
+    });
+
+    it('falla catalogada: el encuentro de otro tenant también responde FORM_INSTANCE_OUT_OF_SCOPE sin consultar la historia', async () => {
+      const d = build();
+      d.emFork.findOne.mockResolvedValue({
+        id: 'enc-1',
+        tenantId: 'tenant-ajeno',
+        patientProfileId: 'pp-9',
+      });
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.listInstancesByEncounter('enc-1', 50, CLINICIAN),
+        ),
+      ).rejects.toMatchObject(OUT_OF_SCOPE);
+      expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
+    });
+
+    it('un fallo que no es una denegación no se disfraza de 404', async () => {
+      const d = build();
+      withEncounter(d);
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(new Error('db'));
+      await expect(
+        runWithTenant(TENANT, () => d.service.getInstance('i1', CLINICIAN)),
+      ).rejects.toThrow('db');
     });
   });
 

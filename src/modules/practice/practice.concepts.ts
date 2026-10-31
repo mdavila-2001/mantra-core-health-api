@@ -54,6 +54,12 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'PR_TYPE_INSURER',
       display: 'Insurer practice type',
     },
+    // P50: la práctica propia de una farmacia, de la que cuelgan su casa central
+    // y sus sucursales como sedes físicas (`pharmacy_sites.practice_site_id`).
+    PRACTICE_TYPE_PHARMACY: {
+      code: 'PR_TYPE_PHARMACY',
+      display: 'Pharmacy practice type',
+    },
     PRACTICE_ACTIVE: { code: 'PR_ACTIVE', display: 'Practice active' },
 
     // --- practice_sites --------------------------------------------------------
@@ -492,6 +498,13 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
     ROLE_ASSIGNMENT_SUSPENDED: {
       code: 'ROLE_ASG_SUSPENDED',
       display: 'Role assignment suspended by organization',
+    },
+    // Centros médicos — la organización invita al profesional y la fila queda
+    // `INVITED` hasta que él la acepte o la decline. Solo el profesional la saca
+    // de ese estado: ninguna vinculación llega a `ACTIVE` sin la otra parte.
+    ROLE_ASSIGNMENT_INVITED: {
+      code: 'ROLE_ASG_INVITED',
+      display: 'Role assignment invited by organization',
     },
 
     // --- practitioner_support_assignments --------------------------------------

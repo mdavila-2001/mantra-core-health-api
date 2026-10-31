@@ -158,5 +158,100 @@
     "id": "changed_type:PUT /practitioners/me/sites/{siteId}/contact-phone:request.contactPhone: object -> string",
     "reason": "Corrección del contrato, no del comportamiento: contactPhone es string | null y el DTO ya lo valida con @IsString(); la reflexión de TypeScript lo emitía como object porque faltaba type: String en @ApiProperty.",
     "migrationNote": "Ninguna para clientes que ya funcionaban: un valor que no fuera texto o null ya era rechazado con 400. Los clientes generados desde el contrato deben regenerarse para tipar el campo como string."
+  },
+  {
+    "id": "new_required_request_field:POST /lakehouse/zones:namespaceId",
+    "reason": "Corrección de seguridad e integridad intencional: namespaceId, encryptionProfileCode y retentionPolicyCode son obligatorios para crear una zona del lakehouse. Antes faltaban en el DTO y la omisión llegaba a la base como violación de NOT NULL (500); ahora se rechaza en la frontera con 400 VALIDATION_FAILED (LAKEHOUSE_REQUIRED_FIELD_MISSING).",
+    "migrationNote": "Enviar siempre namespaceId, encryptionProfileCode y retentionPolicyCode en el cuerpo. Un cliente que ya funcionaba los enviaba (si no, recibía 500); ahora el fallo es un 400 explícito. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /lakehouse/zones:encryptionProfileCode",
+    "reason": "Corrección de seguridad e integridad intencional: namespaceId, encryptionProfileCode y retentionPolicyCode son obligatorios para crear una zona del lakehouse. Antes faltaban en el DTO y la omisión llegaba a la base como violación de NOT NULL (500); ahora se rechaza en la frontera con 400 VALIDATION_FAILED (LAKEHOUSE_REQUIRED_FIELD_MISSING).",
+    "migrationNote": "Enviar siempre namespaceId, encryptionProfileCode y retentionPolicyCode en el cuerpo. Un cliente que ya funcionaba los enviaba (si no, recibía 500); ahora el fallo es un 400 explícito. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /lakehouse/zones:retentionPolicyCode",
+    "reason": "Corrección de seguridad e integridad intencional: namespaceId, encryptionProfileCode y retentionPolicyCode son obligatorios para crear una zona del lakehouse. Antes faltaban en el DTO y la omisión llegaba a la base como violación de NOT NULL (500); ahora se rechaza en la frontera con 400 VALIDATION_FAILED (LAKEHOUSE_REQUIRED_FIELD_MISSING).",
+    "migrationNote": "Enviar siempre namespaceId, encryptionProfileCode y retentionPolicyCode en el cuerpo. Un cliente que ya funcionaba los enviaba (si no, recibía 500); ahora el fallo es un 400 explícito. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /lakehouse/datasets/{id}/quality-runs:transformationRunId",
+    "reason": "Corrección intencional: una corrida de calidad debe estar ligada a la transformación que evalúa (transformationRunId); sin ella no hay trazabilidad del dato validado. Antes la omisión producía un fallo no controlado; ahora 400 VALIDATION_FAILED.",
+    "migrationNote": "Incluir transformationRunId (identificador de la corrida de transformación evaluada) en el cuerpo de POST /lakehouse/datasets/{id}/quality-runs. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /research/projects/{id}/cohorts:inclusionExpression",
+    "reason": "Corrección intencional: una cohorte de investigación sin criterio de inclusión (inclusionExpression) seleccionaría población sin definición auditable. El campo pasa a ser obligatorio y se valida en la frontera con 400 VALIDATION_FAILED.",
+    "migrationNote": "Enviar inclusionExpression con la expresión de inclusión de la cohorte en POST /research/projects/{id}/cohorts. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /research/dataset-releases/{id}/approve:objectManifestId",
+    "reason": "Corrección intencional: aprobar la liberación de un dataset de investigación exige fijar qué se libera (objectManifestId, manifiesto de objetos) y con qué esquema (schemaVersion); sin ellos la aprobación no es reproducible ni auditable. Ambos pasan a ser obligatorios (400 VALIDATION_FAILED si faltan).",
+    "migrationNote": "Enviar objectManifestId y schemaVersion en el cuerpo de POST /research/dataset-releases/{id}/approve. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /research/dataset-releases/{id}/approve:schemaVersion",
+    "reason": "Corrección intencional: aprobar la liberación de un dataset de investigación exige fijar qué se libera (objectManifestId, manifiesto de objetos) y con qué esquema (schemaVersion); sin ellos la aprobación no es reproducible ni auditable. Ambos pasan a ser obligatorios (400 VALIDATION_FAILED si faltan).",
+    "migrationNote": "Enviar objectManifestId y schemaVersion en el cuerpo de POST /research/dataset-releases/{id}/approve. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions:parámetro query:purposeOfUse",
+    "reason": "Corrección de seguridad intencional: el autorizador de vistas de read_models decide sobre datos de un paciente y necesita el propósito de uso (purposeOfUse) y el paciente (patientProfileId) para evaluar consentimiento y alcance. Sin ellos la petición se rechaza en lugar de autorizarse a ciegas.",
+    "migrationNote": "Añadir los parámetros de query purposeOfUse y patientProfileId a GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions:parámetro query:patientProfileId",
+    "reason": "Corrección de seguridad intencional: el autorizador de vistas de read_models decide sobre datos de un paciente y necesita el propósito de uso (purposeOfUse) y el paciente (patientProfileId) para evaluar consentimiento y alcance. Sin ellos la petición se rechaza en lugar de autorizarse a ciegas.",
+    "migrationNote": "Añadir los parámetros de query purposeOfUse y patientProfileId a GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions. Regenerar los clientes desde el contrato."
+  },
+  {
+    "id": "new_required_request_field:POST /tracking/webhooks/carriers/{carrierCode}:parámetro header:x-carrier-signature",
+    "reason": "Corrección de seguridad intencional: el webhook de transportistas ahora se autentica con firma HMAC y ventana anti-replay (cabeceras x-carrier-signature y x-carrier-timestamp; secreto WEBHOOK_SECRET_CARRIER_<CÓDIGO>). Sin ellas se rechaza la petición, de modo que nadie pueda inyectar eventos de seguimiento falsos.",
+    "migrationNote": "El transportista debe firmar el cuerpo con HMAC usando el secreto WEBHOOK_SECRET_CARRIER_<CÓDIGO> y enviar x-carrier-signature y x-carrier-timestamp en cada llamada a POST /tracking/webhooks/carriers/{carrierCode}."
+  },
+  {
+    "id": "new_required_request_field:POST /tracking/webhooks/carriers/{carrierCode}:parámetro header:x-carrier-timestamp",
+    "reason": "Corrección de seguridad intencional: el webhook de transportistas ahora se autentica con firma HMAC y ventana anti-replay (cabeceras x-carrier-signature y x-carrier-timestamp; secreto WEBHOOK_SECRET_CARRIER_<CÓDIGO>). Sin ellas se rechaza la petición, de modo que nadie pueda inyectar eventos de seguimiento falsos.",
+    "migrationNote": "El transportista debe firmar el cuerpo con HMAC usando el secreto WEBHOOK_SECRET_CARRIER_<CÓDIGO> y enviar x-carrier-signature y x-carrier-timestamp en cada llamada a POST /tracking/webhooks/carriers/{carrierCode}."
+  },
+  {
+    "id": "removed_response:GET /iam/onboarding-drafts/{formType}/{draftId}:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:GET /iam/onboarding-drafts/{formType}/{draftId}:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:PUT /iam/onboarding-drafts/{formType}/{draftId}:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:PUT /iam/onboarding-drafts/{formType}/{draftId}:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:DELETE /iam/onboarding-drafts/{formType}/{draftId}:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:DELETE /iam/onboarding-drafts/{formType}/{draftId}:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:POST /telemetry/onboarding-events:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:POST /telemetry/onboarding-events:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
   }
 ]

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
   PreconditionFailedException,
   touch,
   type AuthenticatedUser,
@@ -11,7 +10,6 @@ import {
   SuppliersRepository,
   PurchaseOrdersRepository,
   GoodsReceiptsRepository,
-  LocationsRepository,
   LotsRepository,
   LedgerRepository,
   StockPositionsRepository,
@@ -24,7 +22,9 @@ import {
   PurchaseOrderResponseDto,
   GoodsReceiptResponseDto,
 } from '../../presentation/dto';
+import type { PharmacyPurchaseOrderLines } from '../../entities';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /**
  * Ejecuta la operación num.
@@ -61,10 +61,10 @@ export class PharmacyProcurementUseCases {
     private readonly suppliersRepo: SuppliersRepository,
     private readonly ordersRepo: PurchaseOrdersRepository,
     private readonly receiptsRepo: GoodsReceiptsRepository,
-    private readonly locationsRepo: LocationsRepository,
     private readonly lotsRepo: LotsRepository,
     private readonly ledgerRepo: LedgerRepository,
     private readonly stockRepo: StockPositionsRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext('PharmacyProcurementService');
@@ -81,6 +81,7 @@ export class PharmacyProcurementUseCases {
       'Creating supplier',
     );
     return this.em.transactional(async (tx) => {
+      await this.scope.requireManagedPharmacy(tx, pharmacyId, actor);
       const supplier = this.suppliersRepo.create(tx, {
         pharmacyId,
         supplierTenantId: dto.supplierTenantId,
@@ -110,6 +111,12 @@ export class PharmacyProcurementUseCases {
       'Placing purchase order',
     );
     return this.em.transactional(async (tx) => {
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        pharmacyId,
+        actor,
+      );
+
       // Idempotencia: un retry con la misma clave devuelve la orden ya creada.
       if (dto.idempotencyKey) {
         const existing = await this.ordersRepo.findByIdempotencyKey(
@@ -130,19 +137,23 @@ export class PharmacyProcurementUseCases {
         }
       }
 
+      // Sede, proveedor y productos son de la farmacia del tenant.
+      await this.scope.requireSite(tx, pharmacy, dto.pharmacySiteId);
       const supplier = await this.suppliersRepo.findById(
         tx,
         dto.pharmacySupplierId,
       );
-      if (!supplier) {
-        throw new ResourceNotFoundException('Proveedor no encontrado', {
-          supplierId: dto.pharmacySupplierId,
-        });
+      if (!supplier || supplier.pharmacyId !== pharmacy.pharmacyId) {
+        throw this.scope.notAvailable();
       }
       if (supplier.statusConceptId !== PINV.SUPPLIER_ACTIVE) {
         throw new PreconditionFailedException('El proveedor no está activo', {
           supplierId: supplier.id,
         });
+      }
+
+      for (const line of dto.lines) {
+        await this.scope.requireProduct(tx, pharmacy, line.pharmacyProductId);
       }
 
       const number = dto.purchaseOrderNumber ?? `PO-${Date.now()}`;
@@ -195,6 +206,12 @@ export class PharmacyProcurementUseCases {
       'Posting goods receipt',
     );
     return this.em.transactional(async (tx) => {
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        pharmacyId,
+        actor,
+      );
+
       // Idempotencia: un retry con la misma clave devuelve la recepción ya
       // posteada SIN repetir el ingreso de stock ni los asientos del ledger.
       if (dto.idempotencyKey) {
@@ -203,6 +220,14 @@ export class PharmacyProcurementUseCases {
           dto.idempotencyKey,
         );
         if (existing) {
+          // La clave no es de la farmacia: una recepción de otra no se devuelve.
+          const existingOrder = await this.ordersRepo.findById(
+            tx,
+            existing.pharmacyPurchaseOrderId,
+          );
+          if (existingOrder?.pharmacyId !== pharmacy.pharmacyId) {
+            throw this.scope.notAvailable();
+          }
           const existingLines = await this.receiptsRepo.findLines(
             tx,
             existing.id,
@@ -231,10 +256,8 @@ export class PharmacyProcurementUseCases {
         tx,
         dto.pharmacyPurchaseOrderId,
       );
-      if (!order) {
-        throw new ResourceNotFoundException('Orden de compra no encontrada', {
-          poId: dto.pharmacyPurchaseOrderId,
-        });
+      if (!order || order.pharmacyId !== pharmacy.pharmacyId) {
+        throw this.scope.notAvailable();
       }
       if (
         order.statusConceptId !== PINV.PO_ORDERED &&
@@ -244,14 +267,33 @@ export class PharmacyProcurementUseCases {
           poId: order.id,
         });
       }
-      const location = await this.locationsRepo.findById(
+      // Sede y ubicación destino son de la farmacia; cada línea de la orden es
+      // de esta orden y su producto, el de la línea y de la farmacia. Todo se
+      // resuelve antes de la primera escritura.
+      const site = await this.scope.requireSite(
         tx,
-        dto.inventoryLocationId,
+        pharmacy,
+        dto.pharmacySiteId,
       );
-      if (!location) {
-        throw new ResourceNotFoundException('Ubicación destino no encontrada', {
-          locationId: dto.inventoryLocationId,
-        });
+      await this.scope.requireLocation(tx, site, dto.inventoryLocationId);
+      const resolvedLines: {
+        line: CreateGoodsReceiptDto['lines'][number];
+        poLine: PharmacyPurchaseOrderLines;
+      }[] = [];
+      for (const line of dto.lines) {
+        const poLine = await this.ordersRepo.findLineById(
+          tx,
+          line.pharmacyPurchaseOrderLineId,
+        );
+        if (
+          !poLine ||
+          poLine.pharmacyPurchaseOrderId !== order.id ||
+          poLine.pharmacyProductId !== line.pharmacyProductId
+        ) {
+          throw this.scope.notAvailable();
+        }
+        await this.scope.requireProduct(tx, pharmacy, line.pharmacyProductId);
+        resolvedLines.push({ line, poLine });
       }
 
       const receipt = this.receiptsRepo.create(tx, {
@@ -269,17 +311,7 @@ export class PharmacyProcurementUseCases {
       const lotIds: string[] = [];
       const ledgerEntryIds: string[] = [];
 
-      for (const line of dto.lines) {
-        const poLine = await this.ordersRepo.findLineById(
-          tx,
-          line.pharmacyPurchaseOrderLineId,
-        );
-        if (!poLine) {
-          throw new ResourceNotFoundException('Línea de orden no encontrada', {
-            lineId: line.pharmacyPurchaseOrderLineId,
-          });
-        }
-
+      for (const { line, poLine } of resolvedLines) {
         // UPSERT del lote por (producto, número de lote).
         let lot = await this.lotsRepo.findByProductAndNumber(
           tx,

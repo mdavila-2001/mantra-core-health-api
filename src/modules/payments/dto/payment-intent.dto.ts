@@ -1,13 +1,22 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsIn,
   IsISO8601,
+  IsIn,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
 } from 'class-validator';
+import {
+  BOUNDED_DECIMAL_MESSAGE,
+  BOUNDED_DECIMAL_REGEX,
+} from '../services/payment-money';
+import {
+  type GatewayNextAction,
+  type GatewayPaymentIntentStatus,
+} from '../gateway/payments-gateway.types';
 
 /** Propósito del cobro; determina el `purpose_concept_id` del intent. */
 export type PaymentPurpose = 'INVOICE' | 'DEBT' | 'OTHER';
@@ -45,6 +54,7 @@ export class CreatePaymentIntentDto {
     example: '150.00',
   })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   amount!: string;
 
   /**
@@ -141,6 +151,44 @@ export class CreatePaymentIntentDto {
   @IsOptional()
   @IsISO8601()
   expiresAt?: string;
+}
+
+/** Cobro creado en la pasarela (sólo con `payments.via_gateway` encendido). */
+export class PaymentIntentGatewayDto {
+  /**
+   * Identificador del cobro en la pasarela.
+   */
+  @ApiProperty({
+    description: 'Identificador del cobro en la pasarela (`pi_…`)',
+  })
+  paymentIntentId!: string;
+
+  /**
+   * Estado del cobro en la pasarela.
+   */
+  @ApiProperty({
+    description: 'Estado del cobro en la pasarela',
+    enum: [
+      'requires_action',
+      'processing',
+      'succeeded',
+      'failed',
+      'canceled',
+      'expired',
+    ],
+  })
+  status!: GatewayPaymentIntentStatus;
+
+  /**
+   * Qué tiene que hacer el pagador, si hay algo pendiente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Qué tiene que hacer el pagador: mostrar el QR, transferir con una referencia o ir al formulario del banco',
+    type: 'object',
+    additionalProperties: true,
+  })
+  nextAction?: GatewayNextAction;
 }
 
 /** Representación de un intent devuelta por la API. */

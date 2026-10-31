@@ -3,12 +3,12 @@
 # Flujos del módulo `directory`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 23 (22 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 26 (25 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [directory](../endpoints/directory.md)
 
 ## Proceso: Módulo 04 — Directory (Tenants, Sub-tenants, Branches y Membresías)
 
-- **Código:** `directory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 23
+- **Código:** `directory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 26
 - **Actores:** Cualquier sesión válida · SECURITY_ADMIN · SUPERADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/directory/README.md`
@@ -24,20 +24,22 @@ _Fuente: `src/modules/directory/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:AdminTenantsController` | Operaciones de AdminTenantsController que el README no asigna a un caso de uso | GET /admin/tenants | SUPERADMIN · SECURITY_ADMIN | BAJO | 1 |
-|  |  | POST /admin/tenants | SUPERADMIN | MEDIO | 13 |
+|  |  | POST /admin/tenants | SUPERADMIN | MEDIO | 16 |
 |  |  | PUT /admin/tenants/{tenantId}/public-profile | SUPERADMIN · SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /admin/tenants/{tenantId}/suspend | SUPERADMIN | MEDIO | 6 |
-|  |  | POST /admin/tenants/{tenantId}/verification | SECURITY_ADMIN | MEDIO | 7 |
+|  |  | POST /admin/tenants/{tenantId}/verification | SECURITY_ADMIN | MEDIO | 16 |
 | `ctrl:OrganizationLogoController` | Operaciones de OrganizationLogoController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/logo | Cualquier sesión válida | BAJO | 3 |
 |  |  | PUT /tenants/{tenantId}/logo | Cualquier sesión válida | ALTO | 7 |
 |  |  | GET /tenants/{tenantId}/logo/content | Cualquier sesión válida | BAJO | 5 |
 | `ctrl:TenantsController` | Operaciones de TenantsController que el README no asigna a un caso de uso | GET /tenants/{tenantId} | Cualquier sesión válida | BAJO | 2 |
 |  |  | PATCH /tenants/{tenantId} | Cualquier sesión válida | ALTO | 5 |
+|  |  | POST /tenants/{tenantId}/affiliation-documents | Cualquier sesión válida | ALTO | 13 |
 |  |  | GET /tenants/{tenantId}/branches | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /tenants/{tenantId}/branches | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /tenants/{tenantId}/branches/{branchId} | Cualquier sesión válida | ALTO | 3 |
 |  |  | GET /tenants/{tenantId}/child-tenants | Cualquier sesión válida | BAJO | 2 |
-|  |  | POST /tenants/{tenantId}/child-tenants | SECURITY_ADMIN | MEDIO | 13 |
+|  |  | POST /tenants/{tenantId}/child-tenants | SECURITY_ADMIN | MEDIO | 16 |
+|  |  | GET /tenants/{tenantId}/laboratory-readiness | Cualquier sesión válida | BAJO | 11 |
 |  |  | GET /tenants/{tenantId}/memberships | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /tenants/{tenantId}/memberships | Cualquier sesión válida | ALTO | 2 |
 |  |  | GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | Cualquier sesión válida | BAJO | 3 |
@@ -45,7 +47,8 @@ _Fuente: `src/modules/directory/README.md:3`_
 |  |  | POST /tenants/{tenantId}/memberships/{membershipId}/offboard | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /tenants/{tenantId}/memberships/{membershipId}/role | Cualquier sesión válida | ALTO | 2 |
 |  |  | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | Cualquier sesión válida | ALTO | 6 |
-|  |  | GET /tenants/me | Cualquier sesión válida | BAJO | 12 |
+|  |  | GET /tenants/{tenantId}/pharmacy-readiness | Cualquier sesión válida | BAJO | 11 |
+|  |  | GET /tenants/me | Cualquier sesión válida | BAJO | 13 |
 
 ### Diagrama — etapas `ctrl:AdminTenantsController`, `ctrl:OrganizationLogoController`, `ctrl:TenantsController`
 
@@ -53,57 +56,65 @@ _Fuente: `src/modules/directory/README.md:3`_
 flowchart LR
   a2(["SUPERADMIN · SECURITY_ADMIN"]):::actor
   a5(["SUPERADMIN"]):::actor
-  a17(["SECURITY_ADMIN"]):::actor
-  a21(["Cualquier sesión válida"]):::actor
+  a18(["SECURITY_ADMIN"]):::actor
+  a22(["Cualquier sesión válida"]):::actor
   t3[("directory.tenants")]:::tabla
   t6[("common.addresses")]:::tabla
   t7[("diagnostic_units.diagnostic_study_offerings")]:::tabla
   t8[("diagnostic_units.diagnostic_unit_sites")]:::tabla
   t9[("diagnostic_units.diagnostic_units")]:::tabla
-  t10[("directory.tenant_memberships")]:::tabla
-  t13[("community.public_profiles")]:::tabla
-  t15[("directory.branches")]:::tabla
-  t18[("pharmacy.pharmacies")]:::tabla
-  t23[("common.file_versions")]:::tabla
-  t24[("common.files")]:::tabla
-  t29[("insurance.insurance_carriers")]:::tabla
-  t39[("directory.branch_memberships")]:::tabla
-  t45[("common.contact_points")]:::tabla
-  t46[("common.identifiers")]:::tabla
-  t47[("directory.tenant_legal_representatives")]:::tabla
-  t11[("+7 tablas más")]
-  t19[("+1 tablas más")]
+  t10[("directory.branches")]:::tabla
+  t11[("directory.tenant_medical_facilities")]:::tabla
+  t14[("community.public_profiles")]:::tabla
+  t16[("directory.tenant_memberships")]:::tabla
+  t19[("directory.tenant_affiliation_documents")]:::tabla
+  t24[("common.file_versions")]:::tabla
+  t25[("common.files")]:::tabla
+  t30[("insurance.insurance_carriers")]:::tabla
+  t32[("directory.tenant_legal_representatives")]:::tabla
+  t41[("pharmacy.pharmacies")]:::tabla
+  t46[("directory.branch_memberships")]:::tabla
+  t54[("common.contact_points")]:::tabla
+  t55[("common.identifiers")]:::tabla
+  t12[("+10 tablas más")]
+  t20[("+10 tablas más")]
   subgraph s0["ctrl:AdminTenantsController · Operaciones de AdminTenantsController que el READ…"]
     o1["GET /admin/tenants"]:::op
     o4["POST /admin/tenants"]:::op
-    o12["PUT /admin/tenants/{tenantId}/public-profile"]:::op
-    o14["POST /admin/tenants/{tenantId}/suspend"]:::op
-    o16["POST /admin/tenants/{tenantId}/verification"]:::op
+    o13["PUT /admin/tenants/{tenantId}/public-profile"]:::op
+    o15["POST /admin/tenants/{tenantId}/suspend"]:::op
+    o17["POST /admin/tenants/{tenantId}/verification"]:::op
   end
-  t25[("+1 tablas más")]
+  t26[("+1 tablas más")]
   subgraph s1["ctrl:OrganizationLogoController · Operaciones de OrganizationLogoController que…"]
-    o20["GET /tenants/{tenantId}/logo"]:::op
-    o22["PUT /tenants/{tenantId}/logo"]:::op
-    o26["GET /tenants/{tenantId}/logo/content"]:::op
+    o21["GET /tenants/{tenantId}/logo"]:::op
+    o23["PUT /tenants/{tenantId}/logo"]:::op
+    o27["GET /tenants/{tenantId}/logo/content"]:::op
   end
-  t35[("+7 tablas más")]
-  t48[("+6 tablas más")]
+  t33[("+7 tablas más")]
+  t39[("+10 tablas más")]
+  t42[("+5 tablas más")]
+  t52[("+5 tablas más")]
+  t56[("+7 tablas más")]
   subgraph s2["ctrl:TenantsController · Operaciones de TenantsController que el README no asig…"]
-    o27["GET /tenants/{tenantId}"]:::op
-    o28["PATCH /tenants/{tenantId}"]:::op
-    o30["GET /tenants/{tenantId}/branches"]:::op
-    o31["POST /tenants/{tenantId}/branches"]:::op
-    o32["PATCH /tenants/{tenantId}/branches/{branchId}"]:::op
-    o33["GET /tenants/{tenantId}/child-tenants"]:::op
-    o34["POST /tenants/{tenantId}/child-tenants"]:::op
-    o36["GET /tenants/{tenantId}/memberships"]:::op
-    o37["POST /tenants/{tenantId}/memberships"]:::op
-    o38["GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
-    o40["POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
-    o41["POST /tenants/{tenantId}/memberships/{membershipId}/offboard"]:::op
-    o42["PATCH /tenants/{tenantId}/memberships/{membershipId}/role"]:::op
-    o43["POST /tenants/{tenantId}/memberships/{membershipId}/transfer"]:::op
-    o44["GET /tenants/me"]:::op
+    o28["GET /tenants/{tenantId}"]:::op
+    o29["PATCH /tenants/{tenantId}"]:::op
+    o31["POST /tenants/{tenantId}/affiliation-documents"]:::op
+    o34["GET /tenants/{tenantId}/branches"]:::op
+    o35["POST /tenants/{tenantId}/branches"]:::op
+    o36["PATCH /tenants/{tenantId}/branches/{branchId}"]:::op
+    o37["GET /tenants/{tenantId}/child-tenants"]:::op
+    o38["POST /tenants/{tenantId}/child-tenants"]:::op
+    o40["GET /tenants/{tenantId}/laboratory-readiness"]:::op
+    o43["GET /tenants/{tenantId}/memberships"]:::op
+    o44["POST /tenants/{tenantId}/memberships"]:::op
+    o45["GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
+    o47["POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
+    o48["POST /tenants/{tenantId}/memberships/{membershipId}/offboard"]:::op
+    o49["PATCH /tenants/{tenantId}/memberships/{membershipId}/role"]:::op
+    o50["POST /tenants/{tenantId}/memberships/{membershipId}/transfer"]:::op
+    o51["GET /tenants/{tenantId}/pharmacy-readiness"]:::op
+    o53["GET /tenants/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -113,117 +124,141 @@ flowchart LR
   o4 -->|"CREA"| t8
   o4 -->|"CREA"| t9
   o4 -->|"CREA"| t10
-  o4 -->|"CREA"| t3
-  o4 -.-> t11
-  a2 --> o12
-  o12 -->|"ACTUALIZA"| t13
-  o12 -->|"LEE"| t13
-  o12 -->|"LEE"| t3
-  a5 --> o14
-  o14 -->|"ACTUALIZA"| t15
-  o14 -->|"LEE"| t15
-  o14 -->|"ACTUALIZA"| t10
-  o14 -->|"LEE"| t10
-  o14 -->|"ACTUALIZA"| t3
-  o14 -->|"LEE"| t3
-  a17 --> o16
-  o16 -->|"ACTUALIZA"| t13
-  o16 -->|"CREA"| t13
-  o16 -->|"LEE"| t13
-  o16 -->|"ACTUALIZA"| t3
-  o16 -->|"LEE"| t3
-  o16 -->|"ACTUALIZA"| t18
-  o16 -.-> t19
-  a21 --> o20
-  o20 -->|"LEE"| t13
-  o20 -->|"LEE"| t10
-  o20 -->|"LEE"| t3
-  a21 --> o22
-  o22 -->|"LEE"| t23
-  o22 -->|"LEE"| t24
-  o22 -->|"ACTUALIZA"| t13
-  o22 -->|"CREA"| t13
-  o22 -->|"LEE"| t13
-  o22 -->|"LEE"| t10
-  o22 -.-> t25
-  a21 --> o26
-  o26 -->|"LEE"| t23
-  o26 -->|"LEE"| t24
-  o26 -->|"LEE"| t13
-  o26 -->|"LEE"| t10
-  o26 -->|"LEE"| t3
-  a21 --> o27
-  o27 -->|"LEE"| t10
+  o4 -->|"CREA"| t11
+  o4 -.-> t12
+  a2 --> o13
+  o13 -->|"ACTUALIZA"| t14
+  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t3
+  a5 --> o15
+  o15 -->|"ACTUALIZA"| t10
+  o15 -->|"LEE"| t10
+  o15 -->|"ACTUALIZA"| t16
+  o15 -->|"LEE"| t16
+  o15 -->|"ACTUALIZA"| t3
+  o15 -->|"LEE"| t3
+  a18 --> o17
+  o17 -->|"LEE"| t6
+  o17 -->|"ACTUALIZA"| t14
+  o17 -->|"CREA"| t14
+  o17 -->|"LEE"| t14
+  o17 -->|"LEE"| t9
+  o17 -->|"ACTUALIZA"| t19
+  o17 -.-> t20
+  a22 --> o21
+  o21 -->|"LEE"| t14
+  o21 -->|"LEE"| t16
+  o21 -->|"LEE"| t3
+  a22 --> o23
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t25
+  o23 -->|"ACTUALIZA"| t14
+  o23 -->|"CREA"| t14
+  o23 -->|"LEE"| t14
+  o23 -->|"LEE"| t16
+  o23 -.-> t26
+  a22 --> o27
+  o27 -->|"LEE"| t24
+  o27 -->|"LEE"| t25
+  o27 -->|"LEE"| t14
+  o27 -->|"LEE"| t16
   o27 -->|"LEE"| t3
-  a21 --> o28
-  o28 -->|"LEE"| t10
-  o28 -->|"ACTUALIZA"| t3
+  a22 --> o28
+  o28 -->|"LEE"| t16
   o28 -->|"LEE"| t3
-  o28 -->|"ACTUALIZA"| t29
-  o28 -->|"LEE"| t29
-  a21 --> o30
-  o30 -->|"LEE"| t15
-  o30 -->|"LEE"| t10
-  o30 -->|"LEE"| t3
-  a21 --> o31
-  o31 -->|"CREA"| t15
-  o31 -->|"LEE"| t15
-  o31 -->|"LEE"| t10
-  o31 -->|"LEE"| t3
-  a21 --> o32
-  o32 -->|"ACTUALIZA"| t15
-  o32 -->|"LEE"| t15
-  o32 -->|"LEE"| t10
-  a21 --> o33
-  o33 -->|"LEE"| t10
-  o33 -->|"LEE"| t3
-  a17 --> o34
-  o34 -->|"CREA"| t6
-  o34 -->|"CREA"| t7
-  o34 -->|"CREA"| t8
-  o34 -->|"CREA"| t9
-  o34 -->|"CREA"| t10
-  o34 -->|"CREA"| t3
-  o34 -.-> t35
-  a21 --> o36
+  a22 --> o29
+  o29 -->|"LEE"| t16
+  o29 -->|"ACTUALIZA"| t3
+  o29 -->|"LEE"| t3
+  o29 -->|"ACTUALIZA"| t30
+  o29 -->|"LEE"| t30
+  a22 --> o31
+  o31 -->|"LEE"| t24
+  o31 -->|"ACTUALIZA"| t25
+  o31 -->|"LEE"| t25
+  o31 -->|"CREA"| t19
+  o31 -->|"LEE"| t19
+  o31 -->|"LEE"| t32
+  o31 -.-> t33
+  a22 --> o34
+  o34 -->|"LEE"| t10
+  o34 -->|"LEE"| t16
+  o34 -->|"LEE"| t3
+  a22 --> o35
+  o35 -->|"CREA"| t10
+  o35 -->|"LEE"| t10
+  o35 -->|"LEE"| t16
+  o35 -->|"LEE"| t3
+  a22 --> o36
+  o36 -->|"ACTUALIZA"| t10
   o36 -->|"LEE"| t10
-  o36 -->|"LEE"| t3
-  a21 --> o37
-  o37 -->|"CREA"| t10
-  o37 -->|"LEE"| t10
-  a21 --> o38
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t10
-  o38 -->|"LEE"| t3
-  a21 --> o40
-  o40 -->|"CREA"| t39
-  o40 -->|"LEE"| t39
-  o40 -->|"LEE"| t15
-  o40 -->|"ACTUALIZA"| t10
-  o40 -->|"LEE"| t10
-  a21 --> o41
-  o41 -->|"ACTUALIZA"| t39
-  o41 -->|"LEE"| t39
-  o41 -->|"ACTUALIZA"| t10
-  o41 -->|"LEE"| t10
-  a21 --> o42
-  o42 -->|"ACTUALIZA"| t10
-  o42 -->|"LEE"| t10
-  a21 --> o43
-  o43 -->|"ACTUALIZA"| t39
-  o43 -->|"CREA"| t39
-  o43 -->|"LEE"| t39
-  o43 -->|"LEE"| t15
-  o43 -->|"ACTUALIZA"| t10
-  o43 -->|"LEE"| t10
-  a21 --> o44
-  o44 -->|"LEE"| t6
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t46
-  o44 -->|"LEE"| t47
-  o44 -->|"LEE"| t10
-  o44 -->|"LEE"| t3
-  o44 -.-> t48
+  o36 -->|"LEE"| t16
+  a22 --> o37
+  o37 -->|"LEE"| t16
+  o37 -->|"LEE"| t3
+  a18 --> o38
+  o38 -->|"CREA"| t6
+  o38 -->|"CREA"| t7
+  o38 -->|"CREA"| t8
+  o38 -->|"CREA"| t9
+  o38 -->|"CREA"| t10
+  o38 -->|"CREA"| t11
+  o38 -.-> t39
+  a22 --> o40
+  o40 -->|"LEE"| t6
+  o40 -->|"LEE"| t9
+  o40 -->|"LEE"| t19
+  o40 -->|"LEE"| t16
+  o40 -->|"LEE"| t3
+  o40 -->|"LEE"| t41
+  o40 -.-> t42
+  a22 --> o43
+  o43 -->|"LEE"| t16
+  o43 -->|"LEE"| t3
+  a22 --> o44
+  o44 -->|"CREA"| t16
+  o44 -->|"LEE"| t16
+  a22 --> o45
+  o45 -->|"LEE"| t46
+  o45 -->|"LEE"| t16
+  o45 -->|"LEE"| t3
+  a22 --> o47
+  o47 -->|"CREA"| t46
+  o47 -->|"LEE"| t46
+  o47 -->|"LEE"| t10
+  o47 -->|"ACTUALIZA"| t16
+  o47 -->|"LEE"| t16
+  a22 --> o48
+  o48 -->|"ACTUALIZA"| t46
+  o48 -->|"LEE"| t46
+  o48 -->|"ACTUALIZA"| t16
+  o48 -->|"LEE"| t16
+  a22 --> o49
+  o49 -->|"ACTUALIZA"| t16
+  o49 -->|"LEE"| t16
+  a22 --> o50
+  o50 -->|"ACTUALIZA"| t46
+  o50 -->|"CREA"| t46
+  o50 -->|"LEE"| t46
+  o50 -->|"LEE"| t10
+  o50 -->|"ACTUALIZA"| t16
+  o50 -->|"LEE"| t16
+  a22 --> o51
+  o51 -->|"LEE"| t6
+  o51 -->|"LEE"| t9
+  o51 -->|"LEE"| t19
+  o51 -->|"LEE"| t16
+  o51 -->|"LEE"| t3
+  o51 -->|"LEE"| t41
+  o51 -.-> t52
+  a22 --> o53
+  o53 -->|"LEE"| t6
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t19
+  o53 -->|"LEE"| t32
+  o53 -->|"LEE"| t16
+  o53 -.-> t56
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -247,7 +282,7 @@ Aprovisionar un tenant raíz con su membership owner
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de tenant ya existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TENANT_TYPES.join(', ')}; PreconditionFailedException: Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales; PreconditionFailedException: La latitud y la longitud de una sede van juntas o no van; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -299,102 +334,107 @@ flowchart TD
   n20 -->|"no"| n22
   n23(["422 PRECONDITION_FAILED El bloque `broker` sólo corresponde a un tenant de tipo BROKER"]):::error
   n22 -->|"sí"| n23
-  n24{"tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
+  n24{"tenantType !== 'PHARMACY' && input.pharmacy"}:::decision
   n22 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
+  n25(["422 PRECONDITION_FAILED El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY"]):::error
   n24 -->|"sí"| n25
-  n26{"input.diagnosticUnit"}:::decision
+  n26{"tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n24 -->|"no"| n26
-  n27{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n27(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
   n26 -->|"sí"| n27
-  n28(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
-  n27 -->|"sí"| n28
-  n29{"invalidModalities.length › 0"}:::decision
-  n27 -->|"no"| n29
-  n30(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n28{"input.medicalFacility"}:::decision
+  n26 -->|"no"| n28
+  n29{"!MEDICAL_FACILITY_TENANT_TYPES.includes(tenantType)"}:::decision
+  n28 -->|"sí"| n29
+  n30(["422 PRECONDITION_FAILED El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TE…"]):::error
   n29 -->|"sí"| n30
-  n31["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n31["Llama a TenantTypeProfileService.assertMedicalFacilityCoherence"]:::llamada
   n29 -->|"no"| n31
-  n26 -->|"no"| n31
-  n32["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n32{"branches.length › MEDICAL_FACILITY_MAX_BRANCHES"}:::decision
   n31 --> n32
-  n33[("LEE terminology.catalog_concepts")]:::efecto
-  n32 --> n33
-  n34{"unknown.length › 0"}:::decision
-  n33 --> n34
-  n35(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n33(["422 PRECONDITION_FAILED Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales"]):::error
+  n32 -->|"sí"| n33
+  n34{"halfPoint"}:::decision
+  n32 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED La latitud y la longitud de una sede van juntas o no van"]):::error
   n34 -->|"sí"| n35
-  n36["Llama a TenantsRepository.create"]:::llamada
+  n36{"input.diagnosticUnit"}:::decision
   n34 -->|"no"| n36
-  n37[("CREA directory.tenants")]:::efecto
-  n36 --> n37
-  n38["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
-  n37 --> n38
-  n39{"input.tenantType === 'PAYER' && input.payer"}:::decision
-  n38 --> n39
-  n40["Llama a CatalogRepository.createCarrier"]:::llamada
+  n28 -->|"no"| n36
+  n37{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n36 -->|"sí"| n37
+  n38(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n37 -->|"sí"| n38
+  n39{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n37 -->|"no"| n39
+  n40(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
   n39 -->|"sí"| n40
-  n41[("CREA insurance.insurance_carriers")]:::efecto
-  n40 --> n41
-  n42["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
-  n41 --> n42
-  n43["Llama a AddressesRepository.create"]:::llamada
-  n42 --> n43
-  n44[("CREA common.addresses")]:::efecto
+  n41{"invalidModalities.length › 0"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n41 -->|"sí"| n42
+  n43["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n41 -->|"no"| n43
+  n36 -->|"no"| n43
+  n44["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n43 --> n44
-  n45{"input.tenantType === 'BROKER' && input.broker"}:::decision
+  n45[("LEE terminology.catalog_concepts")]:::efecto
   n44 --> n45
-  n39 -->|"no"| n45
-  n46["Llama a CatalogRepository.createBroker"]:::llamada
-  n45 -->|"sí"| n46
-  n47[("CREA insurance.insurance_brokers")]:::efecto
-  n46 --> n47
-  n48{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
-  n47 --> n48
-  n45 -->|"no"| n48
-  n49["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
-  n48 -->|"sí"| n49
-  n50["Llama a PracticesRepository.create"]:::llamada
+  n46{"unknown.length › 0"}:::decision
+  n45 --> n46
+  n47(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a TenantsRepository.create"]:::llamada
+  n46 -->|"no"| n48
+  n49[("CREA directory.tenants")]:::efecto
+  n48 --> n49
+  n50["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
   n49 --> n50
-  n51[("CREA practice.practices")]:::efecto
+  n51{"input.tenantType === 'PAYER' && input.payer"}:::decision
   n50 --> n51
-  n52{"declaredAddress"}:::decision
-  n51 --> n52
-  n53["Llama a AddressesRepository.create"]:::llamada
-  n52 -->|"sí"| n53
-  n54[("CREA common.addresses")]:::efecto
+  n52["Llama a CatalogRepository.createCarrier"]:::llamada
+  n51 -->|"sí"| n52
+  n53[("CREA insurance.insurance_carriers")]:::efecto
+  n52 --> n53
+  n54["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
   n53 --> n54
-  n55["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
+  n55["Llama a AddressesRepository.create"]:::llamada
   n54 --> n55
-  n52 -->|"no"| n55
-  n56[("LEE practice.practice_sites")]:::efecto
+  n56[("CREA common.addresses")]:::efecto
   n55 --> n56
-  n57["Llama a PracticeSitesRepository.create"]:::llamada
+  n57{"input.tenantType === 'BROKER' && input.broker"}:::decision
   n56 --> n57
-  n58[("CREA practice.practice_sites")]:::efecto
-  n57 --> n58
-  n59["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n51 -->|"no"| n57
+  n58["Llama a CatalogRepository.createBroker"]:::llamada
+  n57 -->|"sí"| n58
+  n59[("CREA insurance.insurance_brokers")]:::efecto
   n58 --> n59
-  n60[("CREA diagnostic_units.diagnostic_units")]:::efecto
+  n60{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n59 --> n60
-  n61["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n60 --> n61
-  n62[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n57 -->|"no"| n60
+  n61["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
+  n60 -->|"sí"| n61
+  n62["Llama a PracticesRepository.create"]:::llamada
   n61 --> n62
-  n63["Repite: por cada const conceptId de profile.modalityConceptIds ?? []"]:::bucle
+  n63[("CREA practice.practices")]:::efecto
   n62 --> n63
-  n64["Llama a DiagnosticStudyOfferingsRepository.create"]:::llamada
-  n63 -->|"cada elemento"| n64
-  n65[("CREA diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n64["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n63 --> n64
+  n65[("CREA diagnostic_units.diagnostic_units")]:::efecto
   n64 --> n65
-  n66["Llama a TenantMembershipsRepository.create"]:::llamada
+  n66["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
   n65 --> n66
-  n63 -->|"al terminar"| n66
-  n48 -->|"no"| n66
-  n67[("CREA directory.tenant_memberships")]:::efecto
+  n67[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
   n66 --> n67
-  n68(("201 Responde con éxito")):::ok
+  n68["Repite: por cada const branch de profile.branches ?? []"]:::bucle
   n67 --> n68
+  n69["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
+  n68 -->|"cada elemento"| n69
+  n70[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  n68 -->|"al terminar"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -556,7 +596,7 @@ Verificar y activar un tenant
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant no está pendiente de verificación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant no está pendiente de verificación; PreconditionFailedException: La farmacia todavía no puede operar: faltan papeles o el punto de su casa central / El laboratorio todavía no puede operar: faltan la matrícula del SEPREC, la…; PreconditionFailedException: El catálogo de {subject} no incluye el código {code.toUpperCase()} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -580,48 +620,122 @@ flowchart TD
   n7 -->|"no"| n9
   n10(["422 PRECONDITION_FAILED El tenant no está pendiente de verificación"]):::error
   n9 -->|"sí"| n10
-  n11[("ACTUALIZA directory.tenants · ACTUALIZA directory.tenants · ACTUALIZA directory.tenants")]:::efecto
+  n11["Llama a PharmacyOperatingRequirementsService.evaluateForTenant"]:::llamada
   n9 -->|"no"| n11
-  n12{"dto.countryConceptId"}:::decision
+  n12["Llama a PharmacyOperatingRequirementsService.kindOf"]:::llamada
   n11 --> n12
-  n13[("ACTUALIZA directory.tenants")]:::efecto
-  n12 -->|"sí"| n13
-  n14{"dto.jurisdictionConceptId"}:::decision
+  n13[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n12 --> n13
+  n14["Llama a PharmacyOperatingRequirementsService.evaluate"]:::llamada
   n13 --> n14
-  n12 -->|"no"| n14
-  n15[("ACTUALIZA directory.tenants")]:::efecto
-  n14 -->|"sí"| n15
-  n16["Llama a PublicProfileProjectionService.projectOrganization"]:::llamada
+  n15["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n14 --> n15
+  n16{"!this.cache"}:::decision
   n15 --> n16
-  n14 -->|"no"| n16
-  n17["Llama a PublicProfilesRepository.findByTarget"]:::llamada
-  n16 --> n17
-  n18[("LEE community.public_profiles")]:::efecto
+  n17["Transacción: catch(…)"]:::transaccion
+  n16 -->|"sí"| n17
+  n18(["↩ (relanza el error capturado)"]):::error
   n17 --> n18
-  n19{"existing"}:::decision
-  n18 --> n19
-  n20{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
-  n19 -->|"sí"| n20
-  n21[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
-  n20 -->|"sí"| n21
-  n22["Llama a PublicProfilesRepository.create"]:::llamada
+  n19[("LEE pharmacy.pharmacies")]:::efecto
+  n16 -->|"no"| n19
+  n20{"!pharmacy"}:::decision
+  n19 --> n20
+  n21["Llama a PharmacyOperatingRequirementsService.headquartersHasPoint"]:::llamada
+  n20 -->|"no"| n21
+  n22[("LEE practice.practice_sites · LEE common.addresses")]:::efecto
   n21 --> n22
-  n20 -->|"no"| n22
-  n19 -->|"no"| n22
-  n23[("CREA community.public_profiles")]:::efecto
+  n23{"operating && !operating.readiness.ready"}:::decision
+  n20 -->|"sí"| n23
   n22 --> n23
-  n24{"tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY"}:::decision
-  n23 --> n24
-  n25[("LEE pharmacy.pharmacies")]:::efecto
-  n24 -->|"sí"| n25
-  n26["Repite: por cada const pharmacy de pharmacies"]:::bucle
+  n24(["422 PRECONDITION_FAILED La farmacia todavía no puede operar: faltan papeles o el punto de su casa central / E…"]):::error
+  n23 -->|"sí"| n24
+  n25[("ACTUALIZA directory.tenants · ACTUALIZA directory.tenants · ACTUALIZA directory.tenants")]:::efecto
+  n23 -->|"no"| n25
+  n26{"dto.countryConceptId"}:::decision
   n25 --> n26
-  n27[("ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies")]:::efecto
-  n26 -->|"cada elemento"| n27
-  n28(("200 Responde con éxito")):::ok
+  n27[("ACTUALIZA directory.tenants")]:::efecto
+  n26 -->|"sí"| n27
+  n28{"dto.jurisdictionConceptId"}:::decision
   n27 --> n28
-  n26 -->|"al terminar"| n28
-  n24 -->|"no"| n28
+  n26 -->|"no"| n28
+  n29[("ACTUALIZA directory.tenants")]:::efecto
+  n28 -->|"sí"| n29
+  n30["Llama a PublicProfileProjectionService.projectOrganization"]:::llamada
+  n29 --> n30
+  n28 -->|"no"| n30
+  n31["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n30 --> n31
+  n32[("LEE community.public_profiles")]:::efecto
+  n31 --> n32
+  n33{"existing"}:::decision
+  n32 --> n33
+  n34{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
+  n33 -->|"sí"| n34
+  n35[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
+  n34 -->|"sí"| n35
+  n36["Llama a PublicProfilesRepository.create"]:::llamada
+  n35 --> n36
+  n34 -->|"no"| n36
+  n33 -->|"no"| n36
+  n37[("CREA community.public_profiles")]:::efecto
+  n36 --> n37
+  n38{"tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY"}:::decision
+  n37 --> n38
+  n39[("LEE pharmacy.pharmacies")]:::efecto
+  n38 -->|"sí"| n39
+  n40["Repite: por cada const pharmacy de pharmacies"]:::bucle
+  n39 --> n40
+  n41[("ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies")]:::efecto
+  n40 -->|"cada elemento"| n41
+  n42["Llama a PharmacyOperatingRequirementsService.markDocumentsVerified"]:::llamada
+  n41 --> n42
+  n40 -->|"al terminar"| n42
+  n43["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n42 --> n43
+  n44{"!this.cache"}:::decision
+  n43 --> n44
+  n45["Transacción: catch(…)"]:::transaccion
+  n44 -->|"sí"| n45
+  n46(["↩ (relanza el error capturado)"]):::error
+  n45 --> n46
+  n47["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n44 -->|"no"| n47
+  n48{"!conceptId"}:::decision
+  n47 --> n48
+  n49(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n48 -->|"sí"| n49
+  n50["Repite: por cada const doc de await em.find(TenantAffiliationDocuments, { id: {…"]:::bucle
+  n48 -->|"no"| n50
+  n51[("ACTUALIZA directory.tenant_affiliation_documents · ACTUALIZA directory.tenant_affiliation_documents · ACTUALI…")]:::efecto
+  n50 -->|"cada elemento"| n51
+  n52{"operating?.kind === 'LABORATORY'"}:::decision
+  n51 --> n52
+  n50 -->|"al terminar"| n52
+  n38 -->|"no"| n52
+  n53["Llama a PharmacyOperatingRequirementsService.markDocumentsVerified"]:::llamada
+  n52 -->|"sí"| n53
+  n54["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n53 --> n54
+  n55{"!this.cache"}:::decision
+  n54 --> n55
+  n56["Transacción: catch(…)"]:::transaccion
+  n55 -->|"sí"| n56
+  n57(["↩ (relanza el error capturado)"]):::error
+  n56 --> n57
+  n58["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n55 -->|"no"| n58
+  n59{"!conceptId"}:::decision
+  n58 --> n59
+  n60(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n59 -->|"sí"| n60
+  n61["Repite: por cada const doc de await em.find(TenantAffiliationDocuments, { id: {…"]:::bucle
+  n59 -->|"no"| n61
+  n62[("ACTUALIZA directory.tenant_affiliation_documents · ACTUALIZA directory.tenant_affiliation_documents · ACTUALI…")]:::efecto
+  n61 -->|"cada elemento"| n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
+  n61 -->|"al terminar"| n63
+  n52 -->|"no"| n63
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -782,7 +896,175 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /tenants/{tenantId}/branches
+#### 7. POST /tenants/{tenantId}/affiliation-documents
+
+Completar los documentos legales de la organización
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requiere pertenecer a la organización, o ser administrador de la plataf… |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ese documento ya está presentado y pendiente de verificación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare al menos un documento para vincular; PreconditionFailedException: Un mismo archivo no puede respaldar dos documentos distintos; PreconditionFailedException: Los papeles se completan mientras la organización está pendiente de verificación; PreconditionFailedException: El documento {label} ya está vinculado a una organización; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: El catálogo de {subject} no incluye el código {code.toUpperCase()}; PreconditionFailedException: La organización no tiene representante legal al que atar el poder |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a TenantDocumentCompletionService.complete"]:::llamada
+  n2 --> n3
+  n4{"declared.length === 0"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED Declare al menos un documento para vincular"]):::error
+  n4 -->|"sí"| n5
+  n6{"new Set(fileIds).size !== fileIds.length"}:::decision
+  n4 -->|"no"| n6
+  n7(["422 PRECONDITION_FAILED Un mismo archivo no puede respaldar dos documentos distintos"]):::error
+  n6 -->|"sí"| n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n6 -->|"no"| n8
+  n9["Llama a TenantDocumentCompletionService.assertAuthorized"]:::llamada
+  n8 --> n9
+  n10(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requier…"]):::error
+  n9 --> n10
+  n11["Llama a TenantsRepository.findById"]:::llamada
+  n12[("LEE directory.tenants")]:::efecto
+  n11 --> n12
+  n13{"!tenant"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Organización no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15{"tenant.statusConceptId !== DIR.TENANT_PENDING"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Los papeles se completan mientras la organización está pendiente de verificación"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n15 -->|"no"| n17
+  n18{"!this.cache"}:::decision
+  n17 --> n18
+  n19["Transacción: catch(…)"]:::transaccion
+  n18 -->|"sí"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 --> n20
+  n21["Llama a PharmacyOperatingRequirementsService.liveDocumentsByType"]:::llamada
+  n18 -->|"no"| n21
+  n22["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n21 --> n22
+  n23{"!this.cache"}:::decision
+  n22 --> n23
+  n24["Transacción: catch(…)"]:::transaccion
+  n23 -->|"sí"| n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 --> n25
+  n26["Repite: por cada const { role } de declared"]:::bucle
+  n23 -->|"no"| n26
+  n27{"typeConceptId !== undefined && live.has(typeConceptId)"}:::decision
+  n26 -->|"cada elemento"| n27
+  n28(["409 CONFLICT Ese documento ya está presentado y pendiente de verificación"]):::error
+  n27 -->|"sí"| n28
+  n29["Repite: por cada const { role, fileId } de declared"]:::bucle
+  n27 -->|"no"| n29
+  n26 -->|"al terminar"| n29
+  n30["Llama a TenantAffiliationDocumentsService.attachDocument"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n30 --> n31
+  n32{"!this.cache"}:::decision
+  n31 --> n32
+  n33["Transacción: catch(…)"]:::transaccion
+  n32 -->|"sí"| n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 --> n34
+  n35["Llama a TenantAffiliationDocumentsService.attachOne"]:::llamada
+  n32 -->|"no"| n35
+  n36["Llama a DirectoryTenantLegalRepository.findAffiliationDocumentByFile"]:::llamada
+  n35 --> n36
+  n37[("LEE directory.tenant_affiliation_documents")]:::efecto
+  n36 --> n37
+  n38{"alreadyLinked"}:::decision
+  n37 --> n38
+  n39(["422 PRECONDITION_FAILED El documento {label} ya está vinculado a una organización"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
+  n38 -->|"no"| n40
+  n41{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
+  n40 --> n41
+  n42(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n41 -->|"sí"| n42
+  n43{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n41 -->|"no"| n43
+  n44(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
+  n43 -->|"sí"| n44
+  n45{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
+  n43 -->|"no"| n45
+  n46(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
+  n45 -->|"sí"| n46
+  n47[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
+  n45 -->|"no"| n47
+  n48["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n47 --> n48
+  n49{"!conceptId"}:::decision
+  n48 --> n49
+  n50(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n49 -->|"sí"| n50
+  n51["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n49 -->|"no"| n51
+  n52{"!conceptId"}:::decision
+  n51 --> n52
+  n53(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a AffiliationDocumentConceptsService.conceptIdOf"]:::llamada
+  n52 -->|"no"| n54
+  n55{"!conceptId"}:::decision
+  n54 --> n55
+  n56(["422 PRECONDITION_FAILED El catálogo de {subject} no incluye el código {code.toUpperCase()}"]):::error
+  n55 -->|"sí"| n56
+  n57["Llama a DirectoryTenantLegalRepository.createAffiliationDocument"]:::llamada
+  n55 -->|"no"| n57
+  n58[("CREA directory.tenant_affiliation_documents")]:::efecto
+  n57 --> n58
+  n59{"dto.powerOfAttorneyFileId !== undefined"}:::decision
+  n58 --> n59
+  n29 -->|"al terminar"| n59
+  n60["Llama a TenantDocumentCompletionService.attachPowerOfAttorney"]:::llamada
+  n59 -->|"sí"| n60
+  n61["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n60 --> n61
+  n62{"!this.cache"}:::decision
+  n61 --> n62
+  n63["Transacción: catch(…)"]:::transaccion
+  n62 -->|"sí"| n63
+  n64(["↩ (relanza el error capturado)"]):::error
+  n63 --> n64
+  n65["Llama a DirectoryTenantLegalRepository.listLegalRepsByTenant"]:::llamada
+  n62 -->|"no"| n65
+  n66[("LEE directory.tenant_legal_representatives")]:::efecto
+  n65 --> n66
+  n67{"!representative"}:::decision
+  n66 --> n67
+  n68(["422 PRECONDITION_FAILED La organización no tiene representante legal al que atar el poder"]):::error
+  n67 -->|"sí"| n68
+  n69["Llama a TenantAffiliationDocumentsService.attachPowerOfAttorney"]:::llamada
+  n67 -->|"no"| n69
+  n70{"input.alreadyDeclaredFileIds.includes(input.fileId)"}:::decision
+  n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. GET /tenants/{tenantId}/branches
 
 Sucursales de la organización
 
@@ -829,7 +1111,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /tenants/{tenantId}/branches
+#### 9. POST /tenants/{tenantId}/branches
 
 Crear una branch / sede física con geolocalización
 
@@ -890,7 +1172,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PATCH /tenants/{tenantId}/branches/{branchId}
+#### 10. PATCH /tenants/{tenantId}/branches/{branchId}
 
 Editar una sucursal
 
@@ -960,7 +1242,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /tenants/{tenantId}/child-tenants
+#### 11. GET /tenants/{tenantId}/child-tenants
 
 Sub-organizaciones de una organización
 
@@ -1009,7 +1291,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /tenants/{tenantId}/child-tenants
+#### 12. POST /tenants/{tenantId}/child-tenants
 
 Crear una organización hija / sub-tenant
 
@@ -1021,7 +1303,7 @@ Crear una organización hija / sub-tenant
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant padre no encontrado |
 | 409 | `CONFLICT` | ConflictException: El código de tenant ya existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant padre no está activo; PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant padre no está activo; PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TENANT_TYPES.join(', ')}; PreconditionFailedException: Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales; PreconditionFailedException: La latitud y la longitud de una sede van juntas o no van; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1085,92 +1367,92 @@ flowchart TD
   n26 -->|"no"| n28
   n29(["422 PRECONDITION_FAILED El bloque `broker` sólo corresponde a un tenant de tipo BROKER"]):::error
   n28 -->|"sí"| n29
-  n30{"tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
+  n30{"tenantType !== 'PHARMACY' && input.pharmacy"}:::decision
   n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
+  n31(["422 PRECONDITION_FAILED El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY"]):::error
   n30 -->|"sí"| n31
-  n32{"input.diagnosticUnit"}:::decision
+  n32{"tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n30 -->|"no"| n32
-  n33{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n33(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
   n32 -->|"sí"| n33
-  n34(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
-  n33 -->|"sí"| n34
-  n35{"invalidModalities.length › 0"}:::decision
-  n33 -->|"no"| n35
-  n36(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n34{"input.medicalFacility"}:::decision
+  n32 -->|"no"| n34
+  n35{"!MEDICAL_FACILITY_TENANT_TYPES.includes(tenantType)"}:::decision
+  n34 -->|"sí"| n35
+  n36(["422 PRECONDITION_FAILED El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TE…"]):::error
   n35 -->|"sí"| n36
-  n37["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n37["Llama a TenantTypeProfileService.assertMedicalFacilityCoherence"]:::llamada
   n35 -->|"no"| n37
-  n32 -->|"no"| n37
-  n38["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n38{"branches.length › MEDICAL_FACILITY_MAX_BRANCHES"}:::decision
   n37 --> n38
-  n39[("LEE terminology.catalog_concepts")]:::efecto
-  n38 --> n39
-  n40{"unknown.length › 0"}:::decision
-  n39 --> n40
-  n41(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n39(["422 PRECONDITION_FAILED Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales"]):::error
+  n38 -->|"sí"| n39
+  n40{"halfPoint"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED La latitud y la longitud de una sede van juntas o no van"]):::error
   n40 -->|"sí"| n41
-  n42["Llama a TenantsRepository.create"]:::llamada
+  n42{"input.diagnosticUnit"}:::decision
   n40 -->|"no"| n42
-  n43[("CREA directory.tenants")]:::efecto
-  n42 --> n43
-  n44["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
-  n43 --> n44
-  n45{"input.tenantType === 'PAYER' && input.payer"}:::decision
-  n44 --> n45
-  n46["Llama a CatalogRepository.createCarrier"]:::llamada
+  n34 -->|"no"| n42
+  n43{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n42 -->|"sí"| n43
+  n44(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n43 -->|"sí"| n44
+  n45{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n43 -->|"no"| n45
+  n46(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
   n45 -->|"sí"| n46
-  n47[("CREA insurance.insurance_carriers")]:::efecto
-  n46 --> n47
-  n48["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
-  n47 --> n48
-  n49["Llama a AddressesRepository.create"]:::llamada
-  n48 --> n49
-  n50[("CREA common.addresses")]:::efecto
+  n47{"invalidModalities.length › 0"}:::decision
+  n45 -->|"no"| n47
+  n48(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n47 -->|"sí"| n48
+  n49["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n47 -->|"no"| n49
+  n42 -->|"no"| n49
+  n50["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n49 --> n50
-  n51{"input.tenantType === 'BROKER' && input.broker"}:::decision
+  n51[("LEE terminology.catalog_concepts")]:::efecto
   n50 --> n51
-  n45 -->|"no"| n51
-  n52["Llama a CatalogRepository.createBroker"]:::llamada
-  n51 -->|"sí"| n52
-  n53[("CREA insurance.insurance_brokers")]:::efecto
-  n52 --> n53
-  n54{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
-  n53 --> n54
-  n51 -->|"no"| n54
-  n55["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
-  n54 -->|"sí"| n55
-  n56["Llama a PracticesRepository.create"]:::llamada
+  n52{"unknown.length › 0"}:::decision
+  n51 --> n52
+  n53(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a TenantsRepository.create"]:::llamada
+  n52 -->|"no"| n54
+  n55[("CREA directory.tenants")]:::efecto
+  n54 --> n55
+  n56["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
   n55 --> n56
-  n57[("CREA practice.practices")]:::efecto
+  n57{"input.tenantType === 'PAYER' && input.payer"}:::decision
   n56 --> n57
-  n58{"declaredAddress"}:::decision
-  n57 --> n58
-  n59["Llama a AddressesRepository.create"]:::llamada
-  n58 -->|"sí"| n59
-  n60[("CREA common.addresses")]:::efecto
+  n58["Llama a CatalogRepository.createCarrier"]:::llamada
+  n57 -->|"sí"| n58
+  n59[("CREA insurance.insurance_carriers")]:::efecto
+  n58 --> n59
+  n60["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
   n59 --> n60
-  n61["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
+  n61["Llama a AddressesRepository.create"]:::llamada
   n60 --> n61
-  n58 -->|"no"| n61
-  n62[("LEE practice.practice_sites")]:::efecto
+  n62[("CREA common.addresses")]:::efecto
   n61 --> n62
-  n63["Llama a PracticeSitesRepository.create"]:::llamada
+  n63{"input.tenantType === 'BROKER' && input.broker"}:::decision
   n62 --> n63
-  n64[("CREA practice.practice_sites")]:::efecto
-  n63 --> n64
-  n65["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n57 -->|"no"| n63
+  n64["Llama a CatalogRepository.createBroker"]:::llamada
+  n63 -->|"sí"| n64
+  n65[("CREA insurance.insurance_brokers")]:::efecto
   n64 --> n65
-  n66[("CREA diagnostic_units.diagnostic_units")]:::efecto
+  n66{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n65 --> n66
-  n67["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n66 --> n67
-  n68[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n63 -->|"no"| n66
+  n67["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
+  n66 -->|"sí"| n67
+  n68["Llama a PracticesRepository.create"]:::llamada
   n67 --> n68
-  n69["Repite: por cada const conceptId de profile.modalityConceptIds ?? []"]:::bucle
+  n69[("CREA practice.practices")]:::efecto
   n68 --> n69
-  n70["Llama a DiagnosticStudyOfferingsRepository.create"]:::llamada
-  n69 -->|"cada elemento"| n70
+  n70["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n69 --> n70
   n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
@@ -1181,7 +1463,78 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. GET /tenants/{tenantId}/logo
+#### 13. GET /tenants/{tenantId}/laboratory-readiness
+
+Requisitos pendientes para que el laboratorio opere
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requiere pertenecer a la organización, o ser administrador de la plataf… |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La organización no es una farmacia / La organización no es un laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TenantDocumentCompletionService.laboratoryReadiness"]:::llamada
+  n2 --> n3
+  n4["Llama a TenantDocumentCompletionService.readiness"]:::llamada
+  n3 --> n4
+  n5["Llama a TenantDocumentCompletionService.assertAuthorized"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requier…"]):::error
+  n5 --> n6
+  n7["Llama a TenantsRepository.findById"]:::llamada
+  n8[("LEE directory.tenants")]:::efecto
+  n7 --> n8
+  n9{"!tenant"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Organización no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PharmacyOperatingRequirementsService.kindOf"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n11 --> n12
+  n13{"(await this.requirements.kindOf(em, tenant)) !== kind"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La organización no es una farmacia / La organización no es un laboratorio"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PharmacyOperatingRequirementsService.evaluate"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n15 --> n16
+  n17{"!this.cache"}:::decision
+  n16 --> n17
+  n18["Transacción: catch(…)"]:::transaccion
+  n17 -->|"sí"| n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 --> n19
+  n20[("LEE pharmacy.pharmacies")]:::efecto
+  n17 -->|"no"| n20
+  n21{"!pharmacy"}:::decision
+  n20 --> n21
+  n22["Llama a PharmacyOperatingRequirementsService.headquartersHasPoint"]:::llamada
+  n21 -->|"no"| n22
+  n23[("LEE practice.practice_sites · LEE common.addresses")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n21 -->|"sí"| n24
+  n23 --> n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. GET /tenants/{tenantId}/logo
 
 Logo de la propia organización
 
@@ -1245,7 +1598,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. PUT /tenants/{tenantId}/logo
+#### 15. PUT /tenants/{tenantId}/logo
 
 Cambiar o quitar el logo como administrador de la organización
 
@@ -1256,7 +1609,7 @@ Cambiar o quitar el logo como administrador de la organización
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma; ForbiddenException: {labels.subject} no le pertenece |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada; ResourceNotFoundException: {labels.notFound} |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: El logo debe ser una imagen de sensibilidad NORMAL; PreconditionFailedException: El logo supera los 2 MB |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1331,34 +1684,24 @@ flowchart TD
   n33 -->|"no"| n35
   n36(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
   n35 -->|"sí"| n36
-  n37["Llama a OrganizationLogoService.assertNormal"]:::llamada
+  n37["Llama a PublicProfileProjectionService.setOrganizationLogo"]:::llamada
   n35 -->|"no"| n37
-  n38{"sensitivity !== CONCEPTS.SENSITIVITY_NORMAL"}:::decision
+  n12 -->|"no"| n37
+  n38["Llama a PublicProfilesRepository.findByTarget"]:::llamada
   n37 --> n38
-  n39(["422 PRECONDITION_FAILED El logo debe ser una imagen de sensibilidad NORMAL"]):::error
-  n38 -->|"sí"| n39
-  n40{"Number(version.sizeBytes) › 2 * 1024 * 1024"}:::decision
-  n38 -->|"no"| n40
-  n41(["422 PRECONDITION_FAILED El logo supera los 2 MB"]):::error
+  n39[("LEE community.public_profiles")]:::efecto
+  n38 --> n39
+  n40{"!profile"}:::decision
+  n39 --> n40
+  n41["Llama a PublicProfilesRepository.create"]:::llamada
   n40 -->|"sí"| n41
-  n42["Llama a PublicProfileProjectionService.setOrganizationLogo"]:::llamada
-  n40 -->|"no"| n42
-  n12 -->|"no"| n42
-  n43["Llama a PublicProfilesRepository.findByTarget"]:::llamada
-  n42 --> n43
-  n44[("LEE community.public_profiles")]:::efecto
+  n42[("CREA community.public_profiles")]:::efecto
+  n41 --> n42
+  n43[("ACTUALIZA community.public_profiles")]:::efecto
+  n40 -->|"no"| n43
+  n44(("200 Responde con éxito")):::ok
+  n42 --> n44
   n43 --> n44
-  n45{"!profile"}:::decision
-  n44 --> n45
-  n46["Llama a PublicProfilesRepository.create"]:::llamada
-  n45 -->|"sí"| n46
-  n47[("CREA community.public_profiles")]:::efecto
-  n46 --> n47
-  n48[("ACTUALIZA community.public_profiles")]:::efecto
-  n45 -->|"no"| n48
-  n49(("200 Responde con éxito")):::ok
-  n47 --> n49
-  n48 --> n49
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1367,7 +1710,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /tenants/{tenantId}/logo/content
+#### 16. GET /tenants/{tenantId}/logo/content
 
 Imagen del logo para miembros de la organización
 
@@ -1508,7 +1851,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /tenants/{tenantId}/memberships
+#### 17. GET /tenants/{tenantId}/memberships
 
 Plantilla de la organización
 
@@ -1555,7 +1898,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /tenants/{tenantId}/memberships
+#### 18. POST /tenants/{tenantId}/memberships
 
 Incorporar un usuario al tenant (membership)
 
@@ -1614,7 +1957,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+#### 19. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 Sucursales asignadas a una membresía
 
@@ -1669,7 +2012,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+#### 20. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 Asignar la membresía a una branch
 
@@ -1751,7 +2094,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
+#### 21. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
 
 Revocar / offboarding de un miembro
 
@@ -1834,7 +2177,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
+#### 22. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
 
 Cambiar rol / scope de la membresía
 
@@ -1923,7 +2266,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
+#### 23. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
 
 Transferir la membresía entre branches
 
@@ -2017,7 +2360,78 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /tenants/me
+#### 24. GET /tenants/{tenantId}/pharmacy-readiness
+
+Requisitos pendientes para que la farmacia opere
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requiere pertenecer a la organización, o ser administrador de la plataf… |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La organización no es una farmacia / La organización no es un laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TenantDocumentCompletionService.pharmacyReadiness"]:::llamada
+  n2 --> n3
+  n4["Llama a TenantDocumentCompletionService.readiness"]:::llamada
+  n3 --> n4
+  n5["Llama a TenantDocumentCompletionService.assertAuthorized"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requier…"]):::error
+  n5 --> n6
+  n7["Llama a TenantsRepository.findById"]:::llamada
+  n8[("LEE directory.tenants")]:::efecto
+  n7 --> n8
+  n9{"!tenant"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Organización no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PharmacyOperatingRequirementsService.kindOf"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n11 --> n12
+  n13{"(await this.requirements.kindOf(em, tenant)) !== kind"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La organización no es una farmacia / La organización no es un laboratorio"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PharmacyOperatingRequirementsService.evaluate"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n15 --> n16
+  n17{"!this.cache"}:::decision
+  n16 --> n17
+  n18["Transacción: catch(…)"]:::transaccion
+  n17 -->|"sí"| n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 --> n19
+  n20[("LEE pharmacy.pharmacies")]:::efecto
+  n17 -->|"no"| n20
+  n21{"!pharmacy"}:::decision
+  n20 --> n21
+  n22["Llama a PharmacyOperatingRequirementsService.headquartersHasPoint"]:::llamada
+  n21 -->|"no"| n22
+  n23[("LEE practice.practice_sites · LEE common.addresses")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n21 -->|"sí"| n24
+  n23 --> n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 25. GET /tenants/me
 
 Las organizaciones del actor, con su rol en cada una
 
@@ -2085,9 +2499,23 @@ flowchart TD
   n25 --> n26
   n27[("LEE common.contact_points")]:::efecto
   n26 --> n27
-  n28(("200 Responde con éxito")):::ok
+  n28["Llama a DirectoryReadService.loadLegalDocuments"]:::llamada
   n27 --> n28
-  n6 -->|"al terminar"| n28
+  n29["Llama a DirectoryTenantLegalRepository.listAffiliationDocsByTenant"]:::llamada
+  n28 --> n29
+  n30[("LEE directory.tenant_affiliation_documents")]:::efecto
+  n29 --> n30
+  n31["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n30 --> n31
+  n32{"!this.cache"}:::decision
+  n31 --> n32
+  n33["Transacción: catch(…)"]:::transaccion
+  n32 -->|"sí"| n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n32 -->|"no"| n35
+  n6 -->|"al terminar"| n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

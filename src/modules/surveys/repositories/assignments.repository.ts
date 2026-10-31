@@ -6,6 +6,10 @@ import { createdBy } from '../../../common';
 /** Alta de una asignación de encuesta a la cosa evaluada. */
 export interface CreateAssignmentData {
   /**
+   * Identificador fijo (asignación de la encuesta base del sistema).
+   */
+  id?: string;
+  /**
    * Identificador asociado a survey version.
    */
   surveyVersionId: string;
@@ -91,6 +95,26 @@ export class AssignmentsRepository {
       active: true,
       targetId: { $in: targetIds },
     });
+  }
+
+  /**
+   * Lista las asignaciones ACTIVAS de las versiones indicadas, de la más antigua
+   * a la más reciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param surveyVersionIds - Identificadores de versión.
+   * @returns Resultado conforme al contrato `Promise<SurveyAssignments[]>`.
+   */
+  listActiveByVersions(
+    em: EntityManager,
+    surveyVersionIds: string[],
+  ): Promise<SurveyAssignments[]> {
+    if (surveyVersionIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      SurveyAssignments,
+      { surveyVersionId: { $in: surveyVersionIds }, active: true },
+      { orderBy: { createdAt: 'asc' } },
+    );
   }
 
   /**

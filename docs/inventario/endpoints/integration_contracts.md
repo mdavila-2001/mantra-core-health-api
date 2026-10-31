@@ -14,16 +14,16 @@
 |---|---|---|---|---|---|---|
 | 1 | POST | `/integration/contracts` | Definir un contrato de integración | MEDIO | 2 | SECURITY_ADMIN |
 | 2 | POST | `/integration/contracts/{id}/auth-profiles` | Configurar perfil de autenticación sender-constrained | MEDIO | 2 | SECURITY_ADMIN |
-| 3 | POST | `/integration/contracts/{id}/auth-profiles/{apId}/rotate` | Rotar las credenciales de un perfil de autenticación | MEDIO | 2 | SECURITY_ADMIN |
+| 3 | POST | `/integration/contracts/{id}/auth-profiles/{apId}/rotate` | Rotar las credenciales de un perfil de autenticación | MEDIO | 3 | SECURITY_ADMIN |
 | 4 | POST | `/integration/contracts/{id}/exchanges` | Ejecutar un intercambio idempotente (inbound) | MEDIO | 6 | SECURITY_ADMIN |
 | 5 | POST | `/integration/contracts/{id}/exchanges/{recordId}/attempts` | Registrar un intento de intercambio outbound | MEDIO | 7 | SECURITY_ADMIN |
-| 6 | POST | `/integration/contracts/{id}/retire` | Retirar el contrato (soft-delete lógico) | MEDIO | 4 | SECURITY_ADMIN |
+| 6 | POST | `/integration/contracts/{id}/retire` | Retirar el contrato (soft-delete lógico) | MEDIO | 3 | SECURITY_ADMIN |
 | 7 | POST | `/integration/contracts/{id}/sync-cursors/{scope}/advance` | Avanzar el cursor de sincronización | MEDIO | 4 | SECURITY_ADMIN |
 | 8 | POST | `/integration/contracts/{id}/versions` | Publicar una nueva versión de contrato | MEDIO | 3 | SECURITY_ADMIN |
-| 9 | POST | `/integration/contracts/{id}/versions/{versionId}/activate` | Activar una versión y transicionar el estado del contrato | MEDIO | 4 | SECURITY_ADMIN |
+| 9 | POST | `/integration/contracts/{id}/versions/{versionId}/activate` | Activar una versión y transicionar el estado del contrato | MEDIO | 3 | SECURITY_ADMIN |
 | 10 | POST | `/integration/contracts/{id}/webhook-subscriptions` | Suscribir un webhook al contrato | MEDIO | 3 | SECURITY_ADMIN |
 | 11 | POST | `/integration/exchanges/{recordId}/retry` | Reintentar un intercambio fallido | MEDIO | 7 | SECURITY_ADMIN |
-| 12 | POST | `/integration/webhooks/{subscriptionId}/deliveries` | Entregar y verificar un webhook firmado | MEDIO | 4 | SECURITY_ADMIN |
+| 12 | POST | `/integration/webhooks/{subscriptionId}/deliveries` | Entregar y verificar un webhook firmado | MEDIO | 5 | SECURITY_ADMIN |
 
 ---
 
@@ -34,7 +34,7 @@
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.createContract` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:66`
+- **Implementación:** `IntegrationContractsController.createContract` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -44,25 +44,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts` la atiende `IntegrationContractsController.createContract` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:66). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsCreateContractDto` (7 campos, 2 obligatorios). Delega en `IntegrationContractsService.createContract`. Crea filas en integration_contracts.integration_contracts. Lee integration_contracts.integration_contracts.
+`POST /integration/contracts` la atiende `IntegrationContractsController.createContract` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsCreateContractDto` (7 campos, 2 obligatorios). Delega en `IntegrationContractsService.createContract`. Crea filas en integration_contracts.integration_contracts. Lee integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:71` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_contracts` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.createContract → IntegrationContractsService.createContract → ContractsRepository.create | `src/modules/integration_contracts/repositories/contracts.repository.ts:77` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.createContract → IntegrationContractsService.createContract → ContractsRepository.findByCodeAndProvider | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
+| `integration_contracts.integration_contracts` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.createContract → IntegrationContractsService.createContract → IntegrationContractsService.persistContract → ContractsRepository.create | `src/modules/integration_contracts/repositories/contracts.repository.ts:104` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.createContract → IntegrationContractsService.createContract → IntegrationContractsService.persistContract → ContractsRepository.findByCodeAndProvider | `src/modules/integration_contracts/repositories/contracts.repository.ts:95` |
 
 ### Cuerpo — DTO `IntegrationContractsCreateContractDto` · `application/json`
 
@@ -143,7 +143,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.configureAuthProfile` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104`
+- **Implementación:** `IntegrationContractsController.configureAuthProfile` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:124`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -153,26 +153,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/auth-profiles` la atiende `IntegrationContractsController.configureAuthProfile` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAuthProfileDto` (9 campos, 0 obligatorios). Delega en `IntegrationAuthProfilesService.configure`. Crea filas en integration_contracts.integration_auth_profiles. Lee integration_contracts.integration_contracts.
+`POST /integration/contracts/{id}/auth-profiles` la atiende `IntegrationContractsController.configureAuthProfile` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:124). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAuthProfileDto` (9 campos, 0 obligatorios). Delega en `IntegrationAuthProfilesService.configure`. Crea filas en integration_contracts.integration_auth_profiles. Lee integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:124` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:124` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `integration_contracts.integration_auth_profiles` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.configureAuthProfile → IntegrationAuthProfilesService.configure → AuthProfilesRepository.create | `src/modules/integration_contracts/repositories/auth-profiles.repository.ts:74` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.configureAuthProfile → IntegrationAuthProfilesService.configure → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.configureAuthProfile → IntegrationAuthProfilesService.configure → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
 
 ### Parámetros
 
@@ -234,7 +234,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
@@ -258,7 +257,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.rotateCredential` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:118`
+- **Implementación:** `IntegrationContractsController.rotateCredential` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:143`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -268,26 +267,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/auth-profiles/{apId}/rotate` la atiende `IntegrationContractsController.rotateCredential` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:118). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsRotateCredentialDto` (3 campos, 1 obligatorio). Delega en `IntegrationAuthProfilesService.rotate`. Actualiza integration_contracts.integration_auth_profiles. Lee integration_contracts.integration_auth_profiles.
+`POST /integration/contracts/{id}/auth-profiles/{apId}/rotate` la atiende `IntegrationContractsController.rotateCredential` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:143). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsRotateCredentialDto` (3 campos, 1 obligatorio). Delega en `IntegrationAuthProfilesService.rotate`. Actualiza integration_contracts.integration_auth_profiles. Lee integration_contracts.integration_auth_profiles, integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, apId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, apId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:143` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_auth_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.rotateCredential → IntegrationAuthProfilesService.rotate | `src/modules/integration_contracts/services/integration-auth-profiles.service.ts:125` |
+| `integration_contracts.integration_auth_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.rotateCredential → IntegrationAuthProfilesService.rotate | `src/modules/integration_contracts/services/integration-auth-profiles.service.ts:132` |
 | `integration_contracts.integration_auth_profiles` | LEE | LEE | DIRECTA | IntegrationContractsController.rotateCredential → IntegrationAuthProfilesService.rotate → AuthProfilesRepository.findById | `src/modules/integration_contracts/repositories/auth-profiles.repository.ts:66` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.rotateCredential → IntegrationAuthProfilesService.rotate → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
 
 ### Parámetros
 
@@ -338,7 +338,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil de autenticación no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
@@ -362,7 +361,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.executeExchange` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:145`
+- **Implementación:** `IntegrationContractsController.executeExchange` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:180`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -372,28 +371,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/exchanges` la atiende `IntegrationContractsController.executeExchange` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:145). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExecuteExchangeDto` (8 campos, 0 obligatorios). Delega en `IntegrationExchangesService.executeExchange`. Crea filas en integration_contracts.integration_exchange_attempts, integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts, integration_contracts.integration_idempotency_records.
+`POST /integration/contracts/{id}/exchanges` la atiende `IntegrationContractsController.executeExchange` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:180). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ExecuteExchangeDto` (8 campos, 0 obligatorios). Delega en `IntegrationExchangesService.executeExchange`. Crea filas en integration_contracts.integration_exchange_attempts, integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts, integration_contracts.integration_idempotency_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:145` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → ContractVersionsRepository.findActiveByContract | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:83` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
 | `integration_contracts.integration_exchange_attempts` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → ExchangeAttemptsRepository.create | `src/modules/integration_contracts/repositories/exchange-attempts.repository.ts:88` |
-| `integration_contracts.integration_exchange_records` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → ExchangeRecordsRepository.create | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:73` |
+| `integration_contracts.integration_exchange_records` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → ExchangeRecordsRepository.create | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:90` |
 | `integration_contracts.integration_idempotency_records` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → IdempotencyRecordsRepository.create | `src/modules/integration_contracts/repositories/idempotency-records.repository.ts:61` |
 | `integration_contracts.integration_idempotency_records` | LEE | LEE | DIRECTA | IntegrationContractsController.executeExchange → IntegrationExchangesService.executeExchange → IdempotencyRecordsRepository.findByKey | `src/modules/integration_contracts/repositories/idempotency-records.repository.ts:50` |
 
@@ -457,7 +456,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
 | 409 | `CONFLICT` | ConflictException: La clave de idempotencia se reusó con un payload distinto |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta la clave de idempotencia (idempotency-key); PreconditionFailedException: No hay versión ACTIVE del contrato |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -483,7 +481,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.recordAttempt` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163`
+- **Implementación:** `IntegrationContractsController.recordAttempt` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:203`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -493,30 +491,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/exchanges/{recordId}/attempts` la atiende `IntegrationContractsController.recordAttempt` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsRecordAttemptDto` (8 campos, 1 obligatorio). Delega en `IntegrationExchangesService.recordAttempt`. Crea filas en integration_contracts.integration_exchange_attempts. Actualiza integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_exchange_attempts, integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records.
+`POST /integration/contracts/{id}/exchanges/{recordId}/attempts` la atiende `IntegrationContractsController.recordAttempt` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:203). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsRecordAttemptDto` (8 campos, 1 obligatorio). Delega en `IntegrationExchangesService.recordAttempt`. Crea filas en integration_contracts.integration_exchange_attempts. Actualiza integration_contracts.integration_idempotency_records. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts, integration_contracts.integration_exchange_attempts, integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, recordId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:203` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, recordId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:203` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.completeIdempotency → ContractVersionsRepository.findById | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:57` |
+| `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.resolveRecordInTenant → ContractVersionsRepository.findById | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:57` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.resolveRecordInTenant → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
 | `integration_contracts.integration_exchange_attempts` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → ExchangeAttemptsRepository.create | `src/modules/integration_contracts/repositories/exchange-attempts.repository.ts:88` |
 | `integration_contracts.integration_exchange_attempts` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → ExchangeAttemptsRepository.maxAttemptNumber | `src/modules/integration_contracts/repositories/exchange-attempts.repository.ts:58` |
-| `integration_contracts.integration_exchange_records` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt | `src/modules/integration_contracts/services/integration-exchanges.service.ts:243` |
-| `integration_contracts.integration_exchange_records` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → ExchangeRecordsRepository.findById | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:65` |
-| `integration_contracts.integration_idempotency_records` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.completeIdempotency | `src/modules/integration_contracts/services/integration-exchanges.service.ts:480` |
+| `integration_contracts.integration_exchange_records` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.resolveRecordInTenant → ExchangeRecordsRepository.findByIdForUpdate | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:78` |
+| `integration_contracts.integration_idempotency_records` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.completeIdempotency | `src/modules/integration_contracts/services/integration-exchanges.service.ts:521` |
 | `integration_contracts.integration_idempotency_records` | LEE | LEE | DIRECTA | IntegrationContractsController.recordAttempt → IntegrationExchangesService.recordAttempt → IntegrationExchangesService.completeIdempotency → IdempotencyRecordsRepository.findByKey | `src/modules/integration_contracts/repositories/idempotency-records.repository.ts:50` |
 
 ### Parámetros
@@ -582,7 +580,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de intercambio no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
@@ -606,7 +603,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.retireContract` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:189`
+- **Implementación:** `IntegrationContractsController.retireContract` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:239`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -616,28 +613,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/retire` la atiende `IntegrationContractsController.retireContract` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:189). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RetireContractDto` (2 campos, 0 obligatorios). Delega en `IntegrationContractsService.retireContract`. Actualiza integration_contracts.integration_contract_versions, integration_contracts.integration_contracts. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
+`POST /integration/contracts/{id}/retire` la atiende `IntegrationContractsController.retireContract` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:239). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RetireContractDto` (2 campos, 0 obligatorios). Delega en `IntegrationContractsService.retireContract`. Actualiza integration_contracts.integration_contract_versions. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:189` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:189` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:239` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:239` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_contract_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.retireContract → IntegrationContractsService.retireContract | `src/modules/integration_contracts/services/integration-contracts.service.ts:282` |
+| `integration_contracts.integration_contract_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.retireContract → IntegrationContractsService.retireContract | `src/modules/integration_contracts/services/integration-contracts.service.ts:319` |
 | `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationContractsController.retireContract → IntegrationContractsService.retireContract → ContractVersionsRepository.findActiveVersions | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:96` |
-| `integration_contracts.integration_contracts` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.retireContract → IntegrationContractsService.retireContract | `src/modules/integration_contracts/services/integration-contracts.service.ts:286` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.retireContract → IntegrationContractsService.retireContract → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.retireContract → IntegrationContractsService.retireContract → ContractsRepository.findByIdInTenantForUpdate | `src/modules/integration_contracts/repositories/contracts.repository.ts:81` |
 
 ### Parámetros
 
@@ -683,7 +679,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato ya está retirado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -708,7 +703,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.advanceCursor` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:176`
+- **Implementación:** `IntegrationContractsController.advanceCursor` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:221`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -718,26 +713,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/sync-cursors/{scope}/advance` la atiende `IntegrationContractsController.advanceCursor` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:176). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AdvanceCursorDto` (3 campos, 1 obligatorio). Delega en `IntegrationExchangesService.advanceCursor`. Crea filas en integration_contracts.integration_sync_cursors. Actualiza integration_contracts.integration_sync_cursors. Lee integration_contracts.integration_contracts, integration_contracts.integration_sync_cursors.
+`POST /integration/contracts/{id}/sync-cursors/{scope}/advance` la atiende `IntegrationContractsController.advanceCursor` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:221). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AdvanceCursorDto` (3 campos, 1 obligatorio). Delega en `IntegrationExchangesService.advanceCursor`. Crea filas en integration_contracts.integration_sync_cursors. Actualiza integration_contracts.integration_sync_cursors. Lee integration_contracts.integration_contracts, integration_contracts.integration_sync_cursors.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:176` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:221` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:221` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.advanceCursor → IntegrationExchangesService.advanceCursor → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
-| `integration_contracts.integration_sync_cursors` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.advanceCursor → IntegrationExchangesService.advanceCursor | `src/modules/integration_contracts/services/integration-exchanges.service.ts:416` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.advanceCursor → IntegrationExchangesService.advanceCursor → ContractsRepository.findByIdInTenantForUpdate | `src/modules/integration_contracts/repositories/contracts.repository.ts:81` |
+| `integration_contracts.integration_sync_cursors` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.advanceCursor → IntegrationExchangesService.advanceCursor | `src/modules/integration_contracts/services/integration-exchanges.service.ts:420` |
 | `integration_contracts.integration_sync_cursors` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.advanceCursor → IntegrationExchangesService.advanceCursor → SyncCursorsRepository.create | `src/modules/integration_contracts/repositories/sync-cursors.repository.ts:54` |
 | `integration_contracts.integration_sync_cursors` | LEE | LEE | DIRECTA | IntegrationContractsController.advanceCursor → IntegrationExchangesService.advanceCursor → SyncCursorsRepository.findByScope | `src/modules/integration_contracts/repositories/sync-cursors.repository.ts:42` |
 
@@ -793,7 +788,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El cursor solo puede avanzar hacia adelante |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -818,7 +812,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.publishVersion` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:77`
+- **Implementación:** `IntegrationContractsController.publishVersion` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:87`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -828,19 +822,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/versions` la atiende `IntegrationContractsController.publishVersion` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:77). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateContractVersionDto` (6 campos, 0 obligatorios). Delega en `IntegrationContractsService.publishVersion`. Crea filas en integration_contracts.integration_contract_versions. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
+`POST /integration/contracts/{id}/versions` la atiende `IntegrationContractsController.publishVersion` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateContractVersionDto` (6 campos, 0 obligatorios). Delega en `IntegrationContractsService.publishVersion`. Crea filas en integration_contracts.integration_contract_versions. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:87` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:87` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -848,7 +842,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|---|---|---|
 | `integration_contracts.integration_contract_versions` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.publishVersion → IntegrationContractsService.publishVersion → ContractVersionsRepository.create | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:107` |
 | `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationContractsController.publishVersion → IntegrationContractsService.publishVersion → ContractVersionsRepository.maxVersionNumber | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:65` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.publishVersion → IntegrationContractsService.publishVersion → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.publishVersion → IntegrationContractsService.publishVersion → ContractsRepository.findByIdInTenantForUpdate | `src/modules/integration_contracts/repositories/contracts.repository.ts:81` |
 
 ### Parámetros
 
@@ -906,7 +900,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se pueden publicar versiones en contratos DRAFT o ACTIVE |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -931,7 +924,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.activateVersion` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:89`
+- **Implementación:** `IntegrationContractsController.activateVersion` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -941,28 +934,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/versions/{versionId}/activate` la atiende `IntegrationContractsController.activateVersion` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:89). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ActivateVersionDto` (1 campo, 0 obligatorios). Delega en `IntegrationContractsService.activateVersion`. Actualiza integration_contracts.integration_contract_versions, integration_contracts.integration_contracts. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
+`POST /integration/contracts/{id}/versions/{versionId}/activate` la atiende `IntegrationContractsController.activateVersion` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ActivateVersionDto` (1 campo, 0 obligatorios). Delega en `IntegrationContractsService.activateVersion`. Actualiza integration_contracts.integration_contract_versions. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, versionId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:89` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, versionId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_contract_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.activateVersion → IntegrationContractsService.activateVersion | `src/modules/integration_contracts/services/integration-contracts.service.ts:226` |
+| `integration_contracts.integration_contract_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.activateVersion → IntegrationContractsService.activateVersion | `src/modules/integration_contracts/services/integration-contracts.service.ts:260` |
 | `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationContractsController.activateVersion → IntegrationContractsService.activateVersion → ContractVersionsRepository.findById | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:57` |
-| `integration_contracts.integration_contracts` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationContractsController.activateVersion → IntegrationContractsService.activateVersion | `src/modules/integration_contracts/services/integration-contracts.service.ts:235` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.activateVersion → IntegrationContractsService.activateVersion → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.activateVersion → IntegrationContractsService.activateVersion → ContractsRepository.findByIdInTenantForUpdate | `src/modules/integration_contracts/repositories/contracts.repository.ts:81` |
 
 ### Parámetros
 
@@ -1007,7 +999,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado; ResourceNotFoundException: Versión no encontrada para el contrato |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede activar una versión DRAFT |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1032,7 +1023,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationContractsController.subscribeWebhook` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:133`
+- **Implementación:** `IntegrationContractsController.subscribeWebhook` — `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1042,19 +1033,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/contracts/{id}/webhook-subscriptions` la atiende `IntegrationContractsController.subscribeWebhook` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:133). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsCreateWebhookSubscriptionDto` (6 campos, 0 obligatorios). Delega en `IntegrationWebhooksService.subscribe`. Crea filas en integration_contracts.contract_webhook_subscriptions. Lee integration_contracts.contract_webhook_subscriptions, integration_contracts.integration_contracts.
+`POST /integration/contracts/{id}/webhook-subscriptions` la atiende `IntegrationContractsController.subscribeWebhook` (src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IntegrationContractsCreateWebhookSubscriptionDto` (6 campos, 0 obligatorios). Delega en `IntegrationWebhooksService.subscribe`. Crea filas en integration_contracts.contract_webhook_subscriptions. Lee integration_contracts.contract_webhook_subscriptions, integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:133` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:133` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1062,7 +1053,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|---|---|---|
 | `integration_contracts.contract_webhook_subscriptions` | ESCRIBE | CREA | DIRECTA | IntegrationContractsController.subscribeWebhook → IntegrationWebhooksService.subscribe → WebhookSubscriptionsRepository.create | `src/modules/integration_contracts/repositories/webhook-subscriptions.repository.ts:88` |
 | `integration_contracts.contract_webhook_subscriptions` | LEE | LEE | DIRECTA | IntegrationContractsController.subscribeWebhook → IntegrationWebhooksService.subscribe → WebhookSubscriptionsRepository.findDuplicate | `src/modules/integration_contracts/repositories/webhook-subscriptions.repository.ts:64` |
-| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.subscribeWebhook → IntegrationWebhooksService.subscribe → ContractsRepository.findById | `src/modules/integration_contracts/repositories/contracts.repository.ts:60` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationContractsController.subscribeWebhook → IntegrationWebhooksService.subscribe → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
 
 ### Parámetros
 
@@ -1120,7 +1111,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una suscripción para ese evento y callback |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato debe estar ACTIVE para suscribir webhooks |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1146,7 +1136,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationExchangesController.retry` — `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:46`
+- **Implementación:** `IntegrationExchangesController.retry` — `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:51`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1156,30 +1146,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/exchanges/{recordId}/retry` la atiende `IntegrationExchangesController.retry` (src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:46). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RetryExchangeDto` (3 campos, 0 obligatorios). Delega en `IntegrationExchangesService.retry`. Crea filas en integration_contracts.integration_exchange_attempts. Actualiza integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_exchange_attempts, integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records.
+`POST /integration/exchanges/{recordId}/retry` la atiende `IntegrationExchangesController.retry` (src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:51). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RetryExchangeDto` (3 campos, 0 obligatorios). Delega en `IntegrationExchangesService.retry`. Crea filas en integration_contracts.integration_exchange_attempts. Actualiza integration_contracts.integration_idempotency_records. Lee integration_contracts.integration_contract_versions, integration_contracts.integration_contracts, integration_contracts.integration_exchange_attempts, integration_contracts.integration_exchange_records, integration_contracts.integration_idempotency_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: recordId | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:46` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:51` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: recordId | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:51` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.completeIdempotency → ContractVersionsRepository.findById | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:57` |
+| `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.resolveRecordInTenant → ContractVersionsRepository.findById | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:57` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.resolveRecordInTenant → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
 | `integration_contracts.integration_exchange_attempts` | ESCRIBE | CREA | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → ExchangeAttemptsRepository.create | `src/modules/integration_contracts/repositories/exchange-attempts.repository.ts:88` |
 | `integration_contracts.integration_exchange_attempts` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → ExchangeAttemptsRepository.lastAttempt | `src/modules/integration_contracts/repositories/exchange-attempts.repository.ts:75` |
-| `integration_contracts.integration_exchange_records` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationExchangesController.retry → IntegrationExchangesService.retry | `src/modules/integration_contracts/services/integration-exchanges.service.ts:330` |
-| `integration_contracts.integration_exchange_records` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → ExchangeRecordsRepository.findById | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:65` |
-| `integration_contracts.integration_idempotency_records` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.completeIdempotency | `src/modules/integration_contracts/services/integration-exchanges.service.ts:480` |
+| `integration_contracts.integration_exchange_records` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.resolveRecordInTenant → ExchangeRecordsRepository.findByIdForUpdate | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:78` |
+| `integration_contracts.integration_idempotency_records` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.completeIdempotency | `src/modules/integration_contracts/services/integration-exchanges.service.ts:521` |
 | `integration_contracts.integration_idempotency_records` | LEE | LEE | DIRECTA | IntegrationExchangesController.retry → IntegrationExchangesService.retry → IntegrationExchangesService.completeIdempotency → IdempotencyRecordsRepository.findByKey | `src/modules/integration_contracts/repositories/idempotency-records.repository.ts:50` |
 
 ### Parámetros
@@ -1232,7 +1222,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de intercambio no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se reintenta un intercambio con último intento FAILED; PreconditionFailedException: El último intento marcó fallo permanente (no reintentable) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1257,7 +1246,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IntegrationExchangesController.deliver` — `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:58`
+- **Implementación:** `IntegrationExchangesController.deliver` — `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:68`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1267,19 +1256,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Cómo se atiende (sistema)
 
-`POST /integration/webhooks/{subscriptionId}/deliveries` la atiende `IntegrationExchangesController.deliver` (src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:58). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `DeliverWebhookDto` (6 campos, 0 obligatorios). Delega en `IntegrationWebhooksService.deliver`. Crea filas en integration_contracts.integration_exchange_records, integration_contracts.webhook_delivery_evidence. Lee integration_contracts.contract_webhook_subscriptions, integration_contracts.integration_contract_versions.
+`POST /integration/webhooks/{subscriptionId}/deliveries` la atiende `IntegrationExchangesController.deliver` (src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:68). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `DeliverWebhookDto` (6 campos, 0 obligatorios). Delega en `IntegrationWebhooksService.deliver`. Crea filas en integration_contracts.integration_exchange_records, integration_contracts.webhook_delivery_evidence. Lee integration_contracts.contract_webhook_subscriptions, integration_contracts.integration_contract_versions, integration_contracts.integration_contracts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: subscriptionId | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:58` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:68` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: subscriptionId | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:68` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1287,7 +1276,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|---|---|---|
 | `integration_contracts.contract_webhook_subscriptions` | LEE | LEE | DIRECTA | IntegrationExchangesController.deliver → IntegrationWebhooksService.deliver → WebhookSubscriptionsRepository.findById | `src/modules/integration_contracts/repositories/webhook-subscriptions.repository.ts:54` |
 | `integration_contracts.integration_contract_versions` | LEE | LEE | DIRECTA | IntegrationExchangesController.deliver → IntegrationWebhooksService.deliver → ContractVersionsRepository.findActiveByContract | `src/modules/integration_contracts/repositories/contract-versions.repository.ts:83` |
-| `integration_contracts.integration_exchange_records` | ESCRIBE | CREA | DIRECTA | IntegrationExchangesController.deliver → IntegrationWebhooksService.deliver → ExchangeRecordsRepository.create | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:73` |
+| `integration_contracts.integration_contracts` | LEE | LEE | DIRECTA | IntegrationExchangesController.deliver → IntegrationWebhooksService.deliver → ContractsRepository.findByIdInTenant | `src/modules/integration_contracts/repositories/contracts.repository.ts:69` |
+| `integration_contracts.integration_exchange_records` | ESCRIBE | CREA | DIRECTA | IntegrationExchangesController.deliver → IntegrationWebhooksService.deliver → ExchangeRecordsRepository.create | `src/modules/integration_contracts/repositories/exchange-records.repository.ts:90` |
 | `integration_contracts.webhook_delivery_evidence` | ESCRIBE | CREA | DIRECTA | IntegrationExchangesController.deliver → IntegrationWebhooksService.deliver → DeliveryEvidenceRepository.create | `src/modules/integration_contracts/repositories/delivery-evidence.repository.ts:45` |
 
 ### Parámetros
@@ -1344,7 +1334,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suscripción de webhook no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está ACTIVE; PreconditionFailedException: La suscripción aún no es válida; PreconditionFailedException: La suscripción ya expiró; PreconditionFailedException: No hay versión ACTIVE del contrato para entregar; PreconditionFailedException: La suscripción no tiene callbackUri para entregar; PreconditionFailedException: El cuerpo del despacho excede el tamaño permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

@@ -3,15 +3,20 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
-  IsIn,
   IsISO8601,
+  IsIn,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import {
+  BOUNDED_DECIMAL_MESSAGE,
+  BOUNDED_DECIMAL_REGEX,
+} from '../services/payment-money';
 
 /** Método de cálculo de una tarifa. */
 export type FeeMethod = 'PERCENTAGE' | 'FIXED';
@@ -73,6 +78,7 @@ export class CreateFeeScheduleDto {
   })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   percentage?: string;
 
   /**
@@ -84,6 +90,7 @@ export class CreateFeeScheduleDto {
   })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   fixedAmount?: string;
 
   /**
@@ -158,6 +165,7 @@ export class SettlementLineDto {
    */
   @ApiProperty({ example: '150.00' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   amount!: string;
 
   /**
@@ -166,6 +174,7 @@ export class SettlementLineDto {
   @ApiPropertyOptional({ example: '4.65' })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   feeAmount?: string;
 }
 
@@ -194,6 +203,7 @@ export class ImportSettlementDto {
    */
   @ApiProperty({ example: '1500.00' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   grossAmount!: string;
 
   /**
@@ -201,6 +211,7 @@ export class ImportSettlementDto {
    */
   @ApiProperty({ example: '46.50' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   feeAmount!: string;
 
   /**
@@ -208,6 +219,7 @@ export class ImportSettlementDto {
    */
   @ApiProperty({ example: '1453.50' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   netAmount!: string;
 
   /**
@@ -293,6 +305,7 @@ export class PayoutItemDto {
    */
   @ApiProperty({ example: '100.00' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   amount!: string;
 
   /**
@@ -301,6 +314,7 @@ export class PayoutItemDto {
   @ApiPropertyOptional({ example: '5.00' })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   commissionAmount?: string;
 
   /**
@@ -421,6 +435,7 @@ export class ProviderRecordDto {
    */
   @ApiProperty({ example: '150.00' })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   providerAmount!: string;
 
   /**
@@ -444,6 +459,7 @@ export class ProviderRecordDto {
   @ApiPropertyOptional({ example: '4.65' })
   @IsOptional()
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   providerFeeAmount?: string;
 }
 

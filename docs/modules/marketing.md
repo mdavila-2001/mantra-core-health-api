@@ -27,7 +27,7 @@ inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-t
   find src/modules/marketing -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **2 controllers, 14 rutas HTTP, 14 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **2 controllers, 15 rutas HTTP, 14 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -48,6 +48,7 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`,
 | `POST /marketing/enrollments/:id/advance` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/enrollments/:id/exit` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/tracked-links` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/tracked-links/:id/recipient-tokens` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/touchpoints` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/attribution/compute` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `GET /r/:code` | pública | `tracked-link-redirect` |
@@ -94,7 +95,7 @@ journey (draft) ── steps ── activate ──> active + inscripciones (act
                                               ├─ advance sin siguiente ──> completed
                                               └─ exit ──> completed (meta) | exited (baja, rebote)
 
-enlace (active) ── GET /r/{code} ──> click_count++ [+ touchpoint si hay miembro]
+enlace (active) ── GET /r/{code}?t=<token> ──> click_count++ [+ touchpoint si el token es válido]
 
 touchpoints del miembro en ventana ── attribution/compute ──> reparto con SUM(weight) = 1
 ```
@@ -130,7 +131,21 @@ touchpoints del miembro en ventana ── attribution/compute ──> reparto co
 `MARKETING_MANAGER` en todo el módulo. `CONTENT_EDITOR` para publicar plantillas. `SYSTEM` en lo
 que ejecutan los workers: refresco de segmento, materialización, avance y salida de inscripciones,
 touchpoints y atribución. `GET /r/:code` es **público**: quien hace click es el destinatario del
-mensaje, no un usuario con sesión.
+mensaje, no un usuario con sesión; por eso no declara quién es: presenta el token que emite
+`POST /marketing/tracked-links/:id/recipient-tokens` (firmado, con vencimiento y ligado al enlace y
+al destinatario).
+
+## Alcance por tenant
+
+El tenant sale del contexto autenticado (`requireTenantId()`), nunca del cuerpo: `tenantId` en los
+DTO de alta es opcional y, si llega, debe coincidir con el activo (`412 MARKETING_TENANT_MISMATCH`).
+Segmentos, campañas, journeys y plantillas se buscan y bloquean por `id + tenantId`; las
+inscripciones heredan el tenant de su journey y los enlaces y touchpoints, el de su campaña. Un
+recurso de otro tenant responde igual que uno inexistente (`404`, mismo mensaje y `reason`
+`MARKETING_*_NOT_AVAILABLE`, sin `details`). Los endpoints `SYSTEM` también exigen un tenant activo
+(`X-Tenant-Id`). Los códigos de segmento, campaña y journey son únicos por tenant; la violación de
+unicidad de la base responde `409 MARKETING_CODE_ALREADY_EXISTS`
+(`database/SQL/patches/2026-10-24_marketing_code_unique_per_tenant.sql`).
 
 ## Concurrencia
 

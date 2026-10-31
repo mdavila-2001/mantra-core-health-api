@@ -4,25 +4,25 @@
 
 - **Bloque:** Datos y NoSQL (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 - **Operaciones:** 16 (16 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 15 · BAJO 1
-- **Tablas distintas que tocan:** 28
+- **Riesgo:** ALTO 0 · MEDIO 14 · BAJO 2
+- **Tablas distintas que tocan:** 32
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/health-data.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/fhir/r5/$export` | Exportar un Bundle FHIR interoperable con su manifiesto | MEDIO | 5 | PRIVACY_OFFICER, HEALTH_DATA_ADMIN |
-| 2 | GET | `/fhir/r5/Patient/{id}/$everything` | Servir la historia longitudinal del paciente | BAJO | 3 | INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
+| 1 | POST | `/fhir/r5/$export` | Exportar un Bundle FHIR interoperable con su manifiesto | MEDIO | 13 | PRIVACY_OFFICER, HEALTH_DATA_ADMIN |
+| 2 | GET | `/fhir/r5/Patient/{id}/$everything` | Servir la historia longitudinal del paciente | BAJO | 5 | INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
 | 3 | POST | `/health-data/canonical-resources/{id}/bindings` | Enlazar el recurso a una entidad de dominio | MEDIO | 5 | CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
 | 4 | POST | `/health-data/canonical-resources/{id}/identifiers` | Registrar un identificador de negocio del recurso | MEDIO | 5 | INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
 | 5 | POST | `/health-data/canonical-resources/{id}/relationships` | Relacionar dos recursos canónicos | MEDIO | 4 | DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
 | 6 | POST | `/health-data/canonical-resources/{id}/retire` | Retirar el recurso canónico (borrado lógico) | MEDIO | 8 | CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
-| 7 | POST | `/health-data/canonical-resources/project` | Proyectar el registro a recurso canónico y versionarlo | MEDIO | 10 | INGESTION_WORKER, HEALTH_DATA_ADMIN |
-| 8 | POST | `/health-data/deidentification-runs` | Registrar una corrida de de-identificación | MEDIO | 5 | PRIVACY_OFFICER, HEALTH_DATA_ADMIN |
+| 7 | POST | `/health-data/canonical-resources/project` | Proyectar el registro a recurso canónico y versionarlo | MEDIO | 12 | INGESTION_WORKER, HEALTH_DATA_ADMIN |
+| 8 | POST | `/health-data/deidentification-runs` | Registrar una corrida de de-identificación | MEDIO | 9 | PRIVACY_OFFICER, HEALTH_DATA_ADMIN |
 | 9 | POST | `/health-data/identity/candidates/{id}/decision` | Resolver un candidato de identidad longitudinal | MEDIO | 9 | MPI_STEWARD, HEALTH_DATA_ADMIN |
 | 10 | POST | `/health-data/ingestion-batches` | Abrir un lote de ingesta desde una conexión de origen | MEDIO | 4 | INGESTION_WORKER, HEALTH_DATA_ADMIN |
-| 11 | POST | `/health-data/ingestion-batches/{id}/close` | Cerrar el lote conciliando sus contadores | MEDIO | 3 | INGESTION_WORKER, HEALTH_DATA_ADMIN |
+| 11 | POST | `/health-data/ingestion-batches/{id}/close` | Cerrar el lote conciliando sus contadores | BAJO | 2 | INGESTION_WORKER, HEALTH_DATA_ADMIN |
 | 12 | POST | `/health-data/ingestion-batches/{id}/records` | Registrar un registro crudo del lote | MEDIO | 3 | INGESTION_WORKER, HEALTH_DATA_ADMIN |
 | 13 | POST | `/health-data/quality-runs` | Ejecutar reglas de calidad y abrir incidencias | MEDIO | 6 | DATA_STEWARD, HEALTH_DATA_ADMIN |
 | 14 | POST | `/health-data/source-connections` | Dar de alta una conexión de origen (crea el sistema si no existe) | MEDIO | 3 | HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN |
@@ -48,7 +48,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Cómo se atiende (sistema)
 
-`POST /fhir/r5/$export` la atiende `FhirR5Controller.exportBundle` (src/modules/health_data/controllers/fhir-r5.controller.ts:52). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ExportBundleDto` (14 campos, 4 obligatorios). Delega en `DataReleaseService.exportBundle`. Crea filas en health_data.health_export_jobs, health_data.health_export_manifests, health_data.health_provenance_records, health_data.health_provenance_targets. Lee health_data.health_deidentification_runs.
+`POST /fhir/r5/$export` la atiende `FhirR5Controller.exportBundle` (src/modules/health_data/controllers/fhir-r5.controller.ts:52). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ExportBundleDto` (14 campos, 4 obligatorios). Delega en `DataReleaseService.exportBundle`. Crea filas en health_data.health_export_jobs, health_data.health_export_manifests, health_data.health_provenance_records, health_data.health_provenance_targets. Lee authz.clinical_access_grants, common.files, consent.consents, health_data.canonical_health_resources, health_data.health_deidentification_profiles, health_data.health_deidentification_runs, health_data.patient_identity_clusters, health_data.patient_identity_members y 1 más.
 
 ### Requerimientos
 
@@ -56,39 +56,47 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → DataReleaseService.resolveReadDecision | `src/modules/health_data/services/data-release.service.ts:503` |
+| `common.files` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertFileInTenant | `src/modules/health_data/services/data-release.service.ts:632` |
+| `consent.consents` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertConsentInTenant | `src/modules/health_data/services/data-release.service.ts:602` |
+| `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → CanonicalResourcesRepository.existsResourceByPatient | `src/modules/health_data/repositories/canonical-resources.repository.ts:207` |
+| `health_data.health_deidentification_profiles` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertCohortInTenant → DataReleaseRepository.findDeidProfileById | `src/modules/health_data/repositories/data-release.repository.ts:31` |
 | `health_data.health_deidentification_runs` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.findDeidRunById | `src/modules/health_data/repositories/data-release.repository.ts:183` |
 | `health_data.health_export_jobs` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.createExportJob | `src/modules/health_data/repositories/data-release.repository.ts:260` |
 | `health_data.health_export_manifests` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.createExportManifest | `src/modules/health_data/repositories/data-release.repository.ts:340` |
 | `health_data.health_provenance_records` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → HealthProvenanceRepository.createProvenanceRecord | `src/modules/health_data/repositories/health-provenance.repository.ts:122` |
 | `health_data.health_provenance_targets` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → HealthProvenanceRepository.createProvenanceTarget | `src/modules/health_data/repositories/health-provenance.repository.ts:173` |
+| `health_data.patient_identity_clusters` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:344` |
+| `health_data.patient_identity_members` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:339` |
+| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertCohortInTenant | `src/modules/health_data/services/data-release.service.ts:571` |
 
 ### Cuerpo — DTO `ExportBundleDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `exportTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de exportación (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1466` |
-| `purposeOfUseConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Propósito de uso; sin él no se exporta | `src/modules/health_data/dto/health-data.dto.ts:1476` |
-| `contentHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del Bundle entregado; lo sella | `src/modules/health_data/dto/health-data.dto.ts:1487` |
-| `recordCount` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Recursos incluidos; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1497` |
-| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente exportado | `src/modules/health_data/dto/health-data.dto.ts:1505` |
-| `cohortDefinitionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cohorte exportada | `src/modules/health_data/dto/health-data.dto.ts:1513` |
-| `consentDirectiveId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1521` |
-| `deidentificationRunId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Corrida de de-identificación aplicada, si la hubo | `src/modules/health_data/dto/health-data.dto.ts:1532` |
-| `fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1540` |
-| `sizeBytes` | `string` | No | — | `@IsOptional()` `@IsNumberString({ no_symbols: true })` | Tamaño en bytes; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1550` |
-| `encryptionProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1558` |
-| `retentionPolicyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1566` |
-| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo caduca la entrega | `src/modules/health_data/dto/health-data.dto.ts:1577` |
-| `deliveryDestinationJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | A dónde se entrega | `src/modules/health_data/dto/health-data.dto.ts:1585` |
+| `exportTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de exportación (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1495` |
+| `purposeOfUseConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Propósito de uso; sin él no se exporta | `src/modules/health_data/dto/health-data.dto.ts:1505` |
+| `contentHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del Bundle entregado; lo sella | `src/modules/health_data/dto/health-data.dto.ts:1516` |
+| `recordCount` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Recursos incluidos; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1526` |
+| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente exportado | `src/modules/health_data/dto/health-data.dto.ts:1534` |
+| `cohortDefinitionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cohorte exportada | `src/modules/health_data/dto/health-data.dto.ts:1542` |
+| `consentDirectiveId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1550` |
+| `deidentificationRunId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Corrida de de-identificación aplicada, si la hubo | `src/modules/health_data/dto/health-data.dto.ts:1561` |
+| `fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1569` |
+| `sizeBytes` | `string` | No | — | `@IsOptional()` `@IsNumberString({ no_symbols: true })` | Tamaño en bytes; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1579` |
+| `encryptionProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1587` |
+| `retentionPolicyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1595` |
+| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo caduca la entrega | `src/modules/health_data/dto/health-data.dto.ts:1606` |
+| `deliveryDestinationJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | A dónde se entrega | `src/modules/health_data/dto/health-data.dto.ts:1615` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -128,11 +136,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1596` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:1602` |
-| `manifestId` | `string` | Sí | formato uuid | — | Manifiesto inmutable del Bundle | `src/modules/health_data/dto/health-data.dto.ts:1611` |
-| `manifestVersion` | `number` | Sí | — | — | Valor de manifest version mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1617` |
-| `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada de la exportación | `src/modules/health_data/dto/health-data.dto.ts:1626` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1626` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:1632` |
+| `manifestId` | `string` | Sí | formato uuid | — | Manifiesto inmutable del Bundle | `src/modules/health_data/dto/health-data.dto.ts:1641` |
+| `manifestVersion` | `number` | Sí | — | — | Valor de manifest version mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1647` |
+| `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada de la exportación | `src/modules/health_data/dto/health-data.dto.ts:1656` |
 
 ### Respuestas posibles
 
@@ -142,7 +150,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida de de-identificación no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La exportación necesita un paciente o una cohorte; PreconditionFailedException: La corrida de de-identificación no está completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -177,7 +185,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Cómo se atiende (sistema)
 
-`GET /fhir/r5/Patient/{id}/$everything` la atiende `FhirR5Controller.serveEverything` (src/modules/health_data/controllers/fhir-r5.controller.ts:73). Exige sesión con alguno de los roles INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Delega en `DataReleaseService.serveEverything`. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.patient_identity_members.
+`GET /fhir/r5/Patient/{id}/$everything` la atiende `FhirR5Controller.serveEverything` (src/modules/health_data/controllers/fhir-r5.controller.ts:73). Exige sesión con alguno de los roles INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Delega en `DataReleaseService.serveEverything`. Lee authz.clinical_access_grants, health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.patient_identity_clusters, health_data.patient_identity_members.
 
 ### Requerimientos
 
@@ -185,24 +193,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/fhir-r5.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → CanonicalResourcesRepository.findVersionsByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:268` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → DataReleaseService.resolveReadDecision | `src/modules/health_data/services/data-release.service.ts:503` |
+| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → CanonicalResourcesRepository.findVersionsByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:303` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → CanonicalResourcesRepository.findResourcesByPatient | `src/modules/health_data/repositories/canonical-resources.repository.ts:186` |
-| `health_data.patient_identity_members` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → PatientIdentityRepository.findLiveMembershipByProfile | `src/modules/health_data/repositories/patient-identity.repository.ts:316` |
+| `health_data.patient_identity_clusters` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:344` |
+| `health_data.patient_identity_members` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:339` |
 
 ### Parámetros
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
-| `custodian` | query | No | `string` | Custodio por el que se acota la búsqueda |
+| `custodian` | query | No | `string` | Obsoleto: el custodio sale de la sesión (X-Tenant-Id). Si llega y difiere del tenant activo, el paciente no está disponible (404). |
 
 ### Cuerpo
 
@@ -212,17 +222,17 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente por el que se preguntó | `src/modules/health_data/dto/health-data.dto.ts:1679` |
-| `includedPatientProfileIds` | `array<string>` | Sí | formato uuid | — | Perfiles del clúster de identidad que se expandieron | `src/modules/health_data/dto/health-data.dto.ts:1689` |
-| `identityClusterId` | `string` | No | formato uuid | — | Clúster de identidad resuelto | `src/modules/health_data/dto/health-data.dto.ts:1698` |
-| `entries` | `array<EverythingEntryDto>` | Sí | — | — | Valor de entries mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1704` |
-| `entries[].resourceId` | `string` | Sí | formato uuid | — | Identificador asociado a resource. | `src/modules/health_data/dto/health-data.dto.ts:1641` |
-| `entries[].resourceTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a resource type concept. | `src/modules/health_data/dto/health-data.dto.ts:1647` |
-| `entries[].versionId` | `string` | Sí | formato uuid | — | Identificador asociado a version. | `src/modules/health_data/dto/health-data.dto.ts:1653` |
-| `entries[].versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1659` |
-| `entries[].payload` | `object` | Sí | — | — | Payload normalizado de la versión vigente | `src/modules/health_data/dto/health-data.dto.ts:1665` |
-| `total` | `number` | Sí | — | — | Recursos incluidos | `src/modules/health_data/dto/health-data.dto.ts:1710` |
-| `contentHash` | `string` | Sí | — | — | Hash del Bundle; permite validar la frescura de una caché | `src/modules/health_data/dto/health-data.dto.ts:1718` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente por el que se preguntó | `src/modules/health_data/dto/health-data.dto.ts:1709` |
+| `includedPatientProfileIds` | `array<string>` | Sí | formato uuid | — | Perfiles del clúster de identidad que se expandieron | `src/modules/health_data/dto/health-data.dto.ts:1719` |
+| `identityClusterId` | `string` | No | formato uuid | — | Clúster de identidad resuelto | `src/modules/health_data/dto/health-data.dto.ts:1728` |
+| `entries` | `array<EverythingEntryDto>` | Sí | — | — | Valor de entries mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1734` |
+| `entries[].resourceId` | `string` | Sí | formato uuid | — | Identificador asociado a resource. | `src/modules/health_data/dto/health-data.dto.ts:1671` |
+| `entries[].resourceTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a resource type concept. | `src/modules/health_data/dto/health-data.dto.ts:1677` |
+| `entries[].versionId` | `string` | Sí | formato uuid | — | Identificador asociado a version. | `src/modules/health_data/dto/health-data.dto.ts:1683` |
+| `entries[].versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1689` |
+| `entries[].payload` | `object` | Sí | — | — | Payload normalizado de la versión vigente | `src/modules/health_data/dto/health-data.dto.ts:1695` |
+| `total` | `number` | Sí | — | — | Recursos incluidos | `src/modules/health_data/dto/health-data.dto.ts:1740` |
+| `contentHash` | `string` | Sí | — | — | Hash del Bundle; permite validar la frescura de una caché | `src/modules/health_data/dto/health-data.dto.ts:1748` |
 
 ### Respuestas posibles
 
@@ -273,11 +283,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:235` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:235` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -285,8 +295,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|---|---|---|
 | `health_data.canonical_health_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.createBinding → CanonicalResourcesService.createBinding | `src/modules/health_data/services/canonical-resources.service.ts:329` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.createBinding → CanonicalResourcesService.createBinding → CanonicalResourcesRepository.findResourceForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:158` |
-| `health_data.canonical_resource_bindings` | ESCRIBE | CREA | DIRECTA | HealthDataController.createBinding → CanonicalResourcesService.createBinding → CanonicalResourcesRepository.createBinding | `src/modules/health_data/repositories/canonical-resources.repository.ts:519` |
-| `health_data.canonical_resource_bindings` | LEE | LEE | DIRECTA | HealthDataController.createBinding → CanonicalResourcesService.createBinding → CanonicalResourcesRepository.findBinding | `src/modules/health_data/repositories/canonical-resources.repository.ts:555` |
+| `health_data.canonical_resource_bindings` | ESCRIBE | CREA | DIRECTA | HealthDataController.createBinding → CanonicalResourcesService.createBinding → CanonicalResourcesRepository.createBinding | `src/modules/health_data/repositories/canonical-resources.repository.ts:554` |
+| `health_data.canonical_resource_bindings` | LEE | LEE | DIRECTA | HealthDataController.createBinding → CanonicalResourcesService.createBinding → CanonicalResourcesRepository.findBinding | `src/modules/health_data/repositories/canonical-resources.repository.ts:590` |
 | `health_data.health_lineage_edges` | ESCRIBE | CREA | DIRECTA | HealthDataController.createBinding → CanonicalResourcesService.createBinding → HealthProvenanceRepository.createLineageEdge | `src/modules/health_data/repositories/health-provenance.repository.ts:202` |
 
 ### Parámetros
@@ -299,10 +309,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `domainEntityTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de entidad de dominio (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:729` |
-| `domainEntityId` | `string` | Sí | formato uuid | `@IsUUID()` | Entidad de dominio concreta | `src/modules/health_data/dto/health-data.dto.ts:736` |
-| `bindingRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:744` |
-| `mappingVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Versión del mapeo terminológico aplicado | `src/modules/health_data/dto/health-data.dto.ts:755` |
+| `domainEntityTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de entidad de dominio (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:748` |
+| `domainEntityId` | `string` | Sí | formato uuid | `@IsUUID()` | Entidad de dominio concreta | `src/modules/health_data/dto/health-data.dto.ts:755` |
+| `bindingRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:763` |
+| `mappingVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Versión del mapeo terminológico aplicado | `src/modules/health_data/dto/health-data.dto.ts:774` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -330,10 +340,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:766` |
-| `canonicalHealthResourceId` | `string` | Sí | formato uuid | — | Identificador asociado a canonical health resource. | `src/modules/health_data/dto/health-data.dto.ts:772` |
-| `bindingStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a binding status concept. | `src/modules/health_data/dto/health-data.dto.ts:778` |
-| `lineageEdgeId` | `string` | Sí | formato uuid | — | Arista de linaje versión → entidad de dominio | `src/modules/health_data/dto/health-data.dto.ts:787` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:785` |
+| `canonicalHealthResourceId` | `string` | Sí | formato uuid | — | Identificador asociado a canonical health resource. | `src/modules/health_data/dto/health-data.dto.ts:791` |
+| `bindingStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a binding status concept. | `src/modules/health_data/dto/health-data.dto.ts:797` |
+| `lineageEdgeId` | `string` | Sí | formato uuid | — | Arista de linaje versión → entidad de dominio | `src/modules/health_data/dto/health-data.dto.ts:806` |
 
 ### Respuestas posibles
 
@@ -387,11 +397,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:195` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -400,8 +410,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `health_data.canonical_health_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier | `src/modules/health_data/services/canonical-resources.service.ts:126` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier → CanonicalResourcesRepository.findResourceForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:158` |
 | `health_data.canonical_resource_identifiers` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier | `src/modules/health_data/services/canonical-resources.service.ts:111` |
-| `health_data.canonical_resource_identifiers` | ESCRIBE | CREA | DIRECTA | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier → CanonicalResourcesRepository.createIdentifier | `src/modules/health_data/repositories/canonical-resources.repository.ts:313` |
-| `health_data.canonical_resource_identifiers` | LEE | LEE | DIRECTA | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier → CanonicalResourcesRepository.findIdentifier | `src/modules/health_data/repositories/canonical-resources.repository.ts:345` |
+| `health_data.canonical_resource_identifiers` | ESCRIBE | CREA | DIRECTA | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier → CanonicalResourcesRepository.createIdentifier | `src/modules/health_data/repositories/canonical-resources.repository.ts:348` |
+| `health_data.canonical_resource_identifiers` | LEE | LEE | DIRECTA | HealthDataController.registerIdentifier → CanonicalResourcesService.registerIdentifier → CanonicalResourcesRepository.findIdentifier | `src/modules/health_data/repositories/canonical-resources.repository.ts:380` |
 
 ### Parámetros
 
@@ -413,12 +423,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `identifierSystem` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | Sistema emisor del identificador | `src/modules/health_data/dto/health-data.dto.ts:552` |
-| `identifierValue` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | — | `src/modules/health_data/dto/health-data.dto.ts:560` |
-| `identifierTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:568` |
-| `assigningAuthority` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/health_data/dto/health-data.dto.ts:577` |
-| `isPrimary` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Sólo uno vigente por sistema; el anterior se cierra | `src/modules/health_data/dto/health-data.dto.ts:588` |
-| `effectiveFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:596` |
+| `identifierSystem` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | Sistema emisor del identificador | `src/modules/health_data/dto/health-data.dto.ts:571` |
+| `identifierValue` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | — | `src/modules/health_data/dto/health-data.dto.ts:579` |
+| `identifierTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:587` |
+| `assigningAuthority` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/health_data/dto/health-data.dto.ts:596` |
+| `isPrimary` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Sólo uno vigente por sistema; el anterior se cierra | `src/modules/health_data/dto/health-data.dto.ts:607` |
+| `effectiveFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:615` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -448,10 +458,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:607` |
-| `canonicalHealthResourceId` | `string` | Sí | formato uuid | — | Identificador asociado a canonical health resource. | `src/modules/health_data/dto/health-data.dto.ts:613` |
-| `isPrimary` | `boolean` | Sí | — | — | Valor de is primary mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:619` |
-| `supersededIdentifierId` | `string` | No | formato uuid | — | Identificador principal que se cerró | `src/modules/health_data/dto/health-data.dto.ts:628` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:626` |
+| `canonicalHealthResourceId` | `string` | Sí | formato uuid | — | Identificador asociado a canonical health resource. | `src/modules/health_data/dto/health-data.dto.ts:632` |
+| `isPrimary` | `boolean` | Sí | — | — | Valor de is primary mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:638` |
+| `supersededIdentifierId` | `string` | No | formato uuid | — | Identificador principal que se cerró | `src/modules/health_data/dto/health-data.dto.ts:647` |
 
 ### Respuestas posibles
 
@@ -505,11 +515,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:215` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:215` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -517,8 +527,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|---|---|---|
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.createRelationship → CanonicalResourcesService.createRelationship → CanonicalResourcesRepository.findResourceForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:158` |
 | `health_data.canonical_resource_relationships` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.createRelationship → CanonicalResourcesService.createRelationship | `src/modules/health_data/services/canonical-resources.service.ts:226` |
-| `health_data.canonical_resource_relationships` | ESCRIBE | CREA | DIRECTA | HealthDataController.createRelationship → CanonicalResourcesService.createRelationship → CanonicalResourcesRepository.createRelationship | `src/modules/health_data/repositories/canonical-resources.repository.ts:411` |
-| `health_data.canonical_resource_relationships` | LEE | LEE | DIRECTA | HealthDataController.createRelationship → CanonicalResourcesService.createRelationship → CanonicalResourcesRepository.findLiveRelationshipForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:434` |
+| `health_data.canonical_resource_relationships` | ESCRIBE | CREA | DIRECTA | HealthDataController.createRelationship → CanonicalResourcesService.createRelationship → CanonicalResourcesRepository.createRelationship | `src/modules/health_data/repositories/canonical-resources.repository.ts:446` |
+| `health_data.canonical_resource_relationships` | LEE | LEE | DIRECTA | HealthDataController.createRelationship → CanonicalResourcesService.createRelationship → CanonicalResourcesRepository.findLiveRelationshipForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:469` |
 
 ### Parámetros
 
@@ -530,11 +540,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `targetResourceId` | `string` | Sí | formato uuid | `@IsUUID()` | Recurso al que apunta la relación | `src/modules/health_data/dto/health-data.dto.ts:646` |
-| `relationshipTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de relación (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:656` |
-| `relationshipRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:664` |
-| `effectiveFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:672` |
-| `confidenceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Confianza, como cadena decimal | `src/modules/health_data/dto/health-data.dto.ts:680` |
+| `targetResourceId` | `string` | Sí | formato uuid | `@IsUUID()` | Recurso al que apunta la relación | `src/modules/health_data/dto/health-data.dto.ts:665` |
+| `relationshipTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de relación (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:675` |
+| `relationshipRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:683` |
+| `effectiveFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:691` |
+| `confidenceScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Confianza, como cadena decimal | `src/modules/health_data/dto/health-data.dto.ts:699` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -563,7 +573,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Id de la relación creada | `src/modules/health_data/dto/health-data.dto.ts:691` |
+| `id` | `string` | Sí | — | — | Id de la relación creada | `src/modules/health_data/dto/health-data.dto.ts:710` |
 | `sourceConceptId` | `string` | Sí | — | — | Id del concepto origen | sin fuente |
 | `targetConceptId` | `string` | Sí | — | — | Id del concepto destino | sin fuente |
 | `relationshipTypeConceptId` | `string` | Sí | — | — | Tipo de relación (concepto) | sin fuente |
@@ -620,11 +630,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:362` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:362` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -633,9 +643,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `health_data.canonical_health_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.retireResource → CanonicalResourcesService.retireResource | `src/modules/health_data/services/canonical-resources.service.ts:402` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → CanonicalResourcesRepository.findResourceForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:158` |
 | `health_data.canonical_resource_bindings` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.retireResource → CanonicalResourcesService.retireResource | `src/modules/health_data/services/canonical-resources.service.ts:377` |
-| `health_data.canonical_resource_bindings` | LEE | LEE | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → CanonicalResourcesRepository.findLiveBindingsForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:574` |
+| `health_data.canonical_resource_bindings` | LEE | LEE | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → CanonicalResourcesRepository.findLiveBindingsForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:609` |
 | `health_data.canonical_resource_relationships` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.retireResource → CanonicalResourcesService.retireResource | `src/modules/health_data/services/canonical-resources.service.ts:383` |
-| `health_data.canonical_resource_relationships` | LEE | LEE | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → CanonicalResourcesRepository.findLiveRelationshipsForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:457` |
+| `health_data.canonical_resource_relationships` | LEE | LEE | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → CanonicalResourcesRepository.findLiveRelationshipsForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:492` |
 | `health_data.health_provenance_records` | ESCRIBE | CREA | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → HealthProvenanceRepository.createProvenanceRecord | `src/modules/health_data/repositories/health-provenance.repository.ts:122` |
 | `health_data.health_provenance_targets` | ESCRIBE | CREA | DIRECTA | HealthDataController.retireResource → CanonicalResourcesService.retireResource → HealthProvenanceRepository.createProvenanceTarget | `src/modules/health_data/repositories/health-provenance.repository.ts:173` |
 
@@ -649,7 +659,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | Sí | — | `@IsString()` | Por qué se retira | `src/modules/health_data/dto/health-data.dto.ts:1732` |
+| `reason` | `string` | Sí | longitud máxima 1000 | `@IsString()` `@MaxLength(1000)` | Por qué se retira | `src/modules/health_data/dto/health-data.dto.ts:1763` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -673,11 +683,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1743` |
-| `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a lifecycle status concept. | `src/modules/health_data/dto/health-data.dto.ts:1749` |
-| `closedBindings` | `number` | Sí | — | — | Bindings que quedan cerrados | `src/modules/health_data/dto/health-data.dto.ts:1755` |
-| `closedRelationships` | `number` | Sí | — | — | Relaciones que quedan cerradas | `src/modules/health_data/dto/health-data.dto.ts:1761` |
-| `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada del retiro | `src/modules/health_data/dto/health-data.dto.ts:1770` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1774` |
+| `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a lifecycle status concept. | `src/modules/health_data/dto/health-data.dto.ts:1780` |
+| `closedBindings` | `number` | Sí | — | — | Bindings que quedan cerrados | `src/modules/health_data/dto/health-data.dto.ts:1786` |
+| `closedRelationships` | `number` | Sí | — | — | Relaciones que quedan cerradas | `src/modules/health_data/dto/health-data.dto.ts:1792` |
+| `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada del retiro | `src/modules/health_data/dto/health-data.dto.ts:1801` |
 
 ### Respuestas posibles
 
@@ -722,7 +732,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/canonical-resources/project` la atiende `HealthDataController.projectResource` (src/modules/health_data/controllers/health-data.controller.ts:175). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ProjectCanonicalResourceDto` (11 campos, 3 obligatorios). Delega en `HealthIngestionService.projectResource`. Crea filas en health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Actualiza health_data.canonical_health_resources, health_data.health_ingestion_records. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_ingestion_records.
+`POST /health-data/canonical-resources/project` la atiende `HealthDataController.projectResource` (src/modules/health_data/controllers/health-data.controller.ts:175). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ProjectCanonicalResourceDto` (11 campos, 3 obligatorios). Delega en `HealthIngestionService.projectResource`. Crea filas en health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Actualiza health_data.canonical_health_resources. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_ingestion_batches, health_data.health_ingestion_records, health_data.health_source_connections, health_data.health_source_systems.
 
 ### Requerimientos
 
@@ -730,41 +740,43 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.canonical_health_resource_versions` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → CanonicalResourcesRepository.createResourceVersion | `src/modules/health_data/repositories/canonical-resources.repository.ts:200` |
-| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → CanonicalResourcesRepository.findLatestVersion | `src/modules/health_data/repositories/canonical-resources.repository.ts:250` |
-| `health_data.canonical_health_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.projectResource → HealthIngestionService.projectResource | `src/modules/health_data/services/health-ingestion.service.ts:450` |
+| `health_data.canonical_health_resource_versions` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → CanonicalResourcesRepository.createResourceVersion | `src/modules/health_data/repositories/canonical-resources.repository.ts:235` |
+| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → CanonicalResourcesRepository.findLatestVersion | `src/modules/health_data/repositories/canonical-resources.repository.ts:285` |
+| `health_data.canonical_health_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.projectResource → HealthIngestionService.projectResource | `src/modules/health_data/services/health-ingestion.service.ts:478` |
 | `health_data.canonical_health_resources` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → CanonicalResourcesRepository.createResource | `src/modules/health_data/repositories/canonical-resources.repository.ts:119` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → CanonicalResourcesRepository.findResourceByLogicalIdForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:172` |
-| `health_data.health_ingestion_records` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.projectResource → HealthIngestionService.projectResource | `src/modules/health_data/services/health-ingestion.service.ts:386` |
-| `health_data.health_ingestion_records` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthIngestionRepository.findRecordForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:339` |
+| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthIngestionRepository.findBatchById | `src/modules/health_data/repositories/health-ingestion.repository.ts:278` |
+| `health_data.health_ingestion_records` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthIngestionRepository.findRecordForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:368` |
 | `health_data.health_lineage_edges` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthProvenanceRepository.createLineageEdge | `src/modules/health_data/repositories/health-provenance.repository.ts:202` |
 | `health_data.health_provenance_records` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthProvenanceRepository.createProvenanceRecord | `src/modules/health_data/repositories/health-provenance.repository.ts:122` |
 | `health_data.health_provenance_targets` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthProvenanceRepository.createProvenanceTarget | `src/modules/health_data/repositories/health-provenance.repository.ts:173` |
+| `health_data.health_source_connections` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthIngestionService.assertSourceSystemCoherent → HealthIngestionRepository.findConnectionById | `src/modules/health_data/repositories/health-ingestion.repository.ts:127` |
+| `health_data.health_source_systems` | LEE | LEE | DIRECTA | HealthDataController.projectResource → HealthIngestionService.projectResource → HealthIngestionService.assertSourceSystemCoherent → HealthIngestionRepository.findSourceSystemById | `src/modules/health_data/repositories/health-ingestion.repository.ts:141` |
 
 ### Cuerpo — DTO `ProjectCanonicalResourceDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `healthIngestionRecordId` | `string` | Sí | formato uuid | `@IsUUID()` | Registro crudo del que sale la proyección | `src/modules/health_data/dto/health-data.dto.ts:391` |
-| `logicalIdentifier` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | Identificador lógico del recurso en el custodio | `src/modules/health_data/dto/health-data.dto.ts:402` |
-| `normalizedPayloadJson` | `object` | Sí | — | `@IsObject()` | Payload normalizado del recurso | `src/modules/health_data/dto/health-data.dto.ts:409` |
-| `custodianTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:417` |
-| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente al que pertenece el recurso | `src/modules/health_data/dto/health-data.dto.ts:428` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:436` |
-| `sourceSystemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:444` |
-| `payloadFormatConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Formato del payload (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:455` |
-| `originalPayloadFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:463` |
-| `effectiveStartAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:471` |
-| `securityLabelsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Etiquetas de seguridad del recurso | `src/modules/health_data/dto/health-data.dto.ts:479` |
+| `healthIngestionRecordId` | `string` | Sí | formato uuid | `@IsUUID()` | Registro crudo del que sale la proyección | `src/modules/health_data/dto/health-data.dto.ts:403` |
+| `logicalIdentifier` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | Identificador lógico del recurso en el custodio | `src/modules/health_data/dto/health-data.dto.ts:414` |
+| `normalizedPayloadJson` | `object` | Sí | — | `@MaxJsonSize(256 * 1024)` `@IsObject()` | Payload normalizado del recurso | `src/modules/health_data/dto/health-data.dto.ts:422` |
+| `custodianTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Obsoleto: el custodio se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad. | `src/modules/health_data/dto/health-data.dto.ts:435` |
+| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente al que pertenece el recurso | `src/modules/health_data/dto/health-data.dto.ts:446` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:454` |
+| `sourceSystemId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:462` |
+| `payloadFormatConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Formato del payload (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:473` |
+| `originalPayloadFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:481` |
+| `effectiveStartAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:489` |
+| `securityLabelsJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | Etiquetas de seguridad del recurso | `src/modules/health_data/dto/health-data.dto.ts:498` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -800,13 +812,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `resourceId` | `string` | Sí | formato uuid | — | Identificador asociado a resource. | `src/modules/health_data/dto/health-data.dto.ts:490` |
-| `versionId` | `string` | No | formato uuid | — | Ausente si el contenido no cambió | `src/modules/health_data/dto/health-data.dto.ts:499` |
-| `versionNumber` | `number` | No | — | — | Ausente si el contenido no cambió | `src/modules/health_data/dto/health-data.dto.ts:505` |
-| `contentHash` | `string` | Sí | — | — | Valor de content hash mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:511` |
-| `created` | `boolean` | Sí | — | — | true si el recurso se creó en esta proyección | `src/modules/health_data/dto/health-data.dto.ts:517` |
-| `unchanged` | `boolean` | Sí | — | — | true si el payload es idéntico al vigente y no se versionó | `src/modules/health_data/dto/health-data.dto.ts:525` |
-| `provenanceRecordId` | `string` | No | formato uuid | — | Procedencia registrada de la ingesta | `src/modules/health_data/dto/health-data.dto.ts:534` |
+| `resourceId` | `string` | Sí | formato uuid | — | Identificador asociado a resource. | `src/modules/health_data/dto/health-data.dto.ts:509` |
+| `versionId` | `string` | No | formato uuid | — | Ausente si el contenido no cambió | `src/modules/health_data/dto/health-data.dto.ts:518` |
+| `versionNumber` | `number` | No | — | — | Ausente si el contenido no cambió | `src/modules/health_data/dto/health-data.dto.ts:524` |
+| `contentHash` | `string` | Sí | — | — | Valor de content hash mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:530` |
+| `created` | `boolean` | Sí | — | — | true si el recurso se creó en esta proyección | `src/modules/health_data/dto/health-data.dto.ts:536` |
+| `unchanged` | `boolean` | Sí | — | — | true si el payload es idéntico al vigente y no se versionó | `src/modules/health_data/dto/health-data.dto.ts:544` |
+| `provenanceRecordId` | `string` | No | formato uuid | — | Procedencia registrada de la ingesta | `src/modules/health_data/dto/health-data.dto.ts:553` |
 
 ### Respuestas posibles
 
@@ -816,8 +828,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de ingesta no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El registro no está en cola de proyección; PreconditionFailedException: El recurso está retirado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sistema de origen no corresponde a la conexión del lote; PreconditionFailedException: El registro no está en cola de proyección; PreconditionFailedException: El recurso está retirado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/health_data.md).
@@ -851,7 +862,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/deidentification-runs` la atiende `HealthDataController.recordDeidRun` (src/modules/health_data/controllers/health-data.controller.ts:341). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordDeidRunDto` (11 campos, 5 obligatorios). Delega en `DataReleaseService.recordDeidRun`. Crea filas en health_data.health_deidentification_runs, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Lee health_data.health_deidentification_profiles.
+`POST /health-data/deidentification-runs` la atiende `HealthDataController.recordDeidRun` (src/modules/health_data/controllers/health-data.controller.ts:341). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordDeidRunDto` (11 campos, 5 obligatorios). Delega en `DataReleaseService.recordDeidRun`. Crea filas en health_data.health_deidentification_runs, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Lee common.files, consent.consents, health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_deidentification_profiles.
 
 ### Requerimientos
 
@@ -859,15 +870,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:341` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.files` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertFileInTenant | `src/modules/health_data/services/data-release.service.ts:632` |
+| `consent.consents` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertConsentInTenant | `src/modules/health_data/services/data-release.service.ts:602` |
+| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertVersionsInTenant → CanonicalResourcesRepository.findVersionsByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:303` |
+| `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertVersionsInTenant → CanonicalResourcesRepository.findResourcesByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:225` |
 | `health_data.health_deidentification_profiles` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseRepository.findDeidProfileById | `src/modules/health_data/repositories/data-release.repository.ts:31` |
 | `health_data.health_deidentification_runs` | ESCRIBE | CREA | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseRepository.createDeidRun | `src/modules/health_data/repositories/data-release.repository.ts:150` |
 | `health_data.health_lineage_edges` | ESCRIBE | CREA | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → HealthProvenanceRepository.createLineageEdge | `src/modules/health_data/repositories/health-provenance.repository.ts:202` |
@@ -878,17 +893,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `healthDeidentificationProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1323` |
-| `purposeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Propósito de la liberación (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1333` |
-| `startedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:1340` |
-| `outcome` | `string` | Sí | valores: COMPLETED, FAILED | `@IsIn(DEID_OUTCOMES)` | — | `src/modules/health_data/dto/health-data.dto.ts:1347` |
-| `recordsProcessed` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros procesados; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1357` |
-| `consentDirectiveId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Directiva de consentimiento que autoriza el propósito | `src/modules/health_data/dto/health-data.dto.ts:1368` |
-| `inputManifestFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1376` |
-| `outputManifestFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1384` |
-| `recordsRejected` | `string` | No | — | `@IsOptional()` `@IsNumberString({ no_symbols: true })` | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1392` |
-| `verificationSummaryJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Resultado de la verificación de re-identificación | `src/modules/health_data/dto/health-data.dto.ts:1402` |
-| `sourceVersionIds` | `array<string>` | No | formato uuid | `@IsOptional()` `@IsArray()` `@IsUUID(undefined, { each: true })` | Versiones canónicas de las que salió la salida | `src/modules/health_data/dto/health-data.dto.ts:1415` |
+| `healthDeidentificationProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1351` |
+| `purposeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Propósito de la liberación (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1361` |
+| `startedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:1368` |
+| `outcome` | `string` | Sí | valores: COMPLETED, FAILED | `@IsIn(DEID_OUTCOMES)` | — | `src/modules/health_data/dto/health-data.dto.ts:1375` |
+| `recordsProcessed` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros procesados; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1385` |
+| `consentDirectiveId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Directiva de consentimiento que autoriza el propósito | `src/modules/health_data/dto/health-data.dto.ts:1396` |
+| `inputManifestFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1404` |
+| `outputManifestFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1412` |
+| `recordsRejected` | `string` | No | — | `@IsOptional()` `@IsNumberString({ no_symbols: true })` | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1420` |
+| `verificationSummaryJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | Resultado de la verificación de re-identificación | `src/modules/health_data/dto/health-data.dto.ts:1431` |
+| `sourceVersionIds` | `array<string>` | No | formato uuid | `@IsOptional()` `@IsArray()` `@IsUUID(undefined, { each: true })` | Versiones canónicas de las que salió la salida | `src/modules/health_data/dto/health-data.dto.ts:1444` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -928,10 +943,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1426` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:1432` |
-| `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada de la de-identificación | `src/modules/health_data/dto/health-data.dto.ts:1441` |
-| `lineageEdgeCount` | `number` | Sí | — | — | Aristas de linaje versión → manifiesto de salida | `src/modules/health_data/dto/health-data.dto.ts:1449` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1455` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:1461` |
+| `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada de la de-identificación | `src/modules/health_data/dto/health-data.dto.ts:1470` |
+| `lineageEdgeCount` | `number` | Sí | — | — | Aristas de linaje versión → manifiesto de salida | `src/modules/health_data/dto/health-data.dto.ts:1478` |
 
 ### Respuestas posibles
 
@@ -941,7 +956,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil de de-identificación no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de origen no encontrada; ResourceNotFoundException: Consentimiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El perfil de de-identificación no está activo; PreconditionFailedException: Una corrida completada debe declarar su manifiesto de salida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -984,11 +999,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MPI_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:301` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:301` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1014,10 +1029,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: MATCH, NO_MATCH | `@IsIn(MATCH_DECISIONS)` | — | `src/modules/health_data/dto/health-data.dto.ts:1101` |
-| `reasonText` | `string` | Sí | — | `@IsString()` | Por qué se decide así | `src/modules/health_data/dto/health-data.dto.ts:1108` |
-| `evidenceJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Evidencia en la que se apoya la decisión | `src/modules/health_data/dto/health-data.dto.ts:1118` |
-| `memberRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1126` |
+| `decision` | `string` | Sí | valores: MATCH, NO_MATCH | `@IsIn(MATCH_DECISIONS)` | — | `src/modules/health_data/dto/health-data.dto.ts:1124` |
+| `reasonText` | `string` | Sí | longitud máxima 1000 | `@IsString()` `@MaxLength(1000)` | Por qué se decide así | `src/modules/health_data/dto/health-data.dto.ts:1132` |
+| `evidenceJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | Evidencia en la que se apoya la decisión | `src/modules/health_data/dto/health-data.dto.ts:1143` |
+| `memberRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1151` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1045,11 +1060,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1137` |
-| `candidateStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a candidate status concept. | `src/modules/health_data/dto/health-data.dto.ts:1143` |
-| `clusterId` | `string` | No | formato uuid | — | Clúster en el que quedan los dos perfiles | `src/modules/health_data/dto/health-data.dto.ts:1152` |
-| `clusterCreated` | `boolean` | Sí | — | — | true si el clúster se creó en esta decisión | `src/modules/health_data/dto/health-data.dto.ts:1158` |
-| `addedMemberIds` | `array<string>` | Sí | formato uuid | — | Miembros añadidos al clúster | `src/modules/health_data/dto/health-data.dto.ts:1168` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1162` |
+| `candidateStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a candidate status concept. | `src/modules/health_data/dto/health-data.dto.ts:1168` |
+| `clusterId` | `string` | No | formato uuid | — | Clúster en el que quedan los dos perfiles | `src/modules/health_data/dto/health-data.dto.ts:1177` |
+| `clusterCreated` | `boolean` | Sí | — | — | true si el clúster se creó en esta decisión | `src/modules/health_data/dto/health-data.dto.ts:1183` |
+| `addedMemberIds` | `array<string>` | Sí | formato uuid | — | Miembros añadidos al clúster | `src/modules/health_data/dto/health-data.dto.ts:1193` |
 
 ### Respuestas posibles
 
@@ -1095,7 +1110,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/ingestion-batches` la atiende `HealthDataController.openBatch` (src/modules/health_data/controllers/health-data.controller.ts:113). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `OpenIngestionBatchDto` (7 campos, 3 obligatorios). Delega en `HealthIngestionService.openBatch`. Crea filas en health_data.health_ingestion_batches. Actualiza health_data.health_source_connections. Lee health_data.health_ingestion_batches, health_data.health_source_connections.
+`POST /health-data/ingestion-batches` la atiende `HealthDataController.openBatch` (src/modules/health_data/controllers/health-data.controller.ts:113). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `OpenIngestionBatchDto` (7 campos, 3 obligatorios). Delega en `HealthIngestionService.openBatch`. Crea filas en health_data.health_ingestion_batches. Lee health_data.health_ingestion_batches, health_data.health_source_connections, health_data.health_source_systems.
 
 ### Requerimientos
 
@@ -1103,31 +1118,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:113` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.health_ingestion_batches` | ESCRIBE | CREA | DIRECTA | HealthDataController.openBatch → HealthIngestionService.openBatch → HealthIngestionRepository.createBatch | `src/modules/health_data/repositories/health-ingestion.repository.ts:216` |
-| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.openBatch → HealthIngestionService.openBatch → HealthIngestionRepository.findBatchByIdentifier | `src/modules/health_data/repositories/health-ingestion.repository.ts:276` |
-| `health_data.health_source_connections` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.openBatch → HealthIngestionService.openBatch | `src/modules/health_data/services/health-ingestion.service.ts:188` |
+| `health_data.health_ingestion_batches` | ESCRIBE | CREA | DIRECTA | HealthDataController.openBatch → HealthIngestionService.openBatch → HealthIngestionRepository.createBatch | `src/modules/health_data/repositories/health-ingestion.repository.ts:245` |
+| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.openBatch → HealthIngestionService.openBatch → HealthIngestionRepository.findBatchByIdentifier | `src/modules/health_data/repositories/health-ingestion.repository.ts:305` |
 | `health_data.health_source_connections` | LEE | LEE | DIRECTA | HealthDataController.openBatch → HealthIngestionService.openBatch → HealthIngestionRepository.findConnectionForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:108` |
+| `health_data.health_source_systems` | LEE | LEE | DIRECTA | HealthDataController.openBatch → HealthIngestionService.openBatch → HealthIngestionRepository.findSourceSystemById | `src/modules/health_data/repositories/health-ingestion.repository.ts:141` |
 
 ### Cuerpo — DTO `OpenIngestionBatchDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `healthSourceConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión de origen que trae el lote | `src/modules/health_data/dto/health-data.dto.ts:129` |
-| `batchIdentifier` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Identificador del lote en el origen | `src/modules/health_data/dto/health-data.dto.ts:140` |
-| `ingestionModeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Modo de ingesta (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:150` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:158` |
-| `sourcePeriodStart` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:166` |
-| `sourcePeriodEnd` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:174` |
-| `payloadManifestFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Manifiesto del payload en almacenamiento | `src/modules/health_data/dto/health-data.dto.ts:185` |
+| `healthSourceConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión de origen que trae el lote | `src/modules/health_data/dto/health-data.dto.ts:136` |
+| `batchIdentifier` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Identificador del lote en el origen | `src/modules/health_data/dto/health-data.dto.ts:147` |
+| `ingestionModeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Modo de ingesta (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:157` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad. | `src/modules/health_data/dto/health-data.dto.ts:170` |
+| `sourcePeriodStart` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:178` |
+| `sourcePeriodEnd` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:186` |
+| `payloadManifestFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Manifiesto del payload en almacenamiento | `src/modules/health_data/dto/health-data.dto.ts:197` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1159,10 +1174,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:196` |
-| `batchIdentifier` | `string` | Sí | — | — | Valor de batch identifier mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:202` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:208` |
-| `duplicate` | `boolean` | Sí | — | — | true si el lote ya existía y se devuelve el mismo | `src/modules/health_data/dto/health-data.dto.ts:216` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:208` |
+| `batchIdentifier` | `string` | Sí | — | — | Valor de batch identifier mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:214` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:220` |
+| `duplicate` | `boolean` | Sí | — | — | true si el lote ya existía y se devuelve el mismo | `src/modules/health_data/dto/health-data.dto.ts:228` |
 
 ### Respuestas posibles
 
@@ -1172,7 +1187,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión de origen no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión de origen no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1195,7 +1209,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar el lote conciliando sus contadores
 - **Bloque:** Datos y NoSQL
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `HealthDataController.closeBatch` — `src/modules/health_data/controllers/health-data.controller.ts:155`
 
@@ -1207,7 +1221,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/ingestion-batches/{id}/close` la atiende `HealthDataController.closeBatch` (src/modules/health_data/controllers/health-data.controller.ts:155). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `CloseIngestionBatchDto` (2 campos, 0 obligatorios). Delega en `HealthIngestionService.closeBatch`. Actualiza health_data.health_ingestion_batches. Lee health_data.health_ingestion_batches, health_data.health_ingestion_records.
+`POST /health-data/ingestion-batches/{id}/close` la atiende `HealthDataController.closeBatch` (src/modules/health_data/controllers/health-data.controller.ts:155). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `CloseIngestionBatchDto` (2 campos, 0 obligatorios). Delega en `HealthIngestionService.closeBatch`. Lee health_data.health_ingestion_batches, health_data.health_ingestion_records.
 
 ### Requerimientos
 
@@ -1215,19 +1229,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:155` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.health_ingestion_batches` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.closeBatch → HealthIngestionService.closeBatch | `src/modules/health_data/services/health-ingestion.service.ts:287` |
-| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.closeBatch → HealthIngestionService.closeBatch → HealthIngestionRepository.findBatchForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:263` |
-| `health_data.health_ingestion_records` | LEE | LEE | DIRECTA | HealthDataController.closeBatch → HealthIngestionService.closeBatch → HealthIngestionRepository.findRecordsByBatch | `src/modules/health_data/repositories/health-ingestion.repository.ts:371` |
+| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.closeBatch → HealthIngestionService.closeBatch → HealthIngestionRepository.findBatchForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:292` |
+| `health_data.health_ingestion_records` | LEE | LEE | DIRECTA | HealthDataController.closeBatch → HealthIngestionService.closeBatch → HealthIngestionRepository.findRecordsByBatch | `src/modules/health_data/repositories/health-ingestion.repository.ts:400` |
 
 ### Parámetros
 
@@ -1239,8 +1252,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `contentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del contenido completo del lote | `src/modules/health_data/dto/health-data.dto.ts:324` |
-| `recordsRejected` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Registros que el origen rechazó antes de llegar | `src/modules/health_data/dto/health-data.dto.ts:336` |
+| `contentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del contenido completo del lote | `src/modules/health_data/dto/health-data.dto.ts:336` |
+| `recordsRejected` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Registros que el origen rechazó antes de llegar | `src/modules/health_data/dto/health-data.dto.ts:348` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1263,11 +1276,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:347` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:353` |
-| `recordsReceived` | `string` | Sí | — | — | Registros recibidos, contados contra la tabla; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:362` |
-| `recordsAccepted` | `string` | Sí | — | — | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:368` |
-| `recordsRejected` | `string` | Sí | — | — | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:374` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:359` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:365` |
+| `recordsReceived` | `string` | Sí | — | — | Registros recibidos, contados contra la tabla; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:374` |
+| `recordsAccepted` | `string` | Sí | — | — | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:380` |
+| `recordsRejected` | `string` | Sí | — | — | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:386` |
 
 ### Respuestas posibles
 
@@ -1277,7 +1290,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
 | 409 | `CONFLICT` | ConflictException: El lote ya está cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1320,19 +1332,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:134` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.recordIngestionRecord → HealthIngestionService.recordIngestionRecord → HealthIngestionRepository.findBatchForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:263` |
-| `health_data.health_ingestion_records` | ESCRIBE | CREA | DIRECTA | HealthDataController.recordIngestionRecord → HealthIngestionService.recordIngestionRecord → HealthIngestionRepository.createRecord | `src/modules/health_data/repositories/health-ingestion.repository.ts:295` |
-| `health_data.health_ingestion_records` | LEE | LEE | DIRECTA | HealthDataController.recordIngestionRecord → HealthIngestionService.recordIngestionRecord → HealthIngestionRepository.findRecordBySource | `src/modules/health_data/repositories/health-ingestion.repository.ts:353` |
+| `health_data.health_ingestion_batches` | LEE | LEE | DIRECTA | HealthDataController.recordIngestionRecord → HealthIngestionService.recordIngestionRecord → HealthIngestionRepository.findBatchForUpdate | `src/modules/health_data/repositories/health-ingestion.repository.ts:292` |
+| `health_data.health_ingestion_records` | ESCRIBE | CREA | DIRECTA | HealthDataController.recordIngestionRecord → HealthIngestionService.recordIngestionRecord → HealthIngestionRepository.createRecord | `src/modules/health_data/repositories/health-ingestion.repository.ts:324` |
+| `health_data.health_ingestion_records` | LEE | LEE | DIRECTA | HealthDataController.recordIngestionRecord → HealthIngestionService.recordIngestionRecord → HealthIngestionRepository.findRecordBySource | `src/modules/health_data/repositories/health-ingestion.repository.ts:382` |
 
 ### Parámetros
 
@@ -1344,12 +1356,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `sourceRecordIdentifier` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | Identificador del registro en el origen | `src/modules/health_data/dto/health-data.dto.ts:234` |
-| `resourceTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de recurso (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:244` |
-| `payloadHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del payload; detecta que nada cambió | `src/modules/health_data/dto/health-data.dto.ts:255` |
-| `sourceVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del registro en el origen | `src/modules/health_data/dto/health-data.dto.ts:267` |
-| `sourceLastUpdatedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:275` |
-| `payloadFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Payload persistido en almacenamiento | `src/modules/health_data/dto/health-data.dto.ts:286` |
+| `sourceRecordIdentifier` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | Identificador del registro en el origen | `src/modules/health_data/dto/health-data.dto.ts:246` |
+| `resourceTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de recurso (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:256` |
+| `payloadHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del payload; detecta que nada cambió | `src/modules/health_data/dto/health-data.dto.ts:267` |
+| `sourceVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del registro en el origen | `src/modules/health_data/dto/health-data.dto.ts:279` |
+| `sourceLastUpdatedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:287` |
+| `payloadFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Payload persistido en almacenamiento | `src/modules/health_data/dto/health-data.dto.ts:298` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1380,9 +1392,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:297` |
-| `processingStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a processing status concept. | `src/modules/health_data/dto/health-data.dto.ts:303` |
-| `duplicate` | `boolean` | Sí | — | — | true si el registro ya estaba en el lote | `src/modules/health_data/dto/health-data.dto.ts:309` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:309` |
+| `processingStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a processing status concept. | `src/modules/health_data/dto/health-data.dto.ts:315` |
+| `duplicate` | `boolean` | Sí | — | — | true si el registro ya estaba en el lote | `src/modules/health_data/dto/health-data.dto.ts:321` |
 
 ### Respuestas posibles
 
@@ -1392,7 +1404,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El lote ya no está recibiendo registros |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1435,10 +1446,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:281` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1455,18 +1466,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `healthDataQualityRuleSetId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:996` |
-| `startedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:1003` |
-| `recordsEvaluated` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros evaluados; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1013` |
-| `healthIngestionBatchId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ámbito: lote de ingesta | `src/modules/health_data/dto/health-data.dto.ts:1024` |
-| `canonicalResourceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ámbito: recurso canónico | `src/modules/health_data/dto/health-data.dto.ts:1035` |
-| `findings` | `array<HealthDataQualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/health_data/dto/health-data.dto.ts:1045` |
+| `healthDataQualityRuleSetId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1018` |
+| `startedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/health_data/dto/health-data.dto.ts:1025` |
+| `recordsEvaluated` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros evaluados; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1035` |
+| `healthIngestionBatchId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ámbito: lote de ingesta | `src/modules/health_data/dto/health-data.dto.ts:1046` |
+| `canonicalResourceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ámbito: recurso canónico | `src/modules/health_data/dto/health-data.dto.ts:1057` |
+| `findings` | `array<HealthDataQualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/health_data/dto/health-data.dto.ts:1067` |
 | `findings[].healthDataQualityRuleId` | `string` | No | formato uuid | — | Regla que se incumple | sin fuente |
 | `findings[].canonicalHealthResourceId` | `string` | No | formato uuid | — | — | sin fuente |
 | `findings[].canonicalResourceVersionId` | `string` | No | formato uuid | — | — | sin fuente |
 | `findings[].fieldPath` | `string` | No | longitud máxima 500 | — | Campo afectado | sin fuente |
 | `findings[].observedValueHash` | `string` | No | longitud máxima 200 | — | Hash del valor observado; el valor en claro no se guarda | sin fuente |
-| `summaryJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:1053` |
+| `summaryJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:1076` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1506,7 +1517,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1064` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1087` |
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | sin fuente |
 | `evaluatedRecordCount` | `string` | Sí | — | — | Valor de evaluated record count mantenido por la instancia. | sin fuente |
 | `failedRecordCount` | `string` | Sí | — | — | Valor de failed record count mantenido por la instancia. | sin fuente |
@@ -1556,7 +1567,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/source-connections` la atiende `HealthDataController.createSourceConnection` (src/modules/health_data/controllers/health-data.controller.ts:93). Exige sesión con alguno de los roles HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN. Valida el cuerpo como `CreateSourceConnectionDto` (7 campos, 7 obligatorios). Delega en `HealthIngestionService.createSourceConnection`. Crea filas en health_data.health_source_connections, health_data.health_source_systems. Lee health_data.health_source_systems.
+`POST /health-data/source-connections` la atiende `HealthDataController.createSourceConnection` (src/modules/health_data/controllers/health-data.controller.ts:93). Exige sesión con alguno de los roles HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN. Valida el cuerpo como `CreateSourceConnectionDto` (7 campos, 6 obligatorios). Delega en `HealthIngestionService.createSourceConnection`. Crea filas en health_data.health_source_connections, health_data.health_source_systems. Lee health_data.health_source_systems.
 
 ### Requerimientos
 
@@ -1564,36 +1575,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.health_source_connections` | ESCRIBE | CREA | DIRECTA | HealthDataController.createSourceConnection → HealthIngestionService.createSourceConnection → HealthIngestionRepository.createConnection | `src/modules/health_data/repositories/health-ingestion.repository.ts:189` |
-| `health_data.health_source_systems` | ESCRIBE | CREA | DIRECTA | HealthDataController.createSourceConnection → HealthIngestionService.createSourceConnection → HealthIngestionRepository.createSourceSystem | `src/modules/health_data/repositories/health-ingestion.repository.ts:154` |
-| `health_data.health_source_systems` | LEE | LEE | DIRECTA | HealthDataController.createSourceConnection → HealthIngestionService.createSourceConnection → HealthIngestionRepository.findSourceSystemByCode | `src/modules/health_data/repositories/health-ingestion.repository.ts:128` |
+| `health_data.health_source_connections` | ESCRIBE | CREA | DIRECTA | HealthDataController.createSourceConnection → HealthIngestionService.createSourceConnection → HealthIngestionRepository.createConnection | `src/modules/health_data/repositories/health-ingestion.repository.ts:218` |
+| `health_data.health_source_systems` | ESCRIBE | CREA | DIRECTA | HealthDataController.createSourceConnection → HealthIngestionService.createSourceConnection → HealthIngestionRepository.createSourceSystem | `src/modules/health_data/repositories/health-ingestion.repository.ts:183` |
+| `health_data.health_source_systems` | LEE | LEE | DIRECTA | HealthDataController.createSourceConnection → HealthIngestionService.createSourceConnection → HealthIngestionRepository.findSourceSystemByCode | `src/modules/health_data/repositories/health-ingestion.repository.ts:157` |
 
 ### Cuerpo — DTO `CreateSourceConnectionDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant propietario del origen | `src/modules/health_data/dto/health-data.dto.ts:59` |
-| `sourceSystemCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código del sistema de origen; se crea si no existe | `src/modules/health_data/dto/health-data.dto.ts:70` |
-| `sourceSystemName` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre del sistema de origen | `src/modules/health_data/dto/health-data.dto.ts:78` |
-| `sourceTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de sistema de origen | `src/modules/health_data/dto/health-data.dto.ts:85` |
-| `trustLevelConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Nivel de confianza del origen | `src/modules/health_data/dto/health-data.dto.ts:92` |
-| `connectionTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de conexión | `src/modules/health_data/dto/health-data.dto.ts:99` |
-| `endpointUri` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | URI del extremo del origen | `src/modules/health_data/dto/health-data.dto.ts:107` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad. | `src/modules/health_data/dto/health-data.dto.ts:66` |
+| `sourceSystemCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código del sistema de origen; se crea si no existe | `src/modules/health_data/dto/health-data.dto.ts:77` |
+| `sourceSystemName` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre del sistema de origen | `src/modules/health_data/dto/health-data.dto.ts:85` |
+| `sourceTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de sistema de origen | `src/modules/health_data/dto/health-data.dto.ts:92` |
+| `trustLevelConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Nivel de confianza del origen | `src/modules/health_data/dto/health-data.dto.ts:99` |
+| `connectionTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de conexión | `src/modules/health_data/dto/health-data.dto.ts:106` |
+| `endpointUri` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | URI del extremo del origen | `src/modules/health_data/dto/health-data.dto.ts:114` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "sourceSystemCode": "CODIGO_EJEMPLO",
   "sourceSystemName": "Nombre de ejemplo",
   "sourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1623,9 +1633,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la conexión. | `src/modules/health_data/dto/health-data.dto.ts:113` |
-| `healthSourceSystemId` | `string` | Sí | formato uuid | — | Sistema de origen del que cuelga (creado o reutilizado). | `src/modules/health_data/dto/health-data.dto.ts:115` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado: nace activa. | `src/modules/health_data/dto/health-data.dto.ts:117` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la conexión. | `src/modules/health_data/dto/health-data.dto.ts:120` |
+| `healthSourceSystemId` | `string` | Sí | formato uuid | — | Sistema de origen del que cuelga (creado o reutilizado). | `src/modules/health_data/dto/health-data.dto.ts:122` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado: nace activa. | `src/modules/health_data/dto/health-data.dto.ts:124` |
 
 ### Respuestas posibles
 
@@ -1674,35 +1684,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:322` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.patient_timeline_entries` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectTimelineEntry → PatientIdentityService.projectTimelineEntry → PatientIdentityRepository.createTimelineEntry | `src/modules/health_data/repositories/patient-identity.repository.ts:382` |
-| `health_data.patient_timeline_entries` | LEE | LEE | DIRECTA | HealthDataController.projectTimelineEntry → PatientIdentityService.projectTimelineEntry → PatientIdentityRepository.findTimelineEntryBySource | `src/modules/health_data/repositories/patient-identity.repository.ts:415` |
+| `health_data.patient_timeline_entries` | ESCRIBE | CREA | DIRECTA | HealthDataController.projectTimelineEntry → PatientIdentityService.projectTimelineEntry → PatientIdentityRepository.createTimelineEntry | `src/modules/health_data/repositories/patient-identity.repository.ts:414` |
+| `health_data.patient_timeline_entries` | LEE | LEE | DIRECTA | HealthDataController.projectTimelineEntry → PatientIdentityService.projectTimelineEntry → PatientIdentityRepository.findTimelineEntryBySource | `src/modules/health_data/repositories/patient-identity.repository.ts:447` |
 
 ### Cuerpo — DTO `ProjectTimelineEntryDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1182` |
-| `eventTime` | `string` | Sí | formato date-time | `@IsISO8601()` | Cuándo ocurrió el evento clínico | `src/modules/health_data/dto/health-data.dto.ts:1192` |
-| `eventTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de evento (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1202` |
-| `sourceEntityTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de la entidad de origen (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1212` |
-| `sourceEntityId` | `string` | Sí | formato uuid | `@IsUUID()` | Entidad de origen concreta | `src/modules/health_data/dto/health-data.dto.ts:1219` |
-| `custodianTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1227` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1235` |
-| `organizationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1243` |
-| `title` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/health_data/dto/health-data.dto.ts:1252` |
-| `summaryRedacted` | `string` | No | — | `@IsOptional()` `@IsString()` | Resumen ya redactado según el consentimiento; nunca el dato clínico en claro | `src/modules/health_data/dto/health-data.dto.ts:1263` |
-| `clinicalPriorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1271` |
-| `patientVisibilityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Visibilidad para el paciente | `src/modules/health_data/dto/health-data.dto.ts:1282` |
-| `securityLabelsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:1290` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1207` |
+| `eventTime` | `string` | Sí | formato date-time | `@IsISO8601()` | Cuándo ocurrió el evento clínico | `src/modules/health_data/dto/health-data.dto.ts:1217` |
+| `eventTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de evento (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1227` |
+| `sourceEntityTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de la entidad de origen (catálogo abierto) | `src/modules/health_data/dto/health-data.dto.ts:1237` |
+| `sourceEntityId` | `string` | Sí | formato uuid | `@IsUUID()` | Entidad de origen concreta | `src/modules/health_data/dto/health-data.dto.ts:1244` |
+| `custodianTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1252` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1260` |
+| `organizationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1268` |
+| `title` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/health_data/dto/health-data.dto.ts:1277` |
+| `summaryRedacted` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Resumen ya redactado según el consentimiento; nunca el dato clínico en claro | `src/modules/health_data/dto/health-data.dto.ts:1290` |
+| `clinicalPriorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:1298` |
+| `patientVisibilityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Visibilidad para el paciente | `src/modules/health_data/dto/health-data.dto.ts:1309` |
+| `securityLabelsJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:1318` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1742,8 +1752,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1301` |
-| `duplicate` | `boolean` | Sí | — | — | true si la entrada ya existía para esa entidad y evento | `src/modules/health_data/dto/health-data.dto.ts:1309` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1329` |
+| `duplicate` | `boolean` | Sí | — | — | true si la entrada ya existía para esa entidad y evento | `src/modules/health_data/dto/health-data.dto.ts:1337` |
 
 ### Respuestas posibles
 
@@ -1794,17 +1804,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN | `src/modules/health_data/controllers/health-data.controller.ts:256` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:256` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | HealthDataController.validateVersion → HealthValidationService.validateVersion → CanonicalResourcesRepository.findVersionById | `src/modules/health_data/repositories/canonical-resources.repository.ts:236` |
+| `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | HealthDataController.validateVersion → HealthValidationService.validateVersion → CanonicalResourcesRepository.findVersionById | `src/modules/health_data/repositories/canonical-resources.repository.ts:271` |
 | `health_data.canonical_health_resources` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthDataController.validateVersion → HealthValidationService.validateVersion | `src/modules/health_data/services/health-validation.service.ts:165` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.validateVersion → HealthValidationService.validateVersion → CanonicalResourcesRepository.findResourceForUpdate | `src/modules/health_data/repositories/canonical-resources.repository.ts:158` |
 | `health_data.fhir_profile_versions` | LEE | LEE | DIRECTA | HealthDataController.validateVersion → HealthValidationService.validateVersion → HealthValidationRepository.findProfileVersionById | `src/modules/health_data/repositories/health-validation.repository.ts:36` |
@@ -1822,16 +1832,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `fhirProfileVersionId` | `string` | Sí | formato uuid | `@IsUUID()` | Versión del perfil FHIR contra la que se valida | `src/modules/health_data/dto/health-data.dto.ts:853` |
-| `validatorVersion` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Versión del validador que produjo el resultado | `src/modules/health_data/dto/health-data.dto.ts:864` |
-| `startedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Cuándo empezó la validación | `src/modules/health_data/dto/health-data.dto.ts:874` |
-| `issues` | `array<ValidationIssueDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ValidationIssueDto)` | Hallazgos del validador | `src/modules/health_data/dto/health-data.dto.ts:887` |
-| `issues[].severity` | `string` | No | valores: FATAL, ERROR, WARNING, INFORMATION | `@IsIn(ISSUE_SEVERITIES)` | — | `src/modules/health_data/dto/health-data.dto.ts:803` |
-| `issues[].issueCode` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/health_data/dto/health-data.dto.ts:812` |
-| `issues[].expressionPath` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Ruta FHIRPath del hallazgo | `src/modules/health_data/dto/health-data.dto.ts:824` |
-| `issues[].diagnosticsText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/health_data/dto/health-data.dto.ts:832` |
-| `issues[].locationJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:840` |
-| `summaryJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:895` |
+| `fhirProfileVersionId` | `string` | Sí | formato uuid | `@IsUUID()` | Versión del perfil FHIR contra la que se valida | `src/modules/health_data/dto/health-data.dto.ts:874` |
+| `validatorVersion` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Versión del validador que produjo el resultado | `src/modules/health_data/dto/health-data.dto.ts:885` |
+| `startedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Cuándo empezó la validación | `src/modules/health_data/dto/health-data.dto.ts:895` |
+| `issues` | `array<ValidationIssueDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ValidationIssueDto)` | Hallazgos del validador | `src/modules/health_data/dto/health-data.dto.ts:908` |
+| `issues[].severity` | `string` | No | valores: FATAL, ERROR, WARNING, INFORMATION | `@IsIn(ISSUE_SEVERITIES)` | — | `src/modules/health_data/dto/health-data.dto.ts:822` |
+| `issues[].issueCode` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/health_data/dto/health-data.dto.ts:831` |
+| `issues[].expressionPath` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Ruta FHIRPath del hallazgo | `src/modules/health_data/dto/health-data.dto.ts:843` |
+| `issues[].diagnosticsText` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/health_data/dto/health-data.dto.ts:852` |
+| `issues[].locationJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:861` |
+| `summaryJson` | `object` | No | — | `@IsOptional()` `@MaxJsonSize(256 * 1024)` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:917` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1869,11 +1879,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:906` |
-| `resultConceptId` | `string` | Sí | formato uuid | — | Resultado derivado de las severidades halladas | `src/modules/health_data/dto/health-data.dto.ts:915` |
-| `issueCount` | `number` | Sí | — | — | Valor de issue count mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:921` |
-| `quarantined` | `boolean` | Sí | — | — | true si el recurso quedó en cuarentena | `src/modules/health_data/dto/health-data.dto.ts:927` |
-| `duplicate` | `boolean` | Sí | — | — | true si esa validación ya se había corrido | `src/modules/health_data/dto/health-data.dto.ts:933` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:928` |
+| `resultConceptId` | `string` | Sí | formato uuid | — | Resultado derivado de las severidades halladas | `src/modules/health_data/dto/health-data.dto.ts:937` |
+| `issueCount` | `number` | Sí | — | — | Valor de issue count mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:943` |
+| `quarantined` | `boolean` | Sí | — | — | true si el recurso quedó en cuarentena | `src/modules/health_data/dto/health-data.dto.ts:949` |
+| `duplicate` | `boolean` | Sí | — | — | true si esa validación ya se había corrido | `src/modules/health_data/dto/health-data.dto.ts:955` |
 
 ### Respuestas posibles
 

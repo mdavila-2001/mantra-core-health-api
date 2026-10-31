@@ -41,6 +41,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuditTrailInterceptor } from './modules/audit/interceptors/audit-trail.interceptor';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
+import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admissions.config';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -53,6 +54,7 @@ import { CrmModule } from './modules/crm/crm.module';
 import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/cross_store_consistency.module';
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
+import { MedicalCentersModule } from './modules/medical_centers/medical_centers.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
 import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
@@ -94,6 +96,8 @@ import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
 import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
+import { pharmacyErpEnvSchema } from './modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env';
+import { paymentsGatewayEnvSchema } from './modules/payments/gateway/payments-gateway.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -127,8 +131,11 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
+        .concat(admissionsEnvSchema)
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
+        .concat(pharmacyErpEnvSchema)
+        .concat(paymentsGatewayEnvSchema)
         .concat(verificationBypassEnvSchema)
         .concat(seedBootEnvSchema),
     }),
@@ -203,6 +210,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     CrossStoreConsistencyModule,
     DelegatedAccessModule,
     DiagnosticUnitsModule,
+    MedicalCentersModule,
     DiagnosticsModule,
     EducationModule,
     ErpModule,

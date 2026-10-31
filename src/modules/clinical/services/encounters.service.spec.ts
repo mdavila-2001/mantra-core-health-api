@@ -61,6 +61,16 @@ function build() {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
     listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
+  // REQ-16-035: la relación asistencial del check-in se cubre en su propio spec.
+  const careRelationships = {
+    recordEncounterCareRelationships: mockFn().mockResolvedValue([]),
+    notifyEncounterCareRelationshipRequests:
+      mockFn().mockResolvedValue(undefined),
+  };
+  // FAC-01 · S-3: la factura de la cita cobrada se liga al encuentro.
+  const bookingsRepo = {
+    linkPaymentInvoiceToEncounter: mockFn().mockResolvedValue(false),
+  };
   const service = new EncountersService(
     em as any,
     encountersRepo,
@@ -70,9 +80,13 @@ function build() {
     logger as any,
     clinicalRead as any,
     filesService as any,
+    careRelationships as any,
+    bookingsRepo as any,
   );
   return {
     service,
+    bookingsRepo,
+    em,
     tx,
     encountersRepo,
     episodesRepo,
@@ -80,6 +94,7 @@ function build() {
     seal,
     clinicalRead,
     filesService,
+    careRelationships,
   };
 }
 
@@ -194,6 +209,78 @@ describe('EncountersService', () => {
       );
     });
 
+    it('deja la relación asistencial de los profesionales del encuentro dentro de la transacción (REQ-16-035)', async () => {
+      const d = build();
+      d.encountersRepo.create.mockReturnValue(encounter());
+      d.encountersRepo.createParticipant.mockReturnValue({ id: 'part1' });
+      await d.service.checkIn(
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          primaryPractitionerId: 'hp-main',
+          participants: [{ practitionerProfileId: 'hp1' }],
+        },
+        actor,
+      );
+      expect(
+        d.careRelationships.recordEncounterCareRelationships,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          practitionerProfileIds: ['hp-main', 'hp1'],
+        },
+        actor,
+      );
+    });
+
+    it('avisa al paciente de las solicitudes sólo después del commit (REQ-16-035)', async () => {
+      const d = build();
+      const notices = [
+        { relId: 'cr-1', patientProfileId: 'p1', tenantId: 't1' },
+      ];
+      d.encountersRepo.create.mockReturnValue(encounter());
+      d.careRelationships.recordEncounterCareRelationships.mockResolvedValue(
+        notices,
+      );
+      const order: string[] = [];
+      d.careRelationships.notifyEncounterCareRelationshipRequests.mockImplementation(
+        () => {
+          order.push('notify');
+          return Promise.resolve();
+        },
+      );
+      const transactional = d.em.transactional;
+      d.em.transactional = mockFn(async (cb: any) => {
+        const result = await transactional(cb);
+        order.push('commit');
+        return result;
+      });
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1' },
+        actor,
+      );
+      expect(order).toEqual(['commit', 'notify']);
+      expect(
+        d.careRelationships.notifyEncounterCareRelationshipRequests,
+      ).toHaveBeenCalledWith(notices, actor);
+    });
+
+    it('no avisa ni deja relación si el encuentro ya existía para la cita', async () => {
+      const d = build();
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([
+        { ...encounter(), id: 'enc-prev' },
+      ]);
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'a1' },
+        actor,
+      );
+      expect(
+        d.careRelationships.recordEncounterCareRelationships,
+      ).not.toHaveBeenCalled();
+    });
+
     it('rejects when the referenced episode does not exist', async () => {
       const d = build();
       d.episodesRepo.findById.mockResolvedValue(null);
@@ -270,6 +357,27 @@ describe('EncountersService', () => {
       );
     });
 
+    it('FAC-01 · S-3: links the paid appointment invoice to the new encounter', async () => {
+      const d = build();
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([]);
+      d.encountersRepo.create.mockReturnValue(encounter());
+
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      expect(d.bookingsRepo.linkPaymentInvoiceToEncounter).toHaveBeenCalledWith(
+        d.tx,
+        {
+          id: encounter().id,
+          appointmentId: 'appt1',
+          patientProfileId: 'p1',
+          tenantId: 't1',
+        },
+      );
+    });
+
     it('does not look up the appointment when none is given', async () => {
       const d = build();
       d.encountersRepo.create.mockReturnValue(encounter());
@@ -281,6 +389,9 @@ describe('EncountersService', () => {
 
       expect(d.encountersRepo.findAppointmentForUpdate).not.toHaveBeenCalled();
       expect(d.encountersRepo.findByAppointmentId).not.toHaveBeenCalled();
+      expect(
+        d.bookingsRepo.linkPaymentInvoiceToEncounter,
+      ).not.toHaveBeenCalled();
     });
   });
 

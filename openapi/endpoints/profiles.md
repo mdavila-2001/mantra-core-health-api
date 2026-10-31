@@ -2,76 +2,5067 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 57 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 84 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
-- **Controladores:** `PractitionerSignatureAssetsController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
+- **Etiquetas OpenAPI:** `admissions`, `profiles-affiliations`, `profiles-patients`, `profiles-practitioner-admission`, `profiles-practitioners`, `profiles-primary-practitioner`
+- **Controladores:** `AdmissionsController`, `OwnAdmissionController`, `PatientAddressBookController`, `PractitionerSignatureAssetsController`, `PrimaryPractitionerController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [GET /profiles/credentials](#1-get-profiles-credentials) — Listar credenciales pendientes de verificación
-2. [POST /profiles/credentials/{credentialId}/verify](#2-post-profiles-credentials-credentialid-verify) — Verificar credencial profesional
-3. [GET /profiles/patients](#3-get-profiles-patients) — UC-05-13: listado paginado de pacientes
-4. [POST /profiles/patients](#4-post-profiles-patients) — Alta de persona y perfil de paciente
-5. [GET /profiles/patients/{profileId}](#5-get-profiles-patients-profileid) — UC-05-14: ficha de filiación de un paciente (F-01)
-6. [POST /profiles/patients/{profileId}/identity-links](#6-post-profiles-patients-profileid-identity-links) — Vincular identidad externa de paciente (MPI)
-7. [POST /profiles/patients/{profileId}/portal-proxies](#7-post-profiles-patients-profileid-portal-proxies) — Otorgar proxy de portal a un representante
-8. [POST /profiles/patients/{profileId}/related-persons](#8-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
-9. [GET /profiles/patients/me](#9-get-profiles-patients-me) — Consultar los propios datos de filiación
-10. [PATCH /profiles/patients/me](#10-patch-profiles-patients-me) — Editar los propios datos de filiación
-11. [GET /profiles/patients/me/dependent-candidates](#11-get-profiles-patients-me-dependent-candidates) — Buscar por nombre a quién pedirle que deje representarla
-12. [POST /profiles/patients/me/dependent-requests](#12-post-profiles-patients-me-dependent-requests) — Pedir representar a una persona que ya tiene cuenta
-13. [POST /profiles/patients/me/dependent-requests/{id}/accept](#13-post-profiles-patients-me-dependent-requests-id-accept) — Aceptar una solicitud de dependiente
-14. [POST /profiles/patients/me/dependent-requests/{id}/reject](#14-post-profiles-patients-me-dependent-requests-id-reject) — Rechazar una solicitud de dependiente
-15. [GET /profiles/patients/me/dependent-requests/incoming](#15-get-profiles-patients-me-dependent-requests-incoming) — Listar las solicitudes de dependiente recibidas
-16. [GET /profiles/patients/me/dependents](#16-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
-17. [POST /profiles/patients/me/dependents](#17-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
-18. [DELETE /profiles/patients/me/photo](#18-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
-19. [PUT /profiles/patients/me/photo](#19-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
-20. [GET /profiles/patients/me/summary](#20-get-profiles-patients-me-summary) — Consultar el resumen propio
-21. [POST /profiles/patients/merge](#21-post-profiles-patients-merge) — Fusionar pacientes duplicados
-22. [GET /profiles/patients/merge-events](#22-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
-23. [POST /profiles/patients/merge/{eventId}/reverse](#23-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-24. [POST /profiles/patients/search](#24-post-profiles-patients-search) — UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
-25. [POST /profiles/persons/{personId}/account-links](#25-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-26. [POST /profiles/persons/{personId}/decease](#26-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-27. [GET /profiles/practitioners](#27-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
-28. [POST /profiles/practitioners](#28-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-29. [POST /profiles/practitioners/{profileId}/affiliations](#29-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
-30. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#30-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-31. [DELETE /profiles/practitioners/{profileId}/photo](#31-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
-32. [PUT /profiles/practitioners/{profileId}/photo](#32-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
-33. [POST /profiles/practitioners/{profileId}/specialties](#33-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-34. [GET /profiles/practitioners/{profileId}/summary](#34-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
-35. [PATCH /profiles/practitioners/me](#35-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-36. [GET /profiles/practitioners/me/affiliations](#36-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-37. [POST /profiles/practitioners/me/affiliations](#37-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-38. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#38-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
-39. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#39-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
-40. [POST /profiles/practitioners/me/credentials](#40-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
-41. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#41-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
-42. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#42-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
-43. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#43-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
-44. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#44-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
-45. [GET /profiles/practitioners/me/linkable-organizations](#45-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-46. [GET /profiles/practitioners/me/onboarding](#46-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-47. [GET /profiles/practitioners/me/signature-assets](#47-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
-48. [PUT /profiles/practitioners/me/signature-assets](#48-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
-49. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#49-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
-50. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#50-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
-51. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#51-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
-52. [GET /profiles/practitioners/me/summary](#52-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-53. [GET /profiles/practitioners/specialty-counts](#53-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-54. [GET /tenants/{tenantId}/practitioner-requests](#54-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-55. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#55-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-56. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#56-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-57. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#57-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+1. [GET /admissions](#1-get-admissions) — Bandeja de admisiones
+2. [GET /admissions/{id}](#2-get-admissions-id) — Detalle de una admisión
+3. [POST /admissions/{id}/claim](#3-post-admissions-id-claim) — Tomar la admisión para revisarla
+4. [POST /admissions/{id}/decision](#4-post-admissions-id-decision) — Resolver la admisión: VERIFIED o REJECTED
+5. [GET /admissions/{id}/documents/{fileId}/content](#5-get-admissions-id-documents-fileid-content) — Contenido de un documento de la admisión (URL firmada)
+6. [POST /admissions/{id}/documents/{fileId}/download-url](#6-post-admissions-id-documents-fileid-download-url) — URL firmada para abrir un documento de la admisión
+7. [POST /admissions/{id}/items/{itemId}/review](#7-post-admissions-id-items-itemid-review) — Revisar un ítem del checklist
+8. [POST /admissions/{id}/reassign](#8-post-admissions-id-reassign) — Pasar la revisión a otro revisor
+9. [POST /admissions/{id}/reinstate](#9-post-admissions-id-reinstate) — Reponer una verificación suspendida (devuelve el check)
+10. [POST /admissions/{id}/release](#10-post-admissions-id-release) — Soltar una revisión tomada para que otro la tome
+11. [POST /admissions/{id}/request-info](#11-post-admissions-id-request-info) — Pedir información al médico
+12. [POST /admissions/{id}/suspend](#12-post-admissions-id-suspend) — Suspender una verificación (quita el check)
+13. [POST /admissions/expire-sweep](#13-post-admissions-expire-sweep) — Barrido de vencimientos
+14. [POST /admissions/search](#14-post-admissions-search) — Bandeja de admisiones con los filtros en el cuerpo
+15. [GET /profiles/credentials](#15-get-profiles-credentials) — Listar credenciales pendientes de verificación
+16. [POST /profiles/credentials/{credentialId}/verify](#16-post-profiles-credentials-credentialid-verify) — Verificar credencial profesional
+17. [GET /profiles/patients](#17-get-profiles-patients) — UC-05-13: listado paginado de pacientes
+18. [POST /profiles/patients](#18-post-profiles-patients) — Alta de persona y perfil de paciente
+19. [GET /profiles/patients/{profileId}](#19-get-profiles-patients-profileid) — UC-05-14: ficha de filiación de un paciente (F-01)
+20. [POST /profiles/patients/{profileId}/identity-links](#20-post-profiles-patients-profileid-identity-links) — Vincular identidad externa de paciente (MPI)
+21. [POST /profiles/patients/{profileId}/portal-proxies](#21-post-profiles-patients-profileid-portal-proxies) — Otorgar proxy de portal a un representante
+22. [POST /profiles/patients/{profileId}/related-persons](#22-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
+23. [GET /profiles/patients/me](#23-get-profiles-patients-me) — Consultar los propios datos de filiación
+24. [PATCH /profiles/patients/me](#24-patch-profiles-patients-me) — Editar los propios datos de filiación
+25. [GET /profiles/patients/me/addresses](#25-get-profiles-patients-me-addresses) — Listar las propias direcciones (la preferida primero)
+26. [POST /profiles/patients/me/addresses](#26-post-profiles-patients-me-addresses) — Guardar una dirección nueva
+27. [DELETE /profiles/patients/me/addresses/{id}](#27-delete-profiles-patients-me-addresses-id) — Quitar una dirección guardada o la del trabajo
+28. [PATCH /profiles/patients/me/addresses/{id}](#28-patch-profiles-patients-me-addresses-id) — Corregir una dirección (cierra la vigente y abre otra)
+29. [PUT /profiles/patients/me/addresses/{id}/preferred](#29-put-profiles-patients-me-addresses-id-preferred) — Marcar la dirección que se ofrece primero
+30. [GET /profiles/patients/me/dependent-candidates](#30-get-profiles-patients-me-dependent-candidates) — Buscar por nombre a quién pedirle que deje representarla
+31. [POST /profiles/patients/me/dependent-requests](#31-post-profiles-patients-me-dependent-requests) — Pedir representar a una persona que ya tiene cuenta
+32. [POST /profiles/patients/me/dependent-requests/{id}/accept](#32-post-profiles-patients-me-dependent-requests-id-accept) — Aceptar una solicitud de dependiente
+33. [POST /profiles/patients/me/dependent-requests/{id}/reject](#33-post-profiles-patients-me-dependent-requests-id-reject) — Rechazar una solicitud de dependiente
+34. [GET /profiles/patients/me/dependent-requests/incoming](#34-get-profiles-patients-me-dependent-requests-incoming) — Listar las solicitudes de dependiente recibidas
+35. [GET /profiles/patients/me/dependents](#35-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
+36. [POST /profiles/patients/me/dependents](#36-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
+37. [DELETE /profiles/patients/me/photo](#37-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
+38. [PUT /profiles/patients/me/photo](#38-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
+39. [DELETE /profiles/patients/me/primary-practitioner](#39-delete-profiles-patients-me-primary-practitioner) — Quitar el propio médico de cabecera
+40. [GET /profiles/patients/me/primary-practitioner](#40-get-profiles-patients-me-primary-practitioner) — Consultar el propio médico de cabecera
+41. [PUT /profiles/patients/me/primary-practitioner](#41-put-profiles-patients-me-primary-practitioner) — Elegir o cambiar el propio médico de cabecera
+42. [GET /profiles/patients/me/summary](#42-get-profiles-patients-me-summary) — Consultar el resumen propio
+43. [POST /profiles/patients/merge](#43-post-profiles-patients-merge) — Fusionar pacientes duplicados
+44. [GET /profiles/patients/merge-events](#44-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
+45. [POST /profiles/patients/merge/{eventId}/reverse](#45-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+46. [POST /profiles/patients/search](#46-post-profiles-patients-search) — UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
+47. [POST /profiles/persons/{personId}/account-links](#47-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+48. [POST /profiles/persons/{personId}/decease](#48-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+49. [GET /profiles/practitioners](#49-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
+50. [POST /profiles/practitioners](#50-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+51. [PATCH /profiles/practitioners/{profileId}](#51-patch-profiles-practitioners-profileid) — Corregir el perfil profesional de otro (titular o plataforma)
+52. [POST /profiles/practitioners/{profileId}/affiliations](#52-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
+53. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#53-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+54. [DELETE /profiles/practitioners/{profileId}/photo](#54-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
+55. [PUT /profiles/practitioners/{profileId}/photo](#55-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
+56. [POST /profiles/practitioners/{profileId}/specialties](#56-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+57. [GET /profiles/practitioners/{profileId}/summary](#57-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+58. [PATCH /profiles/practitioners/me](#58-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+59. [GET /profiles/practitioners/me/admission](#59-get-profiles-practitioners-me-admission) — Estado de mi verificación
+60. [POST /profiles/practitioners/me/admission/resubmit](#60-post-profiles-practitioners-me-admission-resubmit) — Reenviar mi solicitud
+61. [POST /profiles/practitioners/me/admission/withdraw](#61-post-profiles-practitioners-me-admission-withdraw) — Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
+62. [GET /profiles/practitioners/me/affiliations](#62-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+63. [POST /profiles/practitioners/me/affiliations](#63-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+64. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#64-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+65. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#65-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+66. [POST /profiles/practitioners/me/credentials](#66-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+67. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#67-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+68. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#68-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
+69. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#69-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
+70. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#70-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
+71. [GET /profiles/practitioners/me/linkable-organizations](#71-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+72. [GET /profiles/practitioners/me/onboarding](#72-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+73. [GET /profiles/practitioners/me/primary-patients](#73-get-profiles-practitioners-me-primary-patients) — Listar los pacientes que me eligieron como médico de cabecera
+74. [GET /profiles/practitioners/me/signature-assets](#74-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
+75. [PUT /profiles/practitioners/me/signature-assets](#75-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
+76. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#76-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
+77. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#77-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
+78. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#78-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+79. [GET /profiles/practitioners/me/summary](#79-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+80. [GET /profiles/practitioners/specialty-counts](#80-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+81. [GET /tenants/{tenantId}/practitioner-requests](#81-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+82. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#82-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+83. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#83-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+84. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#84-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
-## 1. GET /profiles/credentials
+## 1. GET /admissions
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Bandeja de admisiones
+- **Operation ID:** `AdmissionsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.list](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Orden por vencimiento (`due_at`) con paginación por cursor y conteos por estado. La cédula va enmascarada. Para buscar por cédula, preferir `POST /admissions/search`: una query string queda en los logs del proxy.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admissions` en `AdmissionsController_list`. El controlador delega en `PractitionerAdmissionsReadService.list`. No recibe body. El tipo de retorno estático es `Promise<AdmissionListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `type` | query | No | `string` | Sin restricción adicional declarada | Tipo de admisión; hoy ALTA_DE_DOCTOR. | `ALTA_DE_DOCTOR` |
+| `status` | query | No | `string` | valores: `ENVIADA`, `EN_REVISION`, `INFORMACION_REQUERIDA`, `VERIFICADA`, `RECHAZADA`, `SUSPENDIDA`, `EXPIRADA`, `RETIRADA`, `ABANDONADA` | Sin descripción específica en OpenAPI. | `ENVIADA` |
+| `assignedTo` | query | No | `string` | Sin restricción adicional declarada | Cuenta asignada, o `me`, o `none` (sin asignar). | `valor-ejemplo` |
+| `overdue` | query | No | `boolean` | Sin restricción adicional declarada | true = sólo vencidas. | `true` |
+| `q` | query | No | `string` | longitud máxima 80 | Nombre, cédula o matrícula (2 a 80 caracteres). | `valor-ejemplo` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco de la página anterior. | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `25` |
+| `sort` | query | No | `string` | valores: `due_at` | Sin descripción específica en OpenAPI. | `due_at` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admissions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admissions?type=ALTA_DE_DOCTOR&status=ENVIADA&assignedTo=valor-ejemplo&overdue=true&q=valor-ejemplo&cursor=valor-ejemplo&limit=25&sort=due_at HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AdmissionListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemsSummary": {
+        "licenses": 1,
+        "credentials": 1,
+        "specialties": 1
+      },
+      "requirementsSummary": {
+        "total": 1,
+        "verified": 1,
+        "rejected": 1,
+        "pending": 1
+      },
+      "submittedAt": "2026-07-31T12:00:00.000Z",
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "overdue": true,
+      "assignedTo": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "rowVersion": 1,
+      "practitioner": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "fullName": "Nombre de ejemplo",
+        "profession": "valor-ejemplo",
+        "maskedNationalId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  ],
+  "nextCursor": "valor-ejemplo",
+  "counts": {
+    "clave": "valor"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AdmissionSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemsSummary":{"licenses":1,"credentials":1,"specialties":1},"requirementsSummary":{"total":1,"verified":1,"rejected":1,"pending":1},"submittedAt":"2026-07-31T12:00:00.000Z","dueAt":"2026-07-31T12:00:00.000Z","overdue":true,"assignedTo":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"rowVersion":1,"practitioner":{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `items[].type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `items[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `items[].itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `items[].requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `items[].assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `items[].assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `items[].practitioner` | Sí | `AdmissionPractitionerSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `nextCursor` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `counts` | Sí | `object` | Sin restricción adicional declarada | Cantidad por código de estado, con los filtros menos el de estado. | `{"clave":"valor"}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions"
+}
+```
+
+---
+
+## 2. GET /admissions/{id}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Detalle de una admisión
+- **Operation ID:** `AdmissionsController_detail`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.detail](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Datos completos del profesional (con cédula), checklist de requisitos, documentos, formulario enviado y bitácora. La lectura queda registrada.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admissions/{id}` en `AdmissionsController_detail`. El controlador delega en `PractitionerAdmissionsReadService.detail`. No recibe body. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admissions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admissions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}"
+}
+```
+
+---
+
+## 3. POST /admissions/{id}/claim
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Tomar la admisión para revisarla
+- **Operation ID:** `AdmissionsController_claim`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.claim](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Tomar la admisión para revisarla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/claim` en `AdmissionsController_claim`. El controlador delega en `PractitionerAdmissionsService.claim`. Valida el body como `ClaimAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ClaimAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/claim HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/claim HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/claim"
+}
+```
+
+---
+
+## 4. POST /admissions/{id}/decision
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Resolver la admisión: VERIFIED o REJECTED
+- **Operation ID:** `AdmissionsController_decide`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.decide](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+No recibe ítems: el servidor los deriva de las revisiones. VERIFIED exige el checklist completo (422 ADMISSION_CHECKLIST_INCOMPLETE); REJECTED exige motivo.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/decision` en `AdmissionsController_decide`. El controlador delega en `PractitionerAdmissionsService.decide`. Valida el body como `DecideAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DecideAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "decision": "VERIFIED"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+| `decision` | Sí | `string` | valores: `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `reason` | No | `string` | longitud máxima 500 | Obligatorio al rechazar. Lo ve el médico. | `Texto descriptivo de ejemplo` |
+| `reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO` | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `internalNote` | No | `string` | longitud máxima 1000 | Nota interna: nunca llega al médico. | `valor-ejemplo` |
+| `items` | No | `array<string>` | Sin restricción adicional declarada | YA NO SE ACEPTA: el estado de cada ítem lo fija `.../items/:itemId/review` y el servidor lo deriva de las revisiones. Mandarlo responde 422 ADMISSION_DECISION_ITEMS_NOT_ACCEPTED. | `["valor-ejemplo"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "decision": "VERIFIED",
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo",
+  "items": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La resolución no recibe ítems: se revisan uno por uno en .../items/:itemId/review | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El checklist no está completo: hay requisitos sin verificar o rechazados | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una matrícula verificada ya venció: no se puede verificar con ella | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/decision"
+}
+```
+
+---
+
+## 5. GET /admissions/{id}/documents/{fileId}/content
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Contenido de un documento de la admisión (URL firmada)
+- **Operation ID:** `AdmissionsController_documentContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.documentContent](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Sin `Content-Type` sniffing, sin caché y con sandbox: el documento no puede ejecutar nada.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admissions/{id}/documents/{fileId}/content` en `AdmissionsController_documentContent`. El controlador delega en `PractitionerAdmissionDocumentsService.open`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admissions/00000000-0000-4000-8000-000000000001/documents/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`, `fileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admissions/00000000-0000-4000-8000-000000000001/documents/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/documents/{fileId}/content"
+}
+```
+
+---
+
+## 6. POST /admissions/{id}/documents/{fileId}/download-url
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** URL firmada para abrir un documento de la admisión
+- **Operation ID:** `AdmissionsController_documentUrl`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.documentUrl](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Vida de 2 minutos, atada a quien la pide y a la admisión. El archivo debe ser de ESA admisión.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/documents/{fileId}/download-url` en `AdmissionsController_documentUrl`. El controlador delega en `PractitionerAdmissionDocumentsService.issueUrl`. No recibe body. El tipo de retorno estático es `Promise<AdmissionDocumentUrlDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/documents/00000000-0000-4000-8000-000000000001/download-url HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`, `fileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/documents/00000000-0000-4000-8000-000000000001/download-url HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AdmissionDocumentUrlDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDocumentUrlDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDocumentUrlDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "url": "valor-ejemplo",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "name": "Nombre de ejemplo",
+  "mimeType": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `url` | Sí | `string` | Sin restricción adicional declarada | Ruta de la API para abrir el documento (vida corta, atada al actor). | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/documents/{fileId}/download-url"
+}
+```
+
+---
+
+## 7. POST /admissions/{id}/items/{itemId}/review
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Revisar un ítem del checklist
+- **Operation ID:** `AdmissionsController_reviewItem`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.reviewItem](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+`itemId` es el `id` del ítem del checklist (la revisión). VERIFIED exige la fuente consultada; REJECTED e INFO_REQUIRED exigen motivo. Concurrencia por ítem.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/items/{itemId}/review` en `AdmissionsController_reviewItem`. El controlador delega en `PractitionerAdmissionsService.reviewItem`. Valida el body como `ReviewAdmissionItemDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `itemId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReviewAdmissionItemDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/items/00000000-0000-4000-8000-000000000001/review HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "VERIFIED",
+  "expectedRowVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`, `itemId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `string` | valores: `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `reason` | No | `string` | longitud máxima 500 | Obligatorio si no es VERIFIED. Lo ve el médico. | `Texto descriptivo de ejemplo` |
+| `reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO` | Motivo estructurado; por omisión OTRO. | `ILEGIBLE` |
+| `internalNote` | No | `string` | longitud máxima 1000 | Nota interna: nunca llega al médico. | `valor-ejemplo` |
+| `sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO` | Fuente consultada (tipo). | `REGISTRO_MINSALUD` |
+| `sourceRef` | No | `string` | longitud máxima 500 | Nº de trámite, comprobante o URL de la fuente. | `valor-ejemplo` |
+| `sourceConsultedAt` | No | `string` | formato `date-time` | Cuándo se consultó la fuente (por omisión, ahora). | `2026-07-31T12:00:00.000Z` |
+| `verificationSourceUri` | No | `string` | longitud máxima 2000 | URL de la fuente consultada. Compatibilidad: con VERIFIED alcanza como fuente (se registra como tipo OTRO si no viene `sourceType`). | `valor-ejemplo` |
+| `evidenceSha256` | No | `string` | patrón `^[0-9a-f]{64}$`; patrón runtime `/^[0-9a-f]{64}$/` | Huella (`evidenceSha256`) del ítem tal como la entregó `GET /admissions/:id`: lo que el revisor tuvo delante. OBLIGATORIA para VERIFIED; si ya no coincide con la evidencia viva responde 409 ADMISSION_EVIDENCE_CHANGED y no cambia nada. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `expectedRowVersion` | Sí | `number` | mínimo 1; máximo 2_147_483_647 | Versión del ÍTEM (`rowVersion` del item del checklist). | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/items/00000000-0000-4000-8000-000000000001/review HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "VERIFIED",
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo",
+  "sourceType": "REGISTRO_MINSALUD",
+  "sourceRef": "valor-ejemplo",
+  "sourceConsultedAt": "2026-07-31T12:00:00.000Z",
+  "verificationSourceUri": "valor-ejemplo",
+  "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "expectedRowVersion": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Ítem de la admisión no encontrado | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | La evidencia del ítem cambió desde que la revisó: vuelva a abrirla | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La admisión no está en revisión | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | Verificar este ítem exige declarar la fuente consultada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha de consulta de la fuente no puede ser futura | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/items/{itemId}/review"
+}
+```
+
+---
+
+## 8. POST /admissions/{id}/reassign
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Pasar la revisión a otro revisor
+- **Operation ID:** `AdmissionsController_reassign`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.reassign](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Pasar la revisión a otro revisor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/reassign` en `AdmissionsController_reassign`. El controlador delega en `PractitionerAdmissionsService.reassign`. Valida el body como `ReassignAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReassignAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/reassign HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "toUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+| `toUserId` | Sí | `string` | formato `uuid` | Cuenta del revisor que recibe la admisión. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/reassign HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "toUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El revisor indicado no existe o es el propio solicitante | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/reassign"
+}
+```
+
+---
+
+## 9. POST /admissions/{id}/reinstate
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Reponer una verificación suspendida (devuelve el check)
+- **Operation ID:** `AdmissionsController_reinstate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.reinstate](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Reponer una verificación suspendida (devuelve el check). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/reinstate` en `AdmissionsController_reinstate`. El controlador delega en `PractitionerAdmissionsService.reinstate`. Valida el body como `SuspendAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SuspendAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/reinstate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+| `reason` | Sí | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO` | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `internalNote` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/reinstate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La verificación ya venció: el médico debe renovarla | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/reinstate"
+}
+```
+
+---
+
+## 10. POST /admissions/{id}/release
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Soltar una revisión tomada para que otro la tome
+- **Operation ID:** `AdmissionsController_release`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.release](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Soltar una revisión tomada para que otro la tome. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/release` en `AdmissionsController_release`. El controlador delega en `PractitionerAdmissionsService.release`. Valida el body como `ClaimAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ClaimAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/release HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/release HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/release"
+}
+```
+
+---
+
+## 11. POST /admissions/{id}/request-info
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Pedir información al médico
+- **Operation ID:** `AdmissionsController_requestInfo`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.requestInfo](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Pedir información al médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/request-info` en `AdmissionsController_requestInfo`. El controlador delega en `PractitionerAdmissionsService.requestInfo`. Valida el body como `RequestAdmissionInfoDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RequestAdmissionInfoDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/request-info HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+| `reason` | Sí | `string` | longitud máxima 500 | Qué debe corregir o aportar el médico. | `Texto descriptivo de ejemplo` |
+| `reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO` | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `items` | No | `array<AdmissionItemRefDto>` | máximo MAX_INFO_REQUEST_ITEMS elemento(s) | Ítems puntuales; los marca INFO_REQUIRED. | `[{"type":"LICENSE","id":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].type` | No | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `items[].id` | No | `string` | formato `uuid` | La ficha (matrícula, título, especialidad o perfil). | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/request-info HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "items": [
+    {
+      "type": "LICENSE",
+      "id": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/request-info"
+}
+```
+
+---
+
+## 12. POST /admissions/{id}/suspend
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Suspender una verificación (quita el check)
+- **Operation ID:** `AdmissionsController_suspend`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.suspend](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Suspender una verificación (quita el check). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/{id}/suspend` en `AdmissionsController_suspend`. El controlador delega en `PractitionerAdmissionsService.suspend`. Valida el body como `SuspendAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SuspendAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `1` |
+| `reason` | Sí | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO` | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `internalNote` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "itemsSummary": {
+    "licenses": 1,
+    "credentials": 1,
+    "specialties": 1
+  },
+  "requirementsSummary": {
+    "total": 1,
+    "verified": 1,
+    "rejected": 1,
+    "pending": 1
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "overdue": true,
+  "assignedTo": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  },
+  "rowVersion": 1,
+  "practitioner": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "fullName": "Nombre de ejemplo",
+    "profession": "valor-ejemplo",
+    "maskedNationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalId": "00000000-0000-4000-8000-000000000001",
+    "nationalIdIssuer": "valor-ejemplo",
+    "birthDate": "valor-ejemplo",
+    "age": 1,
+    "occupation": "valor-ejemplo",
+    "personalMobile": "valor-ejemplo",
+    "personalEmail": "usuario@example.com",
+    "workMobile": "valor-ejemplo",
+    "workPhone": "+59170000000",
+    "workEmail": "usuario@example.com"
+  },
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "number": "valor-ejemplo",
+      "jurisdiction": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "level": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "institution": "valor-ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "valor-ejemplo",
+      "verificationSourceUri": "valor-ejemplo",
+      "rejectionReasonText": "Texto descriptivo de ejemplo"
+    }
+  ],
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "state": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "supportingCredentialId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "events": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "valor-ejemplo",
+      "fromStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "toStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemType": "valor-ejemplo",
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "verificationSourceUri": "valor-ejemplo",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "actor": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "actorRole": "valor-ejemplo",
+      "occurredAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "decisionReasonCode": "CODIGO_EJEMPLO",
+  "internalNote": "valor-ejemplo",
+  "validUntil": "valor-ejemplo",
+  "resubmissionCount": 1,
+  "attestedAt": "valor-ejemplo",
+  "fourEyesRequired": true,
+  "requirements": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "required": true,
+      "evidenceKind": "DOCUMENT",
+      "requiresSource": true,
+      "professionGroup": "MEDICO",
+      "minItems": 1,
+      "maxItems": 1,
+      "state": "NOT_PROVIDED",
+      "satisfied": true,
+      "blockedBy": "valor-ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "itemId": "00000000-0000-4000-8000-000000000001",
+          "itemType": "LICENSE",
+          "label": "valor-ejemplo",
+          "state": "PENDING",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "verificationSourceUri": "valor-ejemplo",
+          "sourceType": "REGISTRO_MINSALUD",
+          "sourceRef": "valor-ejemplo",
+          "sourceConsultedAt": "valor-ejemplo",
+          "reasonCode": "ILEGIBLE",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "internalNote": "valor-ejemplo",
+          "reviewedBy": {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Nombre de ejemplo"
+          },
+          "reviewedAt": "valor-ejemplo",
+          "evidenceChanged": true,
+          "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "rowVersion": 1
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "requirementCode": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "reason": "MISSING"
+    }
+  ],
+  "canVerify": true,
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "requirementCode": "CODIGO_EJEMPLO",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "mimeType": "valor-ejemplo",
+      "sizeBytes": 1,
+      "uploadedAt": "2026-07-31T12:00:00.000Z",
+      "pages": 1,
+      "reviewState": "PENDING",
+      "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "submittedForm": {
+    "clave": "valor"
+  },
+  "submittedFormSource": "SNAPSHOT"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `practitioner` | Sí | `AdmissionPractitionerDetailDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001","nationalId":"00000000-0000-4000-8000-000000000001","nationalIdIssuer":"valor-ejemplo","birthDate":"valor-ejemplo","age":1,"occupation":"valor-ejemplo","personalMobile":"valor-ejemplo","personalEmail":"usuario@example.com","workMobile":"valor-ejemplo","workPhone":"+59170000000","workEmail":"usuario@example.com"}` |
+| `practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitioner.nationalIdIssuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.birthDate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.age` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `practitioner.occupation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.personalEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `practitioner.workMobile` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitioner.workPhone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `practitioner.workEmail` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `licenses` | Sí | `array<AdmissionLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","number":"valor-ejemplo","jurisdiction":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].jurisdiction` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `licenses[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `licenses[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `credentials` | Sí | `array<AdmissionCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","level":"valor-ejemplo","title":"valor-ejemplo","institution":"valor-ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"fileId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","verificationSourceUri":"valor-ejemplo","rejectionReasonText":"Texto descriptivo de ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].level` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].title` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].institution` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `credentials[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `credentials[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].rejectionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialties` | Sí | `array<AdmissionSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","state":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"supportingCredentialId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `specialties[].state` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `specialties[].state.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `specialties[].state.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].supportingCredentialId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events` | Sí | `array<AdmissionEventDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"valor-ejemplo","fromStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"toStatus":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemType":"valor-ejemplo","itemId":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","verificationSourceUri":"valor-ejemplo","reasonCode":"CODIGO_EJEMPLO","reasonText":"Texto descriptivo de ejemplo","actor":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"actorRole":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}]` |
+| `events[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].type` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fromStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].fromStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].fromStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].toStatus` | No | `AdmissionCodeLabelDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `events[].toStatus.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].toStatus.label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].itemId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].requirementCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].reasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `events[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `events[].actor` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `events[].actor.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].actor.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `events[].actorRole` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].occurredAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionReasonCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `internalNote` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validUntil` | No | `string` | admite null | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `valor-ejemplo` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `attestedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `fourEyesRequired` | Sí | `boolean` | Sin restricción adicional declarada | La configuración exige un aprobador distinto de los revisores. | `true` |
+| `requirements` | Sí | `array<AdmissionChecklistRequirementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","description":"Texto descriptivo de ejemplo","required":true,"evidenceKind":"DOCUMENT","requiresSource":true,"professionGroup":"MEDICO","minItems":1,"maxItems":1,"state":"NOT_PROVIDED","satisfied":true,"blockedBy":"valor-ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]}]` |
+| `requirements[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `requirements[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requirements[].evidenceKind` | Sí | `string` | valores: `DOCUMENT`, `DATA` | Sin descripción específica en el contrato OpenAPI. | `DOCUMENT` |
+| `requirements[].requiresSource` | Sí | `boolean` | Sin restricción adicional declarada | Verificar un ítem exige declarar la fuente consultada. | `true` |
+| `requirements[].professionGroup` | No | `string` | valores: `MEDICO`, `ODONTOLOGO`; admite null | Sin descripción específica en el contrato OpenAPI. | `MEDICO` |
+| `requirements[].minItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].maxItems` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requirements[].state` | Sí | `string` | valores: `NOT_PROVIDED`, `MISSING`, `PENDING`, `INFO_REQUIRED`, `VERIFIED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `NOT_PROVIDED` |
+| `requirements[].satisfied` | Sí | `boolean` | Sin restricción adicional declarada | El requisito está cumplido. | `true` |
+| `requirements[].blockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items` | Sí | `array<AdmissionChecklistItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemType":"LICENSE","label":"valor-ejemplo","state":"PENDING","fileId":"00000000-0000-4000-8000-000000000001","verificationSourceUri":"valor-ejemplo","sourceType":"REGISTRO_MINSALUD","sourceRef":"valor-ejemplo","sourceConsultedAt":"valor-ejemplo","reasonCode":"ILEGIBLE","reasonText":"Texto descriptivo de ejemplo","internalNote":"valor-ejemplo","reviewedBy":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"reviewedAt":"valor-ejemplo","evidenceChanged":true,"evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","rowVersion":1}]` |
+| `requirements[].items[].id` | No | `string` | formato `uuid`; admite null | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemId` | Sí | `string` | formato `uuid` | La ficha: matrícula, título, especialidad o perfil. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].itemType` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `requirements[].items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `requirements[].items[].fileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].verificationSourceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceType` | No | `string` | valores: `REGISTRO_MINSALUD`, `COLEGIO_MEDICO`, `COLEGIO_ODONTOLOGOS`, `SEDES`, `SEGIP`, `DOCUMENTO_APORTADO`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `REGISTRO_MINSALUD` |
+| `requirements[].items[].sourceRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].sourceConsultedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `requirements[].items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `requirements[].items[].internalNote` | No | `string` | admite null | Sólo para el personal; nunca llega al médico. | `valor-ejemplo` |
+| `requirements[].items[].reviewedBy` | No | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `requirements[].items[].reviewedBy.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `requirements[].items[].reviewedBy.name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `requirements[].items[].reviewedAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requirements[].items[].evidenceChanged` | Sí | `boolean` | Sin restricción adicional declarada | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `true` |
+| `requirements[].items[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `requirements[].items[].rowVersion` | No | `number` | admite null | expectedRowVersion del ítem. | `1` |
+| `blockers` | Sí | `array<AdmissionBlockerDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requirementCode":"CODIGO_EJEMPLO","label":"valor-ejemplo","reason":"MISSING"}]` |
+| `blockers[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `blockers[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `blockers[].reason` | Sí | `string` | valores: `MISSING`, `REJECTED`, `PENDING`, `INFO_REQUIRED`, `BELOW_MINIMUM` | Sin descripción específica en el contrato OpenAPI. | `MISSING` |
+| `canVerify` | Sí | `boolean` | Sin restricción adicional declarada | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `true` |
+| `documents` | Sí | `array<AdmissionDocumentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","requirementCode":"CODIGO_EJEMPLO","fileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","mimeType":"valor-ejemplo","sizeBytes":1,"uploadedAt":"2026-07-31T12:00:00.000Z","pages":1,"reviewState":"PENDING","evidenceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].requirementCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `documents[].fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `documents[].mimeType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `documents[].sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `documents[].pages` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `documents[].reviewState` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `documents[].evidenceSha256` | Sí | `string` | Sin restricción adicional declarada | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `submittedForm` | Sí | `object` | Sin restricción adicional declarada | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `{"clave":"valor"}` |
+| `submittedFormSource` | Sí | `string` | valores: `SNAPSHOT`, `LIVE` | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `SNAPSHOT` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/{id}/suspend"
+}
+```
+
+---
+
+## 13. POST /admissions/expire-sweep
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Barrido de vencimientos
+- **Operation ID:** `AdmissionsController_expireSweep`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.expireSweep](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Baja las verificaciones vencidas (y con ellas el check) y cierra por abandono las solicitudes sin respuesta del solicitante. Idempotente.
+
+Contexto declarado en el controlador: Declarada antes de `:id` para que `expire-sweep` no se lea como un id.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/expire-sweep` en `AdmissionsController_expireSweep`. El controlador delega en `PractitionerAdmissionsService.expireSweep`. No recibe body. El tipo de retorno estático es `Promise<AdmissionSweepResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /admissions/expire-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /admissions/expire-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionSweepResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionSweepResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "expired": 1,
+  "abandoned": 1,
+  "skipped": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expired` | Sí | `number` | Sin restricción adicional declarada | Verificaciones vencidas (VERIFICADA a EXPIRADA). | `1` |
+| `abandoned` | Sí | `number` | Sin restricción adicional declarada | Solicitudes cerradas por falta de respuesta (a ABANDONADA). | `1` |
+| `skipped` | Sí | `boolean` | Sin restricción adicional declarada | `true` si no corrió porque otro nodo tenía el barrido en curso (no es un error: repetir es inocuo). | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/expire-sweep"
+}
+```
+
+---
+
+## 14. POST /admissions/search
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `admissions`
+- **Nombre:** Bandeja de admisiones con los filtros en el cuerpo
+- **Operation ID:** `AdmissionsController_search`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdmissionsController.search](../../src/modules/profiles/presentation/controllers/admissions.controller.ts)
+
+### Descripción de negocio
+
+Igual que `GET /admissions`, pero el texto buscado (nombre, cédula, matrícula) no viaja en la URL.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admissions/search` en `AdmissionsController_search`. El controlador delega en `PractitionerAdmissionsReadService.list`. Valida el body como `ListAdmissionsQueryDto` y consume `application/json`. El tipo de retorno estático es `Promise<AdmissionListDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ListAdmissionsQueryDto`; los campos opcionales se omiten.
+
+```http
+POST /admissions/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADMISSIONS_REVIEWER`, `ADMISSIONS_APPROVER`, `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `type` | No | `string` | valores: `ALTA_DE_DOCTOR` | Tipo de admisión; hoy ALTA_DE_DOCTOR. | `ALTA_DE_DOCTOR` |
+| `status` | No | `string` | valores: `ENVIADA`, `EN_REVISION`, `INFORMACION_REQUERIDA`, `VERIFICADA`, `RECHAZADA`, `SUSPENDIDA`, `EXPIRADA`, `RETIRADA`, `ABANDONADA` | Sin descripción específica en el contrato OpenAPI. | `ENVIADA` |
+| `assignedTo` | No | `string` | longitud máxima 40 | Cuenta asignada, o `me`, o `none` (sin asignar). | `valor-ejemplo` |
+| `overdue` | No | `boolean` | Sin restricción adicional declarada | true = sólo vencidas. | `true` |
+| `q` | No | `string` | longitud máxima 80 | Nombre, cédula o matrícula (2 a 80 caracteres). | `valor-ejemplo` |
+| `cursor` | No | `string` | longitud máxima 512 | Cursor opaco de la página anterior. | `valor-ejemplo` |
+| `limit` | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en el contrato OpenAPI. | `25` |
+| `sort` | No | `string` | valores: `due_at` | Sin descripción específica en el contrato OpenAPI. | `due_at` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admissions/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "type": "ALTA_DE_DOCTOR",
+  "status": "ENVIADA",
+  "assignedTo": "valor-ejemplo",
+  "overdue": true,
+  "q": "valor-ejemplo",
+  "cursor": "valor-ejemplo",
+  "limit": 25,
+  "sort": "due_at"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdmissionListDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AdmissionListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdmissionListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo"
+      },
+      "itemsSummary": {
+        "licenses": 1,
+        "credentials": 1,
+        "specialties": 1
+      },
+      "requirementsSummary": {
+        "total": 1,
+        "verified": 1,
+        "rejected": 1,
+        "pending": 1
+      },
+      "submittedAt": "2026-07-31T12:00:00.000Z",
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "overdue": true,
+      "assignedTo": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo"
+      },
+      "rowVersion": 1,
+      "practitioner": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "fullName": "Nombre de ejemplo",
+        "profession": "valor-ejemplo",
+        "maskedNationalId": "00000000-0000-4000-8000-000000000001"
+      }
+    }
+  ],
+  "nextCursor": "valor-ejemplo",
+  "counts": {
+    "clave": "valor"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AdmissionSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"},"itemsSummary":{"licenses":1,"credentials":1,"specialties":1},"requirementsSummary":{"total":1,"verified":1,"rejected":1,"pending":1},"submittedAt":"2026-07-31T12:00:00.000Z","dueAt":"2026-07-31T12:00:00.000Z","overdue":true,"assignedTo":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"},"rowVersion":1,"practitioner":{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].type` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `items[].type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].type.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `items[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].itemsSummary` | Sí | `AdmissionItemsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"licenses":1,"credentials":1,"specialties":1}` |
+| `items[].itemsSummary.licenses` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].itemsSummary.credentials` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].itemsSummary.specialties` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary` | Sí | `AdmissionRequirementsSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"total":1,"verified":1,"rejected":1,"pending":1}` |
+| `items[].requirementsSummary.total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary.verified` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary.rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requirementsSummary.pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].overdue` | Sí | `boolean` | Sin restricción adicional declarada | Venció su plazo y la plataforma le debe una respuesta. | `true` |
+| `items[].assignedTo` | Sí | `AdmissionActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}` |
+| `items[].assignedTo.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].assignedTo.name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].rowVersion` | Sí | `number` | Sin restricción adicional declarada | Versión de la fila; se manda como expectedRowVersion. | `1` |
+| `items[].practitioner` | Sí | `AdmissionPractitionerSummaryDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","fullName":"Nombre de ejemplo","profession":"valor-ejemplo","maskedNationalId":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].practitioner.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitioner.fullName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].practitioner.profession` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].practitioner.maskedNationalId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `nextCursor` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `counts` | Sí | `object` | Sin restricción adicional declarada | Cantidad por código de estado, con los filtros menos el de estado. | `{"clave":"valor"}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admissions/search"
+}
+```
+
+---
+
+## 15. GET /profiles/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -137,6 +5128,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPendingCredentialsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -203,7 +5195,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /profiles/credentials/{credentialId}/verify
+## 16. POST /profiles/credentials/{credentialId}/verify
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -253,8 +5245,9 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `decision` | Sí | `string` | valores: `VERIFIED`, `REJECTED` | Resultado de la verificación | `VERIFIED` |
+| `decision` | Sí | `string` | valores: `VERIFIED`, `REJECTED` | Resultado de la verificación. Mientras el profesional tenga una admisión abierta (o esté pendiente), VERIFIED se rechaza con 412 ADMISSION_VERIFY_VIA_REVIEW: el título se verifica desde `POST /admissions/:id/items/:itemId/review`, con la huella de lo que se vio. REJECTED sigue valiendo para quien tomó la revisión. | `VERIFIED` |
 | `verificationSourceUri` | No | `string` | longitud máxima 2000 | URI de la fuente de verificación consultada (registro del colegio profesional, resolución de la autoridad). OBLIGATORIA cuando la decisión es VERIFIED: habilitar a un profesional sin declarar contra qué se comprobó su matrícula no deja rastro auditable. Para REJECTED es opcional, porque se puede rechazar por defectos de forma del propio documento sin consultar a nadie. | `valor-ejemplo` |
+| `reason` | No | `string` | longitud máxima 500 | Motivo del rechazo; lo ve el profesional en su admisión. | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -268,7 +5261,8 @@ Content-Type: application/json
 
 {
   "decision": "VERIFIED",
-  "verificationSourceUri": "valor-ejemplo"
+  "verificationSourceUri": "valor-ejemplo",
+  "reason": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -286,6 +5280,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CredentialResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -305,7 +5300,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `state` | Sí | `string` | formato `uuid` | Concept id del estado de la credencial | `00000000-0000-4000-8000-000000000001` |
 | `verifiedAt` | No | `string` | formato `date-time` | Valor de verified at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
-| `practitionerVerified` | Sí | `boolean` | Sin restricción adicional declarada | true si al verificar quedó habilitado todo el perfil profesional | `true` |
+| `practitionerVerified` | Sí | `boolean` | Sin restricción adicional declarada | Siempre false desde v4.2.67: verificar una credencial ya no habilita el perfil; | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -320,6 +5315,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Una credencial verificada debe declarar la fuente consultada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | La credencial no está pendiente de verificación | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un título de una admisión abierta se verifica desde la revisión de la admisión ' +             '(POST /admissions/:id/items/:itemId/review), con la huella de lo que se vio | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La admisión no está en revisión: tómela antes de verificar sus títulos | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -337,7 +5334,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /profiles/patients
+## 17. GET /profiles/patients
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -405,6 +5402,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchPatientsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -472,7 +5470,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /profiles/patients
+## 18. POST /profiles/patients
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -559,6 +5557,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PatientProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PatientProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PatientProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -610,7 +5609,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /profiles/patients/{profileId}
+## 19. GET /profiles/patients/{profileId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -676,6 +5675,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientDetailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -773,7 +5773,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /profiles/patients/{profileId}/identity-links
+## 20. POST /profiles/patients/{profileId}/identity-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -866,6 +5866,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdentityLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdentityLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdentityLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdentityLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdentityLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -915,7 +5916,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /profiles/patients/{profileId}/portal-proxies
+## 21. POST /profiles/patients/{profileId}/portal-proxies
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1008,6 +6009,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PortalProxyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PortalProxyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PortalProxyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PortalProxyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PortalProxyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1060,7 +6062,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /profiles/patients/{profileId}/related-persons
+## 22. POST /profiles/patients/{profileId}/related-persons
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1148,6 +6150,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RelatedPersonResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RelatedPersonResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RelatedPersonResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RelatedPersonResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RelatedPersonResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1202,7 +6205,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /profiles/patients/me
+## 23. GET /profiles/patients/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1263,6 +6266,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1295,6 +6299,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1302,6 +6308,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1390,16 +6398,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -1473,7 +6485,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /profiles/patients/me
+## 24. PATCH /profiles/patients/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1532,6 +6544,8 @@ Content-Type: application/json
 | `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
 | `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
@@ -1571,6 +6585,8 @@ Content-Type: application/json
   "taxHolderName": "Nombre de ejemplo",
   "homeAddressLines": "valor-ejemplo",
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "homeLatitude": {},
   "homeLongitude": {},
@@ -1600,6 +6616,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1632,6 +6649,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1639,6 +6658,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1727,16 +6748,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -1812,7 +6837,656 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /profiles/patients/me/dependent-candidates
+## 25. GET /profiles/patients/me/addresses
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Listar las propias direcciones (la preferida primero)
+- **Operation ID:** `PatientAddressBookController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.list](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Listar las propias direcciones (la preferida primero). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/addresses` en `PatientAddressBookController_list`. El controlador delega en `PatientAddressBookService.list`. No recibe body. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses"
+}
+```
+
+---
+
+## 26. POST /profiles/patients/me/addresses
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Guardar una dirección nueva
+- **Operation ID:** `PatientAddressBookController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.create](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Guardar una dirección nueva. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/me/addresses` en `PatientAddressBookController_create`. El controlador delega en `PatientAddressBookService.create`. Valida el body como `CreatePatientAddressDto` y consume `application/json`. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreatePatientAddressDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "Casa de mi mamá",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `label` | Sí | `string` | longitud mínima 1; longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `Casa de mi mamá` |
+| `municipalityConceptId` | Sí | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `lines` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isPreferred` | No | `boolean` | Sin restricción adicional declarada | Marcarla como la que se ofrece primero | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "Casa de mi mamá",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1,
+  "isPreferred": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 413 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses"
+}
+```
+
+---
+
+## 27. DELETE /profiles/patients/me/addresses/{id}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Quitar una dirección guardada o la del trabajo
+- **Operation ID:** `PatientAddressBookController_remove`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.remove](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Quitar una dirección guardada o la del trabajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/patients/me/addresses/{id}` en `PatientAddressBookController_remove`. El controlador delega en `PatientAddressBookService.remove`. No recibe body. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 404 | `NOT_FOUND` | Dirección no encontrada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | Su domicilio no se puede quitar: puede corregirlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses/{id}"
+}
+```
+
+---
+
+## 28. PATCH /profiles/patients/me/addresses/{id}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Corregir una dirección (cierra la vigente y abre otra)
+- **Operation ID:** `PatientAddressBookController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.update](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Corregir una dirección (cierra la vigente y abre otra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/patients/me/addresses/{id}` en `PatientAddressBookController_update`. El controlador delega en `PatientAddressBookService.update`. Valida el body como `UpdatePatientAddressDto` y consume `application/json`. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdatePatientAddressDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `label` | No | `string` | longitud mínima 1; longitud máxima 60 | Sólo para las guardadas: domicilio y trabajo tienen nombre fijo. | `valor-ejemplo` |
+| `municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines` | No | `string` | longitud máxima 300 | Vacío para quitarla | `valor-ejemplo` |
+| `district` | No | `string` | longitud máxima 200 | Vacío para quitarlo | `valor-ejemplo` |
+| `latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "valor-ejemplo",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 413 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 404 | `NOT_FOUND` | Dirección no encontrada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El domicilio y el trabajo tienen nombre fijo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses/{id}"
+}
+```
+
+---
+
+## 29. PUT /profiles/patients/me/addresses/{id}/preferred
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Marcar la dirección que se ofrece primero
+- **Operation ID:** `PatientAddressBookController_prefer`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.prefer](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Marcar la dirección que se ofrece primero. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /profiles/patients/me/addresses/{id}/preferred` en `PatientAddressBookController_prefer`. El controlador delega en `PatientAddressBookService.prefer`. No recibe body. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+PUT /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001/preferred HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+PUT /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001/preferred HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 404 | `NOT_FOUND` | Dirección no encontrada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses/{id}/preferred"
+}
+```
+
+---
+
+## 30. GET /profiles/patients/me/dependent-candidates
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1875,6 +7549,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | La cuenta no es de un paciente | `Promise<DependentCandidateDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentCandidateDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1919,7 +7594,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /profiles/patients/me/dependent-requests
+## 31. POST /profiles/patients/me/dependent-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1997,6 +7672,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentLinkRequestSentDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2046,7 +7722,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /profiles/patients/me/dependent-requests/{id}/accept
+## 32. POST /profiles/patients/me/dependent-requests/{id}/accept
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2125,6 +7801,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentLinkRequestDecisionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2173,7 +7850,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /profiles/patients/me/dependent-requests/{id}/reject
+## 33. POST /profiles/patients/me/dependent-requests/{id}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2240,6 +7917,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentLinkRequestDecisionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2285,7 +7963,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /profiles/patients/me/dependent-requests/incoming
+## 34. GET /profiles/patients/me/dependent-requests/incoming
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2346,6 +8024,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IncomingDependentLinkRequestDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2388,7 +8067,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /profiles/patients/me/dependents
+## 35. GET /profiles/patients/me/dependents
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2449,6 +8128,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DependentSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2500,7 +8180,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /profiles/patients/me/dependents
+## 36. POST /profiles/patients/me/dependents
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2596,6 +8276,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DependentSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2667,7 +8348,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. DELETE /profiles/patients/me/photo
+## 37. DELETE /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2730,6 +8411,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2762,6 +8444,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -2769,6 +8453,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -2857,16 +8543,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -2940,7 +8630,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. PUT /profiles/patients/me/photo
+## 38. PUT /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3017,6 +8707,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPatientProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPatientProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3049,6 +8740,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3056,6 +8749,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3144,16 +8839,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -3229,7 +8928,368 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /profiles/patients/me/summary
+## 39. DELETE /profiles/patients/me/primary-practitioner
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Quitar el propio médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_removeOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.removeOwn](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Quitar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/patients/me/primary-practitioner` en `PrimaryPractitionerController_removeOwn`. El controlador delega en `PrimaryPractitionerService.removeOwn`. No recibe body. El tipo de retorno estático es `Promise<OwnPrimaryPractitionerDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPrimaryPractitionerDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "current": {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "professionalTitle": "valor-ejemplo",
+    "since": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `current` | No | `PrimaryPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","since":"2026-07-31T12:00:00.000Z"}` |
+| `current.practitionerProfileId` | No | `string` | formato `uuid` | Con este id se abre su ficha en la guía | `00000000-0000-4000-8000-000000000001` |
+| `current.displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del profesional | `Nombre de ejemplo` |
+| `current.professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado | `valor-ejemplo` |
+| `current.since` | No | `string` | formato `date-time` | Desde cuándo es su médico de cabecera | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 409 | `CONFLICT` | Su médico de cabecera cambió mientras lo elegía. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/primary-practitioner"
+}
+```
+
+---
+
+## 40. GET /profiles/patients/me/primary-practitioner
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Consultar el propio médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_getOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.getOwn](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Consultar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/primary-practitioner` en `PrimaryPractitionerController_getOwn`. El controlador delega en `PrimaryPractitionerService.getOwn`. No recibe body. El tipo de retorno estático es `Promise<OwnPrimaryPractitionerDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPrimaryPractitionerDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "current": {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "professionalTitle": "valor-ejemplo",
+    "since": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `current` | No | `PrimaryPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","since":"2026-07-31T12:00:00.000Z"}` |
+| `current.practitionerProfileId` | No | `string` | formato `uuid` | Con este id se abre su ficha en la guía | `00000000-0000-4000-8000-000000000001` |
+| `current.displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del profesional | `Nombre de ejemplo` |
+| `current.professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado | `valor-ejemplo` |
+| `current.since` | No | `string` | formato `date-time` | Desde cuándo es su médico de cabecera | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/primary-practitioner"
+}
+```
+
+---
+
+## 41. PUT /profiles/patients/me/primary-practitioner
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Elegir o cambiar el propio médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_setOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.setOwn](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Cierra la elección vigente (si la hay) y abre otra. Elegir al que ya es el vigente no cambia nada. No concede acceso clínico.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /profiles/patients/me/primary-practitioner` en `PrimaryPractitionerController_setOwn`. El controlador delega en `PrimaryPractitionerService.setOwn`. Valida el body como `SetPrimaryPractitionerDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnPrimaryPractitionerDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetPrimaryPractitionerDto`; los campos opcionales se omiten.
+
+```http
+PUT /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil profesional que el paciente elige como médico de cabecera | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPrimaryPractitionerDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "current": {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "professionalTitle": "valor-ejemplo",
+    "since": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `current` | No | `PrimaryPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","since":"2026-07-31T12:00:00.000Z"}` |
+| `current.practitionerProfileId` | No | `string` | formato `uuid` | Con este id se abre su ficha en la guía | `00000000-0000-4000-8000-000000000001` |
+| `current.displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del profesional | `Nombre de ejemplo` |
+| `current.professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado | `valor-ejemplo` |
+| `current.since` | No | `string` | formato `date-time` | Desde cuándo es su médico de cabecera | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 409 | `CONFLICT` | Su médico de cabecera cambió mientras lo elegía. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No puede elegirse a sí mismo como médico de cabecera. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | Este profesional no está aceptando pacientes nuevos. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/primary-practitioner"
+}
+```
+
+---
+
+## 42. GET /profiles/patients/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3290,6 +9350,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PatientSummaryResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientSummaryResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientSummaryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientSummaryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientSummaryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3344,7 +9405,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /profiles/patients/merge
+## 43. POST /profiles/patients/merge
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3426,6 +9487,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MergeEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3482,7 +9544,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /profiles/patients/merge-events
+## 44. GET /profiles/patients/merge-events
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3547,6 +9609,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListMergeEventsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3607,7 +9670,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /profiles/patients/merge/{eventId}/reverse
+## 45. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3686,6 +9749,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MergeEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MergeEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3741,7 +9805,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /profiles/patients/search
+## 46. POST /profiles/patients/search
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3825,6 +9889,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchPatientsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3890,7 +9955,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /profiles/persons/{personId}/account-links
+## 47. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3973,6 +10038,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccountLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccountLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccountLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccountLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccountLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4025,7 +10091,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /profiles/persons/{personId}/decease
+## 48. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -4106,6 +10172,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeceaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeceaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeceaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeceaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeceaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4160,7 +10227,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /profiles/practitioners
+## 49. GET /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4226,6 +10293,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPractitionersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4240,6 +10308,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "photoFileId": "00000000-0000-4000-8000-000000000001",
       "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
       "verified": true,
+      "verification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-07-31T12:00:00.000Z",
+        "validUntil": "valor-ejemplo"
+      },
       "acceptsNewPatients": true,
       "telehealthAvailable": true,
       "specialties": [
@@ -4250,7 +10323,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       ],
       "workplaces": [
         "valor-ejemplo"
-      ]
+      ],
+      "ratingAverage": 1,
+      "ratingCount": 1,
+      "activity": {
+        "encounters": 1,
+        "medicationRequests": 1,
+        "clinicalNotes": 1,
+        "documents": 1
+      }
     }
   ],
   "count": 1,
@@ -4263,20 +10344,31 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PractitionerListItemDto>` | Sin restricción adicional declarada | Las filas de esta página. | `[{"profileId":"00000000-0000-4000-8000-000000000001","practitionerCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","photoFileId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","verified":true,"acceptsNewPatients":true,"telehealthAvailable":true,"specialties":[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}],"workplaces":["valor-ejemplo"]}]` |
+| `items` | Sí | `array<PractitionerListItemDto>` | Sin restricción adicional declarada | Las filas de esta página. | `[{"profileId":"00000000-0000-4000-8000-000000000001","practitionerCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","photoFileId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","verified":true,"verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"},"acceptsNewPatients":true,"telehealthAvailable":true,"specialties":[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}],"workplaces":["valor-ejemplo"],"ratingAverage":1,"ratingCount":1,"activity":{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}}]` |
 | `items[].profileId` | Sí | `string` | formato `uuid` | Con este id se abre la ficha (`GET /profiles/practitioners/:id/summary`). | `00000000-0000-4000-8000-000000000001` |
 | `items[].practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Código único del profesional | `CODIGO_EJEMPLO` |
 | `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible de la persona | `Nombre de ejemplo` |
 | `items[].professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado. | `valor-ejemplo` |
 | `items[].photoFileId` | No | `string` | formato `uuid` | Archivo de la foto | `00000000-0000-4000-8000-000000000001` |
 | `items[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Estado de verificación de la matrícula. | `00000000-0000-4000-8000-000000000001` |
-| `items[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la matrícula fue verificada | `true` |
+| `items[].verified` | Sí | `boolean` | Sin restricción adicional declarada | Si la matrícula fue verificada. Equivale a `verification.status === "VERIFIED"`: | `true` |
+| `items[].verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Estado visible de verificación (admisión vigente), aditivo. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `items[].verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `items[].verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Si declara tomar pacientes nuevos. | `true` |
 | `items[].telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina. | `true` |
 | `items[].specialties` | Sí | `array<PractitionerListSpecialtyDto>` | Sin restricción adicional declarada | Sus especialidades, la principal primero. | `[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}]` |
 | `items[].specialties[].specialtyConceptId` | Sí | `string` | formato `uuid` | Concept id de la especialidad | `00000000-0000-4000-8000-000000000001` |
 | `items[].specialties[].isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Si es la especialidad con la que se presenta. | `true` |
 | `items[].workplaces` | Sí | `array<string>` | Sin restricción adicional declarada | Dónde atiende, en texto | `["valor-ejemplo"]` |
+| `items[].ratingAverage` | Sí | `number` | admite null | Media de reseñas publicadas; null si no tiene | `1` |
+| `items[].ratingCount` | Sí | `number` | Sin restricción adicional declarada | Reseñas publicadas | `1` |
+| `items[].activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Lo que asentó en la plataforma: consultas, recetas, notas y documentos. Las mismas cuatro cifras —y el mismo criterio— que la sección `activity` de su ficha, para que ordenar la guía por «más atenciones» y abrir al primero muestren el mismo número. Cuentas, nunca contenido: no es PHI. En cero para quien no tiene cuenta vinculada. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
+| `items[].activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].activity.clinicalNotes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].activity.documents` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor opaco de la página siguiente; null si no hay más | `valor-ejemplo` |
@@ -4307,7 +10399,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /profiles/practitioners
+## 50. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4418,6 +10510,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4479,7 +10572,457 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /profiles/practitioners/{profileId}/affiliations
+## 51. PATCH /profiles/practitioners/{profileId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Corregir el perfil profesional de otro (titular o plataforma)
+- **Operation ID:** `ProfilesPractitionersController_updatePractitionerProfile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.updatePractitionerProfile](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.
+
+Contexto declarado en el controlador: Corregir el perfil profesional de otro — la plataforma (P28). Mismo cuerpo que `practitioners/me`. Sin `@Roles` por el mismo criterio que la foto: quién puede lo decide `ProfileOwnershipService` (titular o `SECURITY_ADMIN`/`SUPERADMIN`), y un profesional que apunta al perfil de un colega recibe 403. Va DESPUÉS de `practitioners/me`: Nest resuelve por orden de declaración y el parámetro capturaría `me`.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/practitioners/{profileId}` en `ProfilesPractitionersController_updatePractitionerProfile`. El controlador delega en `ProfilesPractitionersService.updatePractitionerProfile`. Valida el body como `UpdateOwnPractitionerProfileDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerProfileSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateOwnPractitionerProfileDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/practitioners/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `profileId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `professionalTitle` | No | `string` | longitud máxima 200 | Título profesional | `valor-ejemplo` |
+| `professionalBio` | No | `string` | longitud máxima 4000 | Biografía profesional | `valor-ejemplo` |
+| `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Si acepta pacientes nuevos | `true` |
+| `telehealthAvailable` | No | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina | `true` |
+| `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `nationalId` | No | `string` | longitud mínima 1; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Número del documento de identidad. 409 si la identidad está verificada o en verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
+| `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workLandline` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | longitud máxima 20 | NIT para facturación. Cadena vacía para quedarse sin NIT. | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
+| `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
+| `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
+| `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `valor-ejemplo` |
+| `languages` | No | `array<PractitionerLanguageInputDto>` | máximo 20 elemento(s) | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
+| `languages[].languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].clinicalInterpretationAllowed` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/practitioners/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "professionalTitle": "valor-ejemplo",
+  "professionalBio": "valor-ejemplo",
+  "acceptsNewPatients": true,
+  "telehealthAvailable": true,
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": {},
+  "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "homeAddressLines": "valor-ejemplo",
+  "homeLatitude": {},
+  "homeLongitude": {},
+  "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
+  "workLatitude": {},
+  "workLongitude": {},
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "languages": [
+    {
+      "languageConceptId": "00000000-0000-4000-8000-000000000001",
+      "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalInterpretationAllowed": true
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "practitionerCode": "CODIGO_EJEMPLO",
+  "displayName": "Nombre de ejemplo",
+  "professionalTitle": "valor-ejemplo",
+  "professionalBio": "valor-ejemplo",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "email": "usuario@example.com",
+  "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "workAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+  "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
+  "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "acceptsNewPatients": true,
+  "telehealthAvailable": true,
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+      "isPrimary": true,
+      "boardCertified": true,
+      "practiceScopeText": "valor-ejemplo",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
+      "issueDate": "2026-07-31T12:00:00.000Z",
+      "expiryDate": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "verificationSourceUri": "valor-ejemplo"
+    }
+  ],
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
+      "licenseNumber": "valor-ejemplo",
+      "regulatoryAuthority": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "languages": [
+    {
+      "languageConceptId": "00000000-0000-4000-8000-000000000001",
+      "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalInterpretationAllowed": true
+    }
+  ],
+  "affiliations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": {},
+      "practiceSiteId": {},
+      "healthFacilityConceptId": {},
+      "affiliationTypeConceptId": {},
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "current": true,
+      "status": "00000000-0000-4000-8000-000000000001",
+      "statusKind": "pendiente",
+      "decisionReasonText": "Texto descriptivo de ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "activity": {
+    "encounters": 1,
+    "medicationRequests": 1,
+    "clinicalNotes": 1,
+    "documents": 1
+  },
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `displayName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `professionalTitle` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `professionalBio` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `photoFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
+| `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
+| `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
+| `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties` | Sí | `array<PractitionerSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true,"boardCertified":true,"practiceScopeText":"valor-ejemplo","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].specialtyConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties[].boardCertified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties[].practiceScopeText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].regulatoryAuthority` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
+| `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
+| `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `affiliations[].current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `affiliations[].status` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].statusKind` | Sí | `string` | valores: `pendiente`, `declarado`, `aprobado`, `rechazado`, `revocado`, `desconocido` | Sin descripción específica en el contrato OpenAPI. | `pendiente` |
+| `affiliations[].decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `affiliations[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
+| `activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `activity.clinicalNotes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `activity.documents` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/{profileId}"
+}
+```
+
+---
+
+## 52. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4574,6 +11117,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4651,7 +11195,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 53. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4743,6 +11287,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JurisdictionAuthorizationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JurisdictionAuthorizationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JurisdictionAuthorizationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JurisdictionAuthorizationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JurisdictionAuthorizationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4797,7 +11342,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. DELETE /profiles/practitioners/{profileId}/photo
+## 54. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4864,6 +11409,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4893,6 +11439,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -4901,6 +11448,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -4908,6 +11457,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -4917,6 +11468,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": true,
   "telehealthAvailable": true,
@@ -5023,20 +11579,25 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -5045,6 +11606,10 @@ Campos de la respuesta:
 | `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -5136,7 +11701,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. PUT /profiles/practitioners/{profileId}/photo
+## 55. PUT /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5217,6 +11782,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5246,6 +11812,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -5254,6 +11821,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5261,6 +11830,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5270,6 +11841,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": true,
   "telehealthAvailable": true,
@@ -5376,20 +11952,25 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -5398,6 +11979,10 @@ Campos de la respuesta:
 | `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -5490,7 +12075,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /profiles/practitioners/{profileId}/specialties
+## 56. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5576,6 +12161,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SpecialtyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5635,7 +12221,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /profiles/practitioners/{profileId}/summary
+## 57. GET /profiles/practitioners/{profileId}/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5700,6 +12286,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5729,6 +12316,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -5737,6 +12325,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5744,6 +12334,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5753,6 +12345,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": true,
   "telehealthAvailable": true,
@@ -5859,20 +12456,25 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -5881,6 +12483,10 @@ Campos de la respuesta:
 | `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -5970,7 +12576,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. PATCH /profiles/practitioners/me
+## 58. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6025,6 +12631,7 @@ Content-Type: application/json
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `nationalId` | No | `string` | longitud mínima 1; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Número del documento de identidad. 409 si la identidad está verificada o en verificación. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
 | `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
@@ -6039,6 +12646,8 @@ Content-Type: application/json
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
@@ -6071,6 +12680,7 @@ Content-Type: application/json
   "motherLastName": "Nombre de ejemplo",
   "birthDate": {},
   "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "phone": "+59170000000",
   "workEmail": "usuario@example.com",
@@ -6085,6 +12695,8 @@ Content-Type: application/json
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -6114,6 +12726,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6143,6 +12756,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -6151,6 +12765,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6158,6 +12774,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6167,6 +12785,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": true,
   "telehealthAvailable": true,
@@ -6273,20 +12896,25 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -6295,6 +12923,10 @@ Campos de la respuesta:
 | `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -6367,6 +12999,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
@@ -6389,7 +13022,494 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /profiles/practitioners/me/affiliations
+## 59. GET /profiles/practitioners/me/admission
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioner-admission`
+- **Nombre:** Estado de mi verificación
+- **Operation ID:** `OwnAdmissionController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OwnAdmissionController.get](../../src/modules/profiles/presentation/controllers/own-admission.controller.ts)
+
+### Descripción de negocio
+
+Estados, qué falta y los mensajes dirigidos al médico. Nada del personal.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners/me/admission` en `OwnAdmissionController_get`. El controlador delega en `PractitionerAdmissionsReadService.own`. No recibe body. El tipo de retorno estático es `Promise<OwnAdmissionDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners/me/admission HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners/me/admission HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnAdmissionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "validUntil": "valor-ejemplo",
+  "items": [
+    {
+      "type": "LICENSE",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "label": "valor-ejemplo",
+      "state": "PENDING",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "reasonCode": "ILEGIBLE"
+    }
+  ],
+  "resubmissionCount": 1,
+  "resubmissions": {
+    "used": 1,
+    "max": 1,
+    "remaining": 1
+  },
+  "canResubmit": true,
+  "canWithdraw": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items` | Sí | `array<OwnAdmissionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":"LICENSE","id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo","state":"PENDING","reasonText":"Texto descriptivo de ejemplo","reasonCode":"ILEGIBLE"}]` |
+| `items[].type` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `1` |
+| `resubmissions` | Sí | `AdmissionResubmissionsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"used":1,"max":1,"remaining":1}` |
+| `resubmissions.used` | Sí | `number` | mínimo 0 | Reenvíos ya hechos. | `1` |
+| `resubmissions.max` | Sí | `number` | mínimo 0 | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `1` |
+| `resubmissions.remaining` | Sí | `number` | mínimo 0 | Reenvíos que quedan: `max - used`, nunca negativo. | `1` |
+| `canResubmit` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: el estado admite reenviar y no se llegó al tope. | `true` |
+| `canWithdraw` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/admission"
+}
+```
+
+---
+
+## 60. POST /profiles/practitioners/me/admission/resubmit
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioner-admission`
+- **Nombre:** Reenviar mi solicitud
+- **Operation ID:** `OwnAdmissionController_resubmit`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OwnAdmissionController.resubmit](../../src/modules/profiles/presentation/controllers/own-admission.controller.ts)
+
+### Descripción de negocio
+
+Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos. El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. El servidor guarda cuándo se aceptó y qué versión del texto.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/practitioners/me/admission/resubmit` en `OwnAdmissionController_resubmit`. El controlador delega en `PractitionerAdmissionsService.resubmit`. Valida el body como `ResubmitAdmissionDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnAdmissionDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ResubmitAdmissionDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/practitioners/me/admission/resubmit HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `attested` | Sí | `boolean` | Sin restricción adicional declarada | Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. | `true` |
+| `attestationVersion` | Sí | `string` | longitud máxima 32 | Versión del texto de la declaración que se mostró. | `2026-10` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/practitioners/me/admission/resubmit HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnAdmissionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "validUntil": "valor-ejemplo",
+  "items": [
+    {
+      "type": "LICENSE",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "label": "valor-ejemplo",
+      "state": "PENDING",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "reasonCode": "ILEGIBLE"
+    }
+  ],
+  "resubmissionCount": 1,
+  "resubmissions": {
+    "used": 1,
+    "max": 1,
+    "remaining": 1
+  },
+  "canResubmit": true,
+  "canWithdraw": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items` | Sí | `array<OwnAdmissionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":"LICENSE","id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo","state":"PENDING","reasonText":"Texto descriptivo de ejemplo","reasonCode":"ILEGIBLE"}]` |
+| `items[].type` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `1` |
+| `resubmissions` | Sí | `AdmissionResubmissionsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"used":1,"max":1,"remaining":1}` |
+| `resubmissions.used` | Sí | `number` | mínimo 0 | Reenvíos ya hechos. | `1` |
+| `resubmissions.max` | Sí | `number` | mínimo 0 | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `1` |
+| `resubmissions.remaining` | Sí | `number` | mínimo 0 | Reenvíos que quedan: `max - used`, nunca negativo. | `1` |
+| `canResubmit` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: el estado admite reenviar y no se llegó al tope. | `true` |
+| `canWithdraw` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | No tiene una solicitud de verificación | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Llegó al tope de reenvíos de la solicitud | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | Debe aceptar la declaración para reenviar la solicitud | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/admission/resubmit"
+}
+```
+
+---
+
+## 61. POST /profiles/practitioners/me/admission/withdraw
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioner-admission`
+- **Nombre:** Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
+- **Operation ID:** `OwnAdmissionController_withdraw`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OwnAdmissionController.withdraw](../../src/modules/profiles/presentation/controllers/own-admission.controller.ts)
+
+### Descripción de negocio
+
+Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/practitioners/me/admission/withdraw` en `OwnAdmissionController_withdraw`. El controlador delega en `PractitionerAdmissionsService.withdraw`. No recibe body. El tipo de retorno estático es `Promise<OwnAdmissionDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /profiles/practitioners/me/admission/withdraw HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /profiles/practitioners/me/admission/withdraw HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnAdmissionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnAdmissionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": {
+    "code": "CODIGO_EJEMPLO",
+    "label": "valor-ejemplo"
+  },
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "infoRequestedText": "valor-ejemplo",
+  "infoDueAt": "valor-ejemplo",
+  "decisionReasonText": "Texto descriptivo de ejemplo",
+  "validUntil": "valor-ejemplo",
+  "items": [
+    {
+      "type": "LICENSE",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "label": "valor-ejemplo",
+      "state": "PENDING",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "reasonCode": "ILEGIBLE"
+    }
+  ],
+  "resubmissionCount": 1,
+  "resubmissions": {
+    "used": 1,
+    "max": 1,
+    "remaining": 1
+  },
+  "canResubmit": true,
+  "canWithdraw": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `AdmissionCodeLabelDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo"}` |
+| `status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status.label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `infoRequestedText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `infoDueAt` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items` | Sí | `array<OwnAdmissionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":"LICENSE","id":"00000000-0000-4000-8000-000000000001","label":"valor-ejemplo","state":"PENDING","reasonText":"Texto descriptivo de ejemplo","reasonCode":"ILEGIBLE"}]` |
+| `items[].type` | Sí | `string` | valores: `LICENSE`, `CREDENTIAL`, `SPECIALTY`, `PROFILE` | Sin descripción específica en el contrato OpenAPI. | `LICENSE` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].label` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REJECTED`, `INFO_REQUIRED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].reasonCode` | No | `string` | valores: `ILEGIBLE`, `VENCIDO`, `NO_COINCIDE_NOMBRE`, `NO_FIGURA_EN_REGISTRO`, `DOCUMENTO_INCOMPLETO`, `SOSPECHA_DE_FRAUDE`, `OTRO`; admite null | Sin descripción específica en el contrato OpenAPI. | `ILEGIBLE` |
+| `resubmissionCount` | Sí | `number` | Sin restricción adicional declarada | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `1` |
+| `resubmissions` | Sí | `AdmissionResubmissionsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"used":1,"max":1,"remaining":1}` |
+| `resubmissions.used` | Sí | `number` | mínimo 0 | Reenvíos ya hechos. | `1` |
+| `resubmissions.max` | Sí | `number` | mínimo 0 | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `1` |
+| `resubmissions.remaining` | Sí | `number` | mínimo 0 | Reenvíos que quedan: `max - used`, nunca negativo. | `1` |
+| `canResubmit` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: el estado admite reenviar y no se llegó al tope. | `true` |
+| `canWithdraw` | Sí | `boolean` | Sin restricción adicional declarada | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | No tiene una solicitud de verificación | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 404 | `NOT_FOUND` | Admisión no encontrada | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La acción no es válida desde el estado ${from} | Excepción explícita en src/modules/profiles/application/services/practitioner-admissions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/admission/withdraw"
+}
+```
+
+---
+
+## 62. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6450,6 +13570,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListAffiliationsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListAffiliationsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListAffiliationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListAffiliationsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListAffiliationsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6524,7 +13645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /profiles/practitioners/me/affiliations
+## 63. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6613,6 +13734,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6690,7 +13812,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 64. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6757,6 +13879,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -6788,7 +13911,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 65. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6875,6 +13998,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6947,7 +14071,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /profiles/practitioners/me/credentials
+## 66. POST /profiles/practitioners/me/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7041,6 +14165,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnCredentialResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnCredentialResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7107,7 +14232,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 67. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7174,6 +14299,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -7206,7 +14332,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 68. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7301,6 +14427,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -7335,7 +14462,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 69. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7402,6 +14529,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -7436,7 +14564,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 70. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7521,6 +14649,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -7555,7 +14684,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /profiles/practitioners/me/linkable-organizations
+## 71. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7620,6 +14749,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListLinkableOrganizationsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListLinkableOrganizationsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListLinkableOrganizationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListLinkableOrganizationsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListLinkableOrganizationsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7680,7 +14810,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /profiles/practitioners/me/onboarding
+## 72. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7741,6 +14871,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PractitionerOnboardingDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PractitionerOnboardingDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PractitionerOnboardingDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerOnboardingDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerOnboardingDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7798,7 +14929,131 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /profiles/practitioners/me/signature-assets
+## 73. GET /profiles/practitioners/me/primary-patients
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Listar los pacientes que me eligieron como médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_listOwnPatients`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.listOwnPatients](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Nombre, código de paciente y desde cuándo: ningún dato del expediente.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners/me/primary-patients` en `PrimaryPractitionerController_listOwnPatients`. El controlador delega en `PrimaryPractitionerService.listOwnPatients`. No recibe body. El tipo de retorno estático es `Promise<PrimaryPatientsPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners/me/primary-patients HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners/me/primary-patients?limit=50&offset=0 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrimaryPatientsPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrimaryPatientsPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "patientCode": "CODIGO_EJEMPLO",
+      "since": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "limit": 1,
+  "offset": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PrimaryPatientDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"patientProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","since":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del paciente | `Nombre de ejemplo` |
+| `items[].patientCode` | No | `string` | Sin restricción adicional declarada | Código de paciente | `CODIGO_EJEMPLO` |
+| `items[].since` | Sí | `string` | formato `date-time` | Desde cuándo lo tiene como médico de cabecera | `2026-07-31T12:00:00.000Z` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Pacientes de cabecera vigentes, en total | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `offset` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil profesional | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/primary-patients"
+}
+```
+
+---
+
+## 74. GET /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7858,6 +15113,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSignatureAssetsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7902,7 +15158,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. PUT /profiles/practitioners/me/signature-assets
+## 75. PUT /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7978,6 +15234,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSignatureAssetsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8025,7 +15282,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 76. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8092,6 +15349,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -8124,7 +15382,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 77. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8205,6 +15463,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -8241,7 +15500,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 78. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8308,6 +15567,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SpecialtyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SpecialtyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8360,7 +15620,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /profiles/practitioners/me/summary
+## 79. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8421,6 +15681,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8450,6 +15711,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -8458,6 +15720,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -8465,6 +15729,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -8474,6 +15740,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "workEmployerFreeText": "valor-ejemplo",
   "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
   "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": true,
   "telehealthAvailable": true,
@@ -8580,20 +15851,25 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -8602,6 +15878,10 @@ Campos de la respuesta:
 | `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
 | `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -8691,7 +15971,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /profiles/practitioners/specialty-counts
+## 80. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8752,6 +16032,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSpecialtyCountsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSpecialtyCountsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8803,7 +16084,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /tenants/{tenantId}/practitioner-requests
+## 81. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -8868,6 +16149,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<AffiliationRequestListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AffiliationRequestListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AffiliationRequestListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AffiliationRequestListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationRequestListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8932,7 +16214,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 82. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9000,6 +16282,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -9031,7 +16314,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 83. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9111,6 +16394,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -9143,7 +16427,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 84. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9223,6 +16507,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 

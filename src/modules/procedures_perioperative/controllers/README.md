@@ -12,14 +12,14 @@ dentro) y `/pacu-stays` (la estancia de recuperación, que tiene identidad propi
 
 `JwtAuthGuard` global + `@Roles(...)`, con roles por función clínica:
 
-| Rol | Alcance |
-| --- | --- |
-| `PERIOP_ADMIN` | Todo el módulo |
-| `SURGERY_SCHEDULER` | Programar, asignar equipo, cancelar |
-| `SURGEON` | Diagnósticos, pasos, hallazgos, implantes, muestras, reporte y su firma |
-| `ANESTHESIOLOGIST` | Valoración, plan y eventos de anestesia, verificación de órdenes, alta de PACU |
-| `PERIOP_NURSE` | Checklist, implantes, insumos, admisión en PACU y valoraciones |
-| `BILLING` | Generar cargos |
+| Rol                 | Alcance                                                                        |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `PERIOP_ADMIN`      | Todo el módulo                                                                 |
+| `SURGERY_SCHEDULER` | Programar, asignar equipo, cancelar                                            |
+| `SURGEON`           | Diagnósticos, pasos, hallazgos, implantes, muestras, reporte y su firma        |
+| `ANESTHESIOLOGIST`  | Valoración, plan y eventos de anestesia, verificación de órdenes, alta de PACU |
+| `PERIOP_NURSE`      | Checklist, implantes, insumos, admisión en PACU y valoraciones                 |
+| `BILLING`           | Generar cargos                                                                 |
 
 Dos restricciones son deliberadas y no meramente organizativas:
 

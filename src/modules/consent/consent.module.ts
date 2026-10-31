@@ -26,6 +26,7 @@ import {
   PractitionerAccessRequestsService,
   ConsentMeService,
   EncounterInformedConsentsService,
+  ConsentScopeService,
 } from './services';
 import {
   ConsentsRepository,
@@ -36,6 +37,7 @@ import {
   PatientObjectionsRepository,
   PrivacyRestrictionsRepository,
   ProcessingLegalBasesRepository,
+  ProcessingPurposesRepository,
   TreatmentInformedConsentsRepository,
 } from './repositories';
 import { ClinicalAccessGrantsRepository } from '../authz/repositories';
@@ -88,6 +90,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     PatientObjectionsRepository,
     PrivacyRestrictionsRepository,
     ProcessingLegalBasesRepository,
+    ProcessingPurposesRepository,
     TreatmentInformedConsentsRepository,
     // Repositorio de authz reutilizado para propagar la revocación de consent a
     // los accesos clínicos que se apoyaban en él (C-20), y ahora también para
@@ -100,6 +103,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     PatientProfilesRepository,
     PersonAccountLinksRepository,
     // Servicios
+    ConsentScopeService,
     ConsentsService,
     HipaaAuthorizationsService,
     PatientObjectionsService,

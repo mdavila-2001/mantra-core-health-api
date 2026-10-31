@@ -14,6 +14,7 @@ const ENV: WorkerEnv = {
   apiBaseUrl: 'http://api',
   httpTimeoutMs: 30_000,
   healthPort: 0,
+  healthHost: '127.0.0.1',
   tickTimeoutMs: 300_000,
   stuckTickMs: 600_000,
   drainTimeoutMs: 20_000,
@@ -26,12 +27,14 @@ const ENV: WorkerEnv = {
   tsCompressionOlderThan: '7 days',
   tsRollupRefreshWindowHours: 2,
   tsRetentionPolicies: {},
+  tsAdminTenantId: '11111111-1111-4111-8111-111111111111',
   mockProviderBaseUrl: '',
   mockProviderApiKey: '',
   googleOAuthClientId: '',
   googleOAuthClientSecret: '',
   googleOAuthRefreshToken: '',
   googleSenderEmail: '',
+  emailAllowedRecipientDomains: [],
 };
 
 /** Error de axios con status, como el que produce una respuesta de error real. */

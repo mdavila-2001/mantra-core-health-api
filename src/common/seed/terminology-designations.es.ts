@@ -366,6 +366,227 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.RELATIONSHIP_GRANDPARENT,
+    {
+      display: 'Abuelo o abuela',
+      definition: 'El padre o la madre de uno de los padres del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_GRANDCHILD,
+    {
+      display: 'Nieto o nieta',
+      definition: 'El hijo o la hija de un hijo o una hija del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_UNCLE_AUNT,
+    {
+      display: 'Tío o tía',
+      definition:
+        'El hermano o la hermana de uno de los padres del paciente, o su cónyuge.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_NEPHEW_NIECE,
+    {
+      display: 'Sobrino o sobrina',
+      definition: 'El hijo o la hija de un hermano o una hermana del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_COUSIN,
+    {
+      display: 'Primo o prima',
+      definition: 'El hijo o la hija de un tío o una tía del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_HALF_SIBLING,
+    {
+      display: 'Medio hermano o media hermana',
+      definition:
+        'Hermano o hermana con quien el paciente comparte sólo el padre o sólo la madre.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_GREAT_GRANDPARENT,
+    {
+      display: 'Bisabuelo o bisabuela',
+      definition: 'El padre o la madre de uno de los abuelos del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_GREAT_GRANDCHILD,
+    {
+      display: 'Bisnieto o bisnieta',
+      definition: 'El hijo o la hija de un nieto o una nieta del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_PARENT_IN_LAW,
+    {
+      display: 'Suegro o suegra',
+      definition: 'El padre o la madre del cónyuge o la pareja del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_CHILD_IN_LAW,
+    {
+      display: 'Yerno o nuera',
+      definition: 'El cónyuge o la pareja de un hijo o una hija del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_SIBLING_IN_LAW,
+    {
+      display: 'Cuñado o cuñada',
+      definition:
+        'El hermano o la hermana del cónyuge del paciente, o el cónyuge de un hermano o una hermana del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_STEPPARENT,
+    {
+      display: 'Padrastro o madrastra',
+      definition:
+        'El cónyuge o la pareja del padre o de la madre del paciente, sin ser su progenitor.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_STEPCHILD,
+    {
+      display: 'Hijastro o hijastra',
+      definition:
+        'El hijo o la hija del cónyuge o la pareja del paciente, sin serlo del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_STEPSIBLING,
+    {
+      display: 'Hermanastro o hermanastra',
+      definition:
+        'El hijo o la hija del padrastro o la madrastra del paciente, sin padre ni madre en común.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_ADOPTIVE_PARENT,
+    {
+      display: 'Padre o madre adoptivos',
+      definition:
+        'Quien adoptó legalmente al paciente. La adopción da el mismo vínculo que la filiación, pero la representación legal se acredita aparte.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_ADOPTED_CHILD,
+    {
+      display: 'Hijo o hija adoptivos',
+      definition: 'La persona que el paciente adoptó legalmente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_FOSTER_PARENT,
+    {
+      display: 'Familia sustituta',
+      definition:
+        'Quien tiene al paciente bajo guarda como familia sustituta por decisión judicial (Código Niña, Niño y Adolescente, Ley 548). No es tutor salvo que la resolución lo diga.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_EX_SPOUSE,
+    {
+      display: 'Excónyuge o expareja',
+      definition:
+        'Quien fue cónyuge o pareja del paciente. Suele declararse cuando comparten la crianza de los hijos.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_GODPARENT,
+    {
+      display: 'Padrino o madrina',
+      definition:
+        'El padrino o la madrina del paciente, de bautizo u otro sacramento o celebración.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_GODCHILD,
+    {
+      display: 'Ahijado o ahijada',
+      definition: 'La persona de quien el paciente es padrino o madrina.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_COMPADRE,
+    {
+      display: 'Compadre o comadre',
+      definition:
+        'El vínculo de compadrazgo: el padrino o la madrina de un hijo del paciente, o los padres de su ahijado.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_CAREGIVER,
+    {
+      display: 'Cuidador o cuidadora',
+      definition:
+        'Quien atiende al paciente en su vida diaria, sea o no familiar y cobre o no por hacerlo. No le da representación legal.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_DOMESTIC_WORKER,
+    {
+      display: 'Trabajadora o trabajador del hogar',
+      definition:
+        'Quien trabaja en el hogar del paciente (Ley 2450). Suele ser quien está presente en una emergencia.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_ATTORNEY_IN_FACT,
+    {
+      display: 'Apoderado o apoderada',
+      definition:
+        'Quien actúa en nombre del paciente por un poder notarial. Lo que puede decidir depende de lo que el poder diga, y se acredita con el documento.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_CARE_HOME_STAFF,
+    {
+      display: 'Responsable del hogar o centro de acogida',
+      definition:
+        'Personal del hogar de ancianos, centro de acogida o institución donde vive el paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_NEIGHBOR,
+    {
+      display: 'Vecino o vecina',
+      definition:
+        'Quien vive cerca del paciente y puede acudir o avisar en una emergencia.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_HOUSEMATE,
+    {
+      display: 'Persona con quien comparte vivienda',
+      definition:
+        'Quien vive con el paciente sin ser su familiar ni su pareja: un compañero de cuarto o de departamento.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_COWORKER,
+    {
+      display: 'Compañero o compañera de trabajo',
+      definition: 'Quien trabaja con el paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_EMPLOYER,
+    {
+      display: 'Empleador o empleadora',
+      definition:
+        'La persona o el responsable de la entidad para la que trabaja el paciente.',
+    },
+  ],
+  [
     PROF.RELATED_ACTIVE,
     {
       display: 'Vínculo vigente',
@@ -561,6 +782,78 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.JURISDICTION_SEDES_LA_PAZ,
+    {
+      display: 'SEDES — La Paz',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de La Paz. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_COCHABAMBA,
+    {
+      display: 'SEDES — Cochabamba',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Cochabamba. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_ORURO,
+    {
+      display: 'SEDES — Oruro',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Oruro. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_POTOSI,
+    {
+      display: 'SEDES — Potosí',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Potosí. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_CHUQUISACA,
+    {
+      display: 'SEDES — Chuquisaca',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Chuquisaca. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_TARIJA,
+    {
+      display: 'SEDES — Tarija',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Tarija. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_BENI,
+    {
+      display: 'SEDES — Beni',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Beni. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_PANDO,
+    {
+      display: 'SEDES — Pando',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de la Gobernación de Pando. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+    {
+      display: 'Colegio profesional',
+      definition:
+        'Registro en el colegio de la profesión (Colegio Médico, de Odontólogos, etc.). Se suma a la matrícula y al SEDES, no los reemplaza.',
+    },
+  ],
+  [
     PROF.AUTH_PENDING,
     {
       display: 'Habilitación pendiente',
@@ -582,6 +875,408 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Habilitación vencida',
       definition:
         'La autorización para ejercer caducó y hay que renovarla antes de volver a atender.',
+    },
+  ],
+  // --- Admisiones de profesionales (v4.2.67) -------------------------------
+  [
+    PROF.AUTH_REJECTED,
+    {
+      display: 'Habilitación rechazada',
+      definition:
+        'La revisión de la plataforma no pudo verificar la matrícula; el motivo queda registrado y el profesional puede corregirla y reenviar.',
+    },
+  ],
+  [
+    PROF.SPEC_VERIF_REJECTED,
+    {
+      display: 'Especialidad rechazada',
+      definition:
+        'La revisión no pudo verificar el título que respalda la especialidad declarada.',
+    },
+  ],
+  [
+    PROF.ADMISSION_TYPE_PRACTITIONER_ONBOARDING,
+    {
+      display: 'Alta de doctor',
+      definition:
+        'Solicitud de admisión de un profesional de salud que se registró: la plataforma verifica su identidad, su matrícula y sus títulos antes de habilitarlo.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_SUBMITTED,
+    {
+      display: 'Enviada',
+      definition:
+        'La solicitud llegó a la plataforma y espera que alguien la tome. Equivale a «profesional pendiente de verificación».',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_IN_REVIEW,
+    {
+      display: 'En revisión',
+      definition:
+        'Un revisor tomó la solicitud y está comprobando los requisitos.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_INFO_REQUIRED,
+    {
+      display: 'Información requerida',
+      definition:
+        'El revisor pidió al solicitante corregir o aportar algo antes de seguir.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_VERIFIED,
+    {
+      display: 'Verificada',
+      definition:
+        'La plataforma comprobó todos los requisitos obligatorios; el profesional queda verificado hasta su fecha de vigencia.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_REJECTED,
+    {
+      display: 'Rechazada',
+      definition:
+        'La plataforma no pudo verificar al solicitante; el motivo queda registrado y puede corregir y reenviar.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_SUSPENDED,
+    {
+      display: 'Suspendida',
+      definition:
+        'Una verificación vigente se dejó sin efecto por un motivo registrado; se puede reponer.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_EXPIRED,
+    {
+      display: 'Expirada',
+      definition: 'La vigencia de una verificación venció; hay que renovarla.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_WITHDRAWN,
+    {
+      display: 'Retirada',
+      definition:
+        'El solicitante retiró su solicitud antes de que se resolviera.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_ABANDONED,
+    {
+      display: 'Abandonada',
+      definition:
+        'El solicitante no respondió a la información pedida dentro de su plazo.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_CREATED,
+    {
+      display: 'Solicitud creada',
+      definition: 'Se registró la solicitud de admisión.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_CLAIMED,
+    {
+      display: 'Revisión tomada',
+      definition: 'Un revisor tomó la solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_INFO_REQUESTED,
+    {
+      display: 'Información pedida',
+      definition: 'El revisor pidió información al solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_RESUBMITTED,
+    {
+      display: 'Solicitud reenviada',
+      definition: 'El solicitante reenvió su solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ITEM_VERIFIED,
+    {
+      display: 'Ítem verificado',
+      definition: 'Se verificó un requisito de la solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ITEM_REJECTED,
+    {
+      display: 'Ítem rechazado',
+      definition: 'Se rechazó un requisito de la solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ITEM_INFO_REQUIRED,
+    {
+      display: 'Información de un ítem',
+      definition: 'Se pidió información sobre un requisito puntual.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_VERIFIED,
+    {
+      display: 'Solicitud verificada',
+      definition: 'Se resolvió la solicitud como verificada.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_REJECTED,
+    {
+      display: 'Solicitud rechazada',
+      definition: 'Se resolvió la solicitud como rechazada.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_SUSPENDED,
+    {
+      display: 'Verificación suspendida',
+      definition: 'Se suspendió una verificación vigente.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_REINSTATED,
+    {
+      display: 'Verificación repuesta',
+      definition: 'Se repuso una verificación suspendida.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_EXPIRED,
+    {
+      display: 'Verificación vencida',
+      definition: 'La vigencia de la verificación venció.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_WITHDRAWN,
+    {
+      display: 'Solicitud retirada',
+      definition: 'El solicitante retiró su solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ABANDONED,
+    {
+      display: 'Solicitud abandonada',
+      definition:
+        'La solicitud se cerró por falta de respuesta del solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_RELEASED,
+    {
+      display: 'Revisión soltada',
+      definition: 'El revisor soltó la solicitud para que otro la tome.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_REASSIGNED,
+    {
+      display: 'Revisión reasignada',
+      definition: 'La solicitud pasó a otro revisor.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_BACKFILLED,
+    {
+      display: 'Solicitud migrada',
+      definition:
+        'La solicitud se creó al migrar un profesional anterior a las admisiones.',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_LICENSE,
+    {
+      display: 'Matrícula',
+      definition:
+        'Una habilitación para ejercer (Ministerio de Salud, colegio, SEDES).',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_CREDENTIAL,
+    {
+      display: 'Título',
+      definition:
+        'Un título universitario, diplomado, maestría, doctorado o especialidad.',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_SPECIALTY,
+    {
+      display: 'Especialidad declarada',
+      definition: 'Una especialidad que el profesional declaró ejercer.',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_PROFILE,
+    {
+      display: 'Dato del perfil',
+      definition: 'Un dato del perfil que se comprueba: cédula, consultorios.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_PENDING,
+    {
+      display: 'Pendiente',
+      definition: 'Todavía nadie revisó este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_VERIFIED,
+    {
+      display: 'Verificado',
+      definition: 'El revisor comprobó este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_REJECTED,
+    {
+      display: 'Rechazado',
+      definition: 'El revisor no pudo comprobar este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_INFO_REQUIRED,
+    {
+      display: 'Información requerida',
+      definition: 'El revisor necesita algo más sobre este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVIDENCE_DOCUMENT,
+    {
+      display: 'Documento',
+      definition: 'La evidencia es un archivo que sube el solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVIDENCE_DATA,
+    {
+      display: 'Dato',
+      definition: 'La evidencia es un dato declarado en el formulario.',
+    },
+  ],
+  [
+    PROF.ADMISSION_METHOD_MANUAL,
+    {
+      display: 'Revisión manual',
+      definition: 'Una persona de la plataforma lo comprueba.',
+    },
+  ],
+  [
+    PROF.ADMISSION_METHOD_AUTHORITY_CHECK,
+    {
+      display: 'Consulta a la autoridad',
+      definition: 'Se comprueba contra la autoridad emisora.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_MINSALUD_REGISTRY,
+    {
+      display: 'Registro del Ministerio de Salud',
+      definition:
+        'Se consultó el registro de matrículas del Ministerio de Salud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_MEDICAL_COLLEGE,
+    {
+      display: 'Colegio Médico',
+      definition: 'Se consultó al Colegio Médico.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_DENTAL_COLLEGE,
+    {
+      display: 'Colegio de Odontólogos',
+      definition: 'Se consultó al Colegio de Odontólogos.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_SEDES,
+    {
+      display: 'SEDES',
+      definition: 'Se consultó al Servicio Departamental de Salud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_SEGIP,
+    {
+      display: 'SEGIP',
+      definition: 'Se contrastó con el SEGIP.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_SUBMITTED_DOCUMENT,
+    {
+      display: 'Documento aportado',
+      definition: 'Se contrastó con el documento que aportó el solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_OTHER,
+    {
+      display: 'Otra fuente',
+      definition: 'Se consultó otra fuente, descrita en la referencia.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_ILLEGIBLE,
+    {
+      display: 'Documento ilegible',
+      definition: 'No se puede leer el documento.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_EXPIRED,
+    {
+      display: 'Documento vencido',
+      definition: 'El documento está vencido.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_NAME_MISMATCH,
+    {
+      display: 'El nombre no coincide',
+      definition: 'El nombre del documento no coincide con el del solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_NOT_IN_REGISTRY,
+    {
+      display: 'No figura en el registro',
+      definition: 'No se encontró en el registro consultado.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_INCOMPLETE,
+    {
+      display: 'Documento incompleto',
+      definition: 'Faltan páginas o datos.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_SUSPECTED_FRAUD,
+    {
+      display: 'Sospecha de fraude',
+      definition: 'Sólo para el personal: nunca se muestra al solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_OTHER,
+    {
+      display: 'Otro motivo',
+      definition: 'Otro motivo, descrito en el texto.',
     },
   ],
   [
@@ -666,6 +1361,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Hospital',
       definition:
         'Establecimiento con internación, quirófano y guardia. Se distingue del consultorio justamente por la internación.',
+    },
+  ],
+  [
+    CONCEPTS.TENANT_TYPE_CLINIC,
+    {
+      display: 'Clínica',
+      definition:
+        'Establecimiento privado de atención con internación, de menor escala que un hospital.',
     },
   ],
   [
@@ -1039,6 +1742,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     {
       display: 'Domicilio laboral',
       definition: 'Dirección donde la persona trabaja.',
+    },
+  ],
+  [
+    CONCEPTS.ADDR_USE_SAVED,
+    {
+      display: 'Dirección guardada',
+      definition:
+        'Otra ubicación que la persona guarda en su libreta, además de su domicilio.',
     },
   ],
   [
@@ -1640,6 +2351,129 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
         'Se respira para que llegue a los pulmones. Es la vía del aerosol y del nebulizador.',
     },
   ],
+  [
+    CLIN.MEDICATION_ROUTE_SUBLINGUAL,
+    {
+      display: 'Vía sublingual',
+      definition:
+        'Se deja disolver debajo de la lengua, sin tragarlo: pasa a la sangre por la mucosa de la boca.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_BUCCAL,
+    {
+      display: 'Vía bucal',
+      definition:
+        'Se aplica en la mucosa de la boca —la mejilla o la encía— para que actúe ahí o se absorba por ella.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_NASAL,
+    {
+      display: 'Vía nasal',
+      definition: 'Se aplica dentro de la nariz, en gotas o en aerosol.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_RECTAL,
+    {
+      display: 'Vía rectal',
+      definition: 'Se introduce por el ano: supositorios, enemas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_VAGINAL,
+    {
+      display: 'Vía vaginal',
+      definition:
+        'Se introduce en la vagina: óvulos, cremas o geles vaginales.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_OPHTHALMIC,
+    {
+      display: 'Vía oftálmica',
+      definition: 'Se aplica en el ojo: colirios y pomadas oftálmicas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_OTIC,
+    {
+      display: 'Vía ótica',
+      definition: 'Se aplica en el oído: gotas óticas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_TRANSDERMAL,
+    {
+      display: 'Vía transdérmica',
+      definition:
+        'Un parche sobre la piel libera el medicamento de a poco para que pase a la sangre.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_INTRADERMAL,
+    {
+      display: 'Vía intradérmica',
+      definition:
+        'Se inyecta en el espesor de la piel, muy superficial. Es la de la BCG y la prueba de tuberculina.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_INTRALESIONAL,
+    {
+      display: 'Vía intralesional',
+      definition:
+        'Se inyecta dentro de una lesión, por ejemplo una cicatriz o una lesión de la piel.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_INFILTRATION,
+    {
+      display: 'Infiltración local',
+      definition:
+        'Se inyecta en los tejidos de una zona para que actúe ahí. Es la vía de la anestesia local, también en odontología.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_INTRAARTICULAR,
+    {
+      display: 'Vía intraarticular',
+      definition: 'Se inyecta dentro de una articulación, como la rodilla.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_INTRATHECAL,
+    {
+      display: 'Vía intratecal',
+      definition:
+        'Se inyecta en el líquido que rodea la médula espinal. La administra un especialista.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_EPIDURAL,
+    {
+      display: 'Vía epidural',
+      definition:
+        'Se inyecta en el espacio que rodea las membranas de la médula espinal, como en la analgesia del parto.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_INTRAOSSEOUS,
+    {
+      display: 'Vía intraósea',
+      definition:
+        'Se infunde dentro del hueso cuando no se consigue una vena, en una emergencia.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ROUTE_ENTERAL_TUBE,
+    {
+      display: 'Vía enteral por sonda',
+      definition:
+        'Se administra por una sonda que llega al estómago o al intestino, en quien no puede tragar.',
+    },
+  ],
 
   // --- Unidades de medida (UCUM) ------------------------------------------
   [
@@ -1685,6 +2519,111 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Gota',
       definition:
         'Una gota de la presentación líquida. El volumen depende del gotero, así que sólo se usa con el envase que lo indica.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_MICROGRAM,
+    {
+      display: 'Microgramo',
+      definition:
+        'La milésima parte de un miligramo. Se usa en medicamentos de dosis muy pequeñas, como la levotiroxina.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_INTERNATIONAL_UNIT,
+    {
+      display: 'Unidad internacional',
+      definition:
+        'Unidad que mide la actividad del medicamento y no su peso, como en la insulina, la heparina o la vitamina D.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_MILLIEQUIVALENT,
+    {
+      display: 'Miliequivalente',
+      definition:
+        'Unidad de la cantidad de un electrolito, como el potasio o el bicarbonato.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_AMPOULE,
+    {
+      display: 'Ampolla',
+      definition: 'Una ampolla entera de la presentación inyectable o bebible.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_VIAL,
+    {
+      display: 'Frasco ampolla',
+      definition:
+        'Un frasco cerrado con tapón de goma, de donde se extrae la dosis con jeringa.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_PREFILLED_SYRINGE,
+    {
+      display: 'Jeringa prellenada',
+      definition: 'Una jeringa que ya viene cargada con la dosis.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_SACHET,
+    {
+      display: 'Sobre',
+      definition:
+        'Un sobre de polvo o granulado, que se disuelve antes de tomarlo.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_SUPPOSITORY,
+    {
+      display: 'Supositorio',
+      definition: 'Una unidad sólida para introducir por el recto.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_PESSARY,
+    {
+      display: 'Óvulo',
+      definition: 'Una unidad sólida para introducir en la vagina.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_PATCH,
+    {
+      display: 'Parche',
+      definition: 'Un parche que se pega en la piel.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_PUFF,
+    {
+      display: 'Inhalación',
+      definition: 'Una pulsación del inhalador o del aerosol nasal.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_APPLICATION,
+    {
+      display: 'Aplicación',
+      definition:
+        'Una aplicación de crema, pomada, gel o loción sobre la zona indicada.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_BOTTLE,
+    {
+      display: 'Frasco',
+      definition:
+        'Un frasco entero de la presentación: jarabe, suspensión, solución.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_UNIT_TUBE,
+    {
+      display: 'Pomo',
+      definition: 'Un pomo o tubo entero de crema, pomada o gel.',
     },
   ],
 
@@ -2019,6 +2958,29 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CLIN.SERVICE_REQUEST_PERFORMER_SELF,
+    {
+      display: 'Lo realiza quien indica',
+      definition:
+        'El profesional que ordena es quien realiza el estudio o procedimiento.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PERFORMER_ORGANIZATION,
+    {
+      display: 'Lo realiza un centro médico recomendado',
+      definition:
+        'El profesional recomienda un centro para realizarlo; el paciente puede elegir otro.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE,
+    {
+      display: 'Lo elige el paciente',
+      definition: 'El paciente decide dónde realizarlo.',
+    },
+  ],
+  [
     CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
     {
       display: 'Estudio por imagen',
@@ -2048,6 +3010,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Estudio cardiológico',
       definition:
         'Electrocardiograma, ecocardiograma, Holter y demás estudios del corazón.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
+    {
+      display: 'Otro estudio',
+      definition:
+        'Orden de análisis que no es de laboratorio ni de imagen; quien la ejecuta se elige aparte.',
     },
   ],
   [
@@ -2903,6 +3873,159 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Sociedad de Responsabilidad Limitada (México)',
       definition:
         'Figura mexicana con socios que responden hasta el monto de sus aportaciones, sin partes representadas en títulos negociables.',
+    },
+  ],
+  /* --- formas jurídicas bolivianas no societarias (26/10/2026) ------------ */
+  [
+    CONCEPTS.LEGAL_ENTITY_SAM,
+    {
+      display: 'Sociedad Anónima Mixta (S.A.M.)',
+      definition:
+        'Sociedad anónima con capital del Estado y de particulares (Código de Comercio, art. 424 y siguientes).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_ACCIDENTAL_ASSOCIATION,
+    {
+      display: 'Asociación accidental o de cuentas en participación',
+      definition:
+        'Contrato entre comerciantes para uno o más negocios determinados, sin crear una persona jurídica distinta de la de sus partes.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_CIVIL_PARTNERSHIP,
+    {
+      display: 'Sociedad civil',
+      definition:
+        'Sociedad regida por el Código Civil, típica de profesionales que ejercen juntos sin actividad comercial.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_INDEPENDENT_PROFESSIONAL,
+    {
+      display: 'Profesional independiente (persona natural)',
+      definition:
+        'Profesional que ejerce por cuenta propia con su NIT personal, sin matrícula de comercio: el caso típico del consultorio.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_COOPERATIVE,
+    {
+      display: 'Cooperativa',
+      definition:
+        'Asociación de socios que gestionan en común un servicio sin fines de lucro (Ley 356 General de Cooperativas).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_MUTUAL,
+    {
+      display: 'Mutual o entidad financiera de vivienda',
+      definition:
+        'Entidad de propiedad de sus asociados, sin accionistas externos, que presta servicios a sus miembros.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_SOCIAL_ENTERPRISE,
+    {
+      display: 'Empresa social',
+      definition:
+        'Empresa constituida por sus trabajadores para continuar la actividad de una empresa cerrada o en quiebra (Ley 1055).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_CIVIL_ASSOCIATION,
+    {
+      display: 'Asociación civil sin fines de lucro',
+      definition:
+        'Personas reunidas con un fin común no lucrativo, con personalidad jurídica otorgada por el Estado.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_FOUNDATION,
+    {
+      display: 'Fundación',
+      definition:
+        'Patrimonio destinado a un fin de interés general, sin fines de lucro, con personalidad jurídica.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_NGO,
+    {
+      display: 'Organización no gubernamental (ONG)',
+      definition:
+        'Entidad privada sin fines de lucro dedicada a la cooperación y el desarrollo, registrada ante el Estado.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_RELIGIOUS,
+    {
+      display: 'Entidad religiosa o de creencias espirituales',
+      definition:
+        'Iglesia u organización religiosa con personalidad jurídica, que puede sostener obras de salud.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_DEVELOPMENT_FINANCE,
+    {
+      display: 'Institución Financiera de Desarrollo (IFD)',
+      definition:
+        'Entidad sin fines de lucro autorizada por la ASFI para prestar servicios financieros de desarrollo.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_COMMUNITY_ORGANIZATION,
+    {
+      display: 'Organización social o comunitaria (OTB, junta vecinal)',
+      definition:
+        'Organización territorial de base o comunitaria con personalidad jurídica, que a veces gestiona un puesto de salud.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_PUBLIC_ENTITY,
+    {
+      display: 'Entidad pública',
+      definition:
+        'Órgano o institución del Estado: ministerio, gobernación, municipio, universidad pública u hospital público.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_STATE_ENTERPRISE,
+    {
+      display: 'Empresa estatal',
+      definition:
+        'Empresa pública con el total de su patrimonio en manos del Estado (Ley 466 de la Empresa Pública).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_MIXED_STATE_ENTERPRISE,
+    {
+      display: 'Empresa estatal mixta',
+      definition:
+        'Empresa pública con participación estatal de al menos el 70 % y aporte privado (Ley 466).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_MIXED_ENTERPRISE,
+    {
+      display: 'Empresa mixta',
+      definition:
+        'Empresa pública con participación estatal mayoritaria, menor al 70 %, junto a capital privado (Ley 466).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_INTERGOVERNMENTAL_ENTERPRISE,
+    {
+      display: 'Empresa estatal intergubernamental',
+      definition:
+        'Empresa pública cuyo patrimonio pertenece a más de un nivel de gobierno (Ley 466).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_INTERNATIONAL_ORGANIZATION,
+    {
+      display: 'Organismo internacional o de cooperación',
+      definition:
+        'Organismo internacional o agencia de cooperación que opera en Bolivia por convenio con el Estado.',
     },
   ],
   /* --- la nota clínica narrativa (v4.1.4) -----------------------------------
@@ -4368,6 +5491,185 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    DIAG.SPECIMEN_TYPE_URINE_CLEAN_CATCH,
+    {
+      display: 'Orina de chorro medio',
+      definition:
+        'Orina recogida a mitad de la micción, tras higienizarse, en frasco estéril. Es la del urocultivo.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_URINE_CATHETER,
+    {
+      display: 'Orina por sonda',
+      definition: 'Orina tomada directamente de una sonda vesical.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_NASAL_SWAB,
+    {
+      display: 'Hisopado nasal',
+      definition: 'Muestra tomada frotando un hisopo dentro de la nariz.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_NASOPHARYNGEAL_SWAB,
+    {
+      display: 'Hisopado nasofaríngeo',
+      definition:
+        'Muestra tomada con un hisopo largo y fino que llega hasta el fondo de la nariz, para buscar virus respiratorios.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_GASTRIC_CONTENT,
+    {
+      display: 'Aspirado gástrico',
+      definition:
+        'Contenido del estómago tomado por sonda. Se usa para buscar tuberculosis en niños que no pueden expectorar.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_WOUND,
+    {
+      display: 'Secreción de herida',
+      definition: 'Muestra tomada de una herida para buscar infección.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_PUS,
+    {
+      display: 'Pus',
+      definition: 'Pus de un absceso o una colección, tomado para cultivo.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_VAGINAL,
+    {
+      display: 'Secreción vaginal',
+      definition: 'Muestra de flujo vaginal, para buscar infecciones.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_CERVIX,
+    {
+      display: 'Muestra cervical',
+      definition:
+        'Células o secreción del cuello del útero, como la del Papanicolaou.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_URETHRA,
+    {
+      display: 'Secreción uretral',
+      definition:
+        'Muestra de la secreción de la uretra, para buscar infecciones de transmisión sexual.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SEMEN,
+    {
+      display: 'Semen',
+      definition: 'Muestra de semen, para el espermograma o un cultivo.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_EAR,
+    {
+      display: 'Secreción ótica',
+      definition: 'Muestra de la secreción del oído.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_EYE,
+    {
+      display: 'Secreción conjuntival',
+      definition: 'Muestra de la secreción del ojo.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SYNOVIAL_FLUID,
+    {
+      display: 'Líquido sinovial',
+      definition: 'Líquido extraído de una articulación por punción.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_PLEURAL_FLUID,
+    {
+      display: 'Líquido pleural',
+      definition:
+        'Líquido extraído del espacio que rodea los pulmones por punción.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_PERITONEAL_FLUID,
+    {
+      display: 'Líquido ascítico',
+      definition: 'Líquido extraído del abdomen por punción (paracentesis).',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_AMNIOTIC_FLUID,
+    {
+      display: 'Líquido amniótico',
+      definition:
+        'Líquido que rodea al bebé en el útero, extraído por amniocentesis.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_BONE_MARROW,
+    {
+      display: 'Médula ósea',
+      definition:
+        'Muestra del interior del hueso, donde se forma la sangre, tomada por aspirado o biopsia.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_TISSUE,
+    {
+      display: 'Tejido (biopsia)',
+      definition:
+        'Un fragmento de tejido extraído para estudiarlo en anatomía patológica.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SKIN,
+    {
+      display: 'Raspado de piel',
+      definition:
+        'Escamas de piel raspadas de una lesión, para buscar hongos o parásitos.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_NAIL,
+    {
+      display: 'Uña',
+      definition: 'Fragmentos de uña, para buscar hongos.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_BREAST_MILK,
+    {
+      display: 'Leche materna',
+      definition: 'Muestra de leche materna, para cultivo u otros análisis.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SALIVA,
+    {
+      display: 'Saliva',
+      definition: 'Muestra de saliva.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_CALCULUS,
+    {
+      display: 'Cálculo',
+      definition:
+        'Una piedra expulsada o extraída —renal, biliar— para analizar de qué está hecha.',
+    },
+  ],
+  [
     DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
     {
       display: 'Tubo tapa lila (EDTA)',
@@ -4460,6 +5762,62 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Hisopo con medio de transporte',
       definition:
         'Hisopo que se guarda en un tubo con un medio que mantiene vivos los gérmenes hasta el laboratorio.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_BOTTLE_BLOOD_CULTURE,
+    {
+      display: 'Frasco de hemocultivo',
+      definition:
+        'Frasco con medio de cultivo donde se inyecta la sangre para buscar bacterias u hongos.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_CUP_SPUTUM,
+    {
+      display: 'Frasco para esputo',
+      definition:
+        'Frasco de boca ancha y tapa a rosca para la muestra de esputo, como la de la baciloscopía.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_MICROTUBE_CAPILLARY,
+    {
+      display: 'Microtubo pediátrico',
+      definition:
+        'Tubo pequeño para la sangre capilar de un pinchazo en el dedo o el talón.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_SLIDE_GLASS,
+    {
+      display: 'Lámina portaobjetos',
+      definition:
+        'Lámina de vidrio donde se extiende la muestra para mirarla al microscopio: gota gruesa, frotis, Papanicolaou.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_CARD_FILTER_PAPER,
+    {
+      display: 'Tarjeta de papel filtro',
+      definition:
+        'Tarjeta donde se dejan secar gotas de sangre del talón, para el tamizaje neonatal.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_JAR_FORMALIN,
+    {
+      display: 'Frasco con formol',
+      definition:
+        'Frasco con formol al 10 % donde se conserva la pieza de una biopsia hasta anatomía patológica.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_PINK_EDTA,
+    {
+      display: 'Tubo tapa rosa (EDTA)',
+      definition:
+        'Tubo con anticoagulante EDTA que usa el banco de sangre para el grupo sanguíneo y las pruebas cruzadas.',
     },
   ], // --- Alergias e intolerancias (HL7 FHIR AllergyIntolerance) ------------
   // Traducción de este proyecto, no oficial: ver allergy-designations.es.ts.

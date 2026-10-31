@@ -59,6 +59,16 @@ export class ScheduleTemplates {
   slotMinutes?: number;
 
   /**
+   * Horario flexible, sin turnos fijos (v4.2.52 · P36).
+   *
+   * `true` ≡ la plantilla declara cuándo se atiende pero no genera cupos de
+   * consulta: el paciente pide la hora que quiera dentro de la franja y el cupo
+   * nace al retener, con la duración de `slotMinutes`.
+   */
+  @Property({ fieldName: 'flexible_hours', type: 'boolean', default: false })
+  flexibleHours!: boolean;
+
+  /**
    * Identificador asociado a booking policy.
    */
   @Property({ fieldName: 'booking_policy_id', type: 'uuid', nullable: true }) // FK → scheduling.booking_policies

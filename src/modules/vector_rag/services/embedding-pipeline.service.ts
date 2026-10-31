@@ -13,6 +13,7 @@ import {
   VectorCatalogRepository,
   VectorCorpusRepository,
 } from '../repositories';
+import { inScopeOrNotFound, resolveVectorScope } from '../vector-scope';
 import { ACTIVE_JOB_STATUSES } from '../constants';
 import {
   QueueEmbeddingJobDto,
@@ -71,16 +72,17 @@ export class EmbeddingPipelineService {
     actor: AuthenticatedUser,
     idempotencyKey?: string,
   ): Promise<EmbeddingJobResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const collection = await this.catalogRepo.findCollectionById(
-        tx,
-        collectionId,
-      );
-      if (!collection) {
-        throw new ResourceNotFoundException('Colección no encontrada.', {
+      const collection = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findCollectionById(
+          tx,
           collectionId,
-        });
-      }
+          scope.tenantId,
+        ),
+        'Colección no encontrada.',
+      );
       if (collection.lifecycleState !== 'active') {
         throw new PreconditionFailedException(
           'La colección no está activa; no admite jobs de embedding.',
@@ -153,13 +155,13 @@ export class EmbeddingPipelineService {
     dto: RunEmbeddingJobDto,
     actor: AuthenticatedUser,
   ): Promise<RunEmbeddingJobResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const job = await this.catalogRepo.findJobForUpdate(tx, jobId);
-      if (!job) {
-        throw new ResourceNotFoundException('Job de embedding no encontrado.', {
-          jobId,
-        });
-      }
+      const job = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findJobForUpdate(tx, jobId, scope.tenantId),
+        'Job de embedding no encontrado.',
+      );
       if (!(ACTIVE_JOB_STATUSES as readonly string[]).includes(job.status)) {
         throw new PreconditionFailedException(
           'El job ya no está en cola ni en ejecución.',
@@ -170,15 +172,17 @@ export class EmbeddingPipelineService {
         );
       }
 
-      const collection = await this.catalogRepo.findCollectionById(
-        tx,
-        job.vectorCollectionId,
+      // La colección del job tiene que ser del mismo tenant que el job: lo que
+      // se escribe a partir de aquí hereda ese tenant, no el del llamante.
+      const collection = inScopeOrNotFound(
+        { tenantId: job.tenantId },
+        await this.catalogRepo.findCollectionById(
+          tx,
+          job.vectorCollectionId,
+          job.tenantId,
+        ),
+        'Colección no encontrada.',
       );
-      if (!collection) {
-        throw new ResourceNotFoundException('Colección no encontrada.', {
-          collectionId: job.vectorCollectionId,
-        });
-      }
 
       const model = await this.catalogRepo.findModelVersionById(
         tx,
@@ -369,16 +373,17 @@ export class EmbeddingPipelineService {
     dto: ReEmbedCollectionDto,
     actor: AuthenticatedUser,
   ): Promise<ReEmbedResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const collection = await this.catalogRepo.findCollectionForUpdate(
-        tx,
-        collectionId,
-      );
-      if (!collection) {
-        throw new ResourceNotFoundException('Colección no encontrada.', {
+      const collection = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findCollectionForUpdate(
+          tx,
           collectionId,
-        });
-      }
+          scope.tenantId,
+        ),
+        'Colección no encontrada.',
+      );
       if (collection.lifecycleState !== 'active') {
         throw new PreconditionFailedException('La colección no está activa.', {
           collectionId,
@@ -496,16 +501,22 @@ export class EmbeddingPipelineService {
   }
 
   /**
-   * UC-59-05 (descubrimiento del worker): jobs en cola listos para `run`. Cruza
-   * todos los tenants (barrido `SYSTEM`); ver `VectorCatalogRepository.findQueuedJobs`.
+   * UC-59-05 (descubrimiento del worker): jobs en cola listos para `run`. La
+   * credencial `SYSTEM` sin tenant cruza todos los tenants (barrido); cualquier
+   * otro actor queda acotado a su tenant activo. Ver `VectorCatalogRepository.findQueuedJobs`.
    */
   async listQueuedJobs(
     limit = DEFAULT_PENDING_JOBS_BATCH,
+    actor?: AuthenticatedUser,
   ): Promise<PendingEmbeddingJobsResponseDto> {
+    // Sólo la credencial `SYSTEM` sin tenant barre todas las organizaciones;
+    // cualquier otro actor ve únicamente los jobs de su tenant activo.
+    const scope = actor ? resolveVectorScope(actor) : { tenantId: undefined };
     const jobs = await this.catalogRepo.findQueuedJobs(
       this.em,
       'queued',
       limit,
+      scope.tenantId,
     );
     return {
       jobs: jobs.map((job) => ({

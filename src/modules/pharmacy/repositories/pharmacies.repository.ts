@@ -53,9 +53,13 @@ export interface CreatePharmacyData {
  */
 @Injectable()
 export class PharmaciesRepository {
-  /** Busca una farmacia por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<Pharmacies | null> {
-    return em.findOne(Pharmacies, { id });
+  /** Busca una farmacia por id dentro de un tenant; `null` si no existe o es de otro tenant. */
+  findByIdInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Pharmacies | null> {
+    return em.findOne(Pharmacies, { id, tenantId });
   }
 
   /** Busca una farmacia por (tenant, code) para validar unicidad. */

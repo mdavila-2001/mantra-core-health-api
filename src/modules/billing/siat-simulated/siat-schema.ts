@@ -135,3 +135,23 @@ export const PURCHASE_SALE_SCHEMA: SectorDocumentSchema = {
   activo: true,
   motivoInactivo: null,
 };
+
+/**
+ * Sector 17 · Hospitales/Clínicas — internaciones, cirugías y servicios hospitalarios.
+ *
+ * Idéntico al Sector 1 salvo por el campo adicional `modalidadServicio` en la
+ * cabecera (antes de `codigoMetodoPago`) y los elementos raíz distintos.
+ * Fuente: `HospitalClinicaXML.zip`
+ * sha256 2b4596d0c6637157e8ea5f5b388f2e77818b0008aba2d07b2d36ce71ddc667a6
+ */
+export const HOSPITAL_CLINIC_SCHEMA: SectorDocumentSchema = {
+  codigoDocumentoSector: 17,
+  nombre: 'Hospitales/Clínicas',
+  raizComputarizada: 'facturaHospitalClinicaComputarizadaEnLinea',
+  raizElectronica: 'facturaHospitalClinicaElectronicaEnLinea',
+  cabecera: header(17, [field('modalidadServicio', integerType(1, 99))]),
+  detalle: PURCHASE_SALE_SCHEMA.detalle,
+  detalleMaximo: PURCHASE_SALE_SCHEMA.detalleMaximo,
+  activo: true,
+  motivoInactivo: null,
+};

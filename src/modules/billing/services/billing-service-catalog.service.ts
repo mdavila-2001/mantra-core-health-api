@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   CONCEPT_DEFS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -13,16 +14,14 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { BillingErrorReason } from '../billing.error-reasons';
-import { PracticeTenantLookupService } from '../../practice/services';
-import { PractitionerRoleAssignments } from '../../practice/entities';
-import { PRAC } from '../../practice/practice.concepts';
 import {
-  AssignmentsRepository,
-  TemplatesRepository,
-} from '../../surveys/repositories';
-import { SURVEYS } from '../../surveys/surveys.concepts';
-import type { ServiceCatalog } from '../entities';
+  AttachableFileService,
+  FileUploadService,
+} from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
+import { PracticeTenantLookupService } from '../../practice/services';
 import { ServiceCatalogRepository } from '../repositories';
 import {
   CreateServiceCatalogItemDto,
@@ -31,11 +30,20 @@ import {
   UpdateServiceCatalogItemDto,
 } from '../dto';
 
-/** Plazo por defecto para responder la encuesta de satisfacción que se auto-crea (FT-31). */
-const DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS = 30;
-
 /** Tope de servicios por página cuando el cliente no pide uno. */
 const DEFAULT_PAGE_SIZE = 50;
+
+/**
+ * Lo que puede servir la ruta de imagen de un servicio: una imagen de la
+ * categoría «imagen» y de tipo web. Es lo que impide que un `imageFileId`
+ * apuntado a otro archivo (evidencia de identidad, un PDF clínico) se
+ * convierta en una descarga por esta ruta.
+ */
+const SERVICE_IMAGE_OPTIONS = {
+  allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+  operation: 'billing.service-catalog.image',
+} as const;
 
 /**
  * Sigla de las monedas globales, por concepto.
@@ -55,6 +63,25 @@ const CURRENCY_CODE_BY_CONCEPT: Readonly<Record<string, string>> =
  * — cada presupuesto lleva el precio propio que puso el profesional, nunca
  * `defaultPrice` a ciegas.
  */
+/**
+ * Un precio en 0 no se acepta al dar de alta ni al corregir un servicio: la
+ * cita se cobraría en 0,00 (FAC-06). Un negativo ya lo rechaza el DTO con 400;
+ * acá solo llega un importe no negativo con hasta dos decimales. Lo que crea
+ * el sistema («Cita médica» en `0.00` al dar de alta una práctica) no pasa por
+ * este servicio y sigue igual.
+ *
+ * @param price - Importe validado por el DTO, como texto.
+ * @throws PreconditionFailedException (422) si el importe es 0.
+ */
+function assertPricePositive(price: string): void {
+  if (Number(price) > 0) return;
+  throw new PreconditionFailedException(
+    'El precio tiene que ser mayor que 0',
+    { defaultPrice: price },
+    BillingErrorReason.SERVICE_CATALOG_PRICE_NOT_POSITIVE,
+  );
+}
+
 @Injectable()
 export class BillingServiceCatalogService {
   /**
@@ -68,8 +95,8 @@ export class BillingServiceCatalogService {
     private readonly em: EntityManager,
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
-    private readonly templatesRepo: TemplatesRepository,
-    private readonly assignmentsRepo: AssignmentsRepository,
+    private readonly attachableFiles: AttachableFileService,
+    private readonly fileUpload: FileUploadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BillingServiceCatalogService.name);
@@ -129,6 +156,99 @@ export class BillingServiceCatalogService {
   }
 
   /**
+   * Bytes de la imagen de un servicio, para quien puede ver ese servicio
+   * (decisión P-22-8, opción 1).
+   *
+   * `common.files` solo entrega un archivo a quien lo subió o a un rol de
+   * revisión (`canActorReadOwnFile`), así que un paciente que consulta el
+   * servicio recibiría 403. La política global de archivos no se abre: esta
+   * ruta autoriza **por contexto**, que es el patrón de chat y de community.
+   *
+   * «Puede ver el servicio» significa, acá y sin más: sesión autenticada con
+   * tenant verificado, servicio **activo** y la práctica que lo ofrece
+   * pertenece a ese tenant. El tenant sale de `requireTenantId()`, nunca del
+   * cliente. Un servicio inactivo, ajeno o inexistente responde el mismo 404;
+   * también el que no tiene imagen, o cuyo archivo no es una imagen de
+   * sensibilidad normal con versión vigente utilizable, para no decirle a
+   * quien prueba uuids cuáles existen.
+   *
+   * No hay variante anónima: el catálogo público sigue sin exponer
+   * `image_file_id` (opción 2, no elegida).
+   *
+   * @param id - Servicio del catálogo (`billing.service_catalog.id`).
+   * @returns Bytes y tipo MIME de la imagen.
+   * @throws ResourceNotFoundException (404 uniforme) en cualquier caso en que el actor no deba verla.
+   */
+  async getImageContent(id: string): Promise<FileContentDto> {
+    const tenantId = requireTenantId();
+    const notVisible = {
+      message: 'Imagen no encontrada',
+      reason: BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_VISIBLE,
+    };
+    const em = this.em.fork();
+    const item = await this.serviceCatalogRepo.findById(em, id);
+    const practiceTenantId = item
+      ? await this.practiceTenantLookup.findTenantOfPractice(item.practiceId)
+      : null;
+    // Lanza el 404 uniforme si el servicio no existe o su práctica es ajena.
+    const visible = assertResourceInTenant(
+      item,
+      practiceTenantId,
+      tenantId,
+      notVisible,
+    );
+    const imageFileId = visible.isActive ? visible.imageFileId : undefined;
+    if (!imageFileId) {
+      throw new ResourceNotFoundException(
+        notVisible.message,
+        undefined,
+        notVisible.reason,
+      );
+    }
+
+    try {
+      const { file } =
+        await this.attachableFiles.assertUsableForAuthorizedContext(
+          em,
+          imageFileId,
+          SERVICE_IMAGE_OPTIONS,
+        );
+      // Pertenencia: el `imageFileId` guardado no prueba que el archivo sea de
+      // esta organización (el alta lo aceptaba sin validar). Un archivo de otro
+      // tenant no se sirve aunque el servicio ya lo apunte.
+      if (
+        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+        file.tenantId === tenantId
+      ) {
+        const content = await this.fileUpload.downloadForAuthorizedContext(
+          imageFileId,
+          SERVICE_IMAGE_OPTIONS.operation,
+        );
+        // Se valida una versión y se descarga la vigente: se vuelve a comprobar
+        // sobre lo que de verdad se va a enviar.
+        const allowed: readonly string[] =
+          SERVICE_IMAGE_OPTIONS.allowedMimeTypes;
+        if (allowed.includes(content.mimeType)) {
+          return content;
+        }
+      }
+    } catch {
+      // Archivo inexistente, borrado, infectado o de otro tipo: para quien
+      // pregunta es lo mismo que «el servicio no tiene imagen». Los detalles
+      // (el uuid del archivo) no salen en la respuesta.
+    }
+    this.logger.warn(
+      { operation: SERVICE_IMAGE_OPTIONS.operation, serviceCatalogId: id },
+      'Service image is not servable',
+    );
+    throw new ResourceNotFoundException(
+      notVisible.message,
+      undefined,
+      notVisible.reason,
+    );
+  }
+
+  /**
    * Crea un servicio nuevo en el catálogo maestro.
    *
    * @param dto - Datos validados de la operación.
@@ -150,6 +270,10 @@ export class BillingServiceCatalogService {
       'Creating service catalog item',
     );
     await this.assertRegistrationCanRegister(actor, dto.practiceId);
+    assertPricePositive(dto.defaultPrice);
+    if (dto.imageFileId !== undefined) {
+      await this.assertImageUsable(dto.imageFileId, actor);
+    }
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -180,8 +304,6 @@ export class BillingServiceCatalogService {
       });
       await tx.flush();
 
-      await this.attachDefaultSatisfactionSurvey(tx, item, actor);
-
       this.logger.info(
         {
           operation: 'billing.service-catalog.create',
@@ -194,6 +316,45 @@ export class BillingServiceCatalogService {
   }
 
   /**
+   * Exige que el archivo que se quiere poner como imagen del servicio sea del
+   * actor, de su organización, una imagen de sensibilidad normal y utilizable.
+   *
+   * Es la misma regla que aplica el logo de la organización
+   * (`assertUsableBy`: propio, vivo, con versión vigente sin infectar y del tipo
+   * admitido) más la sensibilidad y el tenant. Sin esto, `imageFileId` apuntaba a
+   * cualquier uuid y la ruta de imagen lo habría servido a toda la organización.
+   * Cualquier incumplimiento —archivo inexistente, ajeno, de otro tenant o de
+   * otro tipo— responde el mismo 404, para no confirmar qué uuids existen.
+   */
+  private async assertImageUsable(
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const tenantId = requireTenantId();
+    try {
+      const { file } = await this.attachableFiles.assertUsableBy(
+        this.em.fork(),
+        fileId,
+        actor,
+        SERVICE_IMAGE_OPTIONS,
+      );
+      if (
+        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+        file.tenantId === tenantId
+      ) {
+        return;
+      }
+    } catch {
+      // Se uniforma abajo: el motivo concreto no sale en la respuesta.
+    }
+    throw new ResourceNotFoundException(
+      'Imagen no encontrada',
+      undefined,
+      BillingErrorReason.SERVICE_CATALOG_IMAGE_NOT_USABLE,
+    );
+  }
+
+  /**
    * Quién puede dar de alta un servicio en una práctica.
    *
    * La administración de la organización, en cualquiera de las suyas; un profesional,
@@ -202,8 +363,12 @@ export class BillingServiceCatalogService {
    *
    * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
    * práctica ajena responde igual que uno inventado.
+   *
+   * Es público porque la importación en lote desde el arancel
+   * (`ProcedureImportService`) exige **exactamente** el mismo alcance que el alta
+   * individual: una sola regla, no dos copias que se desalineen.
    */
-  private async assertRegistrationCanRegister(
+  async assertRegistrationCanRegister(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
@@ -217,125 +382,6 @@ export class BillingServiceCatalogService {
     throw new ResourceNotFoundException('Práctica no encontrada', {
       practiceId,
     });
-  }
-
-  /**
-   * FT-31: todo servicio médico nuevo sale con su encuesta de satisfacción ya
-   * activa, para que ningún servicio quede sin forma de medir la atención.
-   *
-   * Se crea, publica y asocia dentro de la misma transacción que el alta del
-   * servicio: si algo de esto falla, el servicio tampoco se crea — es una
-   * garantía del alta, no un agregado best-effort.
-   *
-   * **Dueño de la plantilla.** `survey_templates.owner_practitioner_id` no
-   * admite nulo, pero quien da de alta un servicio es siempre `SECURITY_ADMIN`
-   * (ver el guard del controlador) y casi nunca tiene perfil profesional. Se
-   * atribuye entonces al profesional activo más antiguo de la práctica —el
-   * primero en el tiempo, o el marcado principal si hay varios— porque en la
-   * enorme mayoría de las prácticas (una o pocas personas atendiendo) es
-   * exactamente la persona a la que le importa esta encuesta. El resto de la
-   * práctica igual la ve entre las respuestas del servicio; sólo la edición
-   * del cuestionario queda del lado de quien figura como dueño.
-   *
-   * Si la práctica todavía no tiene ningún profesional vinculado y activo
-   * (una organización recién creada, antes de que se una el primer doctor), el
-   * servicio se crea igual y queda sin encuesta — no hay a quién atribuírsela.
-   * No hay retro-alta cuando se una el primero: es la misma limitación que ya
-   * acepta el resto del catálogo con datos que faltan.
-   */
-  private async attachDefaultSatisfactionSurvey(
-    tx: EntityManager,
-    item: ServiceCatalog,
-    actor: AuthenticatedUser,
-  ): Promise<void> {
-    const ownerPractitionerId =
-      actor.practitionerProfileId ??
-      (await this.findDefaultSurveyOwner(tx, item.practiceId));
-    if (!ownerPractitionerId) {
-      this.logger.warn(
-        {
-          operation: 'billing.service-catalog.create',
-          serviceCatalogId: item.id,
-          practiceId: item.practiceId,
-        },
-        'Sin profesional activo en la práctica: el servicio queda sin encuesta de satisfacción automática',
-      );
-      return;
-    }
-
-    const tenantId = requireTenantId();
-    const template = this.templatesRepo.createTemplate(tx, {
-      tenantId,
-      ownerPractitionerId,
-      title: `Satisfacción — ${item.name}`,
-      statusConceptId: SURVEYS.TEMPLATE_DRAFT,
-      actorUserId: actor.id,
-    });
-    await tx.flush();
-
-    const version = this.templatesRepo.createVersion(tx, {
-      surveyTemplateId: template.id,
-      versionNumber: 1,
-      publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
-      responseWindowDays: DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS,
-      actorUserId: actor.id,
-    });
-    await tx.flush();
-
-    this.templatesRepo.createQuestion(tx, {
-      surveyVersionId: version.id,
-      position: 1,
-      questionText: '¿Qué tan satisfecho quedó con la atención?',
-      answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
-      required: true,
-      scaleMin: 1,
-      scaleMax: 5,
-      actorUserId: actor.id,
-    });
-    await tx.flush();
-
-    // Publicar acá mismo, no dejarla en borrador: un servicio nuevo sin
-    // encuesta *utilizable* deja el requisito a medias — nadie la publicaría
-    // por su cuenta si ni siquiera sabe que se creó sola.
-    version.publicationStatusConceptId = SURVEYS.VERSION_PUBLISHED;
-    version.effectiveFrom = new Date();
-    version.publishedAt = new Date();
-    touch(version, actor.id);
-    template.statusConceptId = SURVEYS.TEMPLATE_ACTIVE;
-    touch(template, actor.id);
-
-    this.assignmentsRepo.create(tx, {
-      surveyVersionId: version.id,
-      tenantId,
-      targetTypeConceptId: SURVEYS.TARGET_SERVICE,
-      targetId: item.id,
-      active: true,
-      actorUserId: actor.id,
-    });
-    await tx.flush();
-  }
-
-  /**
-   * El profesional activo más antiguo de la práctica, o el marcado principal
-   * si hay varios — ver la nota de {@link attachDefaultSatisfactionSurvey}.
-   */
-  private async findDefaultSurveyOwner(
-    tx: EntityManager,
-    practiceId: string,
-  ): Promise<string | null> {
-    const candidates = await tx.find(PractitionerRoleAssignments, {
-      practiceId,
-      statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
-      validTo: null,
-    });
-    if (candidates.length === 0) return null;
-    candidates.sort((a, b) => {
-      if (Boolean(a.isPrimary) !== Boolean(b.isPrimary)) {
-        return Number(b.isPrimary ?? false) - Number(a.isPrimary ?? false);
-      }
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    });
-    return candidates[0].practitionerProfileId;
   }
 
   /**
@@ -374,7 +420,14 @@ export class BillingServiceCatalogService {
 
       if (dto.name !== undefined) item.name = dto.name;
       if (dto.isActive !== undefined) item.isActive = dto.isActive;
+      if (dto.termsText !== undefined) {
+        // Vacío es lo mismo que null: «sin términos propios», no un contrato
+        // en blanco.
+        const terms = dto.termsText?.trim() ?? '';
+        item.termsText = terms === '' ? undefined : terms;
+      }
       if (dto.defaultPrice !== undefined) {
+        assertPricePositive(dto.defaultPrice);
         item.defaultPrice = dto.defaultPrice;
         // Un importe sin moneda no es un precio. La fila puede venir de un alta
         // que no la declaró: la primera edición la fija, y el boliviano es la
@@ -461,6 +514,7 @@ function toItemDto(row: {
   code: string;
   name: string;
   descriptionText?: string;
+  termsText?: string | null;
   imageFileId?: string;
   serviceConceptId?: string;
   defaultPrice: string;
@@ -475,6 +529,7 @@ function toItemDto(row: {
     code: row.code,
     name: row.name,
     descriptionText: row.descriptionText,
+    termsText: row.termsText ?? undefined,
     imageFileId: row.imageFileId,
     serviceConceptId: row.serviceConceptId,
     defaultPrice: row.defaultPrice,

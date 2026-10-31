@@ -27,6 +27,12 @@ const PART_BYTES = 45 * 1024 * 1024;
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
 function pack() {
+  // Tras un --unpack no está el manifiesto de descargas (no se bajó nada): se conserva el ya empaquetado.
+  // Se lee ANTES de borrar data/, para no dejarlo a medias si falta.
+  const prevManifest = join(DATA_DIR, 'manifest.json');
+  const manifestSrc = existsSync(MANIFEST_PATH) ? MANIFEST_PATH : prevManifest;
+  if (!existsSync(manifestSrc)) throw new Error(`Falta el manifiesto de descargas (${MANIFEST_PATH}): corré fetch-dictionaries.mjs`);
+  const manifest = JSON.parse(readFileSync(manifestSrc, 'utf8'));
   if (existsSync(DATA_DIR)) rmSync(DATA_DIR, { recursive: true });
   mkdirSync(join(DATA_DIR, 'ndjson'), { recursive: true });
   const index = { packedAt: new Date().toISOString(), note: 'gzip de los archivos de glossary-data-build/dictionaries/ndjson; restaurar con --unpack', files: [] };
@@ -48,7 +54,6 @@ function pack() {
   const used = new Set();
   for (const s of [...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE]) for (const f of s.files) used.add(`${s.id}/${f.name}`);
   for (const f of Object.values(ORGANISM_SOURCES.files)) used.add(`${ORGANISM_SOURCES.id}/${f.name}`);
-  const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
   const files = Object.fromEntries(Object.entries(manifest.files).filter(([k]) => used.has(k)));
   writeFileSync(join(DATA_DIR, 'manifest.json'), JSON.stringify({ files }, null, 2) + '\n');
   writeFileSync(join(DATA_DIR, 'INDEX.json'), JSON.stringify(index, null, 2) + '\n');

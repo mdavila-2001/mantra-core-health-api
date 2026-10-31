@@ -20,6 +20,7 @@ import {
   ChartNotesReadService,
   EncounterPdfService,
   ChartMeReadService,
+  ChartEncounterScopeService,
 } from './services';
 import {
   ClinicalNotesRepository,
@@ -116,6 +117,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ChartNotesReadService,
     EncounterPdfService,
     ChartMeReadService,
+    ChartEncounterScopeService,
   ],
 })
 export class ChartModule {}

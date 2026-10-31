@@ -628,7 +628,7 @@ Registra ejecuciones de actualización de contextos para trazar qué fuente prod
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_system_context_refresh_runs_idempotency_key` | sí | idempotency_key | Garantiza que no se repita la combinación (idempotency_key) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «idempotency_key», la primera columna del índice _(CONSULTA)_ |
-| `ix_system_context_refresh_runs_system_context_id` | no | system_context_id | Soporta la clave foránea fk_system_context_refresh_runs_system_context_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_system_context_refresh_runs_system_context_id` | no | system_context_id | Soporta la clave foránea fk_system_context_refresh_runs_system_context_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «system_context_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_system_context_refresh_runs_trigger_concept_id` | no | trigger_concept_id | Soporta la clave foránea fk_system_context_refresh_runs_trigger_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_system_context_refresh_runs_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_system_context_refresh_runs_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_system_context_refresh_runs_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_system_context_refresh_runs_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

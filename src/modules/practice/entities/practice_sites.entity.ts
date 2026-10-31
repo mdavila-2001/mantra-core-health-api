@@ -87,6 +87,9 @@ export class PracticeSites {
   @Property({ fieldName: 'bank_qr_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   bankQrFileId?: string;
 
+  /**
+   * Identificador asociado a logo file.
+   */
   @Property({ fieldName: 'logo_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   logoFileId?: string;
 

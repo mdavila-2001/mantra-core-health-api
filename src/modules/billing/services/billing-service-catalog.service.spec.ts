@@ -11,10 +11,12 @@ import { BillingServiceCatalogService } from './billing-service-catalog.service'
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
   encodeKeysetCursor,
   runWithTenant,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 /** Quien atiende: sin rol administrativo, con perfil profesional. */
@@ -29,8 +31,8 @@ const doctor = {
  * @returns Resultado de build.
  */
 function build() {
-  // Sin vinculaciones activas por defecto: sin `runWithTenant` de por medio,
-  // `attachDefaultSatisfactionSurvey` corta antes de pedir el tenant.
+  // Sin vinculaciones activas por defecto: el alta ya no consulta las del
+  // profesional (se retiró la encuesta automática FT-31).
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
@@ -52,19 +54,33 @@ function build() {
     // profesional tiene que pedirlo a propósito.
     isOwnOffice: mockFn().mockResolvedValue(false),
   };
-  const templatesRepo = {
-    createTemplate: mockFn(),
-    createVersion: mockFn(),
-    createQuestion: mockFn(),
+  const attachableFiles = {
+    assertUsableForAuthorizedContext: mockFn().mockResolvedValue({
+      file: {
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+        tenantId: 't1',
+      },
+    }),
+    assertUsableBy: mockFn().mockResolvedValue({
+      file: {
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+        tenantId: 't1',
+      },
+    }),
   };
-  const assignmentsRepo = { create: mockFn() };
+  const fileUpload = {
+    downloadForAuthorizedContext: mockFn().mockResolvedValue({
+      buffer: Buffer.from('png'),
+      mimeType: 'image/png',
+    }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new BillingServiceCatalogService(
     em as any,
     serviceCatalogRepo as any,
     practiceTenantLookup as any,
-    templatesRepo as any,
-    assignmentsRepo as any,
+    attachableFiles as any,
+    fileUpload as any,
     logger as any,
   );
   return {
@@ -73,8 +89,8 @@ function build() {
     em,
     serviceCatalogRepo,
     practiceTenantLookup,
-    templatesRepo,
-    assignmentsRepo,
+    attachableFiles,
+    fileUpload,
     logger,
   };
 }
@@ -198,15 +214,6 @@ describe('BillingServiceCatalogService', () => {
         d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
-        // Todo servicio nuevo sale con su encuesta (FT-31): el doble de esa parte.
-        d.templatesRepo.createTemplate.mockReturnValue({
-          id: 'tpl-1',
-          statusConceptId: 'draft',
-        });
-        d.templatesRepo.createVersion.mockReturnValue({
-          id: 'ver-1',
-          publicationStatusConceptId: 'draft',
-        });
 
         await runWithTenant('tenant-1', () => d.service.create(dto, doctor));
 
@@ -239,28 +246,19 @@ describe('BillingServiceCatalogService', () => {
     });
 
     /**
-     * FT-31: ningún servicio médico nuevo debería quedar sin forma de medir
-     * la atención. Estos tres casos son la regla completa: quien da de alta
-     * es un profesional, quien da de alta es un admin puro con alguien a
-     * quien atribuirle la plantilla, y quien da de alta es un admin puro sin
-     * nadie —el único caso donde de verdad no hay encuesta.
+     * FT-31 creaba una «Satisfacción — <servicio>» con cada alta. Se retiró: la
+     * encuesta base del sistema (módulo `surveys`) la reemplaza y se emite sola
+     * al completarse cada atención, así que el alta de un servicio ya no toca
+     * `surveys`. Las encuestas que FT-31 ya creó no se borran.
      */
-    describe('encuesta de satisfacción por defecto', () => {
-      it('un profesional que da de alta su propio servicio queda como dueño de la encuesta', async () => {
+    describe('sin encuesta automática por servicio', () => {
+      it('un profesional que da de alta su propio servicio no crea ninguna encuesta', async () => {
         const d = build();
         d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
-        d.templatesRepo.createTemplate.mockReturnValue({
-          id: 'tpl-1',
-          statusConceptId: 'draft',
-        });
-        d.templatesRepo.createVersion.mockReturnValue({
-          id: 'ver-1',
-          publicationStatusConceptId: 'draft',
-        });
 
-        await runWithTenant('tenant-1', () =>
+        const res = await runWithTenant('tenant-1', () =>
           d.service.create(
             {
               practiceId: 'pr1',
@@ -272,70 +270,15 @@ describe('BillingServiceCatalogService', () => {
           ),
         );
 
-        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
-          d.tx,
-          expect.objectContaining({
-            ownerPractitionerId: doctor.practitionerProfileId,
-            title: expect.stringContaining('Consulta general'),
-          }),
-        );
-        expect(d.templatesRepo.createQuestion).toHaveBeenCalled();
-        expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
-          d.tx,
-          expect.objectContaining({
-            surveyVersionId: 'ver-1',
-            targetTypeConceptId: expect.any(String),
-            targetId: item.id,
-            active: true,
-          }),
-        );
-        // Con perfil profesional propio, ni hace falta buscar a quién
-        // atribuírsela: no consulta las vinculaciones de la práctica.
+        expect(res).toEqual(item);
+        // Ni siquiera busca a quién atribuirle una plantilla.
         expect(d.tx.find).not.toHaveBeenCalled();
       });
 
-      it('un admin sin perfil se la atribuye al profesional activo más antiguo de la práctica', async () => {
+      it('un admin sin perfil crea el servicio sin consultar las vinculaciones de la práctica', async () => {
         const d = build();
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
-        d.tx.find.mockResolvedValue([
-          {
-            practitionerProfileId: 'hp-nueva',
-            isPrimary: false,
-            createdAt: new Date('2026-02-01'),
-          },
-          {
-            practitionerProfileId: 'hp-vieja',
-            isPrimary: false,
-            createdAt: new Date('2026-01-01'),
-          },
-        ]);
-        d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
-        d.templatesRepo.createVersion.mockReturnValue({ id: 'ver-1' });
-
-        await runWithTenant('tenant-1', () =>
-          d.service.create(
-            {
-              practiceId: 'pr1',
-              code: 'CONS-01',
-              name: 'Consulta general',
-              defaultPrice: '100.00',
-            },
-            actor,
-          ),
-        );
-
-        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
-          d.tx,
-          expect.objectContaining({ ownerPractitionerId: 'hp-vieja' }),
-        );
-      });
-
-      it('sin nadie a quien atribuirle la plantilla, el servicio se crea igual, sin encuesta', async () => {
-        const d = build();
-        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
-        d.serviceCatalogRepo.create.mockReturnValue(item);
-        d.tx.find.mockResolvedValue([]);
 
         const res = await d.service.create(
           {
@@ -348,10 +291,40 @@ describe('BillingServiceCatalogService', () => {
         );
 
         expect(res).toEqual(item);
-        expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
-        expect(d.logger.warn).toHaveBeenCalled();
+        expect(d.tx.find).not.toHaveBeenCalled();
+        expect(d.logger.warn).not.toHaveBeenCalled();
       });
     });
+
+    it.each(['0', '0.00', '0.0'])(
+      'un precio %s responde 422 «El precio tiene que ser mayor que 0» y no crea nada (FAC-06)',
+      async (price) => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        const error = await d.service
+          .create(
+            {
+              practiceId: 'pr1',
+              code: 'CONS-01',
+              name: 'Consulta general',
+              defaultPrice: price,
+            },
+            actor,
+          )
+          .then(
+            () => null,
+            (e: unknown) => e,
+          );
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        const failed = error as PreconditionFailedException;
+        expect(failed.getStatus()).toBe(422);
+        expect(failed.message).toBe('El precio tiene que ser mayor que 0');
+        expect(failed.reason).toBe(
+          BillingErrorReason.SERVICE_CATALOG_PRICE_NOT_POSITIVE,
+        );
+        expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+      },
+    );
 
     it('rejects a duplicate code within the same practice', async () => {
       const d = build();
@@ -379,6 +352,42 @@ describe('BillingServiceCatalogService', () => {
    * servicios tiene la organización de al lado.
    */
   describe('update', () => {
+    it('términos propios: se guardan, y null o vacío vuelven a los de por defecto', async () => {
+      const d = build();
+      const row = catalogRow();
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const propios = await d.service.update(
+        's1',
+        { termsText: '  La consulta incluye un control a los 15 días.  ' },
+        doctor,
+      );
+      expect(propios.termsText).toBe(
+        'La consulta incluye un control a los 15 días.',
+      );
+
+      // Sin la clave, los términos no se tocan.
+      const precio = await d.service.update(
+        's1',
+        { defaultPrice: '120.00' },
+        doctor,
+      );
+      expect(precio.termsText).toBe(
+        'La consulta incluye un control a los 15 días.',
+      );
+
+      expect(
+        (await d.service.update('s1', { termsText: null }, doctor)).termsText,
+      ).toBeUndefined();
+      await d.service.update('s1', { termsText: 'Otro' }, doctor);
+      expect(
+        (await d.service.update('s1', { termsText: '   ' }, doctor)).termsText,
+      ).toBeUndefined();
+    });
+
     it('quien atiende en esa práctica corrige el precio y su moneda', async () => {
       const d = build();
       const row = catalogRow();
@@ -400,6 +409,33 @@ describe('BillingServiceCatalogService', () => {
       expect(res.currencyCode).toBe('BOB');
       expect(row.updatedByUserId).toBe(doctor.id);
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('corregir el precio a 0.00 responde 422 y la fila queda como estaba (FAC-06)', async () => {
+      const d = build();
+      const row = catalogRow({ defaultPrice: '80.00' });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '0.00' }, doctor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(row.defaultPrice).toBe('80.00');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('corregir solo el nombre de un servicio que vale 0.00 no choca con la regla', async () => {
+      const d = build();
+      const row = catalogRow({ defaultPrice: '0.00' });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const res = await d.service.update('s1', { name: 'Otra' }, doctor);
+      expect(res.name).toBe('Otra');
     });
 
     it('conserva la moneda que la fila ya tenía', async () => {
@@ -495,6 +531,270 @@ describe('BillingServiceCatalogService', () => {
           roles: ['PATIENT'],
         } as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+  describe('getImageContent (P-22-8, opción 1)', () => {
+    const row = () =>
+      catalogRow({ id: 's1', practiceId: 'pr1', imageFileId: 'file-1' });
+
+    /** Servicio visible: activo, con imagen y de una práctica del tenant activo. */
+    function visible() {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(row());
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('t1');
+      return d;
+    }
+
+    it('sirve la imagen a cualquier sesión del tenant de la práctica, sin ser quien la subió', async () => {
+      const d = visible();
+
+      const res = await runWithTenant('t1', () =>
+        d.service.getImageContent('s1'),
+      );
+
+      expect(res.mimeType).toBe('image/png');
+      expect(
+        d.attachableFiles.assertUsableForAuthorizedContext,
+      ).toHaveBeenCalledWith(
+        expect.anything(),
+        'file-1',
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        }),
+      );
+      expect(d.fileUpload.downloadForAuthorizedContext).toHaveBeenCalledWith(
+        'file-1',
+        'billing.service-catalog.image',
+      );
+    });
+
+    it('un servicio de una práctica de otro tenant responde 404 y no toca el archivo', async () => {
+      const d = visible();
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('otro');
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un servicio inexistente responde el mismo 404 que uno ajeno', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+      const ajeno = visible();
+      ajeno.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('otro');
+
+      const a = await runWithTenant('t1', () =>
+        d.service.getImageContent('x'),
+      ).catch((e) => e);
+      const b = await runWithTenant('t1', () =>
+        ajeno.service.getImageContent('s1'),
+      ).catch((e) => e);
+
+      expect(a).toBeInstanceOf(ResourceNotFoundException);
+      expect(b).toBeInstanceOf(ResourceNotFoundException);
+      expect(a.message).toBe(b.message);
+      expect(a.getResponse?.() ?? a.reason).toEqual(
+        b.getResponse?.() ?? b.reason,
+      );
+    });
+
+    it('un servicio inactivo responde 404', async () => {
+      const d = visible();
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...row(),
+        isActive: false,
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un servicio sin imagen responde 404', async () => {
+      const d = visible();
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...row(),
+        imageFileId: undefined,
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('un archivo que no es de sensibilidad normal responde 404 aunque el servicio apunte a él', async () => {
+      const d = visible();
+      d.attachableFiles.assertUsableForAuthorizedContext.mockResolvedValue({
+        file: { sensitivityConceptId: 'phi' },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un archivo no utilizable (otro tipo, borrado o infectado) responde 404 sin filtrar el uuid', async () => {
+      const d = visible();
+      d.attachableFiles.assertUsableForAuthorizedContext.mockRejectedValue(
+        new Error('File type not allowed file-1'),
+      );
+
+      const err = await runWithTenant('t1', () =>
+        d.service.getImageContent('s1'),
+      ).catch((e) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(JSON.stringify(err.getResponse?.() ?? err.message)).not.toContain(
+        'file-1',
+      );
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant verificado en el contexto no sirve nada', async () => {
+      const d = visible();
+
+      await expect(d.service.getImageContent('s1')).rejects.toBeDefined();
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un archivo de otro tenant no se sirve aunque el servicio ya lo tuviera guardado', async () => {
+      const d = visible();
+      d.attachableFiles.assertUsableForAuthorizedContext.mockResolvedValue({
+        file: {
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+          tenantId: 'otro-tenant',
+        },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('si la versión descargada no es una imagen de la lista, responde 404 y no envía los bytes', async () => {
+      const d = visible();
+      d.fileUpload.downloadForAuthorizedContext.mockResolvedValue({
+        buffer: Buffer.from('<html>'),
+        mimeType: 'text/html',
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('imageFileId en el alta (P-22-8)', () => {
+    const dto = {
+      practiceId: 'pr1',
+      code: 'CONS-01',
+      name: 'Consulta general',
+      defaultPrice: '100.00',
+      imageFileId: 'file-1',
+    } as any;
+
+    /** Alta de la administración sobre un código libre. */
+    function alta() {
+      const d = build();
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(
+        catalogRow({ id: 'nuevo', imageFileId: 'file-1' }),
+      );
+      return d;
+    }
+
+    it('acepta una imagen propia, de su organización y de sensibilidad normal', async () => {
+      const d = alta();
+
+      await runWithTenant('t1', () => d.service.create(dto, actor));
+
+      expect(d.attachableFiles.assertUsableBy).toHaveBeenCalledWith(
+        expect.anything(),
+        'file-1',
+        actor,
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        }),
+      );
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 un archivo de otro usuario y no crea nada', async () => {
+      const d = alta();
+      d.attachableFiles.assertUsableBy.mockRejectedValue(
+        new Error('El archivo no le pertenece'),
+      );
+
+      const err = await runWithTenant('t1', () =>
+        d.service.create(dto, actor),
+      ).catch((e) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 un archivo de otro tenant', async () => {
+      const d = alta();
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: {
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+          tenantId: 'otro-tenant',
+        },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.create(dto, actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 un archivo que no es de sensibilidad normal', async () => {
+      const d = alta();
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: { sensitivityConceptId: 'phi', tenantId: 't1' },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.create(dto, actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('el rechazo es el mismo 404 para inexistente, ajeno y de otro tenant', async () => {
+      const mensajes = new Set<string>();
+      for (const falla of [
+        () => Promise.reject(new Error('no existe')),
+        () => Promise.reject(new Error('no le pertenece')),
+        () =>
+          Promise.resolve({
+            file: {
+              sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+              tenantId: 'otro-tenant',
+            },
+          }),
+      ]) {
+        const d = alta();
+        d.attachableFiles.assertUsableBy.mockImplementation(falla);
+        const err = await runWithTenant('t1', () =>
+          d.service.create(dto, actor),
+        ).catch((e) => e);
+        mensajes.add(`${err.constructor.name}:${err.message}`);
+      }
+      expect(mensajes.size).toBe(1);
+    });
+
+    it('sin imageFileId no consulta archivos', async () => {
+      const d = alta();
+
+      await runWithTenant('t1', () =>
+        d.service.create({ ...dto, imageFileId: undefined }, actor),
+      );
+
+      expect(d.attachableFiles.assertUsableBy).not.toHaveBeenCalled();
     });
   });
 });

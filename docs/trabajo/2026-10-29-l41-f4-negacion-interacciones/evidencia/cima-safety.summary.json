@@ -1,0 +1,48 @@
+{
+  "drugs": 2380,
+  "relationships": {
+    "CONTRAINDICATED_IN": 6951,
+    "ADVERSE_EFFECT": 64059,
+    "PREGNANCY_LACTATION_CAUTION": 5068
+  },
+  "frequency": {
+    "SIN_FRECUENCIA": 50919,
+    "FREQUENT": 4720,
+    "VERY_RARE": 2278,
+    "OCCASIONAL": 3770,
+    "VERY_FREQUENT": 2372
+  },
+  "interactionsBySeverity": {
+    "UNSPECIFIED": 21518,
+    "NOT_RECOMMENDED": 752,
+    "CONTRAINDICATED": 945
+  },
+  "unmatchedBySection": {
+    "4.3": 6656,
+    "4.8": 101304,
+    "4.5": 35763,
+    "4.6": 16327
+  },
+  "unmatchedByReason": {
+    "no-exact-term": 55343,
+    "ambiguous": 23411,
+    "dose-guard": 26731,
+    "not-a-sentence": 25226,
+    "no-catalog-ingredient": 16138,
+    "negated-interaction": 2010,
+    "no-pregnancy-lactation-term": 10046,
+    "no-interaction-data": 1145
+  },
+  "loadableRelationships": 76078,
+  "missingConcepts": 0,
+  "lactmed": {
+    "summaries": 1148,
+    "relationships": 588,
+    "loadableRelationships": 588,
+    "unmatchedByReason": {
+      "no-catalog-drug": 314,
+      "dose-guard": 239,
+      "ambiguous-atc": 7
+    }
+  }
+}

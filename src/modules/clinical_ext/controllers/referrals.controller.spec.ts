@@ -7,7 +7,16 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { RequestMethod } from '@nestjs/common';
+import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { ReferralsController } from './referrals.controller';
+import {
+  CreateReferralDto,
+  ListReferralTargetServicesQueryDto,
+  SearchReferralTargetsQueryDto,
+} from '../dto';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
 
@@ -20,6 +29,12 @@ function build() {
     create: mockFn(),
     respond: mockFn(),
     listMine: mockFn(),
+    listByPatient: mockFn(),
+    get: mockFn(),
+    counterReferral: mockFn(),
+    cancel: mockFn(),
+    searchTargets: mockFn(),
+    listTargetServices: mockFn(),
   };
   const controller = new ReferralsController(referralsService as any);
   return { controller, referralsService };
@@ -40,9 +55,121 @@ describe('ReferralsController', () => {
     expect(d.referralsService.respond).toHaveBeenCalledWith('ref1', dto, actor);
   });
 
+  it('delegates listByPatient with the actor so the service can authorize', async () => {
+    const d = build();
+    await d.controller.listByPatient('p1', actor);
+    expect(d.referralsService.listByPatient).toHaveBeenCalledWith('p1', actor);
+  });
+
+  it('delegates get, counter-referral and cancel (v4266)', async () => {
+    const d = build();
+    await d.controller.get('ref1', actor);
+    expect(d.referralsService.get).toHaveBeenCalledWith('ref1', actor);
+    const dto = { counterReferralText: 'Alta de fisioterapia' };
+    await d.controller.counterReferral('ref1', dto, actor);
+    expect(d.referralsService.counterReferral).toHaveBeenCalledWith(
+      'ref1',
+      dto,
+      actor,
+    );
+    await d.controller.cancel('ref1', actor);
+    expect(d.referralsService.cancel).toHaveBeenCalledWith('ref1', actor);
+  });
+
   it('delegates listMine (CV-10) to the authenticated actor', async () => {
     const d = build();
     await d.controller.listMine(actor);
     expect(d.referralsService.listMine).toHaveBeenCalledWith(actor);
+  });
+
+  it('delegates searchTargets (destinos de derivación)', async () => {
+    const d = build();
+    const query = { q: 'card', kind: 'PRACTITIONER' as const };
+    await d.controller.searchTargets(query);
+    expect(d.referralsService.searchTargets).toHaveBeenCalledWith(query);
+  });
+
+  it('delegates listTargetServices (servicios del destino)', async () => {
+    const d = build();
+    const query = { targetTenantId: '6f1c1b1e-1111-4111-8111-111111111111' };
+    await d.controller.listTargetServices(query);
+    expect(d.referralsService.listTargetServices).toHaveBeenCalledWith(query);
+  });
+
+  it('declara targets y target-services antes de cualquier ruta con :id', () => {
+    const proto = ReferralsController.prototype as any;
+    const routes = Object.getOwnPropertyNames(proto)
+      .filter((name) => name !== 'constructor')
+      .map((name) => ({
+        path: Reflect.getMetadata(PATH_METADATA, proto[name]) as string,
+        method: Reflect.getMetadata(METHOD_METADATA, proto[name]),
+      }))
+      .filter((route) => route.path !== undefined);
+    const index = (path: string) =>
+      routes.findIndex(
+        (route) => route.path === path && route.method === RequestMethod.GET,
+      );
+    const firstParam = routes.findIndex((route) => route.path.includes(':'));
+    expect(index('targets')).toBeGreaterThanOrEqual(0);
+    expect(index('target-services')).toBeGreaterThanOrEqual(0);
+    expect(index('targets')).toBeLessThan(firstParam);
+    expect(index('target-services')).toBeLessThan(firstParam);
+  });
+
+  it('las búsquedas de destino tienen techo de tasa (60/min, como el directorio)', () => {
+    const proto = ReferralsController.prototype as any;
+    for (const handler of [proto.searchTargets, proto.listTargetServices]) {
+      expect(Reflect.getMetadata('THROTTLER:LIMITdefault', handler)).toBe(60);
+      expect(Reflect.getMetadata('THROTTLER:TTLdefault', handler)).toBe(60_000);
+    }
+  });
+
+  describe('validación del contrato', () => {
+    const errorsOf = async (cls: any, plain: object) =>
+      (await validate(plainToInstance(cls, plain))).map((e) => e.property);
+
+    it('targets: q de un carácter y kind ajeno se rechazan', async () => {
+      expect(
+        await errorsOf(SearchReferralTargetsQueryDto, { q: 'a', kind: 'X' }),
+      ).toEqual(['q', 'kind']);
+      expect(
+        await errorsOf(SearchReferralTargetsQueryDto, {
+          q: 'ca',
+          kind: 'ORGANIZATION',
+        }),
+      ).toEqual([]);
+    });
+
+    it('target-services: los ids tienen que ser uuid', async () => {
+      expect(
+        await errorsOf(ListReferralTargetServicesQueryDto, {
+          targetProfileId: 'x',
+        }),
+      ).toEqual(['targetProfileId']);
+    });
+
+    it('create: referralType sólo admite los ocho códigos', async () => {
+      const base = {
+        patientProfileId: '6f1c1b1e-1111-4111-8111-111111111111',
+        targetServiceCatalogId: '6f1c1b1e-2222-4222-8222-222222222222',
+      };
+      expect(
+        await errorsOf(CreateReferralDto, { ...base, referralType: 'OTRO' }),
+      ).toEqual(['referralType']);
+      for (const referralType of [
+        'TREATMENT',
+        'CONSULTATION',
+        'DIAGNOSTIC_STUDY',
+        'PROCEDURE',
+        'SECOND_OPINION',
+        'THERAPY',
+        'HOSPITALIZATION',
+        'OTHER',
+      ]) {
+        expect(
+          await errorsOf(CreateReferralDto, { ...base, referralType }),
+        ).toEqual([]);
+      }
+    });
   });
 });

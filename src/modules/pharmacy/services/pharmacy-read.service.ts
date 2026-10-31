@@ -27,9 +27,12 @@ import type {
   PharmacySiteReadDto,
 } from '../dto';
 import {
+  PharmacyCatalogRepository,
   PharmacyReadRepository,
+  type CatalogPrice,
   type ProductSearchFilter,
 } from '../repositories';
+import { catalogStatusOf, isInStock } from './pharmacy-catalog-rules';
 
 /**
  * Lecturas del directorio de farmacias del tenant activo (carril E2).
@@ -48,10 +51,12 @@ export class PharmacyReadService {
    *
    * @param em - Contexto de persistencia.
    * @param readRepo - Consultas de la cara de lectura.
+   * @param catalogRepo - Precio, categoría e imágenes del catálogo (P47).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly readRepo: PharmacyReadRepository,
+    private readonly catalogRepo: PharmacyCatalogRepository,
   ) {}
 
   /** El directorio: farmacias publicadas del tenant, con sus números. */
@@ -215,11 +220,16 @@ export class PharmacyReadService {
    *
    * @param query - Texto, origen (para ordenar por distancia) y tope.
    */
-  async listSites(query: {
-    search?: string;
-    origin?: GeoPoint;
-    limit: number;
-  }): Promise<PharmacySiteListResponseDto> {
+  async listSites(
+    query: {
+      search?: string;
+      origin?: GeoPoint;
+      limit: number;
+      /** P34: sólo las abiertas ahora (24 h declaradas o de turno vigente). */
+      openNow?: boolean;
+    },
+    now: Date = new Date(),
+  ): Promise<PharmacySiteListResponseDto> {
     const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
@@ -230,7 +240,22 @@ export class PharmacyReadService {
       this.readRepo.findActiveSites(em, pharmacyIds),
       this.readRepo.findActiveProductOwners(em, pharmacyIds),
     ]);
-    const { addressBySite } = await this.resolveSiteContext(em, sites, []);
+    const [{ addressBySite }, shifts] = await Promise.all([
+      this.resolveSiteContext(em, sites, []),
+      this.readRepo.findCurrentOnCallShifts(
+        em,
+        sites.map((site) => site.id),
+        now,
+      ),
+    ]);
+    // El turno vigente que termina más tarde, por sede.
+    const onCallUntil = new Map<string, Date>();
+    for (const shift of shifts) {
+      const known = onCallUntil.get(shift.pharmacySiteId);
+      if (!known || shift.endsAt > known) {
+        onCallUntil.set(shift.pharmacySiteId, shift.endsAt);
+      }
+    }
 
     const pharmacyById = new Map(
       pharmacies.map((pharmacy) => [pharmacy.id, pharmacy]),
@@ -259,8 +284,14 @@ export class PharmacyReadService {
           homeDeliveryAvailable: site.homeDeliveryAvailable ?? null,
           pickupAvailable: site.pickupAvailable ?? null,
           productCount: productCount.get(pharmacy.id) ?? 0,
+          open24h: site.open24h ?? null,
+          onCallUntil: onCallUntil.get(site.id)?.toISOString() ?? null,
         };
       })
+      .filter(
+        (item) =>
+          !query.openNow || item.open24h === true || item.onCallUntil !== null,
+      )
       .filter(
         (item) =>
           term === undefined ||
@@ -320,32 +351,81 @@ export class PharmacyReadService {
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const concepts = await this.readRepo.findConcepts(
-      em,
-      unique(
-        page
-          .flatMap((row) => [row.medicationConceptId, row.dosageFormConceptId])
-          .filter((id): id is string => Boolean(id)),
-      ),
-    );
-    const conceptById = new Map(
-      concepts.map((concept) => [concept.id, concept]),
-    );
     const nameByPharmacy = new Map(
       pharmacies.map((pharmacy) => [pharmacy.id, displayName(pharmacy)]),
     );
 
     return {
-      items: page.map((row) =>
-        toProductReadDto(
-          row,
-          nameByPharmacy.get(row.pharmacyId) ?? 'Sin registrar',
-          conceptById,
-        ),
-      ),
+      items: await this.toCatalogDtos(em, page, nameByPharmacy, false),
       limit,
       truncated,
     };
+  }
+
+  /**
+   * Proyecta productos como los lista la búsqueda, con lo que administra la
+   * farmacia (precio vigente, categoría, descripción, «hay / no hay») y, si
+   * `managed`, estado, existencias, umbral e imágenes. Todo en lotes.
+   *
+   * @param em - Contexto de persistencia.
+   * @param rows - Productos ya autorizados para quien lee.
+   * @param nameByPharmacy - Nombre visible de cada farmacia.
+   * @param managed - Si es la lectura de gestión del personal.
+   */
+  async toCatalogDtos(
+    em: EntityManager,
+    rows: readonly PharmacyProducts[],
+    nameByPharmacy: ReadonlyMap<string, string>,
+    managed: boolean,
+  ): Promise<PharmacyProductReadDto[]> {
+    if (rows.length === 0) return [];
+    const productIds = rows.map((row) => row.id);
+    const [concepts, prices, categories, images] = await Promise.all([
+      this.readRepo.findConcepts(
+        em,
+        unique(
+          rows
+            .flatMap((row) => [
+              row.medicationConceptId,
+              row.dosageFormConceptId,
+            ])
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ),
+      this.catalogRepo.findCurrentPrices(em, productIds),
+      this.catalogRepo.findCategoriesByIds(
+        em,
+        unique(
+          rows
+            .map((row) => row.pharmacyProductCategoryId)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ),
+      managed
+        ? this.catalogRepo.findImageFileIds(em, productIds)
+        : Promise.resolve(new Map<string, string[]>()),
+    ]);
+    const conceptById = new Map(
+      concepts.map((concept) => [concept.id, concept]),
+    );
+    const categoryName = new Map(
+      categories.map((category) => [category.id, category.name]),
+    );
+    return rows.map((row) =>
+      toProductReadDto(
+        row,
+        nameByPharmacy.get(row.pharmacyId) ?? 'Sin registrar',
+        conceptById,
+        {
+          price: prices.get(row.id),
+          categoryName: row.pharmacyProductCategoryId
+            ? (categoryName.get(row.pharmacyProductCategoryId) ?? null)
+            : null,
+          imageFileIds: images.get(row.id) ?? [],
+          managed,
+        },
+      ),
+    );
   }
 
   /**
@@ -393,7 +473,8 @@ export class PharmacyReadService {
       now,
     );
 
-    const products = await this.readRepo.findActiveProductsByIds(
+    // Lo marcado «no tengo» (o con conteo en 0) no se ofrece en la sede (P47).
+    const products = await this.readRepo.findSellableProductsByIds(
       em,
       unique(prices.map((price) => price.pharmacyProductId)),
     );
@@ -605,7 +686,27 @@ export function toProductReadDto(
   row: PharmacyProducts,
   pharmacyName: string,
   concepts: ReadonlyMap<string, CatalogConcepts>,
+  extras: ProductCatalogExtras = { managed: false },
 ): PharmacyProductReadDto {
+  const catalog = {
+    unitPrice: extras.price?.amount ?? null,
+    currency: extras.price ? extras.price.currency : null,
+    inStock: isInStock({
+      stockQuantity: row.stockQuantity,
+      outOfStockDeclared: row.outOfStockDeclared ?? false,
+    }),
+    category: extras.categoryName ?? null,
+    description: row.descriptionText ?? null,
+  };
+  const managed = extras.managed
+    ? {
+        status: catalogStatusOf(row.statusConceptId),
+        stock: row.stockQuantity ?? null,
+        minStock: row.minStockQuantity ?? null,
+        outOfStockDeclared: row.outOfStockDeclared ?? false,
+        imageFileIds: [...(extras.imageFileIds ?? [])],
+      }
+    : {};
   return {
     id: row.id,
     pharmacyId: row.pharmacyId,
@@ -618,7 +719,21 @@ export function toProductReadDto(
     dosageForm: optionalConcept(concepts, row.dosageFormConceptId),
     medication: optionalConcept(concepts, row.medicationConceptId),
     requiresPrescription: row.requiresPrescription ?? null,
+    ...catalog,
+    ...managed,
   };
+}
+
+/** Lo que el catálogo de la farmacia agrega a un producto al leerlo (P47). */
+export interface ProductCatalogExtras {
+  /** Precio vigente, si tiene. */
+  readonly price?: CatalogPrice;
+  /** Nombre de su categoría, si tiene. */
+  readonly categoryName?: string | null;
+  /** Imágenes propias (sólo gestión). */
+  readonly imageFileIds?: readonly string[];
+  /** Si se agregan estado, existencias, umbral e imágenes. */
+  readonly managed: boolean;
 }
 
 /** La dirección en una línea, o null si no tiene ninguna parte con texto. */

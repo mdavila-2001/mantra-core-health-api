@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -14,32 +14,15 @@ import {
   SEED,
   TokenService,
   touch,
-  type AuthenticatedUser,
 } from '../../../../common';
-import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
   ADMIN_GENDER_CONCEPT_BY_CODE,
   BIRTH_SEX_CONCEPT_BY_CODE,
   PROF,
 } from '../../../profiles/profiles.concepts';
-import {
-  PatientProfilesRepository,
-  PersonAccountLinksRepository,
-  PersonProfilesRepository,
-  PersonsRepository,
-  RelatedPersonsRepository,
-} from '../../../profiles/infrastructure/repositories';
-import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
-import { AdministrativeAreaCatalogService } from '../../../profiles/application/services/administrative-area-catalog.service';
-import {
-  AddressesRepository,
-  ContactPointsRepository,
-  IdentifiersRepository,
-} from '../../../common/repositories';
-import { NotificationsService } from '../../../messaging/services';
+import { composeAccountDisplayName } from '../../../../common/text/person-name';
 import { DIR } from '../../../directory/directory.concepts';
-import { TenantMembershipsRepository } from '../../../directory/repositories';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,
@@ -54,16 +37,25 @@ import {
   VerifyEmailResponseDto,
 } from '../../presentation/dto';
 import {
-  createResidenceAddress,
-  createWorkAddress,
-} from '../../../common/services/residence-address';
-import { createGuardianRelatedPerson } from '../../../profiles/application/services/guardian-related-person';
-import { createDeclaredCoverage } from '../../../insurance/application/services/declared-coverage';
+  COMMON_RECORDS_PORT,
+  type CommonRecordsPort,
+} from '../ports/common-records.port';
 import {
-  CatalogRepository,
-  CoverageRepository,
-} from '../../../insurance/infrastructure/repositories';
-import { CatalogConceptsRepository } from '../../../terminology/repositories';
+  DECLARED_COVERAGE_PORT,
+  type DeclaredCoveragePort,
+} from '../ports/declared-coverage.port';
+import {
+  DIRECTORY_REGISTRATION_PORT,
+  type DirectoryRegistrationPort,
+} from '../ports/directory-registration.port';
+import {
+  EMAIL_NOTICE_PORT,
+  type EmailNoticePort,
+} from '../ports/email-notice.port';
+import {
+  PROFILE_REGISTRATION_PORT,
+  type ProfileRegistrationPort,
+} from '../ports/profile-registration.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
@@ -100,14 +92,11 @@ export class IamPatientSelfRegistrationService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
    * @param emailVerificationsRepo - Valor de email verifications repo requerido por la operación.
-   * @param personsRepo - Valor de persons repo requerido por la operación.
-   * @param personProfilesRepo - Valor de person profiles repo requerido por la operación.
-   * @param patientProfilesRepo - Valor de patient profiles repo requerido por la operación.
-   * @param accountLinksRepo - Valor de account links repo requerido por la operación.
-   * @param identifiersRepo - Valor de identifiers repo requerido por la operación.
-   * @param contactPointsRepo - Valor de contact points repo requerido por la operación.
-   * @param notificationsService - Valor de notifications service requerido por la operación.
-   * @param tenantMembershipsRepo - Valor de tenant memberships repo requerido por la operación.
+   * @param profiles - Persona, perfiles, vínculo cuenta-persona y tutor (`profiles`).
+   * @param commonRecords - Identificadores, contactos y direcciones (`common`).
+   * @param coverage - Seguros declarados en el alta (`insurance`).
+   * @param emailNotice - Encolado del correo de verificación.
+   * @param directory - Membresía en el tenant por defecto (`directory`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -118,22 +107,18 @@ export class IamPatientSelfRegistrationService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly eventsRepo: SecurityEventsRepository,
     private readonly emailVerificationsRepo: EmailVerificationsRepository,
-    private readonly personsRepo: PersonsRepository,
-    private readonly personProfilesRepo: PersonProfilesRepository,
-    private readonly patientProfilesRepo: PatientProfilesRepository,
-    private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly identifiersRepo: IdentifiersRepository,
-    private readonly contactPointsRepo: ContactPointsRepository,
-    private readonly addressesRepo: AddressesRepository,
-    private readonly catalogConceptsRepo: CatalogConceptsRepository,
-    private readonly relatedPersonsRepo: RelatedPersonsRepository,
-    private readonly insuranceCatalogRepo: CatalogRepository,
-    private readonly coverageRepo: CoverageRepository,
-    private readonly notificationsService: NotificationsService,
-    private readonly tenantMembershipsRepo: TenantMembershipsRepository,
+    @Inject(PROFILE_REGISTRATION_PORT)
+    private readonly profiles: ProfileRegistrationPort,
+    @Inject(COMMON_RECORDS_PORT)
+    private readonly commonRecords: CommonRecordsPort,
+    @Inject(DECLARED_COVERAGE_PORT)
+    private readonly coverage: DeclaredCoveragePort,
+    @Inject(EMAIL_NOTICE_PORT)
+    private readonly emailNotice: EmailNoticePort,
+    @Inject(DIRECTORY_REGISTRATION_PORT)
+    private readonly directory: DirectoryRegistrationPort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
-    private readonly administrativeAreas: AdministrativeAreaCatalogService,
   ) {
     this.logger.setContext(IamPatientSelfRegistrationService.name);
   }
@@ -213,7 +198,7 @@ export class IamPatientSelfRegistrationService {
       // FK plana a `terminology.catalog_concepts`: la base aceptaría CUALQUIER
       // concepto (un municipio, una especialidad) como si fuera un
       // departamento. Se comprueba antes de escribir nada.
-      await this.administrativeAreas.assertIsAdministrativeArea(
+      await this.profiles.assertIsAdministrativeArea(
         tx,
         dto.issuerAdministrativeAreaConceptId,
       );
@@ -255,7 +240,7 @@ export class IamPatientSelfRegistrationService {
       });
 
       // 2) Persona + clasificación + perfil de paciente.
-      const person = this.personsRepo.create(tx, {
+      const person = this.profiles.createPerson(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
         name: dto.name,
@@ -292,7 +277,7 @@ export class IamPatientSelfRegistrationService {
       });
       await tx.flush();
 
-      this.personProfilesRepo.create(tx, {
+      this.profiles.createPersonProfile(tx, {
         personId: person.id,
         profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
         statusConceptId: PROF.PROFILE_ACTIVE,
@@ -302,7 +287,7 @@ export class IamPatientSelfRegistrationService {
 
       // `patient_profiles.profile_id` ES `persons.id` (ver ProfilesPatientsService).
       const patientCode = `PAT-${randomUUID()}`;
-      const patient = this.patientProfilesRepo.create(tx, {
+      const patient = this.profiles.createPatientProfile(tx, {
         profileId: person.id,
         patientCode,
         recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
@@ -310,7 +295,7 @@ export class IamPatientSelfRegistrationService {
       });
 
       // 3) Vínculo cuenta-persona: el titular es él mismo.
-      this.accountLinksRepo.create(tx, {
+      this.profiles.createAccountLink(tx, {
         personId: person.id,
         userId: user.id,
         linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
@@ -325,7 +310,7 @@ export class IamPatientSelfRegistrationService {
 
       // 4) El documento también como identificador oficial de la persona, que es
       // donde el resto del sistema lo busca (`common.identifiers`).
-      this.identifiersRepo.create(tx, {
+      this.commonRecords.createIdentifier(tx, {
         ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
         ownerId: person.id,
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
@@ -340,7 +325,7 @@ export class IamPatientSelfRegistrationService {
       // El NIT con el que quiere que le facturen. Va como identificador oficial
       // de tipo tributario junto con su razón social (holderName).
       if (dto.billingTaxId) {
-        this.identifiersRepo.create(tx, {
+        this.commonRecords.createIdentifier(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
           typeConceptId: CONCEPTS.ID_TYPE_TAX,
@@ -367,7 +352,7 @@ export class IamPatientSelfRegistrationService {
       // escribía el de promotions porque era el único que
       // `IamAuthService.loadActiveTenantIds` consultaba — ese método ya acepta
       // ambos, así que la fila puede llevar por fin el concepto que le toca.
-      this.tenantMembershipsRepo.create(tx, {
+      this.directory.createTenantMembership(tx, {
         userId: user.id,
         tenantId: SEED.tenantId,
         tenantRoleConceptId: DIR.ROLE_STAFF,
@@ -379,44 +364,31 @@ export class IamPatientSelfRegistrationService {
 
       // Domicilio: el municipio elegido en el alta. El departamento lo deriva
       // el ayudante del código del INE, no viene del cliente.
-      await createResidenceAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          municipalityConceptId: dto.residenceMunicipalityConceptId,
-          lines: dto.homeAddressLines,
-          latitude: dto.homeLatitude,
-          longitude: dto.homeLongitude,
-          actorUserId: user.id,
-        },
-      );
+      await this.commonRecords.createResidenceAddress(tx, {
+        personId: person.id,
+        municipalityConceptId: dto.residenceMunicipalityConceptId,
+        lines: dto.homeAddressLines,
+        district: dto.homeDistrict,
+        latitude: dto.homeLatitude,
+        longitude: dto.homeLongitude,
+        actorUserId: user.id,
+      });
 
       // El trabajo es una segunda dirección de la misma persona, distinguida
       // por su uso: quien lleva un medicamento necesita saber a cuál ir.
-      await createWorkAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          municipalityConceptId: dto.workMunicipalityConceptId,
-          lines: dto.workAddressLines,
-          latitude: dto.workLatitude,
-          longitude: dto.workLongitude,
-          actorUserId: user.id,
-        },
-      );
+      await this.commonRecords.createWorkAddress(tx, {
+        personId: person.id,
+        municipalityConceptId: dto.workMunicipalityConceptId,
+        lines: dto.workAddressLines,
+        district: dto.workDistrict,
+        latitude: dto.workLatitude,
+        longitude: dto.workLongitude,
+        actorUserId: user.id,
+      });
 
       // El tutor o persona autorizada, si lo declaró, y los demás contactos de
       // emergencia que agregó con el «+»: cada uno es una persona relacionada.
-      const relatedRepos = {
-        persons: this.personsRepo,
-        relatedPersons: this.relatedPersonsRepo,
-        contactPoints: this.contactPointsRepo,
-      };
-      await createGuardianRelatedPerson(relatedRepos, tx, {
+      await this.profiles.createGuardianRelatedPerson(tx, {
         patientProfileId: patient.profileId,
         name: dto.guardianName,
         phone: dto.guardianPhone,
@@ -424,7 +396,7 @@ export class IamPatientSelfRegistrationService {
         actorUserId: user.id,
       });
       for (const contact of dto.additionalEmergencyContacts ?? []) {
-        await createGuardianRelatedPerson(relatedRepos, tx, {
+        await this.profiles.createGuardianRelatedPerson(tx, {
           patientProfileId: patient.profileId,
           name: contact.name,
           phone: contact.phone,
@@ -435,12 +407,8 @@ export class IamPatientSelfRegistrationService {
 
       // Los seguros declarados. Privado y público conviven: una persona puede
       // estar afiliada a la Caja y tener además una póliza.
-      const coverageRepos = {
-        catalog: this.insuranceCatalogRepo,
-        coverage: this.coverageRepo,
-      };
       if (dto.privateInsurancePlanId) {
-        await createDeclaredCoverage(coverageRepos, tx, {
+        await this.coverage.createDeclaredCoverage(tx, {
           patientProfileId: patient.profileId,
           insurancePlanId: dto.privateInsurancePlanId,
           expectedSector: 'private',
@@ -450,7 +418,7 @@ export class IamPatientSelfRegistrationService {
         });
       }
       if (dto.publicInsurancePlanId) {
-        await createDeclaredCoverage(coverageRepos, tx, {
+        await this.coverage.createDeclaredCoverage(tx, {
           patientProfileId: patient.profileId,
           insurancePlanId: dto.publicInsurancePlanId,
           expectedSector: 'public',
@@ -469,7 +437,7 @@ export class IamPatientSelfRegistrationService {
         ...(dto.additionalPhones ?? []),
       ];
       phones.forEach((phone, index) => {
-        this.contactPointsRepo.create(tx, {
+        this.commonRecords.createContactPoint(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
           systemConceptId: CONCEPTS.CONTACT_PHONE,
@@ -482,7 +450,7 @@ export class IamPatientSelfRegistrationService {
 
       let emailVerificationToken: string | undefined;
       if (dto.email) {
-        this.contactPointsRepo.create(tx, {
+        this.commonRecords.createContactPoint(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
@@ -627,22 +595,15 @@ export class IamPatientSelfRegistrationService {
     email: string,
     token: string,
   ): Promise<boolean> {
-    const actor: AuthenticatedUser = { id: userId, roles: [] };
     try {
-      await this.notificationsService.createRequest(
-        {
-          channelId: MESSAGING_SEED.emailChannelId,
-          recipientUserId: userId,
-          recipientAddress: email,
-          payloadJson: {
-            subject: 'Verifique su correo',
-            bodyText:
-              'Para verificar su correo, use este código: ' +
-              `${token}\n\nSi no creó esta cuenta, ignore este mensaje.`,
-          },
-        },
-        actor,
-      );
+      await this.emailNotice.enqueueEmail({
+        recipientUserId: userId,
+        recipientAddress: email,
+        subject: 'Verifique su correo',
+        bodyText:
+          'Para verificar su correo, use este código: ' +
+          `${token}\n\nSi no creó esta cuenta, ignore este mensaje.`,
+      });
       return true;
     } catch (error) {
       this.logger.warn(

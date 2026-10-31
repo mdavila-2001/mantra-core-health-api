@@ -9,7 +9,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 02 | common | 7 | 49 | 0 | 55 | 0 |
 | 03 | terminology | 16 | 80 | 0 | 103 | 0 |
 | 04 | directory | 7 | 59 | 4 | 55 | 0 |
-| 05 | profiles | 20 | 134 | 7 | 145 | 0 |
+| 05 | profiles | 24 | 166 | 34 | 177 | 0 |
 | 06 | authz | 15 | 100 | 15 | 90 | 0 |
 | 07 | consent | 10 | 81 | 0 | 103 | 0 |
 | 08 | clinical | 28 | 280 | 33 | 309 | 14 |
@@ -359,6 +359,9 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 - `clinical_inpatient_census_entries` — stub de cruce (tabla real en su módulo dueño)
 - `clinical_inpatient_census_adjustments` — stub de cruce (tabla real en su módulo dueño)
 - `delegated_access_shared_access_link_uses` — stub de cruce (tabla real en su módulo dueño)
+- `profiles_practitioner_admission_events` — stub de cruce (tabla real en su módulo dueño)
+- `profiles_practitioner_admissions` — stub de cruce (tabla real en su módulo dueño)
+- `profiles_admission_requirements` — stub de cruce (tabla real en su módulo dueño)
 
 ### 35 · messaging
 - ⚠ índice 'uq_adapter_inbound_events_provider_id' omitido: columna(s) inexistente(s) ['received_time_bucket'] en adapter_inbound_events (¿tipo no-SQL descartado? requiere PostGIS)

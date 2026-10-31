@@ -11,10 +11,12 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { BillingErrorReason } from '../billing.error-reasons';
 import {
   InvoicesRepository,
   BillingDocumentLinksRepository,
+  BillingLinkTargetsRepository,
 } from '../repositories';
 import { PracticeTenantLookupService } from '../../practice/services';
 import {
@@ -27,8 +29,32 @@ import {
   InvoiceDetailDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
-import { fromCents, toCents } from '../money.util';
+import { exactCents, fromCents, toCents } from '../money.util';
+import { validateLineAmounts } from '../billing-lines';
+import {
+  activeTenantId,
+  assertDocumentInTenant,
+  assertPracticeInTenant,
+} from '../billing-scope';
 import type { Invoices } from '../entities';
+
+/** "No existe" del encuentro origen de una factura; el ajeno o de otro paciente responde idéntico. */
+const INVOICE_ENCOUNTER_NOT_FOUND = {
+  message: 'Encuentro no encontrado',
+  reason: BillingErrorReason.INVOICE_ENCOUNTER_NOT_FOUND,
+};
+
+/** "No existe" de la factura original de una nota de crédito; la ajena responde idéntico. */
+const CREDIT_NOTE_ORIGINAL_NOT_FOUND = {
+  message: 'Factura no encontrada',
+  reason: BillingErrorReason.INVOICE_CREDIT_NOTE_ORIGINAL_NOT_FOUND,
+};
+
+/** "No existe" de la factura origen de un plan de pagos; la ajena responde idéntico. */
+const PAYMENT_PLAN_SOURCE_NOT_FOUND = {
+  message: 'Factura origen no encontrada',
+  reason: BillingErrorReason.INVOICE_PAYMENT_PLAN_SOURCE_NOT_FOUND,
+};
 
 /** Tope de facturas por página cuando el cliente no pide uno (CV-12). */
 const DEFAULT_INVOICES_PAGE_SIZE = 50;
@@ -39,6 +65,12 @@ const DEFAULT_INVOICES_PAGE_SIZE = 50;
  * (UC-17-11). El servicio posee la unidad de trabajo: `em.transactional` y flush
  * del padre (factura) antes de crear hijos (líneas, vínculos), porque las FK son
  * columnas uuid planas que MikroORM no ordena.
+ *
+ * Alcance: la factura no tiene `tenant_id`; su tenant es el de su práctica. Toda
+ * operación contrasta la práctica (o la factura cargada por UUID) con el tenant
+ * del contexto antes de leer o escribir, y una ajena responde igual que una
+ * inexistente. El tenant de los vínculos de documento sale del contexto, nunca
+ * del cuerpo. Los importes de las líneas se validan con decimal exacto.
  */
 @Injectable()
 export class InvoicesService {
@@ -48,12 +80,14 @@ export class InvoicesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param invoicesRepo - Valor de invoices repo requerido por la operación.
    * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param linkTargets - Lectura de los documentos que la factura vincula.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly invoicesRepo: InvoicesRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly linkTargets: BillingLinkTargetsRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
@@ -73,7 +107,46 @@ export class InvoicesService {
       },
       'Issuing invoice from encounter',
     );
+    // Carril 16, REQ-16-029: una factura que declara un reclamo a la
+    // aseguradora (`claimId`) sería el cobro del precio completo de un
+    // servicio que ya se reclamó. Los servicios con seguro se le facturan al
+    // paciente desde la solicitud de seguro, con su parte calculada.
+    if (dto.claimId) {
+      throw new PreconditionFailedException(
+        'Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada',
+        { claimId: dto.claimId },
+        BillingErrorReason.INVOICE_LINE_SERVICE_ALREADY_CLAIMED,
+      );
+    }
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
+      // El encuentro origen se contrasta antes de escribir: una FK sólo
+      // demuestra que existe, y vincular el de otra organización (o el de otro
+      // paciente) colgaría la factura de un expediente ajeno.
+      if (dto.encounterId) {
+        const encounter = await this.linkTargets.findEncounter(
+          tx,
+          dto.encounterId,
+        );
+        assertResourceInTenant(
+          encounter,
+          encounter?.tenantId,
+          tenantId,
+          INVOICE_ENCOUNTER_NOT_FOUND,
+        );
+        if (encounter?.patientProfileId !== dto.patientProfileId) {
+          throw new ResourceNotFoundException(
+            INVOICE_ENCOUNTER_NOT_FOUND.message,
+            undefined,
+            INVOICE_ENCOUNTER_NOT_FOUND.reason,
+          );
+        }
+      }
       const invoiceNumber = dto.invoiceNumber ?? this.generateNumber('INV');
       const clash = await this.invoicesRepo.findByNumber(
         tx,
@@ -95,15 +168,15 @@ export class InvoicesService {
       let taxCents = 0;
       let discountCents = 0;
       const lineTotals = dto.lines.map((l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const discCents = l.discount ? toCents(l.discount) : 0;
-        const taxAmtCents = l.taxAmount ? toCents(l.taxAmount) : 0;
-        const netCents = baseCents - discCents;
-        const lineTotalCents = netCents + taxAmtCents;
-        subtotalCents += netCents;
-        discountCents += discCents;
-        taxCents += taxAmtCents;
-        return fromCents(lineTotalCents);
+        const line = validateLineAmounts(l, {
+          amount: BillingErrorReason.INVOICE_LINE_AMOUNT_INVALID,
+          discountExceedsBase:
+            BillingErrorReason.INVOICE_LINE_DISCOUNT_EXCEEDS_BASE,
+        });
+        subtotalCents += line.netCents;
+        discountCents += line.discountCents;
+        taxCents += line.taxCents;
+        return fromCents(line.lineTotalCents);
       });
       const totalCents = subtotalCents + taxCents;
 
@@ -144,9 +217,9 @@ export class InvoicesService {
         });
       });
 
-      if (dto.tenantId && (dto.encounterId || dto.claimId)) {
+      if (dto.encounterId || dto.claimId) {
         this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           relationTypeConceptId: BILL.REL_ENCOUNTER_OF,
           invoiceId: invoice.id,
           encounterId: dto.encounterId,
@@ -181,23 +254,32 @@ export class InvoicesService {
       },
       'Issuing credit note',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const original = await this.invoicesRepo.findById(tx, invoiceId);
-      if (!original)
-        throw new ResourceNotFoundException(
-          'Factura no encontrada',
-          {
-            invoiceId,
-          },
-          BillingErrorReason.INVOICE_CREDIT_NOTE_ORIGINAL_NOT_FOUND,
-        );
+      const original = await assertDocumentInTenant(
+        this.practiceTenantLookup,
+        await this.invoicesRepo.findById(tx, invoiceId),
+        tenantId,
+        CREDIT_NOTE_ORIGINAL_NOT_FOUND,
+      );
 
       // Total del reverso (positivo); se registra en la NC con signo negativo.
-      const reverseCents = dto.lines.reduce((acc, l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const taxCents = l.taxAmount ? toCents(l.taxAmount) : 0;
-        return acc + baseCents + taxCents;
-      }, 0);
+      const reverseLines = dto.lines.map((l) =>
+        validateLineAmounts(l, {
+          amount: BillingErrorReason.CREDIT_NOTE_LINE_AMOUNT_INVALID,
+        }),
+      );
+      const reverseCents = reverseLines.reduce(
+        (acc, l) => acc + l.lineTotalCents,
+        0,
+      );
+      if (reverseCents <= 0) {
+        throw new PreconditionFailedException(
+          'La nota de crédito debe revertir un importe positivo',
+          undefined,
+          BillingErrorReason.CREDIT_NOTE_LINE_AMOUNT_INVALID,
+        );
+      }
 
       const originalBalanceCents = toCents(original.balance ?? '0');
       if (reverseCents > originalBalanceCents && !dto.writeOff) {
@@ -229,14 +311,13 @@ export class InvoicesService {
       });
       await tx.flush();
 
-      dto.lines.forEach((l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const taxCents = l.taxAmount ? toCents(l.taxAmount) : 0;
+      dto.lines.forEach((l, i) => {
+        const { baseCents, taxCents } = reverseLines[i];
         this.invoicesRepo.createLine(tx, {
           invoiceId: credit.id,
           description: l.description ?? dto.reason,
           quantity: l.quantity,
-          unitPrice: fromCents(-toCents(l.unitPrice)),
+          unitPrice: fromCents(-(exactCents(l.unitPrice) ?? 0)),
           taxAmount: l.taxAmount ? fromCents(-taxCents) : undefined,
           lineTotal: fromCents(-(baseCents + taxCents)),
           actorUserId: actor.id,
@@ -250,14 +331,12 @@ export class InvoicesService {
         newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_ADJUSTED;
       touch(original, actor.id);
 
-      if (dto.tenantId) {
-        this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
-          relationTypeConceptId: BILL.REL_CREDIT_OF,
-          invoiceId: credit.id,
-          actorUserId: actor.id,
-        });
-      }
+      this.linksRepo.create(tx, {
+        tenantId,
+        relationTypeConceptId: BILL.REL_CREDIT_OF,
+        invoiceId: credit.id,
+        actorUserId: actor.id,
+      });
 
       this.logger.info(
         {
@@ -284,17 +363,14 @@ export class InvoicesService {
       },
       'Creating payment plan',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const source = await this.invoicesRepo.findById(tx, dto.sourceInvoiceId);
-      if (!source) {
-        throw new ResourceNotFoundException(
-          'Factura origen no encontrada',
-          {
-            invoiceId: dto.sourceInvoiceId,
-          },
-          BillingErrorReason.INVOICE_PAYMENT_PLAN_SOURCE_NOT_FOUND,
-        );
-      }
+      const source = await assertDocumentInTenant(
+        this.practiceTenantLookup,
+        await this.invoicesRepo.findById(tx, dto.sourceInvoiceId),
+        tenantId,
+        PAYMENT_PLAN_SOURCE_NOT_FOUND,
+      );
 
       const balanceCents = toCents(source.balance ?? '0');
       if (balanceCents <= 0) {
@@ -307,10 +383,17 @@ export class InvoicesService {
         );
       }
 
-      const installmentsCents = dto.installments.reduce(
-        (acc, i) => acc + toCents(i.amount),
-        0,
-      );
+      const installmentsCents = dto.installments.reduce((acc, i) => {
+        const cents = exactCents(i.amount);
+        if (cents === null || cents <= 0) {
+          throw new PreconditionFailedException(
+            'Cada cuota del plan debe ser un importe positivo',
+            undefined,
+            BillingErrorReason.INVOICE_PAYMENT_PLAN_INSTALLMENT_AMOUNT_INVALID,
+          );
+        }
+        return acc + cents;
+      }, 0);
       if (installmentsCents !== balanceCents) {
         throw new PreconditionFailedException(
           'La suma de cuotas debe igualar el saldo de la factura',
@@ -341,14 +424,12 @@ export class InvoicesService {
           actorUserId: actor.id,
         });
         await tx.flush();
-        if (dto.tenantId) {
-          this.linksRepo.create(tx, {
-            tenantId: dto.tenantId,
-            relationTypeConceptId: BILL.REL_INSTALLMENT_OF,
-            invoiceId: child.id,
-            actorUserId: actor.id,
-          });
-        }
+        this.linksRepo.create(tx, {
+          tenantId,
+          relationTypeConceptId: BILL.REL_INSTALLMENT_OF,
+          invoiceId: child.id,
+          actorUserId: actor.id,
+        });
         created.push(child);
       }
 

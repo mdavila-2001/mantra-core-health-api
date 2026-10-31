@@ -6,6 +6,9 @@ import {
   TenantResidencyBindings,
 } from '../entities';
 import { createdBy } from '../../../common';
+import { Tenants } from '../../directory/entities';
+import { CatalogConcepts } from '../../terminology/entities';
+import { ResidencyPolicies as StorageResidencyPolicies } from '../../polyglot_storage/entities';
 
 /**
  * Acceso a datos de residencia de datos (UC-11-06) y transferencias
@@ -39,6 +42,48 @@ export class ResidencyRepository {
     id: string,
   ): Promise<DataResidencyPolicies | null> {
     return em.findOne(DataResidencyPolicies, { id });
+  }
+
+  /**
+   * Política a la que apunta la FK de `tenant_residency_bindings`
+   * (`polyglot_storage.residency_policies`), que no es la tabla de políticas
+   * propia de este módulo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la política de almacenamiento.
+   * @returns La política, o `null` si no existe en esa tabla.
+   */
+  findBindingPolicyById(
+    em: EntityManager,
+    id: string,
+  ): Promise<StorageResidencyPolicies | null> {
+    return em.findOne(StorageResidencyPolicies, { id });
+  }
+
+  /**
+   * Indica si el tenant existe.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del tenant.
+   * @returns `true` si existe.
+   */
+  async tenantExists(em: EntityManager, id: string): Promise<boolean> {
+    return (await em.count(Tenants, { id })) > 0;
+  }
+
+  /**
+   * Conceptos del catálogo por id (regiones del binding).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores de concepto.
+   * @returns Mapa `id → code` de los que existen.
+   */
+  async findConceptCodes(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Map<string, string>> {
+    const concepts = await em.find(CatalogConcepts, { id: { $in: [...ids] } });
+    return new Map(concepts.map((concept) => [concept.id, concept.code]));
   }
 
   /**

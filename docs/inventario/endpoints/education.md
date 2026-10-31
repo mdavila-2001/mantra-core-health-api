@@ -5,27 +5,27 @@
 - **Bloque:** Marketing y Crecimiento (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 - **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 14 · BAJO 0
-- **Tablas distintas que tocan:** 15
+- **Tablas distintas que tocan:** 16
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/education.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/education/assessments/{id}/attempts` | Iniciar un intento de evaluación | MEDIO | 4 | LEARNER, EDUCATION_ADMIN |
-| 2 | POST | `/education/attempts/{id}/submit` | Enviar y calificar el intento | MEDIO | 4 | LEARNER, EDUCATION_ADMIN |
+| 1 | POST | `/education/assessments/{id}/attempts` | Iniciar un intento de evaluación | MEDIO | 5 | LEARNER, EDUCATION_ADMIN |
+| 2 | POST | `/education/attempts/{id}/submit` | Enviar y calificar el intento | MEDIO | 6 | LEARNER, EDUCATION_ADMIN |
 | 3 | POST | `/education/certificates/{id}/cme-credits` | Acreditar las horas CME al profesional | MEDIO | 4 | SYSTEM, EDUCATION_ADMIN |
-| 4 | POST | `/education/certificates/{id}/revoke` | Revocar el certificado y revertir sus créditos CME | MEDIO | 4 | EDUCATION_ADMIN |
+| 4 | POST | `/education/certificates/{id}/revoke` | Revocar el certificado y revertir sus créditos CME | MEDIO | 5 | EDUCATION_ADMIN |
 | 5 | POST | `/education/courses/{id}/assessments` | Diseñar una evaluación con sus preguntas | MEDIO | 4 | EDUCATION_ADMIN, COURSE_AUTHOR |
 | 6 | POST | `/education/courses/{id}/cohorts` | Abrir una cohorte del curso | MEDIO | 3 | EDUCATION_ADMIN |
 | 7 | POST | `/education/courses/{id}/instructors` | Asignar un instructor al curso | MEDIO | 5 | EDUCATION_ADMIN |
 | 8 | POST | `/education/courses/{id}/reviews` | Publicar una reseña del curso | MEDIO | 3 | LEARNER, EDUCATION_ADMIN |
 | 9 | POST | `/education/courses/{id}/versions/publish` | Publicar una versión nueva del curso | MEDIO | 4 | EDUCATION_ADMIN, COURSE_AUTHOR |
 | 10 | POST | `/education/courses/publish` | Publicar un curso con sus módulos y lecciones | MEDIO | 5 | EDUCATION_ADMIN, COURSE_AUTHOR |
-| 11 | POST | `/education/enrollments` | Inscribir a un aprendiz | MEDIO | 5 | EDUCATION_ADMIN, LEARNER |
+| 11 | POST | `/education/enrollments` | Inscribir a un aprendiz | MEDIO | 6 | EDUCATION_ADMIN, LEARNER |
 | 12 | POST | `/education/enrollments/{id}/certificate` | Emitir el certificado verificable | MEDIO | 4 | SYSTEM, EDUCATION_ADMIN |
-| 13 | POST | `/education/enrollments/{id}/complete` | Completar el curso | MEDIO | 7 | SYSTEM, EDUCATION_ADMIN, LEARNER |
-| 14 | POST | `/education/enrollments/{id}/lesson-progress` | Registrar el progreso de una lección | MEDIO | 6 | LEARNER, EDUCATION_ADMIN, SYSTEM |
+| 13 | POST | `/education/enrollments/{id}/complete` | Completar el curso | MEDIO | 8 | SYSTEM, EDUCATION_ADMIN, LEARNER |
+| 14 | POST | `/education/enrollments/{id}/lesson-progress` | Registrar el progreso de una lección | MEDIO | 7 | LEARNER, EDUCATION_ADMIN, SYSTEM |
 
 ---
 
@@ -36,7 +36,7 @@
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.startAttempt` — `src/modules/education/controllers/education.controller.ts:167`
+- **Implementación:** `EducationController.startAttempt` — `src/modules/education/controllers/education.controller.ts:207`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -46,28 +46,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/assessments/{id}/attempts` la atiende `EducationController.startAttempt` (src/modules/education/controllers/education.controller.ts:167). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN. Valida el cuerpo como `StartAttemptDto` (1 campo, 1 obligatorio). Delega en `EducationLearningService.startAttempt`. Crea filas en education.assessment_attempts. Lee education.assessment_attempts, education.assessments, education.enrollments.
+`POST /education/assessments/{id}/attempts` la atiende `EducationController.startAttempt` (src/modules/education/controllers/education.controller.ts:207). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN. Valida el cuerpo como `StartAttemptDto` (1 campo, 1 obligatorio). Delega en `EducationLearningService.startAttempt`. Crea filas en education.assessment_attempts. Lee education.assessment_attempts, education.assessments, education.courses, education.enrollments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:207` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:207` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.assessment_attempts` | ESCRIBE | CREA | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationLearningRepository.createAttempt | `src/modules/education/repositories/education-learning.repository.ts:293` |
-| `education.assessment_attempts` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationLearningRepository.findAttemptsForUpdate | `src/modules/education/repositories/education-learning.repository.ts:334` |
-| `education.assessments` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationCatalogRepository.findAssessmentById | `src/modules/education/repositories/education-catalog.repository.ts:698` |
-| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationLearningRepository.findEnrollmentById | `src/modules/education/repositories/education-learning.repository.ts:147` |
+| `education.assessment_attempts` | ESCRIBE | CREA | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationLearningRepository.createAttempt | `src/modules/education/repositories/education-learning.repository.ts:326` |
+| `education.assessment_attempts` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationLearningRepository.findAttemptsForUpdate | `src/modules/education/repositories/education-learning.repository.ts:375` |
+| `education.assessments` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationScopeService.assessment → EducationCatalogRepository.findAssessmentById | `src/modules/education/repositories/education-catalog.repository.ts:708` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationScopeService.assessment → EducationScopeService.assertCourseInScope → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.startAttempt → EducationLearningService.startAttempt → EducationScopeService.enrollment → EducationLearningRepository.findEnrollmentById | `src/modules/education/repositories/education-learning.repository.ts:148` |
 
 ### Parámetros
 
@@ -79,7 +80,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `enrollmentId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:910` |
+| `enrollmentId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:915` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -103,8 +104,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:921` |
-| `attemptNumber` | `number` | Sí | — | — | Valor de attempt number mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:927` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:926` |
+| `attemptNumber` | `number` | Sí | — | — | Valor de attempt number mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:932` |
 | `outcome` | `string` | Sí | formato uuid | — | Valor de outcome mantenido por la instancia. | sin fuente |
 | `checkStatus` | `string` | Sí | formato uuid | — | Valor de check status mantenido por la instancia. | sin fuente |
 
@@ -116,7 +117,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Evaluación no encontrada; ResourceNotFoundException: Inscripción no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: Ya hay un intento en curso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción es de otro curso; PreconditionFailedException: La inscripción no está activa; PreconditionFailedException: Se agotaron los intentos permitidos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -142,7 +143,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.submitAttempt` — `src/modules/education/controllers/education.controller.ts:184`
+- **Implementación:** `EducationController.submitAttempt` — `src/modules/education/controllers/education.controller.ts:229`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -152,28 +153,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/attempts/{id}/submit` la atiende `EducationController.submitAttempt` (src/modules/education/controllers/education.controller.ts:184). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN. Valida el cuerpo como `SubmitAttemptDto` (1 campo, 1 obligatorio). Delega en `EducationLearningService.submitAttempt`. Actualiza education.assessment_attempts. Lee education.assessment_attempts, education.assessment_questions, education.assessments.
+`POST /education/attempts/{id}/submit` la atiende `EducationController.submitAttempt` (src/modules/education/controllers/education.controller.ts:229). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN. Valida el cuerpo como `SubmitAttemptDto` (1 campo, 1 obligatorio). Delega en `EducationLearningService.submitAttempt`. Actualiza education.assessment_attempts. Lee education.assessment_attempts, education.assessment_questions, education.assessments, education.courses, education.enrollments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:184` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:184` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:229` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:229` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.assessment_attempts` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.submitAttempt → EducationLearningService.submitAttempt | `src/modules/education/services/education-learning.service.ts:459` |
-| `education.assessment_attempts` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationLearningRepository.findAttemptForUpdate | `src/modules/education/repositories/education-learning.repository.ts:318` |
-| `education.assessment_questions` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationCatalogRepository.findQuestionsByAssessment | `src/modules/education/repositories/education-catalog.repository.ts:779` |
-| `education.assessments` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationCatalogRepository.findAssessmentById | `src/modules/education/repositories/education-catalog.repository.ts:698` |
+| `education.assessment_attempts` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.submitAttempt → EducationLearningService.submitAttempt | `src/modules/education/services/education-learning.service.ts:633` |
+| `education.assessment_attempts` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationScopeService.attemptForUpdate → EducationLearningRepository.findAttemptById | `src/modules/education/repositories/education-learning.repository.ts:345` |
+| `education.assessment_questions` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationCatalogRepository.findQuestionsByAssessment | `src/modules/education/repositories/education-catalog.repository.ts:789` |
+| `education.assessments` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationCatalogRepository.findAssessmentById | `src/modules/education/repositories/education-catalog.repository.ts:708` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationScopeService.attemptForUpdate → EducationScopeService.enrollment → EducationScopeService.assertCourseInScope → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.submitAttempt → EducationLearningService.submitAttempt → EducationScopeService.attemptForUpdate → EducationScopeService.enrollment → EducationLearningRepository.findEnrollmentById | `src/modules/education/repositories/education-learning.repository.ts:148` |
 
 ### Parámetros
 
@@ -185,7 +188,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `responsesJson` | `object` | Sí | — | `@IsObject()` | Respuestas por pregunta, con la forma { "<questionId>": <respuesta> } | `src/modules/education/dto/education.dto.ts:954` |
+| `responsesJson` | `object` | Sí | — | `@IsObject()` | Respuestas por pregunta, con la forma { "<questionId>": <respuesta> } | `src/modules/education/dto/education.dto.ts:959` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -209,12 +212,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:965` |
-| `score` | `string` | Sí | — | — | Puntuación obtenida, en porcentaje | `src/modules/education/dto/education.dto.ts:971` |
-| `passed` | `boolean` | Sí | — | — | Valor de passed mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:977` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:983` |
-| `correctAnswers` | `number` | Sí | — | — | Preguntas acertadas | `src/modules/education/dto/education.dto.ts:989` |
-| `totalQuestions` | `number` | Sí | — | — | Preguntas de la evaluación | `src/modules/education/dto/education.dto.ts:995` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:970` |
+| `score` | `string` | Sí | — | — | Puntuación obtenida, en porcentaje | `src/modules/education/dto/education.dto.ts:976` |
+| `passed` | `boolean` | Sí | — | — | Valor de passed mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:982` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:988` |
+| `correctAnswers` | `number` | Sí | — | — | Preguntas acertadas | `src/modules/education/dto/education.dto.ts:994` |
+| `totalQuestions` | `number` | Sí | — | — | Preguntas de la evaluación | `src/modules/education/dto/education.dto.ts:1000` |
 
 ### Respuestas posibles
 
@@ -224,7 +227,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Intento no encontrado; ResourceNotFoundException: Evaluación no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: Evaluación no encontrada |
 | 409 | `CONFLICT` | ConflictException: El intento ya fue corregido |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tiempo del intento venció |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -250,7 +253,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.recordCmeCredit` — `src/modules/education/controllers/education.controller.ts:233`
+- **Implementación:** `EducationController.recordCmeCredit` — `src/modules/education/controllers/education.controller.ts:293`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -260,27 +263,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/certificates/{id}/cme-credits` la atiende `EducationController.recordCmeCredit` (src/modules/education/controllers/education.controller.ts:233). Exige sesión con alguno de los roles SYSTEM, EDUCATION_ADMIN. Valida el cuerpo como `RecordCmeCreditDto` (4 campos, 1 obligatorio). Delega en `EducationLearningService.recordCmeCredit`. Crea filas en education.cme_credit_records. Lee education.certificates, education.cme_credit_records, education.courses.
+`POST /education/certificates/{id}/cme-credits` la atiende `EducationController.recordCmeCredit` (src/modules/education/controllers/education.controller.ts:293). Exige sesión con alguno de los roles SYSTEM, EDUCATION_ADMIN. Valida el cuerpo como `RecordCmeCreditDto` (4 campos, 1 obligatorio). Delega en `EducationLearningService.recordCmeCredit`. Crea filas en education.cme_credit_records. Lee education.certificates, education.cme_credit_records, education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:233` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:233` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:293` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:293` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.certificates` | LEE | LEE | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationLearningRepository.findCertificateById | `src/modules/education/repositories/education-learning.repository.ts:395` |
-| `education.cme_credit_records` | ESCRIBE | CREA | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationLearningRepository.createCmeRecord | `src/modules/education/repositories/education-learning.repository.ts:502` |
-| `education.cme_credit_records` | LEE | LEE | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationLearningRepository.findCmeRecord | `src/modules/education/repositories/education-learning.repository.ts:526` |
+| `education.certificates` | LEE | LEE | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationScopeService.certificate → EducationLearningRepository.findCertificateById | `src/modules/education/repositories/education-learning.repository.ts:436` |
+| `education.cme_credit_records` | ESCRIBE | CREA | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationLearningRepository.createCmeRecord | `src/modules/education/repositories/education-learning.repository.ts:543` |
+| `education.cme_credit_records` | LEE | LEE | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationLearningRepository.findCmeRecord | `src/modules/education/repositories/education-learning.repository.ts:567` |
 | `education.courses` | LEE | LEE | DIRECTA | EducationController.recordCmeCredit → EducationLearningService.recordCmeCredit → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 
 ### Parámetros
@@ -293,10 +296,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil profesional al que se acredita | `src/modules/education/dto/education.dto.ts:1146` |
-| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:1154` |
-| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:1162` |
-| `periodYear` | `number` | No | mínimo 2000; máximo 2100 | `@IsOptional()` `@IsInt()` `@Min(2000)` `@Max(2100)` | Año del periodo de acreditación; por defecto, el actual | `src/modules/education/dto/education.dto.ts:1174` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil profesional al que se acredita | `src/modules/education/dto/education.dto.ts:1151` |
+| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:1159` |
+| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:1167` |
+| `periodYear` | `number` | No | mínimo 2000; máximo 2100 | `@IsOptional()` `@IsInt()` `@Min(2000)` `@Max(2100)` | Año del periodo de acreditación; por defecto, el actual | `src/modules/education/dto/education.dto.ts:1179` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -323,11 +326,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1185` |
-| `creditHours` | `string` | Sí | — | — | Horas acreditadas | `src/modules/education/dto/education.dto.ts:1191` |
-| `periodYear` | `number` | Sí | — | — | Valor de period year mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1197` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1203` |
-| `alreadyAwarded` | `boolean` | Sí | — | — | true si el crédito ya estaba acreditado | `src/modules/education/dto/education.dto.ts:1209` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1190` |
+| `creditHours` | `string` | Sí | — | — | Horas acreditadas | `src/modules/education/dto/education.dto.ts:1196` |
+| `periodYear` | `number` | Sí | — | — | Valor de period year mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1202` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1208` |
+| `alreadyAwarded` | `boolean` | Sí | — | — | true si el crédito ya estaba acreditado | `src/modules/education/dto/education.dto.ts:1214` |
 
 ### Respuestas posibles
 
@@ -337,7 +340,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Certificado no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El certificado no está vigente; PreconditionFailedException: El certificado no otorga créditos CME; PreconditionFailedException: El curso no declara organismo acreditador |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -362,7 +365,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.revokeCertificate` — `src/modules/education/controllers/education.controller.ts:266`
+- **Implementación:** `EducationController.revokeCertificate` — `src/modules/education/controllers/education.controller.ts:336`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -372,28 +375,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/certificates/{id}/revoke` la atiende `EducationController.revokeCertificate` (src/modules/education/controllers/education.controller.ts:266). Exige sesión con alguno de los roles EDUCATION_ADMIN. Valida el cuerpo como `RevokeCertificateDto` (1 campo, 1 obligatorio). Delega en `EducationLearningService.revokeCertificate`. Actualiza education.certificates, education.cme_credit_records. Lee education.certificates, education.cme_credit_records.
+`POST /education/certificates/{id}/revoke` la atiende `EducationController.revokeCertificate` (src/modules/education/controllers/education.controller.ts:336). Exige sesión con alguno de los roles EDUCATION_ADMIN. Valida el cuerpo como `RevokeCertificateDto` (1 campo, 1 obligatorio). Delega en `EducationLearningService.revokeCertificate`. Actualiza education.certificates, education.cme_credit_records. Lee education.certificates, education.cme_credit_records, education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:266` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:266` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:336` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:336` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.certificates` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.revokeCertificate → EducationLearningService.revokeCertificate | `src/modules/education/services/education-learning.service.ts:798` |
-| `education.certificates` | LEE | LEE | DIRECTA | EducationController.revokeCertificate → EducationLearningService.revokeCertificate → EducationLearningRepository.findCertificateForUpdate | `src/modules/education/repositories/education-learning.repository.ts:409` |
-| `education.cme_credit_records` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.revokeCertificate → EducationLearningService.revokeCertificate | `src/modules/education/services/education-learning.service.ts:793` |
-| `education.cme_credit_records` | LEE | LEE | DIRECTA | EducationController.revokeCertificate → EducationLearningService.revokeCertificate → EducationLearningRepository.findCmeRecordsForUpdate | `src/modules/education/repositories/education-learning.repository.ts:537` |
+| `education.certificates` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.revokeCertificate → EducationLearningService.revokeCertificate | `src/modules/education/services/education-learning.service.ts:946` |
+| `education.certificates` | LEE | LEE | DIRECTA | EducationController.revokeCertificate → EducationLearningService.revokeCertificate → EducationScopeService.certificate → EducationLearningRepository.findCertificateById | `src/modules/education/repositories/education-learning.repository.ts:436` |
+| `education.cme_credit_records` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.revokeCertificate → EducationLearningService.revokeCertificate | `src/modules/education/services/education-learning.service.ts:941` |
+| `education.cme_credit_records` | LEE | LEE | DIRECTA | EducationController.revokeCertificate → EducationLearningService.revokeCertificate → EducationLearningRepository.findCmeRecordsForUpdate | `src/modules/education/repositories/education-learning.repository.ts:578` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.revokeCertificate → EducationLearningService.revokeCertificate → EducationScopeService.certificate → EducationScopeService.assertCourseInScope → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 
 ### Parámetros
 
@@ -405,7 +409,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | Sí | — | `@IsString()` | Por qué se revoca | `src/modules/education/dto/education.dto.ts:1106` |
+| `reason` | `string` | Sí | — | `@IsString()` | Por qué se revoca | `src/modules/education/dto/education.dto.ts:1111` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -429,9 +433,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1117` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1123` |
-| `cmeRecordsReversed` | `number` | Sí | — | — | Créditos CME revertidos | `src/modules/education/dto/education.dto.ts:1129` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1122` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1128` |
+| `cmeRecordsReversed` | `number` | Sí | — | — | Créditos CME revertidos | `src/modules/education/dto/education.dto.ts:1134` |
 
 ### Respuestas posibles
 
@@ -441,7 +445,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Certificado no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: El certificado ya está revocado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -466,7 +470,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.createAssessment` — `src/modules/education/controllers/education.controller.ts:151`
+- **Implementación:** `EducationController.createAssessment` — `src/modules/education/controllers/education.controller.ts:186`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -476,28 +480,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/courses/{id}/assessments` la atiende `EducationController.createAssessment` (src/modules/education/controllers/education.controller.ts:151). Exige sesión con alguno de los roles EDUCATION_ADMIN, COURSE_AUTHOR. Valida el cuerpo como `CreateAssessmentDto` (13 campos, 5 obligatorios). Delega en `EducationCatalogService.createAssessment`. Crea filas en education.assessment_questions, education.assessments. Lee education.course_modules, education.courses.
+`POST /education/courses/{id}/assessments` la atiende `EducationController.createAssessment` (src/modules/education/controllers/education.controller.ts:186). Exige sesión con alguno de los roles EDUCATION_ADMIN, COURSE_AUTHOR. Valida el cuerpo como `CreateAssessmentDto` (13 campos, 5 obligatorios). Delega en `EducationCatalogService.createAssessment`. Crea filas en education.assessment_questions, education.assessments. Lee education.course_modules, education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:151` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:186` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:186` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.assessment_questions` | ESCRIBE | CREA | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationCatalogRepository.createQuestion | `src/modules/education/repositories/education-catalog.repository.ts:758` |
-| `education.assessments` | ESCRIBE | CREA | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationCatalogRepository.createAssessment | `src/modules/education/repositories/education-catalog.repository.ts:669` |
+| `education.assessment_questions` | ESCRIBE | CREA | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationCatalogRepository.createQuestion | `src/modules/education/repositories/education-catalog.repository.ts:768` |
+| `education.assessments` | ESCRIBE | CREA | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationCatalogRepository.createAssessment | `src/modules/education/repositories/education-catalog.repository.ts:679` |
 | `education.course_modules` | LEE | LEE | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationCatalogRepository.findModulesByCourse | `src/modules/education/repositories/education-catalog.repository.ts:343` |
-| `education.courses` | LEE | LEE | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.createAssessment → EducationCatalogService.createAssessment → EducationScopeService.course → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 
 ### Parámetros
 
@@ -509,19 +513,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `courseModuleId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Módulo al que pertenece la evaluación | `src/modules/education/dto/education.dto.ts:803` |
-| `title` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | — | `src/modules/education/dto/education.dto.ts:811` |
-| `assessmentType` | `string` | Sí | valores: QUIZ, EXAM, SURVEY | `@IsIn(ASSESSMENT_TYPES)` | — | `src/modules/education/dto/education.dto.ts:818` |
-| `passingScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Puntuación mínima para aprobar, en porcentaje | `src/modules/education/dto/education.dto.ts:828` |
-| `maxAttempts` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Intentos permitidos | `src/modules/education/dto/education.dto.ts:837` |
-| `timeLimitMinutes` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | — | `src/modules/education/dto/education.dto.ts:846` |
-| `isGraded` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Una encuesta no puntúa | `src/modules/education/dto/education.dto.ts:854` |
-| `questions` | `array<AssessmentQuestionDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => AssessmentQuestionDto)` | Preguntas, al menos una | `src/modules/education/dto/education.dto.ts:867` |
-| `questions[].questionType` | `string` | Sí | valores: SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER, MATCHING | `@IsIn(QUESTION_TYPES)` | — | `src/modules/education/dto/education.dto.ts:755` |
-| `questions[].promptText` | `string` | Sí | — | `@IsString()` | Enunciado | `src/modules/education/dto/education.dto.ts:762` |
-| `questions[].optionsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Opciones que se muestran al aprendiz | `src/modules/education/dto/education.dto.ts:770` |
-| `questions[].correctAnswerJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Respuesta correcta. Sólo la lee la corrección; nunca se devuelve al aprendiz. | `src/modules/education/dto/education.dto.ts:781` |
-| `questions[].points` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Puntos de la pregunta | `src/modules/education/dto/education.dto.ts:789` |
+| `courseModuleId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Módulo al que pertenece la evaluación | `src/modules/education/dto/education.dto.ts:808` |
+| `title` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | — | `src/modules/education/dto/education.dto.ts:816` |
+| `assessmentType` | `string` | Sí | valores: QUIZ, EXAM, SURVEY | `@IsIn(ASSESSMENT_TYPES)` | — | `src/modules/education/dto/education.dto.ts:823` |
+| `passingScore` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Puntuación mínima para aprobar, en porcentaje | `src/modules/education/dto/education.dto.ts:833` |
+| `maxAttempts` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Intentos permitidos | `src/modules/education/dto/education.dto.ts:842` |
+| `timeLimitMinutes` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | — | `src/modules/education/dto/education.dto.ts:851` |
+| `isGraded` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Una encuesta no puntúa | `src/modules/education/dto/education.dto.ts:859` |
+| `questions` | `array<AssessmentQuestionDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => AssessmentQuestionDto)` | Preguntas, al menos una | `src/modules/education/dto/education.dto.ts:872` |
+| `questions[].questionType` | `string` | Sí | valores: SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER, MATCHING | `@IsIn(QUESTION_TYPES)` | — | `src/modules/education/dto/education.dto.ts:760` |
+| `questions[].promptText` | `string` | Sí | — | `@IsString()` | Enunciado | `src/modules/education/dto/education.dto.ts:767` |
+| `questions[].optionsJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Opciones que se muestran al aprendiz | `src/modules/education/dto/education.dto.ts:775` |
+| `questions[].correctAnswerJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Respuesta correcta. Sólo la lee la corrección; nunca se devuelve al aprendiz. | `src/modules/education/dto/education.dto.ts:786` |
+| `questions[].points` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Puntos de la pregunta | `src/modules/education/dto/education.dto.ts:794` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -567,10 +571,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:878` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:884` |
-| `questionIds` | `array<string>` | Sí | formato uuid | — | Valor de question ids mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:890` |
-| `totalPoints` | `string` | Sí | — | — | Suma de los puntos de las preguntas | `src/modules/education/dto/education.dto.ts:896` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:883` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:889` |
+| `questionIds` | `array<string>` | Sí | formato uuid | — | Valor de question ids mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:895` |
+| `totalPoints` | `string` | Sí | — | — | Suma de los puntos de las preguntas | `src/modules/education/dto/education.dto.ts:901` |
 
 ### Respuestas posibles
 
@@ -580,7 +584,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una evaluación puntuable necesita respuesta correcta en cada pregunta; PreconditionFailedException: El módulo no pertenece al curso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -605,7 +608,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.openCohort` — `src/modules/education/controllers/education.controller.ts:107`
+- **Implementación:** `EducationController.openCohort` — `src/modules/education/controllers/education.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -615,27 +618,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/courses/{id}/cohorts` la atiende `EducationController.openCohort` (src/modules/education/controllers/education.controller.ts:107). Exige sesión con alguno de los roles EDUCATION_ADMIN. Valida el cuerpo como `OpenCohortDto` (5 campos, 2 obligatorios). Delega en `EducationCatalogService.openCohort`. Crea filas en education.course_cohorts. Lee education.course_cohorts, education.courses.
+`POST /education/courses/{id}/cohorts` la atiende `EducationController.openCohort` (src/modules/education/controllers/education.controller.ts:127). Exige sesión con alguno de los roles EDUCATION_ADMIN. Valida el cuerpo como `OpenCohortDto` (5 campos, 2 obligatorios). Delega en `EducationCatalogService.openCohort`. Crea filas en education.course_cohorts. Lee education.course_cohorts, education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:107` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:127` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.course_cohorts` | ESCRIBE | CREA | DIRECTA | EducationController.openCohort → EducationCatalogService.openCohort → EducationCatalogRepository.createCohort | `src/modules/education/repositories/education-catalog.repository.ts:613` |
-| `education.course_cohorts` | LEE | LEE | DIRECTA | EducationController.openCohort → EducationCatalogService.openCohort → EducationCatalogRepository.findCohortByCode | `src/modules/education/repositories/education-catalog.repository.ts:644` |
-| `education.courses` | LEE | LEE | DIRECTA | EducationController.openCohort → EducationCatalogService.openCohort → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.course_cohorts` | ESCRIBE | CREA | DIRECTA | EducationController.openCohort → EducationCatalogService.openCohort → EducationCatalogRepository.createCohort | `src/modules/education/repositories/education-catalog.repository.ts:618` |
+| `education.course_cohorts` | LEE | LEE | DIRECTA | EducationController.openCohort → EducationCatalogService.openCohort → EducationCatalogRepository.findCohortByCode | `src/modules/education/repositories/education-catalog.repository.ts:649` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.openCohort → EducationCatalogService.openCohort → EducationScopeService.course → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 
 ### Parámetros
 
@@ -694,7 +697,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cohorte con ese código en el curso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cohorte debe terminar después de empezar; PreconditionFailedException: El curso no está publicado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -720,7 +722,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.assignInstructor` — `src/modules/education/controllers/education.controller.ts:91`
+- **Implementación:** `EducationController.assignInstructor` — `src/modules/education/controllers/education.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -730,29 +732,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/courses/{id}/instructors` la atiende `EducationController.assignInstructor` (src/modules/education/controllers/education.controller.ts:91). Exige sesión con alguno de los roles EDUCATION_ADMIN. Valida el cuerpo como `AssignInstructorDto` (6 campos, 2 obligatorios). Delega en `EducationCatalogService.assignInstructor`. Crea filas en education.course_instructors, education.instructors. Lee education.course_instructors, education.courses, education.instructors.
+`POST /education/courses/{id}/instructors` la atiende `EducationController.assignInstructor` (src/modules/education/controllers/education.controller.ts:106). Exige sesión con alguno de los roles EDUCATION_ADMIN. Valida el cuerpo como `AssignInstructorDto` (6 campos, 2 obligatorios). Delega en `EducationCatalogService.assignInstructor`. Crea filas en education.course_instructors, education.instructors. Lee education.course_instructors, education.courses, education.instructors.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:91` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:106` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.course_instructors` | ESCRIBE | CREA | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.createCourseInstructor | `src/modules/education/repositories/education-catalog.repository.ts:540` |
-| `education.course_instructors` | LEE | LEE | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.findCourseInstructors | `src/modules/education/repositories/education-catalog.repository.ts:564` |
-| `education.courses` | LEE | LEE | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.course_instructors` | ESCRIBE | CREA | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.createCourseInstructor | `src/modules/education/repositories/education-catalog.repository.ts:545` |
+| `education.course_instructors` | LEE | LEE | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.findCourseInstructors | `src/modules/education/repositories/education-catalog.repository.ts:569` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationScopeService.course → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 | `education.instructors` | ESCRIBE | CREA | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.createInstructor | `src/modules/education/repositories/education-catalog.repository.ts:484` |
-| `education.instructors` | LEE | LEE | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.findInstructorByProfile | `src/modules/education/repositories/education-catalog.repository.ts:505` |
+| `education.instructors` | LEE | LEE | DIRECTA | EducationController.assignInstructor → EducationCatalogService.assignInstructor → EducationCatalogRepository.findInstructorByProfile | `src/modules/education/repositories/education-catalog.repository.ts:510` |
 
 ### Parámetros
 
@@ -812,7 +814,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
 | 409 | `CONFLICT` | ConflictException: El instructor ya está asignado al curso; ConflictException: El curso ya tiene instructor titular |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -837,7 +838,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.createReview` — `src/modules/education/controllers/education.controller.ts:249`
+- **Implementación:** `EducationController.createReview` — `src/modules/education/controllers/education.controller.ts:314`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -847,27 +848,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/courses/{id}/reviews` la atiende `EducationController.createReview` (src/modules/education/controllers/education.controller.ts:249). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN. Valida el cuerpo como `EducationCreateReviewDto` (2 campos, 1 obligatorio). Delega en `EducationCatalogService.createReview`. Crea filas en education.course_reviews. Lee education.course_reviews, education.courses.
+`POST /education/courses/{id}/reviews` la atiende `EducationController.createReview` (src/modules/education/controllers/education.controller.ts:314). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN. Valida el cuerpo como `EducationCreateReviewDto` (2 campos, 1 obligatorio). Delega en `EducationCatalogService.createReview`. Crea filas en education.course_reviews. Lee education.course_reviews, education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:249` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:314` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:314` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.course_reviews` | ESCRIBE | CREA | DIRECTA | EducationController.createReview → EducationCatalogService.createReview → EducationCatalogRepository.createReview | `src/modules/education/repositories/education-catalog.repository.ts:824` |
-| `education.course_reviews` | LEE | LEE | DIRECTA | EducationController.createReview → EducationCatalogService.createReview → EducationCatalogRepository.findReviewByReviewer | `src/modules/education/repositories/education-catalog.repository.ts:844` |
-| `education.courses` | LEE | LEE | DIRECTA | EducationController.createReview → EducationCatalogService.createReview → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.course_reviews` | ESCRIBE | CREA | DIRECTA | EducationController.createReview → EducationCatalogService.createReview → EducationCatalogRepository.createReview | `src/modules/education/repositories/education-catalog.repository.ts:834` |
+| `education.course_reviews` | LEE | LEE | DIRECTA | EducationController.createReview → EducationCatalogService.createReview → EducationCatalogRepository.findReviewByReviewer | `src/modules/education/repositories/education-catalog.repository.ts:854` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.createReview → EducationCatalogService.createReview → EducationScopeService.course → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 
 ### Parámetros
 
@@ -879,8 +880,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `rating` | `number` | Sí | mínimo 1; máximo 5 | `@IsInt()` `@Min(1)` `@Max(5)` | — | `src/modules/education/dto/education.dto.ts:1226` |
-| `reviewText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/education/dto/education.dto.ts:1234` |
+| `rating` | `number` | Sí | mínimo 1; máximo 5 | `@IsInt()` `@Min(1)` `@Max(5)` | — | `src/modules/education/dto/education.dto.ts:1231` |
+| `reviewText` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/education/dto/education.dto.ts:1239` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -905,10 +906,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1245` |
-| `courseId` | `string` | Sí | formato uuid | — | Identificador asociado a course. | `src/modules/education/dto/education.dto.ts:1251` |
-| `rating` | `number` | Sí | — | — | Valor de rating mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1257` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1263` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1250` |
+| `courseId` | `string` | Sí | formato uuid | — | Identificador asociado a course. | `src/modules/education/dto/education.dto.ts:1256` |
+| `rating` | `number` | Sí | — | — | Valor de rating mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1262` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1268` |
 
 ### Respuestas posibles
 
@@ -918,7 +919,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
 | 409 | `CONFLICT` | ConflictException: El usuario ya reseñó este curso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -943,7 +943,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.publishVersion` — `src/modules/education/controllers/education.controller.ts:75`
+- **Implementación:** `EducationController.publishVersion` — `src/modules/education/controllers/education.controller.ts:85`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -953,19 +953,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/courses/{id}/versions/publish` la atiende `EducationController.publishVersion` (src/modules/education/controllers/education.controller.ts:75). Exige sesión con alguno de los roles EDUCATION_ADMIN, COURSE_AUTHOR. Valida el cuerpo como `EducationPublishVersionDto` (1 campo, 0 obligatorios). Delega en `EducationCatalogService.publishVersion`. Crea filas en education.course_versions. Actualiza education.courses. Lee education.course_versions, education.courses.
+`POST /education/courses/{id}/versions/publish` la atiende `EducationController.publishVersion` (src/modules/education/controllers/education.controller.ts:85). Exige sesión con alguno de los roles EDUCATION_ADMIN, COURSE_AUTHOR. Valida el cuerpo como `EducationPublishVersionDto` (1 campo, 0 obligatorios). Delega en `EducationCatalogService.publishVersion`. Crea filas en education.course_versions. Actualiza education.courses. Lee education.course_versions, education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:85` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:85` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -974,7 +974,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `education.course_versions` | ESCRIBE | CREA | DIRECTA | EducationController.publishVersion → EducationCatalogService.publishVersion → EducationCatalogRepository.createVersion | `src/modules/education/repositories/education-catalog.repository.ts:408` |
 | `education.course_versions` | LEE | LEE | DIRECTA | EducationController.publishVersion → EducationCatalogService.publishVersion → EducationCatalogRepository.findVersion | `src/modules/education/repositories/education-catalog.repository.ts:435` |
 | `education.courses` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.publishVersion → EducationCatalogService.publishVersion | `src/modules/education/services/education-catalog.service.ts:263` |
-| `education.courses` | LEE | LEE | DIRECTA | EducationController.publishVersion → EducationCatalogService.publishVersion → EducationCatalogRepository.findCourseForUpdate | `src/modules/education/repositories/education-catalog.repository.ts:194` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.publishVersion → EducationCatalogService.publishVersion → EducationScopeService.course → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
 
 ### Parámetros
 
@@ -1020,7 +1020,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
 | 409 | `CONFLICT` | ConflictException: Esa versión del curso ya existe |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un curso archivado no admite versiones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1046,7 +1045,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.publishCourse` — `src/modules/education/controllers/education.controller.ts:60`
+- **Implementación:** `EducationController.publishCourse` — `src/modules/education/controllers/education.controller.ts:65`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1056,18 +1055,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/courses/publish` la atiende `EducationController.publishCourse` (src/modules/education/controllers/education.controller.ts:60). Exige sesión con alguno de los roles EDUCATION_ADMIN, COURSE_AUTHOR. Valida el cuerpo como `PublishCourseDto` (23 campos, 8 obligatorios). Delega en `EducationCatalogService.publishCourse`. Crea filas en education.course_modules, education.course_versions, education.courses, education.lessons. Lee education.courses.
+`POST /education/courses/publish` la atiende `EducationController.publishCourse` (src/modules/education/controllers/education.controller.ts:65). Exige sesión con alguno de los roles EDUCATION_ADMIN, COURSE_AUTHOR. Valida el cuerpo como `PublishCourseDto` (23 campos, 8 obligatorios). Delega en `EducationCatalogService.publishCourse`. Crea filas en education.course_modules, education.course_versions, education.courses, education.lessons. Lee education.courses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:65` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1186,6 +1185,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: Ya existe un curso con ese código |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un curso acreditado necesita declarar sus horas CME |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1211,7 +1211,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.enrollLearner` — `src/modules/education/controllers/education.controller.ts:120`
+- **Implementación:** `EducationController.enrollLearner` — `src/modules/education/controllers/education.controller.ts:145`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1221,28 +1221,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/enrollments` la atiende `EducationController.enrollLearner` (src/modules/education/controllers/education.controller.ts:120). Exige sesión con alguno de los roles EDUCATION_ADMIN, LEARNER. Valida el cuerpo como `EnrollLearnerDto` (7 campos, 4 obligatorios). Delega en `EducationLearningService.enrollLearner`. Crea filas en education.enrollments. Actualiza education.course_cohorts. Lee education.course_cohorts, education.courses, education.enrollments.
+`POST /education/enrollments` la atiende `EducationController.enrollLearner` (src/modules/education/controllers/education.controller.ts:145). Exige sesión con alguno de los roles EDUCATION_ADMIN, LEARNER. Valida el cuerpo como `EnrollLearnerDto` (7 campos, 3 obligatorios). Delega en `EducationLearningService.enrollLearner`. Crea filas en education.enrollments. Actualiza education.course_cohorts. Lee education.course_cohorts, education.courses, education.enrollments, payments.payment_intents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: EDUCATION_ADMIN, LEARNER | `src/modules/education/controllers/education.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: EDUCATION_ADMIN, LEARNER | `src/modules/education/controllers/education.controller.ts:145` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.course_cohorts` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.enrollLearner → EducationLearningService.enrollLearner | `src/modules/education/services/education-learning.service.ts:183` |
-| `education.course_cohorts` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationCatalogRepository.findCohortForUpdate | `src/modules/education/repositories/education-catalog.repository.ts:652` |
-| `education.courses` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
-| `education.enrollments` | ESCRIBE | CREA | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationLearningRepository.createEnrollment | `src/modules/education/repositories/education-learning.repository.ts:117` |
-| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationLearningRepository.findLiveEnrollment | `src/modules/education/repositories/education-learning.repository.ts:179` |
+| `education.course_cohorts` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.enrollLearner → EducationLearningService.enrollLearner | `src/modules/education/services/education-learning.service.ts:252` |
+| `education.course_cohorts` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationScopeService.cohort → EducationCatalogRepository.findCohortById | `src/modules/education/repositories/education-catalog.repository.ts:654` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationScopeService.course → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.enrollments` | ESCRIBE | CREA | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationLearningRepository.createEnrollment | `src/modules/education/repositories/education-learning.repository.ts:118` |
+| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationLearningRepository.findLiveEnrollment | `src/modules/education/repositories/education-learning.repository.ts:180` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | EducationController.enrollLearner → EducationLearningService.enrollLearner → EducationLearningService.assertPurchaseConfirmed → EducationLearningRepository.findPaymentIntent | `src/modules/education/repositories/education-learning.repository.ts:193` |
 
 ### Cuerpo — DTO `EnrollLearnerDto` · `application/json`
 
@@ -1251,10 +1252,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `courseId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:551` |
 | `cohortId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:559` |
 | `learnerType` | `string` | Sí | valores: PRACTITIONER, STAFF, PATIENT, USER | `@IsIn(LEARNER_TYPES)` | — | `src/modules/education/dto/education.dto.ts:566` |
-| `learnerRefId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:573` |
-| `source` | `string` | Sí | valores: SELF, ASSIGNED, PURCHASED, PARTNER | `@IsIn(ENROLLMENT_SOURCES)` | — | `src/modules/education/dto/education.dto.ts:580` |
-| `paymentIntentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intento de pago; obligatorio si la inscripción es PURCHASED | `src/modules/education/dto/education.dto.ts:591` |
-| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Caducidad del acceso | `src/modules/education/dto/education.dto.ts:602` |
+| `learnerRefId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Aprendiz que se inscribe. Un LEARNER no lo declara: se deriva de su sesión y uno ajeno responde 403 (LEARNER_ENROLLMENT_OWNER_REQUIRED). Un administrador debe indicarlo | `src/modules/education/dto/education.dto.ts:578` |
+| `source` | `string` | Sí | valores: SELF, ASSIGNED, PURCHASED, PARTNER | `@IsIn(ENROLLMENT_SOURCES)` | — | `src/modules/education/dto/education.dto.ts:585` |
+| `paymentIntentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intento de pago; obligatorio si la inscripción es PURCHASED | `src/modules/education/dto/education.dto.ts:596` |
+| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Caducidad del acceso | `src/modules/education/dto/education.dto.ts:607` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1262,7 +1263,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 {
   "courseId": "00000000-0000-4000-8000-000000000001",
   "learnerType": "PRACTITIONER",
-  "learnerRefId": "00000000-0000-4000-8000-000000000001",
   "source": "SELF"
 }
 ```
@@ -1287,10 +1287,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:613` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:619` |
-| `progressPercent` | `string` | Sí | — | — | Progreso del curso, en porcentaje | `src/modules/education/dto/education.dto.ts:625` |
-| `cohortEnrolledCount` | `number` | No | — | — | Plazas ocupadas de la cohorte tras inscribir | `src/modules/education/dto/education.dto.ts:633` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:618` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:624` |
+| `progressPercent` | `string` | Sí | — | — | Progreso del curso, en porcentaje | `src/modules/education/dto/education.dto.ts:630` |
+| `cohortEnrolledCount` | `number` | No | — | — | Plazas ocupadas de la cohorte tras inscribir | `src/modules/education/dto/education.dto.ts:638` |
 
 ### Respuestas posibles
 
@@ -1299,10 +1299,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado; ResourceNotFoundException: Cohorte no encontrada |
-| 409 | `CONFLICT` | ConflictException: El aprendiz ya está inscrito en el curso; ConflictException: La cohorte no tiene plazas disponibles |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una inscripción comprada necesita su intento de pago; PreconditionFailedException: El curso no está publicado; PreconditionFailedException: La cohorte pertenece a otro curso; PreconditionFailedException: La cohorte no está abierta |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Esta forma de inscripción es administrativa |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
+| 409 | `CONFLICT` | ConflictException: El pago ya respalda otra inscripción; ConflictException: El aprendiz ya está inscrito en el curso; ConflictException: La cohorte no tiene plazas disponibles |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una inscripción comprada necesita su intento de pago; PreconditionFailedException: El intento de pago sólo aplica a una inscripción comprada; PreconditionFailedException: Indique el aprendiz que se inscribe; PreconditionFailedException: El curso no está publicado; PreconditionFailedException: El curso es de pago: la inscripción requiere una compra confirmada; PreconditionFailedException: El pago de la inscripción no está confirmado; PreconditionFailedException: El curso tiene precio pero no moneda: no se puede verificar el pago; PreconditionFailedException: El pago no corresponde a esta compra; PreconditionFailedException: La cohorte pertenece a otro curso; PreconditionFailedException: La cohorte no está abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/education.md).
@@ -1326,7 +1326,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.issueCertificate` — `src/modules/education/controllers/education.controller.ts:217`
+- **Implementación:** `EducationController.issueCertificate` — `src/modules/education/controllers/education.controller.ts:272`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1336,28 +1336,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/enrollments/{id}/certificate` la atiende `EducationController.issueCertificate` (src/modules/education/controllers/education.controller.ts:217). Exige sesión con alguno de los roles SYSTEM, EDUCATION_ADMIN. Valida el cuerpo como `IssueCertificateDto` (2 campos, 0 obligatorios). Delega en `EducationLearningService.issueCertificate`. Crea filas en education.certificates. Lee education.certificates, education.courses, education.enrollments.
+`POST /education/enrollments/{id}/certificate` la atiende `EducationController.issueCertificate` (src/modules/education/controllers/education.controller.ts:272). Exige sesión con alguno de los roles SYSTEM, EDUCATION_ADMIN. Valida el cuerpo como `IssueCertificateDto` (2 campos, 0 obligatorios). Delega en `EducationLearningService.issueCertificate`. Crea filas en education.certificates. Lee education.certificates, education.courses, education.enrollments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:217` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:217` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:272` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:272` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.certificates` | ESCRIBE | CREA | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationLearningRepository.createCertificate | `src/modules/education/repositories/education-learning.repository.ts:365` |
-| `education.certificates` | LEE | LEE | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationLearningRepository.findCertificateByEnrollment | `src/modules/education/repositories/education-learning.repository.ts:421` |
+| `education.certificates` | ESCRIBE | CREA | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationLearningRepository.createCertificate | `src/modules/education/repositories/education-learning.repository.ts:406` |
+| `education.certificates` | LEE | LEE | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationLearningRepository.findCertificateByEnrollment | `src/modules/education/repositories/education-learning.repository.ts:462` |
 | `education.courses` | LEE | LEE | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
-| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationLearningRepository.findEnrollmentForUpdate | `src/modules/education/repositories/education-learning.repository.ts:161` |
+| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.issueCertificate → EducationLearningService.issueCertificate → EducationScopeService.enrollment → EducationLearningRepository.findEnrollmentById | `src/modules/education/repositories/education-learning.repository.ts:148` |
 
 ### Parámetros
 
@@ -1369,8 +1369,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Documento del certificado | `src/modules/education/dto/education.dto.ts:1046` |
-| `validityMonths` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Vigencia del certificado, en meses | `src/modules/education/dto/education.dto.ts:1055` |
+| `fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Documento del certificado | `src/modules/education/dto/education.dto.ts:1051` |
+| `validityMonths` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Vigencia del certificado, en meses | `src/modules/education/dto/education.dto.ts:1060` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1393,12 +1393,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1066` |
-| `certificateNumber` | `string` | Sí | — | — | Número del certificado | `src/modules/education/dto/education.dto.ts:1072` |
-| `verificationCode` | `string` | Sí | — | — | Código con el que un tercero lo verifica | `src/modules/education/dto/education.dto.ts:1078` |
-| `cmeCreditsAwarded` | `string` | No | — | — | Horas CME acreditadas | `src/modules/education/dto/education.dto.ts:1084` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1090` |
-| `alreadyIssued` | `boolean` | Sí | — | — | true si ya estaba emitido | `src/modules/education/dto/education.dto.ts:1096` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1071` |
+| `certificateNumber` | `string` | Sí | — | — | Número del certificado | `src/modules/education/dto/education.dto.ts:1077` |
+| `verificationCode` | `string` | Sí | — | — | Código con el que un tercero lo verifica | `src/modules/education/dto/education.dto.ts:1083` |
+| `cmeCreditsAwarded` | `string` | No | — | — | Horas CME acreditadas | `src/modules/education/dto/education.dto.ts:1089` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1095` |
+| `alreadyIssued` | `boolean` | Sí | — | — | true si ya estaba emitido | `src/modules/education/dto/education.dto.ts:1101` |
 
 ### Respuestas posibles
 
@@ -1408,7 +1408,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada; ResourceNotFoundException: Curso no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: Curso no encontrado |
 | 409 | `CONFLICT` | ConflictException: No se pudo generar un número de certificado libre; ConflictException: No se pudo generar un código de verificación libre |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción no está completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1434,7 +1434,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.completeEnrollment` — `src/modules/education/controllers/education.controller.ts:201`
+- **Implementación:** `EducationController.completeEnrollment` — `src/modules/education/controllers/education.controller.ts:251`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1444,28 +1444,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/enrollments/{id}/complete` la atiende `EducationController.completeEnrollment` (src/modules/education/controllers/education.controller.ts:201). Exige sesión con alguno de los roles SYSTEM, EDUCATION_ADMIN, LEARNER. Delega en `EducationLearningService.completeEnrollment`. Actualiza education.enrollments. Lee education.assessment_attempts, education.assessments, education.course_modules, education.enrollments, education.lesson_progress, education.lessons.
+`POST /education/enrollments/{id}/complete` la atiende `EducationController.completeEnrollment` (src/modules/education/controllers/education.controller.ts:251). Exige sesión con alguno de los roles SYSTEM, EDUCATION_ADMIN, LEARNER. Delega en `EducationLearningService.completeEnrollment`. Actualiza education.enrollments. Lee education.assessment_attempts, education.assessments, education.course_modules, education.courses, education.enrollments, education.lesson_progress, education.lessons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, EDUCATION_ADMIN, LEARNER | `src/modules/education/controllers/education.controller.ts:201` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:201` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, EDUCATION_ADMIN, LEARNER | `src/modules/education/controllers/education.controller.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:251` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.assessment_attempts` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningRepository.findPassedAttempts | `src/modules/education/repositories/education-learning.repository.ts:349` |
-| `education.assessments` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationCatalogRepository.findGradedAssessments | `src/modules/education/repositories/education-catalog.repository.ts:707` |
+| `education.assessment_attempts` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningRepository.findPassedAttempts | `src/modules/education/repositories/education-learning.repository.ts:390` |
+| `education.assessments` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationCatalogRepository.findGradedAssessments | `src/modules/education/repositories/education-catalog.repository.ts:717` |
 | `education.course_modules` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningService.recomputeProgress → EducationCatalogRepository.findModulesByCourse | `src/modules/education/repositories/education-catalog.repository.ts:343` |
-| `education.enrollments` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.completeEnrollment → EducationLearningService.completeEnrollment | `src/modules/education/services/education-learning.service.ts:550` |
-| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningRepository.findEnrollmentForUpdate | `src/modules/education/repositories/education-learning.repository.ts:161` |
-| `education.lesson_progress` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningService.recomputeProgress → EducationLearningRepository.findProgressByEnrollment | `src/modules/education/repositories/education-learning.repository.ts:252` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationScopeService.enrollment → EducationScopeService.assertCourseInScope → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.enrollments` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.completeEnrollment → EducationLearningService.completeEnrollment | `src/modules/education/services/education-learning.service.ts:718` |
+| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationScopeService.enrollment → EducationLearningRepository.findEnrollmentById | `src/modules/education/repositories/education-learning.repository.ts:148` |
+| `education.lesson_progress` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningService.recomputeProgress → EducationLearningRepository.findProgressByEnrollment | `src/modules/education/repositories/education-learning.repository.ts:285` |
 | `education.lessons` | LEE | LEE | DIRECTA | EducationController.completeEnrollment → EducationLearningService.completeEnrollment → EducationLearningService.recomputeProgress → EducationCatalogRepository.countLessonsByModules | `src/modules/education/repositories/education-catalog.repository.ts:368` |
 
 ### Parámetros
@@ -1482,10 +1483,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1010` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1016` |
-| `progressPercent` | `string` | Sí | — | — | Valor de progress percent mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1022` |
-| `alreadyCompleted` | `boolean` | Sí | — | — | true si ya estaba completada | `src/modules/education/dto/education.dto.ts:1028` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/education/dto/education.dto.ts:1015` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1021` |
+| `progressPercent` | `string` | Sí | — | — | Valor de progress percent mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1027` |
+| `alreadyCompleted` | `boolean` | Sí | — | — | true si ya estaba completada | `src/modules/education/dto/education.dto.ts:1033` |
 
 ### Respuestas posibles
 
@@ -1495,7 +1496,7 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción no está activa; PreconditionFailedException: El curso no está completo; PreconditionFailedException: Quedan evaluaciones sin aprobar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1520,7 +1521,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `EducationController.recordProgress` — `src/modules/education/controllers/education.controller.ts:135`
+- **Implementación:** `EducationController.recordProgress` — `src/modules/education/controllers/education.controller.ts:165`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1530,29 +1531,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Cómo se atiende (sistema)
 
-`POST /education/enrollments/{id}/lesson-progress` la atiende `EducationController.recordProgress` (src/modules/education/controllers/education.controller.ts:135). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN, SYSTEM. Valida el cuerpo como `RecordProgressDto` (5 campos, 2 obligatorios). Delega en `EducationLearningService.recordProgress`. Crea filas en education.lesson_progress. Actualiza education.enrollments. Lee education.course_modules, education.enrollments, education.lesson_progress, education.lessons.
+`POST /education/enrollments/{id}/lesson-progress` la atiende `EducationController.recordProgress` (src/modules/education/controllers/education.controller.ts:165). Exige sesión con alguno de los roles LEARNER, EDUCATION_ADMIN, SYSTEM. Valida el cuerpo como `RecordProgressDto` (5 campos, 2 obligatorios). Delega en `EducationLearningService.recordProgress`. Crea filas en education.lesson_progress. Actualiza education.enrollments. Lee education.course_modules, education.courses, education.enrollments, education.lesson_progress, education.lessons.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LEARNER, EDUCATION_ADMIN, SYSTEM | `src/modules/education/controllers/education.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:135` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: LEARNER, EDUCATION_ADMIN, SYSTEM | `src/modules/education/controllers/education.controller.ts:165` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:165` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `education.course_modules` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationLearningService.recomputeProgress → EducationCatalogRepository.findModulesByCourse | `src/modules/education/repositories/education-catalog.repository.ts:343` |
-| `education.enrollments` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.recordProgress → EducationLearningService.recordProgress | `src/modules/education/services/education-learning.service.ts:278` |
-| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationLearningRepository.findEnrollmentForUpdate | `src/modules/education/repositories/education-learning.repository.ts:161` |
-| `education.lesson_progress` | ESCRIBE | CREA | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationLearningRepository.createLessonProgress | `src/modules/education/repositories/education-learning.repository.ts:227` |
-| `education.lesson_progress` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationLearningService.recomputeProgress → EducationLearningRepository.findProgressByEnrollment | `src/modules/education/repositories/education-learning.repository.ts:252` |
+| `education.course_modules` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationCatalogRepository.findModulesByCourse | `src/modules/education/repositories/education-catalog.repository.ts:343` |
+| `education.courses` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationScopeService.enrollment → EducationScopeService.assertCourseInScope → EducationCatalogRepository.findCourseById | `src/modules/education/repositories/education-catalog.repository.ts:183` |
+| `education.enrollments` | ESCRIBE | ACTUALIZA | POR_TIPO | EducationController.recordProgress → EducationLearningService.recordProgress | `src/modules/education/services/education-learning.service.ts:473` |
+| `education.enrollments` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationScopeService.enrollment → EducationLearningRepository.findEnrollmentById | `src/modules/education/repositories/education-learning.repository.ts:148` |
+| `education.lesson_progress` | ESCRIBE | CREA | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationLearningRepository.createLessonProgress | `src/modules/education/repositories/education-learning.repository.ts:260` |
+| `education.lesson_progress` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationLearningService.recomputeProgress → EducationLearningRepository.findProgressByEnrollment | `src/modules/education/repositories/education-learning.repository.ts:285` |
 | `education.lessons` | LEE | LEE | DIRECTA | EducationController.recordProgress → EducationLearningService.recordProgress → EducationCatalogRepository.findLessonById | `src/modules/education/repositories/education-catalog.repository.ts:358` |
 
 ### Parámetros
@@ -1565,11 +1567,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `lessonId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:650` |
-| `status` | `string` | Sí | valores: IN_PROGRESS, COMPLETED | `@IsIn(['IN_PROGRESS', 'COMPLETED'])` | — | `src/modules/education/dto/education.dto.ts:657` |
-| `secondsWatched` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Segundos vistos del contenido | `src/modules/education/dto/education.dto.ts:666` |
-| `completionPercent` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Porcentaje visto de la lección | `src/modules/education/dto/education.dto.ts:674` |
-| `occurredAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo ocurrió; por defecto, ahora | `src/modules/education/dto/education.dto.ts:685` |
+| `lessonId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/education/dto/education.dto.ts:655` |
+| `status` | `string` | Sí | valores: IN_PROGRESS, COMPLETED | `@IsIn(['IN_PROGRESS', 'COMPLETED'])` | — | `src/modules/education/dto/education.dto.ts:662` |
+| `secondsWatched` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Segundos vistos del contenido | `src/modules/education/dto/education.dto.ts:671` |
+| `completionPercent` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Porcentaje visto de la lección | `src/modules/education/dto/education.dto.ts:679` |
+| `occurredAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo ocurrió; por defecto, ahora | `src/modules/education/dto/education.dto.ts:690` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1598,11 +1600,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Anotación de progreso creada | `src/modules/education/dto/education.dto.ts:696` |
-| `enrollmentId` | `string` | Sí | formato uuid | — | Identificador asociado a enrollment. | `src/modules/education/dto/education.dto.ts:702` |
-| `progressPercent` | `string` | Sí | — | — | Progreso del curso recalculado | `src/modules/education/dto/education.dto.ts:708` |
-| `completedLessons` | `number` | Sí | — | — | Lecciones completadas | `src/modules/education/dto/education.dto.ts:714` |
-| `totalLessons` | `number` | Sí | — | — | Lecciones publicadas del curso | `src/modules/education/dto/education.dto.ts:720` |
+| `id` | `string` | Sí | formato uuid | — | Anotación de progreso creada | `src/modules/education/dto/education.dto.ts:701` |
+| `enrollmentId` | `string` | Sí | formato uuid | — | Identificador asociado a enrollment. | `src/modules/education/dto/education.dto.ts:707` |
+| `progressPercent` | `string` | Sí | — | — | Progreso del curso recalculado | `src/modules/education/dto/education.dto.ts:713` |
+| `completedLessons` | `number` | Sí | — | — | Lecciones completadas | `src/modules/education/dto/education.dto.ts:719` |
+| `totalLessons` | `number` | Sí | — | — | Lecciones publicadas del curso | `src/modules/education/dto/education.dto.ts:725` |
 
 ### Respuestas posibles
 
@@ -1612,7 +1614,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada; ResourceNotFoundException: Lección no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: Lección no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción está cancelada; PreconditionFailedException: El acceso a la inscripción ha caducado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

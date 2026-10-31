@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   IntegrationContractsService,
   IntegrationAuthProfilesService,
@@ -63,6 +68,11 @@ export class IntegrationContractsController {
   ) {}
 
   /** UC-31-01. */
+  @Audited({
+    action: 'INTEGRATION_CONTRACT_CREATED',
+    entity: 'integration_contract',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Definir un contrato de integración' })
@@ -74,6 +84,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-02. */
+  @Audited({
+    action: 'INTEGRATION_CONTRACT_VERSION_PUBLISHED',
+    entity: 'integration_contract_version',
+    entityId: 'result.id',
+  })
   @Post(':id/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar una nueva versión de contrato' })
@@ -86,6 +101,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-10. */
+  @Audited({
+    action: 'INTEGRATION_CONTRACT_VERSION_ACTIVATED',
+    entity: 'integration_contract_version',
+    entityId: 'param:versionId',
+  })
   @Post(':id/versions/:versionId/activate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -101,6 +121,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-03. */
+  @Audited({
+    action: 'INTEGRATION_AUTH_PROFILE_CONFIGURED',
+    entity: 'integration_auth_profile',
+    entityId: 'result.id',
+  })
   @Post(':id/auth-profiles')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -115,6 +140,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-11 (rotación de credenciales). */
+  @Audited({
+    action: 'INTEGRATION_AUTH_PROFILE_ROTATED',
+    entity: 'integration_auth_profile',
+    entityId: 'param:apId',
+  })
   @Post(':id/auth-profiles/:apId/rotate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -130,6 +160,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-04. */
+  @Audited({
+    action: 'CONTRACT_WEBHOOK_SUBSCRIBED',
+    entity: 'contract_webhook_subscription',
+    entityId: 'result.id',
+  })
   @Post(':id/webhook-subscriptions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Suscribir un webhook al contrato' })
@@ -142,6 +177,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-05. */
+  @Audited({
+    action: 'INTEGRATION_EXCHANGE_EXECUTED',
+    entity: 'integration_exchange_record',
+    entityId: 'result.id',
+  })
   @Post(':id/exchanges')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Ejecutar un intercambio idempotente (inbound)' })
@@ -160,6 +200,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-06. */
+  @Audited({
+    action: 'INTEGRATION_EXCHANGE_ATTEMPT_RECORDED',
+    entity: 'integration_exchange_attempt',
+    entityId: 'result.id',
+  })
   @Post(':id/exchanges/:recordId/attempts')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un intento de intercambio outbound' })
@@ -173,6 +218,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-08. */
+  @Audited({
+    action: 'INTEGRATION_SYNC_CURSOR_ADVANCED',
+    entity: 'integration_sync_cursor',
+    entityId: 'result.id',
+  })
   @Post(':id/sync-cursors/:scope/advance')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Avanzar el cursor de sincronización' })
@@ -186,6 +236,11 @@ export class IntegrationContractsController {
   }
 
   /** UC-31-11 (retiro del contrato). */
+  @Audited({
+    action: 'INTEGRATION_CONTRACT_RETIRED',
+    entity: 'integration_contract',
+    entityId: 'param:id',
+  })
   @Post(':id/retire')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Retirar el contrato (soft-delete lógico)' })

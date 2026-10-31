@@ -19,26 +19,35 @@ describe('IdentityVerificationEffectsService', () => {
   function build() {
     const tx = {};
     const authorizationsRepo = { findById: fn().mockResolvedValue(null) };
-    const practitionersRepo = { findById: fn().mockResolvedValue(null) };
+    const admissions = {
+      recordExternalLicenseVerification: fn().mockResolvedValue(true),
+    };
     const tenantsRepo = { findById: fn().mockResolvedValue(null) };
     const verification = {
       applyVerified: fn().mockResolvedValue({ action: 'granted' }),
       applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
     };
+    // Por defecto el tenant no tiene requisitos para operar (no es farmacia
+    // ni laboratorio): `evaluateForTenant` devuelve `undefined`.
+    const operatingRequirements = {
+      evaluateForTenant: fn().mockResolvedValue(undefined),
+    };
     const service = new IdentityVerificationEffectsService(
       authorizationsRepo as never,
-      practitionersRepo as never,
+      admissions as never,
       tenantsRepo as never,
       verification as never,
       logger as never,
+      operatingRequirements as never,
     );
     return {
       service,
       tx,
       authorizationsRepo,
-      practitionersRepo,
+      admissions,
       tenantsRepo,
       verification,
+      operatingRequirements,
     };
   }
 
@@ -47,7 +56,7 @@ describe('IdentityVerificationEffectsService', () => {
     return { subjectTypeConceptId, subjectEntityId } as never;
   }
 
-  it('activates the license and its practitioner when a medical license is verified', async () => {
+  it('records a verified medical license in the admission and does NOT verify the practitioner (v4.2.67)', async () => {
     const d = build();
     const authorization = {
       id: 'auth-1',
@@ -55,25 +64,56 @@ describe('IdentityVerificationEffectsService', () => {
       stateConceptId: PROF.AUTH_PENDING,
       updatedAt: new Date(),
     };
-    const practitioner = {
-      verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
-      practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
-      updatedAt: new Date(),
-    };
     d.authorizationsRepo.findById.mockResolvedValue(authorization);
-    d.practitionersRepo.findById.mockResolvedValue(practitioner);
 
     await d.service.applyVerified(
       d.tx as never,
-      verifiedCase(IDA.SUBJECT_PRACTITIONER_LICENSE, 'auth-1'),
+      {
+        id: 'caso-9',
+        subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+        subjectEntityId: 'auth-1',
+      } as never,
+      ACTOR,
+    );
+
+    // La autoridad aporta evidencia; el cierre es de la admisión.
+    expect(d.admissions.recordExternalLicenseVerification).toHaveBeenCalledWith(
+      d.tx,
+      {
+        authorizationId: 'auth-1',
+        practitionerProfileId: 'prac-1',
+        identityCaseId: 'caso-9',
+        actorUserId: ACTOR,
+      },
+    );
+    expect(authorization.stateConceptId).toBe(PROF.AUTH_PENDING);
+    expect(d.verification.applyVerified).not.toHaveBeenCalled();
+  });
+
+  it('only activates the license when the practitioner has no open admission', async () => {
+    const d = build();
+    const authorization = {
+      id: 'auth-1',
+      practitionerProfileId: 'prac-1',
+      stateConceptId: PROF.AUTH_PENDING,
+      updatedAt: new Date(),
+    } as Record<string, unknown>;
+    d.authorizationsRepo.findById.mockResolvedValue(authorization);
+    d.admissions.recordExternalLicenseVerification.mockResolvedValue(false);
+
+    await d.service.applyVerified(
+      d.tx as never,
+      {
+        id: 'caso-9',
+        subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+        subjectEntityId: 'auth-1',
+      } as never,
       ACTOR,
     );
 
     expect(authorization.stateConceptId).toBe(PROF.AUTH_ACTIVE);
-    expect(practitioner.verificationStatusConceptId).toBe(
-      PROF.PRACT_VERIF_VERIFIED,
-    );
-    expect(practitioner.practiceStatusConceptId).toBe(PROF.PRACTICE_ACTIVE);
+    expect(authorization.verifiedByUserId).toBe(ACTOR);
+    expect(d.verification.applyVerified).not.toHaveBeenCalled();
   });
 
   it('marks a pending institution as verified and active', async () => {
@@ -93,6 +133,70 @@ describe('IdentityVerificationEffectsService', () => {
 
     expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_VERIFIED);
     expect(tenant.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
+  });
+
+  it('keeps a pending pharmacy without its papers pending and without badge (P50)', async () => {
+    const d = build();
+    const tenant = {
+      id: 'tenant-1',
+      statusConceptId: DIR.TENANT_PENDING,
+      verificationStatusConceptId: CONCEPTS.TENANT_UNVERIFIED,
+      updatedAt: new Date(),
+    };
+    d.tenantsRepo.findById.mockResolvedValue(tenant);
+    d.operatingRequirements.evaluateForTenant.mockResolvedValue({
+      kind: 'PHARMACY',
+      readiness: {
+        ready: false,
+        missing: ['HEADQUARTERS_LOCATION'],
+        documentIds: [],
+      },
+    });
+
+    await d.service.applyVerified(
+      d.tx as never,
+      verifiedCase(IDA.SUBJECT_TENANT_IDENTITY, 'tenant-1'),
+      ACTOR,
+    );
+
+    expect(d.operatingRequirements.evaluateForTenant).toHaveBeenCalledWith(
+      d.tx,
+      tenant,
+    );
+    expect(tenant.statusConceptId).toBe(DIR.TENANT_PENDING);
+    expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_UNVERIFIED);
+    expect(d.verification.applyVerified).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reason: 'pharmacy-not-ready',
+        missing: ['HEADQUARTERS_LOCATION'],
+      }),
+      expect.any(String),
+    );
+  });
+
+  it('activates a pending laboratory that has its papers (P51)', async () => {
+    const d = build();
+    const tenant = {
+      id: 'tenant-1',
+      statusConceptId: DIR.TENANT_PENDING,
+      verificationStatusConceptId: CONCEPTS.TENANT_UNVERIFIED,
+      updatedAt: new Date(),
+    };
+    d.tenantsRepo.findById.mockResolvedValue(tenant);
+    d.operatingRequirements.evaluateForTenant.mockResolvedValue({
+      kind: 'LABORATORY',
+      readiness: { ready: true, missing: [], documentIds: ['d1', 'd2', 'd3'] },
+    });
+
+    await d.service.applyVerified(
+      d.tx as never,
+      verifiedCase(IDA.SUBJECT_TENANT_IDENTITY, 'tenant-1'),
+      ACTOR,
+    );
+
+    expect(tenant.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
+    expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_VERIFIED);
   });
 
   it('verifies an already-operating institution without reactivating it', async () => {
@@ -160,30 +264,39 @@ describe('IdentityVerificationEffectsService · sello público (P13)', () => {
   function build() {
     const tx = {};
     const authorizationsRepo = { findById: fn().mockResolvedValue(null) };
-    const practitionersRepo = { findById: fn().mockResolvedValue(null) };
+    const admissions = {
+      recordExternalLicenseVerification: fn().mockResolvedValue(true),
+    };
     const tenantsRepo = { findById: fn().mockResolvedValue(null) };
     const verification = {
       applyVerified: fn().mockResolvedValue({ action: 'granted' }),
       applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
     };
+    // Por defecto el tenant no tiene requisitos para operar (no es farmacia
+    // ni laboratorio): `evaluateForTenant` devuelve `undefined`.
+    const operatingRequirements = {
+      evaluateForTenant: fn().mockResolvedValue(undefined),
+    };
     const service = new IdentityVerificationEffectsService(
       authorizationsRepo as never,
-      practitionersRepo as never,
+      admissions as never,
       tenantsRepo as never,
       verification as never,
       logger as never,
+      operatingRequirements as never,
     );
     return {
       service,
       tx,
       authorizationsRepo,
-      practitionersRepo,
+      admissions,
       tenantsRepo,
       verification,
+      operatingRequirements,
     };
   }
 
-  it('una matrícula verificada emite el sello del profesional', async () => {
+  it('una matrícula verificada NO emite el sello: lo emite la admisión al verificar (D-01)', async () => {
     const d = build();
     d.authorizationsRepo.findById.mockResolvedValue({
       id: 'auth-1',
@@ -194,16 +307,19 @@ describe('IdentityVerificationEffectsService · sello público (P13)', () => {
     await d.service.applyVerified(
       d.tx as never,
       {
+        id: 'caso-1',
         subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
         subjectEntityId: 'auth-1',
       } as never,
       ACTOR,
     );
 
-    const [[, outcome]] = d.verification.applyVerified.mock.calls;
-    expect(outcome.targetId).toBe('prof-1');
-    // El sello no puede durar más que la habilitación que lo respalda.
-    expect(outcome.validTo).toEqual(new Date('2027-01-01T00:00:00Z'));
+    // Un sello por una sola matrícula, sin revisar títulos ni identidad, era el
+    // «sello que miente»: ahora el check sólo nace de la resolución de la admisión.
+    expect(d.verification.applyVerified).not.toHaveBeenCalled();
+    expect(
+      d.admissions.recordExternalLicenseVerification,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('una institución verificada emite su sello', async () => {

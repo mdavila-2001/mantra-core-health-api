@@ -19,7 +19,7 @@
 | [operative_reports](#operative_reports) | Conserva informes operatorios que describen la intervención y sus resultados en el registro perioperatorio. | 19 | 9 | 5 | COINCIDE |
 | [operative_steps](#operative_steps) | Desglosa la intervención en pasos operatorios para conservar la secuencia técnica realizada. | 18 | 11 | 6 | COINCIDE |
 | [pacu_assessments](#pacu_assessments) | Conserva valoraciones realizadas durante la recuperación postanestésica para documentar el estado del paciente tras la cirugía. | 12 | 5 | 2 | COINCIDE |
-| [pacu_stays](#pacu_stays) | Registra permanencias en la unidad de recuperación postanestésica para seguir la etapa inmediata posterior a una intervención. | 16 | 9 | 5 | COINCIDE |
+| [pacu_stays](#pacu_stays) | Registra permanencias en la unidad de recuperación postanestésica para seguir la etapa inmediata posterior a una intervención. | 16 | 9 | 4 | COINCIDE |
 | [postoperative_followups](#postoperative_followups) | Conserva seguimientos posteriores al procedimiento para documentar evolución y continuidad de cuidados. | 18 | 8 | 1 | COINCIDE |
 | [postoperative_orders](#postoperative_orders) | Registra indicaciones posteriores a la intervención para coordinar cuidados inmediatos y recuperación del paciente. | 10 | 6 | 1 | COINCIDE |
 | [preoperative_assessments](#preoperative_assessments) | Conserva valoraciones preoperatorias que aportan información clínica para preparar una intervención. | 23 | 13 | 3 | COINCIDE |
@@ -30,10 +30,10 @@
 | [procedure_case_diagnoses](#procedure_case_diagnoses) | Asocia diagnósticos con casos de procedimiento para documentar las condiciones que motivan o contextualizan la intervención. | 7 | 4 | 4 | COINCIDE |
 | [procedure_case_locations](#procedure_case_locations) | Vincula casos con salas o espacios donde se planifica o realiza la intervención. | 8 | 6 | 3 | COINCIDE |
 | [procedure_case_milestones](#procedure_case_milestones) | Registra hitos de los casos para seguir etapas relevantes de preparación, intervención y recuperación. | 9 | 6 | 7 | COINCIDE |
-| [procedure_case_status_history](#procedure_case_status_history) | Preserva cambios de estado de los casos para reconstruir su evolución operativa y perioperatoria. | 10 | 7 | 7 | COINCIDE |
-| [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 14 | 7 | 10 | COINCIDE |
-| [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 27 | 20 | 38 | COINCIDE |
-| [procedure_charge_items](#procedure_charge_items) | Asocia conceptos facturables con procedimientos para trasladar cargos del acto médico al ciclo administrativo correspondiente. | 16 | 9 | 2 | COINCIDE |
+| [procedure_case_status_history](#procedure_case_status_history) | Preserva cambios de estado de los casos para reconstruir su evolución operativa y perioperatoria. | 10 | 7 | 9 | COINCIDE |
+| [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 14 | 7 | 13 | COINCIDE |
+| [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 27 | 20 | 15 | COINCIDE |
+| [procedure_charge_items](#procedure_charge_items) | Asocia conceptos facturables con procedimientos para trasladar cargos del acto médico al ciclo administrativo correspondiente. | 16 | 9 | 4 | COINCIDE |
 | [procedure_complications](#procedure_complications) | Documenta complicaciones asociadas a procedimientos para dar seguimiento a eventos clínicos adversos o no previstos. | 13 | 9 | 1 | COINCIDE |
 | [procedure_devices](#procedure_devices) | Registra dispositivos utilizados en procedimientos para conservar trazabilidad del equipamiento clínico relevante. | 11 | 5 | 1 | COINCIDE |
 | [procedure_implants](#procedure_implants) | Vincula implantes con procedimientos para documentar qué dispositivo implantable fue utilizado y en qué intervención. | 16 | 10 | 2 | COINCIDE |
@@ -1089,7 +1089,7 @@ Registra permanencias en la unidad de recuperación postanestésica para seguir 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: pacu_stays`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `PacuStays` — `src/modules/procedures_perioperative/entities/pacu_stays.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 5 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -1151,7 +1151,6 @@ Registra permanencias en la unidad de recuperación postanestésica para seguir 
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /pacu-stays/{stayId}/assessments | LEE | DIRECTA |
-| POST /pacu-stays/{stayId}/discharge | ACTUALIZA | POR_TIPO |
 | POST /pacu-stays/{stayId}/discharge | LEE | DIRECTA |
 | POST /procedure-cases/{id}/pacu-stays | CREA | DIRECTA |
 | POST /procedure-cases/{id}/pacu-stays | LEE | DIRECTA |
@@ -1929,7 +1928,7 @@ Preserva cambios de estado de los casos para reconstruir su evolución operativa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_case_status_history`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCaseStatusHistory` — `src/modules/procedures_perioperative/entities/procedure_case_status_history.entity.ts`
-- **Resumen:** 10 columnas · 7 índices · 6 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 10 columnas · 7 índices · 6 FK salientes · 0 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -1979,7 +1978,9 @@ Preserva cambios de estado de los casos para reconstruir su evolución operativa
 | POST /procedure-cases/{id}/cancel | CREA | DIRECTA |
 | POST /procedure-cases/{id}/confirm | CREA | DIRECTA |
 | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | CREA | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | CREA | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders/verify | CREA | DIRECTA |
+| POST /procedure-cases/{id}/team-members | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -2004,7 +2005,7 @@ Identifica integrantes del equipo asignado a un caso de procedimiento para conse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_case_team_members`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCaseTeamMembers` — `src/modules/procedures_perioperative/entities/procedure_case_team_members.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 10 operaciones
+- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2063,7 +2064,10 @@ Identifica integrantes del equipo asignado a un caso de procedimiento para conse
 | PATCH /procedure-cases/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /procedure-cases/{id} | LEE | DIRECTA |
 | POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | ACTUALIZA | POR_TIPO |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
 | GET /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | ACTUALIZA | POR_TIPO |
 | POST /procedure-cases/{id}/team-members | CREA | DIRECTA |
 | POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
 | POST /procedure-cases/{id}/team-members/{memberId}/accept | LEE | DIRECTA |
@@ -2092,7 +2096,7 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_cases`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCases` — `src/modules/procedures_perioperative/entities/procedure_cases.entity.ts`
-- **Resumen:** 27 columnas · 20 índices · 17 FK salientes · 26 entrantes · 38 operaciones
+- **Resumen:** 27 columnas · 20 índices · 17 FK salientes · 26 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -2179,10 +2183,10 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_procedure_cases_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_procedure_cases_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_procedure_cases_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_procedure_cases_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_procedure_cases_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_procedure_cases_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_encounter_id` | no | encounter_id | Soporta la clave foránea fk_procedure_cases_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_service_request_id` | no | service_request_id | Soporta la clave foránea fk_procedure_cases_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_procedure_cases_primary_procedure_id` | no | primary_procedure_id | Soporta la clave foránea fk_procedure_cases_primary_procedure_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_procedure_cases_primary_procedure_id` | no | primary_procedure_id | Soporta la clave foránea fk_procedure_cases_primary_procedure_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «primary_procedure_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_case_type_concept_id` | no | case_type_concept_id | Soporta la clave foránea fk_procedure_cases_case_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_priority_concept_id` | no | priority_concept_id | Soporta la clave foránea fk_procedure_cases_priority_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_procedure_cases_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -2209,44 +2213,21 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
+| POST /clinical/procedures | LEE | DIRECTA |
 | POST /visit-requests | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases | LEE | DIRECTA |
 | POST /procedure-cases | CREA | DIRECTA |
 | POST /procedure-cases | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | PATCH /procedure-cases/{id} | ACTUALIZA | POR_TIPO |
-| PATCH /procedure-cases/{id} | LEE | DIRECTA |
-| POST /procedure-cases/{id}/anesthesia-events | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/anesthesia-events | LEE | DIRECTA |
-| POST /procedure-cases/{id}/anesthesia-plans | LEE | DIRECTA |
-| POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve | LEE | DIRECTA |
-| POST /procedure-cases/{id}/cancel | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/cancel | LEE | DIRECTA |
-| POST /procedure-cases/{id}/charge-items/post | LEE | DIRECTA |
-| POST /procedure-cases/{id}/confirm | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
-| POST /procedure-cases/{id}/diagnoses | LEE | DIRECTA |
-| POST /procedure-cases/{id}/findings | LEE | DIRECTA |
-| POST /procedure-cases/{id}/implants | LEE | DIRECTA |
-| POST /procedure-cases/{id}/medication-uses | LEE | DIRECTA |
 | POST /procedure-cases/{id}/operative-reports | LEE | DIRECTA |
-| POST /procedure-cases/{id}/operative-reports/{reportId}/sign | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/operative-reports/{reportId}/sign | LEE | DIRECTA |
-| POST /procedure-cases/{id}/operative-steps | LEE | DIRECTA |
-| POST /procedure-cases/{id}/pacu-stays | LEE | DIRECTA |
-| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
-| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
-| POST /procedure-cases/{id}/preoperative-orders/verify | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/preoperative-orders/verify | LEE | DIRECTA |
-| POST /procedure-cases/{id}/specimens | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | ACTUALIZA | POR_TIPO |
 | GET /procedure-cases/{id}/team-members | LEE | DIRECTA |
 | POST /procedure-cases/{id}/team-members | ACTUALIZA | POR_TIPO |
-| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
-| POST /procedure-cases/{id}/team-members/{memberId}/accept | LEE | DIRECTA |
-| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2271,7 +2252,7 @@ Asocia conceptos facturables con procedimientos para trasladar cargos del acto m
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_charge_items`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureChargeItems` — `src/modules/procedures_perioperative/entities/procedure_charge_items.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -2326,6 +2307,8 @@ Asocia conceptos facturables con procedimientos para trasladar cargos del acto m
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /patient-spending/me | LEE | POR_SQL |
+| GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /procedure-cases/{id}/charge-items/post | CREA | DIRECTA |
 | POST /procedure-cases/{id}/charge-items/post | LEE | DIRECTA |
 

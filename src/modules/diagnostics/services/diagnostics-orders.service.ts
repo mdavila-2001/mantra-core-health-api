@@ -1,8 +1,11 @@
+import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { DiagnosticOrdersRepository } from '../repositories';
-import { DIAGNOSTIC_CATEGORIES } from '../diagnostics.concepts';
+import { PATIENT_CHART_ORDER_CATEGORIES } from '../diagnostics.concepts';
+import { ServiceRequestNotesService } from '../../clinical/services/service-request-notes.service';
+import { analysisCategoryOf } from '../../clinical/service-request-category';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 
 /**
@@ -27,18 +30,23 @@ export class DiagnosticsOrdersService {
    *
    * @param em - Contexto de persistencia.
    * @param ordersRepo - Acceso a órdenes e informes diagnósticos.
+   * @param siteNames - Nombre de la sede sugerida en cada orden.
    * @param logger - Registro estructurado.
+   * @param basedOnNotes - Notas que motivan cada orden (P40).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly ordersRepo: DiagnosticOrdersRepository,
+    private readonly siteNames: SuggestedSiteNamesReader,
     private readonly logger: PinoLogger,
+    private readonly basedOnNotes: ServiceRequestNotesService,
   ) {
     this.logger.setContext(DiagnosticsOrdersService.name);
   }
 
   /**
-   * Órdenes de laboratorio e imagenología del paciente, con sus informes.
+   * Órdenes de laboratorio e imagenología del paciente (y las de análisis
+   * «otro» de C2, P40), con sus informes y las notas que motivan cada una.
    *
    * @param custodianTenantId - Tenant del contexto.
    * @param patientProfileId - Paciente cuyo circuito se lee.
@@ -65,7 +73,7 @@ export class DiagnosticsOrdersService {
         em,
         custodianTenantId,
         patientProfileId,
-        DIAGNOSTIC_CATEGORIES,
+        PATIENT_CHART_ORDER_CATEGORIES,
         over,
       ),
       this.ordersRepo.findReportsByPatient(
@@ -77,19 +85,39 @@ export class DiagnosticsOrdersService {
     ]);
 
     const truncated: string[] = [];
+    const visibleOrders = this.cut(orders, limit, 'orders', truncated);
+    const [suggestedSiteNames, notesByOrder] = await Promise.all([
+      this.siteNames.namesFor(
+        em,
+        visibleOrders.map((row) => row.suggestedPracticeSiteId),
+      ),
+      this.basedOnNotes.noteIdsFor(
+        em,
+        visibleOrders.map((row) => row.id),
+      ),
+    ]);
 
     return {
       patientProfileId,
-      orders: this.cut(orders, limit, 'orders', truncated).map((row) => ({
+      orders: visibleOrders.map((row) => ({
         id: row.id,
         patientProfileId: row.patientProfileId,
         encounterId: row.encounterId,
         formInstanceId: row.formInstanceId,
         codeConceptId: row.codeConceptId,
         categoryConceptId: row.categoryConceptId,
+        category: analysisCategoryOf(row.categoryConceptId),
+        basedOnNoteIds: notesByOrder.get(row.id) ?? [],
         statusConceptId: row.statusConceptId,
         priorityConceptId: row.priorityConceptId,
         requesterProfileId: row.requesterProfileId,
+        performerSelectionConceptId: row.performerSelectionConceptId ?? null,
+        performerPractitionerProfileId:
+          row.performerPractitionerProfileId ?? null,
+        suggestedPracticeSiteId: row.suggestedPracticeSiteId ?? null,
+        suggestedPracticeSiteName: row.suggestedPracticeSiteId
+          ? (suggestedSiteNames.get(row.suggestedPracticeSiteId) ?? null)
+          : null,
         createdAt: row.createdAt,
         previousDiagnosticReportId: row.previousDiagnosticReportId,
         duplicateOverrideReason: row.duplicateOverrideReason,

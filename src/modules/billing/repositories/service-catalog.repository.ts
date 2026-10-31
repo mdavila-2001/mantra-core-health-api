@@ -90,6 +90,21 @@ export class ServiceCatalogRepository {
   }
 
   /**
+   * Los ítems de un lote, para armar listas sin una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ítems pedidos; con la lista vacía no consulta.
+   * @returns Los ítems que existen.
+   */
+  findByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ServiceCatalog[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ServiceCatalog, { id: { $in: [...ids] } });
+  }
+
+  /**
    * Obtiene find by code.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -103,6 +118,32 @@ export class ServiceCatalogRepository {
     code: string,
   ): Promise<ServiceCatalog | null> {
     return em.findOne(ServiceCatalog, { practiceId, code });
+  }
+
+  /**
+   * Cuáles de esos códigos ya existen en el catálogo de la práctica.
+   *
+   * Es la misma clave que `findByCode` (práctica + código), pero para un lote:
+   * la importación del arancel necesita saber cuáles saltar sin hacer una
+   * consulta por código.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica dueña del catálogo.
+   * @param codes - Códigos candidatos.
+   * @returns El subconjunto de `codes` que ya está dado de alta.
+   */
+  async findExistingCodes(
+    em: EntityManager,
+    practiceId: string,
+    codes: readonly string[],
+  ): Promise<Set<string>> {
+    if (codes.length === 0) return new Set();
+    const rows = await em.find(
+      ServiceCatalog,
+      { practiceId, code: { $in: [...codes] } },
+      { fields: ['code'] },
+    );
+    return new Set(rows.map((row) => row.code));
   }
 
   /**

@@ -21,7 +21,7 @@
 | [order_sets](#order_sets) | Define conjuntos reutilizables de órdenes clínicas para apoyar flujos frecuentes de atención con componentes coordinados. | 14 | 7 | 3 | COINCIDE |
 | [prescription_favorites](#prescription_favorites) | Guarda selecciones frecuentes de prescripción para facilitar la captura de órdenes recurrentes por profesionales autorizados. | 16 | 8 | 5 | COINCIDE |
 | [reference_ranges](#reference_ranges) | Conserva rangos de referencia clínicos para contextualizar la interpretación de mediciones y resultados. | 18 | 6 | 0 | COINCIDE |
-| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 19 | 13 | 6 | COINCIDE |
+| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 19 | 13 | 15 | DIVERGE |
 | [virtual_encounters](#virtual_encounters) | Representa encuentros clínicos realizados por canales virtuales y conserva su contexto dentro de la atención del paciente. | 14 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -316,7 +316,7 @@ Representa equipos de atención responsables de coordinar el cuidado de paciente
 |---|---|---|---|
 | `ix_care_teams_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_care_teams_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_care_teams_episode_id` | no | episode_id | Soporta la clave foránea fk_care_teams_episode_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_care_teams_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_teams_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_teams_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_teams_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_care_teams_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_care_teams_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_teams_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_care_teams_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_teams_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_care_teams_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -995,7 +995,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: referrals`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `Referrals` — `src/modules/clinical_ext/entities/referrals.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 12 FK salientes · 1 entrantes · 6 operaciones
+- **Resumen:** 19 columnas · 13 índices · 12 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -1015,11 +1015,11 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | 12 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 13 | `valid_until` | `date` | Opcional | _sin dato_ | coincide |
 | 14 | `responded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:100`)_ | coincide |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:106`)_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:225`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:231`)_ | coincide |
 | 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:124`)_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:249`)_ | coincide |
 
 #### Relaciones
 
@@ -1044,11 +1044,11 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_referrals_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_referrals_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_referrals_source_encounter_id` | no | source_encounter_id | Soporta la clave foránea fk_referrals_source_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «source_encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_referrals_source_encounter_id` | no | source_encounter_id | Soporta la clave foránea fk_referrals_source_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_referring_profile_id` | no | referring_profile_id | Soporta la clave foránea fk_referrals_referring_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_referrals_target_profile_id` | no | target_profile_id | Soporta la clave foránea fk_referrals_target_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «target_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_referrals_target_profile_id` | no | target_profile_id | Soporta la clave foránea fk_referrals_target_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_target_tenant_id` | no | target_tenant_id | Soporta la clave foránea fk_referrals_target_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_referrals_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_referrals_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «specialty_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_referrals_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_referrals_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_service_request_id` | no | service_request_id | Soporta la clave foránea fk_referrals_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_reason_concept_id` | no | reason_concept_id | Soporta la clave foránea fk_referrals_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_priority_concept_id` | no | priority_concept_id | Soporta la clave foránea fk_referrals_priority_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1064,9 +1064,18 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | GET /referrals | LEE | DIRECTA |
 | POST /referrals | CREA | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
+| GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/cancel | ACTUALIZA | POR_TIPO |
+| PATCH /referrals/{id}/cancel | LEE | DIRECTA |
+| PATCH /referrals/{id}/counter-referral | ACTUALIZA | POR_TIPO |
+| PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
 | PATCH /referrals/{id}/respond | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/respond | LEE | DIRECTA |
 | GET /referrals/me | LEE | DIRECTA |
+| POST /consent/encounters/{encounterId}/informed-consent | ACTUALIZA | POR_TIPO |
+| POST /consent/treatment-informed-consents | ACTUALIZA | POR_TIPO |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | ACTUALIZA | POR_TIPO |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 

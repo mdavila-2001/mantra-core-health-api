@@ -3,7 +3,7 @@ import { practiceAccessScope } from './practice-access.service';
 import {
   buildPracticeAccess,
   type AssignmentRow,
-} from '../../../../test/doubles/practice-access.double';
+} from './practice-access.testing';
 
 const DOCTOR = {
   id: 'user-doc',

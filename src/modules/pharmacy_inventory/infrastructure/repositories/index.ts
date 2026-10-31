@@ -14,3 +14,5 @@ export * from './recall-holds.repository';
 export * from './serials.repository';
 export * from './sync.repository';
 export * from './inventory-read.repository';
+export * from './inventory-scope.repository';
+export * from './integration-read.repository';

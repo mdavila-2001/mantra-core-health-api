@@ -9,6 +9,7 @@ import {
 } from '../entities';
 import { COMM } from '../community.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
+import { PractitionerAdmissions } from '../../profiles/entities';
 import { PRAC } from '../../practice/practice.concepts';
 import type { PublicTerritoryFilter } from '../services/public-territory-filter.service';
 
@@ -234,6 +235,8 @@ export interface SitePublicRow {
   readonly practice_type_concept_id: string;
   readonly practice_admin_user_id: string;
   readonly lines: string | null;
+  /** Distrito o zona, aparte de las líneas desde ADR-0028. */
+  readonly district_text: string | null;
   readonly city: string | null;
   readonly postal_code: string | null;
   readonly latitude: string | null;
@@ -340,7 +343,7 @@ export function publicSitesOf(
  * lectura de sedes con sesión.
  */
 function addressText(row: SitePublicRow): string | null {
-  const parts = [row.lines, row.city, row.postal_code]
+  const parts = [row.lines, row.district_text, row.city, row.postal_code]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');
@@ -766,6 +769,11 @@ export class PublicSearchRepository {
    * Se descartan las direcciones cuya vigencia ya venció y se queda la más
    * reciente por sujeto: un profesional que se mudó aparece donde atiende hoy.
    *
+   * **Sólo direcciones de trabajo.** Lo que sale de acá se publica (calle,
+   * distrito y punto), y un sujeto `USER` puede tener su domicilio en
+   * `common.addresses` con su propio id: sin este filtro el buscador público
+   * mostraba dónde vive alguien en vez de dónde atiende.
+   *
    * @param em - Contexto de persistencia o transacción activa.
    * @param ownerIds - Sujetos de los perfiles del lote (`target_id`).
    * @returns Mapa `ownerId → { city, lat, lng }`; sin dirección, no aparece.
@@ -781,17 +789,19 @@ export class PublicSearchRepository {
       {
         owner_id: string;
         lines: string | null;
+        district_text: string | null;
         city: string | null;
         latitude: string | null;
         longitude: string | null;
       }[]
     >(
-      `SELECT DISTINCT ON (owner_id) owner_id, lines, city, latitude, longitude
+      `SELECT DISTINCT ON (owner_id) owner_id, lines, district_text, city, latitude, longitude
            FROM common.addresses
           WHERE owner_id IN (?)
+            AND use_concept_id = ?
             AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
           ORDER BY owner_id, valid_from DESC NULLS LAST, updated_at DESC`,
-      [ownerIds],
+      [ownerIds, CONCEPTS.ADDR_USE_WORK],
       'all',
     );
 
@@ -805,12 +815,19 @@ export class PublicSearchRepository {
         lng !== null &&
         Number.isFinite(lat) &&
         Number.isFinite(lng);
+      // La calle con su distrito: desde ADR-0028 el distrito va en su propia
+      // columna, y la ficha lo sigue mostrando como cuando venía pegado.
+      const address =
+        [row.lines, row.district_text]
+          .map((part) => part?.trim())
+          .filter((part): part is string => Boolean(part))
+          .join(', ') || null;
       if (!geoValid) {
         // Sin punto pero con texto la dirección **sigue sirviendo**: la ficha
         // escribe dónde atiende aunque no pueda dibujar el mapa.
-        if (row.city || row.lines) {
+        if (row.city || address) {
           output.set(row.owner_id, {
-            address: row.lines,
+            address,
             city: row.city,
             lat: null,
             lng: null,
@@ -819,7 +836,7 @@ export class PublicSearchRepository {
         continue;
       }
       output.set(row.owner_id, {
-        address: row.lines,
+        address,
         city: row.city,
         lat,
         lng,
@@ -948,7 +965,7 @@ export class PublicSearchRepository {
               ps.name AS site_name,
               p.type_concept_id AS practice_type_concept_id,
               p.admin_user_id AS practice_admin_user_id,
-              a.lines, a.city, a.postal_code, a.latitude, a.longitude,
+              a.lines, a.district_text, a.city, a.postal_code, a.latitude, a.longitude,
               pal.user_id AS link_user_id,
               pal.status_concept_id AS link_status_concept_id
          FROM practice.practitioner_role_assignments pra
@@ -1086,6 +1103,39 @@ export class PublicSearchRepository {
       output.set(badge.subjectRefId, previous);
     }
     return output;
+  }
+
+  /**
+   * Profesionales con una solicitud de verificación abierta (enviada, en
+   * revisión o con información pedida): los que el sello público muestra «En
+   * verificación». Un padrón sin solicitud NO está acá: nunca se ve «en
+   * verificación» quien no pidió nada.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerIds - Profesionales de la página (`target_id`).
+   * @returns Los ids con solicitud abierta.
+   */
+  async practitionersInReview(
+    em: EntityManager,
+    practitionerIds: string[],
+  ): Promise<Set<string>> {
+    if (practitionerIds.length === 0) return new Set();
+    const rows = await em.find(
+      PractitionerAdmissions,
+      {
+        practitionerProfileId: { $in: practitionerIds },
+        closedAt: null,
+        statusConceptId: {
+          $in: [
+            PROF.ADMISSION_STATUS_SUBMITTED,
+            PROF.ADMISSION_STATUS_IN_REVIEW,
+            PROF.ADMISSION_STATUS_INFO_REQUIRED,
+          ],
+        },
+      },
+      { fields: ['practitionerProfileId'] },
+    );
+    return new Set(rows.map((row) => row.practitionerProfileId));
   }
 
   /** El perfil público de ese slug, o `null` si no existe **o no es público**. */

@@ -1,20 +1,20 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1263 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1289 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1198/1263** entidades tienen descripción de negocio
+> repositorio. **1271/1289** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
-> Este es el catálogo de lo **implementado**. La bóveda describe 1356 entidades en total
-> — la diferencia (93) son entidades diseñadas pero no materializadas aún en
+> Este es el catálogo de lo **implementado**. La bóveda describe 1419 entidades en total
+> — la diferencia (130) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (63 schemas · 1263 entidades)
+## Por schema (63 schemas · 1289 entidades)
 
-### `accounting` (42 entidades, módulo `accounting`)
+### `accounting` (45 entidades, módulo `accounting`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -54,6 +54,9 @@
 | `liability_postings` | `LiabilityPostings` | 10 | `id` | — | liability_postings es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `liability_schedules` | `LiabilitySchedules` | 15 | `id` | ✅ | liability_schedules es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `open_items` | `OpenItems` | 20 | `id` | ✅ | open_items es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
+| `practitioner_simple_accounts` | `PractitionerSimpleAccounts` | 11 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `practitioner_simple_records` | `PractitionerSimpleRecords` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `practitioner_simple_transactions` | `PractitionerSimpleTransactions` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `profit_centers` | `ProfitCenters` | 16 | `id` | ✅ | profit_centers es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `purchases` | `Purchases` | 15 | `id` | ✅ | purchases es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `sales` | `Sales` | 16 | `id` | ✅ | sales es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
@@ -209,7 +212,7 @@
 | `identity_verification_access_log` | `IdentityVerificationAccessLog` | 9 | `id` | — | identity_verification_access_log es un ledger inmutable (append-only) del módulo 10 · audit (dominio Auditoría y Reporting): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `imaging_studies_history` | `ImagingStudiesHistory` | 10 | `history_id` | — | imaging_studies_history es el historial auditable de `imaging_studies` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensi… |
 | `inbound_messages_history` | `InboundMessagesHistory` | 10 | `history_id` | — | inbound_messages_history es el historial auditable de `inbound_messages` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sen… |
-| `informational_materials_history` | `InformationalMaterialsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
+| `informational_materials_history` | `InformationalMaterialsHistory` | 10 | `history_id` | — | Conserva revisiones de materiales informativos de productos farmacéuticos, con número de revisión y operación auditada, para reconstruir cambios en contenido entregado a profesionales de salud. |
 | `insurance_claims_history` | `InsuranceClaimsHistory` | 10 | `history_id` | — | insurance_claims_history es el historial auditable de `insurance_claims` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sen… |
 | `insurance_decision_access_log` | `InsuranceDecisionAccessLog` | 10 | `id` | — | insurance_decision_access_log es un ledger inmutable (append-only) del módulo 10 · audit (dominio Auditoría y Reporting): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `integration_endpoints_history` | `IntegrationEndpointsHistory` | 10 | `history_id` | — | integration_endpoints_history es el historial auditable de `integration_endpoints` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de u… |
@@ -221,7 +224,7 @@
 | `loyalty_memberships_history` | `LoyaltyMembershipsHistory` | 10 | `history_id` | ✅ | loyalty_memberships_history es el historial auditable de `loyalty_memberships` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un da… |
 | `loyalty_programs_history` | `LoyaltyProgramsHistory` | 10 | `history_id` | ✅ | loyalty_programs_history es el historial auditable de `loyalty_programs` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sen… |
 | `marketing_campaigns_history` | `MarketingCampaignsHistory` | 10 | `history_id` | ✅ | marketing_campaigns_history es el historial auditable de `marketing_campaigns` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un da… |
-| `medical_visitors_history` | `MedicalVisitorsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
+| `medical_visitors_history` | `MedicalVisitorsHistory` | 10 | `history_id` | — | Conserva revisiones de los representantes médicos y sus operaciones auditadas, dando trazabilidad a quién gestiona visitas y materiales ante profesionales de salud. |
 | `medication_requests_history` | `MedicationRequestsHistory` | 10 | `history_id` | — | medication_requests_history es el historial auditable de `medication_requests` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un da… |
 | `message_retries_history` | `MessageRetriesHistory` | 10 | `history_id` | — | message_retries_history es el historial auditable de `message_retries` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensi… |
 | `message_templates_history` | `MessageTemplatesHistory` | 10 | `history_id` | — | message_templates_history es el historial auditable de `message_templates` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato s… |
@@ -241,10 +244,10 @@
 | `payment_methods_history` | `PaymentMethodsHistory` | 10 | `history_id` | — | payment_methods_history es el historial auditable de `payment_methods` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensi… |
 | `payment_transactions_history` | `PaymentTransactionsHistory` | 10 | `history_id` | — | payment_transactions_history es el historial auditable de `payment_transactions` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un … |
 | `payouts_history` | `PayoutsHistory` | 10 | `history_id` | — | payouts_history es el historial auditable de `payouts` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
-| `pharma_lab_staff_history` | `PharmaLabStaffHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
-| `pharma_labs_history` | `PharmaLabsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
-| `pharma_products_history` | `PharmaProductsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
-| `pharmacovigilance_reports_history` | `PharmacovigilanceReportsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
+| `pharma_lab_staff_history` | `PharmaLabStaffHistory` | 10 | `history_id` | — | Registra revisiones del personal de laboratorios farmacéuticos con operación y número de revisión, para auditar cambios de roles que intervienen en actividades de promoción médica. |
+| `pharma_labs_history` | `PharmaLabsHistory` | 10 | `history_id` | — | Mantiene el historial versionado de los laboratorios farmacéuticos y la operación que originó cada revisión, para auditar sus datos institucionales. |
+| `pharma_products_history` | `PharmaProductsHistory` | 10 | `history_id` | — | Mantiene revisiones auditables de productos farmacéuticos, vinculadas a su producto y operación, para reconstruir cambios de información del producto. |
+| `pharmacovigilance_reports_history` | `PharmacovigilanceReportsHistory` | 10 | `history_id` | — | Registra revisiones de reportes de farmacovigilancia junto con su operación, para seguir cambios en casos de seguridad asociados a productos farmacéuticos. |
 | `pharmacy_inventory_access_log` | `PharmacyInventoryAccessLog` | 10 | `id` | — | pharmacy_inventory_access_log es un ledger inmutable (append-only) del módulo 10 · audit (dominio Auditoría y Reporting): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `pharmacy_product_prices_history` | `PharmacyProductPricesHistory` | 10 | `history_id` | — | pharmacy_product_prices_history es el historial auditable de `pharmacy_product_prices` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' … |
 | `positions_history` | `PositionsHistory` | 10 | `history_id` | — | positions_history es el historial auditable de `positions` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
@@ -263,7 +266,7 @@
 | `record_automations_history` | `RecordAutomationsHistory` | 10 | `history_id` | ✅ | record_automations_history es el historial auditable de `record_automations` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato… |
 | `referral_programs_history` | `ReferralProgramsHistory` | 10 | `history_id` | ✅ | referral_programs_history es el historial auditable de `referral_programs` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato s… |
 | `referrals_history` | `ReferralsHistory` | 10 | `history_id` | — | referrals_history es el historial auditable de `referrals` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
-| `regulatory_documents_history` | `RegulatoryDocumentsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
+| `regulatory_documents_history` | `RegulatoryDocumentsHistory` | 10 | `history_id` | — | Conserva revisiones de documentos regulatorios y sus operaciones, para reconstruir cambios en documentación de cumplimiento de laboratorios y productos farmacéuticos. |
 | `report_definitions_history` | `ReportDefinitionsHistory` | 10 | `history_id` | — | report_definitions_history es el historial auditable de `report_definitions` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato… |
 | `report_schedules_history` | `ReportSchedulesHistory` | 10 | `history_id` | — | report_schedules_history es el historial auditable de `report_schedules` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sen… |
 | `schedule_templates_history` | `ScheduleTemplatesHistory` | 10 | `history_id` | — | schedule_templates_history es el historial auditable de `schedule_templates` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato… |
@@ -280,7 +283,7 @@
 | `trackable_subjects_history` | `TrackableSubjectsHistory` | 10 | `history_id` | — | trackable_subjects_history es el historial auditable de `trackable_subjects` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato… |
 | `users_history` | `UsersHistory` | 10 | `history_id` | — | users_history es el historial auditable de `users` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
 | `verified_badges_history` | `VerifiedBadgesHistory` | 10 | `history_id` | ✅ | verified_badges_history es el historial auditable de `verified_badges` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensi… |
-| `visit_requests_history` | `VisitRequestsHistory` | 10 | `history_id` | — | _sin descripción verificada en la bóveda_ |
+| `visit_requests_history` | `VisitRequestsHistory` | 10 | `history_id` | — | Conserva revisiones de solicitudes de visita médica y su operación, para auditar cambios en la coordinación entre representantes y profesionales de salud. |
 | `wallets_history` | `WalletsHistory` | 10 | `history_id` | ✅ | wallets_history es el historial auditable de `wallets` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
 | `workflows_history` | `WorkflowsHistory` | 10 | `history_id` | ✅ | workflows_history es el historial auditable de `workflows` dentro del módulo 10 · audit (dominio Auditoría y Reporting). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
 
@@ -339,7 +342,7 @@
 | `workflow_steps` | `WorkflowSteps` | 15 | `id` | ✅ | workflow_steps es un registro central de negocio del módulo 48 · automation (automatización y orquestación multi-agente), dominio Operaciones de Plataforma. |
 | `workflows` | `Workflows` | 14 | `id` | ✅ | workflows es un registro central de negocio del módulo 48 · automation (automatización y orquestación multi-agente), dominio Operaciones de Plataforma. |
 
-### `billing` (22 entidades, módulo `billing`)
+### `billing` (24 entidades, módulo `billing`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -361,9 +364,9 @@
 | `quotations` | `Quotations` | 20 | `id` | ✅ | quotations es la cotización que un profesional le ofrece a un paciente antes de la atención: un servicio del catálogo, un precio ofrecido y un plan de pagos flexible y sin interés —anticipo, frecuencia y cuotas con fecha… |
 | `receivable_payment_allocations` | `ReceivablePaymentAllocations` | 11 | `id` | — | receivable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `reimbursements` | `Reimbursements` | 11 | `id` | ✅ | reimbursements es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
-| `service_catalog` | `ServiceCatalog` | 17 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
-| `siat_simulated_invoices` | `SiatSimulatedInvoices` | 25 | `id` | ✅ | siat_simulated_invoices guarda la factura fiscal SIMULADA (SIAT) que cuelga de una factura real de 17 · billing. No es un documento tributario válido: el CUF, el CUFD y el XML son ficticios y deterministas, y cada fila d… |
-| `siat_simulated_outbox` | `SiatSimulatedOutbox` | 7 | `id` | — | siat_simulated_outbox es la bandeja de salida SIMULADA de las facturas SIAT simuladas: registra a quién *se enviaría* la factura y con qué adjuntos, pero nunca envía nada (el CHECK `ck_siat_simulated_outbox_status` fija … |
+| `service_catalog` | `ServiceCatalog` | 18 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
+| `siat_simulated_invoices` | `SiatSimulatedInvoices` | 26 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `siat_simulated_outbox` | `SiatSimulatedOutbox` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `tax_codes` | `TaxCodes` | 14 | `id` | ✅ | tax_codes es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `tax_periods` | `TaxPeriods` | 13 | `id` | ✅ | tax_periods es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `vendors` | `Vendors` | 14 | `id` | ✅ | vendors es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
@@ -377,14 +380,14 @@
 | `chart_template_assignments` | `ChartTemplateAssignments` | 11 | `id` | ✅ | chart_template_assignments es una tabla de asociación del módulo 15 · chart (dominio Clínico y Diagnóstico): conecta entidades (`specialty_chart_templates`) para representar relaciones muchos-a-muchos. |
 | `clinical_note_headers` | `ClinicalNoteHeaders` | 14 | `id` | ✅ | clinical_note_headers es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `clinical_note_signatures` | `ClinicalNoteSignatures` | 8 | `id` | — | clinical_note_signatures es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
-| `clinical_note_versions` | `ClinicalNoteVersions` | 19 | `id` | — | clinical_note_versions es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
+| `clinical_note_versions` | `ClinicalNoteVersions` | 20 | `id` | — | clinical_note_versions es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `document_record_files` | `DocumentRecordFiles` | 7 | `id` | — | document_record_files es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `document_records` | `DocumentRecords` | 18 | `id` | ✅ | document_records es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `note_release_events` | `NoteReleaseEvents` | 9 | `id` | — | note_release_events es un ledger inmutable (append-only) del módulo 15 · chart (dominio Clínico y Diagnóstico): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `physical_exam_findings` | `PhysicalExamFindings` | 8 | `id` | — | physical_exam_findings es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `specialty_chart_templates` | `SpecialtyChartTemplates` | 13 | `id` | ✅ | specialty_chart_templates guarda reglas y configuración de gobierno del módulo 15 · chart (dominio Clínico y Diagnóstico): parametriza el comportamiento del negocio sin tocar código. |
 
-### `clinical` (23 entidades, módulo `clinical`)
+### `clinical` (25 entidades, módulo `clinical`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -409,7 +412,9 @@
 | `patient_reported_health_statements` | `PatientReportedHealthStatements` | 14 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `prescription_signature_policies` | `PrescriptionSignaturePolicies` | 13 | `id` | ✅ | prescription_signature_policies registra cuándo una receta exige firma, de forma configurable por tenant. |
 | `procedures` | `Procedures` | 28 | `id` | ✅ | procedures es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
-| `service_requests` | `ServiceRequests` | 19 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
+| `received_services` | `ReceivedServices` | 23 | `id` | ✅ | received_services guarda una fila por servicio que el paciente recibió: una intervención médica realizada o una vacuna aplicada. Es lo que la historia del paciente muestra en «Servicios recibidos», y la intervención es u… |
+| `service_request_notes` | `ServiceRequestNotes` | 6 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `service_requests` | `ServiceRequests` | 22 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
 | `social_history` | `SocialHistory` | 16 | `id` | ✅ | social_history es el historial auditable de `social` dentro del módulo 08 · clinical (dominio Clínico y Diagnóstico). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
 
 ### `clinical_ext` (13 entidades, módulo `clinical_ext`)
@@ -427,14 +432,14 @@
 | `order_sets` | `OrderSets` | 14 | `id` | ✅ | order_sets es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 | `prescription_favorites` | `PrescriptionFavorites` | 16 | `id` | ✅ | los favoritos de prescripción de un profesional: la indicación que repite todos los días —«Amoxicilina 500 mg cada 8 h por 7 días»— guardada con un rótulo propio para no volver a tipearla. Es una comodidad de captura, no… |
 | `reference_ranges` | `ReferenceRanges` | 18 | `id` | ✅ | reference_ranges es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
-| `referrals` | `Referrals` | 19 | `id` | ✅ | referrals es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
+| `referrals` | `Referrals` | 33 | `id` | ✅ | referrals es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 | `virtual_encounters` | `VirtualEncounters` | 14 | `id` | ✅ | virtual_encounters es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 
 ### `common` (7 entidades, módulo `common`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `addresses` | `Addresses` | 20 | `id` | ✅ | addresses es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
+| `addresses` | `Addresses` | 24 | `id` | ✅ | addresses es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `contact_points` | `ContactPoints` | 15 | `id` | ✅ | contact_points es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `file_derivatives` | `FileDerivatives` | 7 | `id` | — | file_derivatives es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `file_links` | `FileLinks` | 13 | `id` | ✅ | file_links es una tabla de asociación del módulo 02 · common (dominio Núcleo y Terminología): conecta entidades (`files`) para representar relaciones muchos-a-muchos. |
@@ -447,8 +452,8 @@
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `bookmarks` | `Bookmarks` | 10 | `id` | ✅ | bookmarks es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
-| `chat_auto_replies` | `ChatAutoReplies` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `comment_media` | `CommentMedia` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `chat_auto_replies` | `ChatAutoReplies` | 15 | `id` | ✅ | Guarda la respuesta automática asociada a un perfil público para atender mensajes entrantes y orientar la interacción en la comunidad de profesionales de salud. |
+| `comment_media` | `CommentMedia` | 8 | `id` | — | Vincula archivos multimedia con comentarios de la comunidad, para adjuntar evidencia o material contextual a una conversación sin mezclarlo con la historia clínica. |
 | `comments` | `Comments` | 20 | `id` | ✅ | comments es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `content_hashtags` | `ContentHashtags` | 9 | `id` | ✅ | content_hashtags es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `content_reports` | `ContentReports` | 11 | `id` | — | content_reports es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
@@ -468,7 +473,7 @@
 | `moderation_decisions` | `ModerationDecisions` | 13 | `id` | ✅ | moderation_decisions es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `moderation_queue` | `ModerationQueue` | 16 | `id` | ✅ | moderation_queue es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `moderation_strikes` | `ModerationStrikes` | 12 | `id` | ✅ | moderation_strikes es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
-| `party_ratings` | `PartyRatings` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `party_ratings` | `PartyRatings` | 17 | `id` | ✅ | Registra valoraciones entre pacientes, profesionales y prácticas; el vínculo opcional con un encuentro verificado permite respaldar reputación con una interacción asistencial real. |
 | `poll_options` | `PollOptions` | 10 | `id` | ✅ | poll_options es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `poll_votes` | `PollVotes` | 9 | `id` | ✅ | poll_votes es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `polls` | `Polls` | 12 | `id` | ✅ | polls es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
@@ -501,7 +506,7 @@
 | `privacy_restrictions` | `PrivacyRestrictions` | 16 | `id` | ✅ | privacy_restrictions es un registro central de negocio del módulo 07 · consent (directivas de privacidad, bases legales y evidencia de consentimiento), dominio Identidad y Seguridad. |
 | `processing_legal_bases` | `ProcessingLegalBases` | 16 | `id` | ✅ | processing_legal_bases es un registro central de negocio del módulo 07 · consent (directivas de privacidad, bases legales y evidencia de consentimiento), dominio Identidad y Seguridad. |
 | `processing_purposes` | `ProcessingPurposes` | 13 | `id` | ✅ | processing_purposes es un registro central de negocio del módulo 07 · consent (directivas de privacidad, bases legales y evidencia de consentimiento), dominio Identidad y Seguridad. |
-| `treatment_informed_consents` | `TreatmentInformedConsents` | 17 | `id` | ✅ | treatment_informed_consents es un registro central de negocio del módulo 07 · consent (directivas de privacidad, bases legales y evidencia de consentimiento), dominio Identidad y Seguridad. |
+| `treatment_informed_consents` | `TreatmentInformedConsents` | 45 | `id` | ✅ | treatment_informed_consents es un registro central de negocio del módulo 07 · consent (directivas de privacidad, bases legales y evidencia de consentimiento), dominio Identidad y Seguridad. |
 
 ### `crm` (32 entidades, módulo `crm`)
 
@@ -565,20 +570,25 @@
 | `schema_migration_jobs` | `SchemaMigrationJobs` | 11 | `id` | — | schema_migration_jobs registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 62 · cross_store_consistency (dominio Datos y NoSQL): responde a '¿qué está pasando ahora mismo?'. |
 | `store_consistency_slos` | `StoreConsistencySlos` | 8 | `id` | — | store_consistency_slos es un registro central de negocio del módulo 62 · cross_store_consistency (proyección outbox, reconciliación y propagación de borrado), dominio Datos y NoSQL. |
 
-### `data_catalog` (8 entidades, módulo `data_catalog`)
+### `data_catalog` (13 entidades, módulo `data_catalog`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `catalog_annotation_revisions` | `CatalogAnnotationRevisions` | 10 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `catalog_annotations` | `CatalogAnnotations` | 34 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `catalog_change_events` | `CatalogChangeEvents` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `catalog_columns` | `CatalogColumns` | 24 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `catalog_evidence_items` | `CatalogEvidenceItems` | 9 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `catalog_objects` | `CatalogObjects` | 22 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `catalog_review_decisions` | `CatalogReviewDecisions` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `catalog_scan_runs` | `CatalogScanRuns` | 34 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_annotation_revisions` | `CatalogAnnotationRevisions` | 10 | `id` | — | Conserva versiones de las anotaciones del catálogo de datos de salud, de modo que puedan revisarse los cambios en definiciones y contexto de los activos catalogados. |
+| `catalog_annotations` | `CatalogAnnotations` | 34 | `id` | ✅ | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. |
+| `catalog_change_events` | `CatalogChangeEvents` | 8 | `id` | — | Registra cambios detectados en objetos y columnas entre escaneos del catálogo, lo que permite seguir la evolución de los activos de datos de salud. |
+| `catalog_columns` | `CatalogColumns` | 24 | `id` | ✅ | Describe las columnas encontradas en los objetos de datos de salud durante un escaneo, con metadatos para su búsqueda, interpretación y gobernanza. |
+| `catalog_evidence_items` | `CatalogEvidenceItems` | 9 | `id` | — | Asocia evidencia a objetos y columnas del catálogo para respaldar la revisión de su significado, procedencia y uso en datos de salud. |
+| `catalog_objects` | `CatalogObjects` | 22 | `id` | ✅ | Identifica objetos de datos relevados por el catálogo y el escaneo que los observó, facilitando localizar y gobernar los activos que sostienen la plataforma de salud. |
+| `catalog_operation_impacts` | `CatalogOperationImpacts` | 14 | `id` | ✅ | Relaciona cada operación con los objetos —y, si corresponde, las columnas— del catálogo que toca y con qué acceso (`LEE`, `ESCRIBE` o `BORRA`), con la confianza de esa inferencia y el camino de llamadas que la respalda. |
+| `catalog_operations` | `CatalogOperations` | 21 | `id` | ✅ | Guarda cada operación HTTP que el inventario de la API declara (método, ruta, módulo, si es pública, roles exigidos, nivel de riesgo y estado de observación), para saber qué operaciones existen antes de relacionarlas con… |
+| `catalog_process_step_operations` | `CatalogProcessStepOperations` | 9 | `id` | ✅ | Tabla puente entre etapas y operaciones: una etapa puede citar varias operaciones (205 de las 732 etapas del inventario), y el `ordinal` conserva el orden en que el inventario las cita. |
+| `catalog_process_steps` | `CatalogProcessSteps` | 10 | `id` | ✅ | Guarda las etapas ordenadas de cada proceso del inventario, con su código y su nombre, para recorrer un proceso paso a paso. |
+| `catalog_processes` | `CatalogProcesses` | 12 | `id` | ✅ | Guarda los procesos que agrupan operaciones del inventario de la API (tipo `MODULO` o `CRITICO`), con su código estable, su nombre y su propósito. |
+| `catalog_review_decisions` | `CatalogReviewDecisions` | 7 | `id` | — | Mantiene decisiones de revisión sobre anotaciones del catálogo, dejando trazabilidad de la validación de definiciones de activos de datos de salud. |
+| `catalog_scan_runs` | `CatalogScanRuns` | 34 | `id` | ✅ | Registra cada ejecución de relevamiento del catálogo para identificar cuándo se descubrieron objetos y columnas de datos de salud y comparar cambios entre escaneos. |
 
-### `delegated_access` (7 entidades, módulo `delegated_access`)
+### `delegated_access` (9 entidades, módulo `delegated_access`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -589,6 +599,8 @@
 | `delegation_events` | `DelegationEvents` | 10 | `id` | — | delegation_events registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 29 · delegated_access (dominio Identidad y Seguridad): responde a '¿qué está pasando ahora mismo?'. |
 | `organization_user_assignments` | `OrganizationUserAssignments` | 19 | `id` | ✅ | organization_user_assignments es una tabla de asociación del módulo 29 · delegated_access (dominio Identidad y Seguridad): conecta entidades (`practitioner_delegate_assignments`) para representar relaciones muchos-a-much… |
 | `practitioner_delegate_assignments` | `PractitionerDelegateAssignments` | 18 | `id` | ✅ | practitioner_delegate_assignments es una tabla de asociación del módulo 29 · delegated_access (dominio Identidad y Seguridad): conecta entidades (`delegated_access_grants`, `delegated_access_approval_requests`, `delegati… |
+| `shared_access_link_uses` | `SharedAccessLinkUses` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `shared_access_links` | `SharedAccessLinks` | 20 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 
 ### `diagnostic_units` (10 entidades, módulo `diagnostic_units`)
 
@@ -646,7 +658,7 @@
 | `specimen_rejection_events` | `SpecimenRejectionEvents` | 9 | `id` | — | specimen_rejection_events registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 20 · diagnostics (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
 | `specimens` | `Specimens` | 21 | `id` | ✅ | specimens es un registro central de negocio del módulo 20 · diagnostics (laboratorio, imagenología médica y media clínica), dominio Clínico y Diagnóstico. |
 
-### `directory` (7 entidades, módulo `directory`)
+### `directory` (9 entidades, módulo `directory`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -654,6 +666,8 @@
 | `branches` | `Branches` | 16 | `id` | ✅ | branches es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
 | `tenant_affiliation_documents` | `TenantAffiliationDocuments` | 23 | `id` | ✅ | tenant_affiliation_documents es un wrap gobernado sobre el archivo (`common.files`) del módulo 04 · directory (dominio Núcleo y Terminología): envuelve cada documento legal de afiliación de la empresa y le agrega tipo de… |
 | `tenant_legal_representatives` | `TenantLegalRepresentatives` | 16 | `id` | ✅ | tenant_legal_representatives es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
+| `tenant_medical_facilities` | `TenantMedicalFacilities` | 16 | `id` | ✅ | tenant_medical_facilities guarda, una fila por organización, lo que un hospital, clínica, consultorio, centro de enfermería u otro establecimiento de salud declara al darse de alta además de lo que ya pide cualquier empr… |
+| `tenant_medical_facility_sites` | `TenantMedicalFacilitySites` | 14 | `id` | ✅ | tenant_medical_facility_sites guarda la casa central y las sucursales (de cero a cincuenta) que una organización médica declara al darse de alta: nombre, líneas de dirección y, si las puso en el mapa, latitud y longitud. |
 | `tenant_memberships` | `TenantMemberships` | 15 | `id` | ✅ | tenant_memberships es una tabla de asociación del módulo 04 · directory (dominio Núcleo y Terminología): conecta entidades (`branch_memberships`, `tenants`) para representar relaciones muchos-a-muchos. |
 | `tenant_web_configs` | `TenantWebConfigs` | 18 | `id` | ✅ | tenant_web_configs guarda reglas y configuración de gobierno del módulo 04 · directory (dominio Núcleo y Terminología): parametriza el comportamiento del negocio sin tocar código. |
 | `tenants` | `Tenants` | 19 | `id` | ✅ | tenants es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
@@ -916,7 +930,7 @@
 | `contract_webhook_subscriptions` | `ContractWebhookSubscriptions` | 14 | `id` | ✅ | contract_webhook_subscriptions es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_auth_profiles` | `IntegrationAuthProfiles` | 17 | `id` | ✅ | integration_auth_profiles es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_contract_versions` | `IntegrationContractVersions` | 13 | `id` | — | integration_contract_versions es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
-| `integration_contracts` | `IntegrationContracts` | 14 | `id` | ✅ | integration_contracts es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
+| `integration_contracts` | `IntegrationContracts` | 15 | `id` | ✅ | integration_contracts es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_exchange_attempts` | `IntegrationExchangeAttempts` | 13 | `id` | — | integration_exchange_attempts es un ledger inmutable (append-only) del módulo 31 · integration_contracts (dominio Integraciones y Contratos): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `integration_exchange_records` | `IntegrationExchangeRecords` | 16 | `id` | — | integration_exchange_records es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_idempotency_records` | `IntegrationIdempotencyRecords` | 10 | `id` | — | integration_idempotency_records es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
@@ -984,8 +998,8 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `group_members` | `MedicalGroupMembers` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `groups` | `MedicalGroups` | 22 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `group_members` | `MedicalGroupMembers` | 15 | `id` | ✅ | Relaciona perfiles de profesionales o integrantes con un grupo médico, permitiendo representar equipos asistenciales y su composición. |
+| `groups` | `MedicalGroups` | 22 | `id` | ✅ | Representa grupos médicos para organizar equipos de profesionales y vincular a sus integrantes con una estructura de atención. |
 
 ### `messaging` (22 entidades, módulo `messaging`)
 
@@ -1109,51 +1123,54 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `doctor_visit_blocks` | `DoctorVisitBlocks` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `doctor_visit_policies` | `DoctorVisitPolicies` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `doctor_visit_windows` | `DoctorVisitWindows` | 14 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `informational_materials` | `InformationalMaterials` | 21 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `material_approvals` | `MaterialApprovals` | 9 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `material_assets` | `MaterialAssets` | 9 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `medical_visitor_products` | `MedicalVisitorProducts` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `medical_visitor_specialties` | `MedicalVisitorSpecialties` | 5 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `medical_visitors` | `MedicalVisitors` | 27 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `pharma_cost_allocations` | `PharmaCostAllocations` | 18 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `pharma_lab_link_events` | `PharmaLabLinkEvents` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `pharma_lab_notices` | `PharmaLabNotices` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `pharma_lab_staff` | `PharmaLabStaff` | 19 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `pharma_labs` | `PharmaLabs` | 16 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `pharma_products` | `PharmaProducts` | 23 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `pharmacovigilance_actions` | `PharmacovigilanceActions` | 12 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `pharmacovigilance_reports` | `PharmacovigilanceReports` | 23 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `regulatory_document_access_log` | `RegulatoryDocumentAccessLog` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `regulatory_document_versions` | `RegulatoryDocumentVersions` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `regulatory_documents` | `RegulatoryDocuments` | 20 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `visit_ratings` | `VisitRatings` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `visit_record_materials` | `VisitRecordMaterials` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `visit_records` | `VisitRecords` | 22 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `visit_request_events` | `VisitRequestEvents` | 11 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `visit_request_topics` | `VisitRequestTopics` | 6 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `visit_requests` | `VisitRequests` | 23 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `visit_survey_answers` | `VisitSurveyAnswers` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `visit_survey_questions` | `VisitSurveyQuestions` | 9 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `visit_survey_responses` | `VisitSurveyResponses` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `visit_surveys` | `VisitSurveys` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `visitor_post_submissions` | `VisitorPostSubmissions` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `doctor_visit_blocks` | `DoctorVisitBlocks` | 12 | `id` | ✅ | Bloquea períodos en que un profesional no recibe visitas de representantes, coordinando el acceso de la industria farmacéutica a la agenda médica. |
+| `doctor_visit_policies` | `DoctorVisitPolicies` | 17 | `id` | ✅ | Define reglas de disponibilidad y confirmación de visitas de representantes para cada profesional, respetando su organización y zona horaria. |
+| `doctor_visit_windows` | `DoctorVisitWindows` | 14 | `id` | ✅ | Detalla días y horarios permitidos por una política de visitas médicas para coordinar reuniones de representantes con profesionales de salud. |
+| `informational_materials` | `InformationalMaterials` | 21 | `id` | ✅ | Registra materiales informativos de un laboratorio y producto, clasificados por especialidad, para su uso controlado en actividades de información médica. |
+| `material_approvals` | `MaterialApprovals` | 9 | `id` | — | Registra la aprobación de una versión de material informativo y el personal revisor, permitiendo controlar qué contenido farmacéutico puede circular. |
+| `material_assets` | `MaterialAssets` | 9 | `id` | — | Almacena referencias y tipos de archivos asociados a materiales informativos farmacéuticos para distribuir piezas aprobadas. |
+| `medical_visitor_products` | `MedicalVisitorProducts` | 7 | `id` | — | Asocia productos autorizados a cada representante médico y delimita su vigencia, controlando qué productos puede presentar ante profesionales. |
+| `medical_visitor_specialties` | `MedicalVisitorSpecialties` | 5 | `id` | — | Asocia especialidades médicas con representantes para ajustar la comunicación de productos a las áreas clínicas que atienden. |
+| `medical_visitors` | `MedicalVisitors` | 27 | `id` | ✅ | Identifica representantes médicos y los vincula con su laboratorio, usuario y registro de personal para gestionar visitas profesionales. |
+| `pharma_cost_allocations` | `PharmaCostAllocations` | 18 | `id` | ✅ | Asigna importes contables a laboratorio, producto y representante, para rastrear costos de actividades de promoción farmacéutica. |
+| `pharma_lab_link_events` | `PharmaLabLinkEvents` | 13 | `id` | — | Registra eventos de vinculación entre laboratorio, personal, representante y usuario, dejando trazabilidad de la gestión de acceso a la red farmacéutica. |
+| `pharma_lab_notices` | `PharmaLabNotices` | 15 | `id` | ✅ | Guarda avisos dirigidos a usuarios de un laboratorio con plantilla y asunto, para comunicar información operativa de actividades farmacéuticas. |
+| `pharma_lab_staff` | `PharmaLabStaff` | 19 | `id` | ✅ | Relaciona usuarios con laboratorios y roles de personal, definiendo quién puede gestionar productos, documentos y visitas farmacéuticas. |
+| `pharma_labs` | `PharmaLabs` | 16 | `id` | ✅ | Representa laboratorios farmacéuticos y su tipo institucional para organizar productos, personal, documentos regulatorios y vínculos con profesionales. |
+| `pharma_products` | `PharmaProducts` | 23 | `id` | ✅ | Registra productos de cada laboratorio con nombre comercial y principio activo, conectándolos con información médica, visitas y farmacovigilancia. |
+| `pharmacovigilance_actions` | `PharmacovigilanceActions` | 12 | `id` | — | Registra acciones y transiciones de estado sobre reportes de farmacovigilancia para dar seguimiento a casos de seguridad de productos. |
+| `pharmacovigilance_reports` | `PharmacovigilanceReports` | 23 | `id` | ✅ | Documenta casos de farmacovigilancia vinculados a laboratorio y producto, incluyendo código de caso y lote para investigar eventos de seguridad. |
+| `regulatory_document_access_log` | `RegulatoryDocumentAccessLog` | 7 | `id` | — | Audita accesos a documentos regulatorios y versiones concretas, conservando el tipo de acceso y el usuario que consultó documentación de cumplimiento farmacéutico. |
+| `regulatory_document_versions` | `RegulatoryDocumentVersions` | 15 | `id` | ✅ | Mantiene las versiones y referencias de almacenamiento de cada documento regulatorio para preservar la documentación vigente e histórica de productos y laboratorios. |
+| `regulatory_documents` | `RegulatoryDocuments` | 20 | `id` | ✅ | Organiza documentos regulatorios de laboratorios, productos y representantes para respaldar cumplimiento y consulta de información farmacéutica. |
+| `visit_ratings` | `VisitRatings` | 17 | `id` | ✅ | Recoge valoraciones de visitas médicas vinculadas a su registro y profesional, para monitorear la calidad de la interacción entre representantes y médicos. |
+| `visit_record_materials` | `VisitRecordMaterials` | 7 | `id` | — | Relaciona una visita registrada con cada material informativo entregado y su versión, haciendo trazable la información farmacéutica presentada al profesional. |
+| `visit_records` | `VisitRecords` | 22 | `id` | ✅ | Documenta visitas efectivamente realizadas, vinculándolas con la solicitud, el representante, el profesional y el laboratorio para dejar constancia de la interacción médica. |
+| `visit_request_events` | `VisitRequestEvents` | 11 | `id` | — | Registra acciones y cambios de estado de solicitudes de visita, dando trazabilidad a su coordinación entre representantes y profesionales. |
+| `visit_request_topics` | `VisitRequestTopics` | 6 | `id` | — | Asocia temas y productos farmacéuticos a una solicitud de visita para anticipar el contenido de la conversación con el profesional de salud. |
+| `visit_requests` | `VisitRequests` | 23 | `id` | ✅ | Gestiona solicitudes de representantes a profesionales de salud, vinculando laboratorio, representante y médico para coordinar visitas. |
+| `visit_survey_answers` | `VisitSurveyAnswers` | 8 | `id` | — | Guarda respuestas tipadas a preguntas de encuestas de visitas, vinculadas a la respuesta y pregunta correspondientes, para evaluar interacciones de información médica. |
+| `visit_survey_questions` | `VisitSurveyQuestions` | 9 | `id` | — | Define preguntas, orden y tipo de respuesta de encuestas asociadas a visitas farmacéuticas, estandarizando la evaluación de esas interacciones. |
+| `visit_survey_responses` | `VisitSurveyResponses` | 12 | `id` | ✅ | Registra respuestas de profesionales a encuestas vinculadas a visitas realizadas, permitiendo evaluar la actividad informativa del laboratorio. |
+| `visit_surveys` | `VisitSurveys` | 17 | `id` | ✅ | Define encuestas de un laboratorio y, cuando corresponde, de un producto y representante, para medir la experiencia de visitas médicas. |
+| `visitor_post_submissions` | `VisitorPostSubmissions` | 15 | `id` | ✅ | Registra publicaciones propuestas por representantes y vinculadas a su laboratorio y materiales informativos, para someter comunicación farmacéutica a gestión antes de difundirla. |
 
-### `pharmacy` (9 entidades, módulo `pharmacy`)
+### `pharmacy` (12 entidades, módulo `pharmacy`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `pharmacies` | `Pharmacies` | 16 | `id` | ✅ | pharmacies es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacies` | `Pharmacies` | 17 | `id` | ✅ | pharmacies es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 | `pharmacy_external_product_mappings` | `PharmacyExternalProductMappings` | 12 | `id` | ✅ | pharmacy_external_product_mappings es una tabla de asociación del módulo 24 · pharmacy (dominio Farmacia): conecta entidades (`pharmacy_integration_connections`, `pharmacy_products`) para representar relaciones muchos-a-… |
 | `pharmacy_integration_connections` | `PharmacyIntegrationConnections` | 17 | `id` | ✅ | pharmacy_integration_connections es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 | `pharmacy_licenses` | `PharmacyLicenses` | 16 | `id` | ✅ | pharmacy_licenses es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacy_on_call_shifts` | `PharmacyOnCallShifts` | 11 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `pharmacy_price_lists` | `PharmacyPriceLists` | 16 | `id` | ✅ | pharmacy_price_lists es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacy_product_categories` | `PharmacyProductCategories` | 9 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `pharmacy_product_identifiers` | `PharmacyProductIdentifiers` | 10 | `id` | — | pharmacy_product_identifiers es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacy_product_images` | `PharmacyProductImages` | 6 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `pharmacy_product_prices` | `PharmacyProductPrices` | 14 | `id` | — | pharmacy_product_prices es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
-| `pharmacy_products` | `PharmacyProducts` | 21 | `id` | ✅ | pharmacy_products es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
-| `pharmacy_sites` | `PharmacySites` | 16 | `id` | ✅ | pharmacy_sites es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacy_products` | `PharmacyProducts` | 26 | `id` | ✅ | pharmacy_products es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacy_sites` | `PharmacySites` | 17 | `id` | ✅ | pharmacy_sites es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 
 ### `pharmacy_inventory` (21 entidades, módulo `pharmacy_inventory`)
 
@@ -1255,12 +1272,12 @@
 |---|---|---:|---|:---:|---|
 | `care_spaces` | `CareSpaces` | 15 | `id` | ✅ | care_spaces es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `clinical_units` | `ClinicalUnits` | 14 | `id` | ✅ | clinical_units es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
-| `healthcare_services` | `HealthcareServices` | 15 | `id` | ✅ | healthcare_services es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
+| `healthcare_services` | `HealthcareServices` | 16 | `id` | ✅ | healthcare_services es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `inventory_items` | `InventoryItems` | 15 | `id` | ✅ | inventory_items es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `inventory_movements` | `InventoryMovements` | 9 | `id` | — | inventory_movements es un ledger inmutable (append-only) del módulo 14 · practice (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `practice_accreditations` | `PracticeAccreditations` | 16 | `id` | ✅ | practice_accreditations es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practice_settings` | `PracticeSettings` | 10 | `id` | ✅ | practice_settings guarda reglas y configuración de gobierno del módulo 14 · practice (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
-| `practice_sites` | `PracticeSites` | 18 | `id` | ✅ | practice_sites es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
+| `practice_sites` | `PracticeSites` | 19 | `id` | ✅ | practice_sites es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practices` | `Practices` | 15 | `id` | ✅ | practices es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practitioner_role_assignments` | `PractitionerRoleAssignments` | 20 | `id` | ✅ | practitioner_role_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`) para representar r… |
 | `practitioner_support_assignments` | `PractitionerSupportAssignments` | 13 | `id` | ✅ | practitioner_support_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_role_assignments`) para representar relaciones muchos-a-muchos. |
@@ -1307,26 +1324,31 @@
 | `surgical_safety_items` | `SurgicalSafetyItems` | 15 | `id` | ✅ | surgical_safety_items es un registro central de negocio del módulo 53 · procedures_perioperative (intervenciones médicas, cirugía y cuidado perioperatorio), dominio Clínico y Diagnóstico. |
 | `surgical_safety_responses` | `SurgicalSafetyResponses` | 11 | `id` | — | surgical_safety_responses es un registro central de negocio del módulo 53 · procedures_perioperative (intervenciones médicas, cirugía y cuidado perioperatorio), dominio Clínico y Diagnóstico. |
 
-### `profiles` (19 entidades, módulo `profiles`)
+### `profiles` (24 entidades, módulo `profiles`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `administrator_profiles` | `AdministratorProfiles` | 8 | `profile_id` | ✅ | administrator_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `admission_requirements` | `AdmissionRequirements` | 21 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `emergency_staff_profiles` | `EmergencyStaffProfiles` | 8 | `profile_id` | ✅ | emergency_staff_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `health_practitioner_profiles` | `HealthPractitionerProfiles` | 17 | `profile_id` | ✅ | health_practitioner_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `insurance_representative_profiles` | `InsuranceRepresentativeProfiles` | 8 | `profile_id` | ✅ | insurance_representative_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 15 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 19 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `patient_identity_links` | `PatientIdentityLinks` | 15 | `id` | ✅ | patient_identity_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`patient_profiles`) para representar relaciones muchos-a-muchos. |
 | `patient_merge_events` | `PatientMergeEvents` | 9 | `id` | — | patient_merge_events registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 05 · profiles (dominio Núcleo y Terminología): responde a '¿qué está pasando ahora mismo?'. |
 | `patient_portal_proxies` | `PatientPortalProxies` | 14 | `id` | ✅ | patient_portal_proxies es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `patient_primary_practitioners` | `PatientPrimaryPractitioners` | 10 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `patient_profiles` | `PatientProfiles` | 13 | `profile_id` | ✅ | patient_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `person_account_links` | `PersonAccountLinks` | 13 | `id` | ✅ | person_account_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`persons`) para representar relaciones muchos-a-muchos. |
 | `person_profiles` | `PersonProfiles` | 9 | `id` | ✅ | person_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `persons` | `Persons` | 27 | `id` | ✅ | persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `practitioner_admission_events` | `PractitionerAdmissionEvents` | 15 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `practitioner_admission_reviews` | `PractitionerAdmissionReviews` | 21 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `practitioner_admissions` | `PractitionerAdmissions` | 26 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `practitioner_affiliations` | `PractitionerAffiliations` | 17 | `id` | ✅ | practitioner_affiliations es el historial laboral del profesional dentro del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. Guarda dónde ejerció: la institución, el c… |
 | `practitioner_languages` | `PractitionerLanguages` | 10 | `id` | ✅ | practitioner_languages es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `practitioner_specialties` | `PractitionerSpecialties` | 16 | `id` | ✅ | practitioner_specialties es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `professional_credentials` | `ProfessionalCredentials` | 23 | `id` | ✅ | professional_credentials es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `practitioner_specialties` | `PractitionerSpecialties` | 17 | `id` | ✅ | practitioner_specialties es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `professional_credentials` | `ProfessionalCredentials` | 24 | `id` | ✅ | professional_credentials es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `provider_operator_profiles` | `ProviderOperatorProfiles` | 8 | `profile_id` | ✅ | provider_operator_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `related_persons` | `RelatedPersons` | 12 | `id` | ✅ | related_persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `secretary_profiles` | `SecretaryProfiles` | 7 | `profile_id` | ✅ | secretary_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
@@ -1351,10 +1373,10 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `execution_plans` | `ExecutionPlans` | 31 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `execution_targets` | `ExecutionTargets` | 20 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `plan_approvals` | `PlanApprovals` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `plan_events` | `PlanEvents` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `execution_plans` | `ExecutionPlans` | 31 | `id` | ✅ | Agrupa objetivos de ejecución en planes de control de calidad del producto de salud y permite asociar aprobaciones y eventos del plan. |
+| `execution_targets` | `ExecutionTargets` | 20 | `id` | ✅ | Define objetivos verificables para los planes de ejecución de calidad, vinculados a los componentes y flujos de la plataforma sanitaria. |
+| `plan_approvals` | `PlanApprovals` | 8 | `id` | — | Registra aprobaciones de planes de ejecución de calidad, aportando control de revisión antes de correr verificaciones de la plataforma de salud. |
+| `plan_events` | `PlanEvents` | 7 | `id` | — | Deja una secuencia de eventos de los planes de calidad para auditar cambios y resultados durante la verificación de la plataforma sanitaria. |
 
 ### `qa_lab` (13 entidades, módulo `qa_lab`)
 
@@ -1409,12 +1431,13 @@
 | `report_subscriptions` | `ReportSubscriptions` | 10 | `id` | ✅ | report_subscriptions es un registro central de negocio del módulo 39 · reporting (reporting, dashboards y distribución programada), dominio Auditoría y Reporting. |
 | `report_versions` | `ReportVersions` | 12 | `id` | ✅ | report_versions es un registro central de negocio del módulo 39 · reporting (reporting, dashboards y distribución programada), dominio Auditoría y Reporting. |
 
-### `scheduling` (18 entidades, módulo `scheduling`)
+### `scheduling` (19 entidades, módulo `scheduling`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `appointment_bookings` | `AppointmentBookings` | 24 | `id` | ✅ | appointment_bookings registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
-| `appointment_payment_states` | `AppointmentPaymentStates` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `appointment_payment_receipts` | `AppointmentPaymentReceipts` | 18 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `appointment_payment_states` | `AppointmentPaymentStates` | 13 | `id` | ✅ | Guarda el estado de pago asociado a una reserva de turno, permitiendo consultar la situación financiera de la cita sin perder su vínculo con la agenda asistencial. |
 | `appointment_reminders` | `AppointmentReminders` | 13 | `id` | ✅ | appointment_reminders es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `availability_exceptions` | `AvailabilityExceptions` | 12 | `id` | ✅ | availability_exceptions es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `availability_slots` | `AvailabilitySlots` | 13 | `id` | ✅ | availability_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
@@ -1427,8 +1450,8 @@
 | `practitioner_schedules` | `PractitionerSchedules` | 16 | `id` | ✅ | practitioner_schedules es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `practitioner_service_offerings` | `PractitionerServiceOfferings` | 16 | `id` | ✅ | declara cómo ofrece un profesional un servicio del catálogo de su práctica: cuánto tarda como mínimo y como máximo, cuánto necesita antes y después, si el paciente puede reservarlo por su cuenta y si cada reserva requier… |
 | `schedulable_resources` | `SchedulableResources` | 15 | `id` | ✅ | schedulable_resources es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `schedule_rules` | `ScheduleRules` | 16 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
-| `schedule_templates` | `ScheduleTemplates` | 15 | `id` | ✅ | schedule_templates guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
+| `schedule_rules` | `ScheduleRules` | 18 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
+| `schedule_templates` | `ScheduleTemplates` | 16 | `id` | ✅ | schedule_templates guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `slot_holds` | `SlotHolds` | 13 | `id` | ✅ | slot_holds registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
 | `waitlist_entries` | `WaitlistEntries` | 15 | `id` | ✅ | waitlist_entries es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 
@@ -1436,13 +1459,13 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `survey_answers` | `SurveyAnswers` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `survey_assignments` | `SurveyAssignments` | 11 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `survey_invitations` | `SurveyInvitations` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `survey_questions` | `SurveyQuestions` | 14 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `survey_responses` | `SurveyResponses` | 11 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `survey_templates` | `SurveyTemplates` | 11 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
-| `survey_versions` | `SurveyVersions` | 13 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `survey_answers` | `SurveyAnswers` | 12 | `id` | ✅ | Conserva respuestas por pregunta para permitir análisis de experiencia sin mezclar resultados con reseñas públicas. |
+| `survey_assignments` | `SurveyAssignments` | 11 | `id` | ✅ | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. |
+| `survey_invitations` | `SurveyInvitations` | 18 | `id` | ✅ | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. |
+| `survey_questions` | `SurveyQuestions` | 14 | `id` | ✅ | Define preguntas que componen cada versión de un cuestionario post-visita. |
+| `survey_responses` | `SurveyResponses` | 11 | `id` | ✅ | Registra respuestas privadas de pacientes a encuestas post-visita sin alimentar la calificación pública de prestadores. |
+| `survey_templates` | `SurveyTemplates` | 13 | `id` | ✅ | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. |
+| `survey_versions` | `SurveyVersions` | 14 | `id` | ✅ | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. |
 
 ### `system_context` (9 entidades, módulo `system_context`)
 
@@ -1512,7 +1535,7 @@
 | `user_activity_events` | `UserActivityEvents` | 19 | `id` | — | user_activity_events registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 28 · telemetry (dominio Operaciones de Plataforma): responde a '¿qué está pasando ahora mismo?'. |
 | `web_vitals` | `WebVitals` | 13 | `id` | — | web_vitals es un registro central de negocio del módulo 28 · telemetry (actividad de usuario, tracking consciente de consentimiento y analítica), dominio Operaciones de Plataforma. |
 
-### `terminology` (15 entidades, módulo `terminology`)
+### `terminology` (16 entidades, módulo `terminology`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -1523,7 +1546,8 @@
 | `concept_designations` | `ConceptDesignations` | 11 | `id` | ✅ | concept_designations forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y está… |
 | `concept_maps` | `ConceptMaps` | 12 | `id` | ✅ | concept_maps forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y estándares (… |
 | `concept_properties` | `ConceptProperties` | 10 | `id` | ✅ | concept_properties forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y estánd… |
-| `concept_relationships` | `ConceptRelationships` | 10 | `id` | ✅ | concept_relationships forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y est… |
+| `concept_relationship_evidence` | `ConceptRelationshipEvidence` | 23 | `id` | ✅ | concept_relationship_evidence guarda una fila por afirmación de una fuente que respalda una arista de concept_relationships (1:N). Una misma relación «neumonía → fiebre» puede estar afirmada por la NNAC 2025, por una ano… |
+| `concept_relationships` | `ConceptRelationships` | 14 | `id` | ✅ | concept_relationships forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y est… |
 | `tenant_catalog_policies` | `TenantCatalogPolicies` | 14 | `id` | ✅ | tenant_catalog_policies forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y e… |
 | `tenant_concept_config` | `TenantConceptConfig` | 12 | `id` | ✅ | tenant_concept_config forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y est… |
 | `terminology_sources` | `TerminologySources` | 14 | `id` | ✅ | terminology_sources forma parte del motor de terminología del módulo 03 · terminology: convierte valores de negocio en referencias a un catálogo versionado en vez de enums fijos, para adaptarse a distintos países y están… |

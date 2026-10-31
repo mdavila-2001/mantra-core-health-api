@@ -12,8 +12,17 @@
 //   concept_relationships   jerarquía is-a declarada por la fuente (REL_IS_A)
 //   concept_maps            xrefs HPO → NCIt declarados por HPO
 //   catalog_import_batches  un lote por sistema
-// Con `--glossary`: además, los fenotipos de HPO con nombre oficial en castellano
-// entran al glosario (value sets glossary-all-terms + glossary-category-signs-symptoms).
+// Glosario (activado por defecto desde 2026-10-24, decisión del propietario): los
+// fenotipos de HPO con nombre oficial en castellano entran al glosario (value sets
+// glossary-all-terms + glossary-category-signs-symptoms). `--no-glossary` lo apaga.
+// Duplicados: una ficha `wikidata-sintoma-q<n>` que Wikidata declara igual al
+// fenotipo por P3841 (cruce versionado en `crosswalk/`, ver lib/glossary-dedupe.mjs)
+// y que ya es miembro del glosario en la base hace que el término HPO NO se sume
+// al glosario; queda en el code system `hpo` y enlazado con un concept_maps.
+// Corra esta carga después de la del glosario; `--no-dedupe` la apaga. Si esos
+// términos ya eran miembros del glosario por una corrida anterior, la carga lo
+// informa (`yaEranMiembrosDelGlosario`) y `--prune-duplicates` quita SÓLO esas
+// membresías (ids deterministas de esta herramienta); el concepto HPO no se toca.
 //
 // Las relaciones enfermedad → síntoma NO van acá: ver load-disease-phenotypes.mjs.
 //
@@ -22,25 +31,33 @@
 //   node tools/terminology-import/symptoms/load-symptoms.mjs                 # dry-run (sin base)
 //   node tools/terminology-import/symptoms/load-symptoms.mjs --apply         # carga (.env DB_*)
 //   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --systems hpo
-//   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --glossary
+//   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --no-glossary   # sin glosario
+//   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --no-dedupe     # glosario sin cruzar con wikidata-sintoma
+//   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --prune-duplicates   # además quita las membresías HPO duplicadas ya cargadas
 // =============================================================================
 
 import 'dotenv/config';
 import pg from 'pg';
 import { existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
+import { readFileSync } from 'node:fs';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
-import { valueSetVersionId } from '../lib/glossary-es/load-plan.mjs';
+import { valueSetMemberId, valueSetVersionId } from '../lib/glossary-es/load-plan.mjs';
+import { dedupeMap, duplicatesAgainst, glossaryEquivalents, wikidataSintomaConceptId } from './lib/glossary-dedupe.mjs';
 import { DB_CONFIG, conceptIdsByCode, ensureCodeSystem, insertMany } from './lib/db.mjs';
 import {
-  CONCEPT, GLOSSARY_VALUE_SETS, codeSystemPlan, conceptId, conceptTuple, designationsFor, displayOf, glossaryFor, isARelationships, isGlossaryTerm, mapsFor, md5uuid, propertiesFor,
+  CONCEPT, GLOSSARY_VALUE_SETS, codeSystemPlan, glossaryEnabled, conceptId, conceptTuple, designationsFor, displayOf, glossaryFor, isARelationships, isGlossaryTerm, mapsFor, md5uuid, propertiesFor,
 } from './lib/load-plan.mjs';
-import { OUT_DIR, SOURCE_FILES } from './lib/sources.mjs';
+import { CROSSWALK_FILE, OUT_DIR, SOURCE_FILES } from './lib/sources.mjs';
 
 const args = process.argv.slice(2);
 if (args.includes('--dry-run') && args.includes('--apply')) throw new Error('Use --dry-run o --apply, no ambos.');
 const DRY_RUN = !args.includes('--apply');
-const GLOSSARY = args.includes('--glossary');
+const GLOSSARY = glossaryEnabled(args);
+const DEDUPE = GLOSSARY && !args.includes('--no-dedupe');
+const PRUNE_DUPLICATES = args.includes('--prune-duplicates');
+if (PRUNE_DUPLICATES && !DEDUPE) throw new Error('--prune-duplicates necesita el glosario y el cruce activos (sin --no-glossary ni --no-dedupe).');
 const SYSTEMS = args.includes('--systems') ? args[args.indexOf('--systems') + 1].split(',') : ['hpo', 'symp', 'ncit'];
 const LICENSE = { hpo: SOURCE_FILES.find((s) => s.key === 'hpo-json').license, symp: SOURCE_FILES.find((s) => s.key === 'symp').license, ncit: SOURCE_FILES.find((s) => s.key === 'ncit').license };
 
@@ -50,14 +67,20 @@ function readTerms(cs) {
   return readNdjson(p);
 }
 
-export function buildPlan(bySystem, { glossary = false } = {}) {
+/**
+ * @param {{ glossary?: boolean, duplicates?: Map<string,{q:string,wikidataConceptId:string}> }} opts
+ *   `duplicates`: código HPO → ficha `wikidata-sintoma` que ya lo representa en el glosario.
+ *   Esos términos no entran al glosario y quedan enlazados a la ficha.
+ */
+export function buildPlan(bySystem, { glossary = false, duplicates = new Map() } = {}) {
   const labels = new Map();
   for (const [cs, rows] of Object.entries(bySystem)) for (const r of rows) labels.set(`${cs}:${r.code}`, { en: r.enName, es: r.esName });
   const labelOf = (cs, code) => labels.get(`${cs}:${code}`) ?? { en: null, es: null };
   const codesBySystem = Object.fromEntries(Object.entries(bySystem).map(([cs, rows]) => [cs, new Set(rows.map((r) => r.code))]));
   return Object.entries(bySystem).map(([cs, rows]) => {
     const p = codeSystemPlan(cs, rows, LICENSE[cs]);
-    const glossaryRows = glossary ? rows.filter(isGlossaryTerm).map(glossaryFor) : [];
+    const glossaryRows = glossary ? rows.filter((r) => isGlossaryTerm(r) && !duplicates.has(r.code)).map(glossaryFor) : [];
+    const dedupeMaps = rows.filter((r) => duplicates.has(r.code)).map((r) => dedupeMap(r, duplicates.get(r.code), conceptId(r.codeSystem, r.code)));
     return {
       ...p,
       rows,
@@ -65,7 +88,7 @@ export function buildPlan(bySystem, { glossary = false } = {}) {
       designations: rows.flatMap(designationsFor).map((d) => [d.id, d.conceptId, d.lang, d.type, d.value, d.preferred]),
       properties: rows.flatMap((r) => propertiesFor(r, labelOf)).map((x) => [x.id, x.conceptId, x.code, x.dataType, JSON.stringify(x.value)]),
       relationships: rows.flatMap(isARelationships).map((x) => [x.id, x.source, x.target, x.type, x.ordinal]),
-      maps: rows.flatMap((r) => mapsFor(r, codesBySystem)).map((m) => [m.id, m.source, m.target, null, m.context, m.version, CONCEPT.TERM_ACTIVE]),
+      maps: [...rows.flatMap((r) => mapsFor(r, codesBySystem)), ...dedupeMaps].map((m) => [m.id, m.source, m.target, null, m.context, m.version, CONCEPT.TERM_ACTIVE]),
       glossaryMemberships: glossaryRows.flatMap((g) => g.memberships).map((m) => [m.id, m.versionId, m.conceptId, true]),
       glossaryProperties: glossaryRows.flatMap((g) => g.properties).map((x) => [x.id, x.conceptId, x.code, x.dataType, JSON.stringify(x.value)]),
     };
@@ -83,6 +106,25 @@ async function assertPrerequisites(client) {
   }
 }
 
+/** Cruce HPO ↔ Wikidata P3841 versionado en `crosswalk/` (lo escribe fetch-hpo-wikidata-crosswalk.mjs). */
+function readCrosswalk() {
+  try {
+    return gunzipSync(readFileSync(CROSSWALK_FILE)).toString('utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  } catch (err) {
+    throw new Error(`No se pudo leer el cruce HPO ↔ Wikidata (${CROSSWALK_FILE}): ${err.message}. Corra fetch-hpo-wikidata-crosswalk.mjs o use --no-dedupe.`);
+  }
+}
+
+/** Fichas `wikidata-sintoma-*` que ya son miembro del glosario en esta base. */
+async function glossaryWikidataSintoma(client, qids) {
+  const ids = [...new Set(qids)].map(wikidataSintomaConceptId);
+  const { rows } = await client.query(
+    'SELECT concept_id FROM terminology.value_set_members WHERE value_set_version_id = $1::uuid AND included AND concept_id = ANY($2::uuid[])',
+    [valueSetVersionId('glossary-all-terms'), ids],
+  );
+  return new Set(rows.map((r) => r.concept_id));
+}
+
 /** Reescribe en las tuplas los ids de concepto planificados por los reales. */
 function remap(tuples, cols, idMap) {
   if (!idMap.size) return tuples;
@@ -93,12 +135,14 @@ async function main() {
   const t0 = Date.now();
   console.log(`=== Carga de síntomas/fenotipos a terminology.* ${DRY_RUN ? '(DRY-RUN por defecto, sin base)' : '(APPLY explícito)'} ===`);
   const bySystem = Object.fromEntries(SYSTEMS.map((cs) => [cs, readTerms(cs)]));
-  const plan = buildPlan(bySystem, { glossary: GLOSSARY });
+  const equivalents = DEDUPE && bySystem.hpo ? glossaryEquivalents(readCrosswalk(), bySystem.hpo, isGlossaryTerm) : new Map();
+  let plan = buildPlan(bySystem, { glossary: GLOSSARY });
   const summary = plan.map((p) => ({
     codeSystem: p.codeSystem.internalCode, version: p.version.version, concepts: p.concepts.length, designations: p.designations.length, properties: p.properties.length,
     isA: p.relationships.length, maps: p.maps.length, glossaryMembers: p.glossaryMemberships.length,
   }));
   console.log(JSON.stringify(summary, null, 2));
+  if (DEDUPE) console.log(`[dedupe] fenotipos del glosario que Wikidata (P3841) declara iguales a un ítem: ${equivalents.size}. Cuáles son duplicados lo decide la base (fichas wikidata-sintoma ya en el glosario) con --apply.`);
   if (DRY_RUN) {
     const sample = plan.map((p) => ({ codeSystem: p.codeSystem, source: p.source, version: p.version, concept: p.concepts[0], display: displayOf(p.rows[0]), designations: p.designations.slice(0, 3), properties: p.properties.slice(0, 6) }));
     writeJson(join(OUT_DIR, 'load-plan.dry-run.json'), { generatedAt: nowIso(), summary, sample }, true);
@@ -109,8 +153,25 @@ async function main() {
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   const result = [];
+  let dedupe = null;
   try {
     await assertPrerequisites(client);
+    if (equivalents.size) {
+      const present = await glossaryWikidataSintoma(client, [...equivalents.values()].flat());
+      const duplicates = duplicatesAgainst(equivalents, present);
+      plan = buildPlan(bySystem, { glossary: GLOSSARY, duplicates });
+      const { rows: yaMiembros } = await client.query(
+        'SELECT count(*)::int AS n FROM terminology.value_set_members WHERE value_set_version_id = $1::uuid AND concept_id = ANY($2::uuid[])',
+        [valueSetVersionId('glossary-all-terms'), [...duplicates.keys()].map((code) => conceptId('hpo', code))],
+      );
+      dedupe = { equivalentesEnWikidata: equivalents.size, fichasWikidataSintomaEnElGlosario: present.size, duplicadosOmitidosDelGlosario: duplicates.size, yaEranMiembrosDelGlosario: yaMiembros[0].n };
+      if (PRUNE_DUPLICATES) {
+        const memberIds = [...duplicates.keys()].flatMap((code) => GLOSSARY_VALUE_SETS.map((vs) => valueSetMemberId(vs, conceptId('hpo', code))));
+        const del = await client.query('DELETE FROM terminology.value_set_members WHERE id = ANY($1::uuid[])', [memberIds]);
+        dedupe.membresiasQuitadas = del.rowCount;
+      }
+      console.log(`[dedupe] ${JSON.stringify(dedupe)}`);
+    }
     const idMap = new Map();
     const ctx = [];
     for (const p of plan) {
@@ -150,7 +211,7 @@ async function main() {
     await client.end();
   }
   console.log('\n=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===');
-  console.log(JSON.stringify({ result, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));
+  console.log(JSON.stringify({ result, dedupe, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));
 }
 
 if (basename(process.argv[1] ?? '') === 'load-symptoms.mjs') {

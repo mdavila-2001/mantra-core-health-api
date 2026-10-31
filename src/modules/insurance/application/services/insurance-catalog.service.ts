@@ -3,10 +3,13 @@ import { EntityManager } from '@mikro-orm/postgresql';
 
 import {
   BOLIVIA_CARRIERS,
+  BOLIVIA_CURATED_CARRIERS,
   BOLIVIA_PUBLIC_INSURERS,
   carrierId,
   isPublicCarrierId,
 } from '../../../../common/seed/bolivia-insurance.catalog';
+import { CONCEPTS } from '../../../../common/constants/concepts';
+import { DIR } from '../../../directory/directory.concepts';
 import {
   InsuranceCarriers,
   InsurancePlans,
@@ -53,6 +56,14 @@ function publicCarrierLabel(legalName: string, sigla?: string | null): string {
  * identificadores del catálogo boliviano sembrado, que son públicos y los
  * mismos para todo el mundo. Una aseguradora cargada por otra vía no entra en
  * el `$in` y por lo tanto no se filtra.
+ *
+ * ## Qué aseguradoras privadas se ofrecen
+ *
+ * Sólo las que tienen una **cuenta registrada**: un tenant activo con al menos
+ * un OWNER o ADMIN vigente, usuario activo y con una credencial activa. Una
+ * privada del catálogo sin esa cuenta no puede atender a quien la elija, así que
+ * no se le ofrece. Los seguros públicos (CNS, CPS, SUS, cajas) no dependen de una
+ * cuenta y se ofrecen siempre.
  */
 @Injectable()
 export class InsuranceCatalogService {
@@ -69,8 +80,12 @@ export class InsuranceCatalogService {
    * @returns Privadas y públicas, cada una con sus planes.
    */
   async listHealthCatalog(): Promise<CarrierCatalogResponseDto> {
-    const ids = [
+    const privateIds = [
       ...BOLIVIA_CARRIERS.map((c) => carrierId(c.code)),
+      ...BOLIVIA_CURATED_CARRIERS.map((c) => carrierId(c.code)),
+    ];
+    const ids = [
+      ...(await this.findPrivateWithAccount(privateIds)),
       ...BOLIVIA_PUBLIC_INSURERS.map((c) => carrierId(c.code)),
     ];
 
@@ -132,5 +147,53 @@ export class InsuranceCatalogService {
 
     entries.sort((a, b) => a.name.localeCompare(b.name, 'es'));
     return { carriers: entries };
+  }
+
+  /**
+   * De las aseguradoras privadas dadas, las que tienen una cuenta registrada.
+   *
+   * Una sola consulta con `exists`: aseguradora activa con tenant activo y una
+   * membresía OWNER/ADMIN vigente de un usuario activo con credencial activa y
+   * sin vencer.
+   *
+   * @param privateIds - Identificadores de las privadas del catálogo.
+   * @returns Los identificadores que cumplen.
+   */
+  private async findPrivateWithAccount(
+    privateIds: string[],
+  ): Promise<string[]> {
+    const rows = await this.em.getConnection().execute<{ id: string }[]>(
+      `select cr.id from insurance.insurance_carriers cr
+        where cr.id in (${privateIds.map(() => '?').join(', ')})
+          and cr.status_concept_id = ?
+          and cr.tenant_id is not null
+          and exists (
+            select 1 from directory.tenants t
+              join directory.tenant_memberships tm on tm.tenant_id = t.id
+              join iam.users u on u.id = tm.user_id
+             where t.id = cr.tenant_id and t.status_concept_id = ?
+               and tm.status_concept_id = ?
+               and tm.tenant_role_concept_id in (?, ?)
+               and tm.start_date <= now()
+               and (tm.end_date is null or tm.end_date > now())
+               and u.status_concept_id = ?
+               and exists (
+                 select 1 from iam.authentication_credentials ac
+                  where ac.user_id = u.id and ac.state_concept_id = ?
+                    and (ac.expires_at is null or ac.expires_at > now())
+               )
+          )`,
+      [
+        ...privateIds,
+        INS.CARRIER_ACTIVE,
+        CONCEPTS.TENANT_ACTIVE,
+        DIR.MEMBERSHIP_ACTIVE,
+        DIR.ROLE_OWNER,
+        DIR.ROLE_ADMIN,
+        CONCEPTS.USER_ACTIVE,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+    );
+    return rows.map((row) => row.id);
   }
 }

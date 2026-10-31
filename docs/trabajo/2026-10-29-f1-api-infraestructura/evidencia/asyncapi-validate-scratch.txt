@@ -1,2 +1,0 @@
-AsyncAPI válido: 0 advertencia(s), 0 errores.
-EXIT=0

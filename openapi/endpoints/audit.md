@@ -2,26 +2,29 @@
 
 # Endpoints del módulo `audit`
 
-Referencia exhaustiva de 11 operación(es) del módulo `audit`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 14 operación(es) del módulo `audit`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `audit`, `audit-compliance`, `audit-moderation`, `audit-privacy`
-- **Controladores:** `AuditController`, `ComplianceController`, `ModerationController`, `PrivacyController`
+- **Etiquetas OpenAPI:** `audit`, `audit-compliance`, `audit-me`, `audit-moderation`, `audit-privacy`
+- **Controladores:** `AuditController`, `AuditMeController`, `AuditQueryController`, `ComplianceController`, `ModerationController`, `PrivacyController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /audit/anomaly/scan](#1-post-audit-anomaly-scan) — Detectar acceso anómalo
-2. [POST /audit/data-access](#2-post-audit-data-access) — Registrar acceso/lectura clínica (accounting WORM)
-3. [POST /audit/events](#3-post-audit-events) — Registrar provenance de un cambio y sellar la cadena hash
-4. [GET /audit/history/{entity}/{id}](#4-get-audit-history-entity-id) — Consultar historial / línea de tiempo de un registro
-5. [POST /audit/integrity/verify](#5-post-audit-integrity-verify) — Verificar integridad tamper-evidence de la cadena
-6. [POST /audit/retention/apply](#6-post-audit-retention-apply) — Aplicar retención / archivado / litigation-hold
-7. [POST /audit/third-party-access](#7-post-audit-third-party-access) — Registrar acceso delegado / de tercero gobernado
-8. [POST /compliance/audit-export](#8-post-compliance-audit-export) — Exportar evidencia de auditoría para cumplimiento
-9. [POST /moderation/decisions](#9-post-moderation-decisions) — Registrar decisión de moderación / gobernanza analítica
-10. [POST /privacy/dsar](#10-post-privacy-dsar) — Tramitar DSAR (solicitud del titular)
-11. [PATCH /privacy/dsar/{id}](#11-patch-privacy-dsar-id) — Avanzar la máquina de estados de una solicitud DSAR
+2. [GET /audit/data-access](#2-get-audit-data-access) — Lecturas de datos sensibles (`audit.data_access_log`), con filtros
+3. [POST /audit/data-access](#3-post-audit-data-access) — Registrar acceso/lectura clínica (accounting WORM)
+4. [POST /audit/events](#4-post-audit-events) — Registrar provenance de un cambio y sellar la cadena hash
+5. [GET /audit/history/{entity}/{id}](#5-get-audit-history-entity-id) — Consultar historial / línea de tiempo de un registro
+6. [POST /audit/integrity/verify](#6-post-audit-integrity-verify) — Verificar integridad tamper-evidence de la cadena
+7. [GET /audit/log](#7-get-audit-log) — Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud
+8. [GET /audit/me/data-access](#8-get-audit-me-data-access) — Quién accedió a mi historia y con qué finalidad
+9. [POST /audit/retention/apply](#9-post-audit-retention-apply) — Aplicar retención / archivado / litigation-hold
+10. [POST /audit/third-party-access](#10-post-audit-third-party-access) — Registrar acceso delegado / de tercero gobernado
+11. [POST /compliance/audit-export](#11-post-compliance-audit-export) — Exportar evidencia de auditoría para cumplimiento
+12. [POST /moderation/decisions](#12-post-moderation-decisions) — Registrar decisión de moderación / gobernanza analítica
+13. [POST /privacy/dsar](#13-post-privacy-dsar) — Tramitar DSAR (solicitud del titular)
+14. [PATCH /privacy/dsar/{id}](#14-patch-privacy-dsar-id) — Avanzar la máquina de estados de una solicitud DSAR
 
 ---
 
@@ -104,6 +107,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnomalyScanResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -150,7 +154,108 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /audit/data-access
+## 2. GET /audit/data-access
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit`
+- **Nombre:** Lecturas de datos sensibles (`audit.data_access_log`), con filtros
+- **Operation ID:** `AuditQueryController_dataAccess`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuditQueryController.dataAccess](../../src/modules/audit/controllers/audit-query.controller.ts)
+
+### Descripción de negocio
+
+Filtra por actor, rango de fechas, tenant, paciente, tipo de recurso y operación. Sin rango, mira los últimos 30 días.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /audit/data-access` en `AuditQueryController_dataAccess`. El controlador delega en `AuditQueryService.dataAccess`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | Sin restricción adicional declarada | Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días | `2026-10-01T00:00:00.000Z` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Hasta (ISO 8601, excluido) | `2026-10-24T00:00:00.000Z` |
+| `userId` | query | No | `string` | formato `uuid` | Quién actuó | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 400 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `operation` | query | No | `string` | valores: `READ`, `CREATE`, `UPDATE`, `DELETE`, `EXPORT` | Sin descripción específica en OpenAPI. | `READ` |
+| `resourceType` | query | No | `string` | longitud máxima 100 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Paciente cuyo dato se leyó | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /audit/data-access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUDITOR`, `DPO`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /audit/data-access?from=2026-10-01T00%3A00%3A00.000Z&to=2026-10-24T00%3A00%3A00.000Z&userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&limit=50&cursor=valor-ejemplo&operation=READ&resourceType=valor-ejemplo&patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUDITOR, DPO, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/audit/data-access"
+}
+```
+
+---
+
+## 3. POST /audit/data-access
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -243,6 +348,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DataAccessResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -291,7 +397,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /audit/events
+## 4. POST /audit/events
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -385,6 +491,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuditEventResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -433,7 +540,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /audit/history/{entity}/{id}
+## 5. GET /audit/history/{entity}/{id}
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -500,6 +607,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HistoryTimelineDto`. Ejemplo completo derivado de ese DTO:
 
@@ -567,7 +675,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /audit/integrity/verify
+## 6. POST /audit/integrity/verify
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -613,7 +721,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `tenantId` | No | `string` | formato `uuid` | Partición de tenant a verificar | `00000000-0000-4000-8000-000000000001` |
-| `limit` | No | `number` | Sin restricción adicional declarada | Máximo de eslabones a recorrer | `1000` |
+| `limit` | No | `number` | Sin restricción adicional declarada | Modo diagnóstico acotado: máximo de eslabones a recorrer. Si se omite, se verifica la partición completa. Un límite menor al total devuelve un resultado parcial (`complete: false`) sin atestación positiva. Debe ser un entero entre 1 y 100000 (`400 AUDIT_INTEGRITY_RANGE_INVALID`). | `1` |
 
 ### Payload completo de ejemplo
 
@@ -627,7 +735,7 @@ Content-Type: application/json
 
 {
   "tenantId": "00000000-0000-4000-8000-000000000001",
-  "limit": 1000
+  "limit": 1
 }
 ```
 
@@ -644,12 +752,14 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IntegrityReportDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
   "verified": true,
+  "complete": true,
   "checkedCount": 1,
   "brokenAt": "valor-ejemplo",
   "attestationId": "00000000-0000-4000-8000-000000000001"
@@ -660,10 +770,11 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `verified` | Sí | `boolean` | Sin restricción adicional declarada | true si la cadena está íntegra | `true` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | true sólo si se recorrió la partición completa y está íntegra. Un | `true` |
+| `complete` | Sí | `boolean` | Sin restricción adicional declarada | true si se examinaron todos los eslabones de la partición; false si el | `true` |
 | `checkedCount` | Sí | `number` | Sin restricción adicional declarada | Nº de eslabones verificados | `1` |
 | `brokenAt` | Sí | `string` | admite null | Id del primer eslabón roto, si lo hay | `valor-ejemplo` |
-| `attestationId` | Sí | `string` | Sin restricción adicional declarada | Id del evento de atestación registrado | `00000000-0000-4000-8000-000000000001` |
+| `attestationId` | Sí | `string` | admite null | Id del evento de atestación registrado. null cuando el resultado es | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -692,7 +803,246 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /audit/retention/apply
+## 7. GET /audit/log
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit`
+- **Nombre:** Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud
+- **Operation ID:** `AuditQueryController_log`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuditQueryController.log](../../src/modules/audit/controllers/audit-query.controller.ts)
+
+### Descripción de negocio
+
+Filtra por actor, rango de fechas, resultado, tenant, acción, verbo y ruta. El verbo y la ruta se derivan de la acción; para las acciones de negocio, del mapa de rutas armado al arrancar (`null` si la acción sella varias rutas). El riesgo se deriva al leer y no se guarda. Sin rango, mira los últimos 30 días.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /audit/log` en `AuditQueryController_log`. El controlador delega en `AuditQueryService.log`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | Sin restricción adicional declarada | Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días | `2026-10-01T00:00:00.000Z` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Hasta (ISO 8601, excluido) | `2026-10-24T00:00:00.000Z` |
+| `userId` | query | No | `string` | formato `uuid` | Quién actuó | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 400 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `result` | query | No | `string` | valores: `SUCCESS`, `FAILURE` | Sin descripción específica en OpenAPI. | `SUCCESS` |
+| `action` | query | No | `string` | longitud máxima 200 | Acción exacta: el código de negocio (`CATALOG_ANNOTATION_SAVED`) o `HTTP <VERBO> <plantilla>` | `valor-ejemplo` |
+| `method` | query | No | `string` | valores: `POST`, `PUT`, `PATCH`, `DELETE` | Verbo HTTP, derivado de la acción; las acciones de negocio salen del mapa de rutas armado al arrancar | `POST` |
+| `route` | query | No | `string` | longitud máxima 300 | Plantilla exacta de la ruta, con `:parámetros` | `/admin/catalog/objects/:id/annotation` |
+| `entity` | query | No | `string` | longitud máxima 100 | Entidad afectada | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /audit/log HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUDITOR`, `DPO`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /audit/log?from=2026-10-01T00%3A00%3A00.000Z&to=2026-10-24T00%3A00%3A00.000Z&userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&limit=50&cursor=valor-ejemplo&result=SUCCESS&action=valor-ejemplo&method=POST&route=%2Fadmin%2Fcatalog%2Fobjects%2F%3Aid%2Fannotation&entity=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUDITOR, DPO, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/audit/log"
+}
+```
+
+---
+
+## 8. GET /audit/me/data-access
+
+- **Módulo:** `audit`
+- **Etiqueta OpenAPI:** `audit-me`
+- **Nombre:** Quién accedió a mi historia y con qué finalidad
+- **Operation ID:** `AuditMeController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuditMeController.list](../../src/modules/audit/controllers/audit-me.controller.ts)
+
+### Descripción de negocio
+
+Del más reciente al más antiguo, paginado por cursor. Cada acceso trae quién lo hizo (tipo y nombre), cuándo, la operación, el tipo de dato y la finalidad declarada. No trae contenido clínico, IP ni identificadores de otras cuentas. Consultar este registro es en sí un acceso y queda anotado.
+
+Contexto declarado en el controlador: Quién accedió a mi historia, cuándo, qué tipo de dato y con qué finalidad.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /audit/me/data-access` en `AuditMeController_list`. El controlador delega en `MyDataAccessService.list`. No recibe body. El tipo de retorno estático es `Promise<MyDataAccessPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | Sin restricción adicional declarada | Desde (ISO 8601, incluido). Sin él, desde el primer acceso | `2026-10-01T00:00:00.000Z` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Hasta (ISO 8601, excluido) | `2026-10-25T00:00:00.000Z` |
+| `excludeOwn` | query | No | `boolean` | Sin restricción adicional declarada | Si es `true`, omite los accesos del propio titular y deja sólo los de terceros | `false` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `25` |
+| `cursor` | query | No | `string` | longitud máxima 400 | `nextCursor` de la página anterior | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /audit/me/data-access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /audit/me/data-access?from=2026-10-01T00%3A00%3A00.000Z&to=2026-10-25T00%3A00%3A00.000Z&excludeOwn=false&limit=25&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyDataAccessPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MyDataAccessPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyDataAccessPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyDataAccessPageDto>` | No |
+| 404 | La cuenta no es la de un paciente | `Promise<MyDataAccessPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyDataAccessPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyDataAccessPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyDataAccessPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyDataAccessPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "accessedAt": "2026-07-31T12:00:00.000Z",
+      "accessor": {
+        "kind": "SELF",
+        "displayName": {}
+      },
+      "operation": "READ",
+      "resourceType": {},
+      "purpose": {}
+    }
+  ],
+  "nextCursor": {},
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MyDataAccessEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","accessedAt":"2026-07-31T12:00:00.000Z","accessor":{"kind":"SELF","displayName":{}},"operation":"READ","resourceType":{},"purpose":{}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del registro | `00000000-0000-4000-8000-000000000001` |
+| `items[].accessedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].accessor` | Sí | `DataAccessorDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"SELF","displayName":{}}` |
+| `items[].accessor.kind` | Sí | `string` | valores: `SELF`, `PRACTITIONER`, `OTHER` | `SELF` es el propio titular; `PRACTITIONER`, un profesional de la salud; `OTHER`, cualquier otra cuenta | `SELF` |
+| `items[].accessor.displayName` | No | `object` | admite null | Nombre a mostrar de la persona vinculada a la cuenta; `null` si no tiene o si es el propio titular | `{}` |
+| `items[].operation` | Sí | `string` | valores: `READ`, `CREATE`, `UPDATE`, `DELETE`, `EXPORT` | Sin descripción específica en el contrato OpenAPI. | `READ` |
+| `items[].resourceType` | No | `object` | admite null | Tipo de dato al que se accedió (código, p. ej. `DIAGNOSTIC_RESULTS`) | `{}` |
+| `items[].purpose` | No | `object` | admite null | Finalidad con que se declaró el acceso (código, p. ej. `TREATMENT`, `PATIENT_ACCESS`) | `{}` |
+| `nextCursor` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Perfil de paciente no encontrado | Excepción explícita en src/modules/audit/services/my-data-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/audit/me/data-access"
+}
+```
+
+---
+
+## 9. POST /audit/retention/apply
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -771,6 +1121,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetentionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -819,7 +1170,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /audit/third-party-access
+## 10. POST /audit/third-party-access
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit`
@@ -921,6 +1272,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ThirdPartyAccessResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -968,7 +1320,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /compliance/audit-export
+## 11. POST /compliance/audit-export
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-compliance`
@@ -1053,6 +1405,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuditExportResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1102,7 +1455,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /moderation/decisions
+## 12. POST /moderation/decisions
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-moderation`
@@ -1195,6 +1548,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationDecisionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1243,7 +1597,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /privacy/dsar
+## 13. POST /privacy/dsar
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-privacy`
@@ -1325,6 +1679,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DsarResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1379,7 +1734,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PATCH /privacy/dsar/{id}
+## 14. PATCH /privacy/dsar/{id}
 
 - **Módulo:** `audit`
 - **Etiqueta OpenAPI:** `audit-privacy`
@@ -1463,6 +1818,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DsarResponseDto`. Ejemplo completo derivado de ese DTO:
 

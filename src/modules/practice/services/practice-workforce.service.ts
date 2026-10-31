@@ -2,21 +2,37 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   decodeKeysetCursor,
   encodeKeysetCursor,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { PublicProfiles } from '../../community/entities';
 import { COMM } from '../../community/community.concepts';
 import { PRAC } from '../practice.concepts';
+import { PracticeAffiliationErrorReason } from '../practice-affiliation.error-reasons';
 import {
   PracticesRepository,
   PracticeSitesRepository,
+  ClinicalUnitsRepository,
+  HealthcareServicesRepository,
   PractitionerRoleAssignmentsRepository,
   PractitionerSupportAssignmentsRepository,
 } from '../repositories';
+import {
+  assertPracticeScope,
+  loadPracticeInScope,
+  practiceOutOfScope,
+} from './practice-scope';
+import { PracticeAdministrationService } from './practice-administration.service';
+import { PRACTICE_ASSIGNMENT_TRANSITIONS } from './role-assignment-transitions';
+import {
+  loadRoleAssignmentRowContext,
+  toRoleAssignmentRow,
+} from './role-assignment-row.mapper';
 import {
   CreateRoleAssignmentDto,
   CreateSupportAssignmentDto,
@@ -31,23 +47,13 @@ import {
 /** Tope de vinculaciones por página cuando el cliente no pide uno (CV-14). */
 const DEFAULT_ASSIGNMENTS_PAGE_SIZE = 50;
 
-/** Transiciones válidas del ciclo de vida de una vinculación (Carril 18). */
-const ASSIGNMENT_TRANSITIONS: Record<string, readonly string[]> = {
-  [PRAC.ROLE_ASSIGNMENT_PENDING]: [
-    PRAC.ROLE_ASSIGNMENT_ACTIVE,
-    PRAC.ROLE_ASSIGNMENT_REJECTED,
-  ],
-  [PRAC.ROLE_ASSIGNMENT_ACTIVE]: [
-    PRAC.ROLE_ASSIGNMENT_SUSPENDED,
-    PRAC.ROLE_ASSIGNMENT_ENDED,
-  ],
-  [PRAC.ROLE_ASSIGNMENT_SUSPENDED]: [
-    PRAC.ROLE_ASSIGNMENT_ACTIVE,
-    PRAC.ROLE_ASSIGNMENT_ENDED,
-  ],
-  [PRAC.ROLE_ASSIGNMENT_REJECTED]: [],
-  [PRAC.ROLE_ASSIGNMENT_ENDED]: [],
-};
+/** Estados que cuentan como «relación en curso» con un procedimiento de la sede. */
+const OPEN_ASSIGNMENT_STATUSES = [
+  PRAC.ROLE_ASSIGNMENT_INVITED,
+  PRAC.ROLE_ASSIGNMENT_PENDING,
+  PRAC.ROLE_ASSIGNMENT_ACTIVE,
+  PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+];
 
 /**
  * Personal de práctica: asignación de rol de profesional a sitio/unidad/servicio
@@ -61,16 +67,22 @@ export class PracticeWorkforceService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param practicesRepo - Valor de practices repo requerido por la operación.
    * @param sitesRepo - Valor de sites repo requerido por la operación.
+   * @param unitsRepo - Unidades clínicas: la de una vinculación debe ser de la práctica.
+   * @param servicesRepo - Servicios de salud: el de una vinculación debe ser de la práctica.
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param supportRepo - Valor de support repo requerido por la operación.
+   * @param administration - Regla de administración por organización (A-6).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,
     private readonly sitesRepo: PracticeSitesRepository,
+    private readonly unitsRepo: ClinicalUnitsRepository,
+    private readonly servicesRepo: HealthcareServicesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
     private readonly supportRepo: PractitionerSupportAssignmentsRepository,
+    private readonly administration: PracticeAdministrationService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PracticeWorkforceService.name);
@@ -82,16 +94,18 @@ export class PracticeWorkforceService {
     dto: CreateRoleAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<RoleAssignmentResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.role.assign', practiceId },
       'Assigning practitioner role',
     );
     return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
-          practiceId,
-        });
+      const practice = await loadPracticeInScope(
+        this.practicesRepo,
+        tx,
+        practiceId,
+        tenantId,
+      );
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
         throw new PreconditionFailedException('La práctica no está activa', {
           practiceId,
@@ -107,6 +121,31 @@ export class PracticeWorkforceService {
               practiceId,
               siteId: dto.practiceSiteId,
             },
+          );
+        }
+      }
+
+      if (dto.clinicalUnitId) {
+        const unit = await this.unitsRepo.findById(tx, dto.clinicalUnitId);
+        const unitSite = unit
+          ? await this.sitesRepo.findById(tx, unit.practiceSiteId)
+          : null;
+        if (!unit || !unitSite || unitSite.practiceId !== practiceId) {
+          throw new PreconditionFailedException(
+            'La unidad no pertenece a la práctica',
+            { practiceId, clinicalUnitId: dto.clinicalUnitId },
+          );
+        }
+      }
+      if (dto.healthcareServiceId) {
+        const service = await this.servicesRepo.findById(
+          tx,
+          dto.healthcareServiceId,
+        );
+        if (!service || service.practiceId !== practiceId) {
+          throw new PreconditionFailedException(
+            'El servicio no pertenece a la práctica',
+            { practiceId, healthcareServiceId: dto.healthcareServiceId },
           );
         }
       }
@@ -144,17 +183,18 @@ export class PracticeWorkforceService {
     dto: CreateSupportAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<SupportAssignmentResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.support.attach', roleId },
       'Attaching support staff',
     );
     return this.em.transactional(async (tx) => {
-      const role = await this.rolesRepo.findById(tx, roleId);
-      if (!role)
-        throw new ResourceNotFoundException(
-          'Rol de profesional no encontrado',
-          { roleId },
-        );
+      const role = await this.loadRoleInScope(
+        tx,
+        roleId,
+        tenantId,
+        'Rol de profesional no encontrado',
+      );
       if (role.statusConceptId !== PRAC.ROLE_ASSIGNMENT_ACTIVE) {
         throw new PreconditionFailedException(
           'El rol de profesional no está activo',
@@ -232,11 +272,34 @@ export class PracticeWorkforceService {
           );
         }
       }
+      if (dto.healthcareServiceId) {
+        await this.assertServiceOfferedBySite(
+          tx,
+          practiceId,
+          dto.practiceSiteId,
+          dto.healthcareServiceId,
+        );
+        const open = await this.rolesRepo.findOpenForServices(
+          tx,
+          practitionerProfileId,
+          dto.practiceSiteId!,
+          [dto.healthcareServiceId],
+          OPEN_ASSIGNMENT_STATUSES,
+        );
+        if (open.length > 0) {
+          throw new ConflictException(
+            'Ya tenés una vinculación en curso con ese procedimiento',
+            { healthcareServiceId: dto.healthcareServiceId },
+            PracticeAffiliationErrorReason.ASSIGNMENT_ALREADY_OPEN,
+          );
+        }
+      }
 
       const role = this.rolesRepo.create(tx, {
         practitionerProfileId,
         practiceId,
         practiceSiteId: dto.practiceSiteId,
+        healthcareServiceId: dto.healthcareServiceId,
         roleConceptId: dto.roleConceptId ?? PRAC.ROLE_ATTENDING,
         specialtyConceptId: dto.specialtyConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : new Date(),
@@ -298,14 +361,14 @@ export class PracticeWorkforceService {
             ).map((p) => [p.targetId, this.fileUrl(p.avatarFileId)] as const),
           );
 
+    const rowContext = await loadRoleAssignmentRowContext(em, assignments);
+
     return assignments.map((a) => {
       const practice = practices.get(a.practiceId);
       return {
-        id: a.id,
-        practiceId: a.practiceId,
+        ...toRoleAssignmentRow(a, rowContext),
         practiceName: practice?.name ?? '(organización no encontrada)',
         practiceType: practice?.typeConceptId ?? null,
-        practiceSiteId: a.practiceSiteId ?? null,
         roleConceptId: a.roleConceptId,
         specialtyConceptId: a.specialtyConceptId ?? null,
         status: a.statusConceptId,
@@ -330,28 +393,26 @@ export class PracticeWorkforceService {
    * CV-14 — página de vinculaciones profesional-organización de una práctica,
    * para que su administrador deje de aprobar a ciegas.
    *
-   * Aislamiento: si la práctica no existe o es de otro tenant, 404 sin
-   * distinguir el caso (el mismo criterio que
-   * {@link PracticeOrganizationReadService.getConsole}) — un administrador de
-   * la clínica A no debe poder confirmar, ni siquiera por el código de error,
-   * que una práctica de la clínica B existe.
+   * Autorización: la lista es de quien administra **esa** organización
+   * (A-6). Una práctica inexistente responde 404; el administrador de otra
+   * organización recibe 403.
    *
    * @param practiceId - Práctica cuyas vinculaciones se listan.
-   * @param tenantId - Tenant del contexto (el del actor).
+   * @param actor - Quien pide la lista: administrador de esa organización.
    * @param options - Filtro de estado, cursor y tope de página.
+   * @throws ForbiddenException si el actor no administra esa organización (A-6).
    */
   async listPracticeAssignments(
     practiceId: string,
-    tenantId: string,
+    actor: AuthenticatedUser,
     options: { statusConceptId?: string; cursor?: string; limit?: number },
   ): Promise<ListPracticeRoleAssignmentsResponseDto> {
     const em = this.em.fork();
-    const practice = await this.practicesRepo.findById(em, practiceId);
-    if (!practice || practice.tenantId !== tenantId) {
-      throw new ResourceNotFoundException('Práctica no encontrada', {
-        practiceId,
-      });
-    }
+    await this.administration.assertCanAdministerPractice(
+      em,
+      practiceId,
+      actor,
+    );
 
     const limit = options.limit ?? DEFAULT_ASSIGNMENTS_PAGE_SIZE;
     const after = options.cursor
@@ -371,11 +432,11 @@ export class PracticeWorkforceService {
     const page = hasMore ? rows.slice(0, limit) : rows;
     const last = page.at(-1);
 
+    const rowContext = await loadRoleAssignmentRowContext(em, page);
+
     return {
       items: page.map((role) => ({
-        id: role.id,
-        practiceId: role.practiceId,
-        practitionerProfileId: role.practitionerProfileId,
+        ...toRoleAssignmentRow(role, rowContext),
         status: role.statusConceptId,
         createdAt: role.createdAt,
       })),
@@ -387,8 +448,9 @@ export class PracticeWorkforceService {
 
   /**
    * Carril 18 (spec línea 1655) — la organización aprueba una vinculación
-   * pendiente: `PENDING → ACTIVE`. Rol `SECURITY_ADMIN` (administra la
-   * organización); el gate autoritativo vive en el controlador.
+   * pendiente: `PENDING → ACTIVE`, solo esa fila. La aprueba quien administra
+   * **esa** organización (A-6) o un rol de plataforma; una invitación
+   * (`INVITED`) no la puede activar la organización, solo el profesional.
    */
   approveAssignment(
     roleId: string,
@@ -400,10 +462,11 @@ export class PracticeWorkforceService {
       PRAC.ROLE_ASSIGNMENT_ACTIVE,
       dto,
       actor,
+      'practice-administrator',
     );
   }
 
-  /** `PENDING → REJECTED`. */
+  /** `PENDING → REJECTED`, solo esa fila (A-6). */
   rejectAssignment(
     roleId: string,
     dto: RoleAssignmentTransitionDto,
@@ -414,6 +477,7 @@ export class PracticeWorkforceService {
       PRAC.ROLE_ASSIGNMENT_REJECTED,
       dto,
       actor,
+      'practice-administrator',
     );
   }
 
@@ -446,25 +510,104 @@ export class PracticeWorkforceService {
   }
 
   /**
-   * Motor común de transición: valida que el paso sea uno de los declarados
-   * en {@link ASSIGNMENT_TRANSITIONS} (rechaza cualquier otro con 422) y sella
-   * `validTo` cuando el destino es un estado terminal (rechazada/finalizada).
+   * Carga una vinculación por UUID hasta su práctica y exige que sea del tenant
+   * activo. La vinculación no lleva tenant: es el de su práctica. Se compara
+   * **antes** de cualquier transición o creación hija.
+   *
+   * @throws ResourceNotFoundException (`PRACTICE_RESOURCE_OUT_OF_SCOPE`) si la
+   * vinculación o su práctica no existen, o son de otro tenant.
+   */
+  private async loadRoleInScope(
+    tx: EntityManager,
+    roleId: string,
+    tenantId: string,
+    message: string,
+  ) {
+    const role = await this.rolesRepo.findById(tx, roleId);
+    const practice = role
+      ? await this.practicesRepo.findById(tx, role.practiceId)
+      : null;
+    if (!role || !practice) throw practiceOutOfScope(message);
+    return assertPracticeScope(role, practice.tenantId, tenantId, message);
+  }
+
+  /**
+   * Carga una vinculación y exige que el actor administre su organización
+   * (A-6): 404 si no existe, 403 si es administrador de otra.
+   *
+   * @throws ResourceNotFoundException si la vinculación o su práctica no existen.
+   * @throws ForbiddenException si el actor no administra esa organización.
+   */
+  private async loadRoleForAdministrator(
+    tx: EntityManager,
+    roleId: string,
+    actor: AuthenticatedUser,
+    message: string,
+  ) {
+    const role = await this.rolesRepo.findById(tx, roleId);
+    if (!role) throw practiceOutOfScope(message);
+    await this.administration.assertCanAdministerPractice(
+      tx,
+      role.practiceId,
+      actor,
+    );
+    return role;
+  }
+
+  /**
+   * Exige que el servicio exista, sea de la práctica y de la sede indicada, y
+   * esté activo: solo se puede pedir trabajar en lo que la sede ofrece hoy.
+   *
+   * @throws PreconditionFailedException (`SERVICE_NOT_OFFERED_BY_SITE`) si no.
+   */
+  private async assertServiceOfferedBySite(
+    tx: EntityManager,
+    practiceId: string,
+    practiceSiteId: string | undefined,
+    healthcareServiceId: string,
+  ): Promise<void> {
+    const service = await this.servicesRepo.findById(tx, healthcareServiceId);
+    if (
+      !practiceSiteId ||
+      !service ||
+      service.practiceId !== practiceId ||
+      service.practiceSiteId !== practiceSiteId ||
+      service.statusConceptId !== PRAC.SERVICE_ACTIVE
+    ) {
+      throw new PreconditionFailedException(
+        'El procedimiento no está publicado y activo en esa sede',
+        { healthcareServiceId },
+        PracticeAffiliationErrorReason.SERVICE_NOT_OFFERED_BY_SITE,
+      );
+    }
+  }
+
+  /**
+   * Motor común de transición de la **organización**: valida que el paso sea
+   * uno de los declarados en {@link PRACTICE_ASSIGNMENT_TRANSITIONS} (rechaza
+   * cualquier otro con 422) y sella `validTo` cuando el destino es un estado
+   * terminal (rechazada/finalizada).
+   *
+   * @param scope - `practice-administrator`: autoriza quien administra esa
+   * organización (A-6). `tenant`: acota al tenant activo (suspender y finalizar).
    */
   private async transitionAssignment(
     roleId: string,
     toStatus: string,
     dto: RoleAssignmentTransitionDto,
     actor: AuthenticatedUser,
+    scope: 'practice-administrator' | 'tenant' = 'tenant',
   ): Promise<RoleAssignmentResponseDto> {
+    const message = 'Vinculación profesional-organización no encontrada';
+    const tenantId = scope === 'tenant' ? requireTenantId() : undefined;
     return this.em.transactional(async (tx) => {
-      const role = await this.rolesRepo.findById(tx, roleId);
-      if (!role)
-        throw new ResourceNotFoundException(
-          'Vinculación profesional-organización no encontrada',
-          { roleId },
-        );
+      const role =
+        tenantId === undefined
+          ? await this.loadRoleForAdministrator(tx, roleId, actor, message)
+          : await this.loadRoleInScope(tx, roleId, tenantId, message);
 
-      const allowed = ASSIGNMENT_TRANSITIONS[role.statusConceptId] ?? [];
+      const allowed =
+        PRACTICE_ASSIGNMENT_TRANSITIONS[role.statusConceptId] ?? [];
       if (!allowed.includes(toStatus)) {
         throw new PreconditionFailedException(
           'La vinculación no admite esa transición desde su estado actual',

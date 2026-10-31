@@ -19,6 +19,10 @@ import {
   InsurerReceivedClaimsService,
   MAX_RECEIVED_CLAIMS,
 } from './insurer-received-claims.service';
+import {
+  PatientChargeBreakdownService,
+  type PatientChargeExtras,
+} from './patient-charge-breakdown.service';
 
 /** Las consultas siempre restringen el dueño antes de leer solicitudes. */
 @Injectable()
@@ -27,6 +31,7 @@ export class MyClaimsService {
     private readonly em: EntityManager,
     private readonly receivedClaims: InsurerReceivedClaimsService,
     private readonly claimReadRepo: ClaimReadRepository,
+    private readonly breakdowns: PatientChargeBreakdownService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MyClaimsService.name);
@@ -140,7 +145,16 @@ export class MyClaimsService {
       limit: MAX_RECEIVED_CLAIMS + 1,
     });
     const page = rows.slice(0, MAX_RECEIVED_CLAIMS);
-    const items = await this.receivedClaims.buildMyItems(em, page, view);
+    const built = await this.receivedClaims.buildMyItems(em, page, view);
+    // El desglose y la objeción son del titular: solo su vista los lleva.
+    const extras =
+      view === 'PATIENT'
+        ? await this.breakdowns.read(em, page)
+        : new Map<string, PatientChargeExtras>();
+    const items = built.map((item) => ({
+      ...item,
+      ...(extras.get(item.id) ?? { breakdown: null, patientObjection: null }),
+    }));
     this.logger.info(
       {
         operation: 'insurance.my-claims.read',

@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -12,6 +13,7 @@ import {
   HospitalsRepository,
   HospitalServiceLinesRepository,
   FacilityLicensesRepository,
+  OrgextReferencesRepository,
 } from '../repositories';
 import {
   CreateHospitalDto,
@@ -22,6 +24,11 @@ import {
   StatusResultDto,
 } from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
+import {
+  orgextNotAvailable,
+  requireOrgextResource,
+  resolveOwnerTenantId,
+} from '../organization_extensions.tenant-scope';
 
 /**
  * Casos de uso del ciclo de vida de un hospital y sus líneas de servicio:
@@ -42,6 +49,7 @@ export class OrgextHospitalsService {
    * @param hospitalsRepo - Valor de hospitals repo requerido por la operación.
    * @param serviceLinesRepo - Valor de service lines repo requerido por la operación.
    * @param licensesRepo - Valor de licenses repo requerido por la operación.
+   * @param references - Pertenencia de las prácticas, sedes y demás UUID ajenos del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -49,6 +57,7 @@ export class OrgextHospitalsService {
     private readonly hospitalsRepo: HospitalsRepository,
     private readonly serviceLinesRepo: HospitalServiceLinesRepository,
     private readonly licensesRepo: FacilityLicensesRepository,
+    private readonly references: OrgextReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrgextHospitalsService.name);
@@ -59,18 +68,29 @@ export class OrgextHospitalsService {
     dto: CreateHospitalDto,
     actor: AuthenticatedUser,
   ): Promise<HospitalResponseDto> {
+    const tenantId = resolveOwnerTenantId(dto.tenantId);
     this.logger.info(
       {
         operation: 'orgext.hospital.specialize',
-        tenantId: dto.tenantId,
+        tenantId,
         practiceId: dto.practiceId,
       },
       'Specializing practice as hospital',
     );
     return this.em.transactional(async (tx) => {
+      // La práctica es del tenant activo. Se comprueba antes del guard de
+      // unicidad: un 409 sobre una práctica ajena confirmaría que existe y
+      // dejaría a un tenant reservar la práctica de otro.
+      if (
+        !(await this.references.practiceInTenants(tx, dto.practiceId, [
+          tenantId,
+        ]))
+      ) {
+        throw orgextNotAvailable();
+      }
       const clash = await this.hospitalsRepo.findByTenantOrPractice(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.practiceId,
       );
       if (clash) {
@@ -84,14 +104,14 @@ export class OrgextHospitalsService {
         throw new ConflictException(
           'El tenant o el practice ya está especializado como hospital',
           {
-            tenantId: dto.tenantId,
+            tenantId,
             practiceId: dto.practiceId,
           },
         );
       }
 
       const hospital = this.hospitalsRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         practiceId: dto.practiceId,
         hospitalTypeConceptId:
           dto.hospitalTypeConceptId ?? ORGEXT.HOSPITAL_TYPE_GENERAL,
@@ -120,16 +140,18 @@ export class OrgextHospitalsService {
     dto: ActivateHospitalDto,
     actor: AuthenticatedUser,
   ): Promise<HospitalResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'orgext.hospital.activate', hospitalId },
       'Activating hospital',
     );
     return this.em.transactional(async (tx) => {
-      const hospital = await this.hospitalsRepo.findById(tx, hospitalId);
-      if (!hospital)
-        throw new ResourceNotFoundException('Hospital no encontrado', {
-          hospitalId,
-        });
+      const found = await this.hospitalsRepo.findByIdInTenant(
+        tx,
+        hospitalId,
+        tenantId,
+      );
+      const hospital = requireOrgextResource(found, found?.tenantId, tenantId);
 
       if (hospital.statusConceptId !== ORGEXT.HOSPITAL_DRAFT) {
         throw new PreconditionFailedException(
@@ -138,6 +160,29 @@ export class OrgextHospitalsService {
             hospitalId,
           },
         );
+      }
+
+      // Sede y perfil público que se fijan al activar: del tenant del hospital.
+      const ownTenant = [hospital.tenantId];
+      if (
+        dto.primaryPracticeSiteId &&
+        !(await this.references.practiceSiteInTenants(
+          tx,
+          dto.primaryPracticeSiteId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.publicProfileId &&
+        !(await this.references.publicProfileInTenants(
+          tx,
+          dto.publicProfileId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
       }
 
       const verifiedCount = await this.licensesRepo.countVerifiedForTenant(
@@ -180,21 +225,46 @@ export class OrgextHospitalsService {
     dto: CreateServiceLineDto,
     actor: AuthenticatedUser,
   ): Promise<ServiceLineResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'orgext.service-line.create', hospitalId },
       'Defining hospital service line',
     );
     return this.em.transactional(async (tx) => {
-      const hospital = await this.hospitalsRepo.findById(tx, hospitalId);
-      if (!hospital)
-        throw new ResourceNotFoundException('Hospital no encontrado', {
-          hospitalId,
-        });
+      const found = await this.hospitalsRepo.findByIdInTenant(
+        tx,
+        hospitalId,
+        tenantId,
+      );
+      const hospital = requireOrgextResource(found, found?.tenantId, tenantId);
 
       if (hospital.statusConceptId !== ORGEXT.HOSPITAL_ACTIVE) {
         throw new PreconditionFailedException('El hospital no está activo', {
           hospitalId,
         });
+      }
+
+      // Unidad clínica y servicio de salud de la línea: del tenant del hospital.
+      const ownTenant = [hospital.tenantId];
+      if (
+        dto.clinicalUnitId &&
+        !(await this.references.clinicalUnitInTenants(
+          tx,
+          dto.clinicalUnitId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.healthcareServiceId &&
+        !(await this.references.healthcareServiceInTenants(
+          tx,
+          dto.healthcareServiceId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
       }
 
       const line = this.serviceLinesRepo.create(tx, {
@@ -234,11 +304,19 @@ export class OrgextHospitalsService {
     lineId: string,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'orgext.service-line.retire', hospitalId, lineId },
       'Retiring service line',
     );
     return this.em.transactional(async (tx) => {
+      // El hospital de la ruta debe ser del tenant activo antes de tocar su línea.
+      const found = await this.hospitalsRepo.findByIdInTenant(
+        tx,
+        hospitalId,
+        tenantId,
+      );
+      requireOrgextResource(found, found?.tenantId, tenantId);
       const line = await this.serviceLinesRepo.findByIdForHospital(
         tx,
         lineId,

@@ -8,3 +8,6 @@ export * from './care-spaces.controller';
 export * from './clinical-units.controller';
 export * from './site-infrastructure.controller';
 export * from './infrastructure-catalog.controller';
+export * from './organization-practices.controller';
+export * from './practice-invitations.controller';
+export * from './practitioner-invitations.controller';

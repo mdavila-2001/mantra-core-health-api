@@ -317,15 +317,15 @@ export class CommunitySearchIndexService {
     const ids = rows.map((row) => row.id);
     const targetIds = rows.map((row) => row.targetId);
 
-    const [ratings, locations, specialties, badges, agenda] = await Promise.all(
-      [
+    const [ratings, locations, specialties, badges, agenda, inReview] =
+      await Promise.all([
         this.repo.ratingsByProfile(em, ids),
         this.repo.locationsByOwner(em, targetIds),
         this.repo.specialtiesByPractitioner(em, targetIds),
         this.repo.badgesByProfiles(em, ids),
         this.repo.agendaByPractitioner(em, targetIds),
-      ],
-    );
+        this.repo.practitionersInReview(em, targetIds),
+      ]);
 
     return rows.map((row) => ({
       id: row.id,
@@ -337,7 +337,11 @@ export class CommunitySearchIndexService {
         // El sello se calcula con el MISMO servicio que sirve el camino SQL:
         // si el índice derivara el estado por su cuenta, el mismo perfil se
         // vería verificado o vencido según quién respondiera la búsqueda.
-        this.verification.readBadge(row, badges.get(row.id) ?? []),
+        this.verification.readBadge(
+          row,
+          badges.get(row.id) ?? [],
+          inReview.has(row.targetId),
+        ),
         agenda.get(row.targetId) ?? null,
       ) as unknown as Record<string, unknown>,
     }));

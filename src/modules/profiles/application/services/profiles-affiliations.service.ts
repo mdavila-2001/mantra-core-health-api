@@ -221,7 +221,9 @@ export class ProfilesAffiliationsService {
   async initialState(
     em: EntityManager,
     practiceSiteId: string | undefined,
-    actor: AuthenticatedUser,
+    // Sólo se lee `tenantIds`: el alta pública del profesional también declara
+    // vínculos y todavía no tiene sesión —ni organizaciones propias—.
+    actor: Pick<AuthenticatedUser, 'tenantIds'>,
   ): Promise<string> {
     // Sin sede el vínculo no nombra ninguna organización de la plataforma: es
     // una línea de currículum. Nadie lo aprobó, así que decir «aprobado» sería

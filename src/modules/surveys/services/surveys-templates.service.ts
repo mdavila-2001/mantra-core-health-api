@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -9,7 +10,14 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { TemplatesRepository } from '../repositories';
+import {
+  AssignmentsRepository,
+  TargetsRepository,
+  TemplatesRepository,
+} from '../repositories';
+import { DEFAULT_RESPONSE_WINDOW_DAYS } from '../surveys.constants';
+import { SurveysErrorReason } from '../surveys.error-reasons';
+import { assertNotSystemTemplate } from '../surveys.system-guard';
 import {
   AddQuestionDto,
   CreateTemplateDto,
@@ -18,6 +26,7 @@ import {
   ReorderQuestionsDto,
   TemplateCreatedDto,
   TemplateDetailDto,
+  TemplateAssignmentDto,
   TemplateSummaryDto,
   OkResultDto,
   UpdateQuestionDto,
@@ -28,6 +37,7 @@ import {
   ANSWER_TYPE_CODE_BY_ID,
   ANSWER_TYPES_REQUIRING_OPTIONS,
   SURVEYS,
+  TARGET_TYPE_CODE_BY_ID,
   type AnswerTypeCode,
 } from '../surveys.concepts';
 import type {
@@ -47,9 +57,6 @@ interface QuestionShape {
   /** Máximo de la escala. */
   scaleMax?: number;
 }
-
-/** Plazo por defecto, en días, para responder una encuesta. */
-const DEFAULT_RESPONSE_WINDOW_DAYS = 30;
 
 /** Estado de plantilla expuesto por el contrato → concept id que lo respalda. */
 const TEMPLATE_STATUS_CODE_BY_ID: Readonly<
@@ -78,11 +85,15 @@ export class SurveysTemplatesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param templatesRepo - Acceso a plantillas, versiones y preguntas.
    * @param logger - Registro estructurado del módulo.
+   * @param assignmentsRepo - Acceso a asignaciones (a qué está asociada cada plantilla).
+   * @param targetsRepo - Nombres de los servicios a los que se asocia.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly templatesRepo: TemplatesRepository,
     private readonly logger: PinoLogger,
+    private readonly assignmentsRepo: AssignmentsRepository,
+    private readonly targetsRepo: TargetsRepository,
   ) {
     this.logger.setContext(SurveysTemplatesService.name);
   }
@@ -148,47 +159,66 @@ export class SurveysTemplatesService {
     templateId: string,
     actor: AuthenticatedUser,
   ): Promise<TemplateCreatedDto> {
-    return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
-      const latest = await this.templatesRepo.findLatestVersion(
-        tx,
-        template.id,
-      );
-      if (!latest) {
-        throw new ResourceNotFoundException('La plantilla no tiene versiones', {
-          templateId,
-        });
-      }
-      if (latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT) {
-        throw new ConflictException(
-          'Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra',
-          { templateId, versionNumber: latest.versionNumber },
+    return this.em
+      .transactional(async (tx) => {
+        const template = await this.loadMutableTemplate(tx, templateId, actor);
+        // Dos aperturas simultáneas leerían la misma «última versión» y
+        // numerarían igual: la plantilla se bloquea antes de leerla.
+        await this.templatesRepo.lockTemplate(tx, template.id);
+        const latest = await this.templatesRepo.findLatestVersion(
+          tx,
+          template.id,
         );
-      }
+        if (!latest) {
+          throw new ResourceNotFoundException(
+            'La plantilla no tiene versiones',
+            {
+              templateId,
+            },
+          );
+        }
+        if (latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT) {
+          throw new ConflictException(
+            'Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra',
+            { templateId, versionNumber: latest.versionNumber },
+          );
+        }
 
-      const version = this.templatesRepo.createVersion(tx, {
-        surveyTemplateId: template.id,
-        versionNumber: latest.versionNumber + 1,
-        publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
-        responseWindowDays: latest.responseWindowDays,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
+        const version = this.templatesRepo.createVersion(tx, {
+          surveyTemplateId: template.id,
+          versionNumber: latest.versionNumber + 1,
+          publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+          responseWindowDays: latest.responseWindowDays,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
 
-      this.logger.info(
-        {
-          operation: 'surveys.version.createNext',
-          templateId,
+        this.logger.info(
+          {
+            operation: 'surveys.version.createNext',
+            templateId,
+            versionNumber: version.versionNumber,
+          },
+          'Survey next version opened as draft',
+        );
+        return {
+          id: template.id,
+          versionId: version.id,
           versionNumber: version.versionNumber,
-        },
-        'Survey next version opened as draft',
-      );
-      return {
-        id: template.id,
-        versionId: version.id,
-        versionNumber: version.versionNumber,
-      };
-    });
+        };
+      })
+      .catch((error: unknown) => {
+        // Si el modelo respalda `(plantilla, número de versión)`, la violación
+        // es que otra apertura ganó la carrera: un conflicto, no un 500.
+        if (error instanceof UniqueConstraintViolationException) {
+          throw new ConflictException(
+            'Otra solicitud abrió la versión siguiente; vuelva a consultar la plantilla',
+            { templateId },
+            SurveysErrorReason.VERSION_NUMBER_TAKEN,
+          );
+        }
+        throw error;
+      });
   }
 
   /** Agrega una pregunta a la versión en borrador de la plantilla. */
@@ -200,7 +230,7 @@ export class SurveysTemplatesService {
     this.validateQuestionShape(dto);
 
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
 
       const position =
@@ -210,7 +240,9 @@ export class SurveysTemplatesService {
         position,
         questionText: dto.questionText,
         answerTypeConceptId: ANSWER_TYPE_BY_CODE[dto.answerType],
-        required: dto.required ?? false,
+        // Las preguntas del profesional son siempre opcionales: el servidor
+        // ignora `required`. Las obligatorias son las de la encuesta base.
+        required: false,
         options: dto.answerType === 'TEXT' ? undefined : dto.options,
         scaleMin: dto.answerType === 'SCALE' ? (dto.scaleMin ?? 1) : undefined,
         scaleMax: dto.answerType === 'SCALE' ? (dto.scaleMax ?? 5) : undefined,
@@ -240,7 +272,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
 
       if (dto.title !== undefined) template.title = dto.title;
@@ -278,7 +310,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
       const question = await this.loadDraftQuestion(tx, version, questionId);
 
@@ -306,7 +338,8 @@ export class SurveysTemplatesService {
 
       if (dto.questionText !== undefined)
         question.questionText = dto.questionText;
-      if (dto.required !== undefined) question.required = dto.required;
+      // Siempre opcional, venga lo que venga en `dto.required` (ver `addQuestion`).
+      question.required = false;
       question.answerTypeConceptId = ANSWER_TYPE_BY_CODE[answerType];
       question.options = options;
       question.scaleMin = scaleMin;
@@ -332,7 +365,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
       const question = await this.loadDraftQuestion(tx, version, questionId);
 
@@ -361,7 +394,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
       const current = await this.templatesRepo.listQuestions(tx, version.id);
       const byId = new Map(current.map((q) => [q.id, q]));
@@ -397,7 +430,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.templatesRepo.findVersionByNumber(
         tx,
         template.id,
@@ -473,7 +506,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       if (template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE) {
         throw new ConflictException('La plantilla ya está desactivada', {
           templateId,
@@ -556,7 +589,81 @@ export class SurveysTemplatesService {
       effectiveFrom: version.effectiveFrom,
       effectiveTo: version.effectiveTo,
       questions: questions.map((q) => this.toQuestionDto(q)),
+      assignments: await this.listAssignments(template.id),
     };
+  }
+
+  /**
+   * A qué está asociada la encuesta: sus asignaciones ACTIVAS, de cualquiera de
+   * sus versiones (una versión nueva no hereda las del borrador anterior, así
+   * que la encuesta puede seguir repartiéndose por una asignación de la versión
+   * vieja). Si una misma cosa figura en dos versiones se informa la más alta,
+   * que es la que se reparte. El servicio lleva su nombre del catálogo, para que
+   * el cliente no tenga que resolver el identificador.
+   */
+  private async listAssignments(
+    templateId: string,
+  ): Promise<TemplateAssignmentDto[]> {
+    const versions = await this.templatesRepo.listVersions(this.em, templateId);
+    const numberOf = new Map(versions.map((v) => [v.id, v.versionNumber]));
+    const active = await this.assignmentsRepo.listActiveByVersions(
+      this.em,
+      versions.map((v) => v.id),
+    );
+
+    const byTarget = new Map<string, (typeof active)[number]>();
+    for (const assignment of active) {
+      const key = `${assignment.targetTypeConceptId}:${assignment.targetId}`;
+      const kept = byTarget.get(key);
+      if (
+        !kept ||
+        (numberOf.get(assignment.surveyVersionId) ?? 0) >
+          (numberOf.get(kept.surveyVersionId) ?? 0)
+      ) {
+        byTarget.set(key, assignment);
+      }
+    }
+
+    const picked = [...byTarget.values()].filter(
+      (a) => TARGET_TYPE_CODE_BY_ID[a.targetTypeConceptId] !== undefined,
+    );
+    const names = await this.targetsRepo.findServiceNames(
+      this.em,
+      picked
+        .filter((a) => a.targetTypeConceptId === SURVEYS.TARGET_SERVICE)
+        .map((a) => a.targetId),
+    );
+    return picked.map((a) => ({
+      id: a.id,
+      targetType: TARGET_TYPE_CODE_BY_ID[a.targetTypeConceptId],
+      targetId: a.targetId,
+      targetName:
+        a.targetTypeConceptId === SURVEYS.TARGET_SERVICE
+          ? (names.get(a.targetId) ?? null)
+          : null,
+      active: a.active,
+    }));
+  }
+
+  /**
+   * Carga la plantilla para **modificarla**: además de la pertenencia, exige
+   * que no sea la encuesta base del sistema.
+   *
+   * La guarda va antes que la comprobación de dueño y responde 403: la plantilla
+   * de sistema no es de ningún profesional, y sin ella el 404 de «no es suya»
+   * ocultaría que la regla es otra. Es defensa en profundidad —ningún
+   * profesional es dueño de una plantilla de sistema—, no el único freno.
+   */
+  private async loadMutableTemplate(
+    em: EntityManager,
+    templateId: string,
+    actor: AuthenticatedUser,
+  ): Promise<SurveyTemplates> {
+    const template = await this.templatesRepo.findTemplateById(em, templateId);
+    if (template && template.tenantId === requireTenantId()) {
+      assertNotSystemTemplate(template, templateId);
+    }
+    return this.loadOwnedTemplate(em, templateId, actor);
   }
 
   /**

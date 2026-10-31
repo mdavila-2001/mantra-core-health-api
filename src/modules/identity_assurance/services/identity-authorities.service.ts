@@ -3,11 +3,15 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { IntegrationEndpoints } from '../../integrations/entities/integration_endpoints.entity';
+import { ProviderConnections } from '../../integrations/entities/provider_connections.entity';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { IDA } from '../identity_assurance.concepts';
+import { IdentityAssuranceErrorReason } from '../identity_assurance.error-reasons';
 import {
   IdentityAuthoritiesRepository,
   IdentityAuthorityEndpointsRepository,
@@ -56,9 +60,12 @@ export class IdentityAuthoritiesService {
       },
       'Registering identity authority',
     );
+    // El tenant sale del contexto autenticado, nunca del cuerpo: el interceptor
+    // rechaza un `dto.tenantId` contradictorio y acá se ignora el declarado.
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const authority = this.authoritiesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         authorityCode: dto.authorityCode,
         name: dto.name,
         authorityTypeConceptId: dto.authorityTypeConceptId,
@@ -88,14 +95,24 @@ export class IdentityAuthoritiesService {
       { operation: 'ida.authority.endpoint', actorId: actor.id, authorityId },
       'Adding identity authority endpoint',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const authority = await this.authoritiesRepo.findById(tx, authorityId);
-      if (!authority) {
-        throw new ResourceNotFoundException(
-          'Autoridad de identidad no encontrada',
-          { authorityId },
-        );
-      }
+      // Autoridad ajena e inexistente responden igual (404 uniforme).
+      const found = await this.authoritiesRepo.findById(tx, authorityId);
+      const authority = assertResourceInTenant(
+        found,
+        found?.tenantId,
+        tenantId,
+        {
+          message: 'Autoridad de identidad no encontrada',
+          reason: IdentityAssuranceErrorReason.AUTHORITY_NOT_AVAILABLE,
+        },
+      );
+      await this.assertEndpointInTenant(
+        tx,
+        dto.integrationEndpointId,
+        tenantId,
+      );
 
       const endpoint = this.endpointsRepo.create(tx, {
         identityAuthorityId: authority.id,
@@ -115,6 +132,36 @@ export class IdentityAuthoritiesService {
         status: endpoint.statusConceptId,
         createdAt: endpoint.createdAt,
       };
+    });
+  }
+
+  /**
+   * El endpoint de integración tiene que ser alcanzable por el tenant: su
+   * proveedor debe tener una conexión del tenant (`provider_connections`). El
+   * endpoint en sí es de catálogo; lo que es del tenant es la conexión.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param integrationEndpointId - Endpoint de integración citado.
+   * @param tenantId - Tenant activo.
+   * @throws ResourceNotFoundException `IDENTITY_ENDPOINT_NOT_AVAILABLE`, igual para ajeno e inexistente.
+   */
+  private async assertEndpointInTenant(
+    tx: EntityManager,
+    integrationEndpointId: string,
+    tenantId: string,
+  ): Promise<void> {
+    const endpoint = await tx.findOne(IntegrationEndpoints, {
+      id: integrationEndpointId,
+    });
+    const connection = endpoint
+      ? await tx.findOne(ProviderConnections, {
+          providerId: endpoint.providerId,
+          tenantId,
+        })
+      : null;
+    assertResourceInTenant(endpoint, connection?.tenantId, tenantId, {
+      message: 'Endpoint de integración no encontrado',
+      reason: IdentityAssuranceErrorReason.ENDPOINT_NOT_AVAILABLE,
     });
   }
 }

@@ -9,12 +9,15 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopPreopService } from './periop-preop.service';
+import { PeriopReacceptanceService } from './periop-reacceptance.service';
 import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
 const actor = { id: 'user-1', roles: ['ANESTHESIOLOGIST'] };
 const CASE = '11111111-1111-1111-1111-111111111111';
@@ -23,6 +26,45 @@ const CHECKLIST = '33333333-3333-3333-3333-333333333333';
 const PLAN = '44444444-4444-4444-4444-444444444444';
 const ORDER = '55555555-5555-5555-5555-555555555555';
 const ITEM = '66666666-6666-6666-6666-666666666666';
+const TENANT_A = '11111111-1111-1111-1111-111111111111';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/**
+ * Mock de una consulta de casos por id. Los casos de prueba son del tenant
+ * activo (`TENANT_A`) salvo que el propio caso declare otro `custodianTenantId`.
+ *
+ * @returns Un `jest.fn` cuyo `mockResolvedValue` sella el tenant del caso.
+ */
+function caseLookupMock(): any {
+  const lookup = mockFn();
+  const resolve = lookup.mockResolvedValue.bind(lookup);
+  lookup.mockResolvedValue = (row: any) =>
+    resolve(
+      row && typeof row === 'object' && row.custodianTenantId === undefined
+        ? Object.assign(row, { custodianTenantId: TENANT_A })
+        : row,
+    );
+  return lookup;
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -51,13 +93,25 @@ function build() {
     createAirwayAssessment: mockFn(),
     createAnesthesiaEvent: mockFn(),
   };
-  const casesRepo = {
-    findCaseForUpdate: mockFn(),
+  const casesRepo: Record<string, any> = {
+    findCaseForUpdate: caseLookupMock(),
+    // Sin bloqueo: por defecto devuelve el mismo caso que la lectura bloqueada.
+    findCaseById: mockFn((...args: unknown[]) =>
+      casesRepo.findCaseForUpdate(...args),
+    ),
     createMilestone: mockFn(),
     findMilestone: mockFn(),
     createStatusHistory: mockFn(),
     createUtilizationEvent: mockFn(),
+    // API#840: la valoración revisa las aceptaciones del equipo.
+    findTeamByCase: mockFn().mockResolvedValue([]),
   };
+  const outbox = {
+    publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
+  };
+  // Por defecto el caso existe y es del tenant activo; los tests que prueban su
+  // ausencia o un caso ajeno lo sobreescriben.
+  casesRepo.findCaseForUpdate.mockResolvedValue({ id: CASE });
   // El alta de la orden clínica que la orden preoperatoria referencia.
   const serviceRequests = {
     create: mockFn().mockResolvedValue({ id: 'sr-1' }),
@@ -68,9 +122,19 @@ function build() {
     preopRepo,
     casesRepo as any,
     serviceRequests as any,
+    new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
   );
-  return { service, serviceRequests, tx, preopRepo, casesRepo, logger };
+  return {
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    serviceRequests,
+    outbox,
+    tx,
+    preopRepo,
+    casesRepo,
+    logger,
+  };
 }
 
 /**
@@ -127,6 +191,58 @@ describe('PeriopPreopService', () => {
         fitnessStatusConceptId: CONCEPTS.FITNESS_FIT,
         milestoneId: 'milestone-1',
       });
+    });
+
+    it('registrar los riesgos tras la aceptación del equipo la invalida (API#840)', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        scheduledCase({
+          statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+          custodianTenantId: TENANT_A,
+        }),
+      );
+      const member: any = {
+        id: 'm-1',
+        statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        acceptedAt: new Date('2026-08-20T09:00:00Z'),
+      };
+      d.casesRepo.findTeamByCase.mockResolvedValue([member]);
+
+      await d.service.createAssessment(CASE, dto(), actor);
+
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+      expect(member.acceptedAt).toBeUndefined();
+      expect(d.casesRepo.createStatusHistory).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
+          reasonText: expect.stringContaining('identifiedRisks'),
+        }),
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          eventType: 'periop.case.reacceptance_required',
+          payloadJson: expect.objectContaining({
+            changedFields: ['identifiedRisks'],
+            acceptancesInvalidated: 1,
+          }),
+        }),
+      );
+    });
+
+    it('sin aceptaciones previas la valoración no genera aviso (API#840)', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        { id: 'm-1', statusConceptId: CONCEPTS.TEAM_ASSIGNED },
+      ]);
+
+      await d.service.createAssessment(CASE, dto(), actor);
+
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
     });
 
     it('stores the risk scores with their model and version', async () => {
@@ -682,5 +798,194 @@ describe('PeriopPreopService', () => {
       expect(res.milestoneId).toBeUndefined();
       expect(d.casesRepo.createMilestone).not.toHaveBeenCalled();
     });
+  });
+});
+
+/** Aserciones del 404 uniforme de PERIOP-01. */
+async function expectNotFound(
+  promise: Promise<unknown>,
+  message: string,
+  reason: string,
+) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(reason);
+  return exception;
+}
+
+describe('PeriopPreopService · alcance de tenant (PERIOP-01)', () => {
+  const CASE_REASON = ProceduresPerioperativeErrorReason.PERIOP_CASE_NOT_FOUND;
+  const REVIEWED_DTO: any = {
+    fitnessStatus: 'FIT',
+    allergiesReviewed: true,
+    medicationsReviewed: true,
+  };
+  const foreignCase = (): any => ({
+    id: CASE,
+    custodianTenantId: TENANT_B,
+    statusConceptId: CONCEPTS.CASE_SCHEDULED,
+  });
+
+  it('crear la valoración preoperatoria en el caso de otro tenant: 404 uniforme, sin persistir', async () => {
+    const d = build();
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(foreignCase());
+
+    const foreign = await expectNotFound(
+      d.service.createAssessment(CASE, REVIEWED_DTO, actor),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(null);
+    const missing = await expectNotFound(
+      d.service.createAssessment(CASE, REVIEWED_DTO, actor),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+
+    expect(foreign.getResponse()).toEqual(missing.getResponse());
+    expect(d.preopRepo.createAssessment).not.toHaveBeenCalled();
+    expect(d.preopRepo.createRiskScore).not.toHaveBeenCalled();
+  });
+
+  it('el tenant del contexto viaja a la consulta que bloquea el caso', async () => {
+    const d = build();
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(null);
+
+    await expectNotFound(
+      d.service.createAssessment(CASE, REVIEWED_DTO, actor),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+
+    expect(d.casesRepo.findCaseForUpdate).toHaveBeenCalledWith(
+      d.tx,
+      CASE,
+      TENANT_A,
+    );
+  });
+
+  it('sin tenant en el contexto no se toca el caso', async () => {
+    const d = build();
+
+    await expect(
+      d.raw.createAssessment(CASE, REVIEWED_DTO, actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.casesRepo.findCaseForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('aprobar el plan de anestesia de un caso de otro tenant: 404 uniforme; el plan de B no cambia', async () => {
+    const d = build();
+    const plan: any = {
+      id: PLAN,
+      procedureCaseId: CASE,
+      statusConceptId: CONCEPTS.PLAN_DRAFT,
+    };
+    d.preopRepo.findAnesthesiaPlanForUpdate.mockResolvedValue(plan);
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(foreignCase());
+
+    await expectNotFound(
+      d.service.approveAnesthesiaPlan(CASE, PLAN, actor),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+
+    expect(plan.statusConceptId).toBe(CONCEPTS.PLAN_DRAFT);
+    expect(d.preopRepo.findAnesthesiaPlanForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('un plan de un caso de otro tenant no se revela como «de otro caso»: 404 del plan', async () => {
+    const d = build();
+    d.casesRepo.findCaseForUpdate.mockResolvedValue({ id: CASE });
+    d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+    d.preopRepo.findAnesthesiaPlanForUpdate.mockResolvedValue({
+      id: PLAN,
+      procedureCaseId: 'caso-de-b',
+      statusConceptId: CONCEPTS.PLAN_DRAFT,
+    });
+
+    await expectNotFound(
+      d.service.approveAnesthesiaPlan(CASE, PLAN, actor),
+      'Plan de anestesia no encontrado',
+      ProceduresPerioperativeErrorReason.ANESTHESIA_PLAN_NOT_FOUND,
+    );
+  });
+
+  it('responder el checklist con el UUID de un caso de otro tenant: 404 del caso; el checklist de B no cambia', async () => {
+    const d = build();
+    const checklist: any = {
+      id: CHECKLIST,
+      procedureCaseId: CASE,
+      statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+    };
+    d.preopRepo.findChecklistForUpdate.mockResolvedValue(checklist);
+    d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+
+    await expectNotFound(
+      d.service.submitChecklistPhase(
+        CASE,
+        CHECKLIST,
+        {
+          phase: 'TIME_OUT' as const,
+          respondedByProfileId: PROFILE,
+          responses: [
+            {
+              itemId: ITEM,
+              status: 'CONFIRMED' as const,
+              responseBoolean: true,
+            },
+          ],
+        } as any,
+        actor,
+      ),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+
+    expect(d.preopRepo.findChecklistForUpdate).not.toHaveBeenCalled();
+    expect(d.preopRepo.createResponse).not.toHaveBeenCalled();
+  });
+
+  it('un checklist de un caso de otro tenant no se revela como «de otro caso»: 404 del checklist', async () => {
+    const d = build();
+    d.casesRepo.findCaseById.mockImplementation((_tx: unknown, id: string) =>
+      Promise.resolve(
+        id === CASE
+          ? { id: CASE, custodianTenantId: TENANT_A }
+          : { id, custodianTenantId: TENANT_B },
+      ),
+    );
+    d.preopRepo.findChecklistForUpdate.mockResolvedValue({
+      id: CHECKLIST,
+      procedureCaseId: 'caso-de-b',
+      statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+    });
+
+    await expectNotFound(
+      d.service.submitChecklistPhase(
+        CASE,
+        CHECKLIST,
+        {
+          phase: 'TIME_OUT' as const,
+          respondedByProfileId: PROFILE,
+          responses: [
+            {
+              itemId: ITEM,
+              status: 'CONFIRMED' as const,
+              responseBoolean: true,
+            },
+          ],
+        } as any,
+        actor,
+      ),
+      'Checklist no encontrado',
+      ProceduresPerioperativeErrorReason.CHECKLIST_NOT_FOUND,
+    );
+    expect(d.preopRepo.createResponse).not.toHaveBeenCalled();
   });
 });

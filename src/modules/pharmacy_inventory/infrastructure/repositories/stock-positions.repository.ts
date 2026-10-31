@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { InventoryStockPositions } from '../../entities';
 
 /** Clave lógica de una posición de stock (ubicación + producto + lote). */
@@ -124,5 +125,29 @@ export class StockPositionsRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * Cuántas posiciones **con lote** tiene un producto en las ubicaciones
+   * activas de una sede. Con lotes, la existencia la llevan las recepciones y
+   * los conteos, no el interruptor por sede.
+   */
+  async countLotPositionsInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+    pharmacyProductId: string,
+  ): Promise<number> {
+    const rows = await em.execute<{ total: string | number }[]>(
+      `select count(*) as total
+         from pharmacy_inventory.inventory_locations loc
+         join pharmacy_inventory.inventory_stock_positions st
+           on st.inventory_location_id = loc.id
+        where loc.pharmacy_site_id = ?
+          and loc.status_concept_id = ?
+          and st.pharmacy_product_id = ?
+          and st.inventory_lot_id is not null`,
+      [pharmacySiteId, PINV.LOCATION_ACTIVE, pharmacyProductId],
+    );
+    return Number(rows?.[0]?.total ?? 0);
   }
 }
