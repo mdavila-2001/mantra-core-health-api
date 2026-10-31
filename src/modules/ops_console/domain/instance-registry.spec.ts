@@ -33,7 +33,7 @@ describe('instance-registry', () => {
   it('U24: los workers del registro son exactamente los entrypoints src/worker-*.ts', () => {
     const registry = WORKER_INSTANCES.map((w) => w.id).sort();
     expect(registry).toEqual(workerIdsOnDisk());
-    expect(registry).toHaveLength(26);
+    expect(registry).toHaveLength(27);
   });
 
   it('U24: y los servicios worker-* de docker-compose.yml', () => {
@@ -79,12 +79,12 @@ describe('instance-registry', () => {
     ]);
   });
 
-  it('buildInstanceRegistry marca requeridos sólo los workers indicados y conserva 34 instancias sin repetir ids', () => {
+  it('buildInstanceRegistry marca requeridos sólo los workers indicados y conserva 35 instancias sin repetir ids', () => {
     const registry = buildInstanceRegistry(
       new Set(['worker-messaging', 'worker-scheduling']),
     );
-    expect(registry).toHaveLength(34);
-    expect(new Set(registry.map((i) => i.id)).size).toBe(34);
+    expect(registry).toHaveLength(35);
+    expect(new Set(registry.map((i) => i.id)).size).toBe(35);
     expect(registry[0].id).toBe('api');
     expect(
       registry

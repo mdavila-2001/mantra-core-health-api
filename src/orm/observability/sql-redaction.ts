@@ -42,12 +42,55 @@ export function statementClass(sql: string): StatementClass {
  */
 export function normalizeSql(sql: string): string {
   return sql
-    .replace(/'(?:[^']|'')*'/g, '?')
+    .replace(LEXEME, (match: string) =>
+      match.startsWith('--') || match.startsWith('/*') ? ' ' : '?',
+    )
     .replace(/\$\d+/g, '?')
     .replace(/\b\d+(?:\.\d+)?\b/g, '?')
     .replace(/\(\s*\?(?:\s*,\s*\?)*\s*\)/g, '(?)')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/**
+ * Lo que puede esconder un valor dentro del SQL, leído de izquierda a derecha
+ * en UNA pasada (un `--` dentro de una cadena no es un comentario, ni una
+ * comilla dentro de un comentario abre una cadena):
+ *  - comentarios de línea (`--`) y de bloque (el sin cerrar llega al final);
+ *  - cadenas con escapes `E'…\'…'`;
+ *  - cadenas `'…'` con `''`;
+ *  - cadenas con dólar `$tag$…$tag$`.
+ * Una cadena SIN cerrar se come hasta el final: sobre-redacta antes que filtrar.
+ */
+const LEXEME =
+  /--[^\n]*|\/\*[\s\S]*?(?:\*\/|$)|(?<![\w$])[eE]'(?:[^'\\]|\\[\s\S]|'')*(?:'|$)|'(?:[^']|'')*(?:'|$)|\$([A-Za-z_]\w*)?\$[\s\S]*?(?:\$\1\$|$)/g;
+
+/** Tope de entrada que se normaliza; más allá no se intenta leerla. */
+export const MAX_SQL_INPUT_CHARS = 200_000;
+export const TRUNCATED_SQL = '[truncated]';
+
+/**
+ * Forma normalizada apta para GUARDAR: se normaliza la sentencia COMPLETA
+ * (nunca se corta antes: un corte puede dejar una cadena sin cerrar) y recién
+ * después se acota. Si queda cualquier comilla, marca de comentario o cadena
+ * con dólar, o la entrada es desmedida, se devuelve `[truncated]`.
+ */
+export function storableNormalizedSql(sql: string, maxChars: number): string {
+  if (typeof sql !== 'string' || sql.length > MAX_SQL_INPUT_CHARS) {
+    return TRUNCATED_SQL;
+  }
+  const normalized = normalizeSql(sql);
+  if (/['"]?\$[A-Za-z_]*\$|'|--|\/\*|\*\//.test(normalized)) {
+    return TRUNCATED_SQL;
+  }
+  return normalized.length > maxChars
+    ? `${normalized.slice(0, maxChars)}…`
+    : normalized;
+}
+
+/** Huella de una forma YA normalizada. */
+export function shapeHashOfNormalized(normalized: string): string {
+  return createHash('sha256').update(normalized).digest('hex').slice(0, 12);
 }
 
 /** Huella corta y estable de la forma de la consulta (no del contenido). */

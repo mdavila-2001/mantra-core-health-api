@@ -795,6 +795,14 @@ services:
       # que el reinicio fuera un OOM. Acotar el montón es correcto de todos
       # modos: hoy no hay ningún límite.
       NODE_OPTIONS: '--max-old-space-size=1024'
+      # Medición de peticiones HTTP, sólo en la API (es quien recibe el tráfico;
+      # los workers no la necesitan). El código la deja apagada por defecto y sin
+      # esto `GET /admin/ops/traffic` sale vacío en producción. Cuenta por minuto
+      # y por plantilla de ruta, nunca la URL real ni el usuario, y la vuelca a
+      # `time_series.service_sli_series`. Un valor inválido hace fallar el arranque.
+      OBSERVABILITY_HTTP_SLI_ENABLED: ${OBSERVABILITY_HTTP_SLI_ENABLED:-true}
+      OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS: ${OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS:-60}
+      TELEMETRY_IDEMPOTENCY_SECRET: ${TELEMETRY_IDEMPOTENCY_SECRET:-}
     deploy:
       resources: *api-resources
     volumes:

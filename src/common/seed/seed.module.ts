@@ -58,6 +58,7 @@ import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
+import { FrontendRoutesSeedService } from '../../modules/read_models/seed/frontend-routes-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -210,6 +211,7 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,
+    FrontendRoutesSeedService,
   ],
   exports: [
     SeedBootstrapService,

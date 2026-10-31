@@ -6,6 +6,7 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
+import { readCursorFields } from '../../../common/pagination/keyset-fields';
 import { normalizeTemplate } from '../../../observability/route-index/route-index.service';
 import {
   RouteMetadataService,
@@ -353,8 +354,8 @@ function rango(
 
 function cursorDe(cursor: string | undefined): TimeCursor | undefined {
   if (!cursor) return undefined;
-  const k = decodeKeysetCursor(cursor);
-  if (typeof k.t !== 'string' || typeof k.i !== 'string')
-    throw new BadRequestException('El cursor de paginación no es válido');
-  return { t: k.t, i: k.i };
+  return readCursorFields(decodeKeysetCursor(cursor), {
+    t: 'timestamp',
+    i: 'uuid',
+  });
 }

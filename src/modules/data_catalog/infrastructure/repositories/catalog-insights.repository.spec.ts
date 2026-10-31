@@ -163,4 +163,49 @@ describe('CatalogInsightsRepository (SQL generado, sin base real)', () => {
       expect(llamadas[0].sql).not.toMatch(/limit \?/);
     });
   });
+
+  describe('piiReconciliation', () => {
+    it('parámetros alineados, orden total, entrada fuera del SQL y limit+1', async () => {
+      const { em, llamadas } = emQueRegistra();
+      await new CatalogInsightsRepository().piiReconciliation(em, {
+        kind: 'ORPHAN_IN_REGISTRY',
+        schema: INYECCION,
+        cursor: { s: 'iam', o: 'users', c: 'email', k: 'MISSING_IN_REGISTRY' },
+        limit: 30,
+      });
+      const { sql, params } = llamadas[0];
+      expect(placeholders(sql)).toBe(params.length);
+      expect(sql).not.toContain('drop table');
+      expect(params).toContain(INYECCION);
+      expect(params.at(-1)).toBe(31);
+      expect(sql).toContain(
+        'order by schema_name, object_name, column_name, kind',
+      );
+      expect(sql).toContain(
+        '(schema_name, object_name, column_name, kind) > (?, ?, ?, ?)',
+      );
+    });
+
+    it('los huérfanos sólo se calculan si el catálogo observó algo', async () => {
+      const { em, llamadas } = emQueRegistra();
+      await new CatalogInsightsRepository().piiReconciliation(em, { limit: 1 });
+      expect(llamadas[0].sql).toMatch(
+        /where exists \(select 1 from data_catalog\.catalog_objects oo/,
+      );
+      expect(llamadas[0].sql).toContain(
+        "a.review_status = 'APPROVED' and a.approved_revision_no = a.current_revision_no",
+      );
+    });
+
+    it('conteos y bases son select parametrizados y no seleccionan valores', async () => {
+      const { em, llamadas } = emQueRegistra();
+      const repo = new CatalogInsightsRepository();
+      await repo.piiReconciliationCounts(em, { schema: 'iam' });
+      await repo.piiReconciliationTotals(em);
+      for (const { sql, params } of llamadas) {
+        expect(placeholders(sql)).toBe(params.length);
+        expect(sql.trim().toLowerCase()).toMatch(/^(with|select) /);
+      }
+    });
+  });
 });

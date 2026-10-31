@@ -11,7 +11,10 @@ import type { AnalyticsWindow } from '../../domain/analytics-window';
  * los eventos (ver `sessionInTenant` y `rowInTenant`).
  */
 export interface AnalyticsScope {
-  tenantId: string;
+  /** Ausente = alcance plataforma (agrega entre organizaciones; ver `analytics-scope.ts`). */
+  tenantId?: string;
+  /** Sólo en alcance plataforma: tamaño mínimo de muestra para mostrar un grupo. */
+  minSample?: number;
   window: AnalyticsWindow;
   portalConceptId?: string;
 }
@@ -38,6 +41,8 @@ export interface DeviceBreakdownRow {
   code: string;
   label: string;
   contexts: number;
+  /** Sesiones distintas del grupo: el tamaño de muestra para suprimir en alcance plataforma. */
+  sample?: number;
 }
 
 /** Máximo de eventos en el timeline de una sesión. */
@@ -73,6 +78,7 @@ export class TelemetryAnalyticsRepository {
   private eventScope(column: string, scope: AnalyticsScope, alias = '') {
     const base = this.scope(column, scope, alias);
     const prefix = alias ? `${alias}.` : '';
+    if (!scope.tenantId) return base;
     return {
       where: `${base.where} AND ${prefix}tenant_id = ?`,
       params: [...base.params, scope.tenantId],
@@ -86,7 +92,8 @@ export class TelemetryAnalyticsRepository {
    *
    * @param column - Columna **calificada** con el `session_id` de la fila externa.
    */
-  private sessionInTenant(column: string, tenantId: string) {
+  private sessionInTenant(column: string, tenantId?: string) {
+    if (!tenantId) return { sql: 'TRUE', params: [] as unknown[] };
     return {
       sql: `(EXISTS (SELECT 1 FROM telemetry.user_activity_events te
                       WHERE te.session_id = ${column} AND te.tenant_id = ?)
@@ -109,8 +116,9 @@ export class TelemetryAnalyticsRepository {
   private rowInTenant(
     eventColumn: string,
     journeyColumn: string,
-    tenantId: string,
+    tenantId?: string,
   ) {
+    if (!tenantId) return { sql: 'TRUE', params: [] as unknown[] };
     const session = this.sessionInTenant('vj.session_id', tenantId);
     return {
       sql: `(CASE WHEN ${eventColumn} IS NOT NULL
@@ -131,12 +139,14 @@ export class TelemetryAnalyticsRepository {
       subjects: number;
       page_views: number;
       last_event_at: Date | null;
+      sample: number;
     }>(
       `SELECT count(*)::int AS events,
               count(DISTINCT session_id)::int AS sessions,
               count(DISTINCT analytics_subject_id)::int AS subjects,
-              count(*) FILTER (WHERE event_name = 'page_view')::int AS page_views,
-              max(occurred_at) AS last_event_at
+              count(*) FILTER (WHERE event_name IN ('pagina_vista', 'page_view'))::int AS page_views,
+              max(occurred_at) AS last_event_at,
+              count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
          FROM telemetry.user_activity_events
         WHERE ${where}`,
       params,
@@ -145,9 +155,11 @@ export class TelemetryAnalyticsRepository {
       route: string;
       events: number;
       sessions: number;
+      sample: number;
     }>(
       `SELECT coalesce(route_template, '(sin ruta)') AS route,
-              count(*)::int AS events, count(DISTINCT session_id)::int AS sessions
+              count(*)::int AS events, count(DISTINCT session_id)::int AS sessions,
+              count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
          FROM telemetry.user_activity_events
         WHERE ${where}
         GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT ${TOP_LIMIT}`,
@@ -157,8 +169,10 @@ export class TelemetryAnalyticsRepository {
       event_name: string;
       events: number;
       sessions: number;
+      sample: number;
     }>(
-      `SELECT event_name, count(*)::int AS events, count(DISTINCT session_id)::int AS sessions
+      `SELECT event_name, count(*)::int AS events, count(DISTINCT session_id)::int AS sessions,
+              count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
          FROM telemetry.user_activity_events
         WHERE ${where}
         GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT ${TOP_LIMIT}`,
@@ -171,19 +185,21 @@ export class TelemetryAnalyticsRepository {
   timeseries(scope: AnalyticsScope) {
     const { where, params } = this.eventScope('occurred_at', scope);
     const unit = scope.window.interval;
-    return this.sql<{ bucket: Date; events: number; sessions: number }>(
+    return this.sql<{ bucket: Date; events: number; sessions: number; sample: number }>(
       `WITH buckets AS (
          SELECT generate_series(date_trunc('${unit}', ?::timestamptz, 'UTC'),
                                 ?::timestamptz - interval '1 microsecond',
                                 interval '1 ${unit}') AS bucket
        ), counts AS (
          SELECT date_trunc('${unit}', occurred_at, 'UTC') AS bucket,
-                count(*)::int AS events, count(DISTINCT session_id)::int AS sessions
+                count(*)::int AS events, count(DISTINCT session_id)::int AS sessions,
+                count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
            FROM telemetry.user_activity_events
           WHERE ${where}
           GROUP BY 1
        )
-       SELECT b.bucket, coalesce(c.events, 0) AS events, coalesce(c.sessions, 0) AS sessions
+       SELECT b.bucket, coalesce(c.events, 0) AS events, coalesce(c.sessions, 0) AS sessions,
+              coalesce(c.sample, 0) AS sample
          FROM buckets b LEFT JOIN counts c ON c.bucket = b.bucket
         ORDER BY b.bucket`,
       [scope.window.from, scope.window.to, ...params],
@@ -207,11 +223,13 @@ export class TelemetryAnalyticsRepository {
     const percentiles = await this.sql<{
       metric_concept_id: string;
       samples: number;
+      subjects: number;
       p50: string | null;
       p75: string | null;
       p95: string | null;
     }>(
       `SELECT w.metric_concept_id, count(*)::int AS samples,
+              count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects,
               percentile_cont(0.50) WITHIN GROUP (ORDER BY w.metric_value)::text AS p50,
               percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75,
               percentile_cont(0.95) WITHIN GROUP (ORDER BY w.metric_value)::text AS p95
@@ -225,8 +243,10 @@ export class TelemetryAnalyticsRepository {
       metric_concept_id: string;
       rating_concept_id: string | null;
       n: number;
+      subjects: number;
     }>(
-      `SELECT w.metric_concept_id, w.rating_concept_id, count(*)::int AS n
+      `SELECT w.metric_concept_id, w.rating_concept_id, count(*)::int AS n,
+              count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects
          FROM telemetry.web_vitals w
         WHERE ${filter}
         GROUP BY 1, 2`,
@@ -243,8 +263,9 @@ export class TelemetryAnalyticsRepository {
       'w.session_journey_id',
       scope.tenantId,
     );
-    return this.sql<{ route: string; samples: number; p75: string | null }>(
+    return this.sql<{ route: string; samples: number; subjects: number; p75: string | null }>(
       `SELECT coalesce(w.route_template, '(sin ruta)') AS route, count(*)::int AS samples,
+              count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects,
               percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75
          FROM telemetry.web_vitals w
         WHERE ${base.where} AND ${tenant.sql}
@@ -499,12 +520,14 @@ export class TelemetryAnalyticsRepository {
     const byConcept = async (dimension: DeviceConceptDimension) => {
       const column = DEVICE_CONCEPT_COLUMNS[dimension];
       return this.sql<DeviceBreakdownRow>(
-        `SELECT code, label, contexts FROM (
+        `SELECT code, label, contexts, sample FROM (
            SELECT coalesce(k.code, cc.${column}::text, '${DEVICE_UNSPECIFIED}') AS code,
                   min(coalesce(nullif(k.display, ''), k.code, cc.${column}::text,
                                '${DEVICE_UNSPECIFIED}')) AS label,
-                  count(*)::int AS contexts
+                  count(*)::int AS contexts,
+                  count(DISTINCT s.k)::int AS sample
              FROM telemetry.client_contexts cc
+             CROSS JOIN LATERAL (SELECT coalesce(cc.analytics_subject_id::text, cc.session_id::text) AS k) s
              LEFT JOIN terminology.catalog_concepts k ON k.id = cc.${column}
             WHERE ${where} AND cc.is_bot IS NOT TRUE
             GROUP BY 1
@@ -519,10 +542,12 @@ export class TelemetryAnalyticsRepository {
     const byOsFamily = await byConcept('osFamily');
     const byBrowserFamily = await byConcept('browserFamily');
     const byAppVersion = await this.sql<DeviceBreakdownRow>(
-      `SELECT code, code AS label, contexts FROM (
+      `SELECT code, code AS label, contexts, sample FROM (
          SELECT coalesce(nullif(btrim(cc.app_version), ''), '${DEVICE_UNSPECIFIED}') AS code,
-                count(*)::int AS contexts
+                count(*)::int AS contexts,
+                count(DISTINCT s.k)::int AS sample
            FROM telemetry.client_contexts cc
+          CROSS JOIN LATERAL (SELECT coalesce(cc.analytics_subject_id::text, cc.session_id::text) AS k) s
           WHERE ${where} AND cc.is_bot IS NOT TRUE
           GROUP BY 1
        ) d

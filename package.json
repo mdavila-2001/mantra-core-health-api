@@ -71,6 +71,8 @@
     "start:worker:scheduling": "node dist/src/worker-scheduling",
     "start:worker:practice:dev": "nest start --watch --entryFile worker-practice",
     "start:worker:scheduling:dev": "nest start --watch --entryFile worker-scheduling",
+    "start:worker:telemetry": "node dist/src/worker-telemetry",
+    "start:worker:telemetry:dev": "nest start --watch --entryFile worker-telemetry",
     "start:worker:tracking": "node dist/src/worker-tracking",
     "start:worker:tracking:dev": "nest start --watch --entryFile worker-tracking",
     "start:worker:workflow": "node dist/src/worker-workflow",

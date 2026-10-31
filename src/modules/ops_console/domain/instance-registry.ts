@@ -30,7 +30,7 @@ export const WORKER_INSTANCE_PREFIX = 'worker-';
 /** Workers opcionales por defecto: existen sólo bajo un perfil de Compose. */
 export const OPTIONAL_WORKERS: readonly string[] = ['worker-files'];
 
-/** Los 26 dominios con proceso worker propio (`src/worker-<dominio>.ts`). */
+/** Los 27 dominios con proceso worker propio (`src/worker-<dominio>.ts`). */
 const WORKER_DOMAINS: ReadonlyArray<readonly [string, string]> = [
   ['audio-assets', 'Audio'],
   ['automation', 'Automatización'],
@@ -54,6 +54,7 @@ const WORKER_DOMAINS: ReadonlyArray<readonly [string, string]> = [
   ['read_models', 'Modelos de lectura'],
   ['reporting', 'Reportería'],
   ['scheduling', 'Agenda'],
+  ['telemetry', 'Telemetría'],
   ['time_series', 'Series de tiempo'],
   ['tracking', 'Seguimiento'],
   ['vector_rag', 'Búsqueda vectorial'],
@@ -114,7 +115,7 @@ export const KNOWN_WORKER_IDS: ReadonlySet<string> = new Set(
 /**
  * Registro efectivo del entorno: los workers de `requiredWorkers` pesan en
  * `overall`; el resto se lista con `required:false` (Coolify arranca 4 de los
- * 26, y un worker que ese despliegue no corre no puede ser una alarma).
+ * 27, y un worker que ese despliegue no corre no puede ser una alarma).
  */
 export function buildInstanceRegistry(
   requiredWorkers: ReadonlySet<string>,

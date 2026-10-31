@@ -1,5 +1,6 @@
 export * from './governance-catalog.controller';
 export * from './governance-read.controller';
+export * from './governance-operations-read.controller';
 export * from './retention-execution.controller';
 export * from './residency.controller';
 export * from './legal-hold.controller';

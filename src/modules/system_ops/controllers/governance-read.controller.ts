@@ -20,19 +20,15 @@ import {
   PolicyPageDto,
   PolicyParamDto,
 } from '../dto/governance-read.dto';
+import { GOVERNANCE_VIEW_ROLES } from '../governance-read.roles';
 import { GovernanceReadService } from '../services/governance-read.service';
 
 /**
- * Quién lee el gobierno de datos: los roles de gobernanza ya usados por el catálogo de datos.
+ * Quién lee el gobierno de datos: los roles de lectura del catálogo (matriz §3.12; incluye
+ * `AUDITOR` y `DATA_STEWARD` en sólo lectura).
  * Escribir sigue siendo de `SECURITY_ADMIN` (ver `GovernanceCatalogController`).
  */
-export const GOVERNANCE_READ_ROLES = [
-  'SECURITY_ADMIN',
-  'GOVERNANCE_ADMIN',
-  'DPO',
-  'PLATFORM_ADMIN',
-  'DATA_PLATFORM_ADMIN',
-] as const;
+export const GOVERNANCE_READ_ROLES = GOVERNANCE_VIEW_ROLES;
 
 /**
  * Lecturas de gobierno de datos bajo `admin/governance`: políticas, bitácora de cambios y registro
@@ -40,7 +36,8 @@ export const GOVERNANCE_READ_ROLES = [
  * autoridad de acceso: ocultar el menú en la pantalla no protege nada.
  *
  * CONTRATO H4 (docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H4-gobernanza.md)
- * Roles: SECURITY_ADMIN, GOVERNANCE_ADMIN, DPO, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN. Sin token 401;
+ * Roles: GOVERNANCE_VIEW_ROLES (SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN,
+ * DPO, AUDITOR, DATA_STEWARD). Sin token 401;
  * otro rol 403. Paginación por cursor opaco `nextCursor` (limit 1..200, def. 50), orden total con
  * desempate estable; parámetros no declarados, valores fuera de lista o cursor corrupto → 400.
  * Respuesta mínima: códigos en vez de ids de concepto, sin snapshots, sin valores de parámetros,

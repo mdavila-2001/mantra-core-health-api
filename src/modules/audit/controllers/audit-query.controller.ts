@@ -15,10 +15,19 @@ import {
   DataAccessPageDto,
   DataAccessQueryDto,
 } from '../dto/audit-query.dto';
+import { DataAccessSummaryQueryDto } from '../dto/audit-oversight.dto';
+import { AuditOversightReadService } from '../services/audit-oversight-read.service';
 import { AuditQueryService } from '../services/audit-query.service';
 
 /** Quién puede leer la bitácora: auditoría, protección de datos y seguridad. */
 export const AUDIT_READ_ROLES = ['AUDITOR', 'DPO', 'SECURITY_ADMIN'] as const;
+
+/** El resumen agregado admite además a gobierno de datos (D-2): no expone filas, sólo conteos. */
+export const AUDIT_SUMMARY_ROLES = [
+  ...AUDIT_READ_ROLES,
+  'GOVERNANCE_ADMIN',
+  'DATA_GOVERNANCE_ADMIN',
+] as const;
 
 /** Propósito con que se sella la lectura de la bitácora: supervisión, no atención del paciente. */
 const AUDIT_READ_PURPOSE = 'SECURITY_OVERSIGHT';
@@ -43,6 +52,9 @@ const AUDIT_READ_PURPOSE = 'SECURITY_OVERSIGHT';
  *      200: { filters: [{ name, type, description, options }], defaultWindowDays, defaultPageSize,
  *             maxPageSize, order, notMeasured: [{ field, reason }] }  (`requestId` y `correlationId`
  *             van en `notMeasured`: el sello no los guarda hoy).
+ *  - GET /audit/data-access/summary  (agregado; roles de la bitácora + GOVERNANCE_ADMIN)
+ *      query: from?, to?, minSample? (1..1000, def. 5)
+ *      200: { window, totals, byPurpose, byResourceType, byOperation, daily, minSample, suppressed, notMeasured }
  *  - GET /audit/data-access  (lecturas sensibles; mismos from/to/userId/tenantId/limit/cursor más
  *      patientProfileId?, resourceType?, operation? READ|CREATE|UPDATE|DELETE|EXPORT)
  *
@@ -55,7 +67,10 @@ const AUDIT_READ_PURPOSE = 'SECURITY_OVERSIGHT';
 @Controller('audit')
 @PlatformTenantOptional(...AUDIT_READ_ROLES, 'SUPERADMIN')
 export class AuditQueryController {
-  constructor(private readonly query: AuditQueryService) {}
+  constructor(
+    private readonly query: AuditQueryService,
+    private readonly oversight: AuditOversightReadService,
+  ) {}
 
   @Get('log')
   @Roles(...AUDIT_READ_ROLES)
@@ -82,6 +97,23 @@ export class AuditQueryController {
   @ApiResponse({ status: 200, type: AuditFilterCatalogDto })
   filterCatalog() {
     return this.query.filterCatalog();
+  }
+
+  @Get('data-access/summary')
+  @Roles(...AUDIT_SUMMARY_ROLES)
+  @PlatformTenantOptional(...AUDIT_SUMMARY_ROLES, 'SUPERADMIN')
+  @AccessLogged({
+    resourceType: 'DATA_ACCESS_SUMMARY',
+    purpose: AUDIT_READ_PURPOSE,
+  })
+  @ApiOperation({
+    summary:
+      'Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación',
+    description:
+      'Sólo conteos (sin ids de paciente ni de recurso). Los grupos con menos de `minSample` eventos no se muestran y se suman a `suppressed`. Además de los roles de la bitácora admite `GOVERNANCE_ADMIN` (decisión D-2). `notMeasured` declara `byRole`.',
+  })
+  dataAccessSummary(@Query() q: DataAccessSummaryQueryDto) {
+    return this.oversight.dataAccessSummary(q);
   }
 
   @Get('data-access')

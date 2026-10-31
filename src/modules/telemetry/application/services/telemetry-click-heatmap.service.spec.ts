@@ -25,6 +25,8 @@ function build(
     cells: mockFn(async () => over.cells ?? []),
     elements: mockFn(async () => over.elements ?? []),
     sizes: mockFn(async () => over.sizes ?? []),
+    scroll: mockFn(async () => ({ pages: 0, measured: 0, subjects: 0, reached: Array(10).fill(0) })),
+    views: mockFn(async () => 0),
   };
   return {
     repo,
@@ -45,8 +47,8 @@ describe('TelemetryClickHeatmapService (repositorio doblado)', () => {
     });
     const res = await service.heatmap(Q, TENANT);
     expect(res.cells).toEqual([
-      { column: 7, row: 12, x: 0.375, y: 0.625, clicks: 1, share: 0.3333 },
-      { column: 8, row: 12, x: 0.425, y: 0.625, clicks: 2, share: 0.6667 },
+      { column: 7, row: 12, x: 0.375, y: 0.625, clicks: 1, rage: 0, dead: 0, value: 1, share: 0.3333 },
+      { column: 8, row: 12, x: 0.425, y: 0.625, clicks: 2, rage: 0, dead: 0, value: 2, share: 0.6667 },
     ]);
   });
 

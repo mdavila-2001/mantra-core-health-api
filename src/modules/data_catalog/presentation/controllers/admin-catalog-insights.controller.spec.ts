@@ -49,6 +49,13 @@ describe('AdminCatalogController · gobierno de datos (HTTP, repositorio doble)'
       fields: 0,
       fields_personal: 0,
     })),
+    piiReconciliation: mockFn(async () => []),
+    piiReconciliationCounts: mockFn(async () => []),
+    piiReconciliationTotals: mockFn(async () => ({
+      approved_personal: 3,
+      declared_fields: 0,
+      observed_objects: 2,
+    })),
     qualityIssues: mockFn(async () => []),
     qualityCounts: mockFn(async () => []),
   };
@@ -128,6 +135,7 @@ describe('AdminCatalogController · gobierno de datos (HTTP, repositorio doble)'
   const RUTAS = [
     '/admin/catalog/pii/summary',
     '/admin/catalog/pii/columns',
+    '/admin/catalog/pii/reconciliation',
     '/admin/catalog/quality/rules',
     '/admin/catalog/quality/issues',
   ];
@@ -316,6 +324,99 @@ describe('AdminCatalogController · gobierno de datos (HTTP, repositorio doble)'
     ])('%s → 400, nunca 500', async (_caso, query) => {
       await get(`/admin/catalog/quality/issues${query}`, ['DPO']).expect(400);
       expect(repo.qualityIssues).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET /admin/catalog/pii/reconciliation', () => {
+    const fila = (n: number, kind = 'MISSING_IN_REGISTRY') => ({
+      kind,
+      schema_name: 'iam',
+      object_name: 'users',
+      column_name: `c${n}`,
+      object_id: kind === 'ORPHAN_IN_REGISTRY' ? null : 'o1',
+      column_id: kind === 'ORPHAN_IN_REGISTRY' ? null : `c${n}`,
+      sensitivity: kind === 'ORPHAN_IN_REGISTRY' ? null : 'PERSONAL',
+      review_status: kind === 'ORPHAN_IN_REGISTRY' ? null : 'APPROVED',
+      entity_registry_id: null,
+      field_registry_id: null,
+    });
+
+    it('con el registro vacío lo declara en notMeasured y cuenta por clase', async () => {
+      repo.piiReconciliation.mockResolvedValueOnce([fila(1), fila(2)]);
+      repo.piiReconciliationCounts.mockResolvedValueOnce([
+        { kind: 'MISSING_IN_REGISTRY', total: 3 },
+      ]);
+      const res = await get('/admin/catalog/pii/reconciliation', [
+        'DPO',
+      ]).expect(200);
+      expect(res.body.summary).toEqual({
+        approvedPersonalColumns: 3,
+        declaredFields: 0,
+        registryEmpty: true,
+        byKind: {
+          MISSING_IN_REGISTRY: 3,
+          REGISTRY_DISAGREES: 0,
+          ORPHAN_IN_REGISTRY: 0,
+        },
+        total: 3,
+      });
+      const campos = res.body.notMeasured.map(
+        (n: { field: string }) => n.field,
+      );
+      expect(campos).toEqual(['declaredRegistry.fields', 'unapprovedColumns']);
+      expect(res.body.items[0]).toMatchObject({
+        kind: 'MISSING_IN_REGISTRY',
+        columnName: 'c1',
+      });
+    });
+
+    it('sin escaneo declara catalog y no inventa huérfanos', async () => {
+      repo.piiReconciliationTotals.mockResolvedValueOnce({
+        approved_personal: 0,
+        declared_fields: 4,
+        observed_objects: 0,
+      });
+      const res = await get('/admin/catalog/pii/reconciliation', [
+        'AUDITOR',
+      ]).expect(200);
+      expect(res.body.notMeasured[0].field).toBe('catalog');
+      expect(res.body.summary.registryEmpty).toBe(false);
+    });
+
+    it('pagina por (schema, objeto, columna, clase) y pasa los filtros', async () => {
+      repo.piiReconciliation.mockResolvedValueOnce([fila(1), fila(2), fila(3)]);
+      const p1 = await get(
+        '/admin/catalog/pii/reconciliation?limit=2&kind=MISSING_IN_REGISTRY&schema=iam',
+        ['DPO'],
+      ).expect(200);
+      expect(repo.piiReconciliation.mock.calls[0][1]).toMatchObject({
+        kind: 'MISSING_IN_REGISTRY',
+        schema: 'iam',
+        limit: 2,
+      });
+      await get(
+        `/admin/catalog/pii/reconciliation?limit=2&cursor=${p1.body.nextCursor}`,
+        ['DPO'],
+      ).expect(200);
+      expect(repo.piiReconciliation.mock.calls[1][1].cursor).toEqual({
+        s: 'iam',
+        o: 'users',
+        c: 'c2',
+        k: 'MISSING_IN_REGISTRY',
+      });
+    });
+
+    it.each([
+      ['una clase inventada', '?kind=ALL'],
+      ['un schema con SQL', "?schema=iam'--"],
+      ['un límite fuera de rango', '?limit=201'],
+      ['un cursor corrupto', '?cursor=%25%25'],
+      ['un parámetro no declarado', '?q=email'],
+    ])('%s → 400, nunca 500', async (_c, query) => {
+      await get(`/admin/catalog/pii/reconciliation${query}`, ['DPO']).expect(
+        400,
+      );
+      expect(repo.piiReconciliation).not.toHaveBeenCalled();
     });
   });
 });

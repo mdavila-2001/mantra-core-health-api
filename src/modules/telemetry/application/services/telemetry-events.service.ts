@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { HttpStatus } from '@nestjs/common';
 import {
   DomainException,
@@ -28,6 +28,7 @@ import {
   ConversionEventsRepository,
   AnalyticsSubjectsRepository,
   TrackingConsentsRepository,
+  TrackingPurposeDefinitionsRepository,
   ActorSessionsRepository,
 } from '../../infrastructure/repositories';
 import type {
@@ -36,10 +37,13 @@ import type {
   SessionJourneys,
   UserActivityEvents,
 } from '../../entities';
+import { SEED } from '../../../../common/constants/concepts';
 import { TelemetryErrorReason } from '../../telemetry.error-reasons';
+import { loadAnonymousIdempotencySecret } from '../../telemetry-idempotency.env';
 import {
   EventPropertyRejection,
   validateEventProperties,
+  isAnonymousSafeRouteTemplate,
   type EventSchemaPolicy,
   type RawEventProperty,
   type ValidatedEventProperty,
@@ -63,12 +67,27 @@ import {
 } from '../../presentation/dto';
 
 /**
+ * Nombre de evento que el esquema anónimo conserva tal cual para que el
+ * conteo de vistas de página sume las identificadas y las anónimas.
+ */
+const ANONYMOUS_PAGE_VIEW_ALIAS = 'pagina_vista';
+
+/**
  * Ingesta de telemetría consent-aware: captura de eventos de actividad en batch
  * (UC-28-07), contexto de cliente + journey (UC-28-08), Core Web Vitals (UC-28-09),
  * conversiones con atribución (UC-28-11) y cierre de journey (UC-28-13).
  *
  * Las tablas de eventos son append-only; los journeys se materializan/actualizan
  * bajo la misma transacción (row_version optimista lo gestiona MikroORM).
+ *
+ * ## Consentimiento y uso agregado
+ *
+ * El gate respeta `requires_consent` del propósito del esquema. Un propósito
+ * que **no** lo exige (`PLATFORM_USAGE_AGGREGATE`) admite el evento sin decisión
+ * del usuario, pero sólo en su forma anónima: sin sujeto, sin journey, con
+ * `user_id` y `session_id` nulos y sin reenvío externo. Si el evento trae
+ * sujeto o journey deja de ser anónimo y vuelve a exigir `GRANTED`; un propósito
+ * sin dato de `requires_consent` se trata como si lo exigiera.
  *
  * Lo que se persiste aquí se ofrece además a la analítica web externa
  * (`TelemetryWebAnalyticsService`) **después de confirmar la transacción** y
@@ -92,6 +111,7 @@ export class TelemetryEventsService {
    * @param conversionsRepo - Valor de conversions repo requerido por la operación.
    * @param subjectsRepo - Valor de subjects repo requerido por la operación.
    * @param consentsRepo - Valor de consents repo requerido por la operación.
+   * @param purposesRepo - Propósitos de tracking: dicen si el gate exige consentimiento.
    * @param sessionsRepo - Traduce el `sid` del token a la sesión y comprueba de quién es.
    * @param webAnalytics - Reenvío de mejor esfuerzo a la analítica web externa.
    * @param logger - Valor de logger requerido por la operación.
@@ -108,6 +128,7 @@ export class TelemetryEventsService {
     private readonly conversionsRepo: ConversionEventsRepository,
     private readonly subjectsRepo: AnalyticsSubjectsRepository,
     private readonly consentsRepo: TrackingConsentsRepository,
+    private readonly purposesRepo: TrackingPurposeDefinitionsRepository,
     private readonly sessionsRepo: ActorSessionsRepository,
     private readonly webAnalytics: TelemetryWebAnalyticsService,
     private readonly logger: PinoLogger,
@@ -153,6 +174,17 @@ export class TelemetryEventsService {
           );
         }
 
+        if (schema.statusConceptId === TELE.SCHEMA_DEPRECATED) {
+          // Un cliente ya desplegado con el id de la versión anterior no debe
+          // perder el resto del lote: el evento se descarta, se cuenta y se avisa.
+          this.logger.warn(
+            { eventSchemaDefinitionId: item.eventSchemaDefinitionId },
+            'Evento descartado: esquema obsoleto',
+          );
+          skipped += 1;
+          continue;
+        }
+
         // Referencias del cuerpo: se comprueban antes del gate y antes de
         // crear nada, para que una ajena no pase por «descartada».
         if (item.analyticsSubjectId) {
@@ -162,22 +194,52 @@ export class TelemetryEventsService {
           ? await this.assertOwnedJourney(tx, item.sessionJourneyId, actor)
           : null;
 
+        // Uso agregado: el propósito no exige consentimiento Y el evento no
+        // identifica a nadie (sin sujeto ni journey). Cualquier otro evento
+        // es del actor y pasa por el gate.
+        const anonymous =
+          !item.analyticsSubjectId &&
+          !item.sessionJourneyId &&
+          (await this.purposeAllowsAnonymous(tx, schema.purposeDefinitionId));
+
         // Gate de consentimiento: el evento es siempre del actor y el propósito
         // exige una decisión efectiva GRANTED; si la última es WITHDRAWN se descarta.
         if (
+          !anonymous &&
           !(await this.consentAllows(tx, actor.id, schema.purposeDefinitionId))
         ) {
           skipped += 1;
           continue;
         }
+        if (anonymous && !isAnonymousSafeRouteTemplate(item.routeTemplate)) {
+          throw new DomainException(
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            ErrorCode.VALIDATION_FAILED,
+            'El evento de uso agregado necesita una plantilla de ruta sin identificadores',
+            { eventName: schema.eventName },
+            TelemetryErrorReason.ANONYMOUS_ROUTE_INVALID,
+          );
+        }
 
         // Idempotencia por clave **del mismo usuario**: descarta reenvíos.
-        const idemKey = item.eventIdempotencyKey ?? randomUUID();
+        // Un evento anónimo no tiene usuario: su clave se acota a los anónimos.
+        // La clave que elige el cliente nunca se guarda tal cual en un evento
+        // anónimo: se acota con un HMAC (secreto del servidor) a quien la envía
+        // y a su organización, para que otra persona no pueda adelantarse con
+        // la misma clave y para que quien lea la analítica no pueda ligar el
+        // evento con la persona probando candidatos. Sin secreto utilizable no
+        // se deduplica el evento anónimo.
+        const idemKey = this.idempotencyKeyFor(
+          item.eventIdempotencyKey,
+          anonymous,
+          actor.id,
+          tenantId,
+        );
         if (item.eventIdempotencyKey) {
           const dup = await this.eventsRepo.findByIdempotencyKey(
             tx,
             idemKey,
-            actor.id,
+            anonymous ? null : actor.id,
           );
           if (dup) {
             skipped += 1;
@@ -189,35 +251,60 @@ export class TelemetryEventsService {
         // pasa la política ni se persiste ni se reenvía.
         const properties = this.validateProperties(schema, item.properties);
 
-        journey =
-          explicitJourney ??
-          (await this.openJourney(tx, {
-            sessionId,
-            analyticsSubjectId: item.analyticsSubjectId,
-            portalTypeConceptId: item.portalTypeConceptId,
-          }));
+        // El evento anónimo no abre ni enlaza journey: la sesión lo identificaría.
+        const eventJourney = anonymous
+          ? null
+          : (explicitJourney ??
+            (await this.openJourney(tx, {
+              sessionId,
+              analyticsSubjectId: item.analyticsSubjectId,
+              portalTypeConceptId: item.portalTypeConceptId,
+            })));
+        if (eventJourney) journey = eventJourney;
+        // En el esquema anónimo sólo se respeta el alias `pagina_vista`.
+        const eventName = anonymous
+          ? item.eventName === ANONYMOUS_PAGE_VIEW_ALIAS
+            ? ANONYMOUS_PAGE_VIEW_ALIAS
+            : schema.eventName
+          : (item.eventName ?? schema.eventName);
 
         const occurredAt = item.occurredAt
           ? new Date(item.occurredAt)
           : new Date();
-        const event = this.eventsRepo.create(tx, {
+        const eventData = {
           eventSchemaDefinitionId: item.eventSchemaDefinitionId,
-          analyticsSubjectId: item.analyticsSubjectId,
-          userId: actor.id,
-          sessionId,
+          analyticsSubjectId: anonymous ? undefined : item.analyticsSubjectId,
+          userId: anonymous ? undefined : actor.id,
+          sessionId: anonymous ? undefined : sessionId,
           tenantId,
           portalTypeConceptId:
             item.portalTypeConceptId ??
             schema.portalTypeConceptId ??
             TELE.PORTAL_WEB,
-          eventName: item.eventName ?? schema.eventName,
+          eventName,
           eventIdempotencyKey: idemKey,
           routeTemplate: item.routeTemplate,
           occurredAt,
           receivedAt: new Date(),
-          correlationId: item.correlationId,
-        });
-        await tx.flush();
+          // Un correlationId elegido por el cliente religaría el evento anónimo con
+          // eventos identificados: no se guarda.
+          correlationId: anonymous ? undefined : item.correlationId,
+        };
+        // El evento anónimo se inserta bajo SAVEPOINT: si dos lotes concurrentes
+        // traen la misma clave, el índice único parcial rechaza al segundo y ese
+        // evento cuenta como duplicado sin tumbar el lote (hallazgo 2, F0).
+        let event: { id: string };
+        if (anonymous) {
+          const insertedId = await this.eventsRepo.insertAnonymous(tx, eventData);
+          if (insertedId === null) {
+            skipped += 1;
+            continue;
+          }
+          event = { id: insertedId };
+        } else {
+          event = this.eventsRepo.create(tx, eventData);
+        }
+        if (!anonymous) await tx.flush();
         eventIds.push(event.id);
 
         for (const prop of properties) {
@@ -239,18 +326,20 @@ export class TelemetryEventsService {
           });
         }
 
-        if (journey) {
-          if (!journey.entryEventId) journey.entryEventId = event.id;
-          journey.exitEventId = event.id;
-          journey.eventCount = (journey.eventCount ?? 0) + 1;
-          journey.updatedAt = new Date();
+        if (eventJourney) {
+          if (!eventJourney.entryEventId) eventJourney.entryEventId = event.id;
+          eventJourney.exitEventId = event.id;
+          eventJourney.eventCount = (eventJourney.eventCount ?? 0) + 1;
+          eventJourney.updatedAt = new Date();
         }
         await tx.flush();
 
+        // Lo anónimo no sale a la analítica externa: no hay quien lo consienta.
+        if (anonymous) continue;
         forwarded.push({
-          eventName: item.eventName ?? schema.eventName,
+          eventName,
           analyticsSubjectId: item.analyticsSubjectId,
-          sessionJourneyId: journey?.id,
+          sessionJourneyId: eventJourney?.id,
           routeTemplate: item.routeTemplate,
           occurredAt,
           // Sólo llega aquí lo que pasó el gate: el evento es de un usuario
@@ -529,6 +618,28 @@ export class TelemetryEventsService {
   }
 
   /**
+   * Clave de idempotencia que se guarda con el evento.
+   *
+   * Un evento con sujeto conserva la clave del cliente (se busca por persona).
+   * Uno anónimo guarda un HMAC de (persona, organización, clave); sin secreto
+   * utilizable guarda una clave aleatoria, es decir, no se deduplica.
+   */
+  private idempotencyKeyFor(
+    clientKey: string | undefined,
+    anonymous: boolean,
+    actorId: string,
+    tenantId: string | null | undefined,
+  ): string {
+    if (clientKey === undefined) return randomUUID();
+    if (!anonymous) return clientKey;
+    const secret = loadAnonymousIdempotencySecret();
+    if (secret === null) return randomUUID();
+    return createHmac('sha256', secret)
+      .update(`anon\u0000${actorId}\u0000${tenantId ?? ''}\u0000${clientKey}`)
+      .digest('hex');
+  }
+
+  /**
    * `iam.sessions.id` de la sesión que respalda el token del actor.
    *
    * La sesión de telemetría es la autenticada: el cliente no la elige.
@@ -687,6 +798,24 @@ export class TelemetryEventsService {
         TelemetryErrorReason.EVENT_PROPERTY_NOT_ALLOWED,
       );
     }
+  }
+
+  /**
+   * `true` si el propósito declara expresamente que no exige consentimiento.
+   * Un propósito inexistente o con `requires_consent` nulo exige consentimiento.
+   */
+  private async purposeAllowsAnonymous(
+    tx: EntityManager,
+    purposeDefinitionId: string,
+  ): Promise<boolean> {
+    // Lista cerrada: sólo el propósito de uso agregado puede recibir eventos sin
+    // consentimiento. Un propósito creado o editado después con
+    // `requires_consent = false` NO pasa a aceptar eventos anónimos por eso.
+    if (purposeDefinitionId !== SEED.platformUsageAggregatePurposeId) {
+      return false;
+    }
+    const purpose = await this.purposesRepo.findById(tx, purposeDefinitionId);
+    return purpose?.requiresConsent === false;
   }
 
   /** Gate de consentimiento efectivo para (user, purpose). */

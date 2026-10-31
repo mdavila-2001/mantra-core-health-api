@@ -6,6 +6,7 @@ import * as entities from './entities';
 import {
   GovernanceCatalogController,
   GovernanceReadController,
+  GovernanceOperationsReadController,
   RetentionExecutionController,
   ResidencyController,
   LegalHoldController,
@@ -17,6 +18,7 @@ import {
 import {
   GovernanceCatalogService,
   GovernanceReadService,
+  GovernanceOperationsReadService,
   RetentionExecutionService,
   ResidencyService,
   LegalHoldService,
@@ -28,6 +30,7 @@ import {
 import {
   GovernanceRepository,
   GovernanceReadRepository,
+  GovernanceOperationsReadRepository,
   RetentionExecutionRepository,
   ResidencyRepository,
   LegalHoldRepository,
@@ -53,6 +56,7 @@ import {
   controllers: [
     GovernanceCatalogController,
     GovernanceReadController,
+    GovernanceOperationsReadController,
     RetentionExecutionController,
     ResidencyController,
     LegalHoldController,
@@ -65,6 +69,7 @@ import {
     // Repositorios
     GovernanceRepository,
     GovernanceReadRepository,
+    GovernanceOperationsReadRepository,
     RetentionExecutionRepository,
     ResidencyRepository,
     LegalHoldRepository,
@@ -80,6 +85,7 @@ import {
     // Servicios
     GovernanceCatalogService,
     GovernanceReadService,
+    GovernanceOperationsReadService,
     RetentionExecutionService,
     ResidencyService,
     LegalHoldService,

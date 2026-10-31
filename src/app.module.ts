@@ -16,6 +16,7 @@ import {
   telemetryEnvSchema,
 } from './observability';
 import { HttpSliModule } from './observability/http-sli/http-sli.module';
+import { SystemObservabilityModule } from './modules/observability/observability.module';
 import {
   AllExceptionsFilter,
   AuthModule,
@@ -169,6 +170,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // minuto lo que el middleware de `main.ts` agregó. Apagado por defecto
     // (`OBSERVABILITY_HTTP_SLI_ENABLED`).
     HttpSliModule,
+    SystemObservabilityModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,

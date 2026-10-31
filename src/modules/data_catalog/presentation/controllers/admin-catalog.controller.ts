@@ -24,7 +24,7 @@ import { iso } from '../../domain/catalog/timestamps';
 import { TenantAgnostic } from '../../../../common/tenant/tenant-agnostic.decorator';
 import {
   CATALOG_WRITE_ROLES,
-  PORTAL_READ_ROLES,
+  PORTAL_VIEW_ROLES,
 } from '../../data_catalog.constants';
 import {
   AnnotationIdParamDto,
@@ -59,6 +59,7 @@ import {
 import {
   PiiColumnsPageDto,
   PiiColumnsQueryDto,
+  PiiReconciliationQueryDto,
   PiiSummaryDto,
   QualityIssuesPageDto,
   QualityIssuesQueryDto,
@@ -123,7 +124,7 @@ export class AdminCatalogController {
   ) {}
 
   @Get('schemas')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Schemas observados, con cuántos objetos tienen ficha y cuántos están aprobados',
@@ -134,7 +135,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Objetos del catálogo, paginados por cursor',
   })
@@ -144,7 +145,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects/:id')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto',
@@ -156,7 +157,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects/:id/columns')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Columnas observadas de un objeto, con su ficha si la tienen',
   })
@@ -166,7 +167,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects/:id/evidence')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Evidencia enlazada a un objeto',
   })
@@ -196,7 +197,7 @@ export class AdminCatalogController {
   }
 
   @Get('columns/:id/evidence')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Evidencia enlazada a una columna',
   })
@@ -228,7 +229,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects/:id/history')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Revisiones y decisiones de la ficha de un objeto',
   })
@@ -238,7 +239,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects/:id/changes')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Cambios que los escaneos detectaron en un objeto',
   })
@@ -248,7 +249,7 @@ export class AdminCatalogController {
   }
 
   @Get('objects/:id/impact')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Quién referencia a un objeto y a quién referencia, por claves foráneas observadas',
@@ -369,7 +370,7 @@ export class AdminCatalogController {
   }
 
   @Get('permission-drift')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Deriva de permisos: roles que las rutas exigen contra los que la API siembra',
@@ -382,7 +383,7 @@ export class AdminCatalogController {
   }
 
   @Get('coverage')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Cobertura del catálogo por dimensión, calculada por el servidor',
   })
@@ -392,7 +393,7 @@ export class AdminCatalogController {
   }
 
   @Get('pii/summary')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Datos personales: cuántas columnas son personales según el catálogo y qué declaró el registro de gobierno',
@@ -405,7 +406,7 @@ export class AdminCatalogController {
   }
 
   @Get('pii/columns')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Columnas clasificadas como datos personales, con su sensibilidad y estado de revisión',
@@ -417,8 +418,24 @@ export class AdminCatalogController {
     return this.insights.piiColumns(q);
   }
 
+  @Get('pii/reconciliation')
+  @Roles(...PORTAL_VIEW_ROLES)
+  @ApiOperation({
+    summary:
+      'Conciliación de las columnas personales del catálogo con el registro declarado de gobierno',
+    description:
+      'Tres clases de discrepancia: personal aprobada sin declarar, declarada sin marca PII/PHI y declarada pero no observada. Sólo metadatos; `notMeasured` declara el registro vacío o el catálogo sin escanear.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resumen y página de discrepancias',
+  })
+  piiReconciliation(@Query() q: PiiReconciliationQueryDto) {
+    return this.insights.piiReconciliation(q);
+  }
+
   @Get('quality/rules')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Reglas de calidad del catálogo, con las incidencias abiertas de cada una',
@@ -429,7 +446,7 @@ export class AdminCatalogController {
   }
 
   @Get('quality/issues')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary:
       'Incidencias de calidad del catálogo (derivadas al leer), paginadas',
@@ -442,7 +459,7 @@ export class AdminCatalogController {
   }
 
   @Get('scans')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({
     summary: 'Escaneos, del más reciente al más antiguo',
   })
@@ -452,7 +469,7 @@ export class AdminCatalogController {
   }
 
   @Get('scans/:id')
-  @Roles(...PORTAL_READ_ROLES)
+  @Roles(...PORTAL_VIEW_ROLES)
   @ApiOperation({ summary: 'Un escaneo' })
   @ApiResponse({ status: 200, type: ScanDto })
   scan(@Param() p: ObjectIdParamDto) {

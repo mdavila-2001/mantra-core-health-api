@@ -1,0 +1,28 @@
+/**
+ * Sub-códigos de negocio estables del módulo `observability` (portal «Sistema»).
+ * Van como 5.º argumento (`reason`) de `DomainException`: `code` dice el tipo
+ * HTTP del error y `reason` cuál fue. Un cliente ramifica sobre `reason`, nunca
+ * sobre `message`.
+ */
+export enum ObservabilityErrorReason {
+  // --- Ventana (422) ---
+  INVALID_DATE = 'INVALID_DATE',
+  EMPTY_WINDOW = 'EMPTY_WINDOW',
+  WINDOW_TOO_LARGE = 'WINDOW_TOO_LARGE',
+  INTERVAL_TOO_FINE = 'INTERVAL_TOO_FINE',
+  INVALID_TIMEZONE = 'INVALID_TIMEZONE',
+
+  // --- Consulta (422) ---
+  UNSUPPORTED_GROUPING = 'OBSERVABILITY_UNSUPPORTED_GROUPING',
+  INVALID_REQUEST_ID = 'OBSERVABILITY_INVALID_REQUEST_ID',
+  INVALID_QUERY_HASH = 'OBSERVABILITY_INVALID_QUERY_HASH',
+
+  // --- Grupos de errores ---
+  ERROR_GROUP_NOT_FOUND = 'OBSERVABILITY_ERROR_GROUP_NOT_FOUND',
+  ERROR_GROUP_VERSION_CONFLICT = 'OBSERVABILITY_ERROR_GROUP_VERSION_CONFLICT',
+  ERROR_GROUP_STATE_UNCHANGED = 'OBSERVABILITY_ERROR_GROUP_STATE_UNCHANGED',
+  ERROR_GROUP_NOTE_REQUIRED = 'OBSERVABILITY_ERROR_GROUP_NOTE_REQUIRED',
+
+  // --- SQL ---
+  SQL_STATEMENT_NOT_FOUND = 'OBSERVABILITY_SQL_STATEMENT_NOT_FOUND',
+}

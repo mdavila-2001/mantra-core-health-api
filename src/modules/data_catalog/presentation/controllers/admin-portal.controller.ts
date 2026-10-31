@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../../../../common';
 import { TenantAgnostic } from '../../../../common/tenant/tenant-agnostic.decorator';
-import { PORTAL_READ_ROLES } from '../../data_catalog.constants';
+import { PORTAL_VIEW_ROLES } from '../../data_catalog.constants';
 import {
   BusquedaQueryDto,
   HallazgoIdParamDto,
@@ -57,7 +57,7 @@ const NO_DISPONIBLE =
  */
 @ApiTags('admin-portal')
 @ApiBearerAuth()
-@Roles(...PORTAL_READ_ROLES)
+@Roles(...PORTAL_VIEW_ROLES)
 @TenantAgnostic()
 @Controller('admin/portal')
 @ApiResponse({ status: 503, description: NO_DISPONIBLE })

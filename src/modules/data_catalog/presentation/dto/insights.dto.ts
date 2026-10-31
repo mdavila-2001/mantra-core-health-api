@@ -15,6 +15,8 @@ import {
 } from '../../domain/catalog/catalog.constants';
 import {
   PII_MIN_SENSITIVITIES,
+  PII_RECONCILIATION_KINDS,
+  type PiiReconciliationKind,
   PII_SORTS,
   QUALITY_RULE_CODES,
   QUALITY_SEVERITIES,
@@ -80,6 +82,23 @@ export class PiiColumnsQueryDto extends PaginacionQueryDto {
   @IsOptional()
   @IsIn(PII_SORTS)
   sort?: PiiSort;
+}
+
+/** Filtros de `GET /admin/catalog/pii/reconciliation`. */
+export class PiiReconciliationQueryDto extends PaginacionQueryDto {
+  @ApiPropertyOptional({
+    enum: PII_RECONCILIATION_KINDS,
+    description:
+      '`MISSING_IN_REGISTRY`: personal aprobada sin declarar. `REGISTRY_DISAGREES`: declarada sin marca PII/PHI. `ORPHAN_IN_REGISTRY`: declarada pero no observada',
+  })
+  @IsOptional()
+  @IsIn(PII_RECONCILIATION_KINDS)
+  kind?: PiiReconciliationKind;
+
+  @ApiPropertyOptional({ description: 'Schema de PostgreSQL' })
+  @IsOptional()
+  @Matches(SCHEMA)
+  schema?: string;
 }
 
 export class PiiColumnDto {

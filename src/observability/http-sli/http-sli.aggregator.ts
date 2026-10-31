@@ -129,13 +129,13 @@ interface Cell {
 }
 
 /** Método normalizado: un verbo fuera de la lista no crea series nuevas. */
-function normalizeMethod(method: string): string {
+export function normalizeMethod(method: string): string {
   const upper = (method ?? '').toUpperCase();
   return KNOWN_METHODS.has(upper) ? upper : 'OTHER';
 }
 
 /** Defensa en profundidad: una plantilla no lleva identificadores. */
-function sanitizeRoute(route: string): string {
+export function sanitizeRoute(route: string): string {
   if (!route) return UNMATCHED_ROUTE;
   if (route === UNMATCHED_ROUTE || route === OVERFLOW_ROUTE) return route;
   if (UUID.test(route) || LONG_DIGITS.test(route) || route.length > 200) {
@@ -148,7 +148,7 @@ function sanitizeRoute(route: string): string {
 }
 
 /** Índice del primer corte que contiene la duración; el último es `inf`. */
-function bucketIndex(durationMs: number): number {
+export function bucketIndex(durationMs: number): number {
   const index = LATENCY_BUCKETS_MS.findIndex((limit) => durationMs <= limit);
   return index === -1 ? LATENCY_BUCKETS_MS.length : index;
 }
