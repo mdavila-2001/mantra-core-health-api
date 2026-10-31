@@ -22,6 +22,7 @@ import {
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
+import { EquipmentF5aService } from './equipment-f5a.service';
 
 /**
  * Casos de uso de equipamiento y calibración del sitio (UC-23-09): registrar un
@@ -43,6 +44,8 @@ export class DiagnosticEquipmentService {
     private readonly scope: DiagnosticUnitScopeService,
     private readonly equipmentRepo: DiagnosticEquipmentRepository,
     private readonly logger: PinoLogger,
+    // F5a: evaluador de §0.3 sobre la sede y eventos del equipo.
+    private readonly f5a: EquipmentF5aService,
   ) {
     this.logger.setContext(DiagnosticEquipmentService.name);
   }
@@ -118,8 +121,25 @@ export class DiagnosticEquipmentService {
       { operation: 'diagnostic_units.equipment.update', equipmentId },
       'Updating equipment',
     );
+    // Mantenimiento sólo cambia estado operativo y calibración (§F5a); sala,
+    // DICOM y datos del equipo son de Admin org/sucursal.
+    const statusOnly =
+      dto.manufacturer === undefined &&
+      dto.model === undefined &&
+      dto.careSpaceId === undefined &&
+      dto.aeTitle === undefined &&
+      dto.stationName === undefined;
     return this.em.transactional(async (tx) => {
-      const equipment = await this.scope.equipment(tx, equipmentId);
+      const { equipment } = await this.f5a.authorize(
+        tx,
+        equipmentId,
+        actor,
+        statusOnly ? 'f5a.equipment.status' : 'f5a.equipment.write',
+      );
+      const before = {
+        careSpaceId: equipment.careSpaceId ?? null,
+        status: equipment.operationalStatusConceptId,
+      };
 
       if (dto.manufacturer !== undefined)
         equipment.manufacturer = dto.manufacturer;
@@ -160,6 +180,7 @@ export class DiagnosticEquipmentService {
       } catch (error) {
         throw translateInfraWriteError(error);
       }
+      await this.f5a.announceChanges(tx, equipment, before, actor.id);
 
       return {
         id: equipment.id,

@@ -531,12 +531,16 @@ components:
             - pharmacy_inventory.location.relocated
             - accounting.infrastructure_item.located
             - accounting.cost_center.unit_linked
+            - diagnostic_units.equipment.located
+            - diagnostic_units.equipment.status_changed
+            - diagnostic_units.equipment.resource_linked
         aggregateType:
           type: string
           enum:
             - pharmacy_inventory.inventory_locations
             - accounting.infrastructure_items
             - accounting.cost_centers
+            - diagnostic_units.diagnostic_equipment
         aggregateId:
           type: string
           format: uuid

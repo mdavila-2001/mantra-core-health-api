@@ -21313,6 +21313,39 @@ paths:
         Retirar (soft-delete) una oferta de estudio. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostic-equipment/{id}:
+    get:
+      operationId: DiagnosticEquipmentController_detail
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Detalle de un equipo con su sala (F5a)
+      tags:
+        - diagnostic-equipment
+      description: >-
+        Detalle de un equipo con su sala (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
     patch:
       operationId: DiagnosticEquipmentController_updateEquipment
       parameters:
@@ -21358,6 +21391,78 @@ paths:
       description: >-
         Actualizar estado/calibración de un equipo. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-equipment/{id}/resource:
+    post:
+      operationId: DiagnosticEquipmentController_createResource
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear el recurso agendable del equipo (F5a)
+      tags:
+        - diagnostic-equipment
+      description: >-
+        Crear el recurso agendable del equipo (F5a). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-equipment/{id}/mwl-station:
+    get:
+      operationId: DiagnosticEquipmentController_mwlStation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Estación MWL del equipo (F5a)
+      tags:
+        - diagnostic-equipment
+      description: >-
+        Estación MWL del equipo (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /diagnostic-unit-accreditations/{id}/renew:
     post:
       operationId: DiagnosticUnitAccreditationsController_renew
