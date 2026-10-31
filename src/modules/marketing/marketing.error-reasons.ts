@@ -35,4 +35,10 @@ export enum MarketingErrorReason {
 
   /** El token de destinatario del enlace es inválido, está vencido o no es de ese enlace. */
   TRACKED_LINK_TOKEN_INVALID = 'MARKETING_TRACKED_LINK_TOKEN_INVALID',
+
+  /** La ventana de una lectura de Insights es inválida (fecha, vacía o mayor de 92 días). */
+  INSIGHTS_WINDOW_INVALID = 'MARKETING_INSIGHTS_WINDOW_INVALID',
+
+  /** La lectura de hechos de Insights devolvería más filas que el máximo; hay que acotarla. */
+  INSIGHTS_FACTS_LIMIT_EXCEEDED = 'MARKETING_INSIGHTS_FACTS_LIMIT_EXCEEDED',
 }
