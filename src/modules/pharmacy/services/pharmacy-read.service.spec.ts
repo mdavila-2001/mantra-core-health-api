@@ -48,6 +48,11 @@ function build() {
     findActiveProducts: mockFn().mockResolvedValue([]),
     findActiveProductOwners: mockFn().mockResolvedValue([]),
     findSellableProductsByIds: mockFn().mockResolvedValue([]),
+    // La regla por sede, doblada: por defecto la sede tiene todo lo pedido.
+    findAvailableProductIdsAtSite: mockFn(
+      async (_em: unknown, _siteId: string, ids: readonly string[]) =>
+        new Set(ids),
+    ),
     findCurrentPublicPriceLists: mockFn().mockResolvedValue([]),
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
@@ -457,6 +462,49 @@ describe('PharmacyReadService', () => {
       display: CURRENCY.display,
     });
     expect(result.pharmacyName).toBe('Farmacia 1');
+  });
+
+  it('does not price what the site does not have under the per-site rule', async () => {
+    const d = build();
+    d.repo.findActiveSiteById.mockResolvedValue({
+      id: 'site-1',
+      pharmacyId: '1',
+      name: 'Sede Centro',
+    });
+    d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+    d.repo.findCurrentPublicPriceLists.mockResolvedValue([
+      { id: 'list-pharm', pharmacyId: '1', code: 'GENERAL' },
+    ]);
+    d.repo.findCurrentPrices.mockResolvedValue(
+      ['prod-catalogo-0-lo-tengo', 'prod-no-lo-tengo'].map((id) => ({
+        pharmacyPriceListId: 'list-pharm',
+        pharmacyProductId: id,
+        unitAmount: '10.00',
+        effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
+      })),
+    );
+    // Los dos siguen publicados y sin el «no tengo» del catálogo…
+    d.repo.findSellableProductsByIds.mockResolvedValue([
+      { id: 'prod-catalogo-0-lo-tengo', productCode: 'A', stockQuantity: 0 },
+      { id: 'prod-no-lo-tengo', productCode: 'B', stockQuantity: 9 },
+    ]);
+    // …pero la sede sólo tiene el primero: «Lo tengo» con catálogo en 0.
+    d.repo.findAvailableProductIdsAtSite.mockResolvedValue(
+      new Set(['prod-catalogo-0-lo-tengo']),
+    );
+
+    const result = await runWithTenant('tenant-a', () =>
+      d.service.getSitePrices('site-1'),
+    );
+
+    expect(d.repo.findAvailableProductIdsAtSite).toHaveBeenCalledWith(
+      expect.anything(),
+      'site-1',
+      ['prod-catalogo-0-lo-tengo', 'prod-no-lo-tengo'],
+    );
+    expect(result.items.map((item) => item.productId)).toEqual([
+      'prod-catalogo-0-lo-tengo',
+    ]);
   });
 
   it('keeps a normal public list visible and excludes an insurer-linked one marked public', async () => {

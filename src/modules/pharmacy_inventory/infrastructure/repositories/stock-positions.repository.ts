@@ -91,6 +91,33 @@ export class StockPositionsRepository {
     );
   }
 
+  /**
+   * Las posiciones **sin lote** de unos productos en unas ubicaciones, con
+   * `SELECT ... FOR UPDATE`, en un orden estable. Es el stock que una sede
+   * declara sin lotes y que el escritor por sede tiene que ver entero.
+   */
+  findLooseForUpdate(
+    em: EntityManager,
+    locationIds: readonly string[],
+    productIds: readonly string[],
+  ): Promise<InventoryStockPositions[]> {
+    if (locationIds.length === 0 || productIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      InventoryStockPositions,
+      {
+        inventoryLocationId: { $in: [...locationIds] },
+        pharmacyProductId: { $in: [...productIds] },
+        inventoryLotId: null,
+      },
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE,
+        orderBy: { inventoryLocationId: 'asc', pharmacyProductId: 'asc' },
+      },
+    );
+  }
+
   /** Todas las posiciones de un lote (para recall/liberación en cualquier ubicación). */
   findByLot(
     em: EntityManager,
