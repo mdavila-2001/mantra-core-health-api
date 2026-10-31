@@ -9,6 +9,10 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import {
+  ServiceRequestComponentDto,
+  ServiceRequestImagingDto,
+} from '../../clinical/dto/service-request-detail.dto';
 import { SpecimenDetailDto } from './specimens.dto';
 
 /**
@@ -105,6 +109,37 @@ export class LabInboxItemDto {
 
   /** Cuándo se emitió la orden. */
   @ApiProperty({ type: String, format: 'date-time' }) requestedAt!: Date;
+
+  /** v4.2.80: requisición que agrupa los estudios pedidos juntos; `null` = alta individual. */
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  requisitionId?: string | null;
+
+  /** v4.2.80: muestra pedida por el médico; `null` = no se indicó. */
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  specimenTypeConceptId?: string | null;
+
+  /** v4.2.80: nombre legible de la muestra pedida. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  specimenTypeDisplay?: string | null;
+
+  /** v4.2.80: componentes marcados del panel, en el orden en que se marcaron. */
+  @ApiPropertyOptional({ type: [ServiceRequestComponentDto] })
+  components?: ServiceRequestComponentDto[];
+
+  /** v4.2.80: `false` = orden sin detalle de componentes («estudio completo»). */
+  @ApiPropertyOptional()
+  componentsSpecified?: boolean;
+
+  /** v4.2.80: modalidad, región, lateralidad y contraste; `null` si no es imagen o no los trae. */
+  @ApiPropertyOptional({ type: () => ServiceRequestImagingDto, nullable: true })
+  imaging?: ServiceRequestImagingDto | null;
+
+  /**
+   * v4.2.80: resumen legible armado por el servidor, p. ej. «Hemograma · 3
+   * componentes» o «Radiografía de mano · Mano · Izquierda · sin contraste».
+   */
+  @ApiPropertyOptional()
+  summary?: string;
 
   /**
    * Muestras que este laboratorio ya recibió para la orden y todavía no

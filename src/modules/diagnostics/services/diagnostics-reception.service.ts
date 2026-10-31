@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { decodeKeysetCursor, encodeKeysetCursor } from '../../../common';
 import type { ServiceRequests } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { ServiceRequestDetailService } from '../../clinical/services/service-request-detail.service';
 import { CATEGORIES_WITH_SPECIMEN } from '../diagnostics.concepts';
 import {
   LabReceptionRepository,
@@ -60,12 +61,14 @@ export class DiagnosticsReceptionService {
    * @param receptionRepo - Lecturas de la bandeja.
    * @param specimensRepo - Contenedores y custodia de los especímenes.
    * @param logger - Registro estructurado.
+   * @param detail - Detalle pedido de la orden (muestra, componentes, imagen; v4.2.80).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly receptionRepo: LabReceptionRepository,
     private readonly specimensRepo: SpecimensRepository,
     private readonly logger: PinoLogger,
+    private readonly detail: ServiceRequestDetailService,
   ) {
     this.logger.setContext(DiagnosticsReceptionService.name);
   }
@@ -162,7 +165,7 @@ export class DiagnosticsReceptionService {
   }
 
   /** Completa el mapa de rótulos con los pacientes que falten. */
-  private async loadLabels(
+  async loadLabels(
     em: EntityManager,
     labels: Map<string, InboxPatientLabel | null>,
     orders: readonly ServiceRequests[],
@@ -179,8 +182,8 @@ export class DiagnosticsReceptionService {
     for (const id of missing) labels.set(id, found.get(id) ?? null);
   }
 
-  /** Proyecta la página: paciente, estudio, organización y muestras. */
-  private async toItems(
+  /** Proyecta la página: paciente, estudio, detalle pedido, organización y muestras. */
+  async toItems(
     em: EntityManager,
     tenantId: string,
     page: readonly ServiceRequests[],
@@ -189,7 +192,7 @@ export class DiagnosticsReceptionService {
     if (page.length === 0) return [];
     const orderIds = page.map((order) => order.id);
 
-    const [specimens, studyNames, tenantNames] = await Promise.all([
+    const [specimens, studyNames, tenantNames, details] = await Promise.all([
       this.receptionRepo.findSpecimensForServiceRequests(
         em,
         tenantId,
@@ -203,6 +206,7 @@ export class DiagnosticsReceptionService {
         em,
         page.map((order) => order.custodianTenantId),
       ),
+      this.detail.describe(em, page),
       this.loadLabels(em, labels, page),
     ]);
     const specimenIds = specimens.map((specimen) => specimen.id);
@@ -213,7 +217,16 @@ export class DiagnosticsReceptionService {
 
     return page.map((order) => {
       const label = labels.get(order.patientProfileId) ?? null;
+      const view = details.get(order.id);
+      const codeDisplay = studyNames.get(order.codeConceptId) ?? null;
       return {
+        requisitionId: order.requisitionId ?? null,
+        specimenTypeConceptId: order.specimenTypeConceptId ?? null,
+        specimenTypeDisplay: view?.specimenTypeDisplay ?? null,
+        components: view?.components ?? [],
+        componentsSpecified: view?.componentsSpecified ?? false,
+        imaging: view?.imaging ?? null,
+        summary: summaryOf(codeDisplay, view),
         serviceRequestId: order.id,
         patientProfileId: order.patientProfileId,
         patientDisplayName: label?.displayName ?? null,
@@ -242,6 +255,45 @@ export class DiagnosticsReceptionService {
 }
 
 /**
+ * El resumen legible de la orden, para la celda «Estudio» de la bandeja.
+ * Laboratorio: «Hemograma · 3 componentes». Imagen: «Radiografía de mano ·
+ * Mano · Izquierda · con contraste». Sin detalle: sólo el nombre del estudio.
+ */
+export function summaryOf(
+  codeDisplay: string | null,
+  view:
+    | {
+        components: readonly unknown[];
+        imaging: {
+          bodySiteDisplay: string | null;
+          lateralityDisplay: string | null;
+          contrastDisplay: string | null;
+        } | null;
+      }
+    | undefined,
+): string {
+  const parts = [codeDisplay ?? 'Estudio'];
+  if (view?.components.length) {
+    parts.push(
+      view.components.length === 1
+        ? '1 componente'
+        : `${view.components.length} componentes`,
+    );
+  }
+  const imaging = view?.imaging;
+  if (imaging) {
+    for (const part of [
+      imaging.bodySiteDisplay,
+      imaging.lateralityDisplay,
+      imaging.contrastDisplay,
+    ]) {
+      if (part) parts.push(part);
+    }
+  }
+  return parts.join(' · ');
+}
+
+/**
  * Minúsculas y sin tildes: «Pérez» y «perez» son la misma búsqueda en un
  * mostrador donde nadie escribe los acentos.
  */
@@ -250,7 +302,7 @@ export function normalizeForSearch(text: string): string {
 }
 
 /** Si el paciente coincide con el texto buscado (nombre o código). */
-function matchesPatient(
+export function matchesPatient(
   label: InboxPatientLabel | null,
   needle: string,
 ): boolean {

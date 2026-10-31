@@ -308,6 +308,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ProceduresService,
     ReceivedServicesProjector,
     ServiceRequestsService,
+    // El receptor (diagnostics) lee el detalle pedido de la orden.
+    ServiceRequestDetailService,
     EncountersRepository,
     ClinicalReadService,
     ClinicalRecordAccessGuard,
