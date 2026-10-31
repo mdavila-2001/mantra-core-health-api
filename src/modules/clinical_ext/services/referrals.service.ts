@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   DomainException,
   ErrorCode,
@@ -261,6 +262,14 @@ export class ReferralsService {
       if (dto.targetProfileId) {
         await this.assertTargetIsPractitioner(tx, dto.targetProfileId);
       }
+      // El tenant indicado se valida antes que el servicio: contra un tenant
+      // inexistente o inactivo, «el servicio no es de esa organización» sería
+      // un motivo engañoso.
+      if (dto.targetTenantId) {
+        await this.assertTargetTenantActive(tx, dto.targetTenantId, {
+          targetTenantId: dto.targetTenantId,
+        });
+      }
       const targetTenantId = dto.targetServiceCatalogId
         ? await this.assertServiceOfTarget(tx, {
             targetServiceCatalogId: dto.targetServiceCatalogId,
@@ -268,6 +277,15 @@ export class ReferralsService {
             targetTenantId: dto.targetTenantId,
           })
         : dto.targetTenantId;
+      // El tenant derivado de la práctica del servicio se valida igual: una
+      // derivación a una organización que no la puede atender no se crea. El
+      // 404 repite el servicio que mandó quien llama, no el tenant derivado,
+      // que no conocía.
+      if (targetTenantId && targetTenantId !== dto.targetTenantId) {
+        await this.assertTargetTenantActive(tx, targetTenantId, {
+          targetServiceCatalogId: dto.targetServiceCatalogId,
+        });
+      }
       if (dto.sourceEncounterId) {
         await this.assertEncounterBelongsToPatient(
           tx,
@@ -384,6 +402,34 @@ export class ReferralsService {
       throw new ResourceNotFoundException(
         'Profesional no encontrado',
         { targetProfileId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
+    }
+  }
+
+  /**
+   * El tenant destino tiene que existir y estar activo (`TENANT_ACTIVE`): una
+   * derivación a una organización que no la puede atender no se crea (#1201).
+   *
+   * Inexistente e inactivo responden igual, con el mismo cuerpo: distinguirlos
+   * permitiría sondear la existencia y el estado de tenants no públicos.
+   *
+   * @param em - Contexto de persistencia (la transacción, en `create`).
+   * @param targetTenantId - Tenant destino, indicado o derivado del servicio.
+   * @param details - Lo que repite el 404: sólo datos que mandó quien llama.
+   * @throws ResourceNotFoundException 404 `REFERRAL_TARGET_NOT_FOUND` si no
+   *   existe o no está activo.
+   */
+  private async assertTargetTenantActive(
+    em: EntityManager,
+    targetTenantId: string,
+    details: Record<string, string | undefined>,
+  ): Promise<void> {
+    const tenant = await this.tenantsRepo.findById(em, targetTenantId);
+    if (!tenant || tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
+      throw new ResourceNotFoundException(
+        'Organización destino no encontrada',
+        details,
         ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
       );
     }
@@ -1053,7 +1099,8 @@ export class ReferralsService {
    * @param query - `targetProfileId` y/o `targetTenantId`.
    * @returns Los servicios, por nombre.
    * @throws ResourceNotFoundException si algún destino no es listable; el
-   *   mismo 404 que si no existiera.
+   *   mismo 404 que si no existiera. Un tenant inexistente, inactivo o sin
+   *   vitrina responde con el mismo cuerpo (#1201): no se distingue el caso.
    */
   async listTargetServices(
     query: ListReferralTargetServicesQueryDto,

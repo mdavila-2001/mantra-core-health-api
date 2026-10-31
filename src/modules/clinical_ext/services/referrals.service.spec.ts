@@ -10,6 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { ReferralsService } from './referrals.service';
 import {
+  CONCEPTS,
   ConflictException,
   DomainException,
   PreconditionFailedException,
@@ -20,6 +21,7 @@ import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
 import { ACTIVE_TENANT, inTenant, thrown } from './clinical-ext-tenant.testing';
 import { Branches } from '../../directory/entities';
+import { DIR } from '../../directory/directory.concepts';
 import { AllExceptionsFilter } from '../../../common/filters/all-exceptions.filter';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
@@ -125,8 +127,12 @@ function build() {
     findById: mockFn(() => Promise.resolve(null)),
     findByTenant: mockFn(() => Promise.resolve([])),
   };
+  // Por defecto, todo tenant destino existe y está activo (#1201); cada test
+  // de tenant inexistente o inactivo lo sobrescribe.
   const tenantsRepo = {
-    findById: mockFn(() => Promise.resolve(null)),
+    findById: mockFn((_em: unknown, id: string) =>
+      Promise.resolve({ id, statusConceptId: CONCEPTS.TENANT_ACTIVE }),
+    ),
     searchPage: mockFn(() => Promise.resolve([])),
   };
   const conceptsRepo = { findByIds: mockFn(() => Promise.resolve(new Map())) };
@@ -694,6 +700,223 @@ describe('ReferralsService', () => {
           targetServiceCatalogId: 'svc-1',
           reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
         },
+      });
+    });
+
+    /**
+     * #1201: una derivación a un tenant inexistente o inactivo no se crea. Antes
+     * se creaba y el aviso a la paciente se salteaba en silencio. Inexistente e
+     * inactivo responden el mismo 404 con el mismo cuerpo: distinguirlos
+     * permitiría sondear la existencia y el estado de tenants no públicos.
+     */
+    describe('tenant destino inexistente o inactivo (#1201)', () => {
+      const created = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+        createdAt: new Date(),
+      };
+      const inactiveTenant = (id: string) => ({
+        id,
+        statusConceptId: DIR.TENANT_SUSPENDED,
+      });
+      /**
+       * El cuerpo HTTP serializado, con la marca de tiempo fija: es lo único
+       * que cambia entre dos respuestas del filtro.
+       */
+      const bytesOf = (error: unknown): string =>
+        JSON.stringify({ ...httpBody(error), timestamp: '<fijo>' });
+
+      /** Crea con el tenant indicado y devuelve el error. */
+      async function createWith(
+        d: ReturnType<typeof build>,
+        dto: Record<string, unknown>,
+      ) {
+        return thrown(
+          d.service.create(
+            { patientProfileId: 'p1', sourceEncounterId: 'e1', ...dto } as any,
+            doctor,
+          ),
+        );
+      }
+
+      it('targetTenantId indicado: inexistente e inactivo dan el mismo 404, byte a byte', async () => {
+        const d = build();
+        d.tenantsRepo.findById.mockResolvedValue(null);
+        const missing = await createWith(d, { targetTenantId: 'ten-x' });
+        d.tenantsRepo.findById.mockResolvedValue(inactiveTenant('ten-x'));
+        const inactive = await createWith(d, { targetTenantId: 'ten-x' });
+
+        for (const err of [missing, inactive]) {
+          expect(err).toBeInstanceOf(ResourceNotFoundException);
+          expect(err).toMatchObject({
+            status: 404,
+            reason: ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+          });
+        }
+        expect(httpBody(missing)).toMatchObject({
+          code: 'NOT_FOUND',
+          reason: 'REFERRAL_TARGET_NOT_FOUND',
+          details: { targetTenantId: 'ten-x' },
+        });
+        expect(bytesOf(inactive)).toBe(bytesOf(missing));
+        expect(d.tenantsRepo.findById).toHaveBeenCalledWith(d.tx, 'ten-x');
+        expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+
+      it('tenant derivado de la práctica del servicio: inexistente e inactivo dan el mismo 404, byte a byte', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findById.mockResolvedValue(service);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-servicio',
+        });
+        d.tenantsRepo.findById.mockResolvedValue(null);
+        const missing = await createWith(d, {
+          targetServiceCatalogId: 'svc-1',
+        });
+        d.tenantsRepo.findById.mockResolvedValue(
+          inactiveTenant('ten-servicio'),
+        );
+        const inactive = await createWith(d, {
+          targetServiceCatalogId: 'svc-1',
+        });
+
+        expect(inactive.reason).toBe(
+          ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+        );
+        expect(httpBody(inactive)).toMatchObject({
+          code: 'NOT_FOUND',
+          reason: 'REFERRAL_TARGET_NOT_FOUND',
+          details: { targetServiceCatalogId: 'svc-1' },
+        });
+        // Sólo lo que mandó quien llama: el tenant derivado no se revela.
+        expect(httpBody(inactive).details).toEqual({
+          targetServiceCatalogId: 'svc-1',
+        });
+        expect(bytesOf(inactive)).toBe(bytesOf(missing));
+        expect(d.tenantsRepo.findById).toHaveBeenCalledWith(
+          d.tx,
+          'ten-servicio',
+        );
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+
+      it('el tenant indicado se valida antes que el servicio: 404 y no SERVICE_TARGET_MISMATCH', async () => {
+        const d = build();
+        d.tenantsRepo.findById.mockResolvedValue(inactiveTenant('ten-x'));
+        d.serviceCatalogRepo.findById.mockResolvedValue(service);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-otra',
+        });
+        const err = await createWith(d, {
+          targetTenantId: 'ten-x',
+          targetServiceCatalogId: 'svc-1',
+        });
+        expect(err.reason).toBe(
+          ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+        );
+        expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
+      });
+
+      it('un tenant activo, indicado o derivado, se sigue creando y avisando', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.referralsRepo.findDuplicate.mockResolvedValue(null);
+        d.referralsRepo.create.mockImplementation((_tx: unknown, row: any) => ({
+          ...created,
+          targetTenantId: row.targetTenantId,
+        }));
+        const direct = await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetTenantId: 'ten-dest',
+          } as any,
+          doctor,
+        );
+        expect(direct.targetTenantId).toBe('ten-dest');
+
+        d.serviceCatalogRepo.findById.mockResolvedValue(service);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-servicio',
+        });
+        const derived = await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        );
+        expect(derived.targetTenantId).toBe('ten-servicio');
+        expect(d.tenantsRepo.findById).toHaveBeenCalledWith(d.tx, 'ten-dest');
+        expect(d.tenantsRepo.findById).toHaveBeenCalledWith(
+          d.tx,
+          'ten-servicio',
+        );
+        expect(d.notifier.notifyRecommended).toHaveBeenCalledTimes(2);
+      });
+
+      it('GET /referrals/target-services: inexistente, inactivo y no listable dan el mismo 404, byte a byte', async () => {
+        // El repositorio responde por los tres casos con la misma consulta
+        // (`isListableOrganization`: existe, `TENANT_ACTIVE` y con vitrina);
+        // acá se simula cada uno y se compara el cuerpo.
+        const d = build();
+        d.tenantsRepo.findById.mockResolvedValue(null);
+        d.targetsRepo.isListableOrganization.mockResolvedValue(false);
+        const missing = await thrown(
+          d.raw.listTargetServices({ targetTenantId: 'ten-x' } as any),
+        );
+        d.tenantsRepo.findById.mockResolvedValue(inactiveTenant('ten-x'));
+        const inactive = await thrown(
+          d.raw.listTargetServices({ targetTenantId: 'ten-x' } as any),
+        );
+        d.tenantsRepo.findById.mockResolvedValue({
+          id: 'ten-x',
+          statusConceptId: CONCEPTS.TENANT_ACTIVE,
+        });
+        const notListable = await thrown(
+          d.raw.listTargetServices({ targetTenantId: 'ten-x' } as any),
+        );
+        expect(httpBody(missing)).toMatchObject({
+          code: 'NOT_FOUND',
+          reason: 'REFERRAL_TARGET_NOT_FOUND',
+          details: { targetTenantId: 'ten-x' },
+        });
+        expect(bytesOf(inactive)).toBe(bytesOf(missing));
+        expect(bytesOf(notListable)).toBe(bytesOf(missing));
+        // No hay una consulta aparte de existencia o estado del tenant.
+        expect(d.tenantsRepo.findById).not.toHaveBeenCalled();
+
+        // Con profesional: tenant inexistente o inactivo (`isActiveTenant`
+        // falso en los dos casos) da el mismo 404 que un profesional no listable.
+        d.targetsRepo.isActiveTenant.mockResolvedValue(false);
+        const withProfileTenant = await thrown(
+          d.raw.listTargetServices({
+            targetProfileId: 'hp-2',
+            targetTenantId: 'ten-x',
+          } as any),
+        );
+        d.targetsRepo.isActiveTenant.mockResolvedValue(true);
+        d.targetsRepo.isListablePractitioner.mockResolvedValue(false);
+        const withProfileHidden = await thrown(
+          d.raw.listTargetServices({
+            targetProfileId: 'hp-2',
+            targetTenantId: 'ten-x',
+          } as any),
+        );
+        expect(withProfileTenant.reason).toBe(
+          ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+        );
+        expect(bytesOf(withProfileTenant)).toBe(bytesOf(withProfileHidden));
+        expect(d.practicesRepo.findByTenant).not.toHaveBeenCalled();
+        expect(d.offeringsRepo.listOfferings).not.toHaveBeenCalled();
       });
     });
 
