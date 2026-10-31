@@ -39,6 +39,8 @@ channels:
         $ref: '#/components/messages/PracticeStructureEvent'
       infrastructureOpsEvent:
         $ref: '#/components/messages/InfrastructureOpsEvent'
+      adtEvent:
+        $ref: '#/components/messages/AdtEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -166,6 +168,21 @@ components:
         paciente.
       payload:
         $ref: '#/components/schemas/InfrastructureOpsEventPayload'
+
+    AdtEvent:
+      name: AdtEvent
+      title: Internación / ADT y censo (clinical, F3)
+      summary: >
+        Movimientos de internación equivalentes a HL7 ADT (A01 ingreso/asignación,
+        A02 traslado con PV1-3 y PV1-6, A17 intercambio, A03 egreso, A12 anulación de
+        traslado), forzados de compatibilidad, revisión de incidentes y cierre/ajuste
+        del censo diario (CONTRATO-F2-F5 §F3.3). Se publican en la misma transacción
+        (src/modules/clinical/services/inpatient/adt-support.ts). El payload lleva ids
+        (encuentro, ubicación, cama), el código HL7 y el requestId; nunca datos del
+        paciente. Cada movimiento de cama publica además
+        practice.care_space.status_changed (eje OCCUPANCY) por CareSpaceOpsPort.
+      payload:
+        $ref: '#/components/schemas/AdtEventPayload'
 
     OutboxMessage:
       name: OutboxMessage
@@ -356,5 +373,49 @@ components:
             v2Code:
               type: string
               enum: [C, H, I, K, O, U, R]
+            requestId:
+              type: string
+
+    AdtEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - clinical.adt.admitted
+            - clinical.adt.bed_assigned
+            - clinical.adt.reservation_created
+            - clinical.adt.transferred
+            - clinical.adt.swapped
+            - clinical.adt.discharged
+            - clinical.adt.reservation_cancelled
+            - clinical.adt.transfer_cancelled
+            - clinical.adt.placement_override
+            - clinical.adt.placement_incident_reviewed
+            - clinical.census_day.closed
+            - clinical.census_day.adjusted
+        aggregateType:
+          type: string
+          enum:
+            - clinical.encounters
+            - clinical.placement_incidents
+            - clinical.inpatient_census_days
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+          properties:
+            encounterId:
+              type: string
+              format: uuid
+            hl7:
+              type: string
+              enum: [A01, A02, A03, A12, A17]
             requestId:
               type: string

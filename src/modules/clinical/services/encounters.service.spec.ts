@@ -18,6 +18,8 @@ import { ForbiddenException } from '@nestjs/common';
 import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
 
+import { PRAC } from '../../practice/practice.concepts';
+
 const actor = { id: 'user-1', roles: [] } as any;
 
 /**
@@ -25,7 +27,10 @@ const actor = { id: 'user-1', roles: [] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    execute: mockFn().mockResolvedValue([]),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const encountersRepo = {
     findById: mockFn(),
@@ -207,6 +212,39 @@ describe('EncountersService', () => {
         d.tx,
         expect.objectContaining({ tenantId: 't1', encounterId: 'enc1' }),
       );
+    });
+
+    it('F3: rechaza un check-in en una cama (422 BED_ASSIGNMENT_REQUIRES_ADT) y no crea nada', async () => {
+      const d = build();
+      d.tx.execute.mockResolvedValue([{ form_concept_id: PRAC.LOC_FORM_BED }]);
+      await expect(
+        d.service.checkIn(
+          {
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            location: { practiceSiteId: 'site1', careSpaceId: 'bed-1' },
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: 'BED_ASSIGNMENT_REQUIRES_ADT' });
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+      expect(d.encountersRepo.createLocation).not.toHaveBeenCalled();
+    });
+
+    it('F3: un check-in en un consultorio sigue permitido', async () => {
+      const d = build();
+      d.tx.execute.mockResolvedValue([{ form_concept_id: PRAC.LOC_FORM_ROOM }]);
+      d.encountersRepo.create.mockReturnValue(encounter());
+      d.encountersRepo.createLocation.mockReturnValue({ id: 'loc1' });
+      const res = await d.service.checkIn(
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          location: { practiceSiteId: 'site1', careSpaceId: 'room-1' },
+        },
+        actor,
+      );
+      expect(res.locationIds).toEqual(['loc1']);
     });
 
     it('deja la relación asistencial de los profesionales del encuentro dentro de la transacción (REQ-16-035)', async () => {

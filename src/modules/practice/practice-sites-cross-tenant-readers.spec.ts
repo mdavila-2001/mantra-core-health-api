@@ -18,6 +18,10 @@ import { join, relative, sep } from 'node:path';
  * decisiones están pendientes del orquestador (REPORTE de F1, «Riesgos»).
  */
 const KNOWN_READERS: Record<string, string> = {
+  'clinical/repositories/inpatient.repository.ts':
+    'F3: sitesWithBeds para el tick del censo (worker, abre app.system_context dentro de su transacción: ve todas las sedes a propósito).',
+  'clinical/services/inpatient/census.use-cases.ts':
+    'F3: lee tenant_id y time_zone de la sede en el cierre del worker (contexto SYSTEM en la transacción); en la ruta HTTP la sede se resuelve por el evaluador de §0.3, dentro del tenant.',
   'community/repositories/public-search.repository.ts':
     'Búsqueda pública de profesionales: une practice_sites con practices, que ya tenía RLS forzada desde 2026-08-05; ' +
     'en ruta pública devuelve 0 sedes. Riesgo previo a F1; necesita contexto SYSTEM o vista pública.',

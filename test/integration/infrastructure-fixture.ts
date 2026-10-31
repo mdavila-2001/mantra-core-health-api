@@ -192,6 +192,8 @@ export interface Planta {
   building: string;
   room: string;
   beds: string[];
+  /** Unidad dueña (OWNER) de las camas. */
+  unit: string;
 }
 
 /**
@@ -250,10 +252,27 @@ export async function armarPlanta(
       activate: true,
     })
     .expect(201);
+  const beds: string[] = bulk.body.created.map((c: { id: string }) => c.id);
+  const unidad = await http()
+    .post(`/sites/${org.siteId}/clinical-units`)
+    .set(como(org))
+    .send({ code: `U-${tag}`, name: `Unidad ${tag}` })
+    .expect(201);
+  for (const bed of beds) {
+    await http()
+      .post(`/care-spaces/${bed}/unit-assignments`)
+      .set(como(org))
+      .send({
+        clinicalUnitId: unidad.body.id,
+        roleCode: 'SPACE_UNIT_ROLE_OWNER',
+      })
+      .expect(201);
+  }
   return {
     building: building.body.id,
     room: habitacion.body.id,
-    beds: bulk.body.created.map((c: { id: string }) => c.id),
+    beds,
+    unit: unidad.body.id,
   };
 }
 
@@ -267,4 +286,55 @@ export async function opsVersion(
     [spaceId],
   );
   return row.ops_version;
+}
+
+/**
+ * Paciente con cuenta propia y membresía en el tenant (la huella que exige
+ * `AuthzClinicalScopeService.isPatientInTenant`).
+ *
+ * @param ctx - Contexto.
+ * @param org - Organización.
+ * @param tag - Prefijo único.
+ * @param campos - `camposObligatoriosDePaciente(ctx)`.
+ */
+export async function registrarPaciente(
+  ctx: TestContext,
+  org: InfraOrg,
+  tag: string,
+  campos: Record<string, unknown>,
+): Promise<{ patientProfileId: string; userId: string }> {
+  const http = () => request(ctx.app.getHttpServer());
+  const nationalId = `F3-${tag}`;
+  await http()
+    .post('/iam/auth/register-patient')
+    .send({
+      ...campos,
+      nationalId,
+      password: PASSWORD,
+      displayName: `Paciente ${tag}`,
+      email: `pac-${tag.toLowerCase()}@example.test`,
+    })
+    .expect(201);
+  const login = await http()
+    .post('/iam/auth/login')
+    .send({ nationalId, password: PASSWORD })
+    .expect(200);
+  const [, body] = String(login.body.accessToken).split('.');
+  const claims = JSON.parse(
+    Buffer.from(body, 'base64url').toString('utf8'),
+  ) as Record<string, string>;
+  await sql(ctx)(
+    `insert into directory.tenant_memberships
+       (id, user_id, tenant_id, tenant_role_concept_id, status_concept_id, access_scope_concept_id,
+        start_date, created_at, updated_at)
+     values (gen_random_uuid(), ?, ?, ?, ?, ?, current_date, now(), now())`,
+    [
+      claims.sub,
+      org.tenantId,
+      DIR.ROLE_STAFF,
+      DIR.MEMBERSHIP_ACTIVE,
+      DIR.SCOPE_ALL_TENANT,
+    ],
+  );
+  return { patientProfileId: claims.pid, userId: claims.sub };
 }
