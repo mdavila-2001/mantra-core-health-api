@@ -1,3 +1,4 @@
+import { MODULE_CONCEPT_SEEDS } from '../../../../common/seed/module-concepts';
 import { documentLast3, maskedName } from '../../domain/masked-patient';
 import {
   isComparableUnit,
@@ -17,6 +18,26 @@ import type {
   PharmacyPrescriptionPatientDto,
   PharmacyPrescriptionShareDto,
 } from '../../presentation/dto/pharmacy-prescription-share.dto';
+
+/**
+ * El código declarado de cada concepto de módulo, por la clave con que lo
+ * guarda el catálogo (`clinical:MEDICATION_UNIT_BOTTLE` → `UNIT_{bottle}`,
+ * `catalog-concept-definitions.ts`). La respuesta no expone la clave interna.
+ */
+const DECLARED_CODE_BY_KEY: ReadonlyMap<string, string> = new Map(
+  MODULE_CONCEPT_SEEDS.map((seed) => [seed.key, seed.code]),
+);
+
+/** El código público de un concepto: el declarado si es de módulo; si no, el guardado. */
+function publicCodeOf(concept: ViewConcept | undefined): string | null {
+  if (concept === undefined) return null;
+  return DECLARED_CODE_BY_KEY.get(concept.code) ?? concept.code;
+}
+
+/** La unidad como la nombra UCUM (`{bottle}`), sin el prefijo del catálogo. */
+function unitCodeOf(concept: ViewConcept | undefined): string | null {
+  return publicCodeOf(concept)?.replace(/^UNIT_/, '') ?? null;
+}
 
 /** Un concepto del vademécum o de la terminología, ya leído. */
 export interface ViewConcept {
@@ -154,7 +175,7 @@ function toMatch(
     pharmacyProductId: product.id,
     name: productName(product),
     price: price?.amount ?? null,
-    currencyCode: currency?.code ?? null,
+    currencyCode: publicCodeOf(currency),
     requiresPrescription: product.requiresPrescription,
     outOfStockDeclared: product.outOfStockDeclared,
     sites: input.sites
@@ -211,7 +232,7 @@ function toItem(
     dosageText: dosageTextOf(item),
     prescribedQuantity: controlled ? total.quantity : item.quantity,
     unitCode: item.unitConceptId
-      ? (input.conceptById.get(item.unitConceptId)?.code ?? null)
+      ? unitCodeOf(input.conceptById.get(item.unitConceptId))
       : null,
     dispensedQuantity: controlled ? dispensed : null,
     remainingQuantity: controlled
