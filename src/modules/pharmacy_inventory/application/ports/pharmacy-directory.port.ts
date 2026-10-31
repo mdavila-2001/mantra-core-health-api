@@ -93,6 +93,11 @@ export interface PharmacyDirectoryPort {
     uow: UnitOfWork,
     ids: readonly string[],
   ): Promise<PharmacyProductSnapshot[]>;
+  /** Vendibles de unos medicamentos del vademécum, de cualquier farmacia. */
+  findSellableProductsByMedicationConcepts(
+    uow: UnitOfWork,
+    conceptIds: readonly string[],
+  ): Promise<PharmacyProductSnapshot[]>;
   findCurrentPublicPriceLists(
     uow: UnitOfWork,
     pharmacyIds: readonly string[],
