@@ -91,4 +91,11 @@ export enum IamErrorReason {
 
   /** La credencial referida no existe para el usuario. */
   CREDENTIAL_NOT_FOUND = 'CREDENTIAL_NOT_FOUND',
+
+  /** La transición de ciclo de vida no es válida desde el estado actual de la cuenta (o cambió mientras se aplicaba). */
+  USER_LIFECYCLE_TRANSITION_INVALID = 'USER_LIFECYCLE_TRANSITION_INVALID',
+  /** Un administrador no suspende ni da de baja su propia cuenta. */
+  USER_SELF_LIFECYCLE_FORBIDDEN = 'USER_SELF_LIFECYCLE_FORBIDDEN',
+  /** La cuenta es la última con capacidad de administrar accesos: quitarla dejaría la plataforma sin administración. */
+  USER_LAST_SECURITY_ADMIN = 'USER_LAST_SECURITY_ADMIN',
 }

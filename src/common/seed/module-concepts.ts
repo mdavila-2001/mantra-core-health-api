@@ -30,6 +30,7 @@ import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_c
 import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/domain/scheduling.concepts';
 import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures_perioperative/procedures_perioperative.concepts';
 import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
+import { PLATFORM_OPS_CONCEPT_SEEDS } from '../../modules/platform_ops/platform_ops.concepts';
 import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
 
 /**
@@ -76,4 +77,5 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...PHARMA_LAB_CONCEPT_SEEDS,
   ...SURVEYS_CONCEPT_SEEDS,
   ...ALLERGY_CONCEPT_SEEDS,
+  ...PLATFORM_OPS_CONCEPT_SEEDS,
 ];

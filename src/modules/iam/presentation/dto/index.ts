@@ -23,3 +23,4 @@ export * from './upload-registration-document.dto';
 export * from './register-practitioner.dto';
 export * from './resend-verification.dto';
 export * from './account-security.dto';
+export * from './user-lifecycle.dto';
