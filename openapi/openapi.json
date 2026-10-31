@@ -106954,6 +106954,177 @@
         ],
         "description": "Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
+    },
+    "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}": {
+      "patch": {
+        "description": "Cambia el producto, el código externo o la unidad; lo que no viene no cambia. Mismas condiciones que el alta y el vínculo vuelve a quedar sin verificar. 404 EXTERNAL_MAPPING_NOT_AVAILABLE si el vínculo no es de la conexión; 409 EXTERNAL_MAPPING_PRODUCT_TAKEN si el producto nuevo ya tiene vínculo; 400 EXTERNAL_MAPPING_EMPTY_UPDATE sin campos.",
+        "operationId": "PharmacyController_updateMapping",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "connectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mappingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMappingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir un vínculo con un código de proveedor externo",
+        "tags": [
+          "pharmacy"
+        ]
+      },
+      "delete": {
+        "description": "Borra el vínculo, también con la conexión inactiva, y devuelve cómo estaba. El stock que ya se sincronizó se conserva. 404 EXTERNAL_MAPPING_NOT_AVAILABLE si el vínculo no es de la conexión.",
+        "operationId": "PharmacyController_unmapProduct",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "connectionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mappingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deshacer un vínculo con un código de proveedor externo",
+        "tags": [
+          "pharmacy"
+        ]
+      }
     }
   },
   "info": {
@@ -169103,11 +169274,27 @@
           },
           "name": {
             "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NO_MAPPING",
+              "AMBIGUOUS_MAPPING"
+            ]
+          },
+          "productIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
           "externalCode",
-          "name"
+          "name",
+          "reason",
+          "productIds"
         ]
       },
       "IntegrationSyncResponseDto": {
@@ -169123,6 +169310,9 @@
           "mapped": {
             "type": "number"
           },
+          "unmappedLines": {
+            "type": "number"
+          },
           "unmapped": {
             "type": "array",
             "items": {
@@ -169131,14 +169321,36 @@
           },
           "applied": {
             "type": "number"
+          },
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationSyncSiteDto"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationSyncSkippedDto"
+            }
+          },
+          "notSent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationSyncNotSentDto"
+            }
           }
         },
         "required": [
           "batchId",
           "received",
           "mapped",
+          "unmappedLines",
           "unmapped",
-          "applied"
+          "applied",
+          "sites",
+          "skipped",
+          "notSent"
         ]
       },
       "IntegrationConnectionDto": {
@@ -169231,6 +169443,10 @@
             "type": "object",
             "nullable": true
           },
+          "externalUnitCode": {
+            "type": "object",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -169278,11 +169494,28 @@
             "type": "object",
             "format": "uuid",
             "nullable": true
+          },
+          "mappingStatus": {
+            "type": "string",
+            "enum": [
+              "MAPPED",
+              "UNMAPPED",
+              "AMBIGUOUS"
+            ]
+          },
+          "mappedProductIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
           "code",
-          "name"
+          "name",
+          "mappingStatus",
+          "mappedProductIds"
         ]
       },
       "ExternalCatalogListDto": {
@@ -170207,6 +170440,188 @@
           "unpublishedMedicationConceptIds",
           "items",
           "count"
+        ]
+      },
+      "UpdateMappingDto": {
+        "type": "object",
+        "properties": {
+          "pharmacyProductId": {
+            "type": "string",
+            "description": "Producto al que pasa el vínculo (activo, de la farmacia)",
+            "format": "uuid"
+          },
+          "externalProductCode": {
+            "type": "string",
+            "description": "Código de producto en el sistema externo",
+            "maxLength": 200
+          },
+          "externalUnitCode": {
+            "type": "object",
+            "description": "Unidad del sistema externo que equivale a una del producto; null la borra",
+            "maxLength": 100,
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MappingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyIntegrationConnectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyProductId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalProductCode": {
+            "type": "string"
+          },
+          "externalUnitCode": {
+            "type": "object",
+            "nullable": true
+          },
+          "verificationStatus": {
+            "type": "string",
+            "description": "Concept id del estado de verificación",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "pharmacyIntegrationConnectionId",
+          "pharmacyProductId",
+          "externalProductCode",
+          "verificationStatus",
+          "createdAt"
+        ]
+      },
+      "IntegrationSyncSiteDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "received": {
+            "type": "number"
+          },
+          "mapped": {
+            "type": "number"
+          },
+          "unmapped": {
+            "type": "number"
+          },
+          "applied": {
+            "type": "number"
+          },
+          "unchanged": {
+            "type": "number"
+          },
+          "skipped": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "siteId",
+          "siteCode",
+          "siteName",
+          "received",
+          "mapped",
+          "unmapped",
+          "applied",
+          "unchanged",
+          "skipped"
+        ]
+      },
+      "IntegrationSyncSkippedDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "externalCode": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "PRODUCT_NOT_AVAILABLE",
+              "PRODUCT_NOT_PUBLISHED",
+              "PRODUCT_OUT_OF_STOCK_DECLARED",
+              "SITE_PRODUCT_KEPT_BY_LOTS",
+              "SITE_MARKED_NOT_AVAILABLE",
+              "UNIT_MISMATCH",
+              "UNIT_NOT_REPORTED"
+            ]
+          },
+          "mappingUnitCode": {
+            "type": "object",
+            "nullable": true
+          },
+          "externalUnitCode": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "siteId",
+          "siteCode",
+          "externalCode",
+          "productId",
+          "quantity",
+          "reason"
+        ]
+      },
+      "IntegrationSyncNotSentDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "externalCode": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "siteId",
+          "siteCode",
+          "externalCode",
+          "productId"
         ]
       }
     },
