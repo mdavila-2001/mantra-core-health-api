@@ -152092,6 +152092,69 @@
           "exclusions"
         ]
       },
+      "ServiceRequestComponentDto": {
+        "type": "object",
+        "properties": {
+          "conceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "display": {
+            "type": "string",
+            "description": "Nombre legible (castellano si existe)"
+          },
+          "ordinal": {
+            "type": "number",
+            "description": "Posición, desde 1, en el orden en que se marcó"
+          }
+        },
+        "required": [
+          "conceptId",
+          "display",
+          "ordinal"
+        ]
+      },
+      "ServiceRequestImagingDto": {
+        "type": "object",
+        "properties": {
+          "modalityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "modalityDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodySiteConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "bodySiteDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "lateralityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lateralityDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "contrastConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contrastDisplay": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "PatientOrderSummaryDto": {
         "type": "object",
         "properties": {
@@ -152116,6 +152179,45 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          },
+          "requisitionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "codeDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "specimenTypeConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "specimenTypeDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceRequestComponentDto"
+            }
+          },
+          "componentsSpecified": {
+            "type": "boolean"
+          },
+          "imaging": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ServiceRequestImagingDto"
+              }
+            ]
+          },
+          "summary": {
+            "type": "string"
           },
           "encounterId": {
             "type": "string",
@@ -152183,6 +152285,14 @@
           "insuranceSettlement",
           "insuranceSettlementAvailability",
           "id",
+          "requisitionId",
+          "codeDisplay",
+          "specimenTypeConceptId",
+          "specimenTypeDisplay",
+          "components",
+          "componentsSpecified",
+          "imaging",
+          "summary",
           "codeConceptId",
           "statusConceptId",
           "performerSelectionConceptId",
