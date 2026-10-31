@@ -505,6 +505,7 @@ components:
             - billing.charge_capture.created
             - billing.charge_capture.tariff_missing
             - billing.charge_capture.voided
+            - billing.charge_capture.invoiced
         aggregateType:
           type: string
           enum:

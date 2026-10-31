@@ -93,6 +93,19 @@ export class RunBedDayDto {
  * Cargos de espacio (F5e, CONTRATO-F2-F5 §F5e): tarifas, día-cama por
  * medianoche, quirófano por tiempo, pendientes y anulación.
  */
+/** `GET /billing/bed-day/stays`. */
+export class StaysQueryDto {
+  @ApiProperty({ format: 'uuid' }) @IsUUID() siteId!: string;
+  @ApiPropertyOptional({ example: '2026-10-01' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  from?: string;
+  @ApiPropertyOptional({ example: '2026-10-31' })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  to?: string;
+}
+
 @ApiTags('billing-space-charges')
 @ApiBearerAuth()
 @Controller()
@@ -139,6 +152,13 @@ export class BillingSpaceChargesController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.charges.closeTariff(id, dto.validTo, actor, requireTenantId());
+  }
+
+  /** Estancias de internación de la sede (de dónde elige Facturación). */
+  @Get('billing/bed-day/stays')
+  @ApiOperation({ summary: 'Estancias de internación de una sede (F5e)' })
+  stays(@Query() q: StaysQueryDto, @CurrentUser() actor: AuthenticatedUser) {
+    return this.charges.stays(q, actor, requireTenantId());
   }
 
   /** Cargos devengados pendientes de un encuentro. */

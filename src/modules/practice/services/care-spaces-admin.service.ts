@@ -26,6 +26,7 @@ import {
   ruleException,
 } from '../practice.error-reasons';
 import type { CareSpaces, ClinicalUnits, PracticeSites } from '../entities';
+import { CareSpaceCategoryPeriods } from '../entities';
 import {
   CareSpacesRepository,
   ClinicalUnitsRepository,
@@ -600,6 +601,7 @@ export class CareSpacesAdminService {
           field: attrs.errors[0].field,
         });
       }
+      const previousCategory = space.bedCategoryConceptId ?? null;
       for (const [key, value] of Object.entries(attrs.values)) {
         (space as unknown as Record<string, unknown>)[key] = value ?? undefined;
         changes.push(key);
@@ -607,6 +609,12 @@ export class CareSpacesAdminService {
 
       touch(space, actor.id);
       await flushStructure(tx);
+      // F5e (dueño del cambio en F1): cambiar la categoría de una cama cierra
+      // el período vigente y abre otro en la misma transacción; el día-cama
+      // usa la categoría vigente en cada medianoche.
+      const nextCategory = space.bedCategoryConceptId ?? null;
+      if (nextCategory !== previousCategory)
+        await this.rollCategoryPeriod(tx, space, nextCategory, actor.id);
       await appendStructureRevision(
         this.historyRepo,
         tx,
@@ -634,6 +642,44 @@ export class CareSpacesAdminService {
       await flushStructure(tx);
       return this.detail(tx, space, siteSpaces);
     });
+  }
+
+  /**
+   * Cierra el período de categoría vigente (`valid_to = ahora`) y, si hay
+   * categoría nueva, abre otro desde ahora (`practice.care_space_category_periods`,
+   * con su EXCLUDE de no solape).
+   */
+  private async rollCategoryPeriod(
+    tx: EntityManager,
+    space: CareSpaces,
+    categoryId: string | null,
+    actorUserId: string,
+  ): Promise<void> {
+    const now = new Date();
+    const open = await tx.find(CareSpaceCategoryPeriods, {
+      careSpaceId: space.id,
+      tenantId: space.tenantId,
+      validTo: null,
+    });
+    for (const p of open) {
+      p.validTo = now;
+      p.updatedAt = now;
+      p.updatedByUserId = actorUserId;
+    }
+    await flushStructure(tx);
+    if (categoryId) {
+      tx.create(CareSpaceCategoryPeriods, {
+        tenantId: space.tenantId,
+        careSpaceId: space.id,
+        bedCategoryConceptId: categoryId,
+        validFrom: now,
+        createdAt: now,
+        updatedAt: now,
+        createdByUserId: actorUserId,
+        updatedByUserId: actorUserId,
+      } as never);
+      await flushStructure(tx);
+    }
   }
 
   /** `POST /care-spaces/:id/move`: regla padre→hijo y anti-ciclo. */
