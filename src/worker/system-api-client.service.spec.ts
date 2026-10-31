@@ -15,6 +15,7 @@ const ENV: WorkerEnv = {
   httpTimeoutMs: 30_000,
   healthPort: 0,
   healthHost: '127.0.0.1',
+  heartbeatIntervalMs: 15_000,
   tickTimeoutMs: 300_000,
   stuckTickMs: 600_000,
   drainTimeoutMs: 20_000,

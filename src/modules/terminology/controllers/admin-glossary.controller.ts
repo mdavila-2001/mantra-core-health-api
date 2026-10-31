@@ -17,8 +17,11 @@ import {
   Audited,
   CurrentUser,
   Roles,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
+import { forbiddenWithReason } from '../../../common/errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
 import {
   AdminCreateGlossaryTermDto,
   AdminGetGlossaryQueryDto,
@@ -56,6 +59,23 @@ import { AdminGlossaryService } from '../services/admin-glossary.service';
  * audience, text:{es,en?}|null, rowVersion, updatedAt, updatedByUserId?}`.
  * No existe DELETE: se retira.
  */
+/**
+ * El glosario es un catálogo GLOBAL: escribirlo exige el `SUPERADMIN` de
+ * plataforma. `@Roles('SUPERADMIN')` solo no alcanza: una asignación `SUPERADMIN`
+ * acotada a una organización (`scopedRoles`) también pasa el guard dentro de esa
+ * organización, y con ella un administrador de una sola clínica reescribiría las
+ * definiciones que ven todas. El comodín de plataforma es el que no aparece en
+ * `scopedRoles` (misma regla que `RolesGuard`).
+ */
+function requirePlatformScope(actor: AuthenticatedUser): void {
+  if (!roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) {
+    throw forbiddenWithReason(
+      'Rol insuficiente para la operación',
+      SystemErrorReason.ROLE_INSUFFICIENT,
+    );
+  }
+}
+
 @ApiTags('admin-catalogs-glossary')
 @ApiBearerAuth()
 @Controller('admin/catalogs/glossary')
@@ -96,6 +116,7 @@ export class AdminGlossaryController {
     @CurrentUser() actor: AuthenticatedUser,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AdminGlossaryTermDto> {
+    requirePlatformScope(actor);
     const { term, created } = await this.service.create(dto, actor);
     res.status(created ? HttpStatus.CREATED : HttpStatus.OK);
     return term;
@@ -115,6 +136,7 @@ export class AdminGlossaryController {
     @Body() dto: AdminUpdateGlossaryTermDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AdminGlossaryTermDto> {
+    requirePlatformScope(actor);
     return this.service.update(conceptId, dto, actor);
   }
 
@@ -132,6 +154,7 @@ export class AdminGlossaryController {
     @Body() dto: AdminGlossaryStateChangeDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AdminGlossaryTermDto> {
+    requirePlatformScope(actor);
     return this.service.setActive(
       conceptId,
       false,
@@ -155,6 +178,7 @@ export class AdminGlossaryController {
     @Body() dto: AdminGlossaryStateChangeDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AdminGlossaryTermDto> {
+    requirePlatformScope(actor);
     return this.service.setActive(
       conceptId,
       true,

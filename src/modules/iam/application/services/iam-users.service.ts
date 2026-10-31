@@ -1,11 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -29,8 +32,32 @@ import {
   LockUserDto,
   GlobalRoleDto,
   StatusResultDto,
+  USER_LIFECYCLE_DEFAULT_PAGE_SIZE,
+  type UserLifecycleHistoryQueryDto,
+  type UserLifecycleResultDto,
+  type UserLifecycleViewDto,
 } from '../../presentation/dto';
+import {
+  USER_LIFECYCLE_RULES,
+  type UserLifecycleAction,
+  type UserLifecycleState,
+} from '../../domain/user-lifecycle';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+
+/** Estado de la cuenta (concepto) al que lleva cada estado de ciclo de vida. */
+const STATUS_CONCEPT_OF_STATE: Readonly<
+  Partial<Record<UserLifecycleState, string>>
+> = {
+  ACTIVE: CONCEPTS.USER_ACTIVE,
+  SUSPENDED: CONCEPTS.USER_LOCKED,
+  DEACTIVATED: CONCEPTS.USER_LOCKED,
+};
+
+/** Quienes pueden administrar accesos: perder al último dejaría la plataforma sin quien reparar. */
+const ACCESS_ADMIN_ROLE_CONCEPTS = [
+  CONCEPTS.ROLE_SECURITY_ADMIN,
+  CONCEPTS.ROLE_SUPERADMIN,
+] as const;
 
 /**
  * Casos de uso de gestión de usuarios por parte de un administrador de seguridad:
@@ -205,6 +232,231 @@ export class IamUsersService {
       });
 
       return { ok: true };
+    });
+  }
+
+  /** Suspende la cuenta (reversible): bloquea el acceso y cierra sus sesiones. */
+  suspend(
+    userId: string,
+    reason: string,
+    actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.applyLifecycle('SUSPEND', userId, reason, actor);
+  }
+
+  /** Reactiva una cuenta suspendida. No reactiva una baja ni una cuenta anonimizada. */
+  reactivate(
+    userId: string,
+    reason: string,
+    actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.applyLifecycle('REACTIVATE', userId, reason, actor);
+  }
+
+  /**
+   * Da de baja la cuenta. **No borra nada**: la fila y su historia quedan; se revocan las
+   * credenciales, los roles globales y las sesiones. Es definitiva para el uso (no se reactiva).
+   */
+  deactivate(
+    userId: string,
+    reason: string,
+    actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    return this.applyLifecycle('DEACTIVATE', userId, reason, actor);
+  }
+
+  /** Estado de ciclo de vida de la cuenta y su historia, paginada, de la más reciente a la más antigua. */
+  async lifecycleOf(
+    userId: string,
+    query: UserLifecycleHistoryQueryDto,
+  ): Promise<UserLifecycleViewDto> {
+    const em = this.em.fork();
+    const user = await this.usersRepo.findById(em, userId);
+    if (!user)
+      throw new ResourceNotFoundException(
+        'Usuario no encontrado',
+        { userId },
+        IamErrorReason.USER_NOT_FOUND,
+      );
+    const limit = query.limit ?? USER_LIFECYCLE_DEFAULT_PAGE_SIZE;
+    const key = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
+    if (key && (typeof key.t !== 'string' || typeof key.i !== 'string'))
+      throw new BadRequestException('El cursor de paginación no es válido');
+    const [state, rows] = await Promise.all([
+      this.lifecycleStateOf(em, user.id, user.statusConceptId),
+      this.eventsRepo.lifecycleHistory(em, userId, {
+        limit,
+        after: key
+          ? { recordedAt: key.t as string, id: key.i as string }
+          : undefined,
+      }),
+    ]);
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page[page.length - 1];
+    return {
+      userId,
+      // Una cuenta sin estado reconocible se presenta como suspendida: no accede.
+      state: state ?? 'SUSPENDED',
+      items: page.map((r) => ({
+        id: r.id,
+        action: r.action,
+        reason: r.reason,
+        recordedByUserId: r.recorded_by_user_id,
+        recordedAt: r.recorded_at,
+      })),
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({ t: last.recorded_at, i: last.id })
+          : null,
+      limit,
+    };
+  }
+
+  /**
+   * Estado de ciclo de vida a partir del estado de la cuenta.
+   *
+   * `LOCKED` es suspensión o baja: la baja se reconoce porque su última acción de ciclo de vida
+   * fue `DEACTIVATE` (el catálogo cerrado `user-status` no tiene un estado propio para ella).
+   */
+  private async lifecycleStateOf(
+    em: EntityManager,
+    userId: string,
+    statusConceptId: string,
+  ): Promise<UserLifecycleState | null> {
+    if (statusConceptId === CONCEPTS.USER_ACTIVE) return 'ACTIVE';
+    if (statusConceptId === CONCEPTS.USER_ANONYMIZED) return 'ANONYMIZED';
+    if (statusConceptId !== CONCEPTS.USER_LOCKED) return null;
+    const last = await this.eventsRepo.latestLifecycleAction(em, userId);
+    return last === 'DEACTIVATE' ? 'DEACTIVATED' : 'SUSPENDED';
+  }
+
+  /**
+   * Transición de ciclo de vida: motivo obligatorio (lo valida el DTO), cerrojo de fila,
+   * precondición de estado en la escritura, idempotente, con rastro en la bitácora de seguridad
+   * y cierre de sesiones. Todo en una transacción: o queda entero o no queda nada.
+   */
+  private async applyLifecycle(
+    action: UserLifecycleAction,
+    userId: string,
+    reason: string,
+    actor: AuthenticatedUser,
+  ): Promise<UserLifecycleResultDto> {
+    this.logger.info(
+      {
+        operation: `iam.user.${action.toLowerCase()}`,
+        userId,
+        actorId: actor.id,
+      },
+      'Applying user lifecycle transition',
+    );
+    // Quien administra no se saca el acceso a sí mismo: dejaría la sesión que lo hace sin cuenta.
+    if (userId === actor.id && action !== 'REACTIVATE')
+      throw new PreconditionFailedException(
+        'Un administrador no puede suspender ni dar de baja su propia cuenta',
+        { userId },
+        IamErrorReason.USER_SELF_LIFECYCLE_FORBIDDEN,
+      );
+    const rule = USER_LIFECYCLE_RULES[action];
+
+    return this.em.transactional(async (tx) => {
+      const user = await this.usersRepo.findByIdForUpdate(tx, userId);
+      if (!user)
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
+      const from = await this.lifecycleStateOf(
+        tx,
+        userId,
+        user.statusConceptId,
+      );
+
+      // Idempotencia: la cuenta ya está donde la acción la dejaría. No se escribe nada.
+      if (from === rule.to)
+        return { id: userId, state: from, changed: false, revokedSessions: 0 };
+      if (!from || !rule.from.includes(from))
+        throw new ConflictException(
+          'La cuenta no puede pasar a ese estado desde el que tiene',
+          { userId, action, state: from },
+          IamErrorReason.USER_LIFECYCLE_TRANSITION_INVALID,
+        );
+
+      if (action !== 'REACTIVATE') {
+        const grants = await this.rolesRepo.findActiveForUser(tx, userId);
+        const isAccessAdmin = grants.some((g) =>
+          (ACCESS_ADMIN_ROLE_CONCEPTS as readonly string[]).includes(
+            g.roleConceptId,
+          ),
+        );
+        if (isAccessAdmin) await this.usersRepo.lockAccessAdminChanges(tx);
+        if (
+          isAccessAdmin &&
+          (await this.rolesRepo.countOtherActiveHolders(
+            tx,
+            ACCESS_ADMIN_ROLE_CONCEPTS,
+            userId,
+          )) === 0
+        )
+          throw new PreconditionFailedException(
+            'Es la última cuenta que administra accesos: concedé ese rol a otra antes',
+            { userId },
+            IamErrorReason.USER_LAST_SECURITY_ADMIN,
+          );
+      }
+
+      const target = STATUS_CONCEPT_OF_STATE[rule.to] as string;
+      // La precondición va en la escritura: si la cuenta cambió desde la lectura, no se aplica.
+      const applied = await this.usersRepo.transitionStatus(
+        tx,
+        userId,
+        [user.statusConceptId],
+        target,
+        actor.id,
+      );
+      if (!applied)
+        throw new ConflictException(
+          'La cuenta cambió de estado mientras se aplicaba: reintentá',
+          { userId, action },
+          IamErrorReason.USER_LIFECYCLE_TRANSITION_INVALID,
+        );
+
+      let revokedSessions = 0;
+      if (action === 'REACTIVATE') {
+        await this.lockoutsRepo.releaseActiveForUser(tx, userId, actor.id);
+      } else {
+        if (!(await this.lockoutsRepo.findActiveForUser(tx, userId)))
+          this.lockoutsRepo.create(tx, {
+            userId,
+            reasonConceptId: CONCEPTS.LOCK_REASON_MANUAL,
+            actorUserId: actor.id,
+          });
+        const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(
+          tx,
+          userId,
+        );
+        revokedSessions = await this.sessionsRepo.revokeAllActiveForUser(
+          tx,
+          userId,
+        );
+        await this.refreshRepo.revokeActiveBySessionIds(tx, sessionIds);
+        if (action === 'DEACTIVATE') {
+          await this.credentialsRepo.revokeAllForUser(tx, userId);
+          await this.rolesRepo.revokeAllForUser(tx, userId);
+        }
+      }
+
+      // `ACCOUNT_LOCK` también registra la reactivación: el catálogo no tiene un tipo de evento
+      // de desbloqueo y la acción va en el detalle.
+      this.eventsRepo.record(tx, {
+        eventTypeConceptId: CONCEPTS.SEC_ACCOUNT_LOCK,
+        outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+        userId,
+        recordedByUserId: actor.id,
+        detailJson: { action, reason, source: 'manual' },
+      });
+      return { id: userId, state: rule.to, changed: true, revokedSessions };
     });
   }
 

@@ -69,10 +69,16 @@ function build() {
     purgeExpired: mockFn().mockResolvedValue(0),
   };
   const rolesRepo = { findActiveForUser: mockFn().mockResolvedValue([]) };
-  const lockoutsRepo = { create: mockFn(), findActiveForUser: mockFn() };
+  const lockoutsRepo = {
+    create: mockFn(),
+    findActiveForUser: mockFn(),
+    releaseActiveForUser: mockFn(),
+  };
   const eventsRepo = {
     record: mockFn(),
     countFailedLoginsSince: mockFn().mockResolvedValue(0),
+    latestLifecycleAction: mockFn(),
+    lifecycleHistory: mockFn(),
   };
   // Por defecto, una cuenta sin persona vinculada: los claims `pid` y `hpid` se
   // omiten y el token queda igual que antes de que existieran. Los casos que los

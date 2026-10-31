@@ -64,9 +64,19 @@ describe('HTTP de /admin/catalogs/glossary', () => {
           secretOrKey: SECRET,
         },
         (
-          payload: { sub: string; roles: string[] },
+          payload: {
+            sub: string;
+            roles: string[];
+            scopedRoles?: Record<string, string[]>;
+          },
           done: (e: unknown, u?: unknown) => void,
-        ) => done(null, { id: payload.sub, roles: payload.roles }),
+        ) =>
+          // Igual que `JwtStrategy`: `scopedRoles` viaja al actor (MCH-001).
+          done(null, {
+            id: payload.sub,
+            roles: payload.roles,
+            scopedRoles: payload.scopedRoles,
+          }),
       ),
     );
     const module = await Test.createTestingModule({
@@ -190,6 +200,23 @@ describe('HTTP de /admin/catalogs/glossary', () => {
       });
       await reads[0][2](bearer(['SECURITY_ADMIN'])).expect(200);
     });
+
+    it.each(writes)(
+      '%s con SUPERADMIN acotado a una organización => 403 (el glosario es global)',
+      async (_n, fn, call) => {
+        // Un SUPERADMIN de `scopedRoles` pasa @Roles dentro de su tenant, pero no es el de plataforma.
+        const acotado = `Bearer ${jwt.sign(
+          {
+            sub: 'u-1',
+            roles: ['SUPERADMIN'],
+            scopedRoles: { 'tenant-1': ['SUPERADMIN'] },
+          },
+          SECRET,
+        )}`;
+        await call(acotado).expect(403);
+        expect(service[fn as keyof typeof service]).not.toHaveBeenCalled();
+      },
+    );
 
     it('SUPERADMIN puede escribir', async () => {
       service.update.mockResolvedValue(term({ rowVersion: 2 }));
