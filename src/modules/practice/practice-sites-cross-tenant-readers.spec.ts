@@ -21,6 +21,8 @@ import { join, relative, sep } from 'node:path';
  * mdavila-2001/mantra-core-health-api#1167.
  */
 const KNOWN_READERS: Record<string, string> = {
+  'clinical/services/inpatient/inpatient-read.use-cases.ts':
+    'F3: sede de la sucursal de un encuentro sin movimientos (filtra por tenant_id del tenant activo) para autorizar la ficha de estancia.',
   'clinical/repositories/inpatient.repository.ts':
     'F3: sitesWithBeds para el tick del censo (worker, abre app.system_context dentro de su transacción: ve todas las sedes a propósito).',
   'clinical/services/inpatient/census.use-cases.ts':

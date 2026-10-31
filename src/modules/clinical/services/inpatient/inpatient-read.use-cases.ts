@@ -9,6 +9,8 @@ import {
 } from '../../entities';
 import { judgePlacement } from '../../domain/inpatient/bed-compatibility';
 import { AdtSupport, type AdtRequest } from './adt-support';
+import { ClinicalReadService } from '../clinical-read.service';
+import { ResourceNotFoundException } from '../../../../common';
 import { locationView } from './adt.use-cases';
 
 /**
@@ -22,6 +24,7 @@ export class InpatientReadUseCases {
     private readonly em: EntityManager,
     private readonly access: InfrastructureAccessService,
     private readonly support: AdtSupport,
+    private readonly clinicalRead: ClinicalReadService,
   ) {}
 
   /**
@@ -75,15 +78,7 @@ export class InpatientReadUseCases {
       { encounterId },
       { orderBy: { periodStart: 'asc', createdAt: 'asc' } },
     );
-    const site = movements[0]?.practiceSiteId;
-    if (site)
-      await this.access.assertCan(
-        req.actor as never,
-        'f3.adt.read',
-        { siteId: site },
-        em,
-        req.tenantId,
-      );
+    await this.authorizeStay(em, encounter, movements, req);
     const incidents = await em.find(PlacementIncidents, { encounterId });
     return {
       encounter: encounterView(encounter),
@@ -103,6 +98,76 @@ export class InpatientReadUseCases {
   }
 
   /**
+   * Autoriza la ficha de estancia **siempre** (revisión de seguridad de F3):
+   * cada espacio distinto de sus movimientos con `f3.adt.read`; un movimiento
+   * sin espacio, o un encuentro sin movimientos (la sede sale de su sucursal),
+   * exige rol de nivel sede; sin sede se deniega (404). Un encuentro que no es
+   * de internación exige además la lectura clínica del expediente.
+   */
+  private async authorizeStay(
+    em: EntityManager,
+    encounter: Encounters,
+    movements: readonly EncounterLocations[],
+    req: AdtRequest,
+  ): Promise<void> {
+    const spaces = [
+      ...new Set(
+        movements.map((m) => m.careSpaceId).filter((x): x is string => !!x),
+      ),
+    ];
+    for (const careSpaceId of spaces) {
+      await this.access.assertCan(
+        req.actor as never,
+        'f3.adt.read',
+        { careSpaceId },
+        em,
+        req.tenantId,
+      );
+    }
+    const siteIds = [
+      ...new Set(
+        movements.filter((m) => !m.careSpaceId).map((m) => m.practiceSiteId),
+      ),
+    ];
+    if (movements.length === 0) {
+      const rows = encounter.branchId
+        ? await em.execute<{ id: string }[]>(
+            'SELECT id FROM practice.practice_sites WHERE branch_id = ? AND tenant_id = ? ORDER BY id LIMIT 1',
+            [encounter.branchId, req.tenantId],
+            'all',
+          )
+        : [];
+      if (rows.length === 0) {
+        throw new ResourceNotFoundException('Encuentro no encontrado', {
+          encounterId: encounter.id,
+        });
+      }
+      siteIds.push(rows[0].id);
+    }
+    for (const siteId of siteIds) {
+      const { target, scope } = await this.access.assertCan(
+        req.actor as never,
+        'f3.adt.read',
+        { siteId },
+        em,
+        req.tenantId,
+      );
+      this.access.decide(
+        'f3.adt.read',
+        this.access.siteLevelRoles(scope, target.site),
+        false,
+        scope,
+      );
+    }
+    if (encounter.classConceptId !== CLIN.ENCOUNTER_CLASS_INPATIENT) {
+      await this.clinicalRead.assertCanReadHistory(
+        encounter.patientProfileId,
+        req.actor as never,
+      );
+    }
+  }
+
+  /**
    * `GET /sites/:siteId/inpatients?unitId`.
    *
    * @param siteId - Sede.
@@ -115,20 +180,28 @@ export class InpatientReadUseCases {
     req: AdtRequest,
   ) {
     const em = this.em.fork();
-    await this.access.assertCan(
+    const { target, scope } = await this.access.assertCan(
       req.actor as never,
       'f3.adt.read',
       { siteId },
       em,
       req.tenantId,
     );
-    const locations = await em.find(EncounterLocations, {
+    const allowed = (u: string | null | undefined) =>
+      this.access.canOnUnit('f3.adt.read', scope, target.site, u ?? null);
+    if (unitId && !allowed(unitId)) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        unitId,
+      });
+    }
+    const all = await em.find(EncounterLocations, {
       practiceSiteId: siteId,
       isBedAssignment: true,
       locationStatusConceptId: CLIN.LOCATION_ACTIVE,
       periodEnd: null,
       ...(unitId ? { clinicalUnitId: unitId } : {}),
     });
+    const locations = all.filter((l) => allowed(l.clinicalUnitId));
     const encounters = locations.length
       ? await em.find(Encounters, {
           id: { $in: locations.map((l) => l.encounterId) },

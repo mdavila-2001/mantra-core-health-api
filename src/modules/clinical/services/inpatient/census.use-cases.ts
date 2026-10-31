@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ResourceNotFoundException } from '../../../../common';
+import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
 import { InfrastructureAccessService } from '../../../practice/services/infrastructure-access.service';
 import { CLIN } from '../../clinical.concepts';
 import {
@@ -134,13 +135,20 @@ export class InpatientCensusUseCases {
     req: AdtRequest,
   ): Promise<CensusDayView[]> {
     const em = this.em.fork();
-    const { target } = await this.access.assertCan(
+    const { target, scope } = await this.access.assertCan(
       req.actor as never,
       'f3.census.read',
       { siteId },
       em,
       req.tenantId,
     );
+    const allowed = (u: string | null) =>
+      this.access.canOnUnit('f3.census.read', scope, target.site, u);
+    if (unitId && !allowed(unitId)) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        unitId,
+      });
+    }
     const tz = target.site.timeZone ?? TZ_DEFAULT;
     const closed = await em.find(InpatientCensusDays, {
       practiceSiteId: siteId,
@@ -150,6 +158,8 @@ export class InpatientCensusUseCases {
     const out: CensusDayView[] = [];
     for (const [unit, counts] of preview) {
       if (unitId && unit !== unitId) continue;
+      // Sin rol de nivel sede, sólo las unidades permitidas (§0.3).
+      if (!allowed(unit)) continue;
       const day = closed.find((d) => d.clinicalUnitId === unit);
       if (day) {
         const adj = await em.find(InpatientCensusAdjustments, {
@@ -198,14 +208,34 @@ export class InpatientCensusUseCases {
     return this.em.transactional(async (tx) => {
       let tz = TZ_DEFAULT;
       let tenantId: string;
+      let allowed: (u: string) => boolean = () => true;
       if (req) {
-        const { target } = await this.access.assertCan(
+        const { target, scope } = await this.access.assertCan(
           req.actor as never,
           'f3.census.close',
           { siteId },
           tx,
           req.tenantId,
         );
+        allowed = (u) =>
+          this.access.canOnUnit('f3.census.close', scope, target.site, u);
+        // Una unidad pedida fuera del alcance → 403 y no se cierra ninguna.
+        const denied = (unitIds ?? []).filter((u) => !allowed(u));
+        if (denied.length > 0) {
+          throw new InsufficientRoleException(
+            'Su rol no permite cerrar el censo de esas unidades',
+            {
+              unitIds: denied,
+              requiredRoles: [
+                'ORG_ADMIN',
+                'SITE_ADMIN',
+                'NURSE_SUPERVISOR',
+                'ADMISSION',
+              ],
+            },
+            'INFRA_ACTION_NOT_ALLOWED',
+          );
+        }
         tz = target.site.timeZone ?? TZ_DEFAULT;
         tenantId = req.tenantId;
       } else {
@@ -245,8 +275,18 @@ export class InpatientCensusUseCases {
         censusDate: date as never,
       });
       const wanted = [...preview.keys()].filter(
-        (u) => u !== null && (!unitIds || unitIds.includes(u)),
+        (u) => u !== null && (!unitIds || unitIds.includes(u)) && allowed(u),
       ) as string[];
+      if (req && wanted.length === 0 && !unitIds?.length) {
+        const any = [...preview.keys()].some((u) => u !== null);
+        if (any) {
+          throw new InsufficientRoleException(
+            'Su rol no permite cerrar el censo de ninguna unidad de la sede',
+            {},
+            'INFRA_ACTION_NOT_ALLOWED',
+          );
+        }
+      }
       const pending = wanted.filter(
         (u) => !existing.some((d) => d.clinicalUnitId === u),
       );
@@ -432,22 +472,31 @@ export class InpatientCensusUseCases {
     req: AdtRequest,
   ): Promise<Record<string, unknown>> {
     const em = this.em.fork();
-    const { target } = await this.access.assertCan(
+    const { target, scope } = await this.access.assertCan(
       req.actor as never,
       'f3.indicators.read',
       { siteId },
       em,
       req.tenantId,
     );
+    const allowed = (u: string | null) =>
+      this.access.canOnUnit('f3.indicators.read', scope, target.site, u);
+    if (unitId && !allowed(unitId)) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        unitId,
+      });
+    }
     const dates = dateRange(from, to);
     if (dates.length === 0 || dates.length > 366)
       throw adtError('INDICATOR_RANGE_TOO_LONG', { maxDays: 366 });
-    const days = await em.find(InpatientCensusDays, {
-      practiceSiteId: siteId,
-      censusDate: { $gte: from as never, $lte: to as never },
-      statusConceptId: CLIN.CENSUS_CLOSED,
-      ...(unitId ? { clinicalUnitId: unitId } : {}),
-    });
+    const days = (
+      await em.find(InpatientCensusDays, {
+        practiceSiteId: siteId,
+        censusDate: { $gte: from as never, $lte: to as never },
+        statusConceptId: CLIN.CENSUS_CLOSED,
+        ...(unitId ? { clinicalUnitId: unitId } : {}),
+      })
+    ).filter((d) => allowed(d.clinicalUnitId));
     const adj = days.length
       ? await em.find(InpatientCensusAdjustments, {
           censusDayId: { $in: days.map((d) => d.id) },
@@ -468,12 +517,19 @@ export class InpatientCensusUseCases {
       }),
     );
     const tz = target.site.timeZone ?? TZ_DEFAULT;
-    const turns = await this.repo.turnarounds(
-      em,
-      siteId,
-      localDayWindow(from, tz).dayStart,
-      localDayWindow(to, tz).cutoff,
-    );
+    // La rotación de cama es de toda la sede: sólo con rol de nivel sede.
+    const turns = this.access.canAtSiteLevel(
+      'f3.indicators.read',
+      scope,
+      target.site,
+    )
+      ? await this.repo.turnarounds(
+          em,
+          siteId,
+          localDayWindow(from, tz).dayStart,
+          localDayWindow(to, tz).cutoff,
+        )
+      : [];
     const min = (a: string | null, b: string | null) =>
       a && b ? (new Date(b).getTime() - new Date(a).getTime()) / 60_000 : null;
     const pick = (xs: (number | null)[]) =>

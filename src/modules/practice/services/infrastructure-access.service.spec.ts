@@ -262,6 +262,30 @@ describe('roles globales sólo cuentan para su objetivo (revisión de seguridad)
   });
 });
 
+describe('alcance por unidad en colecciones (revisión de seguridad F3)', () => {
+  it('asignación UNIT A: canOnUnit A sí, B no, null no; nivel sede no', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_ADMISSION, DELEG.SCOPE_UNIT, {
+        clinical_unit_id: 'unit-A',
+      }),
+    ]);
+    const scope = await svc.actorScope({} as any, actor, site as any);
+    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-A')).toBe(true);
+    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(false);
+    expect(svc.canOnUnit('f2.board.read', scope, site, null)).toBe(false);
+    expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(false);
+  });
+
+  it('asignación SITE: nivel sede y cualquier unidad', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_ADMISSION, DELEG.SCOPE_SITE),
+    ]);
+    const scope = await svc.actorScope({} as any, actor, site as any);
+    expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(true);
+    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(true);
+  });
+});
+
 describe('infra-scope (puro)', () => {
   const target = {
     practiceId: 'p',
