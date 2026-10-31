@@ -42,7 +42,7 @@
 | [`surveys`](surveys.md) | 4 | 5 | 6 | 7 | 11 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 12 | 6 | 9 | 21 |
-| [`marketing`](marketing.md) | 3 | 3 | 3 | 36 | 3 |
+| [`marketing`](marketing.md) | 5 | 5 | 5 | 36 | 4 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
 | [`read_models`](read_models.md) | 3 | 5 | 8 | 13 | 5 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
