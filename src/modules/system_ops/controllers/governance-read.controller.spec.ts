@@ -139,10 +139,19 @@ describe('GovernanceReadController (HTTP, repositorio doble)', () => {
       expect(res.body.code).toBe('FORBIDDEN');
     });
 
-    it.each(['AUDITOR', 'DATA_STEWARD', 'PHARMACIST'])(
-      'un rol que lee el catálogo pero no el gobierno (%s) → 403',
+    it.each(['PHARMACIST', 'MEDICAL_DIRECTOR', 'QA_ADMIN'])(
+      'un rol ajeno al gobierno de datos (%s) → 403',
       async (rol) => {
         for (const ruta of RUTAS) await get(ruta, [rol]).expect(403);
+      },
+    );
+
+    // Matriz §3.12 (D-2): el auditor y el custodio leen políticas y bitácora en sólo lectura.
+    it.each(['AUDITOR', 'DATA_STEWARD'])(
+      'el rol %s lee el gobierno (matriz de roles §3.12)',
+      async (rol) => {
+        await get('/admin/governance/policies', [rol]).expect(200);
+        await get('/admin/governance/change-log', [rol]).expect(200);
       },
     );
 

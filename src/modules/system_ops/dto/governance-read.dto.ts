@@ -344,3 +344,73 @@ export class FieldRegistryPageDto {
   @ApiProperty() limit!: number;
   @ApiProperty({ example: 'column_name, id' }) order!: string;
 }
+
+// ---- dominios, retenciones legales y ejecuciones de retención ------------------------------
+
+/** Filtros de `GET /admin/governance/domains`. */
+export class DomainListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({
+    maxLength: 120,
+    description: 'Busca en código y nombre, sin mayúsculas',
+  })
+  @IsOptional()
+  @Transform(recortar)
+  @IsString()
+  @MaxLength(120)
+  q?: string;
+}
+
+/** Filtros de `GET /admin/governance/legal-holds`. */
+export class LegalHoldListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({
+    description: 'Código del estado (concepto), p. ej. `ACTIVE` o `RELEASED`',
+  })
+  @IsOptional()
+  @Matches(CODIGO)
+  status?: string;
+
+  @ApiPropertyOptional({
+    description: 'Código del tipo de objetivo (concepto)',
+  })
+  @IsOptional()
+  @Matches(CODIGO)
+  targetType?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Organización del hold' })
+  @IsOptional()
+  @IsUUID()
+  tenantId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Objetivo retenido' })
+  @IsOptional()
+  @IsUUID()
+  targetId?: string;
+}
+
+/** Filtros de `GET /admin/governance/retention-executions`. */
+export class RetentionExecutionListQueryDto extends GovPageQueryDto {
+  @ApiPropertyOptional({ format: 'uuid', description: 'Política de retención' })
+  @IsOptional()
+  @IsUUID()
+  policyId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Entidad del registro' })
+  @IsOptional()
+  @IsUUID()
+  entityRegistryId?: string;
+
+  @ApiPropertyOptional({ enum: ['RUNNING', 'SUCCEEDED', 'FAILED'] })
+  @IsOptional()
+  @IsIn(['RUNNING', 'SUCCEEDED', 'FAILED'])
+  status?: string;
+
+  @ApiPropertyOptional({ description: 'Registrada desde (ISO 8601, incluido)' })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  @ApiPropertyOptional({ description: 'Registrada hasta (ISO 8601, excluido)' })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+}

@@ -1,5 +1,6 @@
 export * from './governance-catalog.service';
 export * from './governance-read.service';
+export * from './governance-operations-read.service';
 export * from './retention-execution.service';
 export * from './retention-disposition.executor';
 export * from './residency.service';
