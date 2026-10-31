@@ -1074,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/integrations/dto/responses.dto.ts:33` |
 | `pharmacyId` | `string` | Sí | formato uuid | — | Identificador asociado a pharmacy. | sin fuente |
-| `connectionId` | `string` | Sí | formato uuid | — | Identificador asociado a connection. | sin fuente |
+| `connectionId` | `string` | Sí | formato uuid; admite null | — | Conexión registrada en integraciones; nulo mientras la farmacia no tiene configurado su sistema externo. | sin fuente |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
