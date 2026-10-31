@@ -23,7 +23,7 @@ El comodín vale sólo para el `SUPERADMIN` de plataforma. Un código privilegia
 comodín de RBAC, no habilita el barrido entre tenants ni declarar un tenant ajeno
 (`hasPrivilegedTenantRole` y `roleAuthorizesInTenant` aplican la misma regla). Los códigos de rol
 de plataforma (`SUPERADMIN`, `SYSTEM`, `SECURITY_ADMIN`, `USER`, `PATIENT`, `PRACTITIONER`,
-`CLINICIAN`) están reservados: `POST /authz/roles` responde 409 `ROLE_CODE_RESERVED` si se pide uno.
+`CLINICIAN`, `SUPPORT_STAFF`) están reservados: `POST /authz/roles` responde 409 `ROLE_CODE_RESERVED` si se pide uno.
 
 Si el rol no alcanza: `403 FORBIDDEN` (`ErrorCode.FORBIDDEN`, ver `docs/api/error-model.md`).
 

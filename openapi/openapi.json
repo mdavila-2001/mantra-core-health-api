@@ -156064,6 +156064,11 @@
               "DOMICILIO"
             ],
             "description": "Modalidad de la atención. Ausente = PRESENCIAL. No es el canal de la reserva."
+          },
+          "startAttention": {
+            "type": "boolean",
+            "default": true,
+            "description": "Si abre el encuentro y arranca la atención. Con false la cita queda CONFIRMED y sin encuentro."
           }
         },
         "required": [

@@ -28,4 +28,28 @@ export enum DelegatedAccessErrorReason {
   PRESCRIPTION_SHARE_EXPIRED = 'PRESCRIPTION_SHARE_EXPIRED',
   /** El paciente o quien lo creó revocó el enlace. */
   PRESCRIPTION_SHARE_REVOKED = 'PRESCRIPTION_SHARE_REVOKED',
+  /** La cuenta no tiene perfil de secretaria (personal de apoyo). */
+  SUPPORT_PROFILE_REQUIRED = 'SUPPORT_PROFILE_REQUIRED',
+  /** El vínculo no existe o no es de quien lo pide (mismo 404 en los dos casos). */
+  SUPPORT_LINK_NOT_FOUND = 'SUPPORT_LINK_NOT_FOUND',
+  /** El vínculo no está esperando la decisión de quien decide. */
+  SUPPORT_LINK_NOT_AWAITING_YOU = 'SUPPORT_LINK_NOT_AWAITING_YOU',
+  /** Sólo se termina un vínculo ACTIVO o PENDING. */
+  SUPPORT_LINK_NOT_LIVE = 'SUPPORT_LINK_NOT_LIVE',
+  /** Ya hay un vínculo vivo con ese mismo objetivo. */
+  SUPPORT_LINK_DUPLICATE = 'SUPPORT_LINK_DUPLICATE',
+  /** El objetivo (sede, servicio, piso, doctor) no existe o no es de ese hospital. */
+  SUPPORT_TARGET_NOT_FOUND = 'SUPPORT_TARGET_NOT_FOUND',
+  /** Al objetivo le falta el id que su `targetKind` exige. */
+  SUPPORT_TARGET_INVALID = 'SUPPORT_TARGET_INVALID',
+  /** El hospital indicado no existe. */
+  SUPPORT_ORGANIZATION_NOT_FOUND = 'SUPPORT_ORGANIZATION_NOT_FOUND',
+  /** No hay una cuenta de secretaria con ese documento. */
+  SUPPORT_STAFF_NOT_FOUND = 'SUPPORT_STAFF_NOT_FOUND',
+  /** Quien opera no administra el hospital. */
+  SUPPORT_ORGANIZATION_ADMIN_REQUIRED = 'SUPPORT_ORGANIZATION_ADMIN_REQUIRED',
+  /** La secretaria no tiene un vínculo activo con ese doctor en ese hospital. */
+  SUPPORT_SCOPE_DENIED = 'SUPPORT_SCOPE_DENIED',
+  /** El rango de agenda pedido es inválido o demasiado largo. */
+  SUPPORT_AGENDA_RANGE_INVALID = 'SUPPORT_AGENDA_RANGE_INVALID',
 }
