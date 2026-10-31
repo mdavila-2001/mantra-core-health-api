@@ -209,6 +209,17 @@ export class InpatientReadUseCases {
       em,
       req.tenantId,
     );
+    // Listado: sin rol de nivel sede, sólo profesionales asignados a unidades
+    // del alcance del actor (la expansión parcial siempre con filtro).
+    const filter = await this.access.scopeFilter(
+      req.actor as never,
+      'f3.adt.place',
+      siteId,
+      em,
+      req.tenantId,
+    );
+    const units = [...filter.clinicalUnitIds];
+    if (!filter.allSite && units.length === 0) return [];
     const rows = await em.execute<
       {
         practitioner_profile_id: string;
@@ -224,9 +235,16 @@ export class InpatientReadUseCases {
           AND a.status_concept_id = ?
           AND (a.valid_from IS NULL OR a.valid_from <= now())
           AND (a.valid_to IS NULL OR a.valid_to > now())
+          AND (?::boolean OR a.clinical_unit_id = ANY(?::uuid[]))
         ORDER BY a.practitioner_profile_id, a.is_primary DESC NULLS LAST
         LIMIT 500`,
-      [target.site.practiceId, siteId, PRAC.ROLE_ASSIGNMENT_ACTIVE],
+      [
+        target.site.practiceId,
+        siteId,
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+        filter.allSite,
+        `{${units.join(',')}}`,
+      ],
       'all',
     );
     const names = await findPractitionerNames(
