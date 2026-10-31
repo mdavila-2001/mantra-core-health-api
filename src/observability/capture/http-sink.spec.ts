@@ -99,6 +99,22 @@ describe('HttpSink', () => {
     expect(sink.drain().map((r) => r.flushSeq)).toEqual([1]);
   });
 
+  it('flush_seq no depende del reloj: recuerda 180 minutos detrás del minuto más nuevo', () => {
+    const sink = newSink();
+    const later = (minutes: number) =>
+      new Date(T0.getTime() + minutes * 60_000);
+    sink.record(sample(200));
+    sink.drain();
+    sink.record(sample(200, '/a', later(180)));
+    sink.drain();
+    sink.record(sample(200));
+    expect(sink.drain().map((r) => r.flushSeq)).toEqual([2]);
+    sink.record(sample(200, '/a', later(181)));
+    sink.drain();
+    sink.record(sample(200));
+    expect(sink.drain().map((r) => r.flushSeq)).toEqual([1]);
+  });
+
   it('un volcado vacío no consume flush_seq', () => {
     const sink = newSink();
     expect(sink.drain()).toEqual([]);

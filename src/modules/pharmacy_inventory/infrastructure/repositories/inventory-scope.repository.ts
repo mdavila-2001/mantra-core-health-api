@@ -17,6 +17,13 @@ import {
 import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 
 /**
+ * Producto del catálogo de la farmacia tal como lo leen los casos de uso del
+ * módulo: el tipo sale de este repositorio propio (la excepción declarada de
+ * `module-layout.md`), no de las entidades de `pharmacy`.
+ */
+export type InventoryProduct = PharmacyProducts;
+
+/**
  * Consultas de pertenencia del módulo: cada una resuelve un agregado **dentro**
  * de su padre (farmacia → sede → ubicación; farmacia → producto → lote), de
  * modo que un UUID de otra cadena no se encuentra en vez de cargarse y compararse

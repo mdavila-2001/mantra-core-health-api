@@ -13,7 +13,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 import { CATALOG_STATUSES, IsCatalogMoney } from './catalog-fields.dto';
 import {
   CATEGORY_NAME_MAX,

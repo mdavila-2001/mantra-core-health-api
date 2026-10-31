@@ -1,4 +1,4 @@
-import { PLATFORM_SCOPE_ROLES } from '../../common/tenant/platform-scope';
+import { PLATFORM_SCOPE_ROLES } from '../tenant/platform-scope';
 
 /**
  * Roles de lectura del gobierno de datos (matriz de roles §3.12 del frente 04 del portal).

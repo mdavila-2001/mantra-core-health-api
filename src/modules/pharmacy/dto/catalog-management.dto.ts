@@ -14,7 +14,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 import {
   CATEGORY_NAME_MAX,
   STOCK_MAX,

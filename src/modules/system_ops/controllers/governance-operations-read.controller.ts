@@ -17,7 +17,7 @@ import {
   GOVERNANCE_VIEW_ROLES,
   rolesWithoutPlatformScope,
   LEGAL_HOLD_VIEW_ROLES,
-} from '../governance-read.roles';
+} from '../../../common/auth/governance-read.roles';
 import { GovernanceOperationsReadService } from '../services/governance-operations-read.service';
 
 /**
