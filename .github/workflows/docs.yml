@@ -1,5 +1,12 @@
-name: Documentación
+name: CI · API
 
+# Este es el CI de la API, no sólo el de la documentación: compila, verifica
+# tipos, lint, auditoría de dependencias, pruebas unitarias e integración,
+# contratos y, al final, el portal. Se llamó «Documentación» porque nació en la
+# fase 16 del plan de documentación; el nombre viejo escondía que un rojo acá
+# es un rojo de la API. El archivo conserva su ruta (`docs.yml`) para no romper
+# referencias ni el historial de ejecuciones.
+#
 # Fase 16 del plan de documentación. Convierte la documentación en parte
 # obligatoria del producto: un PR que rompe el contrato OpenAPI/AsyncAPI, deja
 # un enlace roto, o hace fallar `mkdocs build --strict`, no puede mergearse.
@@ -19,9 +26,16 @@ name: Documentación
 # que el trabajo llegue en el momento en que sirve —antes de mergear— sin
 # duplicar cada corrida con el `push` que sigue al merge. `workflow_dispatch`
 # queda para lanzar la batería a mano sobre una rama cuando haga falta.
+#
+# `push` a `dev` vuelve desde el 31/10/2026: el job corre en `ubuntu-latest`
+# (ver abajo), así que la duplicación con el PR ya no ocupa la máquina del
+# equipo, y `dev` necesita su propia ejecución para saber si lo integrado —un
+# merge puede combinar dos PRs verdes que juntos fallan— sigue en verde.
 on:
   pull_request:
     branches: [master, dev]
+  push:
+    branches: [dev]
   workflow_dispatch:
 
 # Mínimo privilegio para el GITHUB_TOKEN (MCH-031). Ningún paso escribe en el
