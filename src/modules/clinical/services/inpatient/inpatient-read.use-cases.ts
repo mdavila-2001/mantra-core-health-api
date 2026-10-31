@@ -100,9 +100,10 @@ export class InpatientReadUseCases {
   /**
    * Autoriza la ficha de estancia **siempre** (revisión de seguridad de F3):
    * cada espacio distinto de sus movimientos con `f3.adt.read`; un movimiento
-   * sin espacio, o un encuentro sin movimientos (la sede sale de su sucursal),
-   * exige rol de nivel sede; sin sede se deniega (404). Un encuentro que no es
-   * de internación exige además la lectura clínica del expediente.
+   * sin espacio exige rol de nivel sede en su sede; un encuentro sin
+   * movimientos exige rol de nivel sede en **todas** las sedes de su sucursal
+   * (sin sucursal o sin sedes: 404). Un encuentro que no es de internación
+   * exige además la lectura clínica del expediente.
    */
   private async authorizeStay(
     em: EntityManager,
@@ -130,9 +131,12 @@ export class InpatientReadUseCases {
       ),
     ];
     if (movements.length === 0) {
+      // El encuentro no guarda su sede: sin una sede exacta, se exige leer
+      // TODAS las sedes de su sucursal (nunca una cualquiera); sin sucursal o
+      // sin sedes, se deniega (revisión de seguridad F3).
       const rows = encounter.branchId
         ? await em.execute<{ id: string }[]>(
-            'SELECT id FROM practice.practice_sites WHERE branch_id = ? AND tenant_id = ? ORDER BY id LIMIT 1',
+            'SELECT id FROM practice.practice_sites WHERE branch_id = ? AND tenant_id = ? ORDER BY id',
             [encounter.branchId, req.tenantId],
             'all',
           )
@@ -142,7 +146,7 @@ export class InpatientReadUseCases {
           encounterId: encounter.id,
         });
       }
-      siteIds.push(rows[0].id);
+      siteIds.push(...rows.map((r) => r.id));
     }
     for (const siteId of siteIds) {
       const { target, scope } = await this.access.assertCan(
