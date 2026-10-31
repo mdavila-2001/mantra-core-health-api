@@ -68,6 +68,13 @@ propio. Las rutas revisadas caen en estas clases:
   `POST /public/profiles/f/:slug/branch-availability` son `@Public()`. El `POST` es una lectura: los
   renglones de la receta viajan en el cuerpo para no quedar en la URL, y no se guardan.
 
+**Sonda de vida de instancias (`ops_console`).** `POST /internal/ops/heartbeats` lleva
+`@Roles('SYSTEM')`: sólo el token que firma `SystemApiClient` en cada worker puede registrar un
+latido, y un administrador de plataforma recibe `403` (nadie fabrica la vida de un proceso desde el
+portal). `GET /admin/ops/instances/liveness` es de sólo lectura y exige los mismos `OPS_READ_ROLES`
+(`PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`) que el resto de
+`/admin/ops`.
+
 Una ruta que **escribe** con un dueño que viaja en el cuerpo y sin comprobación en el servicio
 **no** entra en ninguna de estas clases y lleva `@Roles`: las altas de `/common/addresses`,
 `/common/contact-points` e `/common/identifiers`, la verificación de un contacto y el estado de las
