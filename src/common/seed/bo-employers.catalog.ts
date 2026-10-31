@@ -1858,6 +1858,11 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
 
   /* --- Servicios profesionales y tecnología --- */
   {
+    code: 'ALOVIDA',
+    name: 'AloVida',
+    sector: 'Servicios profesionales y tecnología',
+  },
+  {
     code: 'ASSURESOFT',
     name: 'AssureSoft',
     sector: 'Servicios profesionales y tecnología',
@@ -1910,6 +1915,11 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
   {
     code: 'PWC_BOLIVIA',
     name: 'PwC Bolivia',
+    sector: 'Servicios profesionales y tecnología',
+  },
+  {
+    code: 'SALTORE',
+    name: 'Saltore',
     sector: 'Servicios profesionales y tecnología',
   },
 
