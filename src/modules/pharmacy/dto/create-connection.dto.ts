@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Modos de integración soportados. */
 export type IntegrationModeCode = 'REALTIME' | 'BATCH';

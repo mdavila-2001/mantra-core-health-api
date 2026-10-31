@@ -14,6 +14,8 @@ import { CommunityModule } from '../community/community.module';
 import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
 import { EXTERNAL_PHARMACY_CATALOG_PORT } from './application/ports/external-pharmacy-catalog.port';
 import { HttpExternalPharmacyCatalogAdapter } from './infrastructure/adapters/http-external-pharmacy-catalog.adapter';
+import { PharmacyCatalogBulkLoadAdapter } from './infrastructure/adapters/pharmacy-catalog-bulk-load.adapter';
+import { CATALOG_BULK_LOAD_PORT } from './application/ports/catalog-bulk-load.port';
 import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { INSURANCE_PATIENT_SETTLEMENT_PORT } from './application/ports/insurance-patient-settlement.port';
@@ -259,6 +261,12 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyProcurementUseCases,
     SiteStockWriter,
     SetSiteProductAvailabilityUseCase,
+    // La carga por sucursal corre en el bucle común de la carga masiva de pharmacy.
+    PharmacyCatalogBulkLoadAdapter,
+    {
+      provide: CATALOG_BULK_LOAD_PORT,
+      useExisting: PharmacyCatalogBulkLoadAdapter,
+    },
     BulkSiteAvailabilityUseCase,
     SyncExternalPharmacyCatalogUseCase,
     IntegrationReadService,

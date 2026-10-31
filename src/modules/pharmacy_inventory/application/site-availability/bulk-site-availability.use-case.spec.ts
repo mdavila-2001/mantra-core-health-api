@@ -3,6 +3,7 @@ import { runWithTenant } from '../../../../common';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
 import { PharmacyErrorReason } from '../../../pharmacy/pharmacy.error-reasons';
 import { PharmacyBulkService } from '../../../pharmacy/services/pharmacy-bulk.service';
+import { PharmacyCatalogBulkLoadAdapter } from '../../infrastructure/adapters/pharmacy-catalog-bulk-load.adapter';
 import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import { allowAllScope } from '../scope/pharmacy-inventory-scope.testing';
 import { BulkSiteAvailabilityUseCase } from './bulk-site-availability.use-case';
@@ -93,7 +94,7 @@ function build() {
     scope,
     scopeRepo as any,
     positions as any,
-    bulk,
+    new PharmacyCatalogBulkLoadAdapter(bulk),
     setAvailability,
   );
   return { useCase, scope, writer, em };

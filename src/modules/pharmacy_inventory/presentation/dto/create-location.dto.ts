@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
-import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
+import { IsStrictBoolean } from '../../../../common/validators/strict-boolean.validator';
 
 /** Cuerpo de `POST /pharmacy/:siteId/inventory-locations` (bootstrap de ubicación). */
 export class CreateLocationDto {

@@ -8,7 +8,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
+import { IsStrictBoolean } from '../../../../common/validators/strict-boolean.validator';
 
 /**
  * Cuerpo de `PUT /pharmacies/:pharmacyId/sites/:siteId/products/:productId/availability`.

@@ -1,20 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../../common';
-import type { BulkRequestDto, BulkResponseDto } from '../../../pharmacy/dto';
-import type { PharmacyProducts } from '../../../pharmacy/entities';
-import { PharmacyErrorReason } from '../../../pharmacy/pharmacy.error-reasons';
-import {
-  rejectRow,
-  textField,
-  type BulkHandler,
-} from '../../../pharmacy/services/bulk/bulk-handler';
-import { PharmacyBulkService } from '../../../pharmacy/services/pharmacy-bulk.service';
+import type {
+  BulkRequestDto,
+  BulkResponseDto,
+} from '../../../../common/dto/bulk-load.dto';
 import {
   InventoryScopeRepository,
   StockPositionsRepository,
+  type InventoryProduct,
 } from '../../infrastructure/repositories';
+import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import { BulkSiteAvailabilityRowDto } from '../../presentation/dto';
+import {
+  BulkRowRejected,
+  CATALOG_BULK_LOAD_PORT,
+  type BulkLoadRows,
+  type CatalogBulkLoadPort,
+} from '../ports/catalog-bulk-load.port';
 import {
   PharmacyInventoryScopePolicy,
   type SiteScope,
@@ -29,14 +32,14 @@ export interface SiteRef {
 
 /** Un producto que la sucursal ya lleva por su cuenta. */
 interface TrackedProduct {
-  readonly product: PharmacyProducts;
+  readonly product: InventoryProduct;
 }
 
 /**
  * **El stock de una sucursal en lote** (FAR-06 con el contrato de FAR-05): una
  * fila por producto de esa sede, con «lo tengo / no lo tengo» y la cantidad.
  *
- * Corre en el bucle común de la carga masiva (`PharmacyBulkService`): el mismo
+ * Corre en el bucle común de la carga masiva (`CatalogBulkLoadPort`): el mismo
  * `{ mode, dryRun }`, una transacción por fila, la vista previa que ejecuta y
  * deshace, y el rechazo de **todas** las filas que repiten un código. Cada fila
  * escribe por el mismo camino que el `PUT` de una sede
@@ -58,7 +61,8 @@ export class BulkSiteAvailabilityUseCase {
     private readonly scope: PharmacyInventoryScopePolicy,
     private readonly scopeRepo: InventoryScopeRepository,
     private readonly positions: StockPositionsRepository,
-    private readonly bulk: PharmacyBulkService,
+    @Inject(CATALOG_BULK_LOAD_PORT)
+    private readonly bulk: CatalogBulkLoadPort,
     private readonly setAvailability: SetSiteProductAvailabilityUseCase,
   ) {}
 
@@ -86,24 +90,20 @@ export class BulkSiteAvailabilityUseCase {
   /** Lo que cada fila hace en esta sede. */
   handlerFor(
     site: SiteScope,
-  ): BulkHandler<
-    TrackedProduct,
-    BulkSiteAvailabilityRowDto,
-    BulkSiteAvailabilityRowDto
-  > {
+  ): BulkLoadRows<TrackedProduct, BulkSiteAvailabilityRowDto> {
     const productOf = async (
       tx: EntityManager,
       code: string,
-    ): Promise<PharmacyProducts> => {
+    ): Promise<InventoryProduct> => {
       const product = await this.scopeRepo.findProductByCodeInPharmacy(
         tx,
         code,
         site.pharmacyId,
       );
       if (product === null) {
-        throw rejectRow(
+        throw new BulkRowRejected(
           'productCode',
-          PharmacyErrorReason.PRODUCT_NOT_FOUND,
+          PharmacyInventoryErrorReason.PRODUCT_NOT_FOUND,
           'No hay un producto con ese código en su catálogo',
         );
       }
@@ -111,7 +111,7 @@ export class BulkSiteAvailabilityUseCase {
     };
     const write = async (
       tx: EntityManager,
-      product: PharmacyProducts,
+      product: InventoryProduct,
       row: BulkSiteAvailabilityRowDto,
       actor: AuthenticatedUser,
     ) => {
@@ -120,10 +120,8 @@ export class BulkSiteAvailabilityUseCase {
     };
     return {
       keyField: 'productCode',
-      createRow: BulkSiteAvailabilityRowDto,
-      updateRow: BulkSiteAvailabilityRowDto,
-      keyOf: (raw) => textField(raw, 'productCode'),
-      findExisting: async (tx, _ctx, key) => {
+      rowType: BulkSiteAvailabilityRowDto,
+      findExisting: async (tx, key) => {
         const product = await productOf(tx, key);
         const tracked = await this.positions.countLoosePositionsInSite(
           tx,
@@ -132,13 +130,13 @@ export class BulkSiteAvailabilityUseCase {
         );
         return tracked > 0 ? { product } : null;
       },
-      create: async (tx, ctx, row) => {
+      create: async (tx, row, actor) => {
         const product = await productOf(tx, row.productCode.trim());
-        await write(tx, product, row, ctx.actor);
+        await write(tx, product, row, actor);
         return product.id;
       },
-      update: async (tx, ctx, existing, row) => {
-        const { changed } = await write(tx, existing.product, row, ctx.actor);
+      update: async (tx, existing, row, actor) => {
+        const { changed } = await write(tx, existing.product, row, actor);
         return { id: existing.product.id, changed };
       },
     };
