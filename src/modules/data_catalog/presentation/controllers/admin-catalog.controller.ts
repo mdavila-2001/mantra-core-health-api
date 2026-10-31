@@ -56,7 +56,16 @@ import {
   ScansPageDto,
   SchemaSummaryDto,
 } from '../dto/catalog-response.dto';
+import {
+  PiiColumnsPageDto,
+  PiiColumnsQueryDto,
+  PiiSummaryDto,
+  QualityIssuesPageDto,
+  QualityIssuesQueryDto,
+  QualityRulesDto,
+} from '../dto/insights.dto';
 import { CatalogClassificationService } from '../../application/catalog-classification.service';
+import { CatalogInsightsService } from '../../application/catalog-insights.service';
 import { CatalogGovernanceService } from '../../application/catalog-governance.service';
 import { CatalogReadService } from '../../application/catalog-read.service';
 import { CatalogScanService } from '../../application/catalog-scan.service';
@@ -71,6 +80,33 @@ const IDEMPOTENCY_KEY = /^[A-Za-z0-9._:-]{8,128}$/;
  * Lecturas para los roles de lectura del portal; escrituras y escaneos sólo para
  * `CATALOG_WRITE_ROLES`. Fuera de cualquier tenant: son datos de la
  * plataforma. La autorización la decide esta API, no la pantalla.
+ *
+ * CONTRATO H4 · gobierno de datos (docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H4-gobernanza.md)
+ * Lecturas nuevas, todas `GET`, roles `PORTAL_READ_ROLES` (SECURITY_ADMIN, PLATFORM_ADMIN,
+ * GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD). Sin token 401; otro rol 403.
+ * Sólo metadatos (nombres, tipos, niveles, estados): ningún valor de dato ni texto libre de ficha.
+ * Paginación por cursor opaco `nextCursor`, orden total con desempate; parámetros no declarados → 400.
+ *
+ *  - GET /admin/catalog/pii/summary
+ *      200: { source, observedColumns, classifiedColumns, personalColumns, objectsWithPersonalColumns,
+ *             bySensitivity: [{ sensitivity, columns, approved, needsReview, autoDetected, other }],
+ *             declaredRegistry: { entities, entitiesPersonal, fields, fieldsPersonal },
+ *             notMeasured: [{ field, reason }] }
+ *  - GET /admin/catalog/pii/columns
+ *      query: schema?, minSensitivity? (PSEUDONYMIZED..CREDENTIAL, def. PERSONAL), sensitivity?,
+ *             reviewStatus?, q?, sort? (name|sensitivity, def. name), limit? (1..200, 50), cursor?
+ *      200: { items: [{ columnId, objectId, schemaName, objectName, columnName, nativeType,
+ *             sensitivity, reviewStatus, origin, approved, registryMarksPersonal }],
+ *             nextCursor, limit, sort }
+ *      400: parámetro inválido o cursor de otro orden (`El cursor de paginación no es válido`).
+ *  - GET /admin/catalog/quality/rules
+ *      200: { rules: [{ code, name, description, severity, target, resolution, openIssues }], notMeasured }
+ *  - GET /admin/catalog/quality/issues
+ *      query: rule? (código de regla), severity? (HIGH|MEDIUM|LOW), schema?, q?, limit?, cursor?
+ *      200: { items: [{ ruleCode, severity, schemaName, objectName, columnName, objectId, columnId,
+ *             sensitivity, reviewStatus, affected }], nextCursor, limit,
+ *             summary: { total, bySeverity, byRule }, derived: true, notMeasured }
+ *      Las incidencias se derivan al leer: no hay estado ni acción de cierre (nada que mutar).
  */
 @ApiTags('admin-catalog')
 @ApiBearerAuth()
@@ -83,6 +119,7 @@ export class AdminCatalogController {
     private readonly scans: CatalogScanService,
     private readonly classification: CatalogClassificationService,
     private readonly drift: PermissionDriftService,
+    private readonly insights: CatalogInsightsService,
   ) {}
 
   @Get('schemas')
@@ -352,6 +389,56 @@ export class AdminCatalogController {
   @ApiResponse({ status: 200, type: CatalogCoverageDto })
   coverage(@Query() q: CoverageQueryDto) {
     return this.read.coverage(q);
+  }
+
+  @Get('pii/summary')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Datos personales: cuántas columnas son personales según el catálogo y qué declaró el registro de gobierno',
+    description:
+      'Cifras del servidor sobre la clasificación del catálogo (`catalog_annotations`) y los conteos del registro `system_ops`. Lo que no se puede medir va en `notMeasured` (p. ej. registro de campos vacío).',
+  })
+  @ApiResponse({ status: 200, type: PiiSummaryDto })
+  piiSummary() {
+    return this.insights.piiSummary();
+  }
+
+  @Get('pii/columns')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Columnas clasificadas como datos personales, con su sensibilidad y estado de revisión',
+    description:
+      'Sólo metadatos: schema, objeto, columna, tipo nativo, nivel y estado de la ficha. Nunca valores.',
+  })
+  @ApiResponse({ status: 200, type: PiiColumnsPageDto })
+  piiColumns(@Query() q: PiiColumnsQueryDto) {
+    return this.insights.piiColumns(q);
+  }
+
+  @Get('quality/rules')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Reglas de calidad del catálogo, con las incidencias abiertas de cada una',
+  })
+  @ApiResponse({ status: 200, type: QualityRulesDto })
+  qualityRules() {
+    return this.insights.qualityRules();
+  }
+
+  @Get('quality/issues')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Incidencias de calidad del catálogo (derivadas al leer), paginadas',
+    description:
+      'Cada incidencia es un incumplimiento actual de una regla de `GET /admin/catalog/quality/rules`. No tienen estado ni acción de cierre: desaparecen al corregir la ficha.',
+  })
+  @ApiResponse({ status: 200, type: QualityIssuesPageDto })
+  qualityIssues(@Query() q: QualityIssuesQueryDto) {
+    return this.insights.qualityIssues(q);
   }
 
   @Get('scans')

@@ -1,9 +1,11 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiPropertyOptional,
   ApiTags,
+  PickType,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -17,6 +19,7 @@ import {
   Min,
 } from 'class-validator';
 import { Roles, requireTenantId } from '../../../../common';
+import { AnalyticsDevicesResponseDto } from '../dto/analytics-devices.dto';
 import {
   PORTAL_CODES,
   TelemetryAnalyticsService,
@@ -68,6 +71,13 @@ export class AnalyticsWindowQueryDto {
   @IsIn(PORTAL_CODES)
   portal?: PortalCode;
 }
+
+/** Ventana y portal de `/devices`: sin `interval`, que no tiene sentido sin serie. */
+export class DevicesQueryDto extends PickType(AnalyticsWindowQueryDto, [
+  'from',
+  'to',
+  'portal',
+] as const) {}
 
 export class WebVitalsQueryDto extends AnalyticsWindowQueryDto {
   @ApiPropertyOptional({
@@ -125,6 +135,17 @@ export class TelemetryAnalyticsController {
   })
   overview(@Query() query: AnalyticsWindowQueryDto) {
     return this.analytics.overview(query, requireTenantId());
+  }
+
+  @Get('devices')
+  @Roles(...ANALYTICS_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Desglose de dispositivos (tipo, SO, navegador, versión de app); bots aparte; lo no medido se declara',
+  })
+  @ApiOkResponse({ type: AnalyticsDevicesResponseDto })
+  devices(@Query() query: DevicesQueryDto) {
+    return this.analytics.devices(query, requireTenantId());
   }
 
   @Get('timeseries')

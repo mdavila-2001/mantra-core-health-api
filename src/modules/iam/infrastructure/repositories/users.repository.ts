@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Users } from '../../entities';
 import { CONCEPTS, createdBy } from '../../../../common';
@@ -42,6 +43,60 @@ export class UsersRepository {
   /** Busca un usuario por id; devuelve `null` si no existe. */
   findById(em: EntityManager, id: string): Promise<Users | null> {
     return em.findOne(Users, { id });
+  }
+
+  /**
+   * Busca un usuario por id tomando el cerrojo de la fila (`FOR UPDATE`) hasta el fin de la
+   * transacción. Serializa dos cambios de ciclo de vida sobre la misma cuenta. Exige una
+   * transacción abierta.
+   */
+  findByIdForUpdate(em: EntityManager, id: string): Promise<Users | null> {
+    return em.findOne(Users, { id }, { lockMode: LockMode.PESSIMISTIC_WRITE });
+  }
+
+  /**
+   * Serializa, hasta el fin de la transacción, los cambios que podrían dejar a la plataforma sin
+   * cuenta administradora. El cerrojo de fila no alcanza: dos administradores distintos se
+   * quitarían el acceso a la vez, cada uno viendo al otro todavía activo.
+   */
+  async lockAccessAdminChanges(em: EntityManager): Promise<void> {
+    await em
+      .getConnection()
+      .execute(
+        `select pg_advisory_xact_lock(hashtext('iam.access-admin-lifecycle'))`,
+        [],
+        'all',
+        em.getTransactionContext(),
+      );
+  }
+
+  /**
+   * Cambia el estado de la cuenta **con la precondición en la escritura**: el `UPDATE` sólo
+   * alcanza la fila si todavía está en uno de los estados `from`. Si otra transacción la movió,
+   * devuelve `false` y no escribe.
+   *
+   * No pasa por la entidad: no hay lectura-modificación-escritura que pueda perder la carrera.
+   * Sube `row_version` para que un escritor optimista que cargó la fila antes lo note.
+   */
+  async transitionStatus(
+    em: EntityManager,
+    id: string,
+    from: readonly string[],
+    to: string,
+    actorUserId: string,
+  ): Promise<boolean> {
+    const rows = await em.getConnection().execute(
+      `update iam.users
+            set status_concept_id = ?::uuid, updated_at = now(), updated_by_user_id = ?::uuid,
+                row_version = row_version + 1
+          where id = ?::uuid
+            and status_concept_id in (select value::uuid from jsonb_array_elements_text(?::jsonb))
+        returning id`,
+      [to, actorUserId, id, JSON.stringify(from)],
+      'all',
+      em.getTransactionContext(),
+    );
+    return rows.length === 1;
   }
 
   /** Crea la entidad de usuario en la unidad de trabajo (sin flush). */
