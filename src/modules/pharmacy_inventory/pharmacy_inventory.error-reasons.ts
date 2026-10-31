@@ -85,4 +85,6 @@ export enum PharmacyInventoryErrorReason {
   WARD_STOCK_ALREADY_EXISTS = 'WARD_STOCK_ALREADY_EXISTS',
   /** F5c: retiro o dispensa desde un botiquín sin `available_quantity` suficiente. */
   INSUFFICIENT_AVAILABLE_STOCK = 'INSUFFICIENT_AVAILABLE_STOCK',
+  /** F5c: la reserva indicada para dispensar desde un botiquín no está confirmada o venció. */
+  RESERVATION_NOT_ACTIVE = 'RESERVATION_NOT_ACTIVE',
 }
