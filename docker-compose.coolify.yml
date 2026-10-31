@@ -238,7 +238,9 @@ x-app-env: &app-env
   # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
   AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
-  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  # Encendido por defecto (C-3). Con NODE_ENV=production cualquier otro valor
+  # aborta el arranque (SYSTEM_RLS_ENFORCE_DISABLED).
+  RLS_ENFORCE: ${RLS_ENFORCE:-true}
   # El bypass de verificación aborta el arranque si llega en `true` con
   # NODE_ENV=production; se deja escrito para que nadie lo herede de un `.env`.
   DEV_VERIFICATION_BYPASS: "false"
