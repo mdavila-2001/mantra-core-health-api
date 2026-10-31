@@ -12,20 +12,56 @@ const PLATFORM = { platform: true, minSample: 5 } as const;
 function onePersonRepo() {
   return {
     overview: fn(async () => ({
-      totals: { events: 40, sessions: 1, subjects: 1, page_views: 40, last_event_at: null, sample: 1 },
+      totals: {
+        events: 40,
+        sessions: 1,
+        subjects: 1,
+        page_views: 40,
+        last_event_at: null,
+        sample: 1,
+      },
       topRoutes: [{ route: '/a', events: 40, sessions: 1, sample: 1 }],
       topEvents: [{ event_name: 'clic', events: 40, sessions: 1, sample: 1 }],
     })),
-    timeseries: fn(async () => [{ bucket: new Date('2026-10-01T10:00:00Z'), events: 40, sessions: 1, sample: 1 }]),
+    timeseries: fn(async () => [
+      {
+        bucket: new Date('2026-10-01T10:00:00Z'),
+        events: 40,
+        sessions: 1,
+        sample: 1,
+      },
+    ]),
     webVitals: fn(async () => ({
-      percentiles: [{ metric_concept_id: TELE.METRIC_LCP, samples: 40, subjects: 1, p50: '2000', p75: '2500', p95: '3000' }],
-      ratings: [{ metric_concept_id: TELE.METRIC_LCP, rating_concept_id: TELE.RATING_GOOD, n: 40, subjects: 1 }],
+      percentiles: [
+        {
+          metric_concept_id: TELE.METRIC_LCP,
+          samples: 40,
+          subjects: 1,
+          p50: '2000',
+          p75: '2500',
+          p95: '3000',
+        },
+      ],
+      ratings: [
+        {
+          metric_concept_id: TELE.METRIC_LCP,
+          rating_concept_id: TELE.RATING_GOOD,
+          n: 40,
+          subjects: 1,
+        },
+      ],
     })),
-    webVitalsByRoute: fn(async () => [{ route: '/a', samples: 40, subjects: 1, p75: '2500' }]),
+    webVitalsByRoute: fn(async () => [
+      { route: '/a', samples: 40, subjects: 1, p75: '2500' },
+    ]),
     devices: fn(async () => ({
       totals: { contexts: 40, bots: 0, bot_unknown: 0, last_context_at: null },
-      byDeviceType: [{ code: 'DESKTOP', label: 'Desktop', contexts: 40, sample: 1 }],
-      byOsFamily: [], byBrowserFamily: [], byAppVersion: [{ code: '1', label: '1', contexts: 40, sample: 1 }],
+      byDeviceType: [
+        { code: 'DESKTOP', label: 'Desktop', contexts: 40, sample: 1 },
+      ],
+      byOsFamily: [],
+      byBrowserFamily: [],
+      byAppVersion: [{ code: '1', label: '1', contexts: 40, sample: 1 }],
     })),
   };
 }
@@ -50,7 +86,13 @@ describe('k-anonimato: una persona con N mediciones queda suprimida en plataform
   it('web-vitals: 40 mediciones de 1 persona -> samples, percentiles y ratings null; byRoute también', async () => {
     const svc = new TelemetryAnalyticsService(onePersonRepo() as never);
     const res = await svc.webVitals({ ...Q, metric: 'LCP' }, PLATFORM);
-    expect(res.metrics[0]).toMatchObject({ samples: null, p50: null, p75: null, p95: null, ratings: null });
+    expect(res.metrics[0]).toMatchObject({
+      samples: null,
+      p50: null,
+      p75: null,
+      p95: null,
+      ratings: null,
+    });
     expect(res.byRoute?.routes[0]).toMatchObject({ samples: null, p75: null });
     expect(res.notMeasured[0].metric).toBe('minSample');
   });
@@ -74,21 +116,56 @@ describe('k-anonimato: una persona con N mediciones queda suprimida en plataform
   it('con 5 personas distintas el grupo sale', async () => {
     const repo = onePersonRepo();
     repo.webVitals = fn(async () => ({
-      percentiles: [{ metric_concept_id: TELE.METRIC_LCP, samples: 40, subjects: 5, p50: '2000', p75: '2500', p95: '3000' }],
-      ratings: [{ metric_concept_id: TELE.METRIC_LCP, rating_concept_id: TELE.RATING_GOOD, n: 40, subjects: 5 }],
+      percentiles: [
+        {
+          metric_concept_id: TELE.METRIC_LCP,
+          samples: 40,
+          subjects: 5,
+          p50: '2000',
+          p75: '2500',
+          p95: '3000',
+        },
+      ],
+      ratings: [
+        {
+          metric_concept_id: TELE.METRIC_LCP,
+          rating_concept_id: TELE.RATING_GOOD,
+          n: 40,
+          subjects: 5,
+        },
+      ],
     }));
-    const res = await new TelemetryAnalyticsService(repo as never).webVitals(Q, PLATFORM);
-    expect(res.metrics[0]).toMatchObject({ samples: 40, p75: 2500, ratings: { GOOD: 40 } });
+    const res = await new TelemetryAnalyticsService(repo as never).webVitals(
+      Q,
+      PLATFORM,
+    );
+    expect(res.metrics[0]).toMatchObject({
+      samples: 40,
+      p75: 2500,
+      ratings: { GOOD: 40 },
+    });
   });
 });
 
 describe('pipeline-health no es de alcance plataforma', () => {
-  const proto = TelemetryAnalyticsController.prototype as unknown as Record<string, object>;
+  const proto = TelemetryAnalyticsController.prototype as unknown as Record<
+    string,
+    object
+  >;
   it('sin @PlatformScopeOptional (exige organización); los agregados sí lo llevan', () => {
-    expect(Reflect.getMetadata(PLATFORM_SCOPE_OPTIONAL_KEY, proto.pipelineHealth)).toBeUndefined();
+    expect(
+      Reflect.getMetadata(PLATFORM_SCOPE_OPTIONAL_KEY, proto.pipelineHealth),
+    ).toBeUndefined();
     for (const h of ['overview', 'timeseries', 'webVitals', 'devices']) {
-      expect(Reflect.getMetadata(PLATFORM_SCOPE_OPTIONAL_KEY, proto[h])).toBe(true);
+      expect(Reflect.getMetadata(PLATFORM_SCOPE_OPTIONAL_KEY, proto[h])).toBe(
+        true,
+      );
     }
-    expect(Reflect.getMetadata(PLATFORM_SCOPE_OPTIONAL_KEY, TelemetryAnalyticsController)).toBeUndefined();
+    expect(
+      Reflect.getMetadata(
+        PLATFORM_SCOPE_OPTIONAL_KEY,
+        TelemetryAnalyticsController,
+      ),
+    ).toBeUndefined();
   });
 });

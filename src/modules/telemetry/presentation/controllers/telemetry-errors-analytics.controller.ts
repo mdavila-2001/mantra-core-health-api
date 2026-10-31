@@ -5,12 +5,17 @@ import { PlatformScopeOptional } from '../../../../common/tenant/platform-scope'
 import { resolveAnalyticsScope } from '../../application/analytics-scope';
 import { TelemetryErrorsAnalyticsService } from '../../application/services/telemetry-errors-analytics.service';
 import { ErrorsQueryDto } from '../dto/analytics-errors-query.dto';
-import { ANALYTICS_RAW_ROLES, ANALYTICS_READ_ROLES } from './telemetry-analytics.controller';
+import {
+  ANALYTICS_RAW_ROLES,
+  ANALYTICS_READ_ROLES,
+} from './telemetry-analytics.controller';
 
 /** Roles que pueden ver identificadores de correlación (`request_id`). */
 export function canSeeCorrelation(user: AuthenticatedUser): boolean {
   return user.roles.some(
-    (role) => (ANALYTICS_RAW_ROLES as readonly string[]).includes(role) || role === 'SUPERADMIN',
+    (role) =>
+      (ANALYTICS_RAW_ROLES as readonly string[]).includes(role) ||
+      role === 'SUPERADMIN',
   );
 }
 
@@ -28,31 +33,59 @@ export class TelemetryErrorsAnalyticsController {
   @Get()
   @Roles(...ANALYTICS_READ_ROLES)
   @PlatformScopeOptional()
-  @ApiOperation({ summary: 'Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API' })
-  summary(@Query() query: ErrorsQueryDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.errors.errors(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample), canSeeCorrelation(user));
+  @ApiOperation({
+    summary:
+      'Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API',
+  })
+  summary(
+    @Query() query: ErrorsQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.errors.errors(
+      query,
+      resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample),
+      canSeeCorrelation(user),
+    );
   }
 
   @Get('fingerprints')
   @Roles(...ANALYTICS_READ_ROLES)
   @PlatformScopeOptional()
   @ApiOperation({ summary: 'Top de huellas de error con tendencia' })
-  fingerprints(@Query() query: ErrorsQueryDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.errors.fingerprints(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample), canSeeCorrelation(user));
+  fingerprints(
+    @Query() query: ErrorsQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.errors.fingerprints(
+      query,
+      resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample),
+      canSeeCorrelation(user),
+    );
   }
 
   @Get('routes-not-found')
   @Roles(...ANALYTICS_READ_ROLES)
   @PlatformScopeOptional()
-  @ApiOperation({ summary: 'Rutas que cayeron en «no encontrada» o sin parte registrada' })
-  routesNotFound(@Query() query: ErrorsQueryDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.errors.routesNotFound(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample));
+  @ApiOperation({
+    summary: 'Rutas que cayeron en «no encontrada» o sin parte registrada',
+  })
+  routesNotFound(
+    @Query() query: ErrorsQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.errors.routesNotFound(
+      query,
+      resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample),
+    );
   }
 
   @Get('fingerprints/:fingerprint')
   @Roles(...ANALYTICS_READ_ROLES)
   @PlatformScopeOptional()
-  @ApiOperation({ summary: 'Detalle agregado de una huella; request_id recientes sólo a roles RAW' })
+  @ApiOperation({
+    summary:
+      'Detalle agregado de una huella; request_id recientes sólo a roles RAW',
+  })
   fingerprint(
     @Param('fingerprint') fingerprint: string,
     @Query() query: ErrorsQueryDto,

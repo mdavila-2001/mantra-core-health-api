@@ -1028,7 +1028,9 @@ export class PeriopCasesService {
       }),
       this.casesRepo.countCasesMatching(this.em, tenantId, filters),
     ]);
-    const or = (await this.orView?.fields(cases, tenantId)) ?? new Map();
+    const or =
+      (await this.orView?.fields(cases, tenantId)) ??
+      new Map<string, CaseOrFields>();
     return {
       items: cases.map((c) => this.toSummary(c, or.get(c.id))),
       total,

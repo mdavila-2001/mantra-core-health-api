@@ -31,7 +31,9 @@ const STACK_LINE = /\n\s+at\s.*/gu;
  * corridas de dígitos, y lo topa a 500 caracteres. Reutiliza la redacción del
  * driver y de tokens de enlace ya existentes.
  */
-export function sanitizeClientMessage(raw: string | undefined | null): string | null {
+export function sanitizeClientMessage(
+  raw: string | undefined | null,
+): string | null {
   if (raw === undefined || raw === null) return null;
   let text = String(raw).replace(STACK_LINE, '');
   text = text.split(/\r?\n/u)[0] ?? '';
@@ -51,7 +53,9 @@ export function sanitizeClientMessage(raw: string | undefined | null): string | 
 
 /** Tipo de error (`TypeError`, `HttpErrorResponse`): sólo identificador seguro. */
 export function sanitizeErrorType(raw: string): string {
-  const cleaned = raw.replace(/[^A-Za-z0-9_.$:-]/gu, '').slice(0, CLIENT_ERROR_LIMITS.errorType);
+  const cleaned = raw
+    .replace(/[^A-Za-z0-9_.$:-]/gu, '')
+    .slice(0, CLIENT_ERROR_LIMITS.errorType);
   return cleaned || 'Error';
 }
 
@@ -66,9 +70,15 @@ export function safeRouteOrNull(raw: string | undefined | null): string | null {
 }
 
 /** Plantilla de la ruta de API: mismas reglas, pero sin exigir la forma de ruta web. */
-export function safeApiRouteOrNull(raw: string | undefined | null): string | null {
+export function safeApiRouteOrNull(
+  raw: string | undefined | null,
+): string | null {
   const route = raw?.split(/[?#]/u)[0]?.trim();
-  if (!route || route.length > CLIENT_ERROR_LIMITS.route || !route.startsWith('/')) {
+  if (
+    !route ||
+    route.length > CLIENT_ERROR_LIMITS.route ||
+    !route.startsWith('/')
+  ) {
     return null;
   }
   if (/[^A-Za-z0-9/:._~-]/u.test(route)) return null;
@@ -77,9 +87,13 @@ export function safeApiRouteOrNull(raw: string | undefined | null): string | nul
 }
 
 /** Identificador corto (request id, código de soporte): sólo caracteres seguros. */
-export function safeToken(raw: string | undefined | null, max: number): string | null {
+export function safeToken(
+  raw: string | undefined | null,
+  max: number,
+): string | null {
   const value = raw?.trim();
-  if (!value || value.length > max || /[^A-Za-z0-9._:-]/u.test(value)) return null;
+  if (!value || value.length > max || /[^A-Za-z0-9._:-]/u.test(value))
+    return null;
   return value;
 }
 
@@ -96,7 +110,12 @@ export function clientErrorFingerprint(parts: {
 }): string {
   return createHash('sha256')
     .update(
-      [parts.errorClass, parts.errorType, parts.message ?? '', parts.route ?? ''].join('\u0001'),
+      [
+        parts.errorClass,
+        parts.errorType,
+        parts.message ?? '',
+        parts.route ?? '',
+      ].join('\u0001'),
     )
     .digest('hex')
     .slice(0, 16);

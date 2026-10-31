@@ -17,20 +17,32 @@ export class TelemetryPartsAnalyticsController {
   @Get()
   @Roles(...ANALYTICS_READ_ROLES)
   @PlatformScopeOptional()
-  @ApiOperation({ summary: 'Árbol de partes con su uso, errores y vitales; lo que no casa va a unmapped' })
+  @ApiOperation({
+    summary:
+      'Árbol de partes con su uso, errores y vitales; lo que no casa va a unmapped',
+  })
   list(@Query() query: PartsQueryDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.parts.parts(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample));
+    return this.parts.parts(
+      query,
+      resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample),
+    );
   }
 
   @Get(':routeCode')
   @Roles(...ANALYTICS_READ_ROLES)
   @PlatformScopeOptional()
-  @ApiOperation({ summary: 'Detalle de una parte: serie, acciones clave, vitales y errores' })
+  @ApiOperation({
+    summary: 'Detalle de una parte: serie, acciones clave, vitales y errores',
+  })
   detail(
     @Param('routeCode') routeCode: string,
     @Query() query: PartsQueryDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.parts.part(routeCode.slice(0, 100), query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample));
+    return this.parts.part(
+      routeCode.slice(0, 100),
+      query,
+      resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample),
+    );
   }
 }

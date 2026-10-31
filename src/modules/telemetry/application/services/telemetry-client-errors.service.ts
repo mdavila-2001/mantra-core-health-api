@@ -56,11 +56,14 @@ export class TelemetryClientErrorsService {
   }
 
   /** Actor de la petición si trae un access token válido y su sesión sigue activa; si no, `null`. */
-  async optionalActor(request: Pick<Request, 'headers'>): Promise<ClientErrorActor | null> {
+  async optionalActor(
+    request: Pick<Request, 'headers'>,
+  ): Promise<ClientErrorActor | null> {
     const header = request.headers.authorization;
-    const token = typeof header === 'string' && /^Bearer\s+/iu.test(header)
-      ? header.replace(/^Bearer\s+/iu, '').trim()
-      : undefined;
+    const token =
+      typeof header === 'string' && /^Bearer\s+/iu.test(header)
+        ? header.replace(/^Bearer\s+/iu, '').trim()
+        : undefined;
     if (!token) return null;
     try {
       // El secreto se lee al momento de verificar, igual que `JwtStrategy`: el
@@ -78,11 +81,12 @@ export class TelemetryClientErrorsService {
       const declared = request.headers['x-tenant-id'];
       const wanted = Array.isArray(declared) ? declared[0] : declared;
       const tenants = payload.tenants ?? [];
-      const tenantId = wanted && tenants.includes(wanted)
-        ? wanted
-        : tenants.length === 1
-          ? tenants[0]
-          : null;
+      const tenantId =
+        wanted && tenants.includes(wanted)
+          ? wanted
+          : tenants.length === 1
+            ? tenants[0]
+            : null;
       return { userId: payload.sub, sessionId, tenantId };
     } catch {
       return null;
@@ -103,12 +107,14 @@ export class TelemetryClientErrorsService {
     const occurred = item.occurredAt ? new Date(item.occurredAt) : now;
     // Un reloj del cliente descabellado no manda el error a otra ventana.
     const skew = Math.abs(now.getTime() - occurred.getTime());
-    const occurredAt = Number.isNaN(skew) || skew > 7 * 24 * 3_600_000 ? now : occurred;
+    const occurredAt =
+      Number.isNaN(skew) || skew > 7 * 24 * 3_600_000 ? now : occurred;
     const method = item.httpMethod?.toUpperCase();
     return {
       receivedAt: now,
       occurredAt,
-      portalTypeConceptId: item.portal === 'MOBILE' ? TELE.PORTAL_MOBILE : TELE.PORTAL_WEB,
+      portalTypeConceptId:
+        item.portal === 'MOBILE' ? TELE.PORTAL_MOBILE : TELE.PORTAL_WEB,
       actorTenantId: actor?.tenantId ?? null,
       userId: actor?.userId ?? null,
       sessionId: actor?.sessionId ?? null,
@@ -151,7 +157,12 @@ export class TelemetryClientErrorsService {
     await this.repo.insertMany(rows);
     const rejected = dto.errors.length - rows.length;
     this.logger.info(
-      { operation: 'telemetry.client-errors.ingest', inserted: rows.length, rejected, identified: actor !== null },
+      {
+        operation: 'telemetry.client-errors.ingest',
+        inserted: rows.length,
+        rejected,
+        identified: actor !== null,
+      },
       'Client errors ingested',
     );
     return { inserted: rows.length, rejected };
