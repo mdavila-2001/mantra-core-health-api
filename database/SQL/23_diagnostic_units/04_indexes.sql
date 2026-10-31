@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 23 · schema diagnostic_units
+-- SALUD v4.2.82 · módulo 23 · schema diagnostic_units
 -- Generado de diagram_23_diagnostic_units.puml — NO editar a mano.
 
 
@@ -139,6 +139,12 @@ CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_operational_status_concept_i
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_created_by_user_id" ON "diagnostic_units"."diagnostic_equipment" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_updated_by_user_id" ON "diagnostic_units"."diagnostic_equipment" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_care_space_id" ON "diagnostic_units"."diagnostic_equipment" ("care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_diagnostic_equipment_schedulable_resource_id" ON "diagnostic_units"."diagnostic_equipment" ("schedulable_resource_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_diagnostic_equipment_site_ae_title" ON "diagnostic_units"."diagnostic_equipment" ("diagnostic_unit_site_id", "ae_title") WHERE ae_title IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_unit_accreditations_diagnostic_unit_id" ON "diagnostic_units"."diagnostic_unit_accreditations" ("diagnostic_unit_id");
 
