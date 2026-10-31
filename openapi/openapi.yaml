@@ -93430,6 +93430,18 @@ components:
     UpdateOrgUserAssignmentDto:
       type: object
       properties:
+        practiceSiteId:
+          type: string
+          format: uuid
+          description: Sede (alcance SITE)
+        clinicalUnitId:
+          type: string
+          format: uuid
+          description: Unidad (alcance UNIT)
+        careSpaceId:
+          type: string
+          format: uuid
+          description: Espacio (alcance SPACE)
         supervisorUserId:
           type: string
           description: Nuevo supervisor
