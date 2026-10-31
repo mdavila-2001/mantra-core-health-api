@@ -46,3 +46,5 @@ export type {
   ConversionRefType,
   AttributionModel,
 } from './marketing.dto';
+export { InsightsFactsQueryDto, INSIGHTS_CHANNELS } from './insights-query.dto';
+export type { InsightsChannel } from './insights-query.dto';

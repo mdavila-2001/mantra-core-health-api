@@ -15,3 +15,4 @@ export type {
   CreateTouchpointData,
   CreateAttributionTouchData,
 } from './marketing-journeys.repository';
+export { InsightsFactsRepository } from './insights-facts.repository';
