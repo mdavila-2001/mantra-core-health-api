@@ -20,6 +20,7 @@ import {
 } from '../entities';
 import { PHARM } from '../pharmacy.concepts';
 import { SELLABLE_STOCK_FILTER } from '../services/pharmacy-catalog-rules';
+import { siteProductAvailabilitySql } from '../../pharmacy_inventory/domain/site-product-availability';
 
 /** Acotaciones de la búsqueda de productos del directorio. */
 export interface ProductSearchFilter {
@@ -195,9 +196,9 @@ export class PharmacyReadRepository {
   }
 
   /**
-   * Productos publicados que además se pueden vender hoy: la farmacia no los
-   * marcó «no tengo» y, si llevan conteo, les queda (P47). Es lo que piden la
-   * disponibilidad, los precios de una sede y un pedido nuevo.
+   * Productos publicados que la farmacia no marcó «no tengo» (P47). Es lo que
+   * piden la disponibilidad, los precios de una sede y un pedido nuevo; cuánto
+   * hay en cada sede lo decide después la regla por sede.
    */
   findSellableProductsByIds(
     em: EntityManager,
@@ -209,6 +210,49 @@ export class PharmacyReadRepository {
       statusConceptId: PHARM.PRODUCT_ACTIVE,
       ...SELLABLE_STOCK_FILTER,
     });
+  }
+
+  /**
+   * Los productos publicados y vendibles de unos medicamentos del vademécum,
+   * de cualquier farmacia: la disponibilidad por medicamento los cruza después
+   * con las farmacias visibles y con la regla por sede. Un producto sin
+   * `medication_concept_id` no entra: no hay con qué emparejarlo.
+   */
+  findSellableProductsByMedicationConcepts(
+    em: EntityManager,
+    conceptIds: readonly string[],
+  ): Promise<PharmacyProducts[]> {
+    if (conceptIds.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyProducts, {
+      medicationConceptId: { $in: [...conceptIds] },
+      statusConceptId: PHARM.PRODUCT_ACTIVE,
+      ...SELLABLE_STOCK_FILTER,
+    });
+  }
+
+  /**
+   * De unos productos, los que una sede tiene **disponibles** hoy según la
+   * regla única por sede (`siteProductAvailabilitySql`): el libro si el
+   * producto tiene posición en la sede, lo declarado en el catálogo si no. Es
+   * la misma regla que leen el buscador, el catálogo público y la receta
+   * compartida.
+   */
+  async findAvailableProductIdsAtSite(
+    em: EntityManager,
+    siteId: string,
+    productIds: readonly string[],
+  ): Promise<Set<string>> {
+    if (productIds.length === 0) return new Set();
+    const availability = siteProductAvailabilitySql();
+    const rows = await em.getConnection().execute<{ product_id: string }[]>(
+      `SELECT av.product_id
+         FROM (${availability.sql}) av
+        WHERE av.site_id = ?
+          AND av.product_id IN (${productIds.map(() => '?').join(', ')})`,
+      [...availability.params, siteId, ...productIds],
+      'all',
+    );
+    return new Set(rows.map((row) => row.product_id));
   }
 
   /**

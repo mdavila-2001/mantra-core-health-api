@@ -1,12 +1,18 @@
 import { jest } from '@jest/globals';
 import {
   recommendedPractitionerRoute,
+  referredOrganizationRoute,
   ReferralNotifier,
 } from './referral-notifier.service';
 import { CEXT } from '../clinical_ext.concepts';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
+import { CONCEPTS } from '../../../common';
 import { Referrals } from '../entities';
 import { PersonAccountLinks, Persons } from '../../profiles/entities';
+import { Tenants } from '../../directory/entities';
+import { ServiceCatalog } from '../../billing/entities';
+import { PublicProfiles } from '../../community/entities';
+import { COMM } from '../../community/community.concepts';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -15,7 +21,15 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
  * 24/10/2026). Se fija qué llega a la campana y, sobre todo, que **nada de esto
  * puede romper la derivación**, que ya está escrita.
  */
-function build(options: { referral?: unknown; link?: unknown } = {}) {
+function build(
+  options: {
+    referral?: unknown;
+    link?: unknown;
+    tenant?: unknown;
+    service?: unknown;
+    publicProfile?: unknown;
+  } = {},
+) {
   const referral =
     'referral' in options
       ? options.referral
@@ -39,6 +53,25 @@ function build(options: { referral?: unknown; link?: unknown } = {}) {
         return 'link' in options ? options.link : { userId: 'user-pat' };
       }
       if (entity === Persons) return people[where.id] ?? null;
+      if (entity === Tenants) {
+        return 'tenant' in options
+          ? options.tenant
+          : {
+              id: 'ten-9',
+              legalName: 'Clínica Norte S.R.L.',
+              statusConceptId: CONCEPTS.TENANT_ACTIVE,
+            };
+      }
+      if (entity === ServiceCatalog) {
+        return 'service' in options
+          ? options.service
+          : { id: 'svc-1', name: 'Fisioterapia' };
+      }
+      if (entity === PublicProfiles) {
+        return 'publicProfile' in options
+          ? options.publicProfile
+          : { id: 'pp-1', slug: 'clinica-norte' };
+      }
       return null;
     }),
   };
@@ -98,7 +131,7 @@ describe('ReferralNotifier', () => {
     expect(d.notifications.createRequest).not.toHaveBeenCalled();
   });
 
-  it('una derivación sin profesional destino no avisa', async () => {
+  it('una derivación sin profesional ni organización destino no avisa', async () => {
     const d = build({
       referral: {
         id: 'ref-1',
@@ -130,5 +163,169 @@ describe('ReferralNotifier', () => {
 
     await expect(d.service.notifyRecommended('ref-1')).resolves.toBe(false);
     expect(d.logger.warn).toHaveBeenCalled();
+  });
+
+  describe('derivación a una organización', () => {
+    const orgReferral = {
+      id: 'ref-2',
+      patientProfileId: 'pat-1',
+      targetProfileId: null,
+      targetTenantId: 'ten-9',
+      targetServiceCatalogId: 'svc-1',
+      referringProfileId: 'hp-1',
+      reasonText: 'Rehabilitación de rodilla',
+    };
+
+    it('avisa por la misma campana: «Su médico le derivó a» la organización, con el servicio y el enlace a su ficha pública', async () => {
+      const d = build({
+        referral: orgReferral,
+        tenant: {
+          id: 'ten-9',
+          legalName: 'Clínica Norte S.R.L.',
+          tradeName: 'Clínica Norte',
+          statusConceptId: CONCEPTS.TENANT_ACTIVE,
+        },
+      });
+
+      expect(await d.service.notifyRecommended('ref-2')).toBe(true);
+
+      const [request, actor] = d.notifications.createRequest.mock.calls[0];
+      expect(request.channelId).toBe(MESSAGING_SEED.inAppChannelId);
+      expect(request.recipientUserId).toBe('user-pat');
+      expect(request.categoryConceptId).toBe(CEXT.NOTICE_REFERRAL_RECOMMENDED);
+      expect(request.payloadJson.kind).toBe('REFERRAL_RECOMMENDED');
+      // El nombre comercial gana sobre la razón social, como en la búsqueda.
+      expect(request.payloadJson.subject).toBe(
+        'Su médico le derivó a Clínica Norte',
+      );
+      expect(request.payloadJson.bodyText).toBe(
+        'Su médico le derivó a Clínica Norte para Fisioterapia. ' +
+          'Puede ver su ficha y reservar una cita desde su portal.',
+      );
+      // El motivo es texto libre del médico: no viaja en el aviso de la
+      // organización, ni en el cuerpo ni en el payload ni en la entrega.
+      expect(JSON.stringify(request)).not.toContain('Rehabilitación');
+      expect(JSON.stringify(request)).not.toContain('Motivo');
+      expect(
+        JSON.stringify(d.notifications.deliverNotification.mock.calls),
+      ).not.toContain('Rehabilitación');
+      expect(request.payloadJson.route).toBe(
+        referredOrganizationRoute('clinica-norte'),
+      );
+      expect(request.payloadJson.route).toBe('/o/clinica-norte');
+      expect(request.payloadJson.referralId).toBe('ref-2');
+      expect(request.relatedResourceType).toBe('ORGANIZATION_PROFILE');
+      expect(request.relatedResourceId).toBe('ten-9');
+      expect(d.notifications.deliverNotification).toHaveBeenCalledWith(
+        'req-1',
+        expect.objectContaining({
+          outcome: 'SENT',
+          providerChannelConfigId: MESSAGING_SEED.inAppChannelConfigId,
+          subject: 'Su médico le derivó a Clínica Norte',
+        }),
+        actor,
+      );
+    });
+
+    it('el enlace sale sólo de una ficha pública y activa de organización de ese tenant', async () => {
+      const d = build({ referral: orgReferral });
+
+      await d.service.notifyRecommended('ref-2');
+
+      expect(d.em.findOne).toHaveBeenCalledWith(PublicProfiles, {
+        targetId: 'ten-9',
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+    });
+
+    it('sin ficha pública avisa igual, sin enlace y sin destino de campana', async () => {
+      const d = build({ referral: orgReferral, publicProfile: null });
+
+      expect(await d.service.notifyRecommended('ref-2')).toBe(true);
+
+      const [request] = d.notifications.createRequest.mock.calls[0];
+      expect(request.payloadJson.subject).toBe(
+        'Su médico le derivó a Clínica Norte S.R.L.',
+      );
+      expect(request.payloadJson.bodyText).toBe(
+        'Su médico le derivó a Clínica Norte S.R.L. para Fisioterapia.',
+      );
+      expect(request.payloadJson).not.toHaveProperty('route');
+      expect(request).not.toHaveProperty('relatedResourceType');
+      expect(request).not.toHaveProperty('relatedResourceId');
+    });
+
+    it('sin servicio, el aviso nombra sólo la organización', async () => {
+      const d = build({
+        referral: {
+          ...orgReferral,
+          targetServiceCatalogId: null,
+        },
+      });
+
+      expect(await d.service.notifyRecommended('ref-2')).toBe(true);
+
+      const [request] = d.notifications.createRequest.mock.calls[0];
+      expect(request.payloadJson.bodyText).toBe(
+        'Su médico le derivó a Clínica Norte S.R.L. ' +
+          'Puede ver su ficha y reservar una cita desde su portal.',
+      );
+      expect(d.em.findOne).not.toHaveBeenCalledWith(
+        ServiceCatalog,
+        expect.anything(),
+      );
+    });
+
+    it('una organización inexistente o no activa no recibe pacientes: no hay aviso', async () => {
+      for (const tenant of [
+        null,
+        {
+          id: 'ten-9',
+          legalName: 'Clínica Norte S.R.L.',
+          statusConceptId: 'tenant-suspendido',
+        },
+      ]) {
+        const d = build({ referral: orgReferral, tenant });
+
+        expect(await d.service.notifyRecommended('ref-2')).toBe(false);
+        expect(d.notifications.createRequest).not.toHaveBeenCalled();
+      }
+    });
+
+    it('con profesional y organización, el aviso es el del profesional, como siempre', async () => {
+      const d = build({
+        referral: { ...orgReferral, targetProfileId: 'hp-9' },
+      });
+
+      expect(await d.service.notifyRecommended('ref-2')).toBe(true);
+
+      const [request] = d.notifications.createRequest.mock.calls[0];
+      expect(request.payloadJson.subject).toBe(
+        'Su médico le recomienda otra consulta',
+      );
+      expect(request.payloadJson.route).toBe('/directory/hp-9');
+      expect(request.relatedResourceType).toBe('PRACTITIONER_PROFILE');
+      expect(request.relatedResourceId).toBe('hp-9');
+    });
+
+    it('un fallo al leer la organización no rompe nada ni registra datos de la persona', async () => {
+      const d = build({ referral: orgReferral });
+      const original = d.em.findOne.getMockImplementation();
+      d.em.findOne.mockImplementation(async (entity: unknown, where: any) => {
+        if (entity === Tenants) throw new Error('Clínica Norte: caída');
+        return original(entity, where);
+      });
+
+      await expect(d.service.notifyRecommended('ref-2')).resolves.toBe(false);
+
+      const [fields] = d.logger.warn.mock.calls[0];
+      expect(fields).toEqual({
+        operation: 'clinical_ext.referral.notice',
+        referralId: 'ref-2',
+        errorName: 'Error',
+      });
+    });
   });
 });

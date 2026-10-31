@@ -2,7 +2,6 @@ import { isIP } from 'node:net';
 import {
   BadRequestException,
   ForbiddenException,
-  GoneException,
   Injectable,
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -16,7 +15,6 @@ import {
 } from '../../../common';
 import type { MedicationRequests } from '../../clinical/entities';
 import { PrescriberIdentityReader } from '../../clinical/services/prescriber-identity.reader';
-import type { PrescriberLicense } from '../../clinical/services/prescription-pdf.service';
 import { loadAgendaNoticesEnv } from '../../scheduling/infrastructure/config/agenda-notices.env';
 import { DELEG } from '../delegated_access.concepts';
 import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
@@ -26,10 +24,14 @@ import type {
   CreatePrescriptionShareDto,
   PrescriptionShareCreatedDto,
   PrescriptionShareOwnershipDto,
-  PrescriptionShareResourceType,
   PrescriptionShareSummaryDto,
   PublicPrescriptionShareDto,
 } from '../dto/prescription-shares.dto';
+import {
+  prescriptionNotFound,
+  shareGone,
+  shareNotFound,
+} from './prescription-share-errors';
 import {
   hashShareToken,
   isWellFormedShareToken,
@@ -37,13 +39,20 @@ import {
 } from './prescription-share-token';
 import {
   effectiveShareStatus,
+  shareEndedReason,
   shareExpiresAt,
-  type PrescriptionShareStatus,
 } from './prescription-share-expiry';
+import type {
+  PharmacyPrescriptionShare,
+  PrescriptionSharePrescriber,
+  PrescriptionShareUseContext,
+  ResolvedShare,
+} from './prescription-shares.types';
 import {
   activeItemsOf,
   earliestDate,
   itemsOfLink,
+  itemsSharedAtCreation,
   resourceIdsOf,
   sharesEncounter,
   shareResourceTypeOf,
@@ -52,54 +61,11 @@ import {
 /** Largo máximo del agente de usuario que se guarda en un uso. */
 const USER_AGENT_MAX_LENGTH = 512;
 
-/** Origen de un uso del enlace, para `shared_access_link_uses`. */
-export interface PrescriptionShareUseContext {
-  /** IP del cliente; si no es una IP válida, se guarda `null`. */
-  readonly sourceIp?: string | null;
-  /** Agente de usuario; se recorta a 512 caracteres. */
-  readonly userAgent?: string | null;
-}
-
-/** Quién emitió la receta compartida. */
-export interface PrescriptionSharePrescriber {
-  /** Perfil profesional del prescriptor, o `null` si la receta no lo tiene. */
-  readonly practitionerProfileId: string | null;
-  /** Nombre visible, o `null` si no se encuentra. */
-  readonly name: string | null;
-  /** Matrícula nacional, o `null` si no declaró. */
-  readonly license: PrescriberLicense | null;
-}
-
-/**
- * Lo que `openForPharmacy` le entrega a la pantalla de la farmacia (FAR-02).
- * Trae los ítems vigentes enteros: la proyección y el enmascarado del paciente
- * (S-4) los decide quien arma la respuesta HTTP.
- */
-export interface PharmacyPrescriptionShare {
-  readonly shareId: string;
-  /** Tenant custodio de la receta (`shared_access_links.tenant_id`). */
-  readonly tenantId: string;
-  readonly patientProfileId: string;
-  readonly resourceType: PrescriptionShareResourceType;
-  readonly resourceId: string;
-  /** Emisión más antigua de los ítems vigentes. */
-  readonly issuedAt: Date | null;
-  /** `valid_to` más próximo de los ítems vigentes, o `null` si no tienen. */
-  readonly validTo: Date | null;
-  /** Vencimiento del enlace. */
-  readonly expiresAt: Date;
-  readonly prescriber: PrescriptionSharePrescriber;
-  /** Ítems emitidos y vigentes (regla única de `prescription-validity.ts`). */
-  readonly items: readonly MedicationRequests[];
-}
-
-/** Un enlace con los ítems que comparte, ya clasificados. */
-interface ResolvedShare {
-  readonly link: SharedAccessLinks;
-  readonly activeItems: MedicationRequests[];
-  readonly allItems: MedicationRequests[];
-  readonly status: PrescriptionShareStatus;
-}
+export type {
+  PharmacyPrescriptionShare,
+  PrescriptionSharePrescriber,
+  PrescriptionShareUseContext,
+} from './prescription-shares.types';
 
 /**
  * Enlace compartido de una receta (FAR-01): el paciente, o la médica que la
@@ -151,7 +117,7 @@ export class PrescriptionSharesService {
         DELEG.SHARE_RESOURCE_PRESCRIPTION_ENCOUNTER
           ? await this.links.findItemsByEncounter(tx, target.resourceId)
           : await this.single(tx, target.resourceId);
-      if (items.length === 0) throw this.prescriptionNotFound();
+      if (items.length === 0) throw prescriptionNotFound();
 
       const patientProfileId = items[0].patientProfileId;
       const activeItems = activeItemsOf(items, now);
@@ -244,6 +210,7 @@ export class PrescriptionSharesService {
         createdAt: row.createdAt,
         expiresAt: row.expiresAt,
         status: effectiveShareStatus(row, activeCount, now),
+        endedReason: shareEndedReason(row, activeCount, now),
         uses: uses.get(row.id) ?? 0,
       };
     });
@@ -261,7 +228,7 @@ export class PrescriptionSharesService {
     await this.em.transactional(async (tx) => {
       const link = await this.links.findById(tx, shareId);
       if (!link || !this.ownsOrCreated(link, actor)) {
-        throw this.shareNotFound();
+        throw shareNotFound();
       }
       if (link.revokedAt || link.statusConceptId === CONCEPTS.STATE_REVOKED) {
         return;
@@ -299,7 +266,7 @@ export class PrescriptionSharesService {
   ): Promise<PrescriptionShareOwnershipDto> {
     const link = await this.findByToken(this.em.fork(), token);
     if (!link || !this.ownsOrCreated(link, actor)) {
-      throw this.shareNotFound();
+      throw shareNotFound();
     }
     return {
       shareId: link.id,
@@ -313,8 +280,9 @@ export class PrescriptionSharesService {
    * estado, cuándo y quién la emitió. Nada del paciente ni de los fármacos.
    * Un enlace revocado solo dice `REVOKED`.
    *
-   * Cada apertura deja un uso `OPEN` en `shared_access_link_uses` (S-4), como
-   * la de la farmacia: `DENIED` si el enlace venció o fue revocado (la vista
+   * Cada lectura deja un uso `PUBLIC_VIEW` en `shared_access_link_uses` (S-4),
+   * con su propia acción para que no cuente como apertura de farmacia:
+   * `DENIED` si el enlace venció o fue revocado (la vista
    * igual responde con su `status`), escrito antes de armar la respuesta;
    * `OPENED` si es válido, escrito al final, cuando la respuesta ya está
    * armada. Falla cerrada: si el uso no se puede escribir, la lectura no se
@@ -334,13 +302,14 @@ export class PrescriptionSharesService {
     const em = this.em.fork();
     const now = new Date();
     const resolved = await this.resolve(em, token, now);
-    if (!resolved) throw this.shareNotFound();
+    if (!resolved) throw shareNotFound();
     if (resolved.status !== 'VALID') {
       await this.recordUse(
         resolved.link.id,
         DELEG.SHARE_OUTCOME_DENIED,
         context,
         now,
+        DELEG.SHARE_ACTION_PUBLIC_VIEW,
       );
     }
     if (resolved.status === 'REVOKED') {
@@ -348,6 +317,7 @@ export class PrescriptionSharesService {
       // receta, solo que fue revocado.
       return {
         status: 'REVOKED',
+        endedReason: null,
         issuedAt: null,
         prescriberName: null,
         prescriberLicense: null,
@@ -361,6 +331,7 @@ export class PrescriptionSharesService {
     const prescriber = await this.prescriberOf(em, shown);
     const view: PublicPrescriptionShareDto = {
       status: resolved.status,
+      endedReason: resolved.endedReason,
       issuedAt: earliestDate(shown.map((item) => item.issuedAt)),
       prescriberName: prescriber.name,
       prescriberLicense: prescriber.license,
@@ -372,6 +343,7 @@ export class PrescriptionSharesService {
         DELEG.SHARE_OUTCOME_OPENED,
         context,
         now,
+        DELEG.SHARE_ACTION_PUBLIC_VIEW,
       );
     }
     return view;
@@ -407,7 +379,7 @@ export class PrescriptionSharesService {
     const em = this.em.fork();
     const now = new Date();
     const resolved = await this.resolve(em, token, now);
-    if (!resolved) throw this.shareNotFound();
+    if (!resolved) throw shareNotFound();
 
     if (resolved.status !== 'VALID') {
       await this.recordUse(
@@ -416,7 +388,7 @@ export class PrescriptionSharesService {
         context,
         now,
       );
-      throw this.gone(resolved.status);
+      throw shareGone(resolved.status, resolved.endedReason);
     }
     // El `OPENED` va al final: si el prescriptor o `prepare` fallan, no queda
     // una apertura que no ocurrió.
@@ -488,7 +460,7 @@ export class PrescriptionSharesService {
   ): void {
     if (actor.patientProfileId === patientProfileId) return;
     const practitionerProfileId = actor.practitionerProfileId;
-    if (!practitionerProfileId) throw this.prescriptionNotFound();
+    if (!practitionerProfileId) throw prescriptionNotFound();
     const considered = activeItems.length > 0 ? activeItems : allItems;
     const issuedAll = considered.every(
       (item) => item.prescriberProfileId === practitionerProfileId,
@@ -531,8 +503,12 @@ export class PrescriptionSharesService {
       : await this.single(em, link.resourceId);
     // Los ítems tienen que ser del mismo paciente del enlace: si no, no se
     // muestran (defensa ante un `resource_id` que no corresponde).
-    const ownItems = allItems.filter(
-      (item) => item.patientProfileId === link.patientProfileId,
+    // Y emitidos antes de compartir: lo emitido después no tiene consentimiento.
+    const ownItems = itemsSharedAtCreation(
+      link,
+      allItems.filter(
+        (item) => item.patientProfileId === link.patientProfileId,
+      ),
     );
     const activeItems = activeItemsOf(ownItems, now);
     return {
@@ -540,6 +516,7 @@ export class PrescriptionSharesService {
       activeItems,
       allItems: ownItems,
       status: effectiveShareStatus(link, activeItems.length, now),
+      endedReason: shareEndedReason(link, activeItems.length, now),
     };
   }
 
@@ -549,6 +526,7 @@ export class PrescriptionSharesService {
     outcomeConceptId: string,
     context: PrescriptionShareUseContext,
     now: Date,
+    actionConceptId: string = DELEG.SHARE_ACTION_OPEN,
   ): Promise<void> {
     const sourceIp =
       context.sourceIp && isIP(context.sourceIp) !== 0
@@ -560,7 +538,7 @@ export class PrescriptionSharesService {
     await this.em.fork().transactional(async (tx) => {
       this.links.appendUse(tx, {
         sharedAccessLinkId: linkId,
-        actionConceptId: DELEG.SHARE_ACTION_OPEN,
+        actionConceptId,
         outcomeConceptId,
         sourceIp,
         userAgent,
@@ -600,31 +578,5 @@ export class PrescriptionSharesService {
         actor.patientProfileId === link.patientProfileId) ||
       link.createdByUserId === actor.id
     );
-  }
-
-  private gone(status: PrescriptionShareStatus): GoneException {
-    const revoked = status === 'REVOKED';
-    const reason = revoked
-      ? DelegatedAccessErrorReason.PRESCRIPTION_SHARE_REVOKED
-      : DelegatedAccessErrorReason.PRESCRIPTION_SHARE_EXPIRED;
-    return new GoneException({
-      // Sin `code` propio para 410: PRECONDITION_FAILED es el más cercano, y
-      // el cliente distingue el caso por `reason` (como la URL de descarga
-      // vencida de `files.service.ts`).
-      code: ErrorCode.PRECONDITION_FAILED,
-      message: revoked
-        ? 'El paciente dejó de compartir esta receta.'
-        : 'Esta receta venció.',
-      reason,
-      details: { reason },
-    });
-  }
-
-  private prescriptionNotFound(): ResourceNotFoundException {
-    return new ResourceNotFoundException('Receta no encontrada');
-  }
-
-  private shareNotFound(): ResourceNotFoundException {
-    return new ResourceNotFoundException('Enlace no encontrado');
   }
 }

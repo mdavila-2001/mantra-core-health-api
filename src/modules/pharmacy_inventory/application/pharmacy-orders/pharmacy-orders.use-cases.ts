@@ -38,6 +38,13 @@ import {
   PharmacyOrderSubstitutionsRepository,
 } from '../../infrastructure/repositories';
 import { PrescriptionOrderGuard } from './prescription-order-guard';
+import {
+  PendingOrderLines,
+  entersPendingConfirmation,
+  noStockForAnyLine,
+  pendingLineData,
+  reservationLineWriter,
+} from './pending-order-lines';
 import { addressText } from '../../domain/address-text';
 import { isRetailList } from '../../domain/pricing/is-retail-list';
 import {
@@ -355,6 +362,7 @@ export class PharmacyOrdersUseCases {
     @Inject(PERSON_ACCOUNT_LINKS_PORT)
     private readonly accountLinks: PersonAccountLinksPort,
     private readonly prescriptionGuard: PrescriptionOrderGuard,
+    private readonly pendingLines: PendingOrderLines,
   ) {
     this.logger.setContext('PharmacyOrdersService');
   }
@@ -476,7 +484,12 @@ export class PharmacyOrdersUseCases {
         dto,
         actor,
         frozenPrices,
+        products,
       );
+      // Todas «No lo tengo» o sin unidades: 422 y la transacción no deja nada.
+      if (outOfStock === dto.lines.length) {
+        throw noStockForAnyLine(site.id, productIds);
+      }
 
       // El total congelado de cabecera, desde las líneas recién selladas.
       this.sealFrozenTotal(
@@ -956,7 +969,33 @@ export class PharmacyOrdersUseCases {
         linesByProduct.set(line.pharmacyProductId, list);
       }
 
-      let adjusted = 0;
+      // Lo «por confirmar» va primero: escribe la sede antes de que una
+      // liberación tome el libro, el orden de candados del «Lo tengo».
+      const pending = await this.pendingLines.resolveOnConfirm(
+        tx,
+        order,
+        lines,
+        adjustments,
+        { tenantId },
+        actor,
+      );
+      for (const { line, positions } of pending.toReserve) {
+        const candidates = positions
+          .filter((position) => num(position.availableQuantity) > 0)
+          .sort(comparePositions);
+        await this.reserveLineStock(
+          tx,
+          order,
+          candidates,
+          line.pharmacyProductId,
+          num(line.requestedQuantity),
+          actor,
+          line,
+          line,
+        );
+      }
+
+      let adjusted = pending.unavailable;
       for (const adjustment of adjustments) {
         const portions = linesByProduct.get(adjustment.productId);
         if (!portions) {
@@ -1000,7 +1039,13 @@ export class PharmacyOrdersUseCases {
       order.reservationStatusConceptId = target;
       order.confirmedAt = new Date();
       touch(order, actor.id);
-      this.sealFrozenTotal(order, lines);
+      if (pending.toReserve.length > 0) await tx.flush();
+      this.sealFrozenTotal(
+        order,
+        pending.toReserve.length > 0
+          ? await this.ordersRepo.findLinesByReservationIds(tx, [order.id])
+          : lines,
+      );
 
       await this.publishStaffEvent(tx, tenantId, order, {
         eventType:
@@ -2203,7 +2248,8 @@ export class PharmacyOrdersUseCases {
    * línea queda registrada con `reserved_quantity = 0` y sin asiento — no hay
    * nada que devolver después. Si alcanza, cada porción escribe su línea, su
    * `MV_RESERVE` y el recálculo de la posición, exactamente como la reserva de
-   * mostrador.
+   * mostrador. Un producto sin posición en la sede que el catálogo ofrece
+   * entra «por confirmar», sin reservar (`pending-order-lines.ts`).
    *
    * @returns Cuántas líneas quedaron sin stock.
    */
@@ -2213,6 +2259,7 @@ export class PharmacyOrdersUseCases {
     dto: CreatePharmacyOrderDto,
     actor: AuthenticatedUser,
     frozenPrices: ReadonlyMap<string, FrozenPrice>,
+    products: readonly PharmacyProductSnapshot[],
   ): Promise<number> {
     const locations = await this.inventoryReadRepo.findActiveLocationsBySites(
       tx,
@@ -2232,7 +2279,22 @@ export class PharmacyOrdersUseCases {
 
     let outOfStock = 0;
     for (const line of dto.lines) {
-      const candidates = (byProduct.get(line.productId) ?? [])
+      const held = byProduct.get(line.productId) ?? [];
+      const product = products.find((item) => item.id === line.productId);
+      if (entersPendingConfirmation(product, held)) {
+        this.reservationsRepo.createLine(
+          tx,
+          pendingLineData(
+            reservation,
+            line.productId,
+            line.quantity,
+            frozenPrices.get(line.productId),
+            actor.id,
+          ),
+        );
+        continue;
+      }
+      const candidates = held
         .filter((position) => num(position.availableQuantity) > 0)
         .sort(comparePositions);
       const reserved = await this.reserveLineStock(
@@ -2266,7 +2328,9 @@ export class PharmacyOrdersUseCases {
     quantity: number,
     actor: AuthenticatedUser,
     frozen?: FrozenPrice,
+    placeholder?: InventoryReservationLines,
   ): Promise<boolean> {
+    const writeLine = reservationLineWriter(this.reservationsRepo, placeholder);
     // Fase 1: bloquear las candidatas y releer su disponible ya con lock.
     const locked: InventoryStockPositions[] = [];
     for (const candidate of candidates) {
@@ -2292,7 +2356,7 @@ export class PharmacyOrdersUseCases {
 
     if (remaining > 0) {
       // Sin stock suficiente: la línea queda dicha, el pedido sigue en pie.
-      this.reservationsRepo.createLine(tx, {
+      writeLine(tx, {
         inventoryReservationId: reservation.id,
         pharmacyProductId: productId,
         requestedQuantity: String(quantity),
@@ -2307,7 +2371,7 @@ export class PharmacyOrdersUseCases {
 
     // Fase 3: escribir porciones con la contabilidad de UC-25-04.
     for (const { position, take } of portions) {
-      this.reservationsRepo.createLine(tx, {
+      writeLine(tx, {
         inventoryReservationId: reservation.id,
         pharmacyProductId: productId,
         inventoryLotId: position.inventoryLotId,

@@ -4,6 +4,7 @@ import {
   activeItemsOf,
   earliestDate,
   itemsOfLink,
+  itemsSharedAtCreation,
   resourceIdsOf,
   shareResourceTypeOf,
 } from './prescription-share-items';
@@ -74,5 +75,38 @@ describe('prescription-share-items', () => {
     const b = new Date('2026-10-01T00:00:00.000Z');
     expect(earliestDate([a, undefined, b, null])).toBe(b);
     expect(earliestDate([undefined])).toBeNull();
+  });
+
+  describe('lo compartido al crear el enlace', () => {
+    const createdAt = new Date('2026-10-20T10:00:00.000Z');
+    const before = new Date(createdAt.getTime() - 1);
+    const after = new Date(createdAt.getTime() + 1);
+
+    it('un enlace de encuentro deja fuera lo emitido después de crearlo', () => {
+      const items = [
+        row({ id: 'm1', issuedAt: before }),
+        row({ id: 'm2', issuedAt: after }),
+        row({ id: 'm3', issuedAt: createdAt }),
+        row({ id: 'm4', statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT }),
+      ];
+      const link = { ...encounterLink, createdAt };
+      expect(itemsSharedAtCreation(link, items).map((item) => item.id)).toEqual(
+        ['m1', 'm3', 'm4'],
+      );
+      expect(itemsOfLink(link, items).map((item) => item.id)).toEqual([
+        'm1',
+        'm3',
+        'm4',
+      ]);
+    });
+
+    it('el enlace de un solo ítem no cambia', () => {
+      const items = [
+        row({ id: 'm9', encounterId: undefined, issuedAt: after }),
+      ];
+      expect(
+        itemsOfLink({ ...itemLink, createdAt }, items).map((item) => item.id),
+      ).toEqual(['m9']);
+    });
   });
 });
