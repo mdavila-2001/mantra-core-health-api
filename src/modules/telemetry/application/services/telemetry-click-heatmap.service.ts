@@ -65,7 +65,10 @@ export class TelemetryClickHeatmapService {
     };
   }
 
-  async heatmap(query: ClickHeatmapQueryDto, tenantId: string | AnalyticsActorScope) {
+  async heatmap(
+    query: ClickHeatmapQueryDto,
+    tenantId: string | AnalyticsActorScope,
+  ) {
     const scope = this.scope(query, tenantId);
     const metric = query.metric ?? 'clicks';
     const platformMin =
@@ -74,25 +77,33 @@ export class TelemetryClickHeatmapService {
         : tenantId.minSample;
     const small = (subjects: number | undefined) =>
       platformMin !== undefined && (subjects ?? 0) < platformMin;
-    const [rawTotals, rawCells, rawElements, sizes, rawScroll, views] = await Promise.all([
-      this.repo.totals(scope),
-      this.repo.cells(scope),
-      this.repo.elements(scope),
-      this.repo.sizes(scope),
-      this.repo.scroll(scope),
-      this.repo.views(scope),
-    ]);
+    const [rawTotals, rawCells, rawElements, sizes, rawScroll, views] =
+      await Promise.all([
+        this.repo.totals(scope),
+        this.repo.cells(scope),
+        this.repo.elements(scope),
+        this.repo.sizes(scope),
+        this.repo.scroll(scope),
+        this.repo.views(scope),
+      ]);
     // Alcance plataforma: si la ruta entera tiene menos de `minSample` personas
     // no sale nada; si no, se suprimen las celdas y los elementos pequeños.
     const hidden = small(rawTotals.subjects) && rawTotals.clicks > 0;
     const totals = rawTotals;
     const cells = hidden ? [] : rawCells.filter((c) => !small(c.subjects));
-    const elements = hidden ? [] : rawElements.filter((e) => !small(e.subjects));
+    const elements = hidden
+      ? []
+      : rawElements.filter((e) => !small(e.subjects));
     const suppressedCells = rawCells.length - cells.length;
     const suppressedElements = rawElements.length - elements.length;
-    const scroll = small(rawScroll.subjects) && rawScroll.pages > 0 ? null : rawScroll;
+    const scroll =
+      small(rawScroll.subjects) && rawScroll.pages > 0 ? null : rawScroll;
     const value = (c: { clicks: number; rage?: number; dead?: number }) =>
-      metric === 'rage' ? (c.rage ?? 0) : metric === 'dead' ? (c.dead ?? 0) : c.clicks;
+      metric === 'rage'
+        ? (c.rage ?? 0)
+        : metric === 'dead'
+          ? (c.dead ?? 0)
+          : c.clicks;
     const shown =
       metric === 'scroll'
         ? []
@@ -181,9 +192,18 @@ export class TelemetryClickHeatmapService {
       grid: { columns: HEATMAP_COLUMNS, rows: HEATMAP_ROWS },
       metric,
       scope:
-        platformMin !== undefined || (typeof tenantId !== 'string' && tenantId.tenantId === undefined)
-          ? { level: 'platform', tenantId: null, minSample: platformMin ?? null }
-          : { level: 'tenant', tenantId: scope.tenantId ?? null, minSample: null },
+        platformMin !== undefined ||
+        (typeof tenantId !== 'string' && tenantId.tenantId === undefined)
+          ? {
+              level: 'platform',
+              tenantId: null,
+              minSample: platformMin ?? null,
+            }
+          : {
+              level: 'tenant',
+              tenantId: scope.tenantId ?? null,
+              minSample: null,
+            },
       views,
       totals: hidden
         ? {
