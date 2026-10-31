@@ -91,3 +91,64 @@ export enum ClinicalErrorReason {
   /** P40: `category` y `categoryConceptId` viajan juntos y no dicen lo mismo. */
   SERVICE_REQUEST_CATEGORY_MISMATCH = 'SERVICE_REQUEST_CATEGORY_MISMATCH',
 }
+
+/**
+ * Motivos del 422 `PRECONDITION_FAILED` de la orden de estudios con detalle
+ * (v4.2.80: muestra, componentes, modalidad, región, lateralidad, contraste).
+ *
+ * **Convención para lo nuevo (H2.S3.M2): el motivo viaja en `details.reason`**
+ * —nunca como tercer argumento de la excepción— junto con `details.field` (la
+ * propiedad del cuerpo que falla) y, en `POST /clinical/requisitions`,
+ * `details.itemIndex` (posición del renglón dentro de `items`, base 0). Así el
+ * cliente ramifica siempre en el mismo sitio. Los motivos anteriores del
+ * módulo (`ClinicalErrorReason`, tercer argumento) NO se migran: es una ruptura
+ * de contrato y la convención de `details.reason` ya la usan la antiduplicación
+ * (`DUPLICATE_STUDY_*`) y `diagnostics/specimen-catalogs.ts`.
+ */
+export const StudyDetailReason = {
+  /** V1: el estudio no pertenece a `service-request-code`. */
+  STUDY_NOT_IN_CATALOG: 'STUDY_NOT_IN_CATALOG',
+  /** V2: la categoría no es la familia que el catálogo da al estudio. */
+  SERVICE_REQUEST_CATEGORY_STUDY_MISMATCH:
+    'SERVICE_REQUEST_CATEGORY_STUDY_MISMATCH',
+  /** V3: muestra en una orden que no es de laboratorio/patología. */
+  SPECIMEN_NOT_ALLOWED_FOR_CATEGORY: 'SPECIMEN_NOT_ALLOWED_FOR_CATEGORY',
+  /** V3: la muestra no es de `specimen-type`. */
+  SPECIMEN_TYPE_NOT_IN_CATALOG: 'SPECIMEN_TYPE_NOT_IN_CATALOG',
+  /** V4: el estudio no es un panel desplegable y la orden trae componentes. */
+  COMPONENTS_NOT_SELECTABLE: 'COMPONENTS_NOT_SELECTABLE',
+  /** V4: un componente no pertenece al panel pedido. */
+  COMPONENT_NOT_IN_PANEL: 'COMPONENT_NOT_IN_PANEL',
+  /** V4 / D3: panel desplegable sin ningún componente marcado. */
+  COMPONENTS_EMPTY: 'COMPONENTS_EMPTY',
+  /** V5: campos de imagen en una orden que no es de imagen. */
+  IMAGING_FIELDS_NOT_ALLOWED: 'IMAGING_FIELDS_NOT_ALLOWED',
+  /** V5: imagen sin modalidad. */
+  MODALITY_REQUIRED: 'MODALITY_REQUIRED',
+  /** V6: la modalidad no es de `service-request-imaging-modality`. */
+  MODALITY_NOT_IN_CATALOG: 'MODALITY_NOT_IN_CATALOG',
+  /** V6: la modalidad no es la que el catálogo da al estudio. */
+  MODALITY_STUDY_MISMATCH: 'MODALITY_STUDY_MISMATCH',
+  /** V7: imagen sin región. */
+  BODY_SITE_REQUIRED: 'BODY_SITE_REQUIRED',
+  /** V7: la región no es de `imaging-body-structure`. */
+  BODY_SITE_NOT_IN_CATALOG: 'BODY_SITE_NOT_IN_CATALOG',
+  /** V8: la lateralidad no es de `condition-laterality`. */
+  LATERALITY_NOT_IN_CATALOG: 'LATERALITY_NOT_IN_CATALOG',
+  /** V8: lateralidad sin región. */
+  LATERALITY_REQUIRES_BODY_SITE: 'LATERALITY_REQUIRES_BODY_SITE',
+  /** V8: la región no admite lateralidad (estructura impar). */
+  LATERALITY_NOT_APPLICABLE: 'LATERALITY_NOT_APPLICABLE',
+  /** V9: el contraste no es de `imaging-contrast`. */
+  CONTRAST_NOT_IN_CATALOG: 'CONTRAST_NOT_IN_CATALOG',
+  /** V9: contraste sin modalidad. */
+  CONTRAST_REQUIRES_MODALITY: 'CONTRAST_REQUIRES_MODALITY',
+  /** V10: antiduplicación (se reutilizan los de `service-requests.service`). */
+  DUPLICATE_STUDY_DETECTED: 'DUPLICATE_STUDY_DETECTED',
+  /** Requisición: la misma `Idempotency-Key` con un cuerpo distinto. */
+  REQUISITION_IDEMPOTENCY_KEY_CONFLICT: 'REQUISITION_IDEMPOTENCY_KEY_CONFLICT',
+} as const;
+
+/** Uno de los motivos de {@link StudyDetailReason}. */
+export type StudyDetailReasonCode =
+  (typeof StudyDetailReason)[keyof typeof StudyDetailReason];

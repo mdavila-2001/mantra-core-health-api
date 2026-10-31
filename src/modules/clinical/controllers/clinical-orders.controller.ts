@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -16,14 +18,21 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ClinicalRecordAccessGuard } from '../guards';
-import { DiagnosticReportsService, ServiceRequestsService } from '../services';
+import {
+  DiagnosticReportsService,
+  RequisitionsService,
+  ServiceRequestReadService,
+  ServiceRequestsService,
+} from '../services';
 import {
   CheckDuplicateStudyDto,
   CreateDiagnosticReportDto,
+  CreateRequisitionDto,
   CreateServiceRequestDto,
   DiagnosticReportResponseDto,
   DuplicateStudyCheckResultDto,
   ReleaseDiagnosticReportDto,
+  RequisitionResponseDto,
   ServiceRequestResponseDto,
 } from '../dto';
 
@@ -52,6 +61,8 @@ export class ClinicalOrdersController {
   constructor(
     private readonly serviceRequestsService: ServiceRequestsService,
     private readonly diagnosticReportsService: DiagnosticReportsService,
+    private readonly requisitionsService: RequisitionsService,
+    private readonly serviceRequestReadService: ServiceRequestReadService,
   ) {}
 
   /**
@@ -93,6 +104,48 @@ export class ClinicalOrdersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ServiceRequestResponseDto> {
     return this.serviceRequestsService.create(dto, actor);
+  }
+
+  /**
+   * C4 (v4.2.80): N estudios pedidos juntos, un renglón de `service_requests`
+   * por estudio, todo o nada. `Idempotency-Key` opcional: repetirla devuelve la
+   * misma requisición (`replayed: true`); con otro contenido, 409.
+   */
+  @Audited({
+    action: 'REQUISITION_CREATED',
+    entity: 'service_request',
+    entityId: 'result.requisitionId',
+  })
+  @Post('requisitions')
+  @UseGuards(ClinicalRecordAccessGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear una requisición: varios estudios con su detalle, atómicos',
+  })
+  createRequisition(
+    @Body() dto: CreateRequisitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ): Promise<RequisitionResponseDto> {
+    return this.requisitionsService.create(
+      dto,
+      actor,
+      idempotencyKey?.trim() || undefined,
+    );
+  }
+
+  /**
+   * C5 (v4.2.80): una orden de servicio con su detalle. El paciente sale de la
+   * orden, así que la autorización de expediente la hace el servicio (el guard
+   * sólo mira `params.patientProfileId`).
+   */
+  @Get('service-requests/:id')
+  @ApiOperation({ summary: 'Leer una orden de servicio con su detalle' })
+  getServiceRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ServiceRequestResponseDto> {
+    return this.serviceRequestReadService.getById(id, actor);
   }
 
   /** UC-08-06. */
