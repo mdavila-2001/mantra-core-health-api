@@ -15,11 +15,13 @@ import { DelegatedAccessErrorReason as Reason } from '../delegated_access.error-
 import {
   awaitingPartyOf,
   buildSupportScope,
+  grantsOrganizationAccess,
   initiatorOf,
   mayDecide,
   scopeCoversPractitioner,
   targetKindOf,
   type SupportDecider,
+  type SupportParty,
   type SupportLinkRow,
   type SupportLinkStatus,
   type SupportTenantScope,
@@ -177,6 +179,7 @@ export class SupportStaffService {
         supportPersonId: personId,
         items: dto.items,
         actorUserId: actor.id,
+        initiatedBy: 'SUPPORT_STAFF',
       });
     });
     this.logger.info(
@@ -379,6 +382,8 @@ export class SupportStaffService {
         supportPersonId: secretary.personId,
         items: dto.items,
         actorUserId: actor.id,
+        // Sólo después de `assertOrganizationAdmin`, unas líneas arriba.
+        initiatedBy: 'ORGANIZATION',
       });
     });
     this.logger.info(
@@ -484,6 +489,7 @@ export class SupportStaffService {
           },
         ],
         actorUserId: actor.id,
+        initiatedBy: 'PRACTITIONER',
       });
       return { tenantId: role.tenantId, created: links };
     });
@@ -546,6 +552,12 @@ export class SupportStaffService {
       readonly supportPersonId: string;
       readonly items: readonly SupportTargetDto[];
       readonly actorUserId: string;
+      /**
+       * Quién inicia. Lo fija cada caso de uso tras su propia comprobación
+       * (`ORGANIZATION` sólo después de `assertOrganizationAdmin`), nunca el
+       * cliente.
+       */
+      readonly initiatedBy: SupportParty;
     },
   ): Promise<string[]> {
     const organizationName = await this.links.findOrganizationName(
@@ -603,15 +615,17 @@ export class SupportStaffService {
     const ids: string[] = [];
     for (const target of resolved) {
       if (target.kind === 'PRACTITIONER') {
-        const link = this.links.createPractitionerLink(tx, {
+        const link = await this.links.createPractitionerLink(tx, {
           practitionerRoleAssignmentId:
             target.practitionerRoleAssignmentId as string,
           supportPersonId: input.supportPersonId,
+          initiatedBy: input.initiatedBy,
           actorUserId: input.actorUserId,
         });
         ids.push(link.id);
       } else {
-        const link = this.links.createLocationLink(tx, {
+        const link = await this.links.createLocationLink(tx, {
+          tenantId: input.tenantId,
           tenantMembershipId: membership.id,
           practiceId: target.practiceId,
           // Sólo la columna más específica: así el vínculo nombra un único
@@ -625,6 +639,7 @@ export class SupportStaffService {
             : target.clinicalUnitId,
           careSpaceId: target.careSpaceId,
           accessScopeConceptId: target.accessScopeConceptId,
+          initiatedBy: input.initiatedBy,
           actorUserId: input.actorUserId,
         });
         ids.push(link.id);
@@ -929,18 +944,6 @@ function linkNotFound(): ResourceNotFoundException {
     undefined,
     Reason.SUPPORT_LINK_NOT_FOUND,
   );
-}
-
-/**
- * Si aceptar este vínculo abre el hospital (la membresía del tenant): sólo
- * cuando del lado del hospital hubo aprobación.
- */
-export function grantsOrganizationAccess(
-  link: SupportLinkRow,
-  decider: SupportDecider,
-): boolean {
-  if (link.kind === 'LOCATION') return true;
-  return decider.isOrganizationAdmin || initiatorOf(link) === 'ORGANIZATION';
 }
 
 /** Si el vínculo es con una vinculación del propio doctor. */

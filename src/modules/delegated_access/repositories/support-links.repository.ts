@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, createdBy, touch } from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
@@ -12,6 +13,7 @@ import type {
   SupportLinkKind,
   SupportLinkRow,
   SupportLinkStatus,
+  SupportParty,
 } from '../domain/support-links';
 
 /** Concepto de estado ↔ estado del vínculo, por tabla. */
@@ -34,6 +36,22 @@ export function statusConceptFor(
   status: SupportLinkStatus,
 ): string {
   return (kind === 'LOCATION' ? LOCATION_STATUS : PRACTITIONER_STATUS)[status];
+}
+
+/** Concepto ↔ parte que inició el vínculo. */
+const INITIATOR_CONCEPT: Readonly<Record<SupportParty, string>> = {
+  SUPPORT_STAFF: DELEG.INITIATOR_SUPPORT_STAFF,
+  ORGANIZATION: DELEG.INITIATOR_ORGANIZATION,
+  PRACTITIONER: DELEG.INITIATOR_PRACTITIONER,
+};
+
+/** La parte iniciadora de un concepto leído; `null` si falta o no es conocido. */
+function initiatorFromConcept(conceptId: string | null): SupportParty | null {
+  if (!conceptId) return null;
+  const found = (Object.keys(INITIATOR_CONCEPT) as SupportParty[]).find(
+    (party) => INITIATOR_CONCEPT[party] === conceptId,
+  );
+  return found ?? null;
 }
 
 /** El estado del vínculo para un concepto leído, o `null` si no es de este flujo. */
@@ -59,6 +77,7 @@ interface RawLinkRow {
   support_name: string | null;
   status_concept_id: string;
   created_by_user_id: string | null;
+  initiated_by_party_concept_id: string | null;
   created_at: Date | string;
   practice_site_id: string | null;
   clinical_unit_id: string | null;
@@ -149,7 +168,8 @@ export class SupportLinksRepository {
                 m.user_id AS support_user_id,
                 pal.person_id AS support_person_id,
                 COALESCE(per.display_name, u.display_name) AS support_name,
-                oua.status_concept_id, oua.created_by_user_id, oua.created_at,
+                oua.status_concept_id, oua.created_by_user_id,
+                oua.initiated_by_party_concept_id, oua.created_at,
                 oua.practice_site_id, oua.clinical_unit_id, oua.care_space_id,
                 NULL::uuid AS practitioner_role_assignment_id,
                 NULL::uuid AS practitioner_profile_id,
@@ -175,7 +195,8 @@ export class SupportLinksRepository {
                 sal.user_id AS support_user_id,
                 psa.support_profile_id AS support_person_id,
                 per.display_name AS support_name,
-                psa.status_concept_id, psa.created_by_user_id, psa.created_at,
+                psa.status_concept_id, psa.created_by_user_id,
+                psa.initiated_by_party_concept_id, psa.created_at,
                 pra.practice_site_id, NULL::uuid AS clinical_unit_id,
                 NULL::uuid AS care_space_id,
                 psa.practitioner_role_assignment_id,
@@ -220,6 +241,7 @@ export class SupportLinksRepository {
           supportName: row.support_name,
           status,
           createdByUserId: row.created_by_user_id,
+          initiatedBy: initiatorFromConcept(row.initiated_by_party_concept_id),
           createdAt: new Date(row.created_at),
           practiceSiteId: row.practice_site_id,
           clinicalUnitId: row.clinical_unit_id,
@@ -688,56 +710,108 @@ export class SupportLinksRepository {
     }
   }
 
-  /** Crea un vínculo de lugar `PENDING`. */
-  createLocationLink(
+  /**
+   * Si `organization_user_assignments` ya tiene `tenant_id` (modelo v4.2.79,
+   * NOT NULL + disparador de consistencia). Se resuelve una vez por proceso.
+   */
+  private locationTenantColumn?: Promise<boolean>;
+
+  private hasLocationTenantColumn(em: EntityManager): Promise<boolean> {
+    this.locationTenantColumn ??= em
+      .execute<{ n: string | number }[]>(
+        `SELECT count(*) AS n FROM information_schema.columns
+          WHERE table_schema = 'delegated_access'
+            AND table_name = 'organization_user_assignments'
+            AND column_name = 'tenant_id'`,
+      )
+      .then((rows) => Number(rows[0]?.n ?? 0) > 0);
+    return this.locationTenantColumn;
+  }
+
+  /**
+   * Crea un vínculo de lugar `PENDING`.
+   *
+   * Con SQL y no con la entidad: el modelo v4.2.79 agrega
+   * `organization_user_assignments.tenant_id` (NOT NULL) y la entidad todavía
+   * no lo mapea. Se escribe cuando la columna existe, así el alta funciona con
+   * el DDL de hoy y con el que viene.
+   */
+  async createLocationLink(
     em: EntityManager,
     data: {
+      readonly tenantId: string;
       readonly tenantMembershipId: string;
       readonly practiceId?: string;
       readonly practiceSiteId?: string;
       readonly clinicalUnitId?: string;
       readonly careSpaceId?: string;
       readonly accessScopeConceptId: string;
+      readonly initiatedBy: SupportParty;
       readonly actorUserId: string;
     },
-  ): OrganizationUserAssignments {
-    return em.create(
-      OrganizationUserAssignments,
-      {
-        tenantMembershipId: data.tenantMembershipId,
-        practiceId: data.practiceId,
-        practiceSiteId: data.practiceSiteId,
-        clinicalUnitId: data.clinicalUnitId,
-        careSpaceId: data.careSpaceId,
-        assignmentRoleConceptId: DELEG.ASSIGN_ROLE_SECRETARY,
-        accessScopeConceptId: data.accessScopeConceptId,
-        statusConceptId: LOCATION_STATUS.PENDING,
-        ...createdBy(data.actorUserId),
-      },
-      { partial: true },
+  ): Promise<{ id: string }> {
+    const id = randomUUID();
+    const now = new Date();
+    const row: Record<string, unknown> = {
+      id,
+      tenant_membership_id: data.tenantMembershipId,
+      practice_id: data.practiceId ?? null,
+      practice_site_id: data.practiceSiteId ?? null,
+      clinical_unit_id: data.clinicalUnitId ?? null,
+      care_space_id: data.careSpaceId ?? null,
+      assignment_role_concept_id: DELEG.ASSIGN_ROLE_SECRETARY,
+      access_scope_concept_id: data.accessScopeConceptId,
+      status_concept_id: LOCATION_STATUS.PENDING,
+      initiated_by_party_concept_id: INITIATOR_CONCEPT[data.initiatedBy],
+      created_at: now,
+      updated_at: now,
+      created_by_user_id: data.actorUserId,
+      updated_by_user_id: data.actorUserId,
+    };
+    if (await this.hasLocationTenantColumn(em)) row.tenant_id = data.tenantId;
+    const columns = Object.keys(row);
+    await em.execute(
+      `INSERT INTO delegated_access.organization_user_assignments
+         (${columns.join(', ')})
+       VALUES (${columns.map(() => '?').join(', ')})`,
+      Object.values(row),
     );
+    return { id };
   }
 
-  /** Crea un vínculo con un doctor `PENDING`. */
-  createPractitionerLink(
+  /** Crea un vínculo con un doctor `PENDING`, con quién lo inició. */
+  async createPractitionerLink(
     em: EntityManager,
     data: {
       readonly practitionerRoleAssignmentId: string;
       readonly supportPersonId: string;
+      readonly initiatedBy: SupportParty;
       readonly actorUserId: string;
     },
-  ): PractitionerSupportAssignments {
-    return em.create(
-      PractitionerSupportAssignments,
-      {
-        practitionerRoleAssignmentId: data.practitionerRoleAssignmentId,
-        supportProfileId: data.supportPersonId,
-        supportRoleConceptId: PRAC.SUPPORT_ROLE_SECRETARY,
-        statusConceptId: PRACTITIONER_STATUS.PENDING,
-        ...createdBy(data.actorUserId),
-      },
-      { partial: true },
+  ): Promise<{ id: string }> {
+    const id = randomUUID();
+    const now = new Date();
+    await em.execute(
+      `INSERT INTO practice.practitioner_support_assignments
+         (id, practitioner_role_assignment_id, support_profile_id,
+          support_role_concept_id, status_concept_id,
+          initiated_by_party_concept_id, created_at, updated_at,
+          created_by_user_id, updated_by_user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.practitionerRoleAssignmentId,
+        data.supportPersonId,
+        PRAC.SUPPORT_ROLE_SECRETARY,
+        PRACTITIONER_STATUS.PENDING,
+        INITIATOR_CONCEPT[data.initiatedBy],
+        now,
+        now,
+        data.actorUserId,
+        data.actorUserId,
+      ],
     );
+    return { id };
   }
 
   /**
