@@ -311,6 +311,12 @@ export class MappingResponseDto {
   externalProductCode!: string;
 
   /**
+   * Unidad del sistema externo que equivale a una del producto.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  externalUnitCode!: string | null;
+
+  /**
    * Valor de verification status mantenido por la instancia.
    */
   @ApiProperty({

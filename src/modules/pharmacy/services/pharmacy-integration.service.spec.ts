@@ -70,6 +70,8 @@ function build() {
   };
   const mappingsRepo = {
     findByConnectionAndProduct: mockFn(),
+    findInConnection: mockFn(),
+    remove: mockFn(),
     create: mockFn(),
   };
   const referencesRepo = {
@@ -254,6 +256,233 @@ describe('PharmacyIntegrationService', () => {
         id: 'map1',
         verificationStatus: PHARM.VERIFICATION_PENDING,
       });
+    });
+  });
+
+  describe('deshacer y corregir un vínculo', () => {
+    const ACTIVE_CONNECTION = {
+      id: 'conn1',
+      pharmacyId: 'ph1',
+      statusConceptId: PHARM.CONNECTION_ACTIVE,
+      supportsStockQuery: true,
+    };
+    const mapping = (extra: object = {}) => ({
+      id: 'map1',
+      pharmacyIntegrationConnectionId: 'conn1',
+      pharmacyProductId: 'pr1',
+      externalProductCode: 'ERP-0001',
+      externalUnitCode: 'BOX',
+      verificationStatusConceptId: PHARM.VERIFICATION_VERIFIED,
+      createdAt: new Date('2026-10-01T00:00:00Z'),
+      updatedAt: new Date('2026-10-01T00:00:00Z'),
+      ...extra,
+    });
+
+    it('deshace un vínculo, también con la conexión inactiva, y devuelve cómo estaba', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue({
+        ...ACTIVE_CONNECTION,
+        statusConceptId: 'inactive',
+      });
+      const row = mapping();
+      d.mappingsRepo.findInConnection.mockResolvedValue(row);
+
+      const res = await inTenant(() =>
+        d.service.unmapProduct('ph1', 'conn1', 'map1', actor),
+      );
+
+      expect(d.mappingsRepo.findInConnection).toHaveBeenCalledWith(
+        d.tx,
+        'conn1',
+        'map1',
+      );
+      expect(d.mappingsRepo.remove).toHaveBeenCalledWith(d.tx, row);
+      expect(d.tx.flush).toHaveBeenCalled();
+      expect(res).toMatchObject({
+        id: 'map1',
+        pharmacyProductId: 'pr1',
+        externalProductCode: 'ERP-0001',
+        externalUnitCode: 'BOX',
+      });
+    });
+
+    it('un vínculo de otra conexión responde 404 y no borra nada', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue(ACTIVE_CONNECTION);
+      d.mappingsRepo.findInConnection.mockResolvedValue(null);
+
+      const error = await rejection(
+        inTenant(() => d.service.unmapProduct('ph1', 'conn1', 'map9', actor)),
+      );
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.reason).toBe(
+        PharmacyErrorReason.EXTERNAL_MAPPING_NOT_AVAILABLE,
+      );
+      expect(d.mappingsRepo.remove).not.toHaveBeenCalled();
+    });
+
+    it('una conexión de otra farmacia responde 404 antes de buscar el vínculo', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue({
+        ...ACTIVE_CONNECTION,
+        pharmacyId: 'ph2',
+      });
+      const error = await rejection(
+        inTenant(() => d.service.unmapProduct('ph1', 'conn1', 'map1', actor)),
+      );
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(d.mappingsRepo.findInConnection).not.toHaveBeenCalled();
+    });
+
+    it('corrige el código y la unidad, y el vínculo vuelve a quedar sin verificar', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue(ACTIVE_CONNECTION);
+      const row = mapping();
+      d.mappingsRepo.findInConnection.mockResolvedValue(row);
+
+      const res = await inTenant(() =>
+        d.service.updateMapping(
+          'ph1',
+          'conn1',
+          'map1',
+          { externalProductCode: 'ERP-0002', externalUnitCode: null },
+          actor,
+        ),
+      );
+
+      expect(row.externalProductCode).toBe('ERP-0002');
+      expect(row.externalUnitCode).toBeUndefined();
+      expect(row.verificationStatusConceptId).toBe(PHARM.VERIFICATION_PENDING);
+      expect((row as any).updatedByUserId).toBe('admin-1');
+      expect(d.tx.flush).toHaveBeenCalled();
+      expect(res).toMatchObject({
+        externalProductCode: 'ERP-0002',
+        externalUnitCode: null,
+        verificationStatus: PHARM.VERIFICATION_PENDING,
+      });
+      expect(d.productsRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('pasa el vínculo a otro producto activo y libre', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue(ACTIVE_CONNECTION);
+      const row = mapping();
+      d.mappingsRepo.findInConnection.mockResolvedValue(row);
+      d.productsRepo.findById.mockResolvedValue({
+        id: 'pr2',
+        pharmacyId: 'ph1',
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+      });
+      d.mappingsRepo.findByConnectionAndProduct.mockResolvedValue(null);
+
+      await inTenant(() =>
+        d.service.updateMapping(
+          'ph1',
+          'conn1',
+          'map1',
+          { pharmacyProductId: 'pr2' },
+          actor,
+        ),
+      );
+
+      expect(row.pharmacyProductId).toBe('pr2');
+      expect(row.externalUnitCode).toBe('BOX');
+    });
+
+    it('no pasa el vínculo a un producto que ya tiene otro: 409 con motivo', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue(ACTIVE_CONNECTION);
+      const row = mapping();
+      d.mappingsRepo.findInConnection.mockResolvedValue(row);
+      d.productsRepo.findById.mockResolvedValue({
+        id: 'pr2',
+        pharmacyId: 'ph1',
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+      });
+      d.mappingsRepo.findByConnectionAndProduct.mockResolvedValue({
+        id: 'map2',
+      });
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.updateMapping(
+            'ph1',
+            'conn1',
+            'map1',
+            { pharmacyProductId: 'pr2' },
+            actor,
+          ),
+        ),
+      );
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(error.reason).toBe(
+        PharmacyErrorReason.EXTERNAL_MAPPING_PRODUCT_TAKEN,
+      );
+      expect(row.pharmacyProductId).toBe('pr1');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('no corrige sobre una conexión inactiva (las condiciones del alta)', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue({
+        ...ACTIVE_CONNECTION,
+        statusConceptId: 'inactive',
+      });
+      d.mappingsRepo.findInConnection.mockResolvedValue(mapping());
+      await expect(
+        inTenant(() =>
+          d.service.updateMapping(
+            'ph1',
+            'conn1',
+            'map1',
+            { externalProductCode: 'X' },
+            actor,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('una corrección sin campos responde 400 sin abrir transacción', async () => {
+      const d = build();
+      const error = await rejection(
+        inTenant(() =>
+          d.service.updateMapping('ph1', 'conn1', 'map1', {}, actor),
+        ),
+      );
+      expect(error.getStatus()).toBe(400);
+      expect(error.reason).toBe(
+        PharmacyErrorReason.EXTERNAL_MAPPING_EMPTY_UPDATE,
+      );
+      expect(d.connectionsRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('el alta duplicada dice el motivo y el vínculo que ya existe', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue(ACTIVE_CONNECTION);
+      d.productsRepo.findById.mockResolvedValue({
+        id: 'pr1',
+        pharmacyId: 'ph1',
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+      });
+      d.mappingsRepo.findByConnectionAndProduct.mockResolvedValue({
+        id: 'map1',
+      });
+      const error = await rejection(
+        inTenant(() =>
+          d.service.mapProduct(
+            'ph1',
+            'conn1',
+            { pharmacyProductId: 'pr1', externalProductCode: 'X' },
+            actor,
+          ),
+        ),
+      );
+      expect(error.reason).toBe(
+        PharmacyErrorReason.EXTERNAL_MAPPING_PRODUCT_TAKEN,
+      );
+      expect(error.details).toMatchObject({ mappingId: 'map1' });
     });
   });
 
