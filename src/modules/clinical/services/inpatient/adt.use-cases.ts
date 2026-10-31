@@ -602,10 +602,12 @@ export class DischargePatientUseCase {
           req.tenantId,
         );
       } else {
-        await this.access.assertCan(
+        // Sin cama no hay espacio sobre el que autorizar: nivel sede (la
+        // expansión parcial por unidad revelaría el estado del encuentro).
+        await this.access.assertSiteLevel(
           req.actor as never,
           'f3.adt.read',
-          { siteId: await siteOf(tx, encounterId) },
+          await siteOf(tx, encounterId),
           tx,
           req.tenantId,
         );

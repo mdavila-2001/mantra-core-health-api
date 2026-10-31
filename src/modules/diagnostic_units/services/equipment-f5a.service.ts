@@ -60,13 +60,26 @@ export class EquipmentF5aService {
       [equipment.diagnosticUnitSiteId],
       'all',
     );
-    await this.access.assertCan(
-      actor,
-      action,
-      { siteId: home.practice_site_id },
-      tx,
-      requireTenantId(),
-    );
+    // Revisión de seguridad F5a: un equipo ubicado se autoriza sobre SU sala
+    // (alcance UNIT/SPACE exacto); uno sin sala, sólo con roles de nivel
+    // sede. Nunca la expansión parcial de la sede para un recurso puntual.
+    if (equipment.careSpaceId) {
+      await this.access.assertCan(
+        actor,
+        action,
+        { careSpaceId: equipment.careSpaceId },
+        tx,
+        requireTenantId(),
+      );
+    } else {
+      await this.access.assertSiteLevel(
+        actor,
+        action,
+        home.practice_site_id,
+        tx,
+        requireTenantId(),
+      );
+    }
     return { equipment, home };
   }
 
@@ -164,6 +177,28 @@ export class EquipmentF5aService {
       scheduledStationName: equipment.stationName ?? null,
       spsLocation: space?.code ?? null,
     };
+  }
+
+  /**
+   * Mover el equipo a otra sala exige el permiso también sobre la sala de
+   * destino (403/404).
+   *
+   * @param tx - Contexto.
+   * @param actor - Actor.
+   * @param careSpaceId - Sala de destino.
+   */
+  async authorizeDestination(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    careSpaceId: string,
+  ): Promise<void> {
+    await this.access.assertCan(
+      actor,
+      'f5a.equipment.write',
+      { careSpaceId },
+      tx,
+      requireTenantId(),
+    );
   }
 
   /**

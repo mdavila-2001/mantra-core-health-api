@@ -154,13 +154,15 @@ export class DiagnosticEquipmentService {
       }
       // F5a (CONTRATO-F2-F5 §F5a): sala del equipo y datos DICOM.
       if (dto.careSpaceId !== undefined) {
-        equipment.careSpaceId = dto.careSpaceId
-          ? await this.assertRoom(
-              tx,
-              equipment.diagnosticUnitSiteId,
-              dto.careSpaceId,
-            )
-          : undefined;
+        if (dto.careSpaceId) {
+          await this.assertRoom(
+            tx,
+            equipment.diagnosticUnitSiteId,
+            dto.careSpaceId,
+          );
+          await this.f5a.authorizeDestination(tx, actor, dto.careSpaceId);
+        }
+        equipment.careSpaceId = dto.careSpaceId ?? undefined;
       }
       if (dto.aeTitle !== undefined) {
         equipment.aeTitle = dto.aeTitle

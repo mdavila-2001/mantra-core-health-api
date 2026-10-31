@@ -671,6 +671,31 @@ export class InfrastructureAccessService {
   }
 
   /**
+   * Exige `action` con roles de **nivel sede** (plataforma, admin, asignaciones
+   * TENANT/PRACTICE/SITE), sin la expansión parcial por unidad o espacio. Para
+   * acciones sobre un recurso puntual que no cuelga de un espacio (revisión de
+   * seguridad F5a): la expansión `partial` queda sólo para listados filtrados.
+   *
+   * @param actor - Actor.
+   * @param action - Acción registrada.
+   * @param siteId - Sede.
+   * @param tx - Contexto.
+   * @param tenantId - Tenant activo.
+   */
+  async assertSiteLevel(
+    actor: AuthenticatedUser,
+    action: string,
+    siteId: string,
+    tx: EntityManager,
+    tenantId: string,
+  ): Promise<{ target: ResolvedTarget; scope: ActorScope }> {
+    const target = await this.resolve(tx, { siteId }, tenantId);
+    const scope = await this.actorScope(tx, actor, target.site);
+    this.decide(action, this.siteLevelRoles(scope, target.site), false, scope);
+    return { target, scope };
+  }
+
+  /**
    * `true` si los roles alcanzan para la acción (sin lanzar).
    *
    * @param action - Acción registrada.

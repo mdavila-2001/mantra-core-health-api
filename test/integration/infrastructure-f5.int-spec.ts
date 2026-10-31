@@ -453,6 +453,60 @@ describe('Infraestructura F5 · integración', () => {
       .get(`/diagnostic-equipment/${equipment}`)
       .set(como(nurseE))
       .expect(403);
+    // Revisión de alcance F5a: un permiso de OTRA unidad de la misma sede no
+    // lee ni mueve el equipo; un permiso sobre SU sala sí lo lee; mover exige
+    // permiso de escritura (y sobre el destino).
+    const supOtraUnidad = await crearPersonal(
+      ctx,
+      orgA,
+      `F5SU-${tag}`,
+      DELEG.ASSIGN_ROLE_NURSE_SUPERVISOR,
+      { unit: planta.unit },
+    );
+    const leeOtra = await http()
+      .get(`/diagnostic-equipment/${equipment}`)
+      .set(como(supOtraUnidad));
+    expect([403, 404]).toContain(leeOtra.status);
+    const mueveOtra = await http()
+      .patch(`/diagnostic-equipment/${equipment}`)
+      .set(como(supOtraUnidad))
+      .send({ careSpaceId: room.body.id });
+    expect([403, 404]).toContain(mueveOtra.status);
+    const supSala = await crearPersonal(
+      ctx,
+      orgA,
+      `F5SS-${tag}`,
+      DELEG.ASSIGN_ROLE_NURSE_SUPERVISOR,
+      { space: room.body.id },
+    );
+    await http()
+      .get(`/diagnostic-equipment/${equipment}`)
+      .set(como(supSala))
+      .expect(200);
+    const room2 = await http()
+      .post(`/sites/${orgA.siteId}/care-spaces`)
+      .set(como(orgA))
+      .send({
+        code: `RX2-${tag}`,
+        name: 'Sala 2',
+        formCode: 'LOC_FORM_ROOM',
+        functionCode: 'SPACE_FN_IMAGING_ROOM',
+        parentSpaceId: planta.building,
+        activate: true,
+        areaM2: 25,
+      })
+      .expect(201);
+    await http()
+      .patch(`/diagnostic-equipment/${equipment}`)
+      .set(como(supSala))
+      .send({ careSpaceId: room2.body.id })
+      .expect(403);
+    const [quieto] = await q(
+      'select care_space_id from diagnostic_units.diagnostic_equipment where id = ?',
+      [equipment],
+    );
+    expect(quieto.care_space_id).toBe(room.body.id);
+
     const evs = await q(
       `select event_type from messaging.domain_events where aggregate_id = ? order by occurred_at`,
       [equipment],
