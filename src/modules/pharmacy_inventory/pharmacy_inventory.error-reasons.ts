@@ -81,4 +81,16 @@ export enum PharmacyInventoryErrorReason {
   PHARMACY_INTEGRATION_UNAVAILABLE = 'PHARMACY_INTEGRATION_UNAVAILABLE',
   /** La conexión no está activa o no admite consultar stock. */
   PHARMACY_INTEGRATION_CONNECTION_INACTIVE = 'PHARMACY_INTEGRATION_CONNECTION_INACTIVE',
+  /** F5c: el espacio o la unidad no son de la sede de práctica de la sede de farmacia. */
+  STOCK_POINT_SITE_MISMATCH = 'STOCK_POINT_SITE_MISMATCH',
+  /** F5c: la función del espacio no tiene perfil `stockPoint` o el espacio no está activo. */
+  SPACE_NOT_STOCK_POINT = 'SPACE_NOT_STOCK_POINT',
+  /** F5c: un botiquín (`WARD_STOCK`) exige su unidad clínica. */
+  WARD_STOCK_REQUIRES_UNIT = 'WARD_STOCK_REQUIRES_UNIT',
+  /** F5c: la unidad ya tiene un botiquín activo. */
+  WARD_STOCK_ALREADY_EXISTS = 'WARD_STOCK_ALREADY_EXISTS',
+  /** F5c: retiro o dispensa desde un botiquín sin `available_quantity` suficiente. */
+  INSUFFICIENT_AVAILABLE_STOCK = 'INSUFFICIENT_AVAILABLE_STOCK',
+  /** F5c: la reserva indicada para dispensar desde un botiquín no está confirmada o venció. */
+  RESERVATION_NOT_ACTIVE = 'RESERVATION_NOT_ACTIVE',
 }

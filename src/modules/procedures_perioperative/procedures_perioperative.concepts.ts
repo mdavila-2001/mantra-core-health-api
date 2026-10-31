@@ -43,6 +43,58 @@ import { defineModuleConcepts } from '../../common/seed/concept-seed';
  */
 export const { seeds: PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS, ids: PERIOP } =
   defineModuleConcepts('procedures_perioperative', {
+    // --- F4 quirófanos (CONTRATO-F2-F5 §F4.2). `ORB_ACTIVE`, `ORB_OWNER_SERVICE`
+    // y `ORB_OWNER_SURGEON` los fija el modelo por literal («Desvíos» M-F4). ---
+    ORB_OWNER_SERVICE: {
+      code: 'ORB_OWNER_SERVICE',
+      display: 'Bloque de un servicio',
+    },
+    ORB_OWNER_SURGEON: {
+      code: 'ORB_OWNER_SURGEON',
+      display: 'Bloque de un cirujano',
+    },
+    ORB_ACTIVE: { code: 'ORB_ACTIVE', display: 'Bloque activo' },
+    ORB_RELEASED: { code: 'ORB_RELEASED', display: 'Bloque liberado' },
+    ORB_CANCELLED: { code: 'ORB_CANCELLED', display: 'Bloque cancelado' },
+    OR_EVENT_PATIENT_IN_ROOM: {
+      code: 'OR_EVENT_PATIENT_IN_ROOM',
+      display: 'Paciente en sala',
+    },
+    OR_EVENT_ANESTHESIA_START: {
+      code: 'OR_EVENT_ANESTHESIA_START',
+      display: 'Inicio de anestesia',
+    },
+    OR_EVENT_INCISION: { code: 'OR_EVENT_INCISION', display: 'Incisión' },
+    OR_EVENT_CLOSURE: { code: 'OR_EVENT_CLOSURE', display: 'Cierre' },
+    OR_EVENT_PATIENT_OUT_OF_ROOM: {
+      code: 'OR_EVENT_PATIENT_OUT_OF_ROOM',
+      display: 'Paciente fuera de sala',
+    },
+    OR_EVENT_CLEANUP_START: {
+      code: 'OR_EVENT_CLEANUP_START',
+      display: 'Inicio de limpieza de sala',
+    },
+    OR_EVENT_CLEANUP_END: {
+      code: 'OR_EVENT_CLEANUP_END',
+      display: 'Fin de limpieza de sala',
+    },
+    OR_EVENT_ROOM_READY: { code: 'OR_EVENT_ROOM_READY', display: 'Sala lista' },
+    MILESTONE_PATIENT_IN_ROOM: {
+      code: 'MILESTONE_PATIENT_IN_ROOM',
+      display: 'Hito: paciente en sala',
+    },
+    MILESTONE_INCISION: {
+      code: 'MILESTONE_INCISION',
+      display: 'Hito: incisión',
+    },
+    MILESTONE_PATIENT_OUT_OF_ROOM: {
+      code: 'MILESTONE_PATIENT_OUT_OF_ROOM',
+      display: 'Hito: paciente fuera de sala',
+    },
+    SSC_RESPONSE_CHECK: {
+      code: 'SSC_RESPONSE_CHECK',
+      display: 'Ítem OMS de verificación',
+    },
     // --- respuesta del integrante a su participación (spec 164) --------------
     // El catálogo transversal ya trae los dos estados del camino feliz
     // (`CONCEPTS.TEAM_ASSIGNED` y `CONCEPTS.TEAM_ACCEPTED`), pero la

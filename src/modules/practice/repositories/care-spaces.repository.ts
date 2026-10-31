@@ -143,6 +143,10 @@ export class CareSpacesRepository {
         operationalStatusConceptId: data.operationalStatusConceptId,
         statusConceptId: data.statusConceptId,
         tenantId: data.tenantId,
+        // F2: `ops_version` es NOT NULL con DEFAULT 1 en la base (lo pone el
+        // patch, `gen_entities` no emite ese default). Sin valor, MikroORM
+        // rechaza el insert («Value for CareSpaces.opsVersion is required»).
+        opsVersion: 1,
         formConceptId: data.formConceptId,
         description: data.description,
         floorNumber: data.floorNumber,

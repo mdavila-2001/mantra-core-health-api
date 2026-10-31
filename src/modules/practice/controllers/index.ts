@@ -11,3 +11,4 @@ export * from './infrastructure-catalog.controller';
 export * from './organization-practices.controller';
 export * from './practice-invitations.controller';
 export * from './practitioner-invitations.controller';
+export * from './care-space-ops.controller';

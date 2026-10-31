@@ -8,7 +8,7 @@ import {
 import { OPS_READ_ROLES } from './ops-console.controller';
 
 /**
- * Sonda de vida de instancias: API, 25 workers, bases y servicios auxiliares.
+ * Sonda de vida de instancias: API, 26 workers, bases y servicios auxiliares.
  * Sólo lectura; nunca escribe en Redis ni audita.
  */
 @ApiTags('ops-console')

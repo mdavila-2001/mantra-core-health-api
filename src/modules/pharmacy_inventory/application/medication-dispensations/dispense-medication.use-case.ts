@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   touch,
   type AuthenticatedUser,
@@ -17,6 +18,11 @@ import {
   MovementResponseDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import {
+  HeldByKey,
+  wardStockCovers,
+} from '../../domain/stock-points/ward-stock-dispense';
+import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
@@ -101,8 +107,13 @@ export class DispenseMedicationUseCase {
         dto.patientProfileId,
         dto.medicationRequestId,
       );
+      // F5c: un botiquín sólo entrega lo disponible (no lo reservado por otros).
+      const wardStock = new Set<string>();
+      let held = new HeldByKey([]);
       for (const line of dto.lines) {
-        await this.scope.requireStockKey(tx, site, line);
+        const location = await this.scope.requireStockKey(tx, site, line);
+        if (location?.locationTypeConceptId === PINV.LOCATION_TYPE_WARD_STOCK)
+          wardStock.add(line.inventoryLocationId);
       }
 
       if (dto.inventoryReservationId) {
@@ -126,6 +137,38 @@ export class DispenseMedicationUseCase {
           throw new PreconditionFailedException(
             'La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense',
             { reservationId: dto.inventoryReservationId },
+          );
+        }
+        // F5c: para un botiquín, la reserva sólo suma lo que ella misma
+        // retiene en esa ubicación, producto y lote, y sólo si está vigente.
+        if (wardStock.size > 0) {
+          const vigente =
+            reservation.reservationStatusConceptId ===
+              PINV.RESERVATION_CONFIRMED &&
+            new Date(reservation.expiresAt).getTime() > Date.now();
+          if (!vigente)
+            throw new PreconditionFailedException(
+              'La reserva no está vigente',
+              { reservationId: reservation.id },
+              PharmacyInventoryErrorReason.RESERVATION_NOT_ACTIVE,
+            );
+          const lines = await this.reservationsRepo.findLinesByReservation(
+            tx,
+            reservation.id,
+          );
+          held = new HeldByKey(
+            lines
+              .filter(
+                (l) =>
+                  !!l.inventoryLocationId &&
+                  l.statusConceptId === PINV.RES_LINE_CONFIRMED,
+              )
+              .map((l) => ({
+                inventoryLocationId: l.inventoryLocationId!,
+                pharmacyProductId: l.pharmacyProductId,
+                inventoryLotId: l.inventoryLotId ?? null,
+                held: num(l.reservedQuantity) - num(l.fulfilledQuantity),
+              })),
           );
         }
       }
@@ -152,6 +195,32 @@ export class DispenseMedicationUseCase {
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
         });
+        if (
+          wardStock.has(line.inventoryLocationId) &&
+          !wardStockCovers(
+            position ? num(position.availableQuantity) : 0,
+            held.of(line),
+            line.dispensedQuantity,
+          )
+        ) {
+          throw new ConflictException(
+            'Stock disponible insuficiente en el botiquín',
+            {
+              productId: line.pharmacyProductId,
+              available: position ? num(position.availableQuantity) : 0,
+              heldByReservation: held.of(line),
+              requested: line.dispensedQuantity,
+            },
+            PharmacyInventoryErrorReason.INSUFFICIENT_AVAILABLE_STOCK,
+          );
+        }
+        // En un botiquín, sólo se libera lo que esta reserva retenía para la clave.
+        const releasedFromReservation = Math.min(
+          held.of(line),
+          line.dispensedQuantity,
+        );
+        if (wardStock.has(line.inventoryLocationId))
+          held.consume(line, line.dispensedQuantity);
         if (
           !position ||
           num(position.onHandQuantity) < line.dispensedQuantity
@@ -198,7 +267,14 @@ export class DispenseMedicationUseCase {
           num(position.onHandQuantity) - line.dispensedQuantity,
         );
         // Si la reserva cubría este lote, se libera al dispensar.
-        if (
+        if (wardStock.has(line.inventoryLocationId)) {
+          position.reservedQuantity = String(
+            Math.max(
+              0,
+              num(position.reservedQuantity) - releasedFromReservation,
+            ),
+          );
+        } else if (
           dto.inventoryReservationId &&
           num(position.reservedQuantity) >= line.dispensedQuantity
         ) {
