@@ -307,7 +307,16 @@ export class SqlSink {
     this.cells.clear();
     this.hashesByMinute.clear();
     this.statements.clear();
-    const horizon = Date.now() - SEQ_MEMORY_MINUTES * MINUTE_MS;
+    // El horizonte se mide contra el minuto más nuevo de los datos, no contra
+    // el reloj: con `Date.now()` un minuto de muestras viejas (o de un reloj
+    // atrasado) se olvidaba en el mismo drenaje que le daba su `flushSeq`, el
+    // siguiente volcado de ese minuto volvía a 1 y `ON CONFLICT DO NOTHING`
+    // descartaba en silencio filas nuevas como si fueran un reintento.
+    let newest = Number.NEGATIVE_INFINITY;
+    for (const minute of this.seqByMinute.keys()) {
+      if (minute > newest) newest = minute;
+    }
+    const horizon = newest - SEQ_MEMORY_MINUTES * MINUTE_MS;
     for (const minute of this.seqByMinute.keys()) {
       if (minute < horizon) this.seqByMinute.delete(minute);
     }
