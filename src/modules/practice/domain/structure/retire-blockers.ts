@@ -63,8 +63,8 @@ export const NEXT_ACTION: Readonly<Record<BlockerKind, NextAction>> = {
       'Dar de baja el recurso de agenda o el horario que usa este espacio.',
   },
   INVENTORY_LOCATION: {
-    label:
-      'Trasladar el stock y cerrar la ubicación de inventario del espacio.',
+    label: 'Transferir el stock o reubicar el depósito',
+    route: '?tab=stock',
   },
   EQUIPMENT: {
     label: 'Reubicar los equipos que están instalados en el espacio.',
@@ -82,16 +82,11 @@ export const NEXT_ACTION: Readonly<Record<BlockerKind, NextAction>> = {
 };
 
 /**
- * Bloqueos del espacio que F1 no puede verificar: `pharmacy_inventory.
- * inventory_locations` y `diagnostic_units.diagnostic_equipment` todavía no
- * tienen `care_space_id` (PLAN §5, franja F5). Se informan como no
+ * Bloqueos del espacio que todavía no se verifican. `INVENTORY_LOCATION` se
+ * verifica desde F5c; `EQUIPMENT` queda para F5f. Se informan como no
  * verificables, nunca como cero.
  */
 export const UNVERIFIABLE_SPACE_CHECKS: readonly UnverifiableCheck[] = [
-  {
-    kind: 'INVENTORY_LOCATION',
-    why: 'pharmacy_inventory.inventory_locations no tiene care_space_id (F5)',
-  },
   {
     kind: 'EQUIPMENT',
     why: 'diagnostic_units.diagnostic_equipment no tiene care_space_id (F5)',

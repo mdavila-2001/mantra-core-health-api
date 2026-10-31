@@ -31967,6 +31967,159 @@
         "description": "Aplicar bloqueos programados y avisar vencidos (worker). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/care-spaces/{id}/stock": {
+      "get": {
+        "operationId": "SpaceAssetsController_stock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stock ubicado en un espacio (F5c)",
+        "tags": [
+          "practice-infrastructure"
+        ],
+        "description": "Stock ubicado en un espacio (F5c). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}/equipment": {
+      "get": {
+        "operationId": "SpaceAssetsController_spaceEquipment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Equipos ubicados en un espacio (F5a)",
+        "tags": [
+          "practice-infrastructure"
+        ],
+        "description": "Equipos ubicados en un espacio (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/diagnostic-equipment": {
+      "get": {
+        "operationId": "SpaceAssetsController_siteEquipment",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Equipos diagnósticos de una sede (F5a)",
+        "tags": [
+          "practice-infrastructure"
+        ],
+        "description": "Equipos diagnósticos de una sede (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/search/{index}/documents": {
       "post": {
         "description": "El servidor sella el documento con el `tenantId` del contexto; el del cuerpo se ignora.",
@@ -82378,6 +82531,76 @@
         "description": "Crear una ubicación de inventario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/pharmacy/inventory-locations/{id}/relocate": {
+      "post": {
+        "operationId": "PharmacyInventoryController_relocateLocation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelocateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reubicar una ubicación de inventario (F5c)",
+        "tags": [
+          "pharmacy-inventory"
+        ],
+        "description": "Reubicar una ubicación de inventario (F5c). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/pharmacy/{pharmacyId}/reservations": {
       "post": {
         "operationId": "PharmacyInventoryController_reserve",
@@ -111581,6 +111804,10 @@
     {
       "name": "practice",
       "description": "Operaciones del dominio funcional practice. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "practice-infrastructure",
+      "description": "Operaciones del dominio funcional practice infrastructure. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "practice-operations",
@@ -159244,11 +159471,43 @@
           "controlledAccess": {
             "type": "boolean",
             "description": "Requiere acceso controlado"
+          },
+          "careSpaceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Espacio físico (F5c)"
+          },
+          "clinicalUnitId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unidad clínica (F5c)"
+          },
+          "locationTypeCode": {
+            "type": "string",
+            "enum": [
+              "SHELF",
+              "WARD_STOCK"
+            ],
+            "default": "SHELF"
           }
         },
         "required": [
           "code",
           "name"
+        ],
+        "additionalProperties": false
+      },
+      "RelocateLocationDto": {
+        "type": "object",
+        "properties": {
+          "careSpaceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Espacio destino"
+          }
+        },
+        "required": [
+          "careSpaceId"
         ],
         "additionalProperties": false
       },

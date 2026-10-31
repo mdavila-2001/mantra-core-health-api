@@ -41,6 +41,10 @@ import * as entities from './entities';
 import { ApproveInventoryCountUseCase } from './application/inventory-count/approve-inventory-count.use-case';
 import { OpenInventoryCountUseCase } from './application/inventory-count/open-inventory-count.use-case';
 import { CreateInventoryLocationUseCase } from './application/inventory-locations/create-inventory-location.use-case';
+import { RelocateInventoryLocationUseCase } from './application/inventory-locations/relocate-inventory-location.use-case';
+import { StockPointGuard } from './application/inventory-locations/stock-point-guard';
+import { CARE_SPACE_STOCK_POINT_PORT } from './application/ports/care-space-stock-point.port';
+import { PracticeCareSpaceStockPointAdapter } from './infrastructure/adapters/practice-care-space-stock-point.adapter';
 import { CreateRecallHoldUseCase } from './application/inventory-recall/create-recall-hold.use-case';
 import { ReleaseRecallHoldUseCase } from './application/inventory-recall/release-recall-hold.use-case';
 import { ReserveInventoryUseCase } from './application/inventory-reservations/reserve-inventory.use-case';
@@ -228,6 +232,13 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     OpenInventoryCountUseCase,
     ApproveInventoryCountUseCase,
     CreateInventoryLocationUseCase,
+    RelocateInventoryLocationUseCase,
+    StockPointGuard,
+    PracticeCareSpaceStockPointAdapter,
+    {
+      provide: CARE_SPACE_STOCK_POINT_PORT,
+      useExisting: PracticeCareSpaceStockPointAdapter,
+    },
     CreateRecallHoldUseCase,
     ReleaseRecallHoldUseCase,
     ReserveInventoryUseCase,

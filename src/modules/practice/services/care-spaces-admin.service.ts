@@ -1267,6 +1267,11 @@ export class CareSpacesAdminService {
         ext.schedulableResources.sampleIds,
         ext.schedulableResources.count,
       ),
+      blocker(
+        'INVENTORY_LOCATION',
+        ext.inventoryLocations.sampleIds,
+        ext.inventoryLocations.count,
+      ),
     ].filter((b): b is Blocker => b !== null);
   }
 

@@ -45,6 +45,8 @@ channels:
         $ref: '#/components/messages/OperatingRoomEvent'
       spaceBillingEvent:
         $ref: '#/components/messages/SpaceBillingEvent'
+      spaceIntegrationEvent:
+        $ref: '#/components/messages/SpaceIntegrationEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -211,6 +213,18 @@ components:
         del paciente.
       payload:
         $ref: '#/components/schemas/SpaceBillingEventPayload'
+
+    SpaceIntegrationEvent:
+      name: SpaceIntegrationEvent
+      title: Integración de espacios (F5a, F5b, F5c, F5d, F5f, F5g)
+      summary: >
+        Hechos de los módulos que se ligan a un espacio físico (CONTRATO-F2-F5 §F5):
+        ubicaciones de inventario ubicadas o reubicadas (botiquín por unidad), y los de
+        las demás subfranjas a medida que se suman. Se publican en la misma transacción.
+        El payload lleva ids de la ubicación, el espacio y la unidad; nunca datos del
+        paciente.
+      payload:
+        $ref: '#/components/schemas/SpaceIntegrationEventPayload'
 
     OutboxMessage:
       name: OutboxMessage
@@ -495,6 +509,29 @@ components:
           enum:
             - billing.space_tariffs
             - billing.charge_captures
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+
+    SpaceIntegrationEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - pharmacy_inventory.location.located
+            - pharmacy_inventory.location.relocated
+        aggregateType:
+          type: string
+          enum:
+            - pharmacy_inventory.inventory_locations
         aggregateId:
           type: string
           format: uuid
