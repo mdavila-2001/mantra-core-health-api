@@ -38,6 +38,8 @@ const REDACT_PATHS = [
   'req.body.refreshToken',
   'req.body.secret',
   'req.body.otp',
+  // «Admisión crea el vínculo»: el número del documento nunca va a los logs.
+  'req.body.identityVerification',
 ];
 
 export {

@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 25 · schema pharmacy_inventory
+-- SALUD v4.2.68 · módulo 25 · schema pharmacy_inventory
 -- Generado de diagram_25_pharmacy_inventory.puml — NO editar a mano.
 
 
@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS "pharmacy_inventory"."inventory_locations" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
+    "clinical_unit_id" uuid,
     CONSTRAINT "pk_inventory_locations" PRIMARY KEY ("id")
 );
 

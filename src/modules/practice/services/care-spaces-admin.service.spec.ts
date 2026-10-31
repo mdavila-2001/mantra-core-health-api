@@ -95,6 +95,8 @@ function build(opts: { typology?: string; siteStatus?: string } = {}) {
       futureProcedures: zero,
       futureBookings: zero,
       schedulableResources: zero,
+      inventoryLocations: zero,
+      equipment: zero,
     }),
   };
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
@@ -670,6 +672,8 @@ describe('CareSpacesAdminService', () => {
         futureProcedures: { count: 0, sampleIds: [] },
         futureBookings: { count: 7, sampleIds: ['b1', 'b2', 'b3', 'b4', 'b5'] },
         schedulableResources: { count: 0, sampleIds: [] },
+        inventoryLocations: { count: 2, sampleIds: ['l1', 'l2'] },
+        equipment: { count: 1, sampleIds: ['eq1'] },
       });
       const err: any = await d.service
         .changeLifecycle(
@@ -686,15 +690,17 @@ describe('CareSpacesAdminService', () => {
       expect(kinds).toEqual([
         ['ACTIVE_CHILDREN', 1],
         ['FUTURE_BOOKING', 7],
+        ['INVENTORY_LOCATION', 2],
+        ['EQUIPMENT', 1],
       ]);
+      expect(err.details.blockers[2].nextAction.label).toBe(
+        'Transferir el stock o reubicar el depósito',
+      );
       expect(err.details.blockers[0].nextAction).toEqual({
         label: expect.stringMatching(/hijos/),
         route: '?tab=children',
       });
-      expect(err.details.unverifiable.map((u: any) => u.kind)).toEqual([
-        'INVENTORY_LOCATION',
-        'EQUIPMENT',
-      ]);
+      expect(err.details.unverifiable).toEqual([]);
       expect(d.spaces.find((s) => s.id === parent.id).statusConceptId).toBe(
         PRAC.SPACE_PLANNED,
       );

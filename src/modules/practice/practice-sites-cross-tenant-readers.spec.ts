@@ -21,6 +21,24 @@ import { join, relative, sep } from 'node:path';
  * mdavila-2001/mantra-core-health-api#1167.
  */
 const KNOWN_READERS: Record<string, string> = {
+  'billing/services/space-charges.service.ts':
+    'F5e: zona horaria y práctica de la sede del encuentro, dentro del tenant (las sedes se autorizan antes con scopeFilter); en el worker, con app.system_context en su transacción.',
+  'accounting/services/space-accounting.service.ts':
+    'F5f: práctica del espacio o de la unidad que se liga (JOIN por practice_site_id), comparada con el tenant activo y la práctica del activo o del centro de costo (404 / 422).',
+  'diagnostic_units/services/equipment-f5a.service.ts':
+    'F5a: sede de práctica y zona horaria de la sede de la unidad de un equipo ya acotado al tenant (DiagnosticUnitScopeService); la sede se autoriza enseguida con assertCan.',
+  'scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts':
+    'R0/F5d: práctica de la sede de un espacio (LEFT JOIN por practice_site_id) para comparar con la práctica del recurso; el tenant del espacio se compara con el del recurso antes (404).',
+  'clinical/services/inpatient/adt.use-cases.ts':
+    'Admisión crea el vínculo: sólo el TIPO PracticeSites de la sede ya resuelta por assertCan (tenant comprobado) para decidir el permiso de ingreso a nivel sede; no consulta la tabla.',
+  'delegated_access/services/assignment-targets.ts':
+    'F5g: comprueba que la sede de una asignación sea del tenant de la membresía (compara tenant_id; 404 si no).',
+  'clinical/services/inpatient/inpatient-read.use-cases.ts':
+    'F3: sede de la sucursal de un encuentro sin movimientos (filtra por tenant_id del tenant activo) para autorizar la ficha de estancia.',
+  'clinical/repositories/inpatient.repository.ts':
+    'F3: sitesWithBeds para el tick del censo (worker, abre app.system_context dentro de su transacción: ve todas las sedes a propósito).',
+  'clinical/services/inpatient/census.use-cases.ts':
+    'F3: lee tenant_id y time_zone de la sede en el cierre del worker (contexto SYSTEM en la transacción); en la ruta HTTP la sede se resuelve por el evaluador de §0.3, dentro del tenant.',
   'community/repositories/public-search.repository.ts':
     'Búsqueda pública de profesionales: une practice_sites con practices, que ya tenía RLS forzada desde 2026-08-05; ' +
     'en ruta pública devuelve 0 sedes. Riesgo previo a F1; necesita contexto SYSTEM o vista pública.',

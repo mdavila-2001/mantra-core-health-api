@@ -386,6 +386,8 @@ describe('ClinicalStructureService', () => {
       expect(d.servicesRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          // F1c: healthcare_services.tenant_id NOT NULL = tenant de la práctica.
+          tenantId: TENANT_A,
           practiceId: 'p1',
           practiceSiteId: 's1',
           serviceConceptId: PROCEDURE,

@@ -18,6 +18,8 @@ import { ForbiddenException } from '@nestjs/common';
 import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
 
+import { PRAC } from '../../practice/practice.concepts';
+
 const actor = { id: 'user-1', roles: [] } as any;
 
 /**
@@ -25,7 +27,10 @@ const actor = { id: 'user-1', roles: [] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    execute: mockFn().mockResolvedValue([]),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const encountersRepo = {
     findById: mockFn(),
@@ -104,6 +109,7 @@ function build() {
  */
 const encounter = () => ({
   id: 'enc1',
+  tenantId: 't1',
   patientProfileId: 'p1',
   episodeId: undefined,
   statusConceptId: CLIN.ENCOUNTER_IN_PROGRESS,
@@ -200,6 +206,44 @@ describe('EncountersService', () => {
         actor,
       );
       expect(res.participantIds).toEqual(['part1']);
+      expect(res.locationIds).toEqual(['loc1']);
+      // F3: encounter_locations.tenant_id es NOT NULL; sin él, 23502.
+      expect(d.encountersRepo.createLocation).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: 't1', encounterId: 'enc1' }),
+      );
+    });
+
+    it('F3: rechaza un check-in en una cama (422 BED_ASSIGNMENT_REQUIRES_ADT) y no crea nada', async () => {
+      const d = build();
+      d.tx.execute.mockResolvedValue([{ form_concept_id: PRAC.LOC_FORM_BED }]);
+      await expect(
+        d.service.checkIn(
+          {
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            location: { practiceSiteId: 'site1', careSpaceId: 'bed-1' },
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: 'BED_ASSIGNMENT_REQUIRES_ADT' });
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+      expect(d.encountersRepo.createLocation).not.toHaveBeenCalled();
+    });
+
+    it('F3: un check-in en un consultorio sigue permitido', async () => {
+      const d = build();
+      d.tx.execute.mockResolvedValue([{ form_concept_id: PRAC.LOC_FORM_ROOM }]);
+      d.encountersRepo.create.mockReturnValue(encounter());
+      d.encountersRepo.createLocation.mockReturnValue({ id: 'loc1' });
+      const res = await d.service.checkIn(
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          location: { practiceSiteId: 'site1', careSpaceId: 'room-1' },
+        },
+        actor,
+      );
       expect(res.locationIds).toEqual(['loc1']);
     });
 

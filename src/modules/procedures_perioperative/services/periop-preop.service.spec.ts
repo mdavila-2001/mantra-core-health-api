@@ -95,6 +95,13 @@ function build() {
   };
   const casesRepo: Record<string, any> = {
     findCaseForUpdate: caseLookupMock(),
+    // F4 (§F4.3): check-list OMS con las tres fases completas; los casos
+    // bloqueantes tienen su propia prueba.
+    findSafetyChecklistByCase: mockFn().mockResolvedValue({
+      signInCompletedAt: new Date(),
+      timeOutCompletedAt: new Date(),
+      signOutCompletedAt: new Date(),
+    }),
     // Sin bloqueo: por defecto devuelve el mismo caso que la lectura bloqueada.
     findCaseById: mockFn((...args: unknown[]) =>
       casesRepo.findCaseForUpdate(...args),

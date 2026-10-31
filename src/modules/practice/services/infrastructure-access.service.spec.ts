@@ -1,0 +1,564 @@
+import { describe, expect, it, jest } from '@jest/globals';
+import { DELEG } from '../../delegated_access/delegated_access.concepts';
+import { PRAC } from '../practice.concepts';
+import { INFRA_F2_POLICY } from '../policies/infra-f2.policy';
+import { INFRA_F5F_POLICY } from '../../accounting/policies/infra-f5f.policy';
+import { INFRA_F4_POLICY } from '../../procedures_perioperative/policies/infra-f4.policy';
+import { grantContains, rolesOn } from '../domain/ops/infra-scope';
+import {
+  InfraPolicyRegistry,
+  InfrastructureAccessService,
+} from './infrastructure-access.service';
+import { translateInfraWriteError } from './ops/ops-errors';
+
+const TENANT = 't-1';
+const site = { id: 'site-1', tenantId: TENANT, practiceId: 'p-1' };
+const bed = {
+  id: 'bed-1',
+  tenantId: TENANT,
+  practiceSiteId: site.id,
+  spaceTypeConceptId: PRAC.SPACE_FN_BED_STANDARD,
+};
+
+function build(
+  grants: any[] = [],
+  adminLevel: string | null = null,
+  space: Record<string, unknown> = bed,
+) {
+  const registry = new InfraPolicyRegistry();
+  registry.register(INFRA_F2_POLICY);
+  registry.register(INFRA_F5F_POLICY);
+  registry.register(INFRA_F4_POLICY);
+  const structureAccess = {
+    adminLevelOf: jest.fn<any>().mockResolvedValue(adminLevel),
+  };
+  const opsRepo = {
+    chain: jest.fn<any>().mockResolvedValue([{ id: bed.id }, { id: 'room-1' }]),
+    unitsOf: jest.fn<any>().mockResolvedValue(['unit-1']),
+    grants: jest.fn<any>().mockResolvedValue(grants),
+    siteScopeIndex: jest.fn<any>().mockResolvedValue({
+      spaces: [
+        {
+          id: 'room-1',
+          parent_space_id: null,
+          space_type_concept_id: PRAC.SPACE_FN_INPATIENT_ROOM,
+          clinical_unit_id: null,
+        },
+        {
+          id: 'bed-1',
+          parent_space_id: 'room-1',
+          space_type_concept_id: PRAC.SPACE_FN_BED_STANDARD,
+          clinical_unit_id: null,
+        },
+        {
+          id: 'bed-2',
+          parent_space_id: null,
+          space_type_concept_id: PRAC.SPACE_FN_BED_STANDARD,
+          clinical_unit_id: null,
+        },
+        {
+          id: 'or-1',
+          parent_space_id: null,
+          space_type_concept_id: PRAC.SPACE_FN_OPERATING_ROOM,
+          clinical_unit_id: null,
+        },
+      ],
+      links: [{ care_space_id: 'room-1', clinical_unit_id: 'unit-A' }],
+      units: [
+        { id: 'unit-A', parent_unit_id: null },
+        { id: 'unit-B', parent_unit_id: null },
+      ],
+    }),
+  };
+  const sitesRepo = { findById: jest.fn<any>().mockResolvedValue(site) };
+  const spacesRepo = { findById: jest.fn<any>().mockResolvedValue(space) };
+  const unitsRepo = { findById: jest.fn() };
+  const svc = new InfrastructureAccessService(
+    registry,
+    structureAccess as any,
+    opsRepo as any,
+    sitesRepo as any,
+    spacesRepo as any,
+    unitsRepo as any,
+  );
+  return { svc, opsRepo };
+}
+
+const actor = { id: 'u-1', roles: [] } as any;
+const grant = (
+  role: string,
+  scope: string,
+  extra: Record<string, string> = {},
+) => ({
+  role_id: role,
+  scope_id: scope,
+  practice_id: 'p-1',
+  practice_site_id: site.id,
+  clinical_unit_id: null,
+  care_space_id: null,
+  ...extra,
+});
+
+describe('InfrastructureAccessService (§0.3)', () => {
+  it('permitido: Limpieza con alcance SITE inicia limpieza en una cama de la sede', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_HOUSEKEEPING, DELEG.SCOPE_SITE),
+    ]);
+    const { roles } = await svc.assertCan(
+      actor,
+      'f2.cleaning.work',
+      { careSpaceId: bed.id },
+      {} as any,
+      TENANT,
+    );
+    expect(roles.has('HOUSEKEEPING')).toBe(true);
+  });
+
+  it('fail-closed por tenant: el espacio de otro tenant es 404, sin consultar roles', async () => {
+    const { svc, opsRepo } = build([
+      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SITE),
+    ]);
+    await expect(
+      svc.assertCan(
+        actor,
+        'f2.cleaning.work',
+        { careSpaceId: bed.id },
+        {} as any,
+        'otro-tenant',
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(opsRepo.grants).not.toHaveBeenCalled();
+  });
+
+  it('fail-closed por rol: Limpieza no bloquea → 403 INFRA_ACTION_NOT_ALLOWED con requiredRoles', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_HOUSEKEEPING, DELEG.SCOPE_SITE),
+    ]);
+    await expect(
+      svc.assertCan(
+        actor,
+        'f2.availability.clinical',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).rejects.toMatchObject({
+      status: 403,
+      reason: 'INFRA_ACTION_NOT_ALLOWED',
+      details: { requiredRoles: ['NURSE'] },
+    });
+  });
+
+  it('alcance SPACE: vale para la habitación que contiene la cama y no para otra', async () => {
+    const inRoom = build([
+      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SPACE, {
+        care_space_id: 'room-1',
+      }),
+    ]);
+    await expect(
+      inRoom.svc.assertCan(
+        actor,
+        'f2.isolation.set',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).resolves.toBeDefined();
+    const elsewhere = build([
+      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SPACE, {
+        care_space_id: 'room-9',
+      }),
+    ]);
+    await expect(
+      elsewhere.svc.assertCan(
+        actor,
+        'f2.isolation.set',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('admin de organización bloquea por motivo administrativo; Jefe QX sólo en quirófanos', async () => {
+    const admin = build([], 'ORG');
+    await expect(
+      admin.svc.assertCan(
+        actor,
+        'f2.availability.admin',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).resolves.toBeDefined();
+    const orManager = build([
+      grant(DELEG.ASSIGN_ROLE_OR_MANAGER, DELEG.SCOPE_SITE),
+    ]);
+    await expect(
+      orManager.svc.assertCan(
+        actor,
+        'f2.availability.admin',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe('roles globales sólo cuentan para su objetivo (revisión de seguridad)', () => {
+  const periopAdmin = { id: 'u-9', roles: ['PERIOP_ADMIN'] } as any;
+  const orRoom = {
+    ...bed,
+    id: 'or-1',
+    spaceTypeConceptId: PRAC.SPACE_FN_OPERATING_ROOM,
+  };
+
+  it('PERIOP_ADMIN global no bloquea ni limpia una cama (403)', async () => {
+    const { svc } = build();
+    for (const action of [
+      'f2.availability.clinical',
+      'f2.cleaning.create',
+      'f2.hygiene.mark-dirty',
+      'f2.board.read',
+    ]) {
+      await expect(
+        svc.assertCan(
+          periopAdmin,
+          action,
+          { careSpaceId: bed.id },
+          {} as any,
+          TENANT,
+        ),
+      ).rejects.toMatchObject({
+        status: 403,
+        reason: 'INFRA_ACTION_NOT_ALLOWED',
+      });
+    }
+  });
+
+  it('PERIOP_ADMIN global sí opera un quirófano de su tenant', async () => {
+    const { svc } = build([], null, orRoom);
+    for (const action of [
+      'f2.availability.clinical',
+      'f2.cleaning.create',
+      'f2.hygiene.mark-dirty',
+    ]) {
+      await expect(
+        svc.assertCan(
+          periopAdmin,
+          action,
+          { careSpaceId: orRoom.id },
+          {} as any,
+          TENANT,
+        ),
+      ).resolves.toBeDefined();
+    }
+  });
+
+  it('PERIOP_ADMIN global no opera un quirófano de otro tenant (404)', async () => {
+    const { svc } = build([], null, { ...orRoom, tenantId: 'otro-tenant' });
+    await expect(
+      svc.assertCan(
+        periopAdmin,
+        'f2.availability.clinical',
+        { careSpaceId: orRoom.id },
+        {} as any,
+        TENANT,
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it('BILLING global no cuenta en acciones que no lo nombran', async () => {
+    const { svc } = build();
+    const billing = { id: 'u-8', roles: ['BILLING'] } as any;
+    await expect(
+      svc.assertCan(
+        billing,
+        'f2.board.read',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('Jefe QX asignado (SITE) tampoco opera camas: OR_MANAGER va sólo en operatingRoomRoles', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_OR_MANAGER, DELEG.SCOPE_SITE),
+    ]);
+    await expect(
+      svc.assertCan(
+        actor,
+        'f2.cleaning.create',
+        { careSpaceId: bed.id },
+        {} as any,
+        TENANT,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe('alcance por unidad en colecciones (revisión de seguridad F3)', () => {
+  it('asignación UNIT A: canOnUnit A sí, B no, null no; nivel sede no', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_ADMISSION, DELEG.SCOPE_UNIT, {
+        clinical_unit_id: 'unit-A',
+      }),
+    ]);
+    const scope = await svc.actorScope({} as any, actor, site as any);
+    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-A')).toBe(true);
+    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(false);
+    expect(svc.canOnUnit('f2.board.read', scope, site, null)).toBe(false);
+    expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(false);
+  });
+
+  it('asignación SITE: nivel sede y cualquier unidad', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_ADMISSION, DELEG.SCOPE_SITE),
+    ]);
+    const scope = await svc.actorScope({} as any, actor, site as any);
+    expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(true);
+    expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(true);
+  });
+});
+
+describe('scopeFilter / assertTargetInScope (raíz de la revisión F2–F4)', () => {
+  it('unidad A: sólo los espacios bajo A; un id fuera del alcance o de otra sede → 404', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_UNIT, {
+        clinical_unit_id: 'unit-A',
+      }),
+    ]);
+    const f = await svc.scopeFilter(
+      actor,
+      'f2.board.read',
+      site.id,
+      {} as any,
+      TENANT,
+    );
+    expect(f.allSite).toBe(false);
+    expect([...f.careSpaceIds].sort()).toEqual(['bed-1', 'room-1']);
+    expect([...f.clinicalUnitIds]).toEqual(['unit-A']);
+    expect(() =>
+      svc.assertTargetInScope(f, { careSpaceId: 'bed-2' }),
+    ).toThrow();
+    expect(() => svc.assertTargetInScope(f, { unitId: 'unit-B' })).toThrow();
+    expect(() =>
+      svc.assertTargetInScope(f, { careSpaceId: 'bed-1', unitId: 'unit-A' }),
+    ).not.toThrow();
+  });
+
+  it('nivel sede: toda la sede, pero un espacio de otra sede sigue siendo 404', async () => {
+    const { svc } = build([grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SITE)]);
+    const f = await svc.scopeFilter(
+      actor,
+      'f2.board.read',
+      site.id,
+      {} as any,
+      TENANT,
+    );
+    expect(f.allSite).toBe(true);
+    expect(f.allowsSpace('bed-2')).toBe(true);
+    expect(() =>
+      svc.assertTargetInScope(f, { careSpaceId: 'espacio-de-otra-sede' }),
+    ).toThrow();
+  });
+
+  it('Jefe QX por espacio: sólo su quirófano', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_OR_MANAGER, DELEG.SCOPE_SPACE, {
+        care_space_id: 'or-1',
+      }),
+    ]);
+    const f = await svc.scopeFilter(
+      actor,
+      'f2.board.read',
+      site.id,
+      {} as any,
+      TENANT,
+    );
+    expect([...f.careSpaceIds]).toEqual(['or-1']);
+  });
+});
+
+describe('infra-scope (puro)', () => {
+  const target = {
+    practiceId: 'p',
+    siteId: 's',
+    unitIds: ['u1'],
+    spaceChain: ['bed', 'room'],
+  };
+
+  it('UNIT contiene por vínculo; supervisión implica el rol base', () => {
+    expect(
+      grantContains({ role: 'NURSE', scope: 'UNIT', unitId: 'u1' }, target),
+    ).toBe(true);
+    const roles = rolesOn(
+      [],
+      [{ role: 'NURSE_SUPERVISOR', scope: 'SITE', siteId: 's' }],
+      target,
+    );
+    expect([...roles].sort()).toEqual(['NURSE', 'NURSE_SUPERVISOR']);
+  });
+
+  it('una asignación de otra sede no cuenta', () => {
+    expect(
+      rolesOn([], [{ role: 'NURSE', scope: 'SITE', siteId: 'otra' }], target)
+        .size,
+    ).toBe(0);
+  });
+});
+
+describe('translateInfraWriteError (§0.2)', () => {
+  it('23503 de FK compuesta → 404 sin detalle', () => {
+    const err = translateInfraWriteError({
+      code: '23503',
+      constraint: 'fk_cleaning_orders_tenant_space',
+    }) as any;
+    expect(err.getStatus()).toBe(404);
+    expect(err.details).toBeUndefined();
+  });
+
+  it('23P01 del mapa → 409 con su reason; otro error se relanza igual', () => {
+    const err = translateInfraWriteError({
+      code: '23P01',
+      constraint: 'ex_care_space_blocks_time',
+    }) as any;
+    expect(err.getStatus()).toBe(409);
+    expect(err.reason).toBe('BLOCK_OVERLAP');
+    const other = new Error('x');
+    expect(translateInfraWriteError(other)).toBe(other);
+  });
+
+  describe('nivel práctica (F5f, assertPracticeLevel)', () => {
+    const tx = (tenant: string | null) => ({
+      execute: jest
+        .fn<any>()
+        .mockResolvedValue(tenant ? [{ tenant_id: tenant }] : []),
+    });
+
+    it('permitido: ACCOUNTING_APPROVER global ubica activos de su tenant', async () => {
+      const { svc } = build();
+      await expect(
+        svc.assertPracticeLevel(
+          tx(TENANT) as any,
+          { id: 'u-1', roles: ['ACCOUNTING_APPROVER'] } as any,
+          'p-1',
+          TENANT,
+          'f5f.accounting.write',
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('fail-closed por tenant: práctica de otro tenant → 404', async () => {
+      const { svc } = build();
+      const err: any = await svc
+        .assertPracticeLevel(
+          tx('t-2') as any,
+          { id: 'u-1', roles: ['ACCOUNTING_APPROVER'] } as any,
+          'p-x',
+          TENANT,
+          'f5f.accounting.write',
+        )
+        .catch((e) => e);
+      expect(err.getStatus()).toBe(404);
+    });
+
+    it('rol global con ámbito de otro tenant (MCH-001) no cuenta → 403', async () => {
+      const { svc } = build();
+      const err: any = await svc
+        .assertPracticeLevel(
+          tx(TENANT) as any,
+          {
+            id: 'u-1',
+            roles: ['ACCOUNTING_APPROVER'],
+            scopedRoles: { 't-2': ['ACCOUNTING_APPROVER'] },
+          } as any,
+          'p-1',
+          TENANT,
+          'f5f.accounting.write',
+        )
+        .catch((e) => e);
+      expect(err.getStatus()).toBe(403);
+    });
+
+    it('una asignación de sede no da nivel práctica; BILLING global sólo lee', async () => {
+      const { svc } = build([
+        grant(DELEG.ASSIGN_ROLE_BILLING, DELEG.SCOPE_SITE),
+      ]);
+      const err: any = await svc
+        .assertPracticeLevel(
+          tx(TENANT) as any,
+          actor,
+          'p-1',
+          TENANT,
+          'f5f.accounting.read',
+        )
+        .catch((e) => e);
+      expect(err.getStatus()).toBe(403);
+      const billing = { id: 'u-1', roles: ['BILLING'] } as any;
+      await expect(
+        svc.assertPracticeLevel(
+          tx(TENANT) as any,
+          billing,
+          'p-1',
+          TENANT,
+          'f5f.accounting.read',
+        ),
+      ).resolves.toBeUndefined();
+      const w: any = await svc
+        .assertPracticeLevel(
+          tx(TENANT) as any,
+          billing,
+          'p-1',
+          TENANT,
+          'f5f.accounting.write',
+        )
+        .catch((e) => e);
+      expect(w.getStatus()).toBe(403);
+    });
+  });
+
+  describe('acciones permitidas (allowedActions, lo que la UI refleja)', () => {
+    it('Limpieza de sede: limpia pero no bloquea; sin roles, nada', async () => {
+      const { svc } = build();
+      const scope = { base: [], grants: [], globals: [] } as any;
+      const keeper = svc.allowedActions(
+        new Set(['HOUSEKEEPING'] as any),
+        false,
+        scope,
+      );
+      expect(keeper).toEqual(
+        expect.arrayContaining(['f2.board.read', 'f2.cleaning.work']),
+      );
+      expect(keeper).not.toContain('f2.availability.admin');
+      expect(svc.allowedActions(new Set(), false, scope)).toEqual([]);
+    });
+  });
+
+  describe('personal de periop (PERIOP_STAFF global)', () => {
+    it('PERIOP_NURSE del tenant ve la agenda de quirófanos de la sede, pero no el tablero de camas', async () => {
+      const { svc } = build();
+      const nurse = { id: 'u-9', roles: ['PERIOP_NURSE'] } as any;
+      const scope = await svc.actorScope({} as any, nurse, site as any);
+      expect(scope.globals).toContain('PERIOP_STAFF');
+      expect(svc.canAtSiteLevel('f4.or.read', scope, site)).toBe(true);
+      expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(false);
+      expect(svc.canAtSiteLevel('f4.utilization.read', scope, site)).toBe(
+        false,
+      );
+    });
+    it('fail-closed por tenant: el rol con ámbito de otro tenant no cuenta (MCH-001)', async () => {
+      const { svc } = build();
+      const nurse = {
+        id: 'u-9',
+        roles: ['PERIOP_NURSE'],
+        scopedRoles: { 't-2': ['PERIOP_NURSE'] },
+      } as any;
+      const scope = await svc.actorScope({} as any, nurse, site as any);
+      expect(scope.globals).not.toContain('PERIOP_STAFF');
+      expect(svc.canAtSiteLevel('f4.or.read', scope, site)).toBe(false);
+    });
+  });
+});
