@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { jest } from '@jest/globals';
 
 /**
@@ -455,11 +456,51 @@ describe('TelemetryEventsService', () => {
         const [, usedKey, scope] =
           d.eventsRepo.findByIdempotencyKey.mock.calls[0];
         expect(usedKey).toMatch(/^[0-9a-f]{64}$/u);
+        // Es un HMAC con secreto del servidor, no un hash que se pueda reconstruir
+        // con datos conocidos.
+        expect(usedKey).not.toBe(
+          createHash('sha256')
+            .update(`anon\u0000user-a\u0000${TENANT_A}\u0000k1`)
+            .digest('hex'),
+        );
         expect(usedKey).not.toBe('k1');
         expect(scope).toBeNull();
         expect(d.eventsRepo.create.mock.calls[0][1].eventIdempotencyKey).toBe(
           usedKey,
         );
+      });
+
+      it('Límite: en producción sin secreto el evento anónimo no se deduplica (clave aleatoria)', async () => {
+        const antes = {
+          env: process.env.NODE_ENV,
+          secret: process.env.TELEMETRY_IDEMPOTENCY_SECRET,
+        };
+        process.env.NODE_ENV = 'production';
+        delete process.env.TELEMETRY_IDEMPOTENCY_SECRET;
+        try {
+          const d = withoutConsentDecision();
+          d.eventsRepo.findByIdempotencyKey.mockResolvedValue(null);
+          const batch = {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                eventIdempotencyKey: 'k1',
+                routeTemplate: '/inicio',
+              },
+            ],
+          };
+          await d.service.captureActivityEvents(batch, actor);
+          await d.service.captureActivityEvents(batch, actor);
+          const keys = d.eventsRepo.findByIdempotencyKey.mock.calls.map(
+            (c: unknown[]) => c[1],
+          );
+          expect(new Set(keys).size).toBe(2);
+        } finally {
+          process.env.NODE_ENV = antes.env;
+          if (antes.secret === undefined)
+            delete process.env.TELEMETRY_IDEMPOTENCY_SECRET;
+          else process.env.TELEMETRY_IDEMPOTENCY_SECRET = antes.secret;
+        }
       });
 
       it('Límite: la misma clave de dos personas distintas no colisiona entre anónimos', async () => {
@@ -520,6 +561,7 @@ describe('TelemetryEventsService', () => {
         ['con un tramo hexadecimal corto', '/enlace/a3f9c2e1b7'],
         ['con texto libre en mayúsculas', '/Juan-Perez/ficha'],
         ['con un punto o un espacio', '/inicio/mi ficha.v2'],
+        ['con un parámetro que arrastra dígitos', '/enlace/:a1234567890'],
         ['con más de ocho segmentos', '/a/b/c/d/e/f/g/h/i'],
       ])('Error 422: %s', async (_name, routeTemplate) => {
         const d = withoutConsentDecision();

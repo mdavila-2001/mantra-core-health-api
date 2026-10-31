@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { HttpStatus } from '@nestjs/common';
 import {
   DomainException,
@@ -38,6 +38,7 @@ import type {
   UserActivityEvents,
 } from '../../entities';
 import { TelemetryErrorReason } from '../../telemetry.error-reasons';
+import { loadAnonymousIdempotencySecret } from '../../telemetry-idempotency.env';
 import {
   EventPropertyRejection,
   validateEventProperties,
@@ -219,19 +220,17 @@ export class TelemetryEventsService {
         // Idempotencia por clave **del mismo usuario**: descarta reenvíos.
         // Un evento anónimo no tiene usuario: su clave se acota a los anónimos.
         // La clave que elige el cliente nunca se guarda tal cual en un evento
-        // anónimo: se acota con un hash a quien la envía y a su organización,
-        // para que otra persona no pueda adelantarse con la misma clave y hacer
-        // que se descarte un evento ajeno.
-        const idemKey =
-          item.eventIdempotencyKey === undefined
-            ? randomUUID()
-            : anonymous
-              ? createHash('sha256')
-                  .update(
-                    `anon\u0000${actor.id}\u0000${tenantId}\u0000${item.eventIdempotencyKey}`,
-                  )
-                  .digest('hex')
-              : item.eventIdempotencyKey;
+        // anónimo: se acota con un HMAC (secreto del servidor) a quien la envía
+        // y a su organización, para que otra persona no pueda adelantarse con
+        // la misma clave y para que quien lea la analítica no pueda ligar el
+        // evento con la persona probando candidatos. Sin secreto utilizable no
+        // se deduplica el evento anónimo.
+        const idemKey = this.idempotencyKeyFor(
+          item.eventIdempotencyKey,
+          anonymous,
+          actor.id,
+          tenantId,
+        );
         if (item.eventIdempotencyKey) {
           const dup = await this.eventsRepo.findByIdempotencyKey(
             tx,
@@ -596,6 +595,28 @@ export class TelemetryEventsService {
         eventCount: journey.eventCount ?? 0,
       };
     });
+  }
+
+  /**
+   * Clave de idempotencia que se guarda con el evento.
+   *
+   * Un evento con sujeto conserva la clave del cliente (se busca por persona).
+   * Uno anónimo guarda un HMAC de (persona, organización, clave); sin secreto
+   * utilizable guarda una clave aleatoria, es decir, no se deduplica.
+   */
+  private idempotencyKeyFor(
+    clientKey: string | undefined,
+    anonymous: boolean,
+    actorId: string,
+    tenantId: string | null | undefined,
+  ): string {
+    if (clientKey === undefined) return randomUUID();
+    if (!anonymous) return clientKey;
+    const secret = loadAnonymousIdempotencySecret();
+    if (secret === null) return randomUUID();
+    return createHmac('sha256', secret)
+      .update(`anon\u0000${actorId}\u0000${tenantId ?? ''}\u0000${clientKey}`)
+      .digest('hex');
   }
 
   /**

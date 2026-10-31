@@ -409,12 +409,12 @@ const ANONYMOUS_ROUTE_MAX_LENGTH = 200;
 
 /**
  * Forma permitida de una plantilla anónima: segmentos en minúscula separados
- * por `-` o `_`, o parámetros con nombre (`:id`). Una lista cerrada, no una
+ * por `-` o `_`, o parámetros con nombre sin dígitos (`:id`, `:routeCode`). Una lista cerrada, no una
  * lista de lo prohibido: un UUID, un hash, un número o un texto libre con
  * mayúsculas, espacios o puntos no tienen forma de colarse.
  */
 const ANONYMOUS_ROUTE_SHAPE =
-  /^(?:\/(?:[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*|:[A-Za-z][A-Za-z0-9]*)){1,8}$/u;
+  /^(?:\/(?:[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*|:[a-z][a-zA-Z]{0,30})){1,8}$/u;
 
 /** Segmento literal que parece un identificador (varios dígitos o un tramo largo con dígitos). */
 function looksLikeIdentifier(segment: string): boolean {
@@ -442,6 +442,11 @@ export function isAnonymousSafeRouteTemplate(
   if (routeTemplate.length > ANONYMOUS_ROUTE_MAX_LENGTH) return false;
   if (routeTemplate === '/') return true;
   if (!ANONYMOUS_ROUTE_SHAPE.test(routeTemplate)) return false;
+  // Segunda comprobación sobre la plantilla entera: los mismos patrones que se
+  // niegan a un valor de propiedad (correo, corridas de 7 o más dígitos).
+  if (BASELINE_PROHIBITED_VALUE_PATTERNS.some((p) => p.test(routeTemplate))) {
+    return false;
+  }
   return routeTemplate
     .split('/')
     .slice(1)
