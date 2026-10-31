@@ -59,7 +59,7 @@ Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): las 14 del módulo (`a
 | `GET /marketing/insights/alert-workflow` | ídem | `insights-workflow` |
 | `PUT /marketing/insights/alert-workflow/:fingerprint` | ídem | `insights-workflow` |
 | `GET /marketing/insights/alert-rules` | ídem | `insights-workflow` |
-| `PATCH /marketing/insights/alert-rules/:code` | ídem | `insights-workflow` |
+| `PATCH /marketing/insights/alert-rules/:code` | PLATFORM_ADMIN, DATA_PLATFORM_ADMIN (+ SUPERADMIN) | `insights-workflow` |
 | `GET` · `PUT /marketing/insights/notification-preferences` | ídem | `insights-workspace` |
 | `GET` · `PUT /marketing/insights/user-preferences` | ídem | `insights-workspace` |
 | `GET /marketing/insights/saved-views` · `PUT` · `DELETE /marketing/insights/saved-views/:id` | ídem | `insights-workspace` |
@@ -149,8 +149,10 @@ touchpoints del miembro en ventana ── attribution/compute ──> reparto co
 **AloVida Insights** (`/marketing/insights/*`, decisión D-7): `@Roles('MARKETING_MANAGER',
 'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en cada handler (`SUPERADMIN` entra por el comodín de
 `RolesGuard`) y `@PlatformTenantOptional('SUPERADMIN', 'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en
-la clase. Nunca `BUSINESS_ADMIN`. Las escrituras (`INSIGHTS_WRITE_ROLES`) usan los mismos roles que las
-lecturas y todas llevan `@Audited` (`MARKETING_INSIGHTS_*`). `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` son roles globales y leen
+la clase. Nunca `BUSINESS_ADMIN`. Las escrituras por usuario y el `PUT alert-workflow` (`INSIGHTS_WRITE_ROLES`) usan los mismos
+roles que las lecturas; `PATCH alert-rules/:code` (reglas compartidas de toda la plataforma) exige solo
+`PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` (`INSIGHTS_RULE_WRITE_ROLES`; `SUPERADMIN` por el comodín), así
+que `MARKETING_MANAGER` recibe 403. Todas llevan `@Audited` (`MARKETING_INSIGHTS_*`). `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` son roles globales y leen
 sin cabecera. `MARKETING_MANAGER` está sembrado con ámbito de **tenant**: no está en la lista
 tenant-opcional a propósito, así que necesita `X-Tenant-Id` (o una sola membresía) y solo autoriza
 en el tenant donde se le concedió (`403 ROLE_INSUFFICIENT` en otro; `403 TENANT_AMBIGUOUS` /

@@ -24,6 +24,7 @@ import { PlatformTenantOptional } from '../../../common/tenant/platform-tenant-o
 import {
   INSIGHTS_PLATFORM_ROLES,
   INSIGHTS_READ_ROLES,
+  INSIGHTS_RULE_WRITE_ROLES,
   INSIGHTS_WRITE_ROLES,
 } from '../marketing.insights-access';
 import {
@@ -101,7 +102,7 @@ export class InsightsWorkflowController {
     entity: 'insights_alert_rule',
   })
   @Patch('alert-rules/:code')
-  @Roles(...INSIGHTS_WRITE_ROLES)
+  @Roles(...INSIGHTS_RULE_WRITE_ROLES)
   @ApiOperation({
     summary: 'Enciende, apaga o cambia el umbral (1 a 500) de una regla',
     description:

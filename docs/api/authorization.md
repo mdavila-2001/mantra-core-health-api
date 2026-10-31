@@ -138,8 +138,9 @@ autoriza en el tenant donde se le concedió (`403 ROLE_INSUFFICIENT` en otro). E
 mismo en cualquier tenant. Los roles globales `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` leen sin
 cabecera. `BUSINESS_ADMIN` nunca. Lo fija `src/modules/marketing/insights-access.spec.ts`.
 
-Las **escrituras** del portal (alertas, reglas, preferencias, vistas guardadas, informes) usan los
-mismos roles y llevan `@Audited`. Alertas y reglas son compartidas; lo que es de la persona se acota
+Las **escrituras** del portal (alertas, preferencias, vistas guardadas, informes) usan los
+mismos roles que las lecturas y llevan `@Audited`; `PATCH alert-rules/:code` (reglas compartidas)
+exige solo `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` (`MARKETING_MANAGER` recibe 403). Alertas y reglas son compartidas; lo que es de la persona se acota
 por el **id del usuario autenticado** (`user.id`), nunca por un `userId` de la petición: un usuario no
 ve ni modifica filas de otro (`404` si manda un `id` ajeno). Las modificaciones de alertas y reglas se
 protegen con `If-Match`/`row_version` (`412 MARKETING_INSIGHTS_VERSION_MISMATCH`).

@@ -135,7 +135,7 @@ it('la matriz D-7 cubre los 16 handlers de Insights (2 lecturas F3, 4 de alertas
   );
 });
 
-describe.each(handlers)(
+describe.each(handlers.filter((h) => h.name !== 'patchRule'))(
   'D-7 acceso a /marketing/insights ($controller.name · $name)',
   (handler) => {
     describe('(a) MARKETING_MANAGER con X-Tenant-Id de su tenant', () => {
@@ -283,3 +283,59 @@ describe.each(handlers)(
     });
   },
 );
+
+/**
+ * Las reglas de alerta son compartidas por toda la plataforma: solo los roles
+ * de plataforma las modifican. `MARKETING_MANAGER` las lee (cubierto arriba con
+ * `listRules`) pero recibe 403 al cambiarlas.
+ */
+describe('D-7 PATCH alert-rules/:code (reglas compartidas)', () => {
+  const patchRule: Target = {
+    controller: InsightsWorkflowController,
+    name: 'patchRule',
+  };
+
+  it('MARKETING_MANAGER con tenant y membresía válidos → 403 ROLE_INSUFFICIENT', () => {
+    expect(run(patchRule, manager(), { 'x-tenant-id': T })).toMatchObject({
+      allowed: false,
+      status: 403,
+      by: 'RolesGuard',
+      reason: 'ROLE_INSUFFICIENT',
+    });
+    expect(run(patchRule, manager())).toMatchObject({
+      allowed: false,
+      status: 403,
+      reason: 'ROLE_INSUFFICIENT',
+    });
+  });
+
+  it.each(['PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN', 'SUPERADMIN'])(
+    '%s global autoriza sin cabecera',
+    (role) => {
+      expect(run(patchRule, { id: 'u-plat', roles: [role] })).toEqual({
+        allowed: true,
+        resolvedTenantId: undefined,
+      });
+    },
+  );
+
+  it('BUSINESS_ADMIN sigue sin entrar', () => {
+    const actor: AuthenticatedUser = {
+      id: 'u-biz',
+      roles: ['BUSINESS_ADMIN'],
+      scopedRoles: { [T]: ['BUSINESS_ADMIN'] },
+      tenantIds: [T],
+    };
+    expect(run(patchRule, actor, { 'x-tenant-id': T }).allowed).toBe(false);
+  });
+
+  it('el PUT alert-workflow compartido sigue abierto a MARKETING_MANAGER (decisión pendiente)', () => {
+    const putWorkflow: Target = {
+      controller: InsightsWorkflowController,
+      name: 'putWorkflow',
+    };
+    expect(run(putWorkflow, manager(), { 'x-tenant-id': T }).allowed).toBe(
+      true,
+    );
+  });
+});

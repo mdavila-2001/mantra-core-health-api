@@ -5,6 +5,7 @@ import { PLATFORM_TENANT_OPTIONAL_KEY } from '../../../common/tenant/platform-te
 import {
   INSIGHTS_PLATFORM_ROLES,
   INSIGHTS_READ_ROLES,
+  INSIGHTS_RULE_WRITE_ROLES,
   INSIGHTS_WRITE_ROLES,
 } from '../marketing.insights-access';
 import { InsightsWorkflowController } from './insights-workflow.controller';
@@ -43,7 +44,9 @@ describe.each([
       expect(roles).toEqual(
         method(handler) === METHOD.GET
           ? [...INSIGHTS_READ_ROLES]
-          : [...INSIGHTS_WRITE_ROLES],
+          : handler === 'patchRule'
+            ? [...INSIGHTS_RULE_WRITE_ROLES]
+            : [...INSIGHTS_WRITE_ROLES],
       );
       expect(roles).not.toContain('BUSINESS_ADMIN');
     }
@@ -61,6 +64,16 @@ describe.each([
       }
     }
   });
+});
+
+it('PATCH alert-rules exige solo PLATFORM_ADMIN y DATA_PLATFORM_ADMIN (nunca MARKETING_MANAGER)', () => {
+  const roles = Reflect.getMetadata(
+    ROLES_KEY,
+    (InsightsWorkflowController.prototype as unknown as Record<string, object>)
+      .patchRule,
+  ) as string[];
+  expect(roles).toEqual(['PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN']);
+  expect(roles).not.toContain('MARKETING_MANAGER');
 });
 
 describe('InsightsWorkflowController · superficie', () => {

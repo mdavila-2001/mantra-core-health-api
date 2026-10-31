@@ -28,6 +28,16 @@ export const INSIGHTS_READ_ROLES = [
 export const INSIGHTS_WRITE_ROLES = INSIGHTS_READ_ROLES;
 
 /**
+ * Quien puede modificar las reglas de alerta, que son COMPARTIDAS por toda la
+ * plataforma. `MARKETING_MANAGER` (rol de tenant) las lee pero no las cambia.
+ * `SUPERADMIN` entra por el comodín de `RolesGuard`.
+ */
+export const INSIGHTS_RULE_WRITE_ROLES = [
+  'PLATFORM_ADMIN',
+  'DATA_PLATFORM_ADMIN',
+] as const;
+
+/**
  * Roles que `TenantScopeGuard` deja operar sin tenant resuelto. Excluye a
  * propósito `MARKETING_MANAGER`: un rol con ámbito de tenant no se vuelve
  * global por estar en esta lista (solo cuenta el rol concedido como global).
