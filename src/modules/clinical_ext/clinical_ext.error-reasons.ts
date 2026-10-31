@@ -37,8 +37,10 @@ export enum ClinicalExtErrorReason {
    */
   REFERRAL_TARGET_REQUIRED = 'REFERRAL_TARGET_REQUIRED',
   /**
-   * 404: el profesional destino (`targetProfileId`) no existe en el padrón, o
-   * el destino de `GET /referrals/target-services` no es listable.
+   * 404: el profesional destino (`targetProfileId`) no existe en el padrón; el
+   * tenant destino (`targetTenantId`, indicado o derivado del servicio) no
+   * existe o no está activo, con el mismo cuerpo en los dos casos; o el
+   * destino de `GET /referrals/target-services` no es listable.
    */
   REFERRAL_TARGET_NOT_FOUND = 'REFERRAL_TARGET_NOT_FOUND',
   /** 404: el servicio destino (`targetServiceCatalogId`) no existe. */
