@@ -39,6 +39,7 @@ import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { ToolRegistrySeedService } from './tool-registry-seed.service';
 import { CommunitySearchIndexService } from '../../modules/community/services';
 import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
 import { SeedCoreState } from './seed-core.state';
@@ -304,6 +305,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly padronOrgAdmins?: PadronOrgAdminsSeedService,
     @Optional()
     private readonly searchIndex?: CommunitySearchIndexService,
+    @Optional()
+    private readonly toolRegistry?: ToolRegistrySeedService,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -728,6 +731,19 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
               kind: 'content' as const,
               run: () =>
                 this.padronOrgAdmins!.run(undefined, this.explicitly()),
+            },
+          ]
+        : []),
+      // Catálogo interno de herramientas de plataforma (`platform_ops`). Solo
+      // necesita los conceptos `platform_ops:*` que materializó el catálogo.
+      // Contenido: sin él `GET /admin/ops/tools` responde vacío, nada más.
+      ...(this.toolRegistry
+        ? [
+            {
+              id: 'registro-herramientas',
+              name: 'registro de herramientas de plataforma',
+              kind: 'content' as const,
+              run: () => this.toolRegistry!.run(),
             },
           ]
         : []),

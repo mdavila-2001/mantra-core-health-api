@@ -271,7 +271,10 @@ export function loadWorkerEnv(): WorkerEnv {
     stuckTickMs: numberFromEnv('WORKER_STUCK_TICK_MS', 10 * 60_000),
     drainTimeoutMs: numberFromEnv('WORKER_DRAIN_TIMEOUT_MS', 20_000),
     shutdownTimeoutMs: numberFromEnv('WORKER_SHUTDOWN_TIMEOUT_MS', 30_000),
-    heartbeatIntervalMs: numberFromEnv('WORKER_HEARTBEAT_INTERVAL_MS', 15_000),
+    heartbeatIntervalMs: Math.max(
+      1000,
+      numberFromEnv('WORKER_HEARTBEAT_INTERVAL_MS', 15_000),
+    ),
     httpRetryAttempts: numberFromEnv('WORKER_HTTP_RETRY_ATTEMPTS', 3),
     httpMaxConcurrent: numberFromEnv('WORKER_HTTP_MAX_CONCURRENT', 16),
     messagingQueueCodes: (process.env.MESSAGING_QUEUE_CODES ?? '')

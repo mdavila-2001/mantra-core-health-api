@@ -8,6 +8,9 @@ import {
   TelemetryAnalyticsController,
 } from './presentation/controllers';
 import { TelemetryOnboardingAnalyticsController } from './presentation/controllers/telemetry-onboarding-analytics.controller';
+import { TelemetryClickHeatmapController } from './presentation/controllers/telemetry-click-heatmap.controller';
+import { TelemetryClickHeatmapService } from './application/services/telemetry-click-heatmap.service';
+import { TelemetryClickHeatmapRepository } from './infrastructure/repositories/telemetry-click-heatmap.repository';
 import {
   TelemetryGovernanceService,
   TelemetryConsentService,
@@ -59,6 +62,7 @@ import {
     TelemetryEventsController,
     TelemetryAnalyticsController,
     TelemetryOnboardingAnalyticsController,
+    TelemetryClickHeatmapController,
   ],
   providers: [
     // Repositorios
@@ -77,6 +81,7 @@ import {
     FunnelStepsRepository,
     ConversionEventsRepository,
     TelemetryAnalyticsRepository,
+    TelemetryClickHeatmapRepository,
     ActorSessionsRepository,
     // Analítica web externa: adaptadores concretos y selección por entorno.
     DisabledWebAnalyticsAdapter,
@@ -96,6 +101,7 @@ import {
     TelemetryWebAnalyticsService,
     TelemetryEventsService,
     TelemetryAnalyticsService,
+    TelemetryClickHeatmapService,
     TelemetryOnboardingAnalyticsService,
   ],
   exports: [

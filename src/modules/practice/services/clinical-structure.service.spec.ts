@@ -506,6 +506,22 @@ describe('ClinicalStructureService', () => {
   });
 });
 
+/**
+ * 404 uniforme de una sede ajena o inexistente: lo emite `StructureAccessService.requireSite`
+ * (mensaje + `details` ausentes de datos ajenos), sin `reason` propio.
+ */
+async function expectSiteNotFound(promise: Promise<unknown>, message: string) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  return exception;
+}
+
 /** Aserciones del 404 uniforme de PRAC-01. */
 async function expectOutOfScope(promise: Promise<unknown>, message: string) {
   const error = await promise.then(
@@ -535,31 +551,22 @@ describe('ClinicalStructureService · alcance de tenant (PRAC-01)', () => {
     statusConceptId: PRAC.PRACTICE_ACTIVE,
   });
 
-  it('crear unidad o espacio con el siteId de otro tenant: 404 uniforme; no se persiste hijo', async () => {
+  it('crear unidad con el siteId de otro tenant: 404 uniforme; no se persiste hijo', async () => {
     const d = build();
     d.sitesRepo.findById.mockResolvedValue(siteOf());
     d.practicesRepo.findById.mockResolvedValue(foreignPractice());
 
-    const unit = await expectOutOfScope(
+    await expectSiteNotFound(
       d.service.createClinicalUnit(
         's1',
         { code: 'U-1', name: 'Unit' } as any,
         actor,
-      ),
-      'Sitio no encontrado',
-    );
-    const space = await expectOutOfScope(
-      d.service.createCareSpace(
-        's1',
-        { code: 'E-1', name: 'Space' } as any,
-        actor,
+        TENANT_A,
       ),
       'Sitio no encontrado',
     );
 
-    expect(unit.getResponse()).toEqual(space.getResponse());
     expect(d.unitsRepo.create).not.toHaveBeenCalled();
-    expect(d.spacesRepo.create).not.toHaveBeenCalled();
     expect(d.tx.flush).not.toHaveBeenCalled();
   });
 
@@ -567,20 +574,22 @@ describe('ClinicalStructureService · alcance de tenant (PRAC-01)', () => {
     const d = build();
     d.sitesRepo.findById.mockResolvedValue(siteOf());
     d.practicesRepo.findById.mockResolvedValue(foreignPractice());
-    const foreign = await expectOutOfScope(
+    const foreign = await expectSiteNotFound(
       d.service.createClinicalUnit(
         's1',
         { code: 'U', name: 'U' } as any,
         actor,
+        TENANT_A,
       ),
       'Sitio no encontrado',
     );
     d.sitesRepo.findById.mockResolvedValue(null);
-    const missing = await expectOutOfScope(
+    const missing = await expectSiteNotFound(
       d.service.createClinicalUnit(
         's1',
         { code: 'U', name: 'U' } as any,
         actor,
+        TENANT_A,
       ),
       'Sitio no encontrado',
     );
@@ -592,9 +601,15 @@ describe('ClinicalStructureService · alcance de tenant (PRAC-01)', () => {
     const d = build();
 
     await expect(
-      d.raw.createClinicalUnit('s1', { code: 'U', name: 'U' } as any, actor),
+      d.raw.createClinicalUnit(
+        's1',
+        { code: 'U', name: 'U' } as any,
+        actor,
+        undefined as any,
+      ),
     ).rejects.toThrow();
-    expect(d.sitesRepo.findById).not.toHaveBeenCalled();
+    expect(d.unitsRepo.create).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 
   it('publicar un servicio con una unidad de otra práctica se rechaza como unidad inexistente', async () => {

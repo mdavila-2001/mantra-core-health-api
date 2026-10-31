@@ -57,4 +57,24 @@ export class AccountLockoutsRepository {
       statusConceptId: CONCEPTS.LOCKOUT_ACTIVE,
     });
   }
+
+  /**
+   * Libera el bloqueo ACTIVO del usuario, si lo hay (la fila queda como historia). Devuelve
+   * `true` si había uno. Sin flush.
+   */
+  async releaseActiveForUser(
+    em: EntityManager,
+    userId: string,
+    actorUserId: string,
+  ): Promise<boolean> {
+    const lockout = await this.findActiveForUser(em, userId);
+    if (!lockout) return false;
+    const now = new Date();
+    lockout.statusConceptId = CONCEPTS.LOCKOUT_RELEASED;
+    lockout.unlockedAt = now;
+    lockout.unlockedByUserId = actorUserId;
+    lockout.updatedAt = now;
+    lockout.updatedByUserId = actorUserId;
+    return true;
+  }
 }
