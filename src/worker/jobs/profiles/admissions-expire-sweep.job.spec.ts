@@ -38,8 +38,8 @@ function build(
 
 /** Los cron que el test agendó de verdad se paran para no dejar timers vivos. */
 const scheduled: CronJob[] = [];
-afterEach(() => {
-  while (scheduled.length) scheduled.pop()?.stop();
+afterEach(async () => {
+  while (scheduled.length) await scheduled.pop()?.stop();
   for (const key of ENV_KEYS) delete process.env[key];
 });
 

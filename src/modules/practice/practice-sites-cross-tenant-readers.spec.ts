@@ -54,6 +54,40 @@ const KNOWN_READERS: Record<string, string> = {
     'Puerto del adaptador anterior (tipos).',
   'pharmacy_inventory/application/pharmacy-inventory-read/read-pharmacy-inventory.use-case.ts':
     'Consume el puerto de directorio de farmacias.',
+  'billing/repositories/patient-spending.repository.ts':
+    'SQL: une practice_sites con directory.tenants por managing_tenant_id para el gasto del paciente (cruza tenants). Contexto de RLS pendiente de decidir (#1167).',
+  'clinical/repositories/procedure-centers-read.repository.ts':
+    'em.find(PracticeSites) para los centros de procedimientos. Contexto de RLS pendiente de decidir (#1167).',
+  'clinical/repositories/received-services.repository.ts':
+    'em.find(PracticeSites) por lista de ids de sede, sin filtro de tenant propio. Contexto de RLS pendiente de decidir (#1167).',
+  'clinical/services/performer-site-db.reader.ts':
+    'Lee la sede ejecutora de un procedimiento. Contexto de RLS pendiente de decidir (#1167).',
+  'clinical/services/procedure-centers.service.ts':
+    'Consume sedes de procedure-centers-read.repository (tipos y armado de la respuesta). Contexto de RLS pendiente de decidir (#1167).',
+  'clinical/services/suggested-site-names.reader.ts':
+    'Lee nombres de sede para sugerir. Contexto de RLS pendiente de decidir (#1167).',
+  'directory/services/pharmacy-operating-requirements.service.ts':
+    'Consulta sedes al evaluar requisitos de operación de una farmacia. Contexto de RLS pendiente de decidir (#1167).',
+  'medical_centers/repositories/medical-center-offers.repository.ts':
+    'em.find(PracticeSites) para la oferta de un centro médico. Contexto de RLS pendiente de decidir (#1167).',
+  'organization_extensions/repositories/orgext-references.repository.ts':
+    'Comprueba que la sede pertenece a alguno de los tenants indicados (hereda el tenant de su práctica). Contexto de RLS pendiente de decidir (#1167).',
+  'pharmacy/repositories/pharmacy-on-call-shifts.repository.ts':
+    'SQL: LEFT JOIN practice_sites (time_zone) en la búsqueda de farmacias de turno, que cruza tenants a propósito. Contexto de RLS pendiente de decidir (#1167).',
+  'pharmacy/repositories/pharmacy-references.repository.ts':
+    'Comprueba que la sede pertenece a una práctica del tenant (la sede sólo lleva practice_id). Contexto de RLS pendiente de decidir (#1167).',
+  'pharmacy/services/bulk/sites.bulk-handler.ts':
+    'Carga masiva de sedes de farmacia vía PracticeSitesRepository, con el tenant de la farmacia. Contexto de RLS pendiente de decidir (#1167).',
+  'pharmacy/services/opening-hours.time.ts':
+    'Sólo documenta/usa practice_sites.time_zone para el huso horario (no consulta la tabla). Contexto de RLS pendiente de decidir (#1167).',
+  'pharmacy/services/pharmacy-opening-hours.service.ts':
+    'Usa readRepo.findPracticeSites para el horario de apertura. Contexto de RLS pendiente de decidir (#1167).',
+  'pharmacy/services/pharmacy-provisioning.service.ts':
+    'Alta de la sede dispensadora: usa PracticeSitesRepository dentro de la transacción del llamador. Contexto de RLS pendiente de decidir (#1167).',
+  'profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts':
+    'em.find(PracticeSites) por lista de ids para la admisión (sedes que pueden ser de otro tenant). Contexto de RLS pendiente de decidir (#1167).',
+  'public/infrastructure/repositories/public-pharmacy-branches.repository.ts':
+    'SQL público: sedes activas de farmacias verificadas de un tenant; en ruta pública sin contexto de tenant el RLS devuelve 0 sedes. Contexto de RLS pendiente de decidir (#1167).',
 };
 
 const MODULES = join(process.cwd(), 'src', 'modules');
