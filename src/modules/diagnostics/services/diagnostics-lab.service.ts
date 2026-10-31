@@ -68,10 +68,16 @@ export class DiagnosticsLabService {
       laboratoryAccessionId: query.laboratoryAccessionId,
       statusConceptId: query.statusConceptId,
       assignedProfileId: query.assignedProfileId,
+      collectionCareSpaceId: query.collectionCareSpaceId,
       limit: query.limit ?? 50,
       offset: query.offset ?? 0,
     });
+    const points = await this.repo.collectionPointsOf(
+      this.em,
+      orders.map((o) => o.laboratoryAccessionId),
+    );
     return orders.map((o) => ({
+      collectionPoint: points.get(o.laboratoryAccessionId) ?? null,
       id: o.id,
       workOrderNumber: o.workOrderNumber,
       laboratoryAccessionId: o.laboratoryAccessionId,

@@ -1,3 +1,8 @@
+import {
+  collectionPoint,
+  collectionPointsOfSite,
+  type CollectionPointRow,
+} from '../../practice/services/ops/collection-points';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -298,6 +303,14 @@ export class ServiceRequestsService {
       });
 
       const decision = await this.resolveDuplicateDecision(tx, dto, options);
+      // F5b: punto de toma de la sede sugerida (422 si no lo es); sin pedido
+      // explícito, en laboratorio, el primer punto disponible de la sede.
+      const point = await this.resolveCollectionPoint(
+        tx,
+        dto.suggestedCareSpaceId,
+        performer.suggestedPracticeSiteId ?? null,
+        categoryConceptId,
+      );
 
       const sr = this.serviceRequestsRepo.create(tx, {
         custodianTenantId: dto.custodianTenantId,
@@ -317,6 +330,7 @@ export class ServiceRequestsService {
         performerPractitionerProfileId:
           performer.performerPractitionerProfileId ?? undefined,
         suggestedPracticeSiteId: performer.suggestedPracticeSiteId ?? undefined,
+        suggestedCareSpaceId: point?.id,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
         actorUserId: actor.id,
@@ -364,6 +378,20 @@ export class ServiceRequestsService {
         },
         actorUserId: actor.id,
       });
+      if (point)
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: sr.custodianTenantId,
+          eventType: 'clinical.service_request.collection_point_suggested',
+          aggregateType: 'clinical.service_requests',
+          aggregateId: sr.id,
+          payloadJson: {
+            serviceRequestId: sr.id,
+            careSpaceId: point.id,
+            practiceSiteId: point.practiceSiteId,
+            explicit: !!dto.suggestedCareSpaceId,
+          },
+          actorUserId: actor.id,
+        });
       await tx.flush();
 
       // Y la campana del paciente, dentro de la transacción (ver
@@ -397,9 +425,47 @@ export class ServiceRequestsService {
               ])
             ).get(performer.suggestedPracticeSiteId) ?? null)
           : null,
+        suggestedCareSpace: point
+          ? { id: point.id, code: point.code, name: point.name }
+          : null,
         createdAt: sr.createdAt,
       };
     });
+  }
+
+  /**
+   * F5b (CONTRATO-F2-F5 §F5b): el punto de toma tiene que ser un espacio
+   * `SPACE_FN_SAMPLE_COLLECTION` activo y disponible de la sede sugerida
+   * (422 `COLLECTION_POINT_INVALID`; un espacio que no se ve —otro tenant—
+   * da lo mismo). Sin pedido explícito y en una orden de laboratorio, el
+   * primer punto disponible de la sede (o ninguno).
+   */
+  private async resolveCollectionPoint(
+    tx: EntityManager,
+    requested: string | undefined,
+    siteId: string | null,
+    categoryConceptId: string | undefined,
+  ): Promise<CollectionPointRow | null> {
+    if (requested) {
+      const point = siteId ? await collectionPoint(tx, requested) : null;
+      if (!point || point.practiceSiteId !== siteId || !point.available)
+        throw new PreconditionFailedException(
+          'El punto de toma no es un punto disponible de la sede sugerida',
+          { suggestedCareSpaceId: requested },
+          ClinicalErrorReason.COLLECTION_POINT_INVALID,
+        );
+      return point;
+    }
+    if (
+      !siteId ||
+      !categoryConceptId ||
+      analysisCategoryOf(categoryConceptId) !== 'LAB'
+    )
+      return null;
+    return (
+      (await collectionPointsOfSite(tx, siteId)).find((p) => p.available) ??
+      null
+    );
   }
 
   /**

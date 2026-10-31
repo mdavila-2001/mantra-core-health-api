@@ -3,6 +3,9 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../common';
 import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { InfrastructureAccessService } from './infrastructure-access.service';
+import { OpsCellBuilder } from './ops/ops-cell-builder';
+import { collectionPointsOfSite } from './ops/collection-points';
+import { CareSpaces } from '../entities';
 
 /** Código corto del tipo de ubicación (el mismo que acepta el alta). */
 const LOCATION_TYPE_CODE = new Map<string, string>([
@@ -77,7 +80,42 @@ export class SpaceAssetsReadService {
   constructor(
     private readonly em: EntityManager,
     private readonly access: InfrastructureAccessService,
+    private readonly cells: OpsCellBuilder,
   ) {}
+
+  /**
+   * `GET /sites/:siteId/sample-collection-points` (§F5b): puntos de toma
+   * ACTIVE y disponibles (sin bloqueo F2) de una sede del tenant activo, con
+   * su unidad y su celda operativa. Permisos «los de la orden/toma
+   * existentes»: cualquier miembro del tenant que ordena; la sede tiene que
+   * ser del tenant (404). Sin datos de paciente.
+   *
+   * @param siteId - Sede.
+   * @param tenantId - Tenant activo.
+   */
+  async collectionPoints(siteId: string, tenantId: string) {
+    const em = this.em.fork();
+    const target = await this.access.resolve(em, { siteId }, tenantId);
+    const points = (await collectionPointsOfSite(em, siteId)).filter(
+      (p) => p.available,
+    );
+    const spaces = points.length
+      ? await em.find(CareSpaces, { id: { $in: points.map((p) => p.id) } })
+      : [];
+    const byId = new Map(spaces.map((s) => [s.id, s]));
+    const out = [];
+    for (const p of points) {
+      const space = byId.get(p.id);
+      if (!space) continue;
+      out.push({
+        careSpace: { id: p.id, code: p.code, name: p.name },
+        unit: p.unitId ? { id: p.unitId, name: p.unitName ?? '' } : null,
+        cell: await this.cells.cellFor(em, space, target.site.practiceId),
+        hours: null,
+      });
+    }
+    return out;
+  }
 
   /**
    * Ubicaciones de inventario del espacio y farmacias de su sede.

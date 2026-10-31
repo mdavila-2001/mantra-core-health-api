@@ -190,6 +190,19 @@ export class CreateServiceRequestDto {
   suggestedPracticeSiteId?: string;
 
   /**
+   * F5b: punto de toma de muestra sugerido (espacio `SPACE_FN_SAMPLE_COLLECTION`
+   * de la sede sugerida). Sin él, en una orden de laboratorio se sugiere el
+   * primer punto disponible de la sede.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Punto de toma sugerido (F5b)',
+  })
+  @IsOptional()
+  @IsUUID()
+  suggestedCareSpaceId?: string;
+
+  /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
    * v4.2.17). Obligatorio cuando el chequeo previo (`duplicate-check`) marcó
    * `isDuplicate: true` y el médico decidió: exactamente el que devolvió el
@@ -324,6 +337,13 @@ export class ServiceRequestResponseDto {
    */
   @ApiProperty({ nullable: true, type: String })
   suggestedPracticeSiteName!: string | null;
+
+  /** F5b: punto de toma sugerido, o `null`. */
+  @ApiProperty({
+    nullable: true,
+    description: 'Punto de toma sugerido {id, code, name} (F5b)',
+  })
+  suggestedCareSpace!: { id: string; code: string; name: string } | null;
 
   /**
    * Fecha y hora en que se creó el registro.

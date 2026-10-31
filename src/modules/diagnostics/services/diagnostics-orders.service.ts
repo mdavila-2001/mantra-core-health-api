@@ -86,6 +86,23 @@ export class DiagnosticsOrdersService {
 
     const truncated: string[] = [];
     const visibleOrders = this.cut(orders, limit, 'orders', truncated);
+    const spaceIds = [
+      ...new Set(
+        visibleOrders
+          .map((row) => row.suggestedCareSpaceId)
+          .filter((x): x is string => !!x),
+      ),
+    ];
+    const spaces = new Map(
+      (spaceIds.length
+        ? await em.execute<{ id: string; code: string; name: string }[]>(
+            'SELECT id, code, name FROM practice.care_spaces WHERE id = ANY(?::uuid[])',
+            [`{${spaceIds.join(',')}}`],
+            'all',
+          )
+        : []
+      ).map((r) => [r.id, r]),
+    );
     const [suggestedSiteNames, notesByOrder] = await Promise.all([
       this.siteNames.namesFor(
         em,
@@ -117,6 +134,9 @@ export class DiagnosticsOrdersService {
         suggestedPracticeSiteId: row.suggestedPracticeSiteId ?? null,
         suggestedPracticeSiteName: row.suggestedPracticeSiteId
           ? (suggestedSiteNames.get(row.suggestedPracticeSiteId) ?? null)
+          : null,
+        suggestedCareSpace: row.suggestedCareSpaceId
+          ? (spaces.get(row.suggestedCareSpaceId) ?? null)
           : null,
         createdAt: row.createdAt,
         previousDiagnosticReportId: row.previousDiagnosticReportId,
