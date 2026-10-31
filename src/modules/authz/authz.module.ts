@@ -1,3 +1,7 @@
+import { AuthzGovernanceController } from './controllers/authz-governance.controller';
+import { AuthzUserLifecycleService } from './services/authz-user-lifecycle.service';
+import { AuthzAccessReviewsService } from './services/authz-access-reviews.service';
+import { AuthzGovernanceReadService } from './services/authz-governance-read.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -80,8 +84,12 @@ import {
     AuthzPdpController,
     AuthzMeController,
     AuthzAdminController,
+    AuthzGovernanceController,
   ],
   providers: [
+    AuthzUserLifecycleService,
+    AuthzAccessReviewsService,
+    AuthzGovernanceReadService,
     // Repositorios
     PermissionCategoriesRepository,
     PermissionsRepository,

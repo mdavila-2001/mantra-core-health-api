@@ -14,7 +14,7 @@ remediación y publicación de drafts genéricos.
   find src/modules/system_ops -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **8 controllers, 24 rutas HTTP, 30 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **9 controllers, 27 rutas HTTP, 30 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -34,6 +34,9 @@ Entidades (`tableName`, 30 de 30 archivos `*.entity.ts`): `accepted_risks`, `ano
 | `POST /admin/ops/backup-policies` | SECURITY_ADMIN | `backup` |
 | `POST /admin/governance/drafts` | SECURITY_ADMIN | `draft` |
 | `POST /admin/governance/drafts/:id/publish` | SECURITY_ADMIN | `draft` |
+| `GET /admin/governance/policies` | ...PORTAL_READ_ROLES | `governance-read` |
+| `GET /admin/governance/policies/:id` | ...PORTAL_READ_ROLES | `governance-read` |
+| `GET /admin/governance/pii-fields` | ...PORTAL_READ_ROLES | `governance-read` |
 | `POST /admin/governance/entity-registry` | SECURITY_ADMIN | `governance-catalog` |
 | `POST /admin/governance/write-policies` | SECURITY_ADMIN | `governance-catalog` |
 | `PATCH /admin/governance/entity-registry/:id/write-policy` | SECURITY_ADMIN | `governance-catalog` |

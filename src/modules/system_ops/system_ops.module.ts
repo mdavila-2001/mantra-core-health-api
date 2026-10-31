@@ -5,6 +5,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
   GovernanceCatalogController,
+  GovernanceReadController,
   RetentionExecutionController,
   ResidencyController,
   LegalHoldController,
@@ -15,6 +16,7 @@ import {
 } from './controllers';
 import {
   GovernanceCatalogService,
+  GovernanceReadService,
   RetentionExecutionService,
   ResidencyService,
   LegalHoldService,
@@ -25,6 +27,7 @@ import {
 } from './services';
 import {
   GovernanceRepository,
+  GovernanceReadRepository,
   RetentionExecutionRepository,
   ResidencyRepository,
   LegalHoldRepository,
@@ -49,6 +52,7 @@ import {
   ],
   controllers: [
     GovernanceCatalogController,
+    GovernanceReadController,
     RetentionExecutionController,
     ResidencyController,
     LegalHoldController,
@@ -60,6 +64,7 @@ import {
   providers: [
     // Repositorios
     GovernanceRepository,
+    GovernanceReadRepository,
     RetentionExecutionRepository,
     ResidencyRepository,
     LegalHoldRepository,
@@ -74,6 +79,7 @@ import {
     { provide: RETENTION_DISPOSITION_EXECUTORS, useValue: [] },
     // Servicios
     GovernanceCatalogService,
+    GovernanceReadService,
     RetentionExecutionService,
     ResidencyService,
     LegalHoldService,

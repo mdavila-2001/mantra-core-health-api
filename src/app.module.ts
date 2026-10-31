@@ -44,6 +44,9 @@ import { audioEnvSchema } from './modules/audio_assets/audio.env';
 import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admissions.config';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
+import { GovernanceAdminModule } from './modules/governance_admin/governance_admin.module';
+import { ClinicalImportModule } from './modules/clinical_import/clinical-import.module';
+import { AdminCatalogsModule } from './modules/admin_catalogs/admin-catalogs.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ClinicalModule } from './modules/clinical/clinical.module';
@@ -193,6 +196,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AuthzModule,
     ConsentModule,
     AccountingModule,
+    AdminCatalogsModule,
+    GovernanceAdminModule,
+    ClinicalImportModule,
     AdsModule,
     AuditModule,
     AudioAssetsModule,
