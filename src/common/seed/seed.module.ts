@@ -95,6 +95,7 @@ import { PadronOrganizationsSeedService } from './padron-organizations-seed.serv
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
 import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import { SeedCensusService } from './seed-census.service';
+import { ToolRegistrySeedService } from './tool-registry-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -206,6 +207,7 @@ import { SeedCensusService } from './seed-census.service';
     PadronOrgAdminsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
+    ToolRegistrySeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -246,6 +248,7 @@ import { SeedCensusService } from './seed-census.service';
     PadronOrgAdminsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
+    ToolRegistrySeedService,
   ],
 })
 export class SeedModule {}
