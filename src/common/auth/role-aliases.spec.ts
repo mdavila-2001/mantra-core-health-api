@@ -4,7 +4,7 @@ import type { AuthenticatedUser } from './authenticated-user.interface';
 import {
   GOVERNANCE_VIEW_ROLES,
   LEGAL_HOLD_VIEW_ROLES,
-} from '../../modules/system_ops/governance-read.roles';
+} from './governance-read.roles';
 import {
   CATALOG_WRITE_ROLES,
   PORTAL_VIEW_ROLES,

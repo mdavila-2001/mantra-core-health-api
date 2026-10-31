@@ -20,7 +20,7 @@ import {
   PolicyPageDto,
   PolicyParamDto,
 } from '../dto/governance-read.dto';
-import { GOVERNANCE_VIEW_ROLES } from '../governance-read.roles';
+import { GOVERNANCE_VIEW_ROLES } from '../../../common/auth/governance-read.roles';
 import { GovernanceReadService } from '../services/governance-read.service';
 
 /**

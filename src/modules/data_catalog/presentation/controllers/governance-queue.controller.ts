@@ -11,7 +11,7 @@ import { PlatformTenantOptional } from '../../../../common/tenant/platform-tenan
 import {
   GOVERNANCE_VIEW_ROLES,
   rolesWithoutPlatformScope,
-} from '../../../system_ops/governance-read.roles';
+} from '../../../../common/auth/governance-read.roles';
 import { GovernanceQueueService } from '../../application/governance-queue.service';
 import { JobsQueryDto, ReviewQueueQueryDto } from '../dto/governance-queue.dto';
 

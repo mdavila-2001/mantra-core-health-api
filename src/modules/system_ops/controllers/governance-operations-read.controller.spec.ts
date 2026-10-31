@@ -18,7 +18,7 @@ import { TracingService } from '../../../observability';
 import {
   GOVERNANCE_VIEW_ROLES,
   LEGAL_HOLD_VIEW_ROLES,
-} from '../governance-read.roles';
+} from '../../../common/auth/governance-read.roles';
 import { GovernanceOperationsReadRepository } from '../repositories/governance-operations-read.repository';
 import { GovernanceOperationsReadService } from '../services/governance-operations-read.service';
 import { GovernanceOperationsReadController } from './governance-operations-read.controller';
