@@ -70,6 +70,10 @@ import {
  * rutas `patients/me/*`, que el propio paciente ejerce sobre sí mismo y para las
  * que basta con la sesión: lo único que le piden es ser el titular de la cuenta,
  * y el sujeto lo resuelve el servidor —no hay parámetro que apunte a otro—.
+ *
+ * Esas rutas `me`, y `patients/:profileId/related-persons` (titular o
+ * plataforma, `ProfileOwnershipService.assertOwnsPatientProfile`), llevan
+ * `@Roles()` vacío (O3-3) donde no lo documenta ya un comentario propio.
  */
 @ApiTags('profiles-patients')
 @ApiBearerAuth()
@@ -96,6 +100,7 @@ export class ProfilesPatientsController {
    * @returns Datos básicos del paciente.
    */
   @Get('patients/me/summary')
+  @Roles()
   @AccessLogged({ resourceType: 'PATIENT_PROFILE_SUMMARY', patient: 'actor' })
   @ApiOperation({ summary: 'Consultar el resumen propio' })
   getOwnSummary(
@@ -204,6 +209,7 @@ export class ProfilesPatientsController {
     entityId: 'result.id',
   })
   @Delete('patients/me/photo')
+  @Roles()
   @ApiOperation({ summary: 'Quitar la propia foto de perfil' })
   removeOwnPhoto(
     @CurrentUser() actor: AuthenticatedUser,
@@ -253,6 +259,7 @@ export class ProfilesPatientsController {
     entityId: 'result.id',
   })
   @Post('patients/me/dependents')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar un dependiente (menor o adulto mayor tutelado)',
@@ -535,6 +542,7 @@ export class ProfilesPatientsController {
     entityId: 'param:profileId',
   })
   @Post('patients/:profileId/related-persons')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar persona relacionada / contacto de emergencia',

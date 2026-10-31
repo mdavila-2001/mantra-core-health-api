@@ -29,6 +29,7 @@ Dos niveles distintos, no uno solo:
 
 ## Ver también
 
+- [Variables en producción](../operacion/variables-produccion.md)
 - [Variables de entorno](../getting-started/environment-variables.md)
 - [Ambientes](environments.md)
 - [Configurar Gmail como proveedor real de email](gmail-provider-setup.md)

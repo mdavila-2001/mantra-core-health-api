@@ -16,7 +16,10 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { CLIENT_ERROR_CLASSES, type ClientErrorClass } from '../../telemetry.concepts';
+import {
+  CLIENT_ERROR_CLASSES,
+  type ClientErrorClass,
+} from '../../telemetry.concepts';
 
 const SCREEN_SIZES = ['movil', 'tableta', 'escritorio'] as const;
 
@@ -32,13 +35,20 @@ export class ClientErrorItemDto {
   @MaxLength(120)
   errorType!: string;
 
-  @ApiPropertyOptional({ maxLength: 500, description: 'Sin stack ni cuerpo; se redacta de nuevo en el servidor.' })
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Sin stack ni cuerpo; se redacta de nuevo en el servidor.',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
   message?: string;
 
-  @ApiPropertyOptional({ maxLength: 300, description: 'Plantilla de ruta sin ids (misma lista cerrada que la ruta anónima).' })
+  @ApiPropertyOptional({
+    maxLength: 300,
+    description:
+      'Plantilla de ruta sin ids (misma lista cerrada que la ruta anónima).',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(300)
@@ -79,13 +89,20 @@ export class ClientErrorItemDto {
   @MaxLength(60)
   apiErrorCode?: string;
 
-  @ApiPropertyOptional({ maxLength: 80, description: 'X-Request-Id de la respuesta; enlaza con observability.error_events.' })
+  @ApiPropertyOptional({
+    maxLength: 80,
+    description:
+      'X-Request-Id de la respuesta; enlaza con observability.error_events.',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(80)
   requestId?: string;
 
-  @ApiPropertyOptional({ maxLength: 40, description: 'Código dictable E-… que ve la persona.' })
+  @ApiPropertyOptional({
+    maxLength: 40,
+    description: 'Código dictable E-… que ve la persona.',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(40)
@@ -113,14 +130,20 @@ export class ClientErrorItemDto {
   @IsBoolean()
   isOnline?: boolean;
 
-  @ApiPropertyOptional({ minimum: 0, maximum: 100000, description: 'Repeticiones suprimidas en el cliente.' })
+  @ApiPropertyOptional({
+    minimum: 0,
+    maximum: 100000,
+    description: 'Repeticiones suprimidas en el cliente.',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(100000)
   suppressedCount?: number;
 
-  @ApiPropertyOptional({ description: 'Se ignora: la huella la calcula el servidor.' })
+  @ApiPropertyOptional({
+    description: 'Se ignora: la huella la calcula el servidor.',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(64)
@@ -140,5 +163,8 @@ export class CaptureClientErrorsDto {
 
 export class ClientErrorsResponseDto {
   @ApiProperty() inserted!: number;
-  @ApiProperty({ description: 'Descartados por no traer versión de app reconocible.' }) rejected!: number;
+  @ApiProperty({
+    description: 'Descartados por no traer versión de app reconocible.',
+  })
+  rejected!: number;
 }

@@ -56,6 +56,11 @@ x-app-env: &app-env
   DB_USER: ${DB_USER:-${POSTGRES_USER}}
   DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD}}
   DB_NAME: ${DB_NAME:-${POSTGRES_DB}}
+  # Rol de RUNTIME (HZ-05 · C-3): `mantra_app`, sin SUPERUSER ni BYPASSRLS.
+  # `postgres-init` le habilita LOGIN con DB_APP_PASSWORD. Vacíos, la API cae al
+  # rol dueño (DB_USER), que ignora RLS: reservalo para DDL, migraciones y seed.
+  DB_APP_USER: ${DB_APP_USER:-}
+  DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
   # Obligatorio contra un Postgres gestionado: sin esto `orm.env.ts` cae a su
   # default `false`, y Neon corta el `startup` en claro. No estaba declarado
   # en este bloque, así que el `.env` no podía activarlo dentro del contenedor.
@@ -167,7 +172,9 @@ x-app-env: &app-env
   # CORS con `credentials: true`. Ver `src/common/auth/README.md`.
   AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-}
-  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  # Encendido por defecto (C-3). Con NODE_ENV=production cualquier otro valor
+  # aborta el arranque (SYSTEM_RLS_ENFORCE_DISABLED).
+  RLS_ENFORCE: ${RLS_ENFORCE:-true}
   MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
   # Materialización del esquema. ESTA VARIABLE TIENE QUE ESTAR AQUÍ.
   #
@@ -380,6 +387,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # HZ-05: habilita LOGIN del rol de runtime `mantra_app` (ver el script).
+      DB_APP_USER: ${DB_APP_USER:-}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
     volumes:
       # Por defecto se aplica la copia versionada del DDL (`database/SQL` y
       # `database/NoSQL`, regenerada desde el modelo con `yarn db:vendor`).

@@ -15,6 +15,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  Roles,
 } from '../../../common';
 import {
   CommunityReviewsService,
@@ -31,7 +32,12 @@ import {
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
 const DEFAULT_PAGE_LIMIT = 50;
 
-/** Endpoint de reviews verificadas de servicio. */
+/** Endpoint de reviews verificadas de servicio. *
+ * `@Roles()` vacío en cada ruta (O3-3): sin rol global. Reseñar exige perfil de
+ * paciente en la sesión y una atención elegible; responder exige actuar como la
+ * vitrina reseñada (`assertActsAsProfile`); el listado sólo muestra vitrinas
+ * públicas.
+ */
 @ApiTags('community-reviews')
 @ApiBearerAuth()
 @Controller('community/profiles')
@@ -54,6 +60,7 @@ export class CommunityReviewsController {
     entityId: 'result.id',
   })
   @Post(':profileId/reviews')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar una review verificada de servicio' })
   publishReview(
@@ -71,6 +78,7 @@ export class CommunityReviewsController {
    * paciente que escribió: ver `ServiceReviewDto`.
    */
   @Get(':profileId/reviews')
+  @Roles()
   @ApiOperation({ summary: 'Reviews publicadas de un perfil' })
   listProfileReviews(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -96,6 +104,7 @@ export class CommunityReviewsController {
     entityId: 'result.id',
   })
   @Post(':profileId/reviews/:reviewId/responses')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Responder una reseña de la propia vitrina' })
   respondToReview(
