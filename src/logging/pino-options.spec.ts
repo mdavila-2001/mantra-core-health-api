@@ -136,6 +136,96 @@ describe('redacción del token del enlace compartido de receta', () => {
       expect(headers.referer).toContain(TOKEN);
     });
 
+    it.each([
+      ['public', ['public', 'prescription-shares', TOKEN]],
+      ['pharmacy', ['pharmacy', 'prescription-shares', TOKEN]],
+      ['clinical', ['clinical', 'prescription-shares', 'by-token', TOKEN]],
+    ])(
+      'saca el token de params.path (comodín de nestjs-pino) en la ruta %s',
+      (_name, path) => {
+        const params = { path };
+        const serialized = serializeRequest({
+          method: 'GET',
+          url: `/${path.join('/')}`,
+          params,
+        });
+        expect(JSON.stringify(serialized)).not.toContain(TOKEN);
+        expect((serialized.params as { path: string[] }).path).toEqual([
+          ...path.slice(0, -1),
+          REDACTED_SHARE_TOKEN,
+        ]);
+        // El original no se toca: lo siguen leyendo los handlers.
+        expect(params.path[path.length - 1]).toBe(TOKEN);
+      },
+    );
+
+    it('saca el token aunque la url ya llegue redactada o venga en otro campo', () => {
+      const serialized = serializeRequest({
+        method: 'GET',
+        url: `/public/prescription-shares/${REDACTED_SHARE_TOKEN}`,
+        params: { path: ['public', 'prescription-shares', TOKEN] },
+        query: { next: `/public/prescription-shares/${TOKEN}` },
+        originalUrl: `/public/prescription-shares/${TOKEN}`,
+        path: `/public/prescription-shares/${TOKEN}`,
+        remoteAddress: '127.0.0.1',
+      });
+      expect(JSON.stringify(serialized)).not.toContain(TOKEN);
+      expect(serialized.remoteAddress).toBe('127.0.0.1');
+    });
+
+    it('saca el token codificado (%XX) de params.path sin tocar otros campos', () => {
+      const encoded = TOKEN.replace('Q2', 'Q%32');
+      const serialized = serializeRequest({
+        method: 'GET',
+        url: `/public/prescription-shares/${encoded}`,
+        params: { path: ['public', 'prescription-shares', TOKEN] },
+        headers: { 'user-agent': 'x', host: 'api.alovida.test' },
+      });
+      expect(JSON.stringify(serialized)).not.toContain(TOKEN);
+      expect(JSON.stringify(serialized)).not.toContain(encoded);
+      expect(serialized.headers).toEqual({
+        'user-agent': 'x',
+        host: 'api.alovida.test',
+      });
+    });
+
+    it('un tramo corto no mutila el resto de la petición', () => {
+      const serialized = serializeRequest({
+        method: 'GET',
+        url: '/public/prescription-shares/x',
+        headers: { 'user-agent': 'axios x y' },
+      });
+      expect(serialized.url).toBe('/public/prescription-shares/[token]');
+      expect(serialized.headers).toEqual({ 'user-agent': 'axios x y' });
+    });
+
+    it('saca el token de la query y de un Referer con returnUrl (flujo «Soy farmacia»)', () => {
+      const serialized = serializeRequest({
+        method: 'GET',
+        url: `/iam/auth/me?next=%2Frx%2F${TOKEN}`,
+        query: { next: `/rx/${TOKEN}` },
+        headers: {
+          referer: `https://app.alovida.test/auth?returnUrl=%2Frx%2F${TOKEN}`,
+        },
+        remoteAddress: '10.0.0.7',
+      });
+      expect(JSON.stringify(serialized)).not.toContain(TOKEN);
+      expect(serialized.url).toBe('/iam/auth/me?next=%2Frx%2F[token]');
+      expect(serialized.query).toEqual({ next: '/rx/[token]' });
+      expect((serialized.headers as { referer: string }).referer).toBe(
+        'https://app.alovida.test/auth?returnUrl=%2Frx%2F[token]',
+      );
+      expect(serialized.remoteAddress).toBe('10.0.0.7');
+    });
+
+    it('una query sin ruta con token no cambia', () => {
+      const query = {
+        returnUrl: '/verify/rx/0d9f7d8c-6a0b-4f47-9a65-2a3c0a1c2b3d',
+      };
+      const serialized = serializeRequest({ method: 'GET', url: '/x', query });
+      expect(serialized.query).toBe(query);
+    });
+
     it('deja igual una petición de otra ruta', () => {
       const req = { method: 'GET', url: '/health', params: { token: 'x' } };
       expect(serializeRequest(req)).toEqual({
@@ -212,6 +302,49 @@ describe('redacción del token del enlace compartido de receta', () => {
         });
         await new Promise((resolve) => setImmediate(resolve));
         const log = lines.join('');
+        expect(log).toContain('[token]');
+        expect(log).not.toContain(TOKEN);
+      },
+    );
+
+    it.each([
+      ['public', ['public', 'prescription-shares', TOKEN]],
+      ['pharmacy', ['pharmacy', 'prescription-shares', TOKEN]],
+      ['clinical', ['clinical', 'prescription-shares', 'by-token', TOKEN]],
+    ])(
+      'con params.path en la línea (%s) el token no está en ningún campo del log',
+      async (_name, path) => {
+        // Lo que Express deja en `req.params` con el comodín de nestjs-pino.
+        const wildcard = createServer((req, res) => {
+          (req as unknown as { params: unknown }).params = { path };
+          wildcardLogger(req, res);
+          res.statusCode = 200;
+          res.end('{}');
+        });
+        const { pinoHttp: options } = buildPinoOptions() as {
+          pinoHttp: Record<string, unknown>;
+        };
+        const wildcardLogger = pinoHttp(
+          { ...options, level: 'info', transport: undefined } as never,
+          new Writable({
+            write(chunk: Buffer, _encoding, done) {
+              lines.push(chunk.toString('utf8'));
+              done();
+            },
+          }),
+        );
+        await new Promise<void>((resolve) =>
+          wildcard.listen(0, '127.0.0.1', resolve),
+        );
+        try {
+          const { port } = wildcard.address() as AddressInfo;
+          await fetch(`http://127.0.0.1:${port}/${path.join('/')}`);
+          await new Promise((resolve) => setImmediate(resolve));
+        } finally {
+          await new Promise<void>((resolve) => wildcard.close(() => resolve()));
+        }
+        const log = lines.join('');
+        expect(log).toContain('"params"');
         expect(log).toContain('[token]');
         expect(log).not.toContain(TOKEN);
       },
