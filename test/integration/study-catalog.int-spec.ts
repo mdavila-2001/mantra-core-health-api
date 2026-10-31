@@ -109,6 +109,32 @@ describe('Catálogo de estudios (integración, Postgres real)', () => {
       ).toBe(true);
     });
 
+    it('trae sección, nombres de componentes, región y lateralidad sembrados (aditivo)', async () => {
+      const labs = await http()
+        .get('/clinical/study-catalog')
+        .query({ family: 'LAB', q: 'hemograma', limit: 100 })
+        .expect(200);
+      const hemo = labs.body.items.find(
+        (i: { code: string }) => i.code === 'HEMOGRAMA',
+      );
+      expect(hemo.section).toEqual({ code: 'HEMATO', name: 'Hematología' });
+      expect(hemo.componentNames.length).toBeGreaterThan(5);
+      expect(hemo.componentNames.length).toBeLessThanOrEqual(60);
+      expect(hemo.componentNames.length).toBe(hemo.componentCount);
+      expect(hemo.regionCode).toBeNull();
+      expect(hemo.requiresLaterality).toBeNull();
+      const imgs = await http()
+        .get('/clinical/study-catalog')
+        .query({ family: 'IMAGING', q: 'mano', limit: 100 })
+        .expect(200);
+      for (const i of imgs.body.items) {
+        expect(i.section).toBeNull();
+        expect(i.componentNames).toEqual([]);
+        expect(i.regionCode).toEqual(expect.any(String));
+        expect(typeof i.requiresLaterality).toBe('boolean');
+      }
+    });
+
     it('pagina por cursor sin repetir ni saltar, en orden alfabético', async () => {
       const all: string[] = [];
       let cursor: string | undefined;
