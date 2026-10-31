@@ -535,6 +535,7 @@ components:
             - diagnostic_units.equipment.status_changed
             - diagnostic_units.equipment.resource_linked
             - clinical.service_request.collection_point_suggested
+            - scheduling.template.care_space_set
         aggregateType:
           type: string
           enum:
@@ -543,6 +544,7 @@ components:
             - accounting.cost_centers
             - diagnostic_units.diagnostic_equipment
             - clinical.service_requests
+            - scheduling.schedule_templates
         aggregateId:
           type: string
           format: uuid

@@ -68,6 +68,7 @@ import { CommonModule } from '../common/common.module';
 // `messaging` no importa `scheduling`, así que la dependencia no cierra ciclo.
 import { MessagingModule } from '../messaging/messaging.module';
 import { CARE_SPACE_DIRECTORY_PORT } from './application/ports/care-space-directory.port';
+import { TemplateCareSpaceGuard } from './application/catalog/support/template-care-space-guard';
 import { PracticeCareSpaceDirectoryAdapter } from './infrastructure/adapters/practice-care-space-directory.adapter';
 // TAREA-15 · el aviso de agenda también llega al chat de `SupportAdmin`
 // (`community.conversations`, reusado tal cual). `community` no importa
@@ -181,6 +182,7 @@ import { BillingBookingAdapter } from './infrastructure/adapters/billing-booking
     SchedulingFlexibleController,
   ],
   providers: [
+    TemplateCareSpaceGuard,
     FormInstanceOriginValidator,
     // La regla de pertenencia del médico a una organización, que consultan
     // el catálogo (al publicar) y las reservas (al aceptar).

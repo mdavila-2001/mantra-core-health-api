@@ -168167,6 +168167,11 @@
       "SchedulingCreateTemplateDto": {
         "type": "object",
         "properties": {
+          "careSpaceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Consultorio de la agenda (F5d): CONSULTING_ROOM/PROCEDURE_ROOM/IMAGING_ROOM agendable de la práctica"
+          },
           "name": {
             "type": "string",
             "maxLength": 200
@@ -168210,6 +168215,11 @@
       "SchedulingUpdateTemplateDto": {
         "type": "object",
         "properties": {
+          "careSpaceId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
           "name": {
             "type": "string",
             "maxLength": 200
