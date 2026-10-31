@@ -1272,6 +1272,7 @@ export class CareSpacesAdminService {
         ext.inventoryLocations.sampleIds,
         ext.inventoryLocations.count,
       ),
+      blocker('EQUIPMENT', ext.equipment.sampleIds, ext.equipment.count),
     ].filter((b): b is Blocker => b !== null);
   }
 

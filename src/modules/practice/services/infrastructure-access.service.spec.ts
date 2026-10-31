@@ -2,6 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { DELEG } from '../../delegated_access/delegated_access.concepts';
 import { PRAC } from '../practice.concepts';
 import { INFRA_F2_POLICY } from '../policies/infra-f2.policy';
+import { INFRA_F5F_POLICY } from '../../accounting/policies/infra-f5f.policy';
 import { grantContains, rolesOn } from '../domain/ops/infra-scope';
 import {
   InfraPolicyRegistry,
@@ -25,6 +26,7 @@ function build(
 ) {
   const registry = new InfraPolicyRegistry();
   registry.register(INFRA_F2_POLICY);
+  registry.register(INFRA_F5F_POLICY);
   const structureAccess = {
     adminLevelOf: jest.fn<any>().mockResolvedValue(adminLevel),
   };
@@ -425,5 +427,94 @@ describe('translateInfraWriteError (§0.2)', () => {
     expect(err.reason).toBe('BLOCK_OVERLAP');
     const other = new Error('x');
     expect(translateInfraWriteError(other)).toBe(other);
+  });
+
+  describe('nivel práctica (F5f, assertPracticeLevel)', () => {
+    const tx = (tenant: string | null) => ({
+      execute: jest
+        .fn<any>()
+        .mockResolvedValue(tenant ? [{ tenant_id: tenant }] : []),
+    });
+
+    it('permitido: ACCOUNTING_APPROVER global ubica activos de su tenant', async () => {
+      const { svc } = build();
+      await expect(
+        svc.assertPracticeLevel(
+          tx(TENANT) as any,
+          { id: 'u-1', roles: ['ACCOUNTING_APPROVER'] } as any,
+          'p-1',
+          TENANT,
+          'f5f.accounting.write',
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('fail-closed por tenant: práctica de otro tenant → 404', async () => {
+      const { svc } = build();
+      const err: any = await svc
+        .assertPracticeLevel(
+          tx('t-2') as any,
+          { id: 'u-1', roles: ['ACCOUNTING_APPROVER'] } as any,
+          'p-x',
+          TENANT,
+          'f5f.accounting.write',
+        )
+        .catch((e) => e);
+      expect(err.getStatus()).toBe(404);
+    });
+
+    it('rol global con ámbito de otro tenant (MCH-001) no cuenta → 403', async () => {
+      const { svc } = build();
+      const err: any = await svc
+        .assertPracticeLevel(
+          tx(TENANT) as any,
+          {
+            id: 'u-1',
+            roles: ['ACCOUNTING_APPROVER'],
+            scopedRoles: { 't-2': ['ACCOUNTING_APPROVER'] },
+          } as any,
+          'p-1',
+          TENANT,
+          'f5f.accounting.write',
+        )
+        .catch((e) => e);
+      expect(err.getStatus()).toBe(403);
+    });
+
+    it('una asignación de sede no da nivel práctica; BILLING global sólo lee', async () => {
+      const { svc } = build([
+        grant(DELEG.ASSIGN_ROLE_BILLING, DELEG.SCOPE_SITE),
+      ]);
+      const err: any = await svc
+        .assertPracticeLevel(
+          tx(TENANT) as any,
+          actor,
+          'p-1',
+          TENANT,
+          'f5f.accounting.read',
+        )
+        .catch((e) => e);
+      expect(err.getStatus()).toBe(403);
+      const billing = { id: 'u-1', roles: ['BILLING'] } as any;
+      await expect(
+        svc.assertPracticeLevel(
+          tx(TENANT) as any,
+          billing,
+          'p-1',
+          TENANT,
+          'f5f.accounting.read',
+        ),
+      ).resolves.toBeUndefined();
+      const w: any = await svc
+        .assertPracticeLevel(
+          tx(TENANT) as any,
+          billing,
+          'p-1',
+          TENANT,
+          'f5f.accounting.write',
+        )
+        .catch((e) => e);
+      expect(w.getStatus()).toBe(403);
+    });
   });
 });

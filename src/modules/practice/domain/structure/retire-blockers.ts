@@ -68,6 +68,7 @@ export const NEXT_ACTION: Readonly<Record<BlockerKind, NextAction>> = {
   },
   EQUIPMENT: {
     label: 'Reubicar los equipos que están instalados en el espacio.',
+    route: '?tab=equipment',
   },
   ACTIVE_CHILD_UNITS: {
     label: 'Retirar o reasignar primero las unidades hijas activas.',
@@ -82,16 +83,11 @@ export const NEXT_ACTION: Readonly<Record<BlockerKind, NextAction>> = {
 };
 
 /**
- * Bloqueos del espacio que todavía no se verifican. `INVENTORY_LOCATION` se
- * verifica desde F5c; `EQUIPMENT` queda para F5f. Se informan como no
- * verificables, nunca como cero.
+ * Bloqueos del espacio que todavía no se verifican. Desde F5c/F5f se verifican
+ * todos (`INVENTORY_LOCATION`, `EQUIPMENT`); la lista queda vacía y se
+ * conserva en la respuesta para no romper a los clientes.
  */
-export const UNVERIFIABLE_SPACE_CHECKS: readonly UnverifiableCheck[] = [
-  {
-    kind: 'EQUIPMENT',
-    why: 'diagnostic_units.diagnostic_equipment no tiene care_space_id (F5)',
-  },
-];
+export const UNVERIFIABLE_SPACE_CHECKS: readonly UnverifiableCheck[] = [];
 
 /** Cuántos ids de ejemplo devuelve cada bloqueo. */
 export const BLOCKER_SAMPLE_SIZE = 5;

@@ -43501,6 +43501,252 @@
         "description": "Consentimientos informados registrados en el encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/accounting/infrastructure-items": {
+      "get": {
+        "operationId": "AccountingSpaceController_listItems",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activos de infraestructura con su espacio (F5f)",
+        "tags": [
+          "accounting"
+        ],
+        "description": "Activos de infraestructura con su espacio (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/accounting/infrastructure-items/{id}": {
+      "patch": {
+        "operationId": "AccountingSpaceController_locateItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocateInfrastructureItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ubicar un activo en un espacio (F5f)",
+        "tags": [
+          "accounting"
+        ],
+        "description": "Ubicar un activo en un espacio (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/accounting/cost-centers": {
+      "get": {
+        "operationId": "AccountingSpaceController_listCostCenters",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Centros de costo con su unidad (F5f)",
+        "tags": [
+          "accounting"
+        ],
+        "description": "Centros de costo con su unidad (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/accounting/cost-centers/{id}/unit-link": {
+      "post": {
+        "operationId": "AccountingSpaceController_linkUnit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkCostCenterUnitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ligar un centro de costo a una unidad (F5f)",
+        "tags": [
+          "accounting"
+        ],
+        "description": "Ligar un centro de costo a una unidad (F5f). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/accounting/accounts": {
       "get": {
         "operationId": "AccountingLedgerController_chartOfAccounts",
@@ -110930,6 +111176,10 @@
   },
   "tags": [
     {
+      "name": "accounting",
+      "description": "Operaciones del dominio funcional accounting. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "accounting-accruals",
       "description": "Operaciones del dominio funcional accounting accruals. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -139424,6 +139674,33 @@
         },
         "required": [
           "decision"
+        ],
+        "additionalProperties": false
+      },
+      "LocateInfrastructureItemDto": {
+        "type": "object",
+        "properties": {
+          "careSpaceId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "careSpaceId"
+        ],
+        "additionalProperties": false
+      },
+      "LinkCostCenterUnitDto": {
+        "type": "object",
+        "properties": {
+          "clinicalUnitId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "clinicalUnitId"
         ],
         "additionalProperties": false
       },
