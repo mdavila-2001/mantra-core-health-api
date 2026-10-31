@@ -8,15 +8,17 @@ import { join, relative, sep } from 'node:path';
  * `tenant_id` desde v4.2.67).
  *
  * Verificado contra la base local con el rol `mantra_app` (evidencia
- * `docs/trabajo/2026-10-29-f1-api-infraestructura/evidencia/
- * rls-practice-sites-mantra_app.txt`): sin `app.current_tenant_id` —una ruta
+ * `rls-practice-sites-mantra_app.txt`, en el historial de git: commit
+ * e1805fa8, `docs/trabajo/2026-10-29-f1-api-infraestructura/evidencia/`):
+ * sin `app.current_tenant_id` —una ruta
  * `@Public`— se ven 0 sedes; con el tenant A, sólo las de A; con
  * `app.system_context`, todas.
  *
  * Cada lector queda acá con su análisis. Este spec **no** arregla nada: fija
  * el inventario para que un lector nuevo no aparezca sin que alguien decida
  * su contexto (SYSTEM, política propia o lectura acotada al tenant). Las
- * decisiones están pendientes del orquestador (REPORTE de F1, «Riesgos»).
+ * decisiones las toma el orquestador: ver
+ * mdavila-2001/mantra-core-health-api#1167.
  */
 const KNOWN_READERS: Record<string, string> = {
   'community/repositories/public-search.repository.ts':

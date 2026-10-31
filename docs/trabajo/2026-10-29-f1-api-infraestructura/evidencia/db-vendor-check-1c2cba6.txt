@@ -1,4 +1,0 @@
-$ MODEL_REPO=<snapshot git archive 1c2cba6> bash scripts/db/vendor-ddl.sh --check
-=== database/SQL al día
-=== database/NoSQL al día
-EXIT=0
