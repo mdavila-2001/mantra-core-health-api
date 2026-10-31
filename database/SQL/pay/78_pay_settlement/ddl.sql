@@ -1,8 +1,8 @@
--- SALUD v4.2.68 · perfil pay · base pay_settlement · DDL completo en orden (generado de diagram_78_pay_settlement.puml)
+-- SALUD v4.2.82 · perfil pay · base pay_settlement · DDL completo en orden (generado de diagram_78_pay_settlement.puml)
 -- Archivo SQL plano, apto para `pool.query(readFileSync(...))`. NO editar a mano.
 
 -- >>> 02_tables.sql
--- SALUD v4.2.68 · módulo 78 · schema pay_settlement
+-- SALUD v4.2.82 · módulo 78 · schema pay_settlement
 -- Generado de diagram_78_pay_settlement.puml — NO editar a mano.
 
 
@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS "idempotency_keys" (
 );
 
 -- >>> 03_fk_intra.sql
--- SALUD v4.2.68 · módulo 78 · schema pay_settlement
+-- SALUD v4.2.82 · módulo 78 · schema pay_settlement
 -- Generado de diagram_78_pay_settlement.puml — NO editar a mano.
 
 
@@ -281,7 +281,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- >>> 04_indexes.sql
--- SALUD v4.2.68 · módulo 78 · schema pay_settlement
+-- SALUD v4.2.82 · módulo 78 · schema pay_settlement
 -- Generado de diagram_78_pay_settlement.puml — NO editar a mano.
 
 
@@ -312,11 +312,17 @@ CREATE INDEX IF NOT EXISTS "outbox_events_pending_idx" ON "outbox_events" ("seq"
 CREATE INDEX IF NOT EXISTS "idempotency_keys_expires_at_idx" ON "idempotency_keys" ("expires_at");
 
 -- >>> 05_constraints.sql
--- SALUD v4.2.68 · perfil pay · módulo 78 · base pay_settlement
+-- SALUD v4.2.82 · perfil pay · módulo 78 · base pay_settlement
 -- Generado de diagram_78_pay_settlement.puml — NO editar a mano.
 
 -- Complementos del perfil pay (gen_ddl_pay.py): funciones, CHECK, FK compuestas y triggers.
 -- Aplicar DESPUÉS de 04_indexes.sql. Idempotente.
+
+CREATE OR REPLACE FUNCTION forbid_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'la tabla % es inmutable (%)', TG_TABLE_NAME, TG_OP USING ERRCODE = 'integrity_constraint_violation';
+END;
+$$;
 
 ALTER TABLE "settlement_merchant_marks" DROP CONSTRAINT IF EXISTS "settlement_merchant_marks_mode_check";
 ALTER TABLE "settlement_merchant_marks" ADD CONSTRAINT "settlement_merchant_marks_mode_check" CHECK (mode IN ('test', 'live'));
@@ -461,3 +467,11 @@ ALTER TABLE "settlement_adjustment_requests" ADD CONSTRAINT "settlement_adjustme
 
 ALTER TABLE "idempotency_keys" DROP CONSTRAINT IF EXISTS "idempotency_keys_state_check";
 ALTER TABLE "idempotency_keys" ADD CONSTRAINT "idempotency_keys_state_check" CHECK (state IN ('started', 'completed'));
+
+-- Rastro de auditoría de SOLO-AGREGAR (CLAUDE.md regla 11): payout.service.ts (INSERT … SELECT … WHERE NOT EXISTS) y reconciliation.service.ts (INSERT) son los únicos que escriben
+-- y no hay UPDATE/DELETE/TRUNCATE sobre ella en services/*/src, test/ ni e2e/. Una política de retención o de supresión sería un procedimiento aparte (decisión de legal), no un DELETE suelto.
+DROP TRIGGER IF EXISTS "settlement_audit_immutable" ON "settlement_audit";
+CREATE TRIGGER settlement_audit_immutable BEFORE UPDATE OR DELETE ON settlement_audit FOR EACH ROW EXECUTE FUNCTION forbid_mutation();
+
+DROP TRIGGER IF EXISTS "settlement_audit_no_truncate" ON "settlement_audit";
+CREATE TRIGGER settlement_audit_no_truncate BEFORE TRUNCATE ON settlement_audit FOR EACH STATEMENT EXECUTE FUNCTION forbid_mutation();

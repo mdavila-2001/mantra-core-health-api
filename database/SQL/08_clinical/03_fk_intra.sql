@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 08 · schema clinical
+-- SALUD v4.2.82 · módulo 08 · schema clinical
 -- Generado de diagram_08_clinical.puml — NO editar a mano.
 
 
@@ -77,6 +77,12 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "clinical"."service_request_notes"
         ADD CONSTRAINT "fk_service_request_notes_service_request_id" FOREIGN KEY ("service_request_id")
+        REFERENCES "clinical"."service_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_request_components"
+        ADD CONSTRAINT "fk_service_request_components_service_request_id" FOREIGN KEY ("service_request_id")
         REFERENCES "clinical"."service_requests" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
@@ -189,6 +195,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "clinical"."inpatient_census_entries"
         ADD CONSTRAINT "fk_inpatient_census_entries_census_day_id" FOREIGN KEY ("census_day_id")
         REFERENCES "clinical"."inpatient_census_days" ("id");
@@ -228,11 +240,4 @@ DO $$ BEGIN
     ALTER TABLE "clinical"."observation_notes"
         ADD CONSTRAINT "fk_observation_notes_observation_id" FOREIGN KEY ("observation_id")
         REFERENCES "clinical"."observations" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
--- + patient_admission_footprints (Admisión crea el vínculo, 2026-10-31)
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_encounter_id" FOREIGN KEY ("encounter_id")
-        REFERENCES "clinical"."encounters" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

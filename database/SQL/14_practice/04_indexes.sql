@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 14 · schema practice
+-- SALUD v4.2.82 · módulo 14 · schema practice
 -- Generado de diagram_14_practice.puml — NO editar a mano.
 
 
@@ -137,6 +137,8 @@ CREATE INDEX IF NOT EXISTS "ix_care_spaces_bed_category_concept_id" ON "practice
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_care_spaces_site_code" ON "practice"."care_spaces" ("practice_site_id", "code");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_care_spaces_tenant_id_id" ON "practice"."care_spaces" ("tenant_id", "id");
+
+CREATE INDEX IF NOT EXISTS "ix_care_spaces_location_path" ON "practice"."care_spaces" (location_path varchar_pattern_ops);
 
 CREATE INDEX IF NOT EXISTS "ix_care_spaces_availability_reason_concept_id" ON "practice"."care_spaces" ("availability_reason_concept_id");
 
@@ -332,6 +334,8 @@ CREATE INDEX IF NOT EXISTS "ix_practitioner_support_assignments_updated_by_user_
 
 CREATE INDEX IF NOT EXISTS "gist_practitioner_support_assignments_effective_period" ON "practice"."practitioner_support_assignments" USING gist (daterange(valid_from, valid_to, '[)'));
 
+CREATE INDEX IF NOT EXISTS "ix_prac_support_assignments_initiated_by_party" ON "practice"."practitioner_support_assignments" ("initiated_by_party_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_practice_accreditations_practice_id" ON "practice"."practice_accreditations" ("practice_id");
 
 CREATE INDEX IF NOT EXISTS "ix_practice_accreditations_practice_site_id" ON "practice"."practice_accreditations" ("practice_site_id");
@@ -355,3 +359,17 @@ CREATE INDEX IF NOT EXISTS "ix_practice_settings_category_concept_id" ON "practi
 CREATE INDEX IF NOT EXISTS "ix_practice_settings_created_by_user_id" ON "practice"."practice_settings" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_practice_settings_updated_by_user_id" ON "practice"."practice_settings" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_location_assignments_tenant_id" ON "practice"."practitioner_location_assignments" ("tenant_id", "status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_location_assignments_practitioner_role_a_id" ON "practice"."practitioner_location_assignments" ("practitioner_role_assignment_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_location_assignments_care_space_id" ON "practice"."practitioner_location_assignments" ("care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_location_assignments_status_concept_id" ON "practice"."practitioner_location_assignments" ("status_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_practitioner_location_assignments_current" ON "practice"."practitioner_location_assignments" ("practitioner_role_assignment_id", "care_space_id") WHERE valid_to IS NULL;
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_location_assignments_created_by_user_id" ON "practice"."practitioner_location_assignments" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_practitioner_location_assignments_updated_by_user_id" ON "practice"."practitioner_location_assignments" ("updated_by_user_id");

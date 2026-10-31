@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 08 · schema clinical
+-- SALUD v4.2.82 · módulo 08 · schema clinical
 -- Generado de diagram_08_clinical.puml — NO editar a mano.
 
 
@@ -283,6 +283,20 @@ CREATE INDEX IF NOT EXISTS "ix_service_requests_custodian_tenant_id_status_conce
 CREATE INDEX IF NOT EXISTS "ix_service_requests_patient_profile_id_updated_at" ON "clinical"."service_requests" ("custodian_tenant_id", "patient_profile_id", "updated_at" DESC);
 
 CREATE INDEX IF NOT EXISTS "ix_service_requests_suggested_care_space_id" ON "clinical"."service_requests" ("suggested_care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_specimen_type_concept_id" ON "clinical"."service_requests" ("specimen_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_modality_concept_id" ON "clinical"."service_requests" ("modality_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_body_site_concept_id" ON "clinical"."service_requests" ("body_site_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_laterality_concept_id" ON "clinical"."service_requests" ("laterality_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_contrast_concept_id" ON "clinical"."service_requests" ("contrast_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_requisition_id" ON "clinical"."service_requests" ("custodian_tenant_id", "requisition_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_performer_inbox" ON "clinical"."service_requests" ("performer_tenant_id", "status_concept_id", "created_at", "id");
 
 CREATE INDEX IF NOT EXISTS "ix_diagnostic_reports_custodian_tenant_id" ON "clinical"."diagnostic_reports" ("custodian_tenant_id");
 
@@ -570,6 +584,22 @@ CREATE INDEX IF NOT EXISTS "ix_inpatient_census_days_site_date" ON "clinical"."i
 
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_inpatient_census_days_tenant_id_id" ON "clinical"."inpatient_census_days" ("tenant_id", "id");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_patient_admission_footprints_tenant_patient" ON "clinical"."patient_admission_footprints" ("tenant_id", "patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_patient_profile_id" ON "clinical"."patient_admission_footprints" ("patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_encounter_id" ON "clinical"."patient_admission_footprints" ("encounter_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_practice_site_id" ON "clinical"."patient_admission_footprints" ("practice_site_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_admission_origin_concept_id" ON "clinical"."patient_admission_footprints" ("admission_origin_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_identity_verification__51230394" ON "clinical"."patient_admission_footprints" ("identity_verification_method_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_referral_id" ON "clinical"."patient_admission_footprints" ("referral_id");
+
+CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_recorded_by_user_id" ON "clinical"."patient_admission_footprints" ("recorded_by_user_id");
+
 CREATE INDEX IF NOT EXISTS "ix_inpatient_census_entries_tenant_id" ON "clinical"."inpatient_census_entries" ("tenant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_inpatient_census_entries_census_day_id" ON "clinical"."inpatient_census_entries" ("census_day_id");
@@ -606,6 +636,16 @@ CREATE INDEX IF NOT EXISTS "ix_service_request_notes_clinical_note_header_id" ON
 
 CREATE INDEX IF NOT EXISTS "ix_service_request_notes_created_by_user_id" ON "clinical"."service_request_notes" ("created_by_user_id");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_service_request_components_request_component" ON "clinical"."service_request_components" ("service_request_id", "component_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_components_service_request_id" ON "clinical"."service_request_components" ("service_request_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_components_custodian_tenant_id" ON "clinical"."service_request_components" ("custodian_tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_components_component_concept_id" ON "clinical"."service_request_components" ("component_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_components_created_by_user_id" ON "clinical"."service_request_components" ("created_by_user_id");
+
 CREATE INDEX IF NOT EXISTS "ix_observation_reference_ranges_observation_id" ON "clinical"."observation_reference_ranges" ("observation_id");
 
 CREATE INDEX IF NOT EXISTS "ix_observation_reference_ranges_observation_component_id" ON "clinical"."observation_reference_ranges" ("observation_component_id");
@@ -621,20 +661,3 @@ CREATE INDEX IF NOT EXISTS "ix_observation_reference_ranges_created_by_user_id" 
 CREATE INDEX IF NOT EXISTS "ix_observation_notes_observation_id" ON "clinical"."observation_notes" ("observation_id");
 
 CREATE INDEX IF NOT EXISTS "ix_observation_notes_author_user_id" ON "clinical"."observation_notes" ("author_user_id");
-
--- + patient_admission_footprints (Admisión crea el vínculo, 2026-10-31)
-CREATE UNIQUE INDEX IF NOT EXISTS "ux_patient_admission_footprints_tenant_patient" ON "clinical"."patient_admission_footprints" ("tenant_id", "patient_profile_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_patient_profile_id" ON "clinical"."patient_admission_footprints" ("patient_profile_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_encounter_id" ON "clinical"."patient_admission_footprints" ("encounter_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_practice_site_id" ON "clinical"."patient_admission_footprints" ("practice_site_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_admission_origin_concept_id" ON "clinical"."patient_admission_footprints" ("admission_origin_concept_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_identity_verification__51230394" ON "clinical"."patient_admission_footprints" ("identity_verification_method_concept_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_referral_id" ON "clinical"."patient_admission_footprints" ("referral_id");
-
-CREATE INDEX IF NOT EXISTS "ix_patient_admission_footprints_recorded_by_user_id" ON "clinical"."patient_admission_footprints" ("recorded_by_user_id");

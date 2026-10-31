@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 14 · schema practice
+-- SALUD v4.2.82 · módulo 14 · schema practice
 -- Generado de diagram_14_practice.puml — NO editar a mano.
 
 
@@ -844,6 +844,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_support_assignments"
+        ADD CONSTRAINT "fk_practitioner_support_assignments_initiated_by_party_7e268d24" FOREIGN KEY ("initiated_by_party_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
     ALTER TABLE "practice"."practice_accreditations"
         ADD CONSTRAINT "fk_practice_accreditations_accreditation_type_concept_id" FOREIGN KEY ("accreditation_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
@@ -904,3 +911,31 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_practice_settings_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_location_assignments"
+        ADD CONSTRAINT "fk_practitioner_location_assignments_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_location_assignments"
+        ADD CONSTRAINT "fk_practitioner_location_assignments_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_location_assignments"
+        ADD CONSTRAINT "fk_practitioner_location_assignments_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practitioner_location_assignments"
+        ADD CONSTRAINT "fk_practitioner_location_assignments_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
