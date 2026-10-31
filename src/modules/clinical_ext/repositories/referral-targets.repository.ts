@@ -66,6 +66,13 @@ export class ReferralTargetsRepository {
   /**
    * Profesionales listables cuyo nombre contiene el texto.
    *
+   * Quedan fuera los que tienen la práctica principal en un tenant que no está
+   * `TENANT_ACTIVE`: la búsqueda los devolvería con ese `tenantId` y
+   * `POST /referrals` los rechaza (#1201). Un profesional sin práctica vigente
+   * (`tenantId` nulo) sigue saliendo: derivarle sin organización es válido.
+   * `practice.practices.tenant_id` tiene FK a `directory.tenants`, así que un
+   * `tenantId` sin fila de tenant no existe.
+   *
    * @param em - Contexto de persistencia.
    * @param q - Texto ya recortado (mínimo dos caracteres, lo valida el DTO).
    * @param activeAssignmentConceptId - Estado vigente de la asignación a práctica.
@@ -107,6 +114,12 @@ export class ReferralTargetsRepository {
           AND ${sqlSearchKey(
             `concat_ws(' ', p.display_name, p.name, p.middle_name, p.last_name, p.mother_last_name)`,
           )} LIKE ?
+          AND NOT EXISTS (
+              SELECT 1
+                FROM directory.tenants tn
+               WHERE tn.id = pr.tenant_id
+                 AND tn.status_concept_id IS DISTINCT FROM ?
+          )
         ORDER BY coalesce(p.display_name, p.last_name, p.name) ASC, hp.profile_id ASC
         LIMIT ?`,
       [
@@ -115,6 +128,7 @@ export class ReferralTargetsRepository {
         COMM.PROFILE_VISIBILITY_PUBLIC,
         CONCEPTS.STATE_ACTIVE,
         pattern,
+        CONCEPTS.TENANT_ACTIVE,
         limit,
       ],
       'all',
