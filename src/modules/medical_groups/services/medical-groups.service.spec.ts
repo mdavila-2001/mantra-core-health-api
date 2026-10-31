@@ -6,6 +6,7 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { MedicalGroupsService } from './medical-groups.service';
 import { MedicalGroupsErrorReason } from '../medical_groups.error-reasons';
 
@@ -102,6 +103,9 @@ function build() {
     findByIdsPage: mockFn(async (_em: any, ids: string[]) =>
       ids.map((id) => groups.get(id)).filter(Boolean),
     ),
+    remove: mockFn((_em: any, group: any) => {
+      groups.delete(group.id);
+    }),
   };
   const membersRepo = {
     create: mockFn((_em: any, data: any) => {
@@ -110,6 +114,14 @@ function build() {
       return member;
     }),
     findById: mockFn(async (_em: any, id: string) => members.get(id) ?? null),
+    remove: mockFn((_em: any, member: any) => {
+      members.delete(member.id);
+    }),
+    removeByGroup: mockFn(async (_em: any, groupId: string) => {
+      for (const [id, m] of members) {
+        if (m.groupId === groupId) members.delete(id);
+      }
+    }),
     findByGroup: mockFn(async (_em: any, groupId: string) =>
       [...members.values()].filter((m) => m.groupId === groupId),
     ),
@@ -972,6 +984,202 @@ describe('MedicalGroupsService', () => {
       await expect(
         d.service.updateExerciseNotes(created.id, 'x', outsider),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('edición y baja', () => {
+    const team = {
+      members: [
+        {
+          practitionerProfileId: 'pract-invitee',
+          roleTitle: 'Anestesista',
+          agreedPaymentAmount: '100.00',
+        },
+      ],
+    };
+
+    /** Un grupo con el invitado ya aceptado, por tanto programado. */
+    async function scheduled(d: ReturnType<typeof build>) {
+      const created = await d.service.create(baseDto(team), creator);
+      const memberId = created.members.find((m) => !m.isCreator)!.id;
+      const group = await d.service.respondToInvitation(
+        created.id,
+        memberId,
+        'ACCEPTED',
+        invitee,
+      );
+      return { group, memberId };
+    }
+
+    it('el creador corrige el lugar y borra las notas', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({ notesText: 'Traer insumos' }),
+        creator,
+      );
+      const res = await d.service.update(
+        created.id,
+        { locationText: '  Quirófano 3  ', notesText: '   ' },
+        creator,
+      );
+      expect(res.locationText).toBe('Quirófano 3');
+      expect(res.notesText).toBeUndefined();
+    });
+
+    it('un lugar vacío no se acepta', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), creator);
+      await expect(
+        d.service.update(created.id, { locationText: '  ' }, creator),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un integrante que no creó el grupo no lo edita ni lo elimina (403)', async () => {
+      const d = build();
+      const { group } = await scheduled(d);
+      await expect(
+        d.service.update(group.id, { locationText: 'Otro' }, invitee),
+      ).rejects.toBeInstanceOf(InsufficientRoleException);
+      await expect(d.service.remove(group.id, invitee)).rejects.toBeInstanceOf(
+        InsufficientRoleException,
+      );
+    });
+
+    it('quien no está en el grupo recibe 404', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), creator);
+      await expect(
+        d.service.remove(created.id, outsider),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('eliminar borra el equipo y el grupo', async () => {
+      const d = build();
+      const { group } = await scheduled(d);
+      await d.service.remove(group.id, creator);
+      expect(d.groups.size).toBe(0);
+      expect(d.members.size).toBe(0);
+    });
+
+    it('un grupo ya realizado no se edita ni se elimina', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), creator);
+      d.groups.get(created.id).scheduledAt = new Date(Date.now() - 60_000);
+      await expect(
+        d.service.update(created.id, { locationText: 'Otro' }, creator),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.remove(created.id, creator),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.groups.size).toBe(1);
+    });
+
+    it('un expediente cerrado es inmutable', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), creator);
+      d.groups.get(created.id).scheduledAt = new Date(
+        Date.now() - 10 * 86400000,
+      );
+      await expect(
+        d.service.remove(created.id, creator),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('agregar un cargo deja la invitación sin responder y el grupo esperando al equipo', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), creator);
+      expect(created.status).toBe('SCHEDULED');
+      const res = await d.service.addMember(
+        created.id,
+        {
+          practitionerProfileId: 'pract-invitee',
+          roleTitle: 'Anestesista',
+          agreedPaymentAmount: '250.00',
+        },
+        creator,
+      );
+      expect(res.status).toBe('PENDING_TEAM');
+      expect(res.members.find((m) => !m.isCreator)).toMatchObject({
+        roleTitle: 'Anestesista',
+        agreedPaymentAmount: '250.00',
+        invitationStatus: 'PENDING',
+      });
+    });
+
+    it('no se repite un profesional ni se invita a uno de otra organización', async () => {
+      const d = build();
+      const { group } = await scheduled(d);
+      const input = (id: string) => ({
+        practitionerProfileId: id,
+        roleTitle: 'Instrumentista',
+        agreedPaymentAmount: '80.00',
+      });
+      await expect(
+        d.service.addMember(group.id, input('pract-invitee'), creator),
+      ).rejects.toBeInstanceOf(ConflictException);
+      await expect(
+        d.service.addMember(group.id, input('pract-creator'), creator),
+      ).rejects.toBeInstanceOf(ConflictException);
+      await expect(
+        d.service.addMember(group.id, input('pract-foreign'), creator),
+      ).rejects.toMatchObject({
+        reason:
+          MedicalGroupsErrorReason.MEDICAL_GROUP_PRACTITIONER_NOT_AVAILABLE,
+      });
+    });
+
+    it('cambiar el pago de quien ya aceptó vuelve a pedirle respuesta', async () => {
+      const d = build();
+      const { group, memberId } = await scheduled(d);
+      expect(group.status).toBe('SCHEDULED');
+      const res = await d.service.updateMember(
+        group.id,
+        memberId,
+        { agreedPaymentAmount: '300.00' },
+        creator,
+      );
+      expect(res.status).toBe('PENDING_TEAM');
+      expect(res.members.find((m) => m.id === memberId)).toMatchObject({
+        agreedPaymentAmount: '300.00',
+        roleTitle: 'Anestesista',
+        invitationStatus: 'PENDING',
+        respondedAt: undefined,
+      });
+    });
+
+    it('el cargo del creador no se modifica ni se quita', async () => {
+      const d = build();
+      const { group } = await scheduled(d);
+      const creatorRow = group.members.find((m) => m.isCreator)!;
+      await expect(
+        d.service.updateMember(
+          group.id,
+          creatorRow.id,
+          { roleTitle: 'Jefe' },
+          creator,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.removeMember(group.id, creatorRow.id, creator),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un integrante inexistente responde 404', async () => {
+      const d = build();
+      const { group } = await scheduled(d);
+      await expect(
+        d.service.removeMember(group.id, 'member-que-no-existe', creator),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('quitar al último pendiente deja el grupo programado', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(team), creator);
+      expect(created.status).toBe('PENDING_TEAM');
+      const pending = created.members.find((m) => !m.isCreator)!;
+      const res = await d.service.removeMember(created.id, pending.id, creator);
+      expect(res.status).toBe('SCHEDULED');
+      expect(res.members).toHaveLength(1);
     });
   });
 
