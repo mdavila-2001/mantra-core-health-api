@@ -10,6 +10,8 @@ import {
   DelegatedAccessAuthzController,
   PrescriptionSharesController,
   PrescriptionSharesPublicController,
+  SupportStaffController,
+  PractitionerSupportController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -19,6 +21,7 @@ import {
   DelegatedAccessEvaluationService,
   DelegationScopeService,
   PrescriptionSharesService,
+  SupportStaffService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -30,6 +33,7 @@ import {
   DelegationEventsRepository,
   DelegationScopeRepository,
   SharedAccessLinksRepository,
+  SupportLinksRepository,
 } from './repositories';
 
 /**
@@ -50,6 +54,8 @@ import {
     DelegatedAccessAuthzController,
     PrescriptionSharesController,
     PrescriptionSharesPublicController,
+    SupportStaffController,
+    PractitionerSupportController,
   ],
   providers: [
     // Repositorios
@@ -62,6 +68,7 @@ import {
     DelegationEventsRepository,
     DelegationScopeRepository,
     SharedAccessLinksRepository,
+    SupportLinksRepository,
     // Servicios
     DelegationScopeService,
     OrgUserAssignmentsService,
@@ -70,6 +77,7 @@ import {
     AccessRequestsService,
     DelegatedAccessEvaluationService,
     PrescriptionSharesService,
+    SupportStaffService,
   ],
   // La farmacia abre el enlace con `openForPharmacy` (FAR-02).
   exports: [PrescriptionSharesService],
