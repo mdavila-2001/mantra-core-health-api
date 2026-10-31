@@ -8,6 +8,7 @@ import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts'
 import { DIAG } from '../../modules/diagnostics/diagnostics.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 import { ALLERGY_SPANISH_DESIGNATION_ENTRIES } from './data/allergies/allergy-designations.es';
+import { STUDY_CATALOG_SPANISH_DESIGNATION_ENTRIES } from '../../modules/study_catalog/study_catalog.designations.es';
 
 /**
  * El catálogo en castellano: cómo se llama cada concepto y qué significa.
@@ -5822,6 +5823,8 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   ], // --- Alergias e intolerancias (HL7 FHIR AllergyIntolerance) ------------
   // Traducción de este proyecto, no oficial: ver allergy-designations.es.ts.
   ...ALLERGY_SPANISH_DESIGNATION_ENTRIES,
+  // Modalidades, regiones y contraste del catálogo de estudios de imagen.
+  ...STUDY_CATALOG_SPANISH_DESIGNATION_ENTRIES,
 ];
 
 /**

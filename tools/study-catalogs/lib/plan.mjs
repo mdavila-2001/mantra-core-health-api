@@ -100,7 +100,7 @@ export function buildPlan(cat, existing, specimenByHl7) {
     const cid = regionId(r.codigo);
     const m = reg3d.get(r.codigo);
     addProps(cid, `IMG_REGION_${r.codigo}`, {
-      region_type: r.tipo, laterality_admitted: r.admite_lateralidad, laterality_source: r.lateralidad_fuente,
+      study_catalog_code: r.codigo, region_type: r.tipo, laterality_admitted: r.admite_lateralidad, laterality_source: r.lateralidad_fuente,
       dicom_body_part: r.dicom_body_part, snomed_code: r.snomed, snomed_display: r.snomed_display,
       uberon_region: m?.uberon_region ?? null, catalog_version: version, source_ids: splitSources(r.fuente), note: r.nota,
     });
@@ -108,7 +108,7 @@ export function buildPlan(cat, existing, specimenByHl7) {
   }
   for (const m of img.modalidades) {
     const cid = modalityId(m.codigo);
-    addProps(cid, `IMG_MODALITY_${m.codigo}`, { dicom_modality: m.dicom, dicom_alternatives: m.dicom_alternativos, catalog_version: version, source_ids: splitSources(m.fuente) });
+    addProps(cid, `IMG_MODALITY_${m.codigo}`, { study_catalog_code: m.codigo, dicom_modality: m.dicom, dicom_alternatives: m.dicom_alternativos, catalog_version: version, source_ids: splitSources(m.fuente) });
     (m.sinonimos ?? []).forEach((s, i) => plan.designations.push([designationIdFor(`IMG_MODALITY_${m.codigo}`, 'synonym', i), cid, BOOT.LANG_ES, BOOT.DESIG_SYNONYM, s, false]));
   }
 
