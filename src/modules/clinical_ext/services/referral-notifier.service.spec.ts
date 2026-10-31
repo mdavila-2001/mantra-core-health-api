@@ -56,7 +56,11 @@ function build(
       if (entity === Tenants) {
         return 'tenant' in options
           ? options.tenant
-          : { id: 'ten-9', legalName: 'Clínica Norte S.R.L.' };
+          : {
+              id: 'ten-9',
+              legalName: 'Clínica Norte S.R.L.',
+              statusConceptId: CONCEPTS.TENANT_ACTIVE,
+            };
       }
       if (entity === ServiceCatalog) {
         return 'service' in options
@@ -179,6 +183,7 @@ describe('ReferralNotifier', () => {
           id: 'ten-9',
           legalName: 'Clínica Norte S.R.L.',
           tradeName: 'Clínica Norte',
+          statusConceptId: CONCEPTS.TENANT_ACTIVE,
         },
       });
 
@@ -195,9 +200,15 @@ describe('ReferralNotifier', () => {
       );
       expect(request.payloadJson.bodyText).toBe(
         'Su médico le derivó a Clínica Norte para Fisioterapia. ' +
-          'Motivo: Rehabilitación de rodilla. ' +
           'Puede ver su ficha y reservar una cita desde su portal.',
       );
+      // El motivo es texto libre del médico: no viaja en el aviso de la
+      // organización, ni en el cuerpo ni en el payload ni en la entrega.
+      expect(JSON.stringify(request)).not.toContain('Rehabilitación');
+      expect(JSON.stringify(request)).not.toContain('Motivo');
+      expect(
+        JSON.stringify(d.notifications.deliverNotification.mock.calls),
+      ).not.toContain('Rehabilitación');
       expect(request.payloadJson.route).toBe(
         referredOrganizationRoute('clinica-norte'),
       );
@@ -239,20 +250,18 @@ describe('ReferralNotifier', () => {
         'Su médico le derivó a Clínica Norte S.R.L.',
       );
       expect(request.payloadJson.bodyText).toBe(
-        'Su médico le derivó a Clínica Norte S.R.L. para Fisioterapia. ' +
-          'Motivo: Rehabilitación de rodilla.',
+        'Su médico le derivó a Clínica Norte S.R.L. para Fisioterapia.',
       );
       expect(request.payloadJson).not.toHaveProperty('route');
       expect(request).not.toHaveProperty('relatedResourceType');
       expect(request).not.toHaveProperty('relatedResourceId');
     });
 
-    it('sin servicio ni motivo, el aviso nombra sólo la organización', async () => {
+    it('sin servicio, el aviso nombra sólo la organización', async () => {
       const d = build({
         referral: {
           ...orgReferral,
           targetServiceCatalogId: null,
-          reasonText: null,
         },
       });
 
@@ -267,6 +276,22 @@ describe('ReferralNotifier', () => {
         ServiceCatalog,
         expect.anything(),
       );
+    });
+
+    it('una organización inexistente o no activa no recibe pacientes: no hay aviso', async () => {
+      for (const tenant of [
+        null,
+        {
+          id: 'ten-9',
+          legalName: 'Clínica Norte S.R.L.',
+          statusConceptId: 'tenant-suspendido',
+        },
+      ]) {
+        const d = build({ referral: orgReferral, tenant });
+
+        expect(await d.service.notifyRecommended('ref-2')).toBe(false);
+        expect(d.notifications.createRequest).not.toHaveBeenCalled();
+      }
     });
 
     it('con profesional y organización, el aviso es el del profesional, como siempre', async () => {

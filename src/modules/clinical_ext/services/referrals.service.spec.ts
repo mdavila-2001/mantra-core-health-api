@@ -1532,6 +1532,101 @@ describe('ReferralsService', () => {
       ]);
     });
 
+    describe('duplicado de una derivación sólo a la organización', () => {
+      const encounter = { id: 'e1', patientProfileId: 'p1', tenantId: 't-1' };
+
+      it('con encuentro, toma la clave lógica y busca por organización y tipo', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.referralsRepo.findDuplicate.mockResolvedValue(null);
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetTenantId: 'ten-dest',
+          } as any,
+          doctor,
+        );
+
+        expect(d.tx.execute.mock.calls[0][1]).toEqual([
+          'clinical_ext.referral:e1:org:ten-dest:CONSULTATION',
+        ]);
+        expect(d.referralsRepo.findDuplicate).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            sourceEncounterId: 'e1',
+            targetTenantId: 'ten-dest',
+            referralTypeConceptId: CEXT.REFERRAL_TYPE_CONSULTATION,
+            treatNullTypeAsSame: true,
+          }),
+        );
+        expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+          d.referralsRepo.findDuplicate.mock.invocationCallOrder[0],
+        );
+      });
+
+      it('un doble envío responde 409 REFERRAL_ALREADY_EXISTS, sin crear ni avisar', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.referralsRepo.findDuplicate.mockResolvedValue({ id: 'ref0' });
+
+        await expectReason(
+          d.service.create(
+            {
+              patientProfileId: 'p1',
+              sourceEncounterId: 'e1',
+              targetTenantId: 'ten-dest',
+            } as any,
+            doctor,
+          ),
+          409,
+          ClinicalExtErrorReason.REFERRAL_ALREADY_EXISTS,
+        );
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+
+      it('con profesional o con servicio no usa la rama de organización', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.referralsRepo.findDuplicate.mockResolvedValue(null);
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetProfileId: 'hp-2',
+            specialtyConceptId: 's1',
+            targetTenantId: 'ten-dest',
+          } as any,
+          doctor,
+        );
+
+        expect(d.tx.execute.mock.calls[0][1]).toEqual([
+          'clinical_ext.referral:e1:hp-2:s1:CONSULTATION',
+        ]);
+        expect(
+          d.referralsRepo.findDuplicate.mock.calls[0][1].targetTenantId,
+        ).toBeUndefined();
+      });
+
+      it('sin encuentro no hay comprobación de duplicado', async () => {
+        const d = build();
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          { patientProfileId: 'p1', targetTenantId: 'ten-dest' } as any,
+          doctor,
+        );
+
+        expect(d.referralsRepo.findDuplicate).not.toHaveBeenCalled();
+        expect(d.referralsRepo.create).toHaveBeenCalled();
+      });
+    });
+
     it('el duplicado con servicio compara encuentro, servicio y tipo', async () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue({
