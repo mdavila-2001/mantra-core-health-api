@@ -83,12 +83,18 @@ export class RequisitionsService {
     const sameContent = fingerprint(dto);
 
     return this.em.transactional(async (tx) => {
+      // La transacción nueva no hereda `app.current_tenant_id`; los componentes
+      // tienen RLS forzado y sin él no se ven (repetición idempotente) ni se escriben.
+      await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
+        tenantId,
+      ]);
       if (idempotencyKey) {
-        await tx
-          .getConnection()
-          .execute('SELECT pg_advisory_xact_lock(hashtextextended(?, 0))', [
-            `requisition:${requisitionId}`,
-          ]);
+        // `tx.execute` y no `getConnection().execute`: sólo así el cerrojo y las
+        // lecturas corren en LA conexión de la transacción.
+        await tx.execute(
+          'SELECT pg_advisory_xact_lock(hashtextextended(?, 0))',
+          [`requisition:${requisitionId}`],
+        );
         const existing = await tx.find(
           ServiceRequests,
           { requisitionId, custodianTenantId: tenantId },
@@ -112,6 +118,7 @@ export class RequisitionsService {
         }
       }
 
+      this.assertNoRepeatedItems(dto);
       const items = [];
       for (const [itemIndex, item] of dto.items.entries()) {
         try {
@@ -143,20 +150,56 @@ export class RequisitionsService {
     });
   }
 
+  /**
+   * V10 dentro del propio cuerpo: el detector de antiduplicación mira lo ya
+   * confirmado en la base y NO ve los renglones de esta misma transacción, así
+   * que dos renglones que se pisan se rechazan aquí. Se pisan si piden el mismo
+   * estudio con la misma región y lateralidad (imagen) o con algún componente
+   * en común / ambos sin desglose (laboratorio).
+   */
+  private assertNoRepeatedItems(dto: CreateRequisitionDto): void {
+    dto.items.forEach((item, index) => {
+      for (let earlier = 0; earlier < index; earlier++) {
+        const other = dto.items[earlier];
+        if (other.codeConceptId !== item.codeConceptId) continue;
+        const sameSite =
+          (other.imaging?.bodySiteConceptId ?? null) ===
+            (item.imaging?.bodySiteConceptId ?? null) &&
+          (other.imaging?.lateralityConceptId ?? null) ===
+            (item.imaging?.lateralityConceptId ?? null);
+        const a = other.componentConceptIds ?? [];
+        const b = item.componentConceptIds ?? [];
+        const overlap =
+          (a.length === 0 && b.length === 0) || a.some((id) => b.includes(id));
+        if (sameSite && overlap) {
+          throw new PreconditionFailedException(
+            'El mismo estudio se pide dos veces en la requisición',
+            {
+              reason: StudyDetailReason.DUPLICATE_STUDY_DETECTED,
+              field: 'codeConceptId',
+              itemIndex: index,
+              duplicateOfItemIndex: earlier,
+            },
+          );
+        }
+      }
+    });
+  }
+
   /** Huella de lo ya guardado, calculada con el mismo criterio que la del cuerpo. */
   private async storedFingerprint(
     em: EntityManager,
     rows: ServiceRequests[],
   ): Promise<string> {
-    const details = await em
-      .getConnection()
-      .execute<{ service_request_id: string; component_concept_id: string }[]>(
-        `SELECT service_request_id, component_concept_id
+    const details: {
+      service_request_id: string;
+      component_concept_id: string;
+    }[] = await em.execute(
+      `SELECT service_request_id, component_concept_id
          FROM clinical.service_request_components
         WHERE service_request_id = ANY(string_to_array(?, ',')::uuid[])`,
-        [rows.map((r) => r.id).join(',')],
-        'all',
-      );
+      [rows.map((r) => r.id).join(',')],
+    );
     const byRequest = new Map<string, string[]>();
     for (const d of details) {
       const list = byRequest.get(d.service_request_id) ?? [];

@@ -24,11 +24,9 @@ function body(items: any[]): any {
 function build(stored: any[] = []) {
   const executed: any[][] = [];
   const tx: any = {
-    getConnection: () => ({
-      execute: mockFn(async (sql: string, params: unknown[]) => {
-        executed.push([sql, params]);
-        return [];
-      }),
+    execute: mockFn(async (sql: string, params: unknown[]) => {
+      executed.push([sql, params]);
+      return [];
     }),
     find: mockFn(async () => stored),
   };
@@ -90,6 +88,15 @@ describe('RequisitionsService.create', () => {
     expect(d.created[1].dto.imaging).toEqual({ bodySiteConceptId: 'mano' });
   });
 
+  it('fija el tenant activo en la transacción antes de todo lo demás (RLS de los componentes)', async () => {
+    const d = build();
+    await run(() => d.service.create(body([{ codeConceptId: 'a' }]), actor));
+    expect(d.tx.execute).toHaveBeenCalledWith(
+      "select set_config('app.current_tenant_id', ?, true)",
+      [TENANT],
+    );
+  });
+
   it('la decisión de antiduplicación de un renglón viaja a su alta', async () => {
     const d = build();
     await run(() =>
@@ -149,6 +156,78 @@ describe('RequisitionsService.create', () => {
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
+  describe('repetidos dentro del mismo cuerpo (V10)', () => {
+    it('mismo estudio, misma región y lateralidad: 422 con itemIndex y duplicateOfItemIndex, sin escribir', async () => {
+      const d = build();
+      const item = {
+        codeConceptId: 'rx',
+        imaging: { bodySiteConceptId: 'mano', lateralityConceptId: 'izq' },
+      };
+      await expect(
+        run(() => d.service.create(body([item, { ...item }]), actor)),
+      ).rejects.toMatchObject({
+        details: {
+          reason: StudyDetailReason.DUPLICATE_STUDY_DETECTED,
+          itemIndex: 1,
+          duplicateOfItemIndex: 0,
+        },
+      });
+      expect(d.serviceRequests.create).not.toHaveBeenCalled();
+    });
+
+    it('misma región con otra lateralidad NO es repetido', async () => {
+      const d = build();
+      await run(() =>
+        d.service.create(
+          body([
+            {
+              codeConceptId: 'rx',
+              imaging: {
+                bodySiteConceptId: 'mano',
+                lateralityConceptId: 'izq',
+              },
+            },
+            {
+              codeConceptId: 'rx',
+              imaging: {
+                bodySiteConceptId: 'mano',
+                lateralityConceptId: 'der',
+              },
+            },
+          ]),
+          actor,
+        ),
+      );
+      expect(d.created).toHaveLength(2);
+    });
+
+    it('laboratorio: componentes en común se pisan; disjuntos no', async () => {
+      const a = build();
+      await expect(
+        run(() =>
+          a.service.create(
+            body([
+              { codeConceptId: 'hemo', componentConceptIds: ['hb', 'hto'] },
+              { codeConceptId: 'hemo', componentConceptIds: ['hto'] },
+            ]),
+            actor,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      const b = build();
+      await run(() =>
+        b.service.create(
+          body([
+            { codeConceptId: 'hemo', componentConceptIds: ['hb'] },
+            { codeConceptId: 'hemo', componentConceptIds: ['plaq'] },
+          ]),
+          actor,
+        ),
+      );
+      expect(b.created).toHaveLength(2);
+    });
+  });
+
   describe('Idempotency-Key', () => {
     it('la misma clave produce el mismo requisitionId y toma un cerrojo consultivo', async () => {
       const d1 = build();
@@ -160,7 +239,9 @@ describe('RequisitionsService.create', () => {
         d2.service.create(body([{ codeConceptId: 'a' }]), actor, 'clave-1'),
       );
       expect(a.requisitionId).toBe(b.requisitionId);
-      expect(d1.executed[0][0]).toMatch(/pg_advisory_xact_lock/);
+      expect(
+        d1.executed.some(([sql]) => /pg_advisory_xact_lock/.test(sql)),
+      ).toBe(true);
     });
 
     it('otra clave u otro paciente: otro requisitionId', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { PreconditionFailedException } from '../../../common';
+import { PreconditionFailedException, runWithTenant } from '../../../common';
 import { CLIN } from '../clinical.concepts';
 import { DIAG } from '../../diagnostics/diagnostics.concepts';
 import { StudyDetailReason } from '../clinical.error-reasons';
@@ -366,15 +366,25 @@ describe('ServiceRequestDetailService.prepare', () => {
 });
 
 describe('ServiceRequestDetailService.writeComponents', () => {
-  it('copia el custodio de la orden y numera desde 1 en el orden recibido', () => {
+  it('copia el custodio de la orden, numera desde 1 y fija el tenant activo en la transacción', async () => {
     const { service } = build();
     const created: any[] = [];
-    const tx = { create: (_e: any, data: any) => created.push(data) } as any;
-    service.writeComponents(
-      tx,
-      { id: 'sr-1', custodianTenantId: 'tenant-1' },
-      [PLAQ, HB],
-      'user-1',
+    const execute = mockFn(async () => undefined);
+    const tx = {
+      create: (_e: any, data: any) => created.push(data),
+      execute,
+    } as any;
+    await runWithTenant('tenant-1', () =>
+      service.writeComponents(
+        tx,
+        { id: 'sr-1', custodianTenantId: 'tenant-1' },
+        [PLAQ, HB],
+        'user-1',
+      ),
+    );
+    expect(execute).toHaveBeenCalledWith(
+      "select set_config('app.current_tenant_id', ?, true)",
+      ['tenant-1'],
     );
     expect(created).toEqual([
       expect.objectContaining({
@@ -386,5 +396,64 @@ describe('ServiceRequestDetailService.writeComponents', () => {
       }),
       expect.objectContaining({ componentConceptId: HB, ordinal: 2 }),
     ]);
+  });
+});
+
+describe('ServiceRequestDetailService.describe (RLS de los componentes)', () => {
+  /** El servicio con un lector de designaciones vacío (los nombres caen al `display`). */
+  const build = () => ({
+    service: new ServiceRequestDetailService(
+      {} as any,
+      {
+        findPreferredByLanguageForConcepts: mockFn(async () => new Map()),
+      } as any,
+    ),
+  });
+
+  const requests = [
+    {
+      id: 'sr-1',
+      codeConceptId: HEMOGRAMA,
+      custodianTenantId: 'tenant-1',
+    },
+  ] as any;
+  const row = { serviceRequestId: 'sr-1', componentConceptId: HB, ordinal: 1 };
+
+  /** Un `em` que sólo sabe leer componentes; los conceptos nombrados salen vacíos. */
+  function emWith(inTransaction: boolean) {
+    const find = mockFn(async (entity: any) =>
+      entity.name === 'ServiceRequestComponents' ? [row] : [],
+    );
+    const execute = mockFn(async () => undefined);
+    const tx = { find, execute };
+    const transactional = mockFn(async (cb: any) => cb(tx));
+    const em = {
+      isInTransaction: () => inTransaction,
+      find,
+      fork: () => ({ transactional }),
+    } as any;
+    return { em, execute, transactional, find };
+  }
+
+  it('sobre un fork (sin transacción) abre la suya y fija el tenant ACTIVO antes de leer', async () => {
+    const { service } = build();
+    const { em, execute, transactional } = emWith(false);
+    const views = await runWithTenant('tenant-1', () =>
+      service.describe(em, requests),
+    );
+    expect(transactional).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledWith(
+      "select set_config('app.current_tenant_id', ?, true)",
+      ['tenant-1'],
+    );
+    expect(views.get('sr-1')?.componentsSpecified).toBe(true);
+  });
+
+  it('dentro de la transacción del alta lee con la misma conexión (ve lo recién escrito)', async () => {
+    const { service } = build();
+    const { em, transactional } = emWith(true);
+    const views = await service.describe(em, requests);
+    expect(transactional).not.toHaveBeenCalled();
+    expect(views.get('sr-1')?.components).toHaveLength(1);
   });
 });

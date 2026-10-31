@@ -380,7 +380,7 @@ export class ServiceRequestsService {
       // Los componentes marcados, después de la orden (misma razón que las
       // notas: no son relación del ORM) y con el custodio de la orden.
       if (prepared.componentConceptIds.length > 0) {
-        this.detail.writeComponents(
+        await this.detail.writeComponents(
           tx,
           sr,
           prepared.componentConceptIds,

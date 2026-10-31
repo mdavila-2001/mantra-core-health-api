@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS, PreconditionFailedException } from '../../../common';
+import {
+  CONCEPTS,
+  PreconditionFailedException,
+  requireTenantId,
+} from '../../../common';
 import { CatalogConcepts } from '../../terminology/entities';
 import { ConceptDesignationsRepository } from '../../terminology/repositories';
 import { CATEGORIES_WITH_SPECIMEN } from '../../diagnostics/diagnostics.concepts';
@@ -340,15 +344,23 @@ export class ServiceRequestDetailService {
 
   /**
    * Escribe los componentes marcados (ordinal desde 1, en el orden recibido).
-   * `custodian_tenant_id` se copia de la orden: el disparador de la tabla
-   * exige que coincida con la sesión y con la orden.
+   * `custodian_tenant_id` se copia de la orden. El disparador de la tabla
+   * (`integrity.service_request_component_tenant`) exige que ese custodio sea el
+   * `app.current_tenant_id` de la sesión —o el contexto de sistema—: con
+   * `RLS_ENFORCE=false` el interceptor de tenant no lo fija, así que se fija acá,
+   * dentro de la transacción (`is_local`), con el tenant ACTIVO de la petición
+   * (nunca el de la orden: si difirieran, el disparador rechaza, que es lo que
+   * se quiere).
    */
-  writeComponents(
+  async writeComponents(
     em: EntityManager,
     serviceRequest: Pick<ServiceRequests, 'id' | 'custodianTenantId'>,
     componentConceptIds: readonly string[],
     actorUserId: string | undefined,
-  ): void {
+  ): Promise<void> {
+    await em.execute("select set_config('app.current_tenant_id', ?, true)", [
+      requireTenantId(),
+    ]);
     componentConceptIds.forEach((componentConceptId, index) => {
       em.create(
         ServiceRequestComponents,
@@ -373,10 +385,9 @@ export class ServiceRequestDetailService {
     const result = new Map<string, ServiceRequestDetailView>();
     if (requests.length === 0) return result;
 
-    const components = await em.find(
-      ServiceRequestComponents,
-      { serviceRequestId: { $in: requests.map((r) => r.id) } },
-      { orderBy: { ordinal: 'ASC' } },
+    const components = await this.loadComponents(
+      em,
+      requests.map((r) => r.id),
     );
     const byRequest = new Map<string, ServiceRequestComponents[]>();
     for (const row of components) {
@@ -435,6 +446,35 @@ export class ServiceRequestDetailService {
       });
     }
     return result;
+  }
+
+  /**
+   * Los componentes de las órdenes. `service_request_components` tiene RLS
+   * forzado y fail-closed: sin `app.current_tenant_id` en la conexión no
+   * devuelve nada, y un `em.fork()` NO hereda la transacción del interceptor de
+   * tenant. Por eso, si el `em` recibido no está en una transacción (lecturas de
+   * C5 y del receptor, que trabajan sobre forks), la lectura abre la suya y fija
+   * el tenant ACTIVO —el custodio o el ejecutor; la política admite a ambos—.
+   * Dentro de la transacción del alta se usa tal cual: ahí leer lo recién
+   * escrito exige la misma conexión.
+   */
+  private async loadComponents(
+    em: EntityManager,
+    serviceRequestIds: string[],
+  ): Promise<ServiceRequestComponents[]> {
+    const load = (reader: EntityManager) =>
+      reader.find(
+        ServiceRequestComponents,
+        { serviceRequestId: { $in: serviceRequestIds } },
+        { orderBy: { ordinal: 'ASC' } },
+      );
+    if (em.isInTransaction()) return load(em);
+    return em.fork().transactional(async (tx) => {
+      await tx.execute("select set_config('app.current_tenant_id', ?, true)", [
+        requireTenantId(),
+      ]);
+      return load(tx);
+    });
   }
 
   /** Nombre en castellano si existe, y si no el `display` del concepto. */
