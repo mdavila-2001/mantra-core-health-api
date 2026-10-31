@@ -249,7 +249,9 @@ export class ReferralsService {
     ) {
       throw new PreconditionFailedException(
         'La derivación necesita un destino: profesional, organización, servicio, sede o destino externo.',
-        { reason: 'REFERRAL_TARGET_REQUIRED' },
+        // `details.reason` se conserva para los clientes que ya lo leían ahí.
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED },
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
       );
     }
     const referralType: ReferralType = dto.referralType ?? 'CONSULTATION';
@@ -348,8 +350,13 @@ export class ReferralsService {
     });
 
     // Después del commit, y sin poder romperlo: el aviso es de cortesía, la
-    // derivación ya existe.
-    if (dto.sourceEncounterId && dto.targetProfileId) {
+    // derivación ya existe. Avisa la derivación a un profesional y también la
+    // derivación a una organización (el tenant destino puede venir del
+    // servicio); sin encuentro no hay relación asistencial demostrada.
+    if (
+      dto.sourceEncounterId &&
+      (dto.targetProfileId || created.targetTenantId)
+    ) {
       await this.notifier.notifyRecommended(created.id);
     }
     return created;
@@ -362,9 +369,11 @@ export class ReferralsService {
   ): Promise<void> {
     const target = await this.practitionersRepo.findById(tx, targetProfileId);
     if (!target) {
-      throw new ResourceNotFoundException('Profesional no encontrado', {
-        targetProfileId,
-      });
+      throw new ResourceNotFoundException(
+        'Profesional no encontrado',
+        { targetProfileId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
     }
   }
 
@@ -385,9 +394,11 @@ export class ReferralsService {
       encounter.patientProfileId !== patientProfileId ||
       actor.tenantIds?.includes(encounter.tenantId) !== true
     ) {
-      throw new ResourceNotFoundException('Encuentro no encontrado', {
-        encounterId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuentro no encontrado',
+        { encounterId },
+        ClinicalExtErrorReason.REFERRAL_ENCOUNTER_NOT_FOUND,
+      );
     }
   }
 
@@ -872,17 +883,20 @@ export class ReferralsService {
       serviceCatalogId,
     );
     if (!service) {
-      throw new ResourceNotFoundException('Servicio no encontrado', {
-        targetServiceCatalogId: serviceCatalogId,
-      });
+      throw new ResourceNotFoundException(
+        'Servicio no encontrado',
+        { targetServiceCatalogId: serviceCatalogId },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_NOT_FOUND,
+      );
     }
     if (!service.isActive) {
       throw new PreconditionFailedException(
         'Ese servicio está inactivo en el catálogo.',
         {
           targetServiceCatalogId: serviceCatalogId,
-          reason: 'REFERRAL_SERVICE_INACTIVE',
+          reason: ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE,
         },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE,
       );
     }
 
@@ -893,8 +907,9 @@ export class ReferralsService {
         'El servicio no pertenece a la organización destino.',
         {
           targetServiceCatalogId: serviceCatalogId,
-          reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+          reason: ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
         },
+        ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
       );
     }
 
@@ -909,8 +924,9 @@ export class ReferralsService {
           'El profesional destino no ofrece ese servicio.',
           {
             targetServiceCatalogId: serviceCatalogId,
-            reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+            reason: ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
           },
+          ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
         );
       }
     }
@@ -932,7 +948,8 @@ export class ReferralsService {
     if (q.length < 2) {
       throw new PreconditionFailedException(
         'La búsqueda necesita al menos dos caracteres.',
-        { reason: 'REFERRAL_TARGET_QUERY_TOO_SHORT' },
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT },
+        ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT,
       );
     }
     const em = this.em.fork();
@@ -1033,7 +1050,8 @@ export class ReferralsService {
     if (!targetProfileId && !targetTenantId) {
       throw new PreconditionFailedException(
         'Indique targetProfileId o targetTenantId.',
-        { reason: 'REFERRAL_TARGET_REQUIRED' },
+        { reason: ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED },
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
       );
     }
     const em = this.em.fork();
@@ -1051,10 +1069,11 @@ export class ReferralsService {
           : this.targetsRepo.isListableOrganization(em, targetTenantId),
     ]);
     if (!profileListable || !tenantListable) {
-      throw new ResourceNotFoundException('Destino no encontrado', {
-        targetProfileId,
-        targetTenantId,
-      });
+      throw new ResourceNotFoundException(
+        'Destino no encontrado',
+        { targetProfileId, targetTenantId },
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
     }
 
     let services: ServiceCatalog[];
