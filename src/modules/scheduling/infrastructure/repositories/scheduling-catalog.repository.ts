@@ -60,6 +60,8 @@ export interface CreateResourceData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** R0: espacio físico del recurso (FK real a `practice.care_spaces`). */
+  careSpaceId?: string;
 }
 
 /**
@@ -314,6 +316,7 @@ export class SchedulingCatalogRepository {
         timeZone: data.timeZone,
         capacity: data.capacity,
         stateConceptId: data.stateConceptId,
+        careSpaceId: data.careSpaceId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

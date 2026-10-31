@@ -1,3 +1,4 @@
+import { assertChecklistPhase } from './or/checklist-gates';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -865,6 +866,11 @@ export class PeriopPreopService {
           { caseId },
           ProceduresPerioperativeErrorReason.INDUCTION_REQUIRES_APPROVED_ANESTHESIA_PLAN,
         );
+      }
+
+      // F4 (§F4.3): la inducción marca el inicio real; exige la Entrada OMS.
+      if (dto.eventType === 'INDUCTION') {
+        await assertChecklistPhase(this.casesRepo, tx, caseId, 'SIGN_IN');
       }
 
       const severity = dto.severity ?? 'ROUTINE';

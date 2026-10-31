@@ -41,6 +41,8 @@ channels:
         $ref: '#/components/messages/InfrastructureOpsEvent'
       adtEvent:
         $ref: '#/components/messages/AdtEvent'
+      operatingRoomEvent:
+        $ref: '#/components/messages/OperatingRoomEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -183,6 +185,18 @@ components:
         practice.care_space.status_changed (eje OCCUPANCY) por CareSpaceOpsPort.
       payload:
         $ref: '#/components/schemas/AdtEventPayload'
+
+    OperatingRoomEvent:
+      name: OperatingRoomEvent
+      title: Quirófanos (procedures_perioperative y scheduling, F4)
+      summary: >
+        Recurso agendable ligado a un espacio (R0), check-list OMS creado, eventos de
+        sala en orden (IN_ROOM → ANESTHESIA_START → INCISION → CLOSURE → OUT_OF_ROOM) y
+        bloques de quirófano creados, liberados o cancelados (CONTRATO-F2-F5 §F4.3). Se
+        publican en la misma transacción. El payload lleva ids de caso, sala, bloque y
+        orden de limpieza (el recambio de sala alimenta a F2); nunca datos del paciente.
+      payload:
+        $ref: '#/components/schemas/OperatingRoomEventPayload'
 
     OutboxMessage:
       name: OutboxMessage
@@ -419,3 +433,33 @@ components:
               enum: [A01, A02, A03, A12, A17]
             requestId:
               type: string
+
+    OperatingRoomEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - scheduling.resource.linked_to_space
+            - periop.checklist.created
+            - periop.case.room_event_recorded
+            - periop.or_block.created
+            - periop.or_block.released
+            - periop.or_block.cancelled
+        aggregateType:
+          type: string
+          enum:
+            - scheduling.schedulable_resources
+            - procedures_perioperative.surgical_safety_checklists
+            - procedures_perioperative.procedure_cases
+            - procedures_perioperative.operating_room_blocks
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true

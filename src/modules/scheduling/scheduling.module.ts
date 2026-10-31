@@ -67,6 +67,8 @@ import { CommonModule } from '../common/common.module';
 // ya evalúa consentimiento, preferencia por categoría y horas de silencio.
 // `messaging` no importa `scheduling`, así que la dependencia no cierra ciclo.
 import { MessagingModule } from '../messaging/messaging.module';
+import { CARE_SPACE_DIRECTORY_PORT } from './application/ports/care-space-directory.port';
+import { PracticeCareSpaceDirectoryAdapter } from './infrastructure/adapters/practice-care-space-directory.adapter';
 // TAREA-15 · el aviso de agenda también llega al chat de `SupportAdmin`
 // (`community.conversations`, reusado tal cual). `community` no importa
 // `scheduling`, así que la dependencia no cierra ciclo.
@@ -305,6 +307,12 @@ import { BillingBookingAdapter } from './infrastructure/adapters/billing-booking
     BookingBillingBridge,
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
+    // R0 (CONTRATO-F2-F5 §F4.1): espacios de `practice` vistos desde la agenda.
+    PracticeCareSpaceDirectoryAdapter,
+    {
+      provide: CARE_SPACE_DIRECTORY_PORT,
+      useExisting: PracticeCareSpaceDirectoryAdapter,
+    },
     AgendaOverlapGuard,
     BlockedBookingsCanceller,
     SlotMoveNotifier,
