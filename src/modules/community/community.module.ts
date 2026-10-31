@@ -64,7 +64,6 @@ import {
   CommunityChatAutoReplyService,
   CommunityMessagingService,
   CommunityBookingChatService,
-  CommunityOrderChatService,
   CommunityModerationService,
   PartyRatingsService,
   PartyRatingsReadService,
