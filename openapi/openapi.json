@@ -106783,6 +106783,92 @@
         ],
         "description": "Mapa de calor por campo y nivel de fricción para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
+    },
+    "/pharmacy-inventory/availability/medications": {
+      "get": {
+        "description": "Por cada medicamento del vademécum considera todos los productos publicados y vendibles de todas las farmacias visibles, con la regla de existencias por sede. Cada sede devuelve un producto por medicamento que tiene disponible (el de menor precio para el paciente) y nombra los medicamentos que le faltan. Orden: las que tienen todos primero; después distancia, total y nombre, como la disponibilidad por producto.",
+        "operationId": "PharmacyInventoryReadController_availabilityByMedication",
+        "parameters": [
+          {
+            "name": "medications",
+            "required": true,
+            "in": "query",
+            "description": "Medicamentos solicitados (`medication_concept_id`): UUIDs separados por coma",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitud WGS84 desde donde medir distancia (va con lng)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "description": "Longitud WGS84 desde donde medir distancia (va con lat)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de sedes servidas (por defecto 20)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicationAvailabilityResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar qué sedes de la red pueden surtir unos medicamentos",
+        "tags": [
+          "pharmacy-inventory-directory"
+        ]
+      }
     }
   },
   "info": {
@@ -169847,6 +169933,189 @@
           "events"
         ],
         "additionalProperties": false
+      },
+      "MedicationAvailabilityProductDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productCode": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "object",
+            "nullable": true
+          },
+          "genericName": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "object",
+            "nullable": true
+          },
+          "packageSizeText": {
+            "type": "object",
+            "nullable": true
+          },
+          "medication": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InventoryConceptDto"
+              }
+            ]
+          },
+          "availableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "price": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AvailabilityPriceDto"
+              }
+            ]
+          },
+          "medicationConceptId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "productId",
+          "productCode",
+          "availableQuantity",
+          "medicationConceptId"
+        ]
+      },
+      "MedicationAvailabilitySiteDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "object",
+            "nullable": true
+          },
+          "homeDeliveryAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "pickupAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "availableCount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "object",
+            "nullable": true
+          },
+          "currency": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InventoryConceptDto"
+              }
+            ]
+          },
+          "stockUpdatedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "missingMedicationConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicationAvailabilityProductDto"
+            }
+          }
+        },
+        "required": [
+          "siteId",
+          "siteName",
+          "pharmacyId",
+          "pharmacyName",
+          "complete",
+          "availableCount",
+          "missingMedicationConceptIds",
+          "products"
+        ]
+      },
+      "MedicationAvailabilityResponseDto": {
+        "type": "object",
+        "properties": {
+          "requestedMedicationConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "unpublishedMedicationConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicationAvailabilitySiteDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "requestedMedicationConceptIds",
+          "unpublishedMedicationConceptIds",
+          "items",
+          "count"
+        ]
       }
     },
     "responses": {

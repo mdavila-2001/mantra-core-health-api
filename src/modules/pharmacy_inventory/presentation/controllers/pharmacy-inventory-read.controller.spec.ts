@@ -8,6 +8,7 @@ function build() {
   const readService = {
     getSiteStock: mockFn().mockResolvedValue({}),
     availability: mockFn().mockResolvedValue({}),
+    availabilityByMedication: mockFn().mockResolvedValue({}),
   };
   const controller = new PharmacyInventoryReadController(readService as any);
   return { controller, readService };
@@ -65,6 +66,53 @@ describe('PharmacyInventoryReadController', () => {
       await d.controller.availability(['prod-1']);
       expect(d.readService.availability).toHaveBeenCalledWith(
         ['prod-1'],
+        undefined,
+        20,
+      );
+    });
+  });
+
+  describe('availabilityByMedication', () => {
+    it('requires medications: without a prescription there is nothing to answer', () => {
+      const d = build();
+      expect(() => d.controller.availabilityByMedication(undefined)).toThrow(
+        BadRequestException,
+      );
+      expect(d.readService.availabilityByMedication).not.toHaveBeenCalled();
+    });
+
+    it('rejects an origin that is not a real WGS84 pair', () => {
+      const d = build();
+      expect(() =>
+        d.controller.availabilityByMedication(['med-1'], '-16.5', undefined),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        d.controller.availabilityByMedication(['med-1'], '91', '0'),
+      ).toThrow(BadRequestException);
+      expect(d.readService.availabilityByMedication).not.toHaveBeenCalled();
+    });
+
+    it('passes the drugs, the parsed origin and the limit to the service in one call', async () => {
+      const d = build();
+      await d.controller.availabilityByMedication(
+        ['med-1', 'med-2'],
+        '-16.5',
+        '-68.15',
+        5,
+      );
+      expect(d.readService.availabilityByMedication).toHaveBeenCalledTimes(1);
+      expect(d.readService.availabilityByMedication).toHaveBeenCalledWith(
+        ['med-1', 'med-2'],
+        { lat: -16.5, lng: -68.15 },
+        5,
+      );
+    });
+
+    it('defaults the limit to 20', async () => {
+      const d = build();
+      await d.controller.availabilityByMedication(['med-1']);
+      expect(d.readService.availabilityByMedication).toHaveBeenCalledWith(
+        ['med-1'],
         undefined,
         20,
       );

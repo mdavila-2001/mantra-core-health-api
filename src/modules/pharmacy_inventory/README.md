@@ -28,6 +28,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
 | `GET /pharmacy-inventory/sites/:siteId/stock` | sesión | `pharmacy-inventory-read` |
 | `GET /pharmacy-inventory/availability` | sesión | `pharmacy-inventory-read` |
+| `GET /pharmacy-inventory/availability/medications` | sesión | `pharmacy-inventory-read` |
 | `POST /pharmacy/:siteId/inventory-locations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/reservations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/transfers` | SECURITY_ADMIN | `pharmacy-inventory` |
@@ -74,6 +75,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | --- | --- |
 | `GET /pharmacy-inventory/sites/{siteId}/stock?product=` | Stock disponible de una sede, agregado por producto sobre sus ubicaciones activas |
 | `GET /pharmacy-inventory/availability?products=a,b&lat=&lng=&limit=` | Qué sedes pueden surtir un pedido: completas primero, luego distancia y precio |
+| `GET /pharmacy-inventory/availability/medications?medications=a,b&lat=&lng=&limit=` | Lo mismo por medicamento de una receta, en toda la red: un producto propio por medicamento en cada sede y los medicamentos que le faltan |
 
 La visibilidad es la del directorio de farmacias (módulo 24) y se **reutiliza**
 —`PharmacyReadRepository` viene exportado por `PharmacyModule`— en vez de
