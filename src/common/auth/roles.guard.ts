@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../errors/system-error-reasons';
+import { roleEquivalents } from './role-aliases';
 import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import type {
@@ -25,6 +26,21 @@ import type {
  * @returns `true` si el rol autoriza en ese tenant.
  */
 export function roleAuthorizesInTenant(
+  user: AuthenticatedUser | undefined,
+  role: string,
+  tenantId: string | undefined,
+): boolean {
+  // Un rol con alias (`GOVERNANCE_ADMIN` = `DATA_GOVERNANCE_ADMIN`, ver `role-aliases.ts`) se
+  // evalúa por cada código equivalente, cada uno con su propio ámbito de tenant.
+  const equivalentes = roleEquivalents(role);
+  if (equivalentes.length > 1)
+    return equivalentes.some((codigo) =>
+      roleHoldsInTenant(user, codigo, tenantId),
+    );
+  return roleHoldsInTenant(user, role, tenantId);
+}
+
+function roleHoldsInTenant(
   user: AuthenticatedUser | undefined,
   role: string,
   tenantId: string | undefined,
