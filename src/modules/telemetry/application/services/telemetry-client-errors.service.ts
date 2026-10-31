@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
 import type { Request } from 'express';
-import { JWT_ALGORITHM } from '../../../../common/auth/auth.env';
+import { JWT_ALGORITHM, loadAuthEnv } from '../../../../common/auth/auth.env';
 import type { JwtPayload } from '../../../../common/auth/jwt-payload.interface';
 import { SessionValidator } from '../../../../common/auth/session-validator';
 import {
@@ -63,7 +63,11 @@ export class TelemetryClientErrorsService {
       : undefined;
     if (!token) return null;
     try {
+      // El secreto se lee al momento de verificar, igual que `JwtStrategy`: el
+      // `JwtModule` global se registra al importar, antes de que ConfigModule
+      // haya poblado el entorno, y puede traer otro secreto.
       const payload = await this.jwt.verifyAsync<JwtPayload>(token, {
+        secret: loadAuthEnv().secret,
         algorithms: [JWT_ALGORITHM],
       });
       if (payload.typ !== 'access') return null;

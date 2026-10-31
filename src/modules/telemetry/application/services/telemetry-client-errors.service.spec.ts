@@ -5,7 +5,10 @@ import { ERROR_CLASS_CONCEPT_BY_CODE, TELE } from '../../telemetry.concepts';
 
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 const SECRET = 'prueba-secreto-largo-1234567890';
-const jwt = new JwtService({ secret: SECRET });
+process.env.JWT_SECRET = SECRET;
+// Módulo registrado con OTRO secreto (como en producción: se registra antes de cargar el entorno).
+const jwt = new JwtService({ secret: 'secreto-del-modulo-distinto-0000' });
+const signer = new JwtService({ secret: SECRET });
 
 function build(session: 'ok' | 'inactive' = 'ok') {
   const repo = { insertMany: fn(async () => undefined), sessionIdOf: fn(async () => 'session-row-1') };
@@ -27,7 +30,7 @@ const item = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 const token = (payload: Record<string, unknown> = {}) =>
-  jwt.sign({ sub: 'user-1', sid: 'sid-1', typ: 'access', roles: [], tenants: ['t1'], ...payload }, { expiresIn: '5m' });
+  signer.sign({ sub: 'user-1', sid: 'sid-1', typ: 'access', roles: [], tenants: ['t1'], ...payload }, { expiresIn: '5m' });
 
 describe('TelemetryClientErrorsService.ingest', () => {
   it('sin token: inserta sin user_id, sesión ni tenant, con el mensaje saneado y la huella del servidor', async () => {

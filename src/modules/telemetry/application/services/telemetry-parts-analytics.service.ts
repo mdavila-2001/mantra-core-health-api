@@ -151,9 +151,14 @@ export class TelemetryPartsAnalyticsService {
       byCode.set(part.routeCode, cur);
     }
     // Una parte con errores pero sin eventos también aparece.
+    const seenRoutes = new Set(rows.map((r) => r.route));
     for (const e of errorRows) {
       const part = registry.resolve(e.route);
       if (part && !byCode.has(part.routeCode)) byCode.set(part.routeCode, { part, acc: zero() });
+      // Ruta con errores pero sin eventos y sin parte registrada (p. ej. un 404 de ruta).
+      if (!part && !seenRoutes.has(e.route)) {
+        unmapped.push({ routeTemplate: e.route, portal: 'WEB', views: 0, events: 0, errors: e.errors });
+      }
     }
 
     const prevByCode = new Map<string, { views: number; errors: number }>();
@@ -171,7 +176,7 @@ export class TelemetryPartsAnalyticsService {
         const errs = errorsOf.get(part.routePattern) ?? 0;
         const d = dwell.find((x) => x.route === part.routePattern);
         const pv = prevByCode.get(part.routeCode);
-        const vit: Record<string, { p75: number | null; samples: number }> = {};
+        const vit: Record<string, { p75: number | null; samples: number | null }> = {};
         for (const v of vitals) {
           const hit = v.rows.find((x) => x.route === part.routePattern);
           if (hit) vit[v.name] = { p75: this.small(actor, hit.subjects) ? null : num(hit.p75), samples: this.small(actor, hit.subjects) ? null : hit.samples };
