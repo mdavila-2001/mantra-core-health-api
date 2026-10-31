@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 65 · schema surveys
+-- SALUD v4.2.68 · módulo 65 · schema surveys
 -- Generado de diagram_65_surveys.puml — NO editar a mano.
 
 
@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS "surveys"."survey_assignments" (
 CREATE TABLE IF NOT EXISTS "surveys"."survey_invitations" (
     "id" uuid NOT NULL,
     "survey_version_id" uuid NOT NULL,
+    "extension_survey_version_id" uuid,
     "survey_assignment_id" uuid NOT NULL,
     "tenant_id" uuid NOT NULL,
     "patient_profile_id" uuid NOT NULL,

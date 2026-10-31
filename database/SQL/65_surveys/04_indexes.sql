@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 65 · schema surveys
+-- SALUD v4.2.68 · módulo 65 · schema surveys
 -- Generado de diagram_65_surveys.puml — NO editar a mano.
 
 
@@ -29,6 +29,8 @@ CREATE INDEX IF NOT EXISTS "ix_survey_invitations_assignment" ON "surveys"."surv
 CREATE INDEX IF NOT EXISTS "ix_survey_invitations_tenant_id" ON "surveys"."survey_invitations" ("tenant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_survey_invitations_subject" ON "surveys"."survey_invitations" ("subject_type_concept_id", "subject_id");
+
+CREATE INDEX IF NOT EXISTS "ix_survey_invitations_extension_version" ON "surveys"."survey_invitations" ("extension_survey_version_id");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_survey_invitations_booking_version" ON "surveys"."survey_invitations" ("appointment_booking_id", "survey_version_id");
 

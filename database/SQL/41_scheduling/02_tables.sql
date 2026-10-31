@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 41 · schema scheduling
+-- SALUD v4.2.68 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
 
@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedulable_resources" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
     CONSTRAINT "pk_schedulable_resources" PRIMARY KEY ("id")
 );
 
@@ -75,6 +76,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_templates" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
     CONSTRAINT "pk_schedule_templates" PRIMARY KEY ("id")
 );
 
@@ -113,6 +115,8 @@ CREATE TABLE IF NOT EXISTS "scheduling"."availability_exceptions" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "source_kind_concept_id" uuid,
+    "source_ref_id" uuid,
     CONSTRAINT "pk_availability_exceptions" PRIMARY KEY ("id")
 );
 
@@ -349,6 +353,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_states" (
     "appointment_booking_id" uuid NOT NULL,
     "status_concept_id" uuid NOT NULL,
     "insurance_used" boolean NOT NULL,
+    "invoice_id" uuid,
     "marked_by_user_id" uuid NOT NULL,
     "marked_at" timestamptz NOT NULL,
     "created_at" timestamptz NOT NULL,

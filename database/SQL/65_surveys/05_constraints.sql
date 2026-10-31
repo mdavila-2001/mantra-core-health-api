@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · schema surveys · constraints de integridad (módulo 33)
+-- SALUD v4.2.68 · schema surveys · constraints de integridad (módulo 33)
 -- Aplicar DESPUÉS de 04_indexes.sql y de SQL/_integrity/00_integrity_functions.sql.
 -- Reglas del módulo 33. Las UK/CHECK/EXCLUDE en prosa quedan como comentario:
 -- el modelo no declara su expresión SQL y no se inventa (temperatura-0).
@@ -21,6 +21,10 @@ ALTER TABLE "surveys"."survey_versions" ADD CONSTRAINT "ck_survey_versions_max_r
 -- CHECK concreto declarado por el modelo (CHECK_SQL).
 ALTER TABLE "surveys"."survey_invitations" DROP CONSTRAINT IF EXISTS "ck_survey_invitations_anchor";
 ALTER TABLE "surveys"."survey_invitations" ADD CONSTRAINT "ck_survey_invitations_anchor" CHECK (("appointment_booking_id" IS NOT NULL OR "subject_id" IS NOT NULL) AND (("subject_type_concept_id" IS NULL) = ("subject_id" IS NULL)));
+
+-- CHECK concreto declarado por el modelo (CHECK_SQL).
+ALTER TABLE "surveys"."survey_invitations" DROP CONSTRAINT IF EXISTS "ck_survey_invitations_extension_distinct";
+ALTER TABLE "surveys"."survey_invitations" ADD CONSTRAINT "ck_survey_invitations_extension_distinct" CHECK ("extension_survey_version_id" IS NULL OR "extension_survey_version_id" <> "survey_version_id");
 
 
 -- ═══ survey_invitation_reminders ═══
