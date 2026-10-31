@@ -23,6 +23,8 @@ import { join, relative, sep } from 'node:path';
 const KNOWN_READERS: Record<string, string> = {
   'billing/services/space-charges.service.ts':
     'F5e: zona horaria y práctica de la sede del encuentro, dentro del tenant (las sedes se autorizan antes con scopeFilter); en el worker, con app.system_context en su transacción.',
+  'accounting/services/space-accounting.service.ts':
+    'F5f: práctica del espacio o de la unidad que se liga (JOIN por practice_site_id), comparada con el tenant activo y la práctica del activo o del centro de costo (404 / 422).',
   'delegated_access/services/assignment-targets.ts':
     'F5g: comprueba que la sede de una asignación sea del tenant de la membresía (compara tenant_id; 404 si no).',
   'clinical/services/inpatient/inpatient-read.use-cases.ts':

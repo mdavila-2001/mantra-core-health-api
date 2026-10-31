@@ -1,3 +1,4 @@
+import { roleAuthorizesInTenant } from '../../../common/auth/roles.guard';
 import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
@@ -138,6 +139,7 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'PLATFORM_ADMIN', 'SUPERADMIN'];
 const GLOBAL_ROLE_MAP: Record<string, InfraRole> = {
   PERIOP_ADMIN: 'OR_MANAGER',
   BILLING: 'BILLING',
+  ACCOUNTING_APPROVER: 'ACCOUNTING',
 };
 
 /**
@@ -251,7 +253,9 @@ export class InfrastructureAccessService {
     if (PLATFORM_ROLES.some((r) => roles.includes(r))) base.push('SUPERADMIN');
     const globals: InfraRole[] = [];
     for (const [global, mapped] of Object.entries(GLOBAL_ROLE_MAP)) {
-      if (roles.includes(global)) globals.push(mapped);
+      // Un rol con ámbito (MCH-001) sólo vale en el tenant que lo indexa.
+      if (roleAuthorizesInTenant(actor, global, site.tenantId))
+        globals.push(mapped);
     }
     const level = await this.structureAccess.adminLevelOf(tx, site, actor);
     if (level === 'ORG') base.push('ORG_ADMIN', 'SITE_ADMIN');
@@ -309,6 +313,48 @@ export class InfrastructureAccessService {
         unitIds: [],
         spaceChain: [],
       },
+    );
+  }
+
+  /**
+   * Exige `action` a nivel práctica: plataforma, admin de la organización,
+   * asignación TENANT/PRACTICE o un rol global que la regla admita. La
+   * práctica tiene que ser del tenant activo (404 si no).
+   *
+   * @param tx - Contexto.
+   * @param actor - Actor.
+   * @param practiceId - Práctica.
+   * @param tenantId - Tenant activo.
+   * @param action - Acción registrada.
+   */
+  async assertPracticeLevel(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    practiceId: string,
+    tenantId: string,
+    action: string,
+  ): Promise<void> {
+    const [p] = await tx.execute<{ tenant_id: string }[]>(
+      'SELECT tenant_id FROM practice.practices WHERE id = ?',
+      [practiceId],
+      'all',
+    );
+    if (!p || p.tenant_id !== tenantId)
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    const pseudoSite = {
+      id: '',
+      practiceId,
+      tenantId,
+      branchId: undefined,
+    } as never;
+    const scope = await this.actorScope(tx, actor, pseudoSite);
+    this.decide(
+      action,
+      this.siteLevelRoles(scope, { id: '', practiceId }),
+      false,
+      scope,
     );
   }
 

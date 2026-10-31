@@ -17,6 +17,8 @@ export interface ExternalSpaceBlockers {
   readonly schedulableResources: BlockingRows;
   /** F5c: ubicaciones de inventario con existencias en el subárbol. */
   readonly inventoryLocations: BlockingRows;
+  /** F5f/F5a: activos de infraestructura y equipos diagnósticos del subárbol. */
+  readonly equipment: BlockingRows;
 }
 
 /** Espacio y sus descendientes (hasta 32 niveles). */
@@ -54,6 +56,8 @@ const SAMPLE = 5;
  *   `practitioner_schedules` del espacio con vigencia abierta o futura.
  * - `INVENTORY_LOCATION` (F5c): ubicaciones de `pharmacy_inventory` del espacio
  *   o de su subárbol con alguna posición `on_hand_quantity > 0`.
+ * - `EQUIPMENT` (F5f): `accounting.infrastructure_items` y
+ *   `diagnostic_units.diagnostic_equipment` ubicados en el espacio o su subárbol.
  */
 @Injectable()
 export class RetireBlockersRepository {
@@ -73,6 +77,7 @@ export class RetireBlockersRepository {
       futureBookings,
       resources,
       inventoryLocations,
+      equipment,
     ] = await Promise.all([
       this.ids(
         em,
@@ -129,6 +134,16 @@ export class RetireBlockersRepository {
                            WHERE sp.inventory_location_id = l.id AND sp.on_hand_quantity > 0)`,
         [careSpaceId],
       ),
+      this.ids(
+        em,
+        `${SUBTREE}
+           SELECT i.id FROM accounting.infrastructure_items i
+            WHERE i.care_space_id IN (SELECT id FROM sub)
+           UNION ALL
+           SELECT e.id FROM diagnostic_units.diagnostic_equipment e
+            WHERE e.care_space_id IN (SELECT id FROM sub)`,
+        [careSpaceId],
+      ),
     ]);
     return {
       activeEncounters,
@@ -136,6 +151,7 @@ export class RetireBlockersRepository {
       futureBookings,
       schedulableResources: resources,
       inventoryLocations,
+      equipment,
     };
   }
 

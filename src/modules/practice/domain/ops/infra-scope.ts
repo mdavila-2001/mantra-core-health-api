@@ -18,7 +18,9 @@ export type InfraRole =
   | 'OR_MANAGER'
   | 'BILLING'
   | 'INFECTION_CONTROL'
-  | 'UNIT_HEAD';
+  | 'UNIT_HEAD'
+  /** Global `ACCOUNTING_APPROVER` (F5f): sólo cuenta donde la regla lo nombra en `globalRoles`. */
+  | 'ACCOUNTING';
 
 /** Alcance de una asignación (`organization_user_assignments.access_scope`). */
 export type GrantScope = 'TENANT' | 'PRACTICE' | 'SITE' | 'UNIT' | 'SPACE';

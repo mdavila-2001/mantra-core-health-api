@@ -219,7 +219,8 @@ components:
       title: Integración de espacios (F5a, F5b, F5c, F5d, F5f, F5g)
       summary: >
         Hechos de los módulos que se ligan a un espacio físico (CONTRATO-F2-F5 §F5):
-        ubicaciones de inventario ubicadas o reubicadas (botiquín por unidad), y los de
+        ubicaciones de inventario ubicadas o reubicadas (botiquín por unidad), activos de
+        infraestructura ubicados y centros de costo ligados a una unidad (F5f), y los de
         las demás subfranjas a medida que se suman. Se publican en la misma transacción.
         El payload lleva ids de la ubicación, el espacio y la unidad; nunca datos del
         paciente.
@@ -528,10 +529,14 @@ components:
           enum:
             - pharmacy_inventory.location.located
             - pharmacy_inventory.location.relocated
+            - accounting.infrastructure_item.located
+            - accounting.cost_center.unit_linked
         aggregateType:
           type: string
           enum:
             - pharmacy_inventory.inventory_locations
+            - accounting.infrastructure_items
+            - accounting.cost_centers
         aggregateId:
           type: string
           format: uuid
