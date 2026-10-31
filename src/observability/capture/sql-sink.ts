@@ -1,6 +1,6 @@
 import {
-  normalizeSql,
-  sqlShapeHash,
+  shapeHashOfNormalized,
+  storableNormalizedSql,
   statementClass,
   type StatementClass,
 } from '../../orm/observability/sql-redaction';
@@ -43,7 +43,6 @@ export const MAX_SQL_HASHES_PER_MINUTE = 5000;
 export const SQL_OVERFLOW_HASH = '__overflow__';
 export const UNKNOWN_OPERATION = 'UNKNOWN';
 const MAX_NORMALIZED_SQL_CHARS = 2000;
-const MAX_INPUT_CHARS = 20_000;
 const MAX_CATALOG_PENDING = 5000;
 const MINUTE_MS = 60_000;
 const SEQ_MEMORY_MINUTES = 180;
@@ -166,8 +165,12 @@ export class SqlSink {
     if (!this.enabled) return;
     try {
       if (isSelfSql(sql)) return;
-      const bounded =
-        sql.length > MAX_INPUT_CHARS ? sql.slice(0, MAX_INPUT_CHARS) : sql;
+      // Se normaliza la sentencia COMPLETA y recién después se acota: cortar
+      // antes puede dejar un literal sin cerrar con su valor adentro.
+      const normalizedFull = storableNormalizedSql(
+        sql,
+        MAX_NORMALIZED_SQL_CHARS,
+      );
       const ms = Number.isFinite(tookMs) && tookMs > 0 ? tookMs : 0;
       const minute = Math.floor(at.getTime() / MINUTE_MS) * MINUTE_MS;
 
@@ -184,7 +187,7 @@ export class SqlSink {
         moduleCode = resolved.moduleCode;
       }
 
-      let hash = sqlShapeHash(bounded);
+      let hash = shapeHashOfNormalized(normalizedFull);
       const known = this.hashesByMinute.get(minute) ?? new Set<string>();
       if (!known.has(hash)) {
         if (known.size >= MAX_SQL_HASHES_PER_MINUTE) hash = SQL_OVERFLOW_HASH;
@@ -193,7 +196,7 @@ export class SqlSink {
       }
 
       if (hash !== SQL_OVERFLOW_HASH) {
-        this.noteStatement(hash, bounded, options.slow, at);
+        this.noteStatement(hash, sql, normalizedFull, options.slow, at);
       }
       noteSqlInRequest(hash, ms);
       if (context && options.slow) context.slowSqlCount += 1;
@@ -236,6 +239,7 @@ export class SqlSink {
   private noteStatement(
     hash: string,
     sql: string,
+    normalized: string,
     slow: boolean,
     at: Date,
   ): void {
@@ -249,7 +253,6 @@ export class SqlSink {
       return;
     }
     if (this.statements.size >= MAX_CATALOG_PENDING) return;
-    const normalized = normalizeSql(sql).slice(0, MAX_NORMALIZED_SQL_CHARS);
     this.statements.set(hash, {
       queryHash: hash,
       statementClass: statementClass(sql),

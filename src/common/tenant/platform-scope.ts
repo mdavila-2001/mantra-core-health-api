@@ -1,7 +1,6 @@
 import { SetMetadata } from '@nestjs/common';
 import type { Request } from 'express';
 import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
-import { expandRoleAliases } from '../auth/role-aliases';
 import { roleAuthorizesInTenant } from '../auth/roles.guard';
 import { hasPrivilegedTenantRole } from './tenant-resolution';
 
@@ -47,11 +46,9 @@ export function hasPlatformScope(
   user: AuthenticatedUser | undefined,
   routeRoles?: readonly string[],
 ): boolean {
-  const rutaConAlias =
-    routeRoles === undefined ? undefined : expandRoleAliases(routeRoles);
   return PLATFORM_SCOPE_ROLES.some(
     (role) =>
-      (rutaConAlias === undefined || rutaConAlias.includes(role)) &&
+      (routeRoles === undefined || routeRoles.includes(role)) &&
       roleAuthorizesInTenant(user, role, undefined),
   );
 }

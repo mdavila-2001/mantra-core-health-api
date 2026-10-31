@@ -174,3 +174,83 @@ describe('SqlSink', () => {
     ).not.toThrow();
   });
 });
+
+describe('SqlSink: ningún fragmento de un literal llega a lo guardado (hallazgo de seguridad)', () => {
+  const EMAIL = 'paciente.reservado@correo.example';
+  const DOC = '8123456-1B';
+  const SECRET = 'secreto-clinico';
+
+  function stored(sql: string): string {
+    const sink = newSink();
+    sink.record(sql, 3, { slow: true }, AT);
+    const { statements, series } = sink.drain();
+    // Todo lo que el sink entrega para guardar, serializado.
+    return JSON.stringify({ statements, series });
+  }
+
+  function expectClean(out: string): void {
+    for (const piece of [EMAIL, DOC, SECRET, 'correo.example', 'reservado']) {
+      expect(out).not.toContain(piece);
+    }
+  }
+
+  it('literal con correo y documento partido justo en el límite de 20 000 caracteres', () => {
+    const prefix = 'select * from iam.users where note = ';
+    // La comilla abre antes del viejo corte y el correo lo cruza.
+    const padding = 'x'.repeat(20_000 - prefix.length - 1 - 10);
+    const sql = `${prefix}'${padding}${EMAIL} ${DOC}' and id = 1`;
+    expect(sql.indexOf(EMAIL)).toBeLessThan(20_000 + 40);
+    expectClean(stored(sql));
+  });
+
+  it('literal sin cerrar (consulta truncada por el driver o por el cliente)', () => {
+    expectClean(stored(`select 1 from t where a = '${EMAIL} ${DOC}`));
+  });
+
+  it("E'it\\'s' con escapes no deja el valor", () => {
+    expectClean(
+      stored(`select 1 from t where a = E'it\\'s ${EMAIL}' and b = '${DOC}'`),
+    );
+  });
+
+  it('cadenas con dólar $$…$$ y $tag$…$tag$', () => {
+    expectClean(stored(`select 1 from t where a = $$ ${EMAIL} ${DOC} $$`));
+    expectClean(
+      stored(`select 1 from t where a = $x$ ${SECRET} 'comilla' $x$ and b = 2`),
+    );
+  });
+
+  it('comentarios -- y /* */ (con comillas y valores adentro)', () => {
+    expectClean(stored(`select 1 from t -- ${EMAIL} ' ${DOC}\nwhere a = 1`));
+    expectClean(stored(`select /* ${SECRET} ' */ 1 from t where a = 2`));
+    expectClean(stored(`select 1 from t /* ${SECRET} sin cerrar`));
+  });
+
+  it('una entrada desmedida se guarda como [truncated], no como SQL cortado', () => {
+    const sink = newSink();
+    sink.record(
+      `select '${'a'.repeat(300_000)}${SECRET}'`,
+      1,
+      { slow: false },
+      AT,
+    );
+    const { statements } = sink.drain();
+    expect(statements[0].normalizedSql).toBe('[truncated]');
+    expect(JSON.stringify(statements)).not.toContain(SECRET);
+  });
+
+  it('el SQL normal sigue guardándose normalizado', () => {
+    const sink = newSink();
+    sink.record(
+      select('11111111-1111-4111-8111-111111111111'),
+      2,
+      { slow: false },
+      AT,
+    );
+    const { statements } = sink.drain();
+    expect(statements[0].normalizedSql).toContain('where "s0"."id" = ?');
+    expect(statements[0].primaryTable).toBe(
+      'platform_ops.service_level_objectives',
+    );
+  });
+});
