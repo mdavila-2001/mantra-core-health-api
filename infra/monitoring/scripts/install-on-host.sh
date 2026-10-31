@@ -18,7 +18,7 @@ set -euo pipefail
 HOST="${1:?Uso: install-on-host.sh <ip-del-servidor>}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/alovida_contabo}"
 REPO_URL="${REPO_URL:-https://github.com/mdavila-2001/mantra-core-health-api.git}"
-BRANCH="${BRANCH:-test}"
+BRANCH="${BRANCH:-dev}"
 REMOTE_DIR=/opt/alovida-monitoring
 STACK_DIR="$REMOTE_DIR/infra/monitoring"
 

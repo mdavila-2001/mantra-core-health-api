@@ -110,17 +110,21 @@ export class IamUsersService {
       'Creating user',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.credentialsRepo.findActivePasswordBySubject(
+      // El correo no distingue mayúsculas, y una credencial pendiente también
+      // ocupa el buzón: al activarse quedarían dos y el ingreso no sabría a
+      // cuál entrar (#1000). El cerrojo pone en cola dos altas simultáneas.
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.email);
+      const clash = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.email,
       );
       if (clash) {
         this.logger.warn(
           { operation: 'iam.user.create', reason: 'email-in-use' },
-          'Rejected user creation: email already has an active credential',
+          'Rejected user creation: email already has a live credential',
         );
         throw new ConflictException(
-          'El email ya tiene una credencial de contraseña activa',
+          'El email ya tiene una credencial de contraseña',
           {
             email: dto.email,
           },

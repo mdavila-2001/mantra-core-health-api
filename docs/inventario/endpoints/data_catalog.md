@@ -60,7 +60,7 @@
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.review` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:282`
+- **Implementación:** `AdminCatalogController.review` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -70,28 +70,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/annotations/{id}/review` la atiende `AdminCatalogController.review` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:282). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ReviewInputDto` (3 campos, 2 obligatorios). Delega en `CatalogGovernanceService.review`. Crea filas en data_catalog.catalog_review_decisions. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_evidence_items.
+`POST /admin/catalog/annotations/{id}/review` la atiende `AdminCatalogController.review` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ReviewInputDto` (3 campos, 2 obligatorios). Delega en `CatalogGovernanceService.review`. Crea filas en data_catalog.catalog_review_decisions. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_evidence_items.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:282` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | LEE | LEE | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.revisionAuthor | `src/modules/data_catalog/repositories/catalog.repository.ts:575` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.decide | `src/modules/data_catalog/repositories/catalog.repository.ts:870` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.annotationById | `src/modules/data_catalog/repositories/catalog.repository.ts:368` |
-| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.columnEvidenceCount | `src/modules/data_catalog/repositories/catalog.repository.ts:509` |
-| `data_catalog.catalog_review_decisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.decide | `src/modules/data_catalog/repositories/catalog.repository.ts:891` |
+| `data_catalog.catalog_annotation_revisions` | LEE | LEE | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.revisionAuthor | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:575` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.decide | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:870` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.annotationById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:368` |
+| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.columnEvidenceCount | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:509` |
+| `data_catalog.catalog_review_decisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.review → CatalogGovernanceService.review → CatalogRepository.decide | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:891` |
 
 ### Parámetros
 
@@ -103,9 +103,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:313` |
-| `expectedRevisionNo` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | Revisión que se revisó (`currentRevisionNo`); si hay una más reciente, 409 | `src/modules/data_catalog/dto/catalog-request.dto.ts:322` |
-| `comment` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Obligatorio, de al menos 10 caracteres, al rechazar | `src/modules/data_catalog/dto/catalog-request.dto.ts:331` |
+| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:313` |
+| `expectedRevisionNo` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | Revisión que se revisó (`currentRevisionNo`); si hay una más reciente, 409 | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:322` |
+| `comment` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Obligatorio, de al menos 10 caracteres, al rechazar | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:331` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -165,7 +165,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.runClassification` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:314`
+- **Implementación:** `AdminCatalogController.runClassification` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:314`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -175,36 +175,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/classification/run` la atiende `AdminCatalogController.runClassification` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:314). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ClassificationRunDto` (1 campo, 0 obligatorios). Delega en `CatalogClassificationService.run`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects.
+`POST /admin/catalog/classification/run` la atiende `AdminCatalogController.runClassification` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:314). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `ClassificationRunDto` (1 campo, 0 obligatorios). Delega en `CatalogClassificationService.run`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:314` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:314` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:314` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:314` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/repositories/catalog.repository.ts:830` |
-| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:715` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:775` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/repositories/catalog.repository.ts:395` |
-| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/repositories/catalog.repository.ts:417` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/repositories/catalog.repository.ts:433` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/repositories/catalog.repository.ts:433` |
+| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
+| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:395` |
+| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:417` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:433` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.runClassification → CatalogClassificationService.run → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:433` |
 
 ### Cuerpo — DTO `ClassificationRunDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `schema` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Limita la corrida a un schema | `src/modules/data_catalog/dto/catalog-request.dto.ts:340` |
+| `schema` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Limita la corrida a un schema | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:340` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -226,15 +226,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `examined` | `number` | Sí | — | — | Columnas observadas que se miraron | `src/modules/data_catalog/dto/catalog-response.dto.ts:553` |
-| `unclassified` | `number` | Sí | — | — | Columnas que ninguna regla reconoció: quedan sin clasificar | `src/modules/data_catalog/dto/catalog-response.dto.ts:557` |
-| `created` | `number` | Sí | — | — | Fichas nuevas | `src/modules/data_catalog/dto/catalog-response.dto.ts:558` |
-| `raised` | `number` | Sí | — | — | Fichas de la máquina subidas a un nivel más alto | `src/modules/data_catalog/dto/catalog-response.dto.ts:562` |
-| `sentToReview` | `number` | Sí | — | — | De las creadas o subidas, las que quedaron en NEEDS_REVIEW por duda | `src/modules/data_catalog/dto/catalog-response.dto.ts:567` |
-| `skippedManual` | `number` | Sí | — | — | No tocadas: las escribió una persona | `src/modules/data_catalog/dto/catalog-response.dto.ts:569` |
-| `skippedReviewed` | `number` | Sí | — | — | No tocadas: ya salieron de AUTO_DETECTED | `src/modules/data_catalog/dto/catalog-response.dto.ts:571` |
-| `skippedNotHigher` | `number` | Sí | — | — | No tocadas: la propuesta no era más alta (nunca baja) | `src/modules/data_catalog/dto/catalog-response.dto.ts:575` |
-| `conflicts` | `number` | Sí | — | — | No escritas: otra petición cambió la ficha antes | `src/modules/data_catalog/dto/catalog-response.dto.ts:579` |
+| `examined` | `number` | Sí | — | — | Columnas observadas que se miraron | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:553` |
+| `unclassified` | `number` | Sí | — | — | Columnas que ninguna regla reconoció: quedan sin clasificar | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:557` |
+| `created` | `number` | Sí | — | — | Fichas nuevas | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:558` |
+| `raised` | `number` | Sí | — | — | Fichas de la máquina subidas a un nivel más alto | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:562` |
+| `sentToReview` | `number` | Sí | — | — | De las creadas o subidas, las que quedaron en NEEDS_REVIEW por duda | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:567` |
+| `skippedManual` | `number` | Sí | — | — | No tocadas: las escribió una persona | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:569` |
+| `skippedReviewed` | `number` | Sí | — | — | No tocadas: ya salieron de AUTO_DETECTED | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:571` |
+| `skippedNotHigher` | `number` | Sí | — | — | No tocadas: la propuesta no era más alta (nunca baja) | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:575` |
+| `conflicts` | `number` | Sí | — | — | No escritas: otra petición cambió la ficha antes | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:579` |
 
 ### Respuestas posibles
 
@@ -265,7 +265,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.saveColumnAnnotation` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:252`
+- **Implementación:** `AdminCatalogController.saveColumnAnnotation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -275,28 +275,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/catalog/columns/{id}/annotation` la atiende `AdminCatalogController.saveColumnAnnotation` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:252). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveColumnAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns.
+`PUT /admin/catalog/columns/{id}/annotation` la atiende `AdminCatalogController.saveColumnAnnotation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveColumnAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:252` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:252` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.insertRevision | `src/modules/data_catalog/repositories/catalog.repository.ts:830` |
-| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.insertAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:715` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.updateAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:775` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.annotationById | `src/modules/data_catalog/repositories/catalog.repository.ts:368` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogRepository.columnById | `src/modules/data_catalog/repositories/catalog.repository.ts:443` |
+| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
+| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogGovernanceService.save → CatalogRepository.annotationById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:368` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.saveColumnAnnotation → CatalogGovernanceService.saveColumnAnnotation → CatalogRepository.columnById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:443` |
 
 ### Parámetros
 
@@ -308,29 +308,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `expectedVersion` | `number` | Sí | mínimo 0 | `@IsInt()` `@Min(0)` | Versión de la ficha que se leyó (`version`); 0 para crearla. Si cambió, 409 | `src/modules/data_catalog/dto/catalog-request.dto.ts:174` |
-| `submit` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Enviarla a revisión: exige propósito, razón de existir y grano de fila (o declararlos como preguntas abiertas) | `src/modules/data_catalog/dto/catalog-request.dto.ts:182` |
-| `changeReason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:188` |
-| `businessName` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:194` |
-| `definition` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:199` |
-| `purpose` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:204` |
-| `existenceRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:209` |
-| `rowGrain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:214` |
-| `alternativesRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:219` |
-| `deletionImpact` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:224` |
-| `businessOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:229` |
-| `dataSteward` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:234` |
-| `technicalOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:239` |
-| `unit` | `object` | No | longitud máxima 100; admite null | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:244` |
-| `valueDomain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:249` |
-| `nullSemantics` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:254` |
-| `sensitivity` | `string` | No | valores: UNKNOWN, ANONYMIZED, PUBLIC, INTERNAL, PSEUDONYMIZED, PERSONAL, PHI_IDENTIFIER, PHI_SENSITIVE, PHI_SPECIAL, CREDENTIAL | `@IsOptional()` `@IsIn(SENSITIVITIES)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:259` |
-| `consumers` | `array<string>` | No | longitud máxima 200; máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:267` |
-| `openQuestions` | `array<OpenQuestionDto>` | No | máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => OpenQuestionDto)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:275` |
-| `openQuestions[].field` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | Campo de la ficha sobre el que es la pregunta | `src/modules/data_catalog/dto/catalog-request.dto.ts:140` |
-| `openQuestions[].question` | `string` | No | longitud mínima 3; longitud máxima 500 | `@IsString()` `@MinLength(3)` `@MaxLength(500)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:146` |
-| `openQuestions[].owner` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:152` |
-| `openQuestions[].dueDate` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Fecha ISO 8601 | `src/modules/data_catalog/dto/catalog-request.dto.ts:157` |
+| `expectedVersion` | `number` | Sí | mínimo 0 | `@IsInt()` `@Min(0)` | Versión de la ficha que se leyó (`version`); 0 para crearla. Si cambió, 409 | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:174` |
+| `submit` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Enviarla a revisión: exige propósito, razón de existir y grano de fila (o declararlos como preguntas abiertas) | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:182` |
+| `changeReason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:188` |
+| `businessName` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:194` |
+| `definition` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:199` |
+| `purpose` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:204` |
+| `existenceRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:209` |
+| `rowGrain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:214` |
+| `alternativesRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:219` |
+| `deletionImpact` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:224` |
+| `businessOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:229` |
+| `dataSteward` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:234` |
+| `technicalOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:239` |
+| `unit` | `object` | No | longitud máxima 100; admite null | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:244` |
+| `valueDomain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:249` |
+| `nullSemantics` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:254` |
+| `sensitivity` | `string` | No | valores: UNKNOWN, ANONYMIZED, PUBLIC, INTERNAL, PSEUDONYMIZED, PERSONAL, PHI_IDENTIFIER, PHI_SENSITIVE, PHI_SPECIAL, CREDENTIAL | `@IsOptional()` `@IsIn(SENSITIVITIES)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:259` |
+| `consumers` | `array<string>` | No | longitud máxima 200; máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:267` |
+| `openQuestions` | `array<OpenQuestionDto>` | No | máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => OpenQuestionDto)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:275` |
+| `openQuestions[].field` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | Campo de la ficha sobre el que es la pregunta | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:140` |
+| `openQuestions[].question` | `string` | No | longitud mínima 3; longitud máxima 500 | `@IsString()` `@MinLength(3)` `@MaxLength(500)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:146` |
+| `openQuestions[].owner` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:152` |
+| `openQuestions[].dueDate` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Fecha ISO 8601 | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:157` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -413,7 +413,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.columnEvidence` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:161`
+- **Implementación:** `AdminCatalogController.columnEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:161`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -423,23 +423,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.columnEvidence` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:161). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.columnEvidence`. Lee data_catalog.catalog_columns, data_catalog.catalog_evidence_items.
+`GET /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.columnEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:161). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.columnEvidence`. Lee data_catalog.catalog_columns, data_catalog.catalog_evidence_items.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:161` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:161` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:161` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:161` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.columnEvidence → CatalogReadService.columnEvidence → CatalogRepository.columnById | `src/modules/data_catalog/repositories/catalog.repository.ts:443` |
-| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.columnEvidence → CatalogReadService.columnEvidence → CatalogRepository.columnEvidence | `src/modules/data_catalog/repositories/catalog.repository.ts:488` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.columnEvidence → CatalogReadService.columnEvidence → CatalogRepository.columnById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:443` |
+| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.columnEvidence → CatalogReadService.columnEvidence → CatalogRepository.columnEvidence | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:488` |
 
 ### Parámetros
 
@@ -484,7 +484,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.addColumnEvidence` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:172`
+- **Implementación:** `AdminCatalogController.addColumnEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:172`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -494,25 +494,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.addColumnEvidence` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:172). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addColumnEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_columns.
+`POST /admin/catalog/columns/{id}/evidence` la atiende `AdminCatalogController.addColumnEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:172). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addColumnEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_columns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:172` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:172` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:172` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:172` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.addColumnEvidence → CatalogGovernanceService.addColumnEvidence → CatalogRepository.columnById | `src/modules/data_catalog/repositories/catalog.repository.ts:443` |
-| `data_catalog.catalog_evidence_items` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.addColumnEvidence → CatalogGovernanceService.addColumnEvidence → CatalogGovernanceService.guardarEvidencia → CatalogRepository.addEvidence | `src/modules/data_catalog/repositories/catalog.repository.ts:531` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.addColumnEvidence → CatalogGovernanceService.addColumnEvidence → CatalogRepository.columnById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:443` |
+| `data_catalog.catalog_evidence_items` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.addColumnEvidence → CatalogGovernanceService.addColumnEvidence → CatalogGovernanceService.guardarEvidencia → CatalogRepository.addEvidence | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:531` |
 
 ### Parámetros
 
@@ -585,7 +585,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.coverage` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:347`
+- **Implementación:** `AdminCatalogController.coverage` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:347`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -595,24 +595,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/coverage` la atiende `AdminCatalogController.coverage` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:347). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.coverage`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/coverage` la atiende `AdminCatalogController.coverage` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:347). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.coverage`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:347` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:347` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:347` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:347` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.coverage → CatalogReadService.coverage → CatalogRepository.coverageRows → CatalogRepository.annotationsOf | `src/modules/data_catalog/repositories/catalog.repository.ts:348` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.coverage → CatalogReadService.coverage → CatalogRepository.coverageRows | `src/modules/data_catalog/repositories/catalog.repository.ts:648` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.coverage → CatalogReadService.coverage → CatalogRepository.scans | `src/modules/data_catalog/repositories/catalog.repository.ts:922` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.coverage → CatalogReadService.coverage → CatalogRepository.coverageRows → CatalogRepository.annotationsOf | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:348` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.coverage → CatalogReadService.coverage → CatalogRepository.coverageRows | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:648` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.coverage → CatalogReadService.coverage → CatalogRepository.scans | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:922` |
 
 ### Parámetros
 
@@ -656,7 +656,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.objects` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:99`
+- **Implementación:** `AdminCatalogController.objects` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:99`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -666,24 +666,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects` la atiende `AdminCatalogController.objects` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:99). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.objects`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects` la atiende `AdminCatalogController.objects` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:99). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.objects`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:99` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:99` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:99` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:99` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.objects → CatalogReadService.objects → CatalogRepository.objects | `src/modules/data_catalog/repositories/catalog.repository.ts:304` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.objects → CatalogReadService.objects → CatalogRepository.objects | `src/modules/data_catalog/repositories/catalog.repository.ts:304` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.objects → CatalogReadService.objects → CatalogRepository.objects | `src/modules/data_catalog/repositories/catalog.repository.ts:304` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.objects → CatalogReadService.objects → CatalogRepository.objects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:304` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.objects → CatalogReadService.objects → CatalogRepository.objects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:304` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.objects → CatalogReadService.objects → CatalogRepository.objects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:304` |
 
 ### Parámetros
 
@@ -735,7 +735,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.object` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:109`
+- **Implementación:** `AdminCatalogController.object` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:109`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -745,26 +745,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}` la atiende `AdminCatalogController.object` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:109). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.objectDetail`. Lee data_catalog.catalog_annotations, data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs, system_ops.entity_registry.
+`GET /admin/catalog/objects/{id}` la atiende `AdminCatalogController.object` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:109). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.objectDetail`. Lee data_catalog.catalog_annotations, data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs, system_ops.entity_registry.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:109` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:109` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:109` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:109` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogRepository.annotationOfObject → CatalogRepository.annotationsOf | `src/modules/data_catalog/repositories/catalog.repository.ts:348` |
-| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogRepository.evidenceCount | `src/modules/data_catalog/repositories/catalog.repository.ts:497` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `system_ops.entity_registry` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogRepository.governance | `src/modules/data_catalog/repositories/catalog.repository.ts:688` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogRepository.annotationOfObject → CatalogRepository.annotationsOf | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:348` |
+| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogRepository.evidenceCount | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:497` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `system_ops.entity_registry` | LEE | LEE | POR_SQL | AdminCatalogController.object → CatalogReadService.objectDetail → CatalogRepository.governance | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:688` |
 
 ### Parámetros
 
@@ -809,7 +809,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.saveAnnotation` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:224`
+- **Implementación:** `AdminCatalogController.saveAnnotation` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -819,29 +819,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/catalog/objects/{id}/annotation` la atiende `AdminCatalogController.saveAnnotation` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:224). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`PUT /admin/catalog/objects/{id}/annotation` la atiende `AdminCatalogController.saveAnnotation` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `AnnotationPatchDto` (23 campos, 1 obligatorio). Delega en `CatalogGovernanceService.saveAnnotation`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations. Actualiza data_catalog.catalog_annotations. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:224` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:224` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.insertRevision | `src/modules/data_catalog/repositories/catalog.repository.ts:830` |
-| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.insertAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:715` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.updateAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:775` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.annotationById | `src/modules/data_catalog/repositories/catalog.repository.ts:368` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
+| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogGovernanceService.save → CatalogRepository.annotationById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:368` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.saveAnnotation → CatalogGovernanceService.saveAnnotation → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
 
 ### Parámetros
 
@@ -853,29 +853,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `expectedVersion` | `number` | Sí | mínimo 0 | `@IsInt()` `@Min(0)` | Versión de la ficha que se leyó (`version`); 0 para crearla. Si cambió, 409 | `src/modules/data_catalog/dto/catalog-request.dto.ts:174` |
-| `submit` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Enviarla a revisión: exige propósito, razón de existir y grano de fila (o declararlos como preguntas abiertas) | `src/modules/data_catalog/dto/catalog-request.dto.ts:182` |
-| `changeReason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:188` |
-| `businessName` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:194` |
-| `definition` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:199` |
-| `purpose` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:204` |
-| `existenceRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:209` |
-| `rowGrain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:214` |
-| `alternativesRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:219` |
-| `deletionImpact` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:224` |
-| `businessOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:229` |
-| `dataSteward` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:234` |
-| `technicalOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:239` |
-| `unit` | `object` | No | longitud máxima 100; admite null | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:244` |
-| `valueDomain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:249` |
-| `nullSemantics` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:254` |
-| `sensitivity` | `string` | No | valores: UNKNOWN, ANONYMIZED, PUBLIC, INTERNAL, PSEUDONYMIZED, PERSONAL, PHI_IDENTIFIER, PHI_SENSITIVE, PHI_SPECIAL, CREDENTIAL | `@IsOptional()` `@IsIn(SENSITIVITIES)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:259` |
-| `consumers` | `array<string>` | No | longitud máxima 200; máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:267` |
-| `openQuestions` | `array<OpenQuestionDto>` | No | máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => OpenQuestionDto)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:275` |
-| `openQuestions[].field` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | Campo de la ficha sobre el que es la pregunta | `src/modules/data_catalog/dto/catalog-request.dto.ts:140` |
-| `openQuestions[].question` | `string` | No | longitud mínima 3; longitud máxima 500 | `@IsString()` `@MinLength(3)` `@MaxLength(500)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:146` |
-| `openQuestions[].owner` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/dto/catalog-request.dto.ts:152` |
-| `openQuestions[].dueDate` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Fecha ISO 8601 | `src/modules/data_catalog/dto/catalog-request.dto.ts:157` |
+| `expectedVersion` | `number` | Sí | mínimo 0 | `@IsInt()` `@Min(0)` | Versión de la ficha que se leyó (`version`); 0 para crearla. Si cambió, 409 | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:174` |
+| `submit` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Enviarla a revisión: exige propósito, razón de existir y grano de fila (o declararlos como preguntas abiertas) | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:182` |
+| `changeReason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:188` |
+| `businessName` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:194` |
+| `definition` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:199` |
+| `purpose` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:204` |
+| `existenceRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:209` |
+| `rowGrain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:214` |
+| `alternativesRationale` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:219` |
+| `deletionImpact` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:224` |
+| `businessOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:229` |
+| `dataSteward` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:234` |
+| `technicalOwner` | `object` | No | longitud máxima 200; admite null | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:239` |
+| `unit` | `object` | No | longitud máxima 100; admite null | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:244` |
+| `valueDomain` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:249` |
+| `nullSemantics` | `object` | No | longitud máxima 4000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(TEXTO)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:254` |
+| `sensitivity` | `string` | No | valores: UNKNOWN, ANONYMIZED, PUBLIC, INTERNAL, PSEUDONYMIZED, PERSONAL, PHI_IDENTIFIER, PHI_SENSITIVE, PHI_SPECIAL, CREDENTIAL | `@IsOptional()` `@IsIn(SENSITIVITIES)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:259` |
+| `consumers` | `array<string>` | No | longitud máxima 200; máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:267` |
+| `openQuestions` | `array<OpenQuestionDto>` | No | máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => OpenQuestionDto)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:275` |
+| `openQuestions[].field` | `string` | No | longitud máxima 60 | `@IsOptional()` `@IsString()` `@MaxLength(60)` | Campo de la ficha sobre el que es la pregunta | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:140` |
+| `openQuestions[].question` | `string` | No | longitud mínima 3; longitud máxima 500 | `@IsString()` `@MinLength(3)` `@MaxLength(500)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:146` |
+| `openQuestions[].owner` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:152` |
+| `openQuestions[].dueDate` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Fecha ISO 8601 | `src/modules/data_catalog/presentation/dto/catalog-request.dto.ts:157` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -958,7 +958,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.changes` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:203`
+- **Implementación:** `AdminCatalogController.changes` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:203`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -968,25 +968,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/changes` la atiende `AdminCatalogController.changes` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:203). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.changes`. Lee data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/changes` la atiende `AdminCatalogController.changes` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:203). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.changes`. Lee data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:203` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:203` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:203` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:203` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogRepository.changes | `src/modules/data_catalog/repositories/catalog.repository.ts:597` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogRepository.changes | `src/modules/data_catalog/repositories/catalog.repository.ts:597` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogRepository.changes | `src/modules/data_catalog/repositories/catalog.repository.ts:597` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogRepository.changes | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:597` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogRepository.changes | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:597` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogRepository.changes | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:597` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.changes → CatalogReadService.changes → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
 
 ### Parámetros
 
@@ -1033,7 +1033,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.columns` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:121`
+- **Implementación:** `AdminCatalogController.columns` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:121`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1043,25 +1043,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/columns` la atiende `AdminCatalogController.columns` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:121). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.columns`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/columns` la atiende `AdminCatalogController.columns` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:121). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.columns`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:121` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:121` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:121` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:121` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogRepository.columnAnnotations | `src/modules/data_catalog/repositories/catalog.repository.ts:467` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogRepository.columns | `src/modules/data_catalog/repositories/catalog.repository.ts:454` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogRepository.columnAnnotations | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:467` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogRepository.columns | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:454` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.columns → CatalogReadService.columns → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
 
 ### Parámetros
 
@@ -1106,7 +1106,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.evidence` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:131`
+- **Implementación:** `AdminCatalogController.evidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1116,24 +1116,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.evidence` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:131). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.evidence`. Lee data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.evidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:131). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.evidence`. Lee data_catalog.catalog_evidence_items, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:131` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:131` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:131` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:131` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.evidence → CatalogReadService.evidence → CatalogRepository.evidence | `src/modules/data_catalog/repositories/catalog.repository.ts:479` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.evidence → CatalogReadService.evidence → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.evidence → CatalogReadService.evidence → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_evidence_items` | LEE | LEE | POR_SQL | AdminCatalogController.evidence → CatalogReadService.evidence → CatalogRepository.evidence | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:479` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.evidence → CatalogReadService.evidence → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.evidence → CatalogReadService.evidence → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
 
 ### Parámetros
 
@@ -1178,7 +1178,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.addEvidence` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:141`
+- **Implementación:** `AdminCatalogController.addEvidence` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:141`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1188,26 +1188,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.addEvidence` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:141). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /admin/catalog/objects/{id}/evidence` la atiende `AdminCatalogController.addEvidence` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:141). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Valida el cuerpo como `DataCatalogEvidenceInputDto` (4 campos, 2 obligatorios). Delega en `CatalogGovernanceService.addEvidence`. Crea filas en data_catalog.catalog_evidence_items. Lee data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:141` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:141` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:141` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:141` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_evidence_items` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.addEvidence → CatalogGovernanceService.addEvidence → CatalogGovernanceService.guardarEvidencia → CatalogRepository.addEvidence | `src/modules/data_catalog/repositories/catalog.repository.ts:531` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.addEvidence → CatalogGovernanceService.addEvidence → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.addEvidence → CatalogGovernanceService.addEvidence → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_evidence_items` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.addEvidence → CatalogGovernanceService.addEvidence → CatalogGovernanceService.guardarEvidencia → CatalogRepository.addEvidence | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:531` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.addEvidence → CatalogGovernanceService.addEvidence → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.addEvidence → CatalogGovernanceService.addEvidence → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
 
 ### Parámetros
 
@@ -1280,7 +1280,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.history` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:193`
+- **Implementación:** `AdminCatalogController.history` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:193`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1290,26 +1290,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/history` la atiende `AdminCatalogController.history` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:193). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.history`. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_review_decisions, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/history` la atiende `AdminCatalogController.history` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:193). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.history`. Lee data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_review_decisions, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:193` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:193` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:193` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:193` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogRepository.revisions | `src/modules/data_catalog/repositories/catalog.repository.ts:552` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogRepository.annotationOfObject → CatalogRepository.annotationsOf | `src/modules/data_catalog/repositories/catalog.repository.ts:348` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
-| `data_catalog.catalog_review_decisions` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogRepository.decisions | `src/modules/data_catalog/repositories/catalog.repository.ts:561` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_annotation_revisions` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogRepository.revisions | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:552` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogRepository.annotationOfObject → CatalogRepository.annotationsOf | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:348` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
+| `data_catalog.catalog_review_decisions` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogRepository.decisions | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:561` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.history → CatalogReadService.history → CatalogReadService.objeto → CatalogRepository.objectById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:331` |
 
 ### Parámetros
 
@@ -1354,7 +1354,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.impact` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:213`
+- **Implementación:** `AdminCatalogController.impact` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:213`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1364,25 +1364,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/objects/{id}/impact` la atiende `AdminCatalogController.impact` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:213). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.impact`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`GET /admin/catalog/objects/{id}/impact` la atiende `AdminCatalogController.impact` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:213). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.impact`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:213` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:213` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:213` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:213` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.annotationsOf | `src/modules/data_catalog/repositories/catalog.repository.ts:348` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.foreignKeyGraph | `src/modules/data_catalog/repositories/catalog.repository.ts:621` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.foreignKeyGraph | `src/modules/data_catalog/repositories/catalog.repository.ts:621` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.objectsByIds | `src/modules/data_catalog/repositories/catalog.repository.ts:320` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.annotationsOf | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:348` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.foreignKeyGraph | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:621` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.foreignKeyGraph | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:621` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.impact → CatalogReadService.impact → CatalogRepository.objectsByIds | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:320` |
 
 ### Parámetros
 
@@ -1429,7 +1429,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.permissionDrift` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:334`
+- **Implementación:** `AdminCatalogController.permissionDrift` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:334`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1439,22 +1439,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/permission-drift` la atiende `AdminCatalogController.permissionDrift` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:334). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PermissionDriftService.report`. Lee authz.roles.
+`GET /admin/catalog/permission-drift` la atiende `AdminCatalogController.permissionDrift` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:334). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PermissionDriftService.report`. Lee authz.roles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:334` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:334` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:334` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:334` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | POR_SQL | AdminCatalogController.permissionDrift → PermissionDriftService.report → PermissionDriftService.databaseRoleCodes | `src/modules/data_catalog/services/permission-drift.service.ts:92` |
+| `authz.roles` | LEE | LEE | POR_SQL | AdminCatalogController.permissionDrift → PermissionDriftService.report → PermissionDriftService.databaseRoleCodes | `src/modules/data_catalog/application/permission-drift.service.ts:73` |
 
 ### Cuerpo
 
@@ -1492,7 +1492,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.listScans` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:357`
+- **Implementación:** `AdminCatalogController.listScans` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:357`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1502,22 +1502,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/scans` la atiende `AdminCatalogController.listScans` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:357). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.scans`. Lee data_catalog.catalog_scan_runs.
+`GET /admin/catalog/scans` la atiende `AdminCatalogController.listScans` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:357). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.scans`. Lee data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:357` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:357` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:357` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:357` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.listScans → CatalogReadService.scans → CatalogRepository.scans | `src/modules/data_catalog/repositories/catalog.repository.ts:922` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.listScans → CatalogReadService.scans → CatalogRepository.scans | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:922` |
 
 ### Parámetros
 
@@ -1562,7 +1562,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.requestScan` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:375`
+- **Implementación:** `AdminCatalogController.requestScan` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1572,37 +1572,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/scans` la atiende `AdminCatalogController.requestScan` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:375). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Delega en `CatalogScanService.request`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /admin/catalog/scans` la atiende `AdminCatalogController.requestScan` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Delega en `CatalogScanService.request`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:375` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:375` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375` |
 | CABECERA | Idempotency-Key (obligatoria) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/repositories/catalog.repository.ts:830` |
-| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:715` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:775` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/repositories/catalog.repository.ts:395` |
-| `data_catalog.catalog_change_events` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1342` |
-| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/repositories/catalog.repository.ts:417` |
-| `data_catalog.catalog_columns` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1269` |
-| `data_catalog.catalog_columns` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1290` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/repositories/catalog.repository.ts:1133` |
-| `data_catalog.catalog_objects` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1236` |
-| `data_catalog.catalog_objects` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1257` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/repositories/catalog.repository.ts:1120` |
-| `data_catalog.catalog_scan_runs` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogRepository.failAbandoned | `src/modules/data_catalog/repositories/catalog.repository.ts:966` |
-| `data_catalog.catalog_scan_runs` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogRepository.insertScan | `src/modules/data_catalog/repositories/catalog.repository.ts:991` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogRepository.scanByIdempotency | `src/modules/data_catalog/repositories/catalog.repository.ts:943` |
+| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
+| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:395` |
+| `data_catalog.catalog_change_events` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1342` |
+| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:417` |
+| `data_catalog.catalog_columns` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1269` |
+| `data_catalog.catalog_columns` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1290` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1133` |
+| `data_catalog.catalog_objects` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1236` |
+| `data_catalog.catalog_objects` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1257` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogScanService.start → CatalogScanService.run → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1120` |
+| `data_catalog.catalog_scan_runs` | ESCRIBE | ACTUALIZA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogRepository.failAbandoned | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:966` |
+| `data_catalog.catalog_scan_runs` | ESCRIBE | CREA | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogRepository.insertScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:991` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.requestScan → CatalogScanService.request → CatalogRepository.scanByIdempotency | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:943` |
 
 ### Parámetros
 
@@ -1618,11 +1618,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `scanId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:438` |
-| `status` | `string` | Sí | valores: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELLED | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:439` |
-| `created` | `boolean` | Sí | — | — | `false` si la petición repetía una `Idempotency-Key` ya usada y se devolvió el escaneo de entonces | `src/modules/data_catalog/dto/catalog-response.dto.ts:444` |
-| `acceptedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:445` |
-| `statusUrl` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:446` |
+| `scanId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:438` |
+| `status` | `string` | Sí | valores: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELLED | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:439` |
+| `created` | `boolean` | Sí | — | — | `false` si la petición repetía una `Idempotency-Key` ya usada y se devolvió el escaneo de entonces | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:444` |
+| `acceptedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:445` |
+| `statusUrl` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:446` |
 
 ### Respuestas posibles
 
@@ -1654,7 +1654,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.scan` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:367`
+- **Implementación:** `AdminCatalogController.scan` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:367`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1664,22 +1664,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/scans/{id}` la atiende `AdminCatalogController.scan` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:367). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.scan`. Lee data_catalog.catalog_scan_runs.
+`GET /admin/catalog/scans/{id}` la atiende `AdminCatalogController.scan` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:367). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.scan`. Lee data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:367` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:367` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:367` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:367` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.scan → CatalogReadService.scan → CatalogRepository.scanById | `src/modules/data_catalog/repositories/catalog.repository.ts:930` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogController.scan → CatalogReadService.scan → CatalogRepository.scanById | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:930` |
 
 ### Parámetros
 
@@ -1724,7 +1724,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminCatalogController.schemas` — `src/modules/data_catalog/controllers/admin-catalog.controller.ts:88`
+- **Implementación:** `AdminCatalogController.schemas` — `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1734,23 +1734,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/schemas` la atiende `AdminCatalogController.schemas` (src/modules/data_catalog/controllers/admin-catalog.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.schemas`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects.
+`GET /admin/catalog/schemas` la atiende `AdminCatalogController.schemas` (src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogReadService.schemas`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:88` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:88` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:88` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:88` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.schemas → CatalogReadService.schemas → CatalogRepository.schemas | `src/modules/data_catalog/repositories/catalog.repository.ts:246` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.schemas → CatalogReadService.schemas → CatalogRepository.schemas | `src/modules/data_catalog/repositories/catalog.repository.ts:246` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogController.schemas → CatalogReadService.schemas → CatalogRepository.schemas | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:246` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogController.schemas → CatalogReadService.schemas → CatalogRepository.schemas | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:246` |
 
 ### Cuerpo
 
@@ -1788,7 +1788,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.deriva` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:175`
+- **Implementación:** `AdminPortalController.deriva` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1798,20 +1798,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/catalogo/deriva` la atiende `AdminPortalController.deriva` (src/modules/data_catalog/controllers/admin-portal.controller.ts:175). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.derivaDelCatalogo`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/catalogo/deriva` la atiende `AdminPortalController.deriva` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:175). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.derivaDelCatalogo`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:175` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:175` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:175` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:175` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Cuerpo
 
@@ -1821,8 +1821,8 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `resumen` | `object` | Sí | — | — | Cifras del catálogo | `src/modules/data_catalog/dto/portal-response.dto.ts:450` |
-| `deriva` | `object` | Sí | — | — | Entidades sin tabla, tablas sin entidad, columnas ausentes, nulabilidad, schemas sin catálogo de la API | `src/modules/data_catalog/dto/portal-response.dto.ts:457` |
+| `resumen` | `object` | Sí | — | — | Cifras del catálogo | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:450` |
+| `deriva` | `object` | Sí | — | — | Entidades sin tabla, tablas sin entidad, columnas ausentes, nulabilidad, schemas sin catálogo de la API | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:457` |
 
 ### Respuestas posibles
 
@@ -1853,7 +1853,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.listarTablas` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:159`
+- **Implementación:** `AdminPortalController.listarTablas` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:159`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1863,20 +1863,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/catalogo/tablas` la atiende `AdminPortalController.listarTablas` (src/modules/data_catalog/controllers/admin-portal.controller.ts:159). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.listarTablas`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/catalogo/tablas` la atiende `AdminPortalController.listarTablas` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:159). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.listarTablas`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:159` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:159` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:159` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -1897,19 +1897,19 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<TablaResumenDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:380` |
-| `items[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:368` |
-| `items[].schema` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:369` |
-| `items[].tabla` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:370` |
-| `items[].dominio` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:371` |
-| `items[].columnas` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:372` |
-| `items[].indices` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:373` |
-| `items[].operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:374` |
-| `items[].orm` | `string` | Sí | valores: COINCIDE, DIVERGE, SIN_ENTIDAD | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:375` |
-| `items[].appendOnly` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:376` |
-| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:381` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:382` |
-| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:383` |
+| `items` | `array<TablaResumenDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:380` |
+| `items[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:368` |
+| `items[].schema` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:369` |
+| `items[].tabla` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:370` |
+| `items[].dominio` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:371` |
+| `items[].columnas` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:372` |
+| `items[].indices` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:373` |
+| `items[].operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:374` |
+| `items[].orm` | `string` | Sí | valores: COINCIDE, DIVERGE, SIN_ENTIDAD | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:375` |
+| `items[].appendOnly` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:376` |
+| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:381` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:382` |
+| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:383` |
 
 ### Respuestas posibles
 
@@ -1940,7 +1940,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.fichaDeTabla` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:166`
+- **Implementación:** `AdminPortalController.fichaDeTabla` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:166`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1950,20 +1950,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/catalogo/tablas/{schema}/{tabla}` la atiende `AdminPortalController.fichaDeTabla` (src/modules/data_catalog/controllers/admin-portal.controller.ts:166). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.fichaDeTabla`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/catalogo/tablas/{schema}/{tabla}` la atiende `AdminPortalController.fichaDeTabla` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:166). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.fichaDeTabla`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:166` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:166` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:166` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:166` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -1980,24 +1980,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:388` |
-| `schema` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:389` |
-| `tabla` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:390` |
-| `dominio` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:391` |
-| `diagrama` | `string` | Sí | — | — | Diagrama del modelo del que sale | `src/modules/data_catalog/dto/portal-response.dto.ts:393` |
-| `ddl` | `string` | Sí | — | — | DDL del que sale | `src/modules/data_catalog/dto/portal-response.dto.ts:394` |
-| `proposito` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:395` |
-| `propositoEstado` | `string` | Sí | — | — | Estado de la revisión del propósito (hoy `DOMAIN_CURATED_DRAFT`) | `src/modules/data_catalog/dto/portal-response.dto.ts:400` |
-| `propositoFuente` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:401` |
-| `entidadOrm` | `object` | No | admite null | — | Clase de la entidad del ORM | `src/modules/data_catalog/dto/portal-response.dto.ts:406` |
-| `gobierno` | `object` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:408` |
-| `columnas` | `array<object>` | Sí | — | — | Columnas con rol estructural y descripción (con fuente o «sin dato») | `src/modules/data_catalog/dto/portal-response.dto.ts:415` |
-| `relaciones` | `object` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:416` |
-| `indices` | `array<object>` | Sí | — | — | Índices con su «para qué» | `src/modules/data_catalog/dto/portal-response.dto.ts:425` |
-| `restricciones` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:430` |
-| `operaciones` | `array<object>` | Sí | — | — | Operaciones HTTP que la tocan | `src/modules/data_catalog/dto/portal-response.dto.ts:436` |
-| `deriva` | `object` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:437` |
-| `revision` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:441` |
+| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:388` |
+| `schema` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:389` |
+| `tabla` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:390` |
+| `dominio` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:391` |
+| `diagrama` | `string` | Sí | — | — | Diagrama del modelo del que sale | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:393` |
+| `ddl` | `string` | Sí | — | — | DDL del que sale | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:394` |
+| `proposito` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:395` |
+| `propositoEstado` | `string` | Sí | — | — | Estado de la revisión del propósito (hoy `DOMAIN_CURATED_DRAFT`) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:400` |
+| `propositoFuente` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:401` |
+| `entidadOrm` | `object` | No | admite null | — | Clase de la entidad del ORM | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:406` |
+| `gobierno` | `object` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:408` |
+| `columnas` | `array<object>` | Sí | — | — | Columnas con rol estructural y descripción (con fuente o «sin dato») | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:415` |
+| `relaciones` | `object` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:416` |
+| `indices` | `array<object>` | Sí | — | — | Índices con su «para qué» | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:425` |
+| `restricciones` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:430` |
+| `operaciones` | `array<object>` | Sí | — | — | Operaciones HTTP que la tocan | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:436` |
+| `deriva` | `object` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:437` |
+| `revision` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:441` |
 
 ### Respuestas posibles
 
@@ -2029,7 +2029,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.listarProcesos` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:130`
+- **Implementación:** `AdminPortalController.listarProcesos` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:130`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2039,20 +2039,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/flujos` la atiende `AdminPortalController.listarProcesos` (src/modules/data_catalog/controllers/admin-portal.controller.ts:130). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.listarProcesos`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/flujos` la atiende `AdminPortalController.listarProcesos` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:130). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.listarProcesos`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:130` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:130` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:130` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:130` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2073,21 +2073,21 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ProcesoResumenDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:249` |
-| `items[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:235` |
-| `items[].tipo` | `string` | Sí | valores: MODULO, CRITICO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:236` |
-| `items[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:237` |
-| `items[].modulo` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:238` |
-| `items[].bloque` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:239` |
-| `items[].agrupacion` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:240` |
-| `items[].actores` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:241` |
-| `items[].operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:242` |
-| `items[].etapas` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:243` |
-| `items[].maquinas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:244` |
-| `items[].revision` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:245` |
-| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:250` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:251` |
-| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:252` |
+| `items` | `array<ProcesoResumenDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:249` |
+| `items[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:235` |
+| `items[].tipo` | `string` | Sí | valores: MODULO, CRITICO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:236` |
+| `items[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:237` |
+| `items[].modulo` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:238` |
+| `items[].bloque` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:239` |
+| `items[].agrupacion` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:240` |
+| `items[].actores` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:241` |
+| `items[].operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:242` |
+| `items[].etapas` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:243` |
+| `items[].maquinas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:244` |
+| `items[].revision` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:245` |
+| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:250` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:251` |
+| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:252` |
 
 ### Respuestas posibles
 
@@ -2118,7 +2118,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.detalleDeProceso` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:137`
+- **Implementación:** `AdminPortalController.detalleDeProceso` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:137`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2128,20 +2128,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/flujos/{codigo}` la atiende `AdminPortalController.detalleDeProceso` (src/modules/data_catalog/controllers/admin-portal.controller.ts:137). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.detalleDeProceso`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/flujos/{codigo}` la atiende `AdminPortalController.detalleDeProceso` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:137). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.detalleDeProceso`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:137` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:137` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:137` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:137` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2157,35 +2157,35 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:235` |
-| `tipo` | `string` | Sí | valores: MODULO, CRITICO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:236` |
-| `nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:237` |
-| `modulo` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:238` |
-| `bloque` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:239` |
-| `agrupacion` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:240` |
-| `actores` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:241` |
-| `operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:242` |
-| `etapas` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:243` |
-| `maquinas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:244` |
-| `revision` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:245` |
-| `paraQueSirve` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:288` |
-| `paraQueSirveFuente` | `object` | No | admite null | — | archivo:línea de donde sale «para qué sirve» | `src/modules/data_catalog/dto/portal-response.dto.ts:293` |
-| `flujoGeneral` | `object` | No | admite null | — | Diagrama declarado en el README del módulo, tal cual | `src/modules/data_catalog/dto/portal-response.dto.ts:298` |
-| `detalleDeEtapas` | `array<EtapaDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:299` |
-| `detalleDeEtapas[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:256` |
-| `detalleDeEtapas[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:257` |
-| `detalleDeEtapas[].fuente` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:258` |
-| `detalleDeEtapas[].agrupacion` | `string` | No | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:259` |
-| `detalleDeEtapas[].operaciones` | `array<object>` | Sí | — | — | Operaciones de la etapa con quién actúa y qué efectos tiene | `src/modules/data_catalog/dto/portal-response.dto.ts:265` |
-| `maquinasDeEstado` | `array<MaquinaDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:300` |
-| `maquinasDeEstado[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:269` |
-| `maquinasDeEstado[].fuente` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:270` |
-| `maquinasDeEstado[].estados` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:271` |
-| `maquinasDeEstado[].transiciones` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:276` |
-| `maquinasDeEstado[].iniciales` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:277` |
-| `maquinasDeEstado[].terminales` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:278` |
-| `maquinasDeEstado[].operaciones` | `array<object>` | Sí | — | — | Operaciones que la ejercen (POR_REFERENCIA) | `src/modules/data_catalog/dto/portal-response.dto.ts:284` |
-| `fuentes` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:301` |
+| `codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:235` |
+| `tipo` | `string` | Sí | valores: MODULO, CRITICO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:236` |
+| `nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:237` |
+| `modulo` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:238` |
+| `bloque` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:239` |
+| `agrupacion` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:240` |
+| `actores` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:241` |
+| `operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:242` |
+| `etapas` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:243` |
+| `maquinas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:244` |
+| `revision` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:245` |
+| `paraQueSirve` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:288` |
+| `paraQueSirveFuente` | `object` | No | admite null | — | archivo:línea de donde sale «para qué sirve» | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:293` |
+| `flujoGeneral` | `object` | No | admite null | — | Diagrama declarado en el README del módulo, tal cual | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:298` |
+| `detalleDeEtapas` | `array<EtapaDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:299` |
+| `detalleDeEtapas[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:256` |
+| `detalleDeEtapas[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:257` |
+| `detalleDeEtapas[].fuente` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:258` |
+| `detalleDeEtapas[].agrupacion` | `string` | No | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:259` |
+| `detalleDeEtapas[].operaciones` | `array<object>` | Sí | — | — | Operaciones de la etapa con quién actúa y qué efectos tiene | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:265` |
+| `maquinasDeEstado` | `array<MaquinaDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:300` |
+| `maquinasDeEstado[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:269` |
+| `maquinasDeEstado[].fuente` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:270` |
+| `maquinasDeEstado[].estados` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:271` |
+| `maquinasDeEstado[].transiciones` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:276` |
+| `maquinasDeEstado[].iniciales` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:277` |
+| `maquinasDeEstado[].terminales` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:278` |
+| `maquinasDeEstado[].operaciones` | `array<object>` | Sí | — | — | Operaciones que la ejercen (POR_REFERENCIA) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:284` |
+| `fuentes` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:301` |
 
 ### Respuestas posibles
 
@@ -2217,7 +2217,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.grafo` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:150`
+- **Implementación:** `AdminPortalController.grafo` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:150`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2227,20 +2227,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/flujos/{codigo}/grafo` la atiende `AdminPortalController.grafo` (src/modules/data_catalog/controllers/admin-portal.controller.ts:150). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.grafoDeProceso`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/flujos/{codigo}/grafo` la atiende `AdminPortalController.grafo` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:150). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.grafoDeProceso`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:150` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:150` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:150` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2256,11 +2256,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `proceso` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:305` |
-| `nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:306` |
-| `roles` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:307` |
-| `nodos` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:312` |
-| `aristas` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:317` |
+| `proceso` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:305` |
+| `nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:306` |
+| `roles` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:307` |
+| `nodos` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:312` |
+| `aristas` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:317` |
 
 ### Respuestas posibles
 
@@ -2292,7 +2292,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.hallazgos` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:111`
+- **Implementación:** `AdminPortalController.hallazgos` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:111`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2302,20 +2302,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/flujos/hallazgos` la atiende `AdminPortalController.hallazgos` (src/modules/data_catalog/controllers/admin-portal.controller.ts:111). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.hallazgos`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/flujos/hallazgos` la atiende `AdminPortalController.hallazgos` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:111). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.hallazgos`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:111` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:111` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:111` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:111` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Cuerpo
 
@@ -2325,11 +2325,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:350` |
-| `severidad` | `string` | Sí | valores: ALTA, MEDIA, BAJA, INFO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:351` |
-| `titulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:352` |
-| `queHacer` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:353` |
-| `cuenta` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:354` |
+| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:350` |
+| `severidad` | `string` | Sí | valores: ALTA, MEDIA, BAJA, INFO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:351` |
+| `titulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:352` |
+| `queHacer` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:353` |
+| `cuenta` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:354` |
 
 ### Respuestas posibles
 
@@ -2360,7 +2360,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.detalleDeHallazgo` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:118`
+- **Implementación:** `AdminPortalController.detalleDeHallazgo` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:118`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2370,20 +2370,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/flujos/hallazgos/{id}` la atiende `AdminPortalController.detalleDeHallazgo` (src/modules/data_catalog/controllers/admin-portal.controller.ts:118). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.detalleDeHallazgo`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/flujos/hallazgos/{id}` la atiende `AdminPortalController.detalleDeHallazgo` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:118). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.detalleDeHallazgo`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:118` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:118` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:118` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:118` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2401,14 +2401,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:350` |
-| `severidad` | `string` | Sí | valores: ALTA, MEDIA, BAJA, INFO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:351` |
-| `titulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:352` |
-| `queHacer` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:353` |
-| `cuenta` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:354` |
-| `items` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:362` |
-| `nextCursor` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:363` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:364` |
+| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:350` |
+| `severidad` | `string` | Sí | valores: ALTA, MEDIA, BAJA, INFO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:351` |
+| `titulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:352` |
+| `queHacer` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:353` |
+| `cuenta` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:354` |
+| `items` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:362` |
+| `nextCursor` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:363` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:364` |
 
 ### Respuestas posibles
 
@@ -2440,7 +2440,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.mapa` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:104`
+- **Implementación:** `AdminPortalController.mapa` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2450,20 +2450,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/flujos/mapa` la atiende `AdminPortalController.mapa` (src/modules/data_catalog/controllers/admin-portal.controller.ts:104). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.mapa`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/flujos/mapa` la atiende `AdminPortalController.mapa` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:104). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.mapa`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:104` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:104` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:104` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:104` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2487,22 +2487,22 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<MapaFilaDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:343` |
-| `items[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:321` |
-| `items[].metodo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:322` |
-| `items[].ruta` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:323` |
-| `items[].flujos` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:324` |
+| `items` | `array<MapaFilaDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:343` |
+| `items[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:321` |
+| `items[].metodo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:322` |
+| `items[].ruta` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:323` |
+| `items[].flujos` | `array<object>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:324` |
 | `items[].flujos[].codigo` | `string` | Sí | — | — | — | sin fuente |
 | `items[].flujos[].nombre` | `string` | Sí | — | — | — | sin fuente |
 | `items[].flujos[].etapa` | `string` | Sí | — | — | — | sin fuente |
-| `items[].modulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:329` |
-| `items[].riesgo` | `string` | Sí | valores: ALTO, MEDIO, BAJO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:330` |
-| `items[].autorizacion` | `string` | Sí | — | — | Pública, los roles o «Sesión sin roles» | `src/modules/data_catalog/dto/portal-response.dto.ts:332` |
-| `items[].llamadaPor` | `array<string>` | No | admite null | — | `null` si no se pudo cruzar con el frontend | `src/modules/data_catalog/dto/portal-response.dto.ts:338` |
-| `items[].senales` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:339` |
-| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:344` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:345` |
-| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:346` |
+| `items[].modulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:329` |
+| `items[].riesgo` | `string` | Sí | valores: ALTO, MEDIO, BAJO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:330` |
+| `items[].autorizacion` | `string` | Sí | — | — | Pública, los roles o «Sesión sin roles» | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:332` |
+| `items[].llamadaPor` | `array<string>` | No | admite null | — | `null` si no se pudo cruzar con el frontend | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:338` |
+| `items[].senales` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:339` |
+| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:344` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:345` |
+| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:346` |
 
 ### Respuestas posibles
 
@@ -2533,7 +2533,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.glosario` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:200`
+- **Implementación:** `AdminPortalController.glosario` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:200`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2543,20 +2543,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/glosario` la atiende `AdminPortalController.glosario` (src/modules/data_catalog/controllers/admin-portal.controller.ts:200). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.glosario`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/glosario` la atiende `AdminPortalController.glosario` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:200). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.glosario`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:200` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:200` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:200` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:200` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2574,14 +2574,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<GlosarioTerminoDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:502` |
-| `items[].termino` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:495` |
-| `items[].definicion` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:496` |
-| `items[].fuente` | `string` | Sí | — | — | repo:archivo:línea | `src/modules/data_catalog/dto/portal-response.dto.ts:497` |
-| `items[].tablasRelacionadas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:498` |
-| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:503` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:504` |
-| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:505` |
+| `items` | `array<GlosarioTerminoDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:502` |
+| `items[].termino` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:495` |
+| `items[].definicion` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:496` |
+| `items[].fuente` | `string` | Sí | — | — | repo:archivo:línea | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:497` |
+| `items[].tablasRelacionadas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:498` |
+| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:503` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:504` |
+| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:505` |
 
 ### Respuestas posibles
 
@@ -2612,7 +2612,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.linaje` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:184`
+- **Implementación:** `AdminPortalController.linaje` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:184`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2622,20 +2622,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/linaje` la atiende `AdminPortalController.linaje` (src/modules/data_catalog/controllers/admin-portal.controller.ts:184). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.linaje`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/linaje` la atiende `AdminPortalController.linaje` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:184). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.linaje`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:184` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:184` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:184` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:184` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Cuerpo
 
@@ -2645,11 +2645,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `metricas` | `object` | Sí | — | — | Dominios, rutas, tablas, aristas, operación→tabla, tabla→tabla; las tablas con datos personales son `SIN_FUENTE` | `src/modules/data_catalog/dto/portal-response.dto.ts:473` |
-| `dominios` | `array<LinajeDominioDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:474` |
-| `dominios[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:461` |
-| `dominios[].etiqueta` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:462` |
-| `dominios[].tablas` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:463` |
+| `metricas` | `object` | Sí | — | — | Dominios, rutas, tablas, aristas, operación→tabla, tabla→tabla; las tablas con datos personales son `SIN_FUENTE` | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:473` |
+| `dominios` | `array<LinajeDominioDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:474` |
+| `dominios[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:461` |
+| `dominios[].etiqueta` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:462` |
+| `dominios[].tablas` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:463` |
 
 ### Respuestas posibles
 
@@ -2680,7 +2680,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.linajeDeTabla` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:191`
+- **Implementación:** `AdminPortalController.linajeDeTabla` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:191`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2690,20 +2690,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/linaje/tablas/{schema}/{tabla}` la atiende `AdminPortalController.linajeDeTabla` (src/modules/data_catalog/controllers/admin-portal.controller.ts:191). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.linajeDeTabla`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/linaje/tablas/{schema}/{tabla}` la atiende `AdminPortalController.linajeDeTabla` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:191). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.linajeDeTabla`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:191` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:191` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:191` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:191` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2720,10 +2720,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:478` |
-| `operaciones` | `array<object>` | Sí | — | — | Operaciones que la leen o la escriben | `src/modules/data_catalog/dto/portal-response.dto.ts:484` |
-| `referencia` | `array<string>` | Sí | — | — | Tablas a las que ésta referencia | `src/modules/data_catalog/dto/portal-response.dto.ts:489` |
-| `referenciadaPor` | `array<string>` | Sí | — | — | Tablas que la referencian | `src/modules/data_catalog/dto/portal-response.dto.ts:491` |
+| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:478` |
+| `operaciones` | `array<object>` | Sí | — | — | Operaciones que la leen o la escriben | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:484` |
+| `referencia` | `array<string>` | Sí | — | — | Tablas a las que ésta referencia | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:489` |
+| `referenciadaPor` | `array<string>` | Sí | — | — | Tablas que la referencian | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:491` |
 
 ### Respuestas posibles
 
@@ -2755,7 +2755,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.listarOperaciones` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:71`
+- **Implementación:** `AdminPortalController.listarOperaciones` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2765,20 +2765,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/operaciones` la atiende `AdminPortalController.listarOperaciones` (src/modules/data_catalog/controllers/admin-portal.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.listarOperaciones`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/operaciones` la atiende `AdminPortalController.listarOperaciones` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.listarOperaciones`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:71` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:71` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:71` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:71` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2802,26 +2802,26 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<OperacionResumenDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:57` |
-| `items[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:38` |
-| `items[].metodo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:39` |
-| `items[].ruta` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:40` |
-| `items[].modulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:41` |
-| `items[].nombre` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:42` |
-| `items[].origen` | `string` | Sí | valores: CONTRATO, CONTRATO_AUSENTE | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:43` |
-| `items[].riesgo` | `string` | Sí | valores: ALTO, MEDIO, BAJO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:44` |
-| `items[].publica` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:45` |
-| `items[].roles` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:46` |
-| `items[].tablas` | `number` | Sí | — | — | Cantidad de tablas que toca | `src/modules/data_catalog/dto/portal-response.dto.ts:47` |
-| `items[].flujos` | `array<FlujoRefDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:48` |
-| `items[].flujos[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:21` |
-| `items[].flujos[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:22` |
-| `items[].flujos[].etapa` | `string` | Sí | — | — | Etapa (caso de uso o controlador) dentro del proceso | `src/modules/data_catalog/dto/portal-response.dto.ts:26` |
-| `items[].flujos[].agrupacion` | `string` | Sí | valores: CASO_DE_USO_README, AGRUPACION_POR_CONTROLADOR, CURADO_EN_DOCUMENTO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:34` |
-| `items[].senales` | `array<string>` | Sí | — | — | Señales del mapa (`SIN_PRUEBAS`, `ESCRIBE_SIN_ROLES`…) | `src/modules/data_catalog/dto/portal-response.dto.ts:53` |
-| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:58` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:59` |
-| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:60` |
+| `items` | `array<OperacionResumenDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:57` |
+| `items[].id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:38` |
+| `items[].metodo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:39` |
+| `items[].ruta` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:40` |
+| `items[].modulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:41` |
+| `items[].nombre` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:42` |
+| `items[].origen` | `string` | Sí | valores: CONTRATO, CONTRATO_AUSENTE | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:43` |
+| `items[].riesgo` | `string` | Sí | valores: ALTO, MEDIO, BAJO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:44` |
+| `items[].publica` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:45` |
+| `items[].roles` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:46` |
+| `items[].tablas` | `number` | Sí | — | — | Cantidad de tablas que toca | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:47` |
+| `items[].flujos` | `array<FlujoRefDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:48` |
+| `items[].flujos[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:21` |
+| `items[].flujos[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:22` |
+| `items[].flujos[].etapa` | `string` | Sí | — | — | Etapa (caso de uso o controlador) dentro del proceso | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:26` |
+| `items[].flujos[].agrupacion` | `string` | Sí | valores: CASO_DE_USO_README, AGRUPACION_POR_CONTROLADOR, CURADO_EN_DOCUMENTO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:34` |
+| `items[].senales` | `array<string>` | Sí | — | — | Señales del mapa (`SIN_PRUEBAS`, `ESCRIBE_SIN_ROLES`…) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:53` |
+| `nextCursor` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:58` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:59` |
+| `total` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:60` |
 
 ### Respuestas posibles
 
@@ -2852,7 +2852,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.detalleDeOperacion` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:78`
+- **Implementación:** `AdminPortalController.detalleDeOperacion` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:78`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2862,20 +2862,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/operaciones/{id}` la atiende `AdminPortalController.detalleDeOperacion` (src/modules/data_catalog/controllers/admin-portal.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.detalleDeOperacion`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/operaciones/{id}` la atiende `AdminPortalController.detalleDeOperacion` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.detalleDeOperacion`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:78` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:78` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:78` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:78` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -2891,88 +2891,88 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:38` |
-| `metodo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:39` |
-| `ruta` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:40` |
-| `modulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:41` |
-| `nombre` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:42` |
-| `origen` | `string` | Sí | valores: CONTRATO, CONTRATO_AUSENTE | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:43` |
-| `riesgo` | `string` | Sí | valores: ALTO, MEDIO, BAJO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:44` |
-| `publica` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:45` |
-| `roles` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:46` |
-| `tablas` | `number` | Sí | — | — | Cantidad de tablas que toca | `src/modules/data_catalog/dto/portal-response.dto.ts:47` |
-| `flujos` | `array<FlujoRefDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:48` |
-| `flujos[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:21` |
-| `flujos[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:22` |
-| `flujos[].etapa` | `string` | Sí | — | — | Etapa (caso de uso o controlador) dentro del proceso | `src/modules/data_catalog/dto/portal-response.dto.ts:26` |
-| `flujos[].agrupacion` | `string` | Sí | valores: CASO_DE_USO_README, AGRUPACION_POR_CONTROLADOR, CURADO_EN_DOCUMENTO | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:34` |
-| `senales` | `array<string>` | Sí | — | — | Señales del mapa (`SIN_PRUEBAS`, `ESCRIBE_SIN_ROLES`…) | `src/modules/data_catalog/dto/portal-response.dto.ts:53` |
-| `bloque` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:164` |
-| `codigo` | `object` | No | admite null | — | archivo:línea del handler | `src/modules/data_catalog/dto/portal-response.dto.ts:169` |
-| `negocio` | `ExplicacionNegocioDto` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:170` |
-| `negocio.texto` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:130` |
-| `negocio.estado` | `string` | Sí | — | — | `AUTO_DETECTADA` hasta que una persona la revise | `src/modules/data_catalog/dto/portal-response.dto.ts:134` |
-| `negocio.fuentes` | `array<string>` | Sí | — | — | Fuentes con las que se compuso el texto | `src/modules/data_catalog/dto/portal-response.dto.ts:136` |
-| `sistema` | `string` | Sí | — | — | Cómo la atiende el sistema (controlador, servicio, tablas) | `src/modules/data_catalog/dto/portal-response.dto.ts:174` |
-| `razonesDeRiesgo` | `array<string>` | Sí | — | — | Por qué tiene ese nivel de riesgo | `src/modules/data_catalog/dto/portal-response.dto.ts:179` |
-| `requerimientos` | `array<RequerimientoDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:181` |
-| `requerimientos[].tipo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:90` |
-| `requerimientos[].detalle` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:91` |
-| `requerimientos[].fuente` | `string` | Sí | — | — | archivo:línea de donde se leyó | `src/modules/data_catalog/dto/portal-response.dto.ts:93` |
-| `parametros` | `array<ParametroDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:182` |
-| `parametros[].nombre` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:64` |
-| `parametros[].en` | `string` | Sí | — | — | path, query, header o cookie | `src/modules/data_catalog/dto/portal-response.dto.ts:65` |
-| `parametros[].obligatorio` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:66` |
-| `parametros[].tipo` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:67` |
-| `parametros[].descripcion` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:68` |
-| `cuerpo` | `CuerpoDto` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:184` |
+| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:38` |
+| `metodo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:39` |
+| `ruta` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:40` |
+| `modulo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:41` |
+| `nombre` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:42` |
+| `origen` | `string` | Sí | valores: CONTRATO, CONTRATO_AUSENTE | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:43` |
+| `riesgo` | `string` | Sí | valores: ALTO, MEDIO, BAJO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:44` |
+| `publica` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:45` |
+| `roles` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:46` |
+| `tablas` | `number` | Sí | — | — | Cantidad de tablas que toca | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:47` |
+| `flujos` | `array<FlujoRefDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:48` |
+| `flujos[].codigo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:21` |
+| `flujos[].nombre` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:22` |
+| `flujos[].etapa` | `string` | Sí | — | — | Etapa (caso de uso o controlador) dentro del proceso | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:26` |
+| `flujos[].agrupacion` | `string` | Sí | valores: CASO_DE_USO_README, AGRUPACION_POR_CONTROLADOR, CURADO_EN_DOCUMENTO | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:34` |
+| `senales` | `array<string>` | Sí | — | — | Señales del mapa (`SIN_PRUEBAS`, `ESCRIBE_SIN_ROLES`…) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:53` |
+| `bloque` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:164` |
+| `codigo` | `object` | No | admite null | — | archivo:línea del handler | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:169` |
+| `negocio` | `ExplicacionNegocioDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:170` |
+| `negocio.texto` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:130` |
+| `negocio.estado` | `string` | Sí | — | — | `AUTO_DETECTADA` hasta que una persona la revise | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:134` |
+| `negocio.fuentes` | `array<string>` | Sí | — | — | Fuentes con las que se compuso el texto | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:136` |
+| `sistema` | `string` | Sí | — | — | Cómo la atiende el sistema (controlador, servicio, tablas) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:174` |
+| `razonesDeRiesgo` | `array<string>` | Sí | — | — | Por qué tiene ese nivel de riesgo | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:179` |
+| `requerimientos` | `array<RequerimientoDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:181` |
+| `requerimientos[].tipo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:90` |
+| `requerimientos[].detalle` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:91` |
+| `requerimientos[].fuente` | `string` | Sí | — | — | archivo:línea de donde se leyó | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:93` |
+| `parametros` | `array<ParametroDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:182` |
+| `parametros[].nombre` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:64` |
+| `parametros[].en` | `string` | Sí | — | — | path, query, header o cookie | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:65` |
+| `parametros[].obligatorio` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:66` |
+| `parametros[].tipo` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:67` |
+| `parametros[].descripcion` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:68` |
+| `cuerpo` | `CuerpoDto` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:184` |
 | `cuerpo.dto` | `object` | No | admite null | — | — | sin fuente |
 | `cuerpo.contentType` | `object` | No | admite null | — | — | sin fuente |
 | `cuerpo.obligatorio` | `object` | No | admite null | — | — | sin fuente |
 | `cuerpo.campos` | `array<CampoDto>` | No | — | — | — | sin fuente |
-| `cuerpo.campos[].campo` | `string` | No | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:72` |
-| `cuerpo.campos[].tipo` | `string` | No | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:73` |
-| `cuerpo.campos[].obligatorio` | `boolean` | No | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:74` |
-| `cuerpo.campos[].restricciones` | `array<string>` | No | — | — | Restricciones leídas del DTO (formato, longitud, rango…) | `src/modules/data_catalog/dto/portal-response.dto.ts:79` |
-| `cuerpo.campos[].descripcion` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:80` |
-| `cuerpo.campos[].ejemplo` | `object` | No | — | — | Ejemplo sintético | `src/modules/data_catalog/dto/portal-response.dto.ts:81` |
-| `cuerpo.campos[].fuente` | `object` | No | admite null | — | archivo:línea del campo | `src/modules/data_catalog/dto/portal-response.dto.ts:86` |
+| `cuerpo.campos[].campo` | `string` | No | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:72` |
+| `cuerpo.campos[].tipo` | `string` | No | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:73` |
+| `cuerpo.campos[].obligatorio` | `boolean` | No | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:74` |
+| `cuerpo.campos[].restricciones` | `array<string>` | No | — | — | Restricciones leídas del DTO (formato, longitud, rango…) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:79` |
+| `cuerpo.campos[].descripcion` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:80` |
+| `cuerpo.campos[].ejemplo` | `object` | No | — | — | Ejemplo sintético | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:81` |
+| `cuerpo.campos[].fuente` | `object` | No | admite null | — | archivo:línea del campo | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:86` |
 | `cuerpo.payloadMinimo` | `object` | No | — | — | Sólo los campos obligatorios, con valores de ejemplo sintéticos | sin fuente |
-| `respuesta` | `RespuestaContratoDto` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:185` |
-| `respuesta.tipoRetorno` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:152` |
-| `respuesta.dto` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:153` |
-| `respuesta.httpCode` | `object` | No | admite null | — | Código de éxito declarado con @HttpCode | `src/modules/data_catalog/dto/portal-response.dto.ts:158` |
-| `respuesta.campos` | `array<CampoDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:159` |
-| `respuesta.campos[].campo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:72` |
-| `respuesta.campos[].tipo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:73` |
-| `respuesta.campos[].obligatorio` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:74` |
-| `respuesta.campos[].restricciones` | `array<string>` | Sí | — | — | Restricciones leídas del DTO (formato, longitud, rango…) | `src/modules/data_catalog/dto/portal-response.dto.ts:79` |
-| `respuesta.campos[].descripcion` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:80` |
-| `respuesta.campos[].ejemplo` | `object` | No | — | — | Ejemplo sintético | `src/modules/data_catalog/dto/portal-response.dto.ts:81` |
-| `respuesta.campos[].fuente` | `object` | No | admite null | — | archivo:línea del campo | `src/modules/data_catalog/dto/portal-response.dto.ts:86` |
-| `respuestasPosibles` | `array<RespuestaPosibleDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:187` |
-| `respuestasPosibles[].estado` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:118` |
-| `respuestasPosibles[].codigo` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:119` |
-| `respuestasPosibles[].causas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:120` |
-| `datos` | `array<TablaOperacionDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:188` |
-| `datos[].schema` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:97` |
-| `datos[].tabla` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:98` |
-| `datos[].operacion` | `string` | Sí | valores: LEE, ESCRIBE, BORRA | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:99` |
-| `datos[].detalle` | `string` | Sí | — | — | CREA, ACTUALIZA, GUARDA, BORRA o LEE | `src/modules/data_catalog/dto/portal-response.dto.ts:101` |
-| `datos[].confianza` | `string` | Sí | valores: DIRECTA, POR_TIPO, POR_REGISTRO, POR_SQL | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:103` |
-| `datos[].via` | `array<string>` | Sí | — | — | Camino handler → servicio → repositorio | `src/modules/data_catalog/dto/portal-response.dto.ts:108` |
-| `datos[].fuente` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:109` |
-| `datos[].catalogada` | `boolean` | Sí | — | — | `false` si es una vista u objeto que no es una tabla del catálogo | `src/modules/data_catalog/dto/portal-response.dto.ts:114` |
-| `eventos` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:189` |
-| `trabajos` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:190` |
-| `noResuelto` | `array<string>` | Sí | — | — | Llamadas cuyo destino depende de un dato en ejecución: no se siguieron | `src/modules/data_catalog/dto/portal-response.dto.ts:196` |
-| `sinTablas` | `object` | No | admite null | — | Por qué no toca tablas, si está curado a mano | `src/modules/data_catalog/dto/portal-response.dto.ts:201` |
-| `pruebas` | `array<PruebaDto>` | Sí | — | — | Pruebas que mencionan la operación (búsqueda textual, no cobertura) | `src/modules/data_catalog/dto/portal-response.dto.ts:207` |
-| `pruebas[].tipo` | `string` | Sí | valores: CONTROLADOR, INTEGRACION | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:124` |
-| `pruebas[].archivo` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:125` |
-| `pruebas[].linea` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:126` |
-| `revision` | `string` | Sí | — | — | `AUTO_DETECTADA` hasta que una persona la revise | `src/modules/data_catalog/dto/portal-response.dto.ts:211` |
-| `datosPersonales` | `string` | Sí | — | — | Siempre `SIN_FUENTE` mientras no exista una clasificación de datos personales | `src/modules/data_catalog/dto/portal-response.dto.ts:216` |
+| `respuesta` | `RespuestaContratoDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:185` |
+| `respuesta.tipoRetorno` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:152` |
+| `respuesta.dto` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:153` |
+| `respuesta.httpCode` | `object` | No | admite null | — | Código de éxito declarado con @HttpCode | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:158` |
+| `respuesta.campos` | `array<CampoDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:159` |
+| `respuesta.campos[].campo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:72` |
+| `respuesta.campos[].tipo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:73` |
+| `respuesta.campos[].obligatorio` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:74` |
+| `respuesta.campos[].restricciones` | `array<string>` | Sí | — | — | Restricciones leídas del DTO (formato, longitud, rango…) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:79` |
+| `respuesta.campos[].descripcion` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:80` |
+| `respuesta.campos[].ejemplo` | `object` | No | — | — | Ejemplo sintético | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:81` |
+| `respuesta.campos[].fuente` | `object` | No | admite null | — | archivo:línea del campo | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:86` |
+| `respuestasPosibles` | `array<RespuestaPosibleDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:187` |
+| `respuestasPosibles[].estado` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:118` |
+| `respuestasPosibles[].codigo` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:119` |
+| `respuestasPosibles[].causas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:120` |
+| `datos` | `array<TablaOperacionDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:188` |
+| `datos[].schema` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:97` |
+| `datos[].tabla` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:98` |
+| `datos[].operacion` | `string` | Sí | valores: LEE, ESCRIBE, BORRA | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:99` |
+| `datos[].detalle` | `string` | Sí | — | — | CREA, ACTUALIZA, GUARDA, BORRA o LEE | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:101` |
+| `datos[].confianza` | `string` | Sí | valores: DIRECTA, POR_TIPO, POR_REGISTRO, POR_SQL | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:103` |
+| `datos[].via` | `array<string>` | Sí | — | — | Camino handler → servicio → repositorio | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:108` |
+| `datos[].fuente` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:109` |
+| `datos[].catalogada` | `boolean` | Sí | — | — | `false` si es una vista u objeto que no es una tabla del catálogo | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:114` |
+| `eventos` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:189` |
+| `trabajos` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:190` |
+| `noResuelto` | `array<string>` | Sí | — | — | Llamadas cuyo destino depende de un dato en ejecución: no se siguieron | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:196` |
+| `sinTablas` | `object` | No | admite null | — | Por qué no toca tablas, si está curado a mano | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:201` |
+| `pruebas` | `array<PruebaDto>` | Sí | — | — | Pruebas que mencionan la operación (búsqueda textual, no cobertura) | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:207` |
+| `pruebas[].tipo` | `string` | Sí | valores: CONTROLADOR, INTEGRACION | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:124` |
+| `pruebas[].archivo` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:125` |
+| `pruebas[].linea` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:126` |
+| `revision` | `string` | Sí | — | — | `AUTO_DETECTADA` hasta que una persona la revise | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:211` |
+| `datosPersonales` | `string` | Sí | — | — | Siempre `SIN_FUENTE` mientras no exista una clasificación de datos personales | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:216` |
 
 ### Respuestas posibles
 
@@ -3004,7 +3004,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.arbol` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:92`
+- **Implementación:** `AdminPortalController.arbol` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:92`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3014,20 +3014,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/operaciones/{id}/arbol` la atiende `AdminPortalController.arbol` (src/modules/data_catalog/controllers/admin-portal.controller.ts:92). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.arbolDeOperacion`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/operaciones/{id}/arbol` la atiende `AdminPortalController.arbol` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:92). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.arbolDeOperacion`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:92` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:92` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:92` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:92` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Parámetros
 
@@ -3043,13 +3043,13 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:220` |
-| `nodos` | `array<object>` | Sí | — | — | Nodos del árbol: ACCESO, SI, SEGUN, BUCLE, INTENTAR, TRANSACCION, LLAMADA, ERROR, EFECTO, EVENTO, TRABAJO, RESPUESTA | `src/modules/data_catalog/dto/portal-response.dto.ts:227` |
-| `respuestas` | `array<RespuestaPosibleDto>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:229` |
-| `respuestas[].estado` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:118` |
-| `respuestas[].codigo` | `object` | No | admite null | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:119` |
-| `respuestas[].causas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:120` |
-| `truncado` | `boolean` | Sí | — | — | `true` si el árbol se cortó por tope de nodos | `src/modules/data_catalog/dto/portal-response.dto.ts:231` |
+| `id` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:220` |
+| `nodos` | `array<object>` | Sí | — | — | Nodos del árbol: ACCESO, SI, SEGUN, BUCLE, INTENTAR, TRANSACCION, LLAMADA, ERROR, EFECTO, EVENTO, TRABAJO, RESPUESTA | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:227` |
+| `respuestas` | `array<RespuestaPosibleDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:229` |
+| `respuestas[].estado` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:118` |
+| `respuestas[].codigo` | `object` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:119` |
+| `respuestas[].causas` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:120` |
+| `truncado` | `boolean` | Sí | — | — | `true` si el árbol se cortó por tope de nodos | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:231` |
 
 ### Respuestas posibles
 
@@ -3081,7 +3081,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdminPortalController.version` — `src/modules/data_catalog/controllers/admin-portal.controller.ts:64`
+- **Implementación:** `AdminPortalController.version` — `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:64`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3091,20 +3091,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/data_ca
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/portal/version` la atiende `AdminPortalController.version` (src/modules/data_catalog/controllers/admin-portal.controller.ts:64). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.version`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
+`GET /admin/portal/version` la atiende `AdminPortalController.version` (src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:64). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `PortalInventoryService.version`. No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/controllers/admin-portal.controller.ts:64` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/admin-portal.controller.ts:64` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:64` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts:64` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/inventory/inventory.repository.ts:44`)_
+No toca tablas relacionales: Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.. _(manual, 2026-10-21; fuente: `src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44`)_
 
 ### Cuerpo
 
@@ -3114,12 +3114,12 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `hash` | `string` | Sí | — | — | Huella del inventario: cambia cuando cambia su contenido | `src/modules/data_catalog/dto/portal-response.dto.ts:8` |
-| `operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:9` |
-| `procesos` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:10` |
-| `tablas` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:11` |
-| `columnas` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/portal-response.dto.ts:12` |
-| `origen` | `string` | Sí | — | — | Directorio del que se leyó el inventario, relativo al proceso | `src/modules/data_catalog/dto/portal-response.dto.ts:17` |
+| `hash` | `string` | Sí | — | — | Huella del inventario: cambia cuando cambia su contenido | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:8` |
+| `operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:9` |
+| `procesos` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:10` |
+| `tablas` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:11` |
+| `columnas` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:12` |
+| `origen` | `string` | Sí | — | — | Directorio del que se leyó el inventario, relativo al proceso | `src/modules/data_catalog/presentation/dto/portal-response.dto.ts:17` |
 
 ### Respuestas posibles
 
@@ -3150,7 +3150,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InternalCatalogInventoryController.importInventory` — `src/modules/data_catalog/controllers/internal-catalog.controller.ts:59`
+- **Implementación:** `InternalCatalogInventoryController.importInventory` — `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:59`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3160,36 +3160,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/catalog/inventory/import` la atiende `InternalCatalogInventoryController.importInventory` (src/modules/data_catalog/controllers/internal-catalog.controller.ts:59). Exige sesión con alguno de los roles SYSTEM. Delega en `InventoryImportService.importInventory`. Crea filas en data_catalog.catalog_operation_impacts, data_catalog.catalog_operations, data_catalog.catalog_process_step_operations, data_catalog.catalog_process_steps, data_catalog.catalog_processes. Actualiza data_catalog.catalog_operations, data_catalog.catalog_processes. Borra de data_catalog.catalog_operation_impacts, data_catalog.catalog_process_step_operations, data_catalog.catalog_process_steps. Lee data_catalog.catalog_objects, data_catalog.catalog_operations, data_catalog.catalog_process_step_operations, data_catalog.catalog_process_steps, data_catalog.catalog_processes.
+`POST /internal/catalog/inventory/import` la atiende `InternalCatalogInventoryController.importInventory` (src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:59). Exige sesión con alguno de los roles SYSTEM. Delega en `InventoryImportService.importInventory`. Crea filas en data_catalog.catalog_operation_impacts, data_catalog.catalog_operations, data_catalog.catalog_process_step_operations, data_catalog.catalog_process_steps, data_catalog.catalog_processes. Actualiza data_catalog.catalog_operations, data_catalog.catalog_processes. Borra de data_catalog.catalog_operation_impacts, data_catalog.catalog_process_step_operations, data_catalog.catalog_process_steps. Lee data_catalog.catalog_objects, data_catalog.catalog_operations, data_catalog.catalog_process_step_operations, data_catalog.catalog_process_steps, data_catalog.catalog_processes.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/data_catalog/controllers/internal-catalog.controller.ts:59` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/internal-catalog.controller.ts:59` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SYSTEM | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:59` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:59` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:76` |
-| `data_catalog.catalog_operation_impacts` | BORRA | BORRA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.deleteImpactsOf | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:229` |
-| `data_catalog.catalog_operation_impacts` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertImpacts | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:244` |
-| `data_catalog.catalog_operations` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertOperations | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:168` |
-| `data_catalog.catalog_operations` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.updateOperations | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:190` |
-| `data_catalog.catalog_operations` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:70` |
-| `data_catalog.catalog_process_step_operations` | BORRA | BORRA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.deleteStepsOf | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:315` |
-| `data_catalog.catalog_process_step_operations` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertStepOperations | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:369` |
-| `data_catalog.catalog_process_step_operations` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:106` |
-| `data_catalog.catalog_process_steps` | BORRA | BORRA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.deleteStepsOf | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:322` |
-| `data_catalog.catalog_process_steps` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertSteps | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:338` |
-| `data_catalog.catalog_process_steps` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:102` |
-| `data_catalog.catalog_processes` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertProcesses | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:281` |
-| `data_catalog.catalog_processes` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.updateProcesses | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:298` |
-| `data_catalog.catalog_processes` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/repositories/catalog-inventory.repository.ts:90` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:76` |
+| `data_catalog.catalog_operation_impacts` | BORRA | BORRA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.deleteImpactsOf | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:229` |
+| `data_catalog.catalog_operation_impacts` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertImpacts | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:244` |
+| `data_catalog.catalog_operations` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertOperations | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:168` |
+| `data_catalog.catalog_operations` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.updateOperations | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:190` |
+| `data_catalog.catalog_operations` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:70` |
+| `data_catalog.catalog_process_step_operations` | BORRA | BORRA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.deleteStepsOf | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:315` |
+| `data_catalog.catalog_process_step_operations` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertStepOperations | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:369` |
+| `data_catalog.catalog_process_step_operations` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:106` |
+| `data_catalog.catalog_process_steps` | BORRA | BORRA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.deleteStepsOf | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:322` |
+| `data_catalog.catalog_process_steps` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertSteps | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:338` |
+| `data_catalog.catalog_process_steps` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:102` |
+| `data_catalog.catalog_processes` | ESCRIBE | CREA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.insertProcesses | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:281` |
+| `data_catalog.catalog_processes` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.updateProcesses | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:298` |
+| `data_catalog.catalog_processes` | LEE | LEE | POR_SQL | InternalCatalogInventoryController.importInventory → InventoryImportService.importInventory → CatalogInventoryRepository.known | `src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts:90` |
 
 ### Cuerpo
 
@@ -3199,29 +3199,29 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `inventory` | `InventoryImportSourceDto` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:537` |
-| `inventory.hash` | `string` | Sí | — | — | Huella del inventario (la misma de `GET /admin/portal/version`) | `src/modules/data_catalog/dto/catalog-response.dto.ts:471` |
-| `inventory.operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:472` |
-| `inventory.procesos` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:473` |
-| `operations` | `InventoryImportOperationsDto` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:539` |
-| `operations.added` | `number` | Sí | — | — | Operaciones nuevas en la base | `src/modules/data_catalog/dto/catalog-response.dto.ts:477` |
-| `operations.changed` | `number` | Sí | — | — | Operaciones cuya huella técnica cambió | `src/modules/data_catalog/dto/catalog-response.dto.ts:479` |
-| `operations.reappeared` | `number` | Sí | — | — | Operaciones `NOT_OBSERVED` que volvieron a aparecer | `src/modules/data_catalog/dto/catalog-response.dto.ts:483` |
-| `operations.unchanged` | `number` | Sí | — | — | Operaciones que no cambiaron: no se tocó su fila | `src/modules/data_catalog/dto/catalog-response.dto.ts:487` |
-| `operations.notObserved` | `number` | Sí | — | — | Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran) | `src/modules/data_catalog/dto/catalog-response.dto.ts:492` |
-| `impacts` | `InventoryImportImpactsDto` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:541` |
-| `impacts.written` | `number` | Sí | — | — | Impactos escritos en esta corrida | `src/modules/data_catalog/dto/catalog-response.dto.ts:497` |
-| `impacts.skippedNotCataloged` | `number` | Sí | — | — | Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta corrida) | `src/modules/data_catalog/dto/catalog-response.dto.ts:502` |
-| `impacts.skippedUnresolved` | `number` | Sí | — | — | Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar | `src/modules/data_catalog/dto/catalog-response.dto.ts:507` |
-| `processes` | `InventoryImportProcessesDto` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:543` |
-| `processes.added` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:511` |
-| `processes.changed` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:512` |
-| `processes.unchanged` | `number` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:513` |
-| `steps` | `InventoryImportStepsDto` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:545` |
-| `steps.written` | `number` | Sí | — | — | Etapas escritas en esta corrida | `src/modules/data_catalog/dto/catalog-response.dto.ts:518` |
-| `stepOperations` | `InventoryImportStepOperationsDto` | Sí | — | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:547` |
-| `stepOperations.written` | `number` | Sí | — | — | Enlaces etapa-operación escritos | `src/modules/data_catalog/dto/catalog-response.dto.ts:523` |
-| `stepOperations.skippedUnresolved` | `number` | Sí | — | — | Enlaces cuya operación no está en el inventario de endpoints | `src/modules/data_catalog/dto/catalog-response.dto.ts:527` |
+| `inventory` | `InventoryImportSourceDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:537` |
+| `inventory.hash` | `string` | Sí | — | — | Huella del inventario (la misma de `GET /admin/portal/version`) | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:471` |
+| `inventory.operaciones` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:472` |
+| `inventory.procesos` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:473` |
+| `operations` | `InventoryImportOperationsDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:539` |
+| `operations.added` | `number` | Sí | — | — | Operaciones nuevas en la base | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:477` |
+| `operations.changed` | `number` | Sí | — | — | Operaciones cuya huella técnica cambió | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:479` |
+| `operations.reappeared` | `number` | Sí | — | — | Operaciones `NOT_OBSERVED` que volvieron a aparecer | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:483` |
+| `operations.unchanged` | `number` | Sí | — | — | Operaciones que no cambiaron: no se tocó su fila | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:487` |
+| `operations.notObserved` | `number` | Sí | — | — | Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran) | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:492` |
+| `impacts` | `InventoryImportImpactsDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:541` |
+| `impacts.written` | `number` | Sí | — | — | Impactos escritos en esta corrida | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:497` |
+| `impacts.skippedNotCataloged` | `number` | Sí | — | — | Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta corrida) | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:502` |
+| `impacts.skippedUnresolved` | `number` | Sí | — | — | Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:507` |
+| `processes` | `InventoryImportProcessesDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:543` |
+| `processes.added` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:511` |
+| `processes.changed` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:512` |
+| `processes.unchanged` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:513` |
+| `steps` | `InventoryImportStepsDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:545` |
+| `steps.written` | `number` | Sí | — | — | Etapas escritas en esta corrida | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:518` |
+| `stepOperations` | `InventoryImportStepOperationsDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:547` |
+| `stepOperations.written` | `number` | Sí | — | — | Enlaces etapa-operación escritos | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:523` |
+| `stepOperations.skippedUnresolved` | `number` | Sí | — | — | Enlaces cuya operación no está en el inventario de endpoints | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:527` |
 
 ### Respuestas posibles
 
@@ -3254,7 +3254,7 @@ El árbol de decisión completo está en [flujos](../flujos/data_catalog.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InternalCatalogScansController.runNext` — `src/modules/data_catalog/controllers/internal-catalog.controller.ts:30`
+- **Implementación:** `InternalCatalogScansController.runNext` — `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3264,36 +3264,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/catalog/scans/run-next` la atiende `InternalCatalogScansController.runNext` (src/modules/data_catalog/controllers/internal-catalog.controller.ts:30). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogScanService.runNext`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
+`POST /internal/catalog/scans/run-next` la atiende `InternalCatalogScansController.runNext` (src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogScanService.runNext`. Crea filas en data_catalog.catalog_annotation_revisions, data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Actualiza data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_change_events, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/data_catalog/controllers/internal-catalog.controller.ts:30` |
-| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/controllers/internal-catalog.controller.ts:30` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| ROL | Alguno de: SYSTEM | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/repositories/catalog.repository.ts:830` |
-| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:715` |
-| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/repositories/catalog.repository.ts:775` |
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/repositories/catalog.repository.ts:395` |
-| `data_catalog.catalog_change_events` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1342` |
-| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/repositories/catalog.repository.ts:417` |
-| `data_catalog.catalog_columns` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1269` |
-| `data_catalog.catalog_columns` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1290` |
-| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/repositories/catalog.repository.ts:1133` |
-| `data_catalog.catalog_objects` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1236` |
-| `data_catalog.catalog_objects` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/repositories/catalog.repository.ts:1257` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/repositories/catalog.repository.ts:1120` |
-| `data_catalog.catalog_scan_runs` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogRepository.failAbandoned | `src/modules/data_catalog/repositories/catalog.repository.ts:966` |
-| `data_catalog.catalog_scan_runs` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.request → CatalogRepository.insertScan | `src/modules/data_catalog/repositories/catalog.repository.ts:991` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogRepository.activeScan | `src/modules/data_catalog/repositories/catalog.repository.ts:952` |
+| `data_catalog.catalog_annotation_revisions` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertRevision | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:830` |
+| `data_catalog.catalog_annotations` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.create → CatalogRepository.insertAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:715` |
+| `data_catalog.catalog_annotations` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogClassificationService.classifyOne → CatalogClassificationService.raise → CatalogRepository.updateAnnotation | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:775` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.annotationsOfColumns | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:395` |
+| `data_catalog.catalog_change_events` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1342` |
+| `data_catalog.catalog_change_events` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogScanService.classifyInBackground → CatalogClassificationService.classifyScan → CatalogClassificationService.runScope → CatalogRepository.columnsToClassify | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:417` |
+| `data_catalog.catalog_columns` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1269` |
+| `data_catalog.catalog_columns` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1290` |
+| `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1133` |
+| `data_catalog.catalog_objects` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1236` |
+| `data_catalog.catalog_objects` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.applyScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1257` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.runClaimed → CatalogScanService.execute → CatalogRepository.knownObjects | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:1120` |
+| `data_catalog.catalog_scan_runs` | ESCRIBE | ACTUALIZA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogRepository.failAbandoned | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:966` |
+| `data_catalog.catalog_scan_runs` | ESCRIBE | CREA | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogScanService.request → CatalogRepository.insertScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:991` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | InternalCatalogScansController.runNext → CatalogScanService.runNext → CatalogRepository.activeScan | `src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts:952` |
 
 ### Cuerpo
 
@@ -3303,10 +3303,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `claimed` | `number` | Sí | valores: 0, 1 | — | 1 si este tick tomó un escaneo; 0 si no había nada que hacer | `src/modules/data_catalog/dto/catalog-response.dto.ts:455` |
-| `scanId` | `string` | No | formato uuid | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:456` |
-| `status` | `string` | No | valores: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELLED | — | — | `src/modules/data_catalog/dto/catalog-response.dto.ts:457` |
-| `fenced` | `boolean` | No | — | — | `true` si el escaneo perdió su lease y no se pisó lo que otro proceso cerró | `src/modules/data_catalog/dto/catalog-response.dto.ts:462` |
+| `claimed` | `number` | Sí | valores: 0, 1 | — | 1 si este tick tomó un escaneo; 0 si no había nada que hacer | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:455` |
+| `scanId` | `string` | No | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:456` |
+| `status` | `string` | No | valores: QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELLED | — | — | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:457` |
+| `fenced` | `boolean` | No | — | — | `true` si el escaneo perdió su lease y no se pisó lo que otro proceso cerró | `src/modules/data_catalog/presentation/dto/catalog-response.dto.ts:462` |
 
 ### Respuestas posibles
 

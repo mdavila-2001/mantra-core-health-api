@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../../common';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
-import type { PharmacyIntegrationConnections } from '../../../pharmacy/entities';
 import { IntegrationReadRepository } from '../../infrastructure/repositories';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
@@ -33,6 +32,14 @@ const MAX_BATCHES = 20;
  * con su vínculo y los últimos lotes. Todo dentro del ámbito del actor: una
  * farmacia o una conexión ajena responde el mismo 404 que una inexistente.
  */
+/**
+ * La conexión tal como la lee el repositorio: la capa de aplicación no importa
+ * entidades de `pharmacy`, sólo `infrastructure/` habla con otros contextos.
+ */
+type FoundConnection = NonNullable<
+  Awaited<ReturnType<IntegrationReadRepository['findConnection']>>
+>;
+
 @Injectable()
 export class IntegrationReadService {
   constructor(
@@ -184,7 +191,7 @@ export class IntegrationReadService {
     em: EntityManager,
     ref: ConnectionRef,
     actor: AuthenticatedUser,
-  ): Promise<PharmacyIntegrationConnections> {
+  ): Promise<FoundConnection> {
     const pharmacy = await this.scope.requireManagedPharmacy(
       em,
       ref.pharmacyId,

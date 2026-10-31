@@ -57,3 +57,9 @@ export const splIdentityPath = (setid) => cpCache('dailymed', 'spl-id', `${setid
 
 // OMS eEML
 export const emlRecommendationPath = (id) => cpCache('eml', 'recommendations', `${id}.json`);
+
+// EMA, información de producto (PDF y su texto)
+export const emaPiTextPath = (slug) => cpCache('ema-pi', `${slug}_es.txt`);
+export const emaPiPdfPath = (slug) => cpCache('ema-pi', `${slug}_es.pdf`);
+/** Salida de py/ema_pi_extract.py (filas del anexo I, verificables carácter por carácter). */
+export const emaPiRowsPath = (slug) => cpCache('ema-pi', 'rows', `${slug}_es.rows.json`);

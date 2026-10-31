@@ -98,6 +98,7 @@ import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
 import { pharmacyErpEnvSchema } from './modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env';
+import { paymentsGatewayEnvSchema } from './modules/payments/gateway/payments-gateway.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -135,6 +136,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
         .concat(pharmacyErpEnvSchema)
+        .concat(paymentsGatewayEnvSchema)
         .concat(verificationBypassEnvSchema)
         .concat(seedBootEnvSchema),
     }),

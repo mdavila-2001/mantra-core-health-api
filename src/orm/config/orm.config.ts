@@ -108,6 +108,8 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // no tiene certificado— pasar el objeto rompería la conexión.
     driverOptions: {
       application_name: APPLICATION_NAME,
+      // Sin esto `pg` espera sin límite una conexión del pool: ver `orm.env.ts`.
+      connectionTimeoutMillis: env.connection.acquireTimeoutMs,
       ...(env.connection.ssl ? { ssl: { rejectUnauthorized: true } } : {}),
     },
 

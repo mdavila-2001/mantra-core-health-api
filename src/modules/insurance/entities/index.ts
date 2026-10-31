@@ -23,6 +23,7 @@ export * from './insurance_products.entity';
 export * from './insurance_reconciliation_batches.entity';
 export * from './insurance_reconciliation_items.entity';
 export * from './network_provider_memberships.entity';
+export * from './practitioner_insurer_requests.entity';
 export * from './patient_coverages.entity';
 export * from './patient_explanations_of_benefit.entity';
 export * from './prior_authorization_determinations.entity';

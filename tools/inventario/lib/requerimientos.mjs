@@ -73,7 +73,9 @@ export function leerGlobales(root = process.cwd()) {
   const main = leer(root, 'src/main.ts');
   const modulo = leer(root, 'src/app.module.ts');
 
-  const cuerpo = main?.match(/json\(\{\s*limit:\s*'([^']+)'\s*\}\)/);
+  // `json({ limit, ... })`: otras opciones (p. ej. `verify`, que guarda el
+  // cuerpo crudo para firmar webhooks) no cambian el límite.
+  const cuerpo = main?.match(/json\(\{\s*limit:\s*'([^']+)'[^}]*\}\)/);
   const tasa = modulo?.match(
     /throttlers:\s*\[\{\s*ttl:\s*([\d_]+)\s*,\s*limit:\s*(\d+)\s*\}\]/,
   );

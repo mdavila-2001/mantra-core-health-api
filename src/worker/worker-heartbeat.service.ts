@@ -1,61 +1,125 @@
 import {
   Inject,
   Injectable,
-  type BeforeApplicationShutdown,
   type OnApplicationBootstrap,
+  type OnApplicationShutdown,
 } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SystemApiClient } from './system-api-client.service';
-import { workerHealth } from './worker-health.registry';
 import { WORKER_ENV } from './worker.tokens';
 import type { WorkerEnv } from './worker.env';
+import {
+  workerHealth,
+  type WorkerHealthSnapshot,
+} from './worker-health.registry';
 
-/** Nombre del dominio del worker (`messaging`, `billing`…), lo aporta `bootstrapWorker`. */
-export const WORKER_NAME = Symbol('WORKER_NAME');
-
-/** Ruta de ingesta de la API (`ops_console`, rol `SYSTEM`). */
+/** Ruta de ingesta de latidos en la API (`ops_console`). */
 export const HEARTBEAT_PATH = '/internal/ops/heartbeats';
 
+/** Tope de frases por sonda y de largo por frase en el cuerpo del latido. */
+export const HEARTBEAT_MAX_REASONS = 10;
+export const HEARTBEAT_MAX_REASON_LENGTH = 200;
+
+/** Cuerpo de `POST /internal/ops/heartbeats`. Sale íntegro del registro de salud. */
+export interface HeartbeatBody {
+  instanceId: string;
+  pid: number;
+  startedAt: string;
+  sentAt: string;
+  status: WorkerHealthSnapshot['status'];
+  liveness: { healthy: boolean; reasons: string[] };
+  readiness: { healthy: boolean; reasons: string[] };
+  stuckTicks: number;
+  openCircuits: string[];
+}
+
+const truncateReasons = (reasons: readonly string[]): string[] =>
+  reasons
+    .slice(0, HEARTBEAT_MAX_REASONS)
+    .map((reason) => reason.slice(0, HEARTBEAT_MAX_REASON_LENGTH));
+
 /**
- * Latido del worker hacia la API (sonda de vida de instancias).
+ * Arma el cuerpo del latido a partir de la fotografía del registro de salud.
  *
- * Cada `WORKER_HEARTBEAT_INTERVAL_MS` (15 s por defecto) hace `POST
- * /internal/ops/heartbeats` con `{ instanceId: 'worker-<dominio>', type:
- * 'worker' }`. **No envía ninguna hora**: la API fija `receivedAt` con su reloj,
- * así que un worker con el reloj desfasado no puede aparecer vivo sin estarlo.
+ * Nunca viaja un mensaje de error ni un dato de negocio: las `reasons` son las
+ * frases que genera el propio registro con claves de tick y de circuito, y aun
+ * así se acotan en cantidad y largo para que la API pueda validarlas con una
+ * lista blanca estricta.
+ */
+export function buildHeartbeatBody(
+  snapshot: WorkerHealthSnapshot,
+  sentAt: Date = new Date(),
+): HeartbeatBody {
+  return {
+    instanceId: `worker-${snapshot.worker}`,
+    pid: snapshot.pid,
+    startedAt: snapshot.startedAt,
+    sentAt: sentAt.toISOString(),
+    status: snapshot.status,
+    liveness: {
+      healthy: snapshot.liveness.healthy,
+      reasons: truncateReasons(snapshot.liveness.reasons),
+    },
+    readiness: {
+      healthy: snapshot.readiness.healthy,
+      reasons: truncateReasons(snapshot.readiness.reasons),
+    },
+    // La liveness sólo falla por ticks atascados o por proceso detenido; en el
+    // segundo caso su única razón no es un tick.
+    stuckTicks:
+      snapshot.liveness.healthy || snapshot.status === 'stopped'
+        ? 0
+        : snapshot.liveness.reasons.length,
+    openCircuits: snapshot.circuits
+      .filter((circuit) => circuit.state === 'open')
+      .map((circuit) => circuit.operation),
+  };
+}
+
+/**
+ * Latido periódico del proceso worker hacia la API.
  *
- * - Sólo emite mientras el proceso está `running`: un worker que no terminó de
- *   arrancar, o que ya está drenando, no declara vida.
- * - Un latido que falla **jamás** tumba el worker: se registra (una vez por
- *   racha de fallos y al recuperarse) y se reintenta en el siguiente intervalo.
- * - Va fuera de `runTick`: no cuenta como tick ni compite con la exclusión mutua.
- * - Si el cortacircuitos `system-api` está abierto el latido tampoco sale; la API
- *   lo verá como «sin latido recibido», nunca como «proceso muerto».
+ * La sonda HTTP del worker (`worker-health.server.ts`) escucha en loopback y
+ * sólo la ve el healthcheck de su propio contenedor: la API no tiene forma de
+ * saber si un worker vive. Este servicio invierte la dirección: cada
+ * `WORKER_HEARTBEAT_INTERVAL_MS` empuja la fotografía del registro de salud a
+ * `POST /internal/ops/heartbeats` con el mismo cliente autenticado que ya usan
+ * los jobs, sin abrir puertos nuevos. La API lo guarda con su propio reloj y
+ * decide con él (`GET /admin/ops/instances/liveness`).
+ *
+ * El primer latido sale cuando terminó el arranque (`onApplicationBootstrap`):
+ * un worker que no terminó de construir sus módulos no emite «vida». Mientras
+ * el estado siga en `starting` no se emite; en `draining` sí, para que el
+ * tablero vea el apagado en curso en vez de un silencio.
+ *
+ * Un latido que falla **no puede tumbar el worker**: el temporizador está
+ * `unref` y toda la emisión va dentro de un `try/catch`. Si el cortacircuitos
+ * `system-api` está abierto, el latido tampoco sale: desde la API se ve «sin
+ * latido», no «proceso muerto», y la causa lo dice así.
  */
 @Injectable()
 export class WorkerHeartbeatService
-  implements OnApplicationBootstrap, BeforeApplicationShutdown
+  implements OnApplicationBootstrap, OnApplicationShutdown
 {
-  private timer: NodeJS.Timeout | undefined;
-  private immediate: NodeJS.Immediate | undefined;
-  private sending = false;
-  private failing = false;
-  private readonly instanceId: string;
+  private timer?: NodeJS.Timeout;
+  private first?: NodeJS.Immediate;
 
   constructor(
-    @Inject(WORKER_NAME) name: string,
-    @Inject(WORKER_ENV)
-    private readonly env: Pick<WorkerEnv, 'heartbeatIntervalMs'>,
     private readonly api: SystemApiClient,
     private readonly logger: PinoLogger,
+    @Inject(WORKER_ENV) private readonly env: WorkerEnv,
   ) {
-    this.instanceId = `worker-${name}`;
     this.logger.setContext(WorkerHeartbeatService.name);
   }
 
   onApplicationBootstrap(): void {
-    // El primer latido sale al terminar el arranque, no antes.
-    this.immediate = setImmediate(() => void this.beat());
+    // En el siguiente turno del bucle: todos los `onApplicationBootstrap` del
+    // módulo raíz ya corrieron (incluido el que marca `running`), así que el
+    // primer latido no sale con estado `starting`.
+    this.first = setImmediate(() => void this.beat());
+    this.first.unref();
+
     this.timer = setInterval(
       () => void this.beat(),
       this.env.heartbeatIntervalMs,
@@ -63,46 +127,33 @@ export class WorkerHeartbeatService
     this.timer.unref();
   }
 
-  beforeApplicationShutdown(): void {
+  onApplicationShutdown(): void {
+    if (this.first) clearImmediate(this.first);
     if (this.timer) clearInterval(this.timer);
-    if (this.immediate) clearImmediate(this.immediate);
+    this.first = undefined;
     this.timer = undefined;
-    this.immediate = undefined;
   }
 
-  /** Un latido. Devuelve `true` si la API lo aceptó. Nunca lanza. */
+  /** Emite un latido. Devuelve `true` si la API lo aceptó. Nunca lanza. */
   async beat(): Promise<boolean> {
-    if (workerHealth.getStatus() !== 'running' || this.sending) return false;
-    this.sending = true;
     try {
-      await this.api.post(
-        HEARTBEAT_PATH,
-        { instanceId: this.instanceId, type: 'worker' },
-        { idempotent: true },
-      );
-      if (this.failing) {
-        this.failing = false;
-        this.logger.info(
-          { instanceId: this.instanceId },
-          'Latido restablecido',
-        );
-      }
+      const snapshot = workerHealth.snapshot();
+      if (snapshot.status === 'starting') return false;
+      await this.api.post(HEARTBEAT_PATH, buildHeartbeatBody(snapshot), {
+        idempotent: true,
+      });
       return true;
     } catch (error) {
-      if (!this.failing) {
-        this.failing = true;
-        // Sólo la clase del error: el mensaje puede traer URLs o cabeceras.
-        this.logger.warn(
-          {
-            instanceId: this.instanceId,
-            errorType: error instanceof Error ? error.name : 'desconocido',
-          },
-          'No se pudo enviar el latido a la API; se reintenta en el siguiente intervalo',
-        );
-      }
+      // Sólo la clase y el estado HTTP: el cuerpo de una respuesta de error de
+      // la API no aporta nada acá y no hace falta volcarlo al log del worker.
+      this.logger.warn(
+        {
+          errorType: error instanceof Error ? error.name : 'desconocido',
+          status: error instanceof HttpException ? error.getStatus() : null,
+        },
+        'No se pudo emitir el latido hacia la API',
+      );
       return false;
-    } finally {
-      this.sending = false;
     }
   }
 }

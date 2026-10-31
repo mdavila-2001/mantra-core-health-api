@@ -154,6 +154,9 @@ import {
     AuthzGrantsService,
     RolesRepository,
     UserRoleAssignmentsRepository,
+    // #893: `procedures_perioperative` prueba con la misma regla que los accesos
+    // clínicos que el paciente del caso quirúrgico pertenece al tenant.
+    AuthzClinicalScopeService,
   ],
 })
 export class AuthzModule {}

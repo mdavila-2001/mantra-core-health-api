@@ -1,55 +1,65 @@
 import { Module } from '@nestjs/common';
+import {
+  AppReadinessService,
+  READINESS_TIMEOUT_MS,
+} from '../../app-readiness.service';
+import { RouteIndexModule } from '../../observability/route-index/route-index.module';
 import { DocumentStoreModule } from '../document_store/document_store.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
-import { RouteIndexModule } from '../../observability/route-index/route-index.module';
-import { OpsConsoleService } from './application/ops-console.service';
 import {
-  INSTANCE_REGISTRY_TOKEN,
-  OpsInstancesService,
-} from './application/ops-instances.service';
+  InstanceLivenessService,
+  INSTANCE_LIVENESS_ENV,
+} from './application/instance-liveness.service';
+import { OpsConsoleService } from './application/ops-console.service';
+import { OpsToolsService } from './application/ops-tools.service';
 import { OpsTrafficService } from './application/ops-traffic.service';
-import { resolveRegistry } from './domain/instance-liveness.env';
-import { DependencyProbeService } from './infrastructure/probes/dependency-probe.service';
-import { OpsConsoleRepository } from './infrastructure/repositories/ops-console.repository';
+import { loadInstanceLivenessEnv } from './domain/instance-liveness.env';
 import { InstanceHeartbeatRepository } from './infrastructure/repositories/instance-heartbeat.repository';
+import { OpsConsoleRepository } from './infrastructure/repositories/ops-console.repository';
 import { OpsTrafficRepository } from './infrastructure/repositories/ops-traffic.repository';
 import { OpsConsoleController } from './presentation/controllers/ops-console.controller';
 import { OpsHeartbeatController } from './presentation/controllers/ops-heartbeat.controller';
-import { OpsInstancesController } from './presentation/controllers/ops-instances.controller';
+import { OpsLivenessController } from './presentation/controllers/ops-liveness.controller';
+import { OpsToolsController } from './presentation/controllers/ops-tools.controller';
 
 /**
  * Consola de operación y preparación para producción del portal
  * administrativo. Sin tablas propias: lee los schemas de los módulos que
  * poseen cada dato y nunca escribe en ellos.
- *
- * La sonda de vida de instancias guarda sus latidos en Redis (clave propia
- * `ops:heartbeat:v1`, sin DDL) y sondea las dependencias reutilizando los
- * servicios que ya exportan `redis_runtime`, `document_store` y
- * `search_platform`.
  */
 @Module({
   imports: [
     RouteIndexModule,
-    RedisRuntimeModule,
+    // Las sondas LIVE de `/admin/ops/tools` reutilizan `AppReadinessService`,
+    // que `AppModule` declara como proveedor propio sin exportarlo: acá se
+    // construye otra instancia con las mismas dependencias.
     DocumentStoreModule,
+    RedisRuntimeModule,
     SearchPlatformModule,
   ],
   controllers: [
     OpsConsoleController,
-    OpsInstancesController,
+    OpsToolsController,
     OpsHeartbeatController,
+    OpsLivenessController,
   ],
   providers: [
     OpsConsoleRepository,
     OpsConsoleService,
     OpsTrafficRepository,
     OpsTrafficService,
+    AppReadinessService,
+    OpsToolsService,
+    // Sonda de vida de instancias. Los umbrales se validan acá, al construir
+    // el módulo: un valor inválido aborta el arranque (regla 90.3).
+    {
+      provide: INSTANCE_LIVENESS_ENV,
+      useFactory: () =>
+        loadInstanceLivenessEnv(process.env, READINESS_TIMEOUT_MS),
+    },
     InstanceHeartbeatRepository,
-    DependencyProbeService,
-    // Falla al arrancar si `OPS_LIVENESS_REQUIRED_WORKERS` es inválida.
-    { provide: INSTANCE_REGISTRY_TOKEN, useFactory: () => resolveRegistry() },
-    OpsInstancesService,
+    InstanceLivenessService,
   ],
 })
 export class OpsConsoleModule {}

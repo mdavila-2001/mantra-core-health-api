@@ -60,7 +60,7 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/simulated/my-invoices/{invoiceId} | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /billing/simulated/outbox | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/simulated/status | Cualquier sesión válida | BAJO | 2 |
-| `ctrl:PatientSpendingController` | Operaciones de PatientSpendingController que el README no asigna a un caso de uso | GET /patient-spending/me | PATIENT | BAJO | 10 |
+| `ctrl:PatientSpendingController` | Operaciones de PatientSpendingController que el README no asigna a un caso de uso | GET /patient-spending/me | PATIENT | BAJO | 11 |
 
 ### Diagrama 1 de 2 — etapas `UC-17-01`, `UC-17-02`, `UC-17-03`…
 
@@ -282,7 +282,7 @@ flowchart LR
     o47["GET /billing/simulated/outbox"]:::op
     o49["GET /billing/simulated/status"]:::op
   end
-  t56[("+4 tablas más")]
+  t56[("+5 tablas más")]
   subgraph s2["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
     o50["GET /patient-spending/me"]:::op
   end

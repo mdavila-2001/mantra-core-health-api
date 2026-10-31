@@ -607,11 +607,27 @@ describe('PharmacyProductsService', () => {
         status: 'PUBLISHED',
         stock: null,
         minStock: null,
+        outOfStockDeclared: false,
         imageFileIds: [],
       });
       expect(product).toMatchObject({ updatedByUserId: 'admin-1' });
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
       expect(d.readRepo.findConcepts).toHaveBeenCalledWith(d.tx, ['c-med']);
+    });
+
+    it('tells the manager the product is marked out of stock, apart from its count', async () => {
+      const d = build();
+      given(d, activeProduct({ stockQuantity: 4, outOfStockDeclared: true }));
+
+      const res = await inTenant(() =>
+        d.service.updateProduct('ph1', 'pr1', { brandName: 'Amoxil' }, actor),
+      );
+
+      expect(res).toMatchObject({
+        stock: 4,
+        inStock: false,
+        outOfStockDeclared: true,
+      });
     });
 
     it('clears a field when the body sends null and leaves the rest alone', async () => {

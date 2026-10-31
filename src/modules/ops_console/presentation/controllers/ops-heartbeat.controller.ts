@@ -1,61 +1,37 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import {
-  ApiAcceptedResponse,
   ApiBearerAuth,
   ApiOperation,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { NotAudited, Roles } from '../../../../common';
-import { OpsInstancesService } from '../../application/ops-instances.service';
+import { Roles } from '../../../../common';
+import { InstanceLivenessService } from '../../application/instance-liveness.service';
 import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
 
 /**
- * Ingesta de latidos de los workers (sonda de vida de instancias).
- *
- * ## Contrato — `POST /internal/ops/heartbeats`
- *
- * - Rol: **sólo `SYSTEM`** (el principal que cada worker se firma, igual que el
- *   precedente `platform-ops.controller.ts` `health-checks/:id/runs`). Un
- *   administrador (`PLATFORM_ADMIN`, `SRE`…) recibe 403: no puede fabricar
- *   latidos. Sin token, 401.
- * - Cuerpo, lista blanca estricta: `{ instanceId: string, type:
- *   'api'|'worker'|'database'|'service', version?: string }`. Cualquier otro
- *   campo (incluido `receivedAt`/`sentAt`) se rechaza con 400.
- * - `instanceId` debe estar declarado en el registro de instancias y vivir de
- *   latidos (workers); si no, 422 con `reason: 'INSTANCE_UNKNOWN'` y no se
- *   guarda nada.
- * - Respuesta: **202** `{ accepted: true }`. El instante (`receivedAt`) lo fija
- *   el servidor con SU reloj; el cliente no participa.
- * - Idempotente: repetirlo sobrescribe el último latido de esa instancia.
- * - Almacén: Redis (hash `ops:heartbeat:v1`). Si falla, 503 y el worker
- *   reintenta en su siguiente intervalo.
- * - Lleva `@NotAudited` (señal de vida sin actor humano, 25 workers × 4/min) y no se
- *   mide en `/admin/ops/traffic`
- *   (`EXCLUDED_HTTP_PATHS`): ahí tampoco aportan valor.
- *
- * La lectura está en {@link OpsInstancesController} (`GET
- * /admin/ops/instances/liveness`).
+ * Ingesta de latidos de los workers. Sólo el rol `SYSTEM` (el que firma
+ * `SystemApiClient`): un administrador no puede fabricar la vida de un
+ * proceso. Sin `@Audited` a propósito: 25 workers × 4/min serían 100 filas de
+ * auditoría por minuto sin valor. La ruta está excluida de la medición HTTP
+ * (`EXCLUDED_HTTP_PATHS`).
  */
-@ApiTags('ops-instances')
+@ApiTags('ops-console')
 @ApiBearerAuth()
 @Controller('internal/ops')
 export class OpsHeartbeatController {
-  constructor(private readonly instances: OpsInstancesService) {}
+  constructor(private readonly liveness: InstanceLivenessService) {}
 
   @Post('heartbeats')
   @Roles('SYSTEM')
-  @NotAudited(
-    'Señal de vida de un worker (principal SYSTEM, sin persona): sólo sobrescribe el último latido en Redis, no toca Postgres ni datos de personas; sellarla en audit_log sería ruido de 25 workers cada 15 s.',
-  )
-  @HttpCode(HttpStatus.ACCEPTED)
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Registrar el latido de una instancia (sólo workers, rol SYSTEM)',
+    summary: 'Latido de un worker hacia la sonda de vida de instancias',
     description:
-      'El servidor guarda la hora de recepción con su propio reloj; el cliente no puede enviarla.',
+      'Idempotente: sobrescribe la entrada de la instancia. La edad se calcula con el reloj de la API (`receivedAt`), no con `sentAt`. `422 INSTANCE_UNKNOWN` si el id no está en el registro de instancias esperadas.',
   })
-  @ApiAcceptedResponse({ type: HeartbeatAcceptedDto })
-  async heartbeat(@Body() dto: HeartbeatDto): Promise<HeartbeatAcceptedDto> {
-    await this.instances.recordHeartbeat(dto);
-    return { accepted: true };
+  @ApiResponse({ status: HttpStatus.CREATED, type: HeartbeatAcceptedDto })
+  record(@Body() dto: HeartbeatDto): Promise<HeartbeatAcceptedDto> {
+    return this.liveness.recordHeartbeat(dto);
   }
 }

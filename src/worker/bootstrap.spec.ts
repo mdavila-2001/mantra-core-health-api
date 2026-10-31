@@ -26,6 +26,7 @@ class SystemApiClientModule {}
 class MockProviderClientModule {}
 class GoogleEmailClientModule {}
 class WorkerLifecycleService {}
+class WorkerHeartbeatService {}
 class LoggerToken {}
 class PinoLoggerToken {}
 
@@ -74,10 +75,7 @@ jest.unstable_mockModule('./google-email-client.module', () => ({
 jest.unstable_mockModule('./worker-lifecycle.service', () => ({
   WorkerLifecycleService,
 }));
-const WORKER_NAME = Symbol('WORKER_NAME');
-class WorkerHeartbeatService {}
 jest.unstable_mockModule('./worker-heartbeat.service', () => ({
-  WORKER_NAME,
   WorkerHeartbeatService,
 }));
 jest.unstable_mockModule('./run-tick.util', () => ({ configureTicks }));
@@ -151,16 +149,6 @@ describe('bootstrapWorker', () => {
       expect.any(Function),
       { bufferLogs: true },
     );
-    // El latido hacia la API es único para los 25 workers: lo registra el
-    // arranque compartido, con el dominio como nombre, y va DESPUÉS del ciclo
-    // de vida (éste marca `running`, requisito para emitir).
-    const rootModule = createApplicationContext.mock.calls[0]?.[0] as object;
-    const providers = Reflect.getMetadata('providers', rootModule) as unknown[];
-    expect(providers).toEqual([
-      WorkerLifecycleService,
-      { provide: WORKER_NAME, useValue: 'messaging' },
-      WorkerHeartbeatService,
-    ]);
     expect(app.get).toHaveBeenCalledWith(LoggerToken);
     expect(app.useLogger).toHaveBeenCalledWith(appLogger);
     expect(app.flushLogs).toHaveBeenCalledTimes(1);

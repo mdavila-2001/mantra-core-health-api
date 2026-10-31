@@ -12,9 +12,12 @@ import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ReferralsController } from './referrals.controller';
+import { AUDITED_KEY } from '../../../common/audit-trail/audit-trail.decorators';
 import {
   CreateReferralDto,
   ListReferralTargetServicesQueryDto,
+  ReferralArrivalDto,
+  ReferralTransferDto,
   SearchReferralTargetsQueryDto,
 } from '../dto';
 
@@ -33,6 +36,8 @@ function build() {
     get: mockFn(),
     counterReferral: mockFn(),
     cancel: mockFn(),
+    updateTransfer: mockFn(),
+    recordArrival: mockFn(),
     searchTargets: mockFn(),
     listTargetServices: mockFn(),
   };
@@ -74,6 +79,45 @@ describe('ReferralsController', () => {
     );
     await d.controller.cancel('ref1', actor);
     expect(d.referralsService.cancel).toHaveBeenCalledWith('ref1', actor);
+  });
+
+  it('delegates transfer and arrival (v4274)', async () => {
+    const d = build();
+    const transfer = { required: false };
+    await d.controller.updateTransfer('ref1', transfer, actor);
+    expect(d.referralsService.updateTransfer).toHaveBeenCalledWith(
+      'ref1',
+      transfer,
+      actor,
+    );
+    const arrival = {
+      arrivedAt: '2026-10-31T11:30:00Z',
+      arrivalCondition: 'STABLE' as const,
+    };
+    await d.controller.recordArrival('ref1', arrival, actor);
+    expect(d.referralsService.recordArrival).toHaveBeenCalledWith(
+      'ref1',
+      arrival,
+      actor,
+    );
+  });
+
+  it('transfer y arrival son PATCH auditados (v4274)', () => {
+    const proto = ReferralsController.prototype as any;
+    for (const [handler, path, action] of [
+      [proto.updateTransfer, ':id/transfer', 'REFERRAL_TRANSFER_UPDATED'],
+      [proto.recordArrival, ':id/arrival', 'REFERRAL_ARRIVAL_RECORDED'],
+    ]) {
+      expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(path);
+      expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
+        RequestMethod.PATCH,
+      );
+      expect(Reflect.getMetadata(AUDITED_KEY, handler)).toEqual({
+        action,
+        entity: 'referral',
+        entityId: 'param:id',
+      });
+    }
   });
 
   it('delegates listMine (CV-10) to the authenticated actor', async () => {
@@ -146,6 +190,57 @@ describe('ReferralsController', () => {
           targetProfileId: 'x',
         }),
       ).toEqual(['targetProfileId']);
+    });
+
+    it('transfer: enumeraciones, tipos de los signos y fechas ISO (v4274)', async () => {
+      expect(
+        await errorsOf(ReferralTransferDto, {
+          transportMode: 'TAXI',
+          departureCondition: 'BAD',
+          departedAt: 'ayer',
+        }),
+      ).toEqual(['transportMode', 'departureCondition', 'departedAt']);
+      const nested = await validate(
+        plainToInstance(ReferralTransferDto, {
+          vitals: { systolicBp: 'alta', temperatureC: 36.55 },
+        }),
+      );
+      expect(nested.map((e) => e.property)).toEqual(['vitals']);
+      expect(nested[0].children?.map((e) => e.property).sort()).toEqual([
+        'systolicBp',
+        'temperatureC',
+      ]);
+      expect(
+        await errorsOf(ReferralTransferDto, {
+          required: true,
+          transportMode: 'AIR_AMBULANCE',
+          departureCondition: 'CRITICAL',
+          vitals: { systolicBp: 90, temperatureC: 36.5, glasgow: 14 },
+          departedAt: '2026-10-31T10:00:00Z',
+        }),
+      ).toEqual([]);
+    });
+
+    it('create: el objeto transfer se valida anidado (v4274)', async () => {
+      expect(
+        await errorsOf(CreateReferralDto, {
+          patientProfileId: '6f1c1b1e-1111-4111-8111-111111111111',
+          transfer: { transportMode: 'TAXI' },
+        }),
+      ).toEqual(['transfer']);
+    });
+
+    it('arrival: arrivedAt y arrivalCondition son obligatorios (v4274)', async () => {
+      expect(await errorsOf(ReferralArrivalDto, {})).toEqual([
+        'arrivedAt',
+        'arrivalCondition',
+      ]);
+      expect(
+        await errorsOf(ReferralArrivalDto, {
+          arrivedAt: '2026-10-31T11:30:00Z',
+          arrivalCondition: 'DECEASED',
+        }),
+      ).toEqual([]);
     });
 
     it('create: referralType sólo admite los ocho códigos', async () => {

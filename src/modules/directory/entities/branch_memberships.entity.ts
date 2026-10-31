@@ -69,4 +69,10 @@ export class BranchMemberships {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'workday_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  workdayConceptId?: string;
+
+  @Property({ fieldName: 'responsible_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  responsibleUserId?: string;
 }

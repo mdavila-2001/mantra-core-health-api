@@ -93,4 +93,27 @@ export class ClinicalUnits {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'responsible_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  responsibleUserId?: string;
+
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  @Property({ columnType: 'varchar', nullable: true })
+  description?: string;
+
+  @Property({
+    fieldName: 'valid_from',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  validFrom?: Date;
+
+  @Property({
+    fieldName: 'valid_to',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  validTo?: Date;
 }

@@ -11,3 +11,4 @@ export * from './insurance-portability.repository';
 export * from './insurance-campaigns.repository';
 export * from './insurance-patient-account.repository';
 export * from './linked-order-data.repository';
+export * from './practitioner-insurer-requests.repository';

@@ -1,411 +1,378 @@
 import { describe, expect, it } from '@jest/globals';
 import {
-  buildLivenessReport,
-  CLOCK_TOLERANCE_MS,
-  evaluateHeartbeatInstance,
-  evaluateProbeInstance,
-  evaluateSelfInstance,
-  LIVENESS_THRESHOLDS,
+  LIVENESS_CAUSES,
+  evaluateInstance,
   overallOf,
-  parseStoredHeartbeat,
-  type HeartbeatStoreRead,
-  type InstanceLivenessView,
-  type ProbeResult,
+  parseHeartbeatRecord,
+  summarize,
+  type EvaluationContext,
+  type InstanceEvaluation,
+  type LivenessThresholds,
 } from './instance-liveness';
-import type { InstanceDefinition } from './instance-registry';
+import {
+  INFRASTRUCTURE_INSTANCES,
+  WORKER_INSTANCES,
+  type InstanceDefinition,
+} from './instance-registry';
 
 const NOW = Date.parse('2026-10-30T12:05:20.000Z');
-
-const worker: InstanceDefinition = {
-  id: 'worker-messaging',
-  label: 'Worker messaging',
-  type: 'worker',
-  source: 'heartbeat',
-  required: true,
+const THRESHOLDS: LivenessThresholds = {
+  workerHeartbeatIntervalMs: 15_000,
+  degradedAfterMs: 30_000,
+  downAfterMs: 60_000,
+  dependencyLatencyDegradedMs: 1_000,
+  dependencyProbeTimeoutMs: 3_000,
+  clockToleranceMs: 5_000,
 };
+const MESSAGING = WORKER_INSTANCES.find((w) => w.id === 'worker-messaging')!;
+const FILES = WORKER_INSTANCES.find((w) => w.id === 'worker-files')!;
+const infra = (id: string): InstanceDefinition =>
+  INFRASTRUCTURE_INSTANCES.find((i) => i.id === id)!;
 
-function store(receivedAt: number, extra: Record<string, unknown> = {}) {
-  return {
-    available: true,
-    records: new Map([
-      [
-        worker.id,
-        JSON.stringify({
-          instanceId: worker.id,
-          type: 'worker',
-          receivedAt,
-          ...extra,
-        }),
-      ],
-    ]),
-  } satisfies HeartbeatStoreRead;
+function record(over: Record<string, unknown> = {}): string {
+  return JSON.stringify({
+    instanceId: 'worker-messaging',
+    pid: 41,
+    startedAt: '2026-10-30T12:00:00.000Z',
+    sentAt: '2026-10-30T12:05:15.000Z',
+    status: 'running',
+    liveness: { healthy: true, reasons: [] },
+    readiness: { healthy: true, reasons: [] },
+    stuckTicks: 0,
+    openCircuits: [],
+    receivedAt: NOW - 5_000,
+    ...over,
+  });
 }
 
-const evalAge = (ageMs: number) =>
-  evaluateHeartbeatInstance(worker, store(NOW - ageMs), NOW);
+function context(over: Partial<EvaluationContext> = {}): EvaluationContext {
+  return {
+    now: NOW,
+    thresholds: THRESHOLDS,
+    heartbeats: {},
+    probes: {},
+    apiStartedAt: '2026-10-30T11:00:00.000Z',
+    ...over,
+  };
+}
 
-describe('umbrales del latido (bordes exactos)', () => {
-  it('U1: latido hace 5 s es VIVA sin causa', () => {
-    const v = evalAge(5_000);
-    expect(v).toMatchObject({
+const worker = (
+  raw: string | undefined,
+  over: Partial<EvaluationContext> = {},
+) =>
+  evaluateInstance(
+    MESSAGING,
+    context({
+      heartbeats: raw === undefined ? {} : { 'worker-messaging': raw },
+      ...over,
+    }),
+  );
+
+const aged = (ageMs: number) => worker(record({ receivedAt: NOW - ageMs }));
+
+describe('evaluateInstance · workers', () => {
+  it('U1: latido fresco, running y sondas sanas → VIVA / OK con la edad en segundos', () => {
+    const result = aged(5_000);
+    expect(result).toMatchObject({
       state: 'VIVA',
-      cause: null,
+      cause: 'OK',
       ageSeconds: 5,
       thresholdSeconds: 60,
       lastHeartbeatAt: new Date(NOW - 5_000).toISOString(),
+      evidence: {
+        source: 'heartbeat',
+        reportedStatus: 'running',
+        startedAt: '2026-10-30T12:00:00.000Z',
+        latencyMs: null,
+      },
     });
   });
 
-  it.each([
-    [0, 'VIVA', null],
-    [29_999, 'VIVA', null],
-    [30_000, 'VIVA', null],
-    [30_001, 'DEGRADADA', 'HEARTBEAT_LATE'],
-    [45_000, 'DEGRADADA', 'HEARTBEAT_LATE'],
-    [60_000, 'DEGRADADA', 'HEARTBEAT_LATE'],
-    [60_001, 'CAIDA', 'HEARTBEAT_EXPIRED'],
-    [3_600_000, 'CAIDA', 'HEARTBEAT_EXPIRED'],
-  ] as const)('edad %i ms => %s', (age, state, cause) => {
-    const v = evalAge(age);
-    expect(v.state).toBe(state);
-    expect(v.cause).toBe(cause);
+  it('U2/U3: 30 000 ms sigue VIVA (≤), 30 001 ms es DEGRADADA / HEARTBEAT_LATE', () => {
+    expect(aged(30_000).state).toBe('VIVA');
+    expect(aged(30_001)).toMatchObject({
+      state: 'DEGRADADA',
+      cause: 'HEARTBEAT_LATE',
+      ageSeconds: 30,
+    });
   });
 
-  it('ageSeconds es coherente con el umbral: > 30 si y sólo si no es VIVA', () => {
-    expect(evalAge(30_000).ageSeconds).toBe(30);
-    expect(evalAge(30_001).ageSeconds).toBe(31);
-    expect(evalAge(60_000).ageSeconds).toBe(60);
-    expect(evalAge(60_001).ageSeconds).toBe(61);
+  it('U4/U5: 60 000 ms sigue DEGRADADA, 60 001 ms es CAIDA / HEARTBEAT_EXPIRED', () => {
+    expect(aged(60_000)).toMatchObject({
+      state: 'DEGRADADA',
+      cause: 'HEARTBEAT_LATE',
+    });
+    expect(aged(60_001)).toMatchObject({
+      state: 'CAIDA',
+      cause: 'HEARTBEAT_EXPIRED',
+      ageSeconds: 60,
+      causeDetail: expect.stringContaining('sin latido desde hace 60 s'),
+    });
   });
 
-  it('U7: reloj adelantado dentro de la tolerancia (+4 999 ms) es VIVA con edad 0', () => {
-    const v = evalAge(-(CLOCK_TOLERANCE_MS - 1));
-    expect(v.state).toBe('VIVA');
-    expect(v.ageSeconds).toBe(0);
+  it('U6: edad 0 → VIVA', () => {
+    expect(aged(0)).toMatchObject({ state: 'VIVA', ageSeconds: 0 });
   });
 
-  it('U7b: exactamente +5 000 ms sigue dentro de la tolerancia', () => {
-    expect(evalAge(-CLOCK_TOLERANCE_MS).state).toBe('VIVA');
+  it('U7: latido 4 999 ms en el futuro (dentro de la tolerancia) → VIVA con edad 0, nunca negativa', () => {
+    expect(aged(-4_999)).toMatchObject({
+      state: 'VIVA',
+      cause: 'OK',
+      ageSeconds: 0,
+    });
   });
 
-  it('U8: +5 001 ms es SIN_DATO / CLOCK_INCONSISTENT, jamás VIVA', () => {
-    const v = evalAge(-(CLOCK_TOLERANCE_MS + 1));
-    expect(v.state).toBe('SIN_DATO');
-    expect(v.cause).toBe('CLOCK_INCONSISTENT');
+  it('U8: latido 5 001 ms en el futuro → SIN_DATO / CLOCK_INCONSISTENT, jamás VIVA', () => {
+    expect(aged(-5_001)).toMatchObject({
+      state: 'SIN_DATO',
+      cause: 'CLOCK_INCONSISTENT',
+      ageSeconds: null,
+    });
   });
 
-  it('U9: un sentAt/clientAt dentro del registro no decide nada (sólo receivedAt)', () => {
-    const v = evaluateHeartbeatInstance(
-      worker,
-      store(NOW - 1_000, { sentAt: NOW - 3_600_000, clientAt: NOW + 9e9 }),
-      NOW,
+  it('U9: un sentAt del worker una hora distinto no cambia el estado (se ignora)', () => {
+    const result = worker(
+      record({ receivedAt: NOW - 5_000, sentAt: '2026-10-30T11:05:15.000Z' }),
     );
-    expect(v.state).toBe('VIVA');
-    expect(v.ageSeconds).toBe(1);
+    expect(result).toMatchObject({ state: 'VIVA', ageSeconds: 5 });
   });
-});
 
-describe('sin evidencia nunca es VIVA', () => {
-  it('U10: nunca vista => SIN_DATO / NEVER_SEEN, sin fecha ni edad', () => {
-    const v = evaluateHeartbeatInstance(
-      worker,
-      { available: true, records: new Map() },
-      NOW,
-    );
-    expect(v).toMatchObject({
+  it('U10: sin registro y required → SIN_DATO / NEVER_SEEN sin latido ni edad', () => {
+    expect(worker(undefined)).toMatchObject({
+      required: true,
       state: 'SIN_DATO',
       cause: 'NEVER_SEEN',
+      lastHeartbeatAt: null,
+      ageSeconds: null,
+      thresholdSeconds: null,
+      evidence: { source: 'none' },
+    });
+  });
+
+  it('U11: sin registro y required:false → SIN_DATO / NEVER_SEEN y no pesa en overall', () => {
+    const result = evaluateInstance(FILES, context());
+    expect(result).toMatchObject({
+      required: false,
+      state: 'SIN_DATO',
+      cause: 'NEVER_SEEN',
+    });
+    expect(overallOf([{ state: 'VIVA', required: true }, result])).toBe('OK');
+  });
+
+  it.each([
+    ['JSON inválido', '{no es json'],
+    ['sin receivedAt', record({ receivedAt: undefined })],
+    ['receivedAt no numérico', record({ receivedAt: '2026-10-30T12:05:15Z' })],
+    ['receivedAt NaN', record({ receivedAt: 'NaN' })],
+    ['status fuera del enumerado', record({ status: 'zombie' })],
+    ['sin liveness', record({ liveness: undefined })],
+    ['un arreglo', '[1,2,3]'],
+  ])('U12: registro ilegible (%s) → SIN_DATO / RECORD_CORRUPT', (_n, raw) => {
+    expect(worker(raw)).toMatchObject({
+      state: 'SIN_DATO',
+      cause: 'RECORD_CORRUPT',
       lastHeartbeatAt: null,
       ageSeconds: null,
     });
   });
 
-  it('U17: store caído => SIN_DATO / STORE_UNAVAILABLE aunque haya un registro viejo en memoria', () => {
-    const v = evaluateHeartbeatInstance(
-      worker,
-      { available: false, records: store(NOW).records },
-      NOW,
-    );
-    expect(v.state).toBe('SIN_DATO');
-    expect(v.cause).toBe('STORE_UNAVAILABLE');
-  });
-
-  it.each([
-    ['JSON inválido', '{no-json'],
-    ['no es objeto', '[1,2]'],
-    ['null', 'null'],
-    [
-      'falta receivedAt',
-      JSON.stringify({ instanceId: 'worker-messaging', type: 'worker' }),
-    ],
-    [
-      'receivedAt como texto',
-      JSON.stringify({
-        instanceId: 'worker-messaging',
-        type: 'worker',
-        receivedAt: 'ayer',
-      }),
-    ],
-    [
-      'receivedAt NaN serializado',
-      JSON.stringify({
-        instanceId: 'worker-messaging',
-        type: 'worker',
-        receivedAt: null,
-      }),
-    ],
-    [
-      'receivedAt negativo',
-      JSON.stringify({
-        instanceId: 'worker-messaging',
-        type: 'worker',
-        receivedAt: -5,
-      }),
-    ],
-    [
-      'receivedAt decimal',
-      JSON.stringify({
-        instanceId: 'worker-messaging',
-        type: 'worker',
-        receivedAt: 1.5,
-      }),
-    ],
-    [
-      'id distinto del campo',
-      JSON.stringify({
-        instanceId: 'worker-billing',
-        type: 'worker',
-        receivedAt: NOW,
-      }),
-    ],
-    [
-      'tipo distinto',
-      JSON.stringify({
-        instanceId: 'worker-messaging',
-        type: 'database',
-        receivedAt: NOW,
-      }),
-    ],
-    ['cadena vacía', ''],
-  ])('U12: registro corrupto (%s) => SIN_DATO / RECORD_CORRUPT', (_n, raw) => {
-    const v = evaluateHeartbeatInstance(
-      worker,
-      { available: true, records: new Map([[worker.id, raw]]) },
-      NOW,
-    );
-    expect(v.state).toBe('SIN_DATO');
-    expect(v.cause).toBe('RECORD_CORRUPT');
-  });
-
-  it('parseStoredHeartbeat acepta el registro íntegro con version', () => {
+  it('U13: fresco con liveness enferma → DEGRADADA / TICK_STUCK', () => {
     expect(
-      parseStoredHeartbeat(
-        JSON.stringify({
-          instanceId: 'a',
-          type: 'worker',
-          receivedAt: 5,
-          version: '1',
-        }),
-      ),
-    ).toEqual({ instanceId: 'a', type: 'worker', receivedAt: 5, version: '1' });
-  });
-});
-
-describe('dependencias por sonda', () => {
-  const db: InstanceDefinition = {
-    id: 'postgresql',
-    label: 'PostgreSQL',
-    type: 'database',
-    source: 'probe',
-    required: true,
-  };
-  const probe = (p: Partial<ProbeResult>): ProbeResult => ({
-    status: 'up',
-    latencyMs: 120,
-    observedAtMs: NOW - 4_000,
-    ...p,
+      worker(record({ liveness: { healthy: false, reasons: ['x'] } })),
+    ).toMatchObject({ state: 'DEGRADADA', cause: 'TICK_STUCK' });
   });
 
-  it('U18: up 120 ms VIVA; 1 000 ms VIVA; 1 001 ms DEGRADADA / PROBE_SLOW', () => {
-    expect(evaluateProbeInstance(db, probe({}), NOW).state).toBe('VIVA');
+  it('U14: fresco con readiness enferma → DEGRADADA / CIRCUIT_OPEN', () => {
     expect(
-      evaluateProbeInstance(db, probe({ latencyMs: 1000 }), NOW).state,
-    ).toBe('VIVA');
-    const slow = evaluateProbeInstance(db, probe({ latencyMs: 1001 }), NOW);
-    expect(slow).toMatchObject({ state: 'DEGRADADA', cause: 'PROBE_SLOW' });
+      worker(record({ readiness: { healthy: false, reasons: ['x'] } })),
+    ).toMatchObject({ state: 'DEGRADADA', cause: 'CIRCUIT_OPEN' });
   });
 
-  it('U19: down por timeout y down por otro error', () => {
-    expect(
-      evaluateProbeInstance(
-        db,
-        probe({ status: 'down', latencyMs: 3000 }),
-        NOW,
-      ),
-    ).toMatchObject({ state: 'CAIDA', cause: 'PROBE_TIMEOUT' });
-    expect(
-      evaluateProbeInstance(db, probe({ status: 'down', latencyMs: 40 }), NOW),
-    ).toMatchObject({ state: 'CAIDA', cause: 'PROBE_FAILED' });
-  });
-
-  it('la sonda que no pudo ejecutarse es SIN_DATO, no CAIDA ni VIVA', () => {
-    expect(evaluateProbeInstance(db, null, NOW)).toMatchObject({
-      state: 'SIN_DATO',
-      cause: 'PROBE_UNAVAILABLE',
+  it('U15: fresco en draining → DEGRADADA / DRAINING', () => {
+    expect(worker(record({ status: 'draining' }))).toMatchObject({
+      state: 'DEGRADADA',
+      cause: 'DRAINING',
+      evidence: { reportedStatus: 'draining' },
     });
   });
 
-  it('la edad de la sonda sale del reloj de la API', () => {
-    const v = evaluateProbeInstance(db, probe({}), NOW);
-    expect(v.ageSeconds).toBe(4);
-    expect(v.thresholdSeconds).toBe(3);
+  it('U16: fresco en starting → no VIVA', () => {
+    expect(worker(record({ status: 'starting' })).state).not.toBe('VIVA');
   });
-});
 
-describe('overall', () => {
-  const inst = (
-    required: boolean,
-    state: InstanceLivenessView['state'],
-  ): Pick<InstanceLivenessView, 'required' | 'state'> => ({ required, state });
-
-  it('U21: todas VIVA => VIVA', () => {
-    expect(overallOf([inst(true, 'VIVA'), inst(true, 'VIVA')])).toBe('VIVA');
-  });
-  it('una DEGRADADA requerida => DEGRADADA', () => {
-    expect(overallOf([inst(true, 'VIVA'), inst(true, 'DEGRADADA')])).toBe(
-      'DEGRADADA',
+  it('U17: almacén caído → todos los workers SIN_DATO / STORE_UNAVAILABLE, ninguno VIVA ni CAIDA', () => {
+    const results = WORKER_INSTANCES.map((definition) =>
+      evaluateInstance(definition, context({ heartbeats: null })),
     );
+    expect(results).toHaveLength(25);
+    for (const result of results) {
+      expect(result).toMatchObject({
+        state: 'SIN_DATO',
+        cause: 'STORE_UNAVAILABLE',
+      });
+    }
   });
-  it('una CAIDA requerida => CAIDA (aunque haya DEGRADADA y SIN_DATO)', () => {
-    expect(
-      overallOf([
-        inst(true, 'CAIDA'),
-        inst(true, 'DEGRADADA'),
-        inst(true, 'SIN_DATO'),
-      ]),
-    ).toBe('CAIDA');
-  });
-  it('CAIDA en una no requerida no cuenta', () => {
-    expect(overallOf([inst(true, 'VIVA'), inst(false, 'CAIDA')])).toBe('VIVA');
-  });
-  it('VIVA + SIN_DATO requerido no puede ser VIVA', () => {
-    expect(overallOf([inst(true, 'VIVA'), inst(true, 'SIN_DATO')])).toBe(
-      'DEGRADADA',
-    );
-  });
-  it('todas SIN_DATO => SIN_DATO', () => {
-    expect(overallOf([inst(true, 'SIN_DATO'), inst(true, 'SIN_DATO')])).toBe(
-      'SIN_DATO',
-    );
-  });
-  it('lista vacía o sin requeridas => SIN_DATO, nunca VIVA', () => {
-    expect(overallOf([])).toBe('SIN_DATO');
-    expect(overallOf([inst(false, 'VIVA')])).toBe('SIN_DATO');
-  });
-});
 
-describe('buildLivenessReport', () => {
-  const registry: InstanceDefinition[] = [
-    { id: 'api', label: 'API', type: 'api', source: 'self', required: true },
-    {
-      id: 'redis',
-      label: 'Redis',
-      type: 'service',
-      source: 'probe',
-      required: true,
-    },
-    worker,
-    { ...worker, id: 'worker-files', required: false },
-  ];
-
-  it('U23: forma del contrato completa y con valores del catálogo', () => {
-    const report = buildLivenessReport({
-      registry,
-      heartbeats: store(NOW - 2_000),
-      probes: new Map([
-        ['redis', { status: 'up', latencyMs: 3, observedAtMs: NOW }],
-      ]),
-      notMeasured: [{ id: 'minio', reason: 'sin sonda' }],
-      nowMs: NOW,
-    });
-    expect(Object.keys(report).sort()).toEqual(
+  it('el estado de un worker con dato nunca expone pid ni mensajes crudos', () => {
+    const result = aged(5_000);
+    expect(JSON.stringify(result)).not.toContain('"pid"');
+    expect(Object.keys(result).sort()).toEqual(
       [
-        'evaluatedAt',
-        'instances',
-        'notMeasured',
-        'overall',
-        'thresholds',
+        'ageSeconds',
+        'cause',
+        'causeDetail',
+        'evidence',
+        'id',
+        'label',
+        'lastHeartbeatAt',
+        'required',
+        'state',
+        'thresholdSeconds',
+        'type',
       ].sort(),
     );
-    expect(report.evaluatedAt).toBe(new Date(NOW).toISOString());
-    expect(report.thresholds).toEqual({
-      heartbeatIntervalSeconds: 15,
-      liveSeconds: 30,
-      degradedSeconds: 60,
-    });
-    expect(report.thresholds).toBe(LIVENESS_THRESHOLDS);
-    for (const i of report.instances) {
-      expect(Object.keys(i).sort()).toEqual(
-        [
-          'ageSeconds',
-          'cause',
-          'evidence',
-          'id',
-          'lastHeartbeatAt',
-          'required',
-          'state',
-          'thresholdSeconds',
-          'type',
-        ].sort(),
-      );
-      expect(['VIVA', 'DEGRADADA', 'CAIDA', 'SIN_DATO']).toContain(i.state);
-      expect(['api', 'worker', 'database', 'service']).toContain(i.type);
-      expect(typeof i.evidence).toBe('string');
-      expect(i.evidence.length).toBeGreaterThan(0);
-    }
-    // worker-files nunca visto y no requerido: no baja `overall`.
-    expect(report.instances.find((i) => i.id === 'worker-files')?.state).toBe(
-      'SIN_DATO',
+  });
+});
+
+describe('evaluateInstance · dependencias y API', () => {
+  const probe = (id: string, outcome: EvaluationContext['probes'][string]) =>
+    evaluateInstance(infra(id), context({ probes: { [id]: outcome } }));
+
+  it('U18: sonda up en 120 ms → VIVA; 1 000 ms → VIVA; 1 001 ms → DEGRADADA / PROBE_SLOW', () => {
+    expect(probe('postgresql', { status: 'up', latencyMs: 120 })).toMatchObject(
+      {
+        state: 'VIVA',
+        cause: 'OK',
+        thresholdSeconds: 3,
+        evidence: { source: 'probe', latencyMs: 120 },
+      },
     );
-    expect(report.overall).toBe('VIVA');
-    expect(report.notMeasured).toEqual([{ id: 'minio', reason: 'sin sonda' }]);
-  });
-
-  it('Redis caído: el almacén no disponible deja a los workers SIN_DATO y overall DEGRADADA o peor, nunca VIVA', () => {
-    const report = buildLivenessReport({
-      registry,
-      heartbeats: { available: false, records: new Map() },
-      probes: new Map([
-        ['redis', { status: 'down', latencyMs: 3000, observedAtMs: NOW }],
-      ]),
-      notMeasured: [],
-      nowMs: NOW,
-    });
+    expect(probe('postgresql', { status: 'up', latencyMs: 1_000 }).state).toBe(
+      'VIVA',
+    );
     expect(
-      report.instances.find((i) => i.id === 'worker-messaging')?.state,
-    ).toBe('SIN_DATO');
-    expect(report.instances.find((i) => i.id === 'redis')?.state).toBe('CAIDA');
-    expect(report.overall).toBe('CAIDA');
+      probe('postgresql', { status: 'up', latencyMs: 1_001 }),
+    ).toMatchObject({ state: 'DEGRADADA', cause: 'PROBE_SLOW' });
   });
 
-  it('la API que responde es VIVA tautológica y lo dice', () => {
-    const v = evaluateSelfInstance(registry[0], NOW);
-    expect(v).toMatchObject({ state: 'VIVA', cause: null, ageSeconds: 0 });
-    expect(v.evidence).toMatch(/respondió esta consulta/);
-  });
-
-  it('H12: la evidencia nunca incluye mensajes crudos de error ni pid', () => {
-    const report = buildLivenessReport({
-      registry,
-      heartbeats: store(NOW - 90_000, {
-        pid: 4242,
-        error: 'ECONNREFUSED 10.0.0.5:6379',
+  it('U19: sonda down por timeout → CAIDA / PROBE_TIMEOUT; por otro error → CAIDA / PROBE_FAILED, sin el mensaje', () => {
+    expect(
+      probe('redis', {
+        status: 'down',
+        latencyMs: 3_001,
+        errorType: 'ProbeTimeoutError',
       }),
-      probes: new Map(),
-      notMeasured: [],
-      nowMs: NOW,
+    ).toMatchObject({ state: 'CAIDA', cause: 'PROBE_TIMEOUT' });
+    const failed = probe('mongodb', {
+      status: 'down',
+      latencyMs: 12,
+      errorType: 'MongoServerSelectionError',
     });
-    const json = JSON.stringify(report);
-    expect(json).not.toMatch(/ECONNREFUSED|10\.0\.0\.5|4242/);
+    expect(failed).toMatchObject({ state: 'CAIDA', cause: 'PROBE_FAILED' });
+    expect(JSON.stringify(failed)).not.toContain('MongoServerSelectionError');
+  });
+
+  it.each(['minio', 'clamav', 'mock-provider-server'])(
+    'U20: %s sin sonda → SIN_DATO / NOT_PROBED y required:false',
+    (id) => {
+      expect(evaluateInstance(infra(id), context())).toMatchObject({
+        required: false,
+        state: 'SIN_DATO',
+        cause: 'NOT_PROBED',
+        evidence: { source: 'none' },
+      });
+    },
+  );
+
+  it('la API que responde es VIVA / OK con evidencia propia y su arranque', () => {
+    expect(evaluateInstance(infra('api'), context())).toMatchObject({
+      state: 'VIVA',
+      cause: 'OK',
+      evidence: {
+        source: 'self',
+        reportedStatus: 'running',
+        startedAt: '2026-10-30T11:00:00.000Z',
+      },
+    });
+  });
+});
+
+describe('overallOf y summarize', () => {
+  const r = (state: InstanceEvaluation['state'], required = true) => ({
+    state,
+    required,
+  });
+
+  it('U21: todas VIVA → OK; una DEGRADADA requerida → ATENCION; una CAIDA requerida → CRITICO', () => {
+    expect(overallOf([r('VIVA'), r('VIVA')])).toBe('OK');
+    expect(overallOf([r('VIVA'), r('DEGRADADA')])).toBe('ATENCION');
+    expect(overallOf([r('VIVA'), r('SIN_DATO')])).toBe('ATENCION');
+    expect(overallOf([r('VIVA'), r('DEGRADADA'), r('CAIDA')])).toBe('CRITICO');
+  });
+
+  it('U21: una CAIDA en required:false no sube a CRITICO', () => {
+    expect(overallOf([r('VIVA'), r('CAIDA', false)])).toBe('OK');
+  });
+
+  it('U21: lista vacía o sin nada evaluable nunca es OK', () => {
+    expect(overallOf([])).toBe('SIN_DATO');
+    expect(overallOf([r('SIN_DATO'), r('SIN_DATO')])).toBe('SIN_DATO');
+    expect(overallOf([r('VIVA', false)])).toBe('SIN_DATO');
+  });
+
+  it('cuenta cada estado y el total', () => {
+    expect(
+      summarize([
+        r('VIVA'),
+        r('VIVA'),
+        r('DEGRADADA'),
+        r('CAIDA'),
+        r('SIN_DATO'),
+      ]),
+    ).toEqual({ VIVA: 2, DEGRADADA: 1, CAIDA: 1, SIN_DATO: 1, total: 5 });
+  });
+});
+
+describe('U23: contrato de forma', () => {
+  it('toda instancia trae los 11 campos, state en 4 valores y cause en el catálogo', () => {
+    const heartbeats: Record<string, string> = {
+      'worker-messaging': record(),
+      'worker-billing': record({ receivedAt: NOW - 61_000 }),
+      'worker-consent': '{corrupto',
+    };
+    const probes = {
+      postgresql: { status: 'up' as const, latencyMs: 10 },
+      redis: {
+        status: 'down' as const,
+        latencyMs: 3_000,
+        errorType: 'ProbeTimeoutError',
+      },
+    };
+    const all = [...INFRASTRUCTURE_INSTANCES, ...WORKER_INSTANCES].map((d) =>
+      evaluateInstance(d, context({ heartbeats, probes })),
+    );
+    expect(all).toHaveLength(33);
+    for (const instance of all) {
+      expect(['VIVA', 'DEGRADADA', 'CAIDA', 'SIN_DATO']).toContain(
+        instance.state,
+      );
+      expect(LIVENESS_CAUSES).toContain(instance.cause);
+      expect(['heartbeat', 'probe', 'self', 'none']).toContain(
+        instance.evidence.source,
+      );
+      expect(typeof instance.causeDetail).toBe('string');
+    }
+  });
+});
+
+describe('parseHeartbeatRecord', () => {
+  it('conserva sólo lo que decide: receivedAt, status, startedAt y las dos sondas', () => {
+    expect(parseHeartbeatRecord(record())).toEqual({
+      receivedAt: NOW - 5_000,
+      status: 'running',
+      startedAt: '2026-10-30T12:00:00.000Z',
+      liveness: { healthy: true },
+      readiness: { healthy: true },
+    });
   });
 });

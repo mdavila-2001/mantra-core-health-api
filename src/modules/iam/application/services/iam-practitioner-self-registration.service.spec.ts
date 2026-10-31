@@ -69,7 +69,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
-      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
       createPassword: fn(),
       // El alta administrativa reserva el login sin secreto: la contraseña la
       // fija el titular al consumir el token de activación.
@@ -142,6 +143,16 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const administrativeAreas = {
       assertIsAdministrativeArea: fn().mockResolvedValue(undefined),
     };
+    // Instituciones y aseguradoras elegidas en el alta (2026-10-28). Por
+    // defecto no pide nada: el caso interesante es que se llame con lo elegido,
+    // dentro de la transacción, y que el aviso salga después.
+    const workplaces = {
+      request: fn().mockResolvedValue({
+        affiliations: [],
+        insurerRequestIds: [],
+      }),
+      notify: fn().mockResolvedValue(undefined),
+    };
 
     // v4.2.67: la solicitud de admisión nace en la misma transacción del alta.
     const admissions = {
@@ -186,6 +197,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         fileUploadService as never,
         attachableFileService as never,
       ),
+      workplaces as never,
     );
     return {
       service,
@@ -216,6 +228,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       attachableFileService,
       ownSiteProvisioning,
       administrativeAreas,
+      workplaces,
     };
   }
 
@@ -1505,7 +1518,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
   it('rejects an email that already has a live credential', async () => {
     const d = build();
-    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
       id: 'cred-existing',
     });
 
@@ -1513,6 +1526,21 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ConflictException,
     );
     expect(d.usersRepo.create).not.toHaveBeenCalled();
+  });
+
+  // #1000: cerrojo por correo antes de comprobarlo, sin distinguir mayúsculas.
+  it('locks the email before checking it case-insensitively', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
+    expect(lock).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(check).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
   });
 
   it('registers the practitioner even if the verification email cannot be queued', async () => {
@@ -1747,6 +1775,103 @@ describe('IamPractitionerSelfRegistrationService', () => {
    * el alta lo llama con los datos correctos, en el orden correcto dentro
    * de la transacción, y que un fallo suyo tumba el alta entera.
    */
+  describe('instituciones y aseguradoras elegidas en el alta', () => {
+    const institutionSlugs = ['clinica-foianini', 'hospital-japones'];
+    const insurerCarrierIds = ['11111111-1111-4111-8111-111111111111'];
+
+    it('las pide dentro de la transacción, a nombre del perfil recién creado', async () => {
+      const d = build();
+      d.workplaces.request.mockResolvedValue({
+        affiliations: [
+          {
+            id: 'af-1',
+            practiceId: 'pr-1',
+            practiceSiteId: 'site-1',
+            statusConceptId: 'pend',
+          },
+          {
+            id: 'af-2',
+            practiceId: 'pr-2',
+            practiceSiteId: null,
+            statusConceptId: 'decl',
+          },
+        ],
+        insurerRequestIds: ['ir-1'],
+      });
+
+      const res = await d.service.registerPractitioner({
+        ...dto,
+        institutionSlugs,
+        insurerCarrierIds,
+      });
+
+      expect(d.workplaces.request).toHaveBeenCalledWith(d.tx, {
+        practitionerProfileId: res.practitionerProfileId,
+        institutionSlugs,
+        insurerCarrierIds,
+        actorUserId: 'user-1',
+      });
+      expect(res).toMatchObject({
+        affiliationIds: ['af-1', 'af-2'],
+        insurerRequestIds: ['ir-1'],
+      });
+    });
+
+    it('avisa a las organizaciones DESPUÉS de confirmar el alta', async () => {
+      const d = build();
+      const affiliations = [
+        {
+          id: 'af-1',
+          practiceId: 'pr-1',
+          practiceSiteId: 'site-1',
+          statusConceptId: 'pend',
+        },
+      ];
+      d.workplaces.request.mockResolvedValue({
+        affiliations,
+        insurerRequestIds: [],
+      });
+
+      await d.service.registerPractitioner({ ...dto, institutionSlugs });
+
+      expect(d.workplaces.notify).toHaveBeenCalledWith(
+        expect.any(String),
+        affiliations,
+      );
+      expect(d.workplaces.request.mock.invocationCallOrder[0]).toBeLessThan(
+        d.workplaces.notify.mock.invocationCallOrder[0],
+      );
+    });
+
+    it('sin elegir nada: pide listas vacías y la respuesta no inventa las claves', async () => {
+      const d = build();
+
+      const res = await d.service.registerPractitioner(dto);
+
+      expect(d.workplaces.request).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          institutionSlugs: [],
+          insurerCarrierIds: [],
+        }),
+      );
+      expect(res).not.toHaveProperty('affiliationIds');
+      expect(res).not.toHaveProperty('insurerRequestIds');
+    });
+
+    it('un slug o una aseguradora inválidos tumban el alta y no se avisa a nadie', async () => {
+      const d = build();
+      d.workplaces.request.mockRejectedValue(
+        new Error('institución no disponible'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({ ...dto, institutionSlugs }),
+      ).rejects.toThrow('institución no disponible');
+      expect(d.workplaces.notify).not.toHaveBeenCalled();
+    });
+  });
+
   describe('ownSite en el alta (P20)', () => {
     const ownSite = {
       name: 'Consultorio Rojas',

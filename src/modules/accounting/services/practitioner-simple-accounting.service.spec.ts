@@ -651,6 +651,24 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       expect(caja.accountClass).toBe('ASSET');
     });
 
+    it('el renombre comprueba el nombre bajo el cerrojo de la práctica (#995)', async () => {
+      const ctx = build();
+      const byCode = await seeded(ctx);
+      ctx.repo.lockAccountsOf.mockClear();
+      ctx.repo.listAccounts.mockClear();
+
+      await ctx.service.updateAccount(
+        byCode('5.8').id,
+        { name: 'Marketing' },
+        actor,
+      );
+
+      expect(ctx.repo.lockAccountsOf).toHaveBeenCalledWith(ctx.em, PRACTICE);
+      expect(
+        ctx.repo.lockAccountsOf.mock.invocationCallOrder[0],
+      ).toBeLessThan(ctx.repo.listAccounts.mock.invocationCallOrder[0]);
+    });
+
     it('sin accountClass en el cuerpo conserva la clase', async () => {
       const ctx = build();
       const byCode = await seeded(ctx);

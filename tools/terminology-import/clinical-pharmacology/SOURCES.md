@@ -4,12 +4,13 @@ Monografías por principio activo (ATC nivel 5) con texto **literal** de fuentes
 archivo dice de dónde sale cada dato, bajo qué licencia y qué queda afuera. El registro de pasadas
 (protocolo de saturación) está en `docs/seed-research/clinical-pharmacology.md`.
 
-> **Estado al 2026-10-24 19:10 UTC.**
+> **Estado al 2026-10-30.**
 >
-> - **Corridas:** nueve pasadas — openFDA + GSRS, RxNav, CIMA, EMA, eEML, DailyMed, CIMA exhaustiva,
->   LactMed y LiverTox.
-> - **Resultado por vía:** 2 883 monografías y 78 972 secciones. 41 998 en castellano (CIMA); el
->   resto en inglés, idioma de origen, sin traducir.
+> - **Corridas:** diez pasadas — openFDA + GSRS, RxNav, CIMA, EMA, eEML, DailyMed, CIMA exhaustiva,
+>   LactMed, LiverTox e información de producto de la EMA en PDF (extracción verificada).
+> - **Resultado por vía:** 2 883 monografías y 81 075 secciones. 45 669 en castellano (CIMA y EMA
+>   PDF); el resto en inglés, idioma de origen, sin traducir. 1 754 punteros sin texto (DailyMed, eEML,
+>   EMA PDF).
 > - **Licencias:** todas las de las fuentes usadas se leyeron en su página, con fecha.
 > - **Decisiones del propietario (2026-10-26, issue 824):** posología solo `professional`; `data/` solo con
 >   el corpus por principio activo; de la eEML solo referencias; las fichas de CIMA sin fecha se cargan
@@ -54,6 +55,7 @@ miembro de ningún value set del glosario y no debe agregarse a uno sin filtrar 
 | **DailyMed (NLM)** — `https://dailymed.nlm.nih.gov/dailymed/services/v2/` | UNII de los principios activos (ingredientes ACTI*) del SPL, para enlazar por código las etiquetas que openFDA trae **sin** bloque `openfda`; puntero citable a las que sólo están en DailyMed | API pública, sin cuenta | Políticas de la NLM (`https://www.nlm.nih.gov/web_policies.html`, leída el 2026-10-24): obras del Gobierno de EE. UU. de libre uso; **el contenido aportado por terceros puede tener copyright**. Por eso, de las etiquetas que sólo están en DailyMed **no se redistribuye el texto**: sólo identidad, versión y URL (`externalDocuments`) | **Usada (pasada 6).** 17 729 identidades SPL; se guarda sólo la identidad, no el XML. 275 punteros sin texto |
 | **LactMed (NICHD/NLM)** — paquete `lactmed_NBK501922.tar.gz` de `https://ftp.ncbi.nlm.nih.gov/pub/litarch/` (lo indica la propia LactMed) + E-utilities (`db=books`) para el accession NBK de cada capítulo | Secciones de lactancia («Summary of Use during Lactation», «Drug Levels», «Effects in Breastfed Infants», «Effects on Lactation and Breastmilk», «Alternate Drugs to Consider»), enlazadas por los UNII del registro | Descarga masiva y API pública, sin cuenta. La web de Bookshelf exige reCAPTCHA: no se usa | Políticas de NCBI (leídas el 2026-10-24): «Information that is created by or for the US government on this site is within the public domain.» Términos de descarga de la NLM (leídos el 2026-10-24): atribuir con «Courtesy of the U.S. National Library of Medicine», no sugerir respaldo, avisar si lo redistribuido no es la versión vigente. **Atribución y aviso de LactMed en cada fila** | **Usada (pasada 8).** 1 976 registros, sha256 en `fetch.meta.json` |
 | **LiverTox (NIDDK/NLM)** — paquete `livertox_NBK547852.tar.gz` del mismo archivo + E-utilities | Hepatotoxicidad («Hepatotoxicity», «Mechanism of Injury», «Outcome and Management»), enlazada por CAS → UNII (CAS PRIMARY del GSRS) | Ídem | El propio libro (leído el 2026-10-24): «LiverTox is produced by the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK) and is copyright free. It is requested that use of LiverTox data in publications be given appropriate acknowledgment.» Más los términos de la NLM. **Atribución y aviso en cada fila** | **Usada (pasada 9).** 1 387 registros, sha256 en `fetch.meta.json` |
+| **EMA — información de producto (PDF del EPAR, castellano)** — `https://www.ema.europa.eu/es/documents/product-information/<slug>-epar-product-information_es.pdf` (enlace de la página del EPAR) | Ficha técnica (anexo I) por sección QRD, **en castellano**, de los medicamentos centralizados con ATC 5 cuyo nº EU no está en CIMA; los demás ya entran por CIMA (mismo documento por nº de registro). Sólo se publican las secciones de extracción verificada (`py/ema_pi_extract.py`): sin glifos sin resolver, sin tablas, sin trazos dibujados dentro del texto, sin guiones de fin de línea ambiguos y con consenso de `pdftotext`; el resto queda como puntero | PDF público, sin cuenta; `pdfminer.six` 20260107 + tabla «Adobe Symbol Encoding to Unicode» (unicode.org, sha256 fijado) | Aviso legal de la EMA, igual que el informe «Medicines output» | **Usada (pasada 10):** 3 671 secciones de 352 medicamentos y 491 punteros. 1 397 PDF con sha256 en `fetch.meta.json`. Fidelidad medida contra CIMA: 646 diferencias chicas revisadas, 0 errores del extractor (ver el registro de pasadas) |
 | **LINAME 2022-2024 (Bolivia)** — `tools/bolivia-datasets/data/liname-2022-2024.json` | Universo de ATC 5 esenciales de Bolivia; hueco «esencial sin monografía» | Ya en el repo | «Documento público del Estado Plurinacional de Bolivia; se cita la fuente» | Usada. Sin texto clínico |
 | **vademecum (dataset de la app)** — `src/common/seed/data/vademecum/vademecum.dataset.json` | ATC 5 de la receta; destino de los `concept_maps` | Ya en el repo | — | Usada (sólo códigos e ids) |
 
@@ -65,9 +67,8 @@ miembro de ningún value set del glosario y no debe agregarse a uno sin filtrar 
 | MedDRA | Licencia por suscripción del MSSO. La reacción adversa queda literal, con su tabla y frecuencia. |
 | WHO ATC/DDD Index (WHOCC) | Sin distribución comercial sin permiso del WHOCC. Los nombres vienen de la AEMPS; los de la OMS que trae el GSRS **no se copian**; **las DDD no se cargan**. |
 | WHO Model Formulary (2008) | © OMS, sin licencia abierta verificada. |
-| EMA EPAR / SmPC en PDF | La ficha completa está en PDF (también en castellano, con fecha). No hay parser de PDF validado contra archivos reales, y la extracción literal (cortes de palabra, encabezados) no está probada. De la EMA se usa el informe tabular (indicación). |
 | NCI Thesaurus (definiciones con `FDA_UNII_Code`) | Una definición del agente no es una sección de monografía; forzarla en una clave cambiaría su sentido. |
-| Health Canada (monografías) | En PDF; licencia de reproducción no verificada. |
+| Health Canada (monografías) | En PDF; la licencia de reproducción no se verificó. |
 | MedlinePlus, información de medicamentos | El texto es de AHFS (ASHP) con copyright: no se redistribuye. |
 | DDInter | CC BY-NC-SA 4.0 (no comercial). Las interacciones quedan como texto literal de 4.5 / `drug_interactions`. |
 | ONC High-Priority DDI list | Sin archivo oficial legible por máquina ni licencia explícita. |

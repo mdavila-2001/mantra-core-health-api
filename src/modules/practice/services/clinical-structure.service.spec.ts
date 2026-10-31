@@ -8,8 +8,9 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ClinicalStructureService } from './clinical-structure.service';
-import { PRAC } from '../practice.concepts';
 import { ForbiddenException } from '@nestjs/common';
+import { PRAC } from '../practice.concepts';
+import { AUD } from '../../audit/audit.concepts';
 import { UniqueConstraintViolationException } from '@mikro-orm/postgresql';
 import {
   ConflictException,
@@ -20,6 +21,8 @@ import {
 import { PracticeErrorReason } from '../practice.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const TENANT = 'tenant-a';
+const OTHER_TENANT = 'tenant-b';
 const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
@@ -68,7 +71,9 @@ function practiceLookupMock(): any {
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const practicesRepo = { findById: practiceLookupMock() };
+  const practicesRepo = {
+    findById: mockFn().mockResolvedValue({ id: 'p1', tenantId: TENANT }),
+  };
   const sitesRepo = { findById: mockFn() };
   const unitsRepo = {
     findById: mockFn(),
@@ -94,17 +99,34 @@ function build() {
   const catalogRepo = { findById: mockFn() };
   const procedures = { isProcedure: mockFn().mockResolvedValue(true) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // F1: la pertenencia la resuelve `StructureAccessService` con el
+  // `tenant_id` de la sede; el doble reproduce su contrato (404 si la sede
+  // no es del tenant activo) sobre `sitesRepo`.
+  const access = {
+    requireSite: mockFn(async (_tx: any, siteId: string, tenantId: string) => {
+      const site = await sitesRepo.findById(_tx, siteId);
+      if (!site || site.tenantId !== tenantId) {
+        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      }
+      return site;
+    }),
+    assertCanWriteSite: mockFn().mockResolvedValue(undefined),
+  };
+  const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
+  const outbox = { publishDomainEvent: mockFn().mockResolvedValue({}) };
   const service = new ClinicalStructureService(
     em as any,
     practicesRepo as any,
     sitesRepo as any,
-    unitsRepo,
-    spacesRepo,
+    unitsRepo as any,
     servicesRepo as any,
     administration as any,
     catalogRepo as any,
     procedures as any,
     logger as any,
+    access as any,
+    historyRepo as any,
+    outbox as any,
   );
   return {
     service: inTenant(service, TENANT_A),
@@ -113,15 +135,22 @@ function build() {
     practicesRepo,
     sitesRepo,
     unitsRepo,
-    spacesRepo,
     servicesRepo,
+    access,
+    historyRepo,
+    outbox,
     administration,
     catalogRepo,
     procedures,
   };
 }
 
-const activeSite = { id: 's1', statusConceptId: PRAC.SITE_ACTIVE };
+const activeSite = {
+  id: 's1',
+  practiceId: 'p1',
+  tenantId: TENANT,
+  statusConceptId: PRAC.SITE_ACTIVE,
+};
 
 describe('ClinicalStructureService', () => {
   describe('createClinicalUnit (UC-14-04)', () => {
@@ -133,6 +162,7 @@ describe('ClinicalStructureService', () => {
           's1',
           { code: 'U-1', name: 'Unit' } as any,
           actor,
+          TENANT,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -149,6 +179,7 @@ describe('ClinicalStructureService', () => {
           's1',
           { code: 'U-1', name: 'Unit', parentUnitId: 'u0' } as any,
           actor,
+          TENANT,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -159,6 +190,7 @@ describe('ClinicalStructureService', () => {
       const created = {
         id: 'u1',
         practiceSiteId: 's1',
+        tenantId: TENANT,
         code: 'U-1',
         statusConceptId: PRAC.UNIT_ACTIVE,
         createdAt: new Date(),
@@ -168,46 +200,110 @@ describe('ClinicalStructureService', () => {
         's1',
         { code: 'U-1', name: 'Unit' },
         actor,
+        TENANT,
       );
       expect(res.status).toBe(PRAC.UNIT_ACTIVE);
     });
   });
 
-  describe('createCareSpace (UC-14-05)', () => {
-    it('rejects when the site is not active', async () => {
-      const d = build();
-      d.sitesRepo.findById.mockResolvedValue({
-        id: 's1',
-        statusConceptId: 'other',
-      });
-      await expect(
-        d.service.createCareSpace(
-          's1',
-          { code: 'C-1', name: 'Room' } as any,
-          actor,
-        ),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
-    });
+  describe('F0 · aislamiento por tenant y regla de organización', () => {
+    const cases = [
+      {
+        name: 'createClinicalUnit',
+        run: (d: ReturnType<typeof build>, tenantId: string) =>
+          d.service.createClinicalUnit(
+            's1',
+            { code: 'U-1', name: 'Unit' } as any,
+            actor,
+            tenantId,
+          ),
+        repo: (d: ReturnType<typeof build>) => d.unitsRepo,
+        history: 'clinical_units',
+        created: {
+          id: 'u1',
+          practiceSiteId: 's1',
+          tenantId: TENANT,
+          code: 'U-1',
+          statusConceptId: PRAC.UNIT_ACTIVE,
+          createdAt: new Date(),
+        },
+      },
+    ];
 
-    it('creates an available space', async () => {
-      const d = build();
-      d.sitesRepo.findById.mockResolvedValue(activeSite);
-      const created = {
-        id: 'c1',
-        practiceSiteId: 's1',
-        code: 'C-1',
-        statusConceptId: PRAC.SPACE_ACTIVE,
-        operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
-        createdAt: new Date(),
-      };
-      d.spacesRepo.create.mockReturnValue(created);
-      const res = await d.service.createCareSpace(
-        's1',
-        { code: 'C-1', name: 'Room' },
-        actor,
-      );
-      expect(res.operationalStatus).toBe(PRAC.SPACE_OP_AVAILABLE);
-    });
+    for (const c of cases) {
+      describe(c.name, () => {
+        it('sede de otro tenant: 404, sin autorizar ni crear', async () => {
+          const d = build();
+          d.sitesRepo.findById.mockResolvedValue({
+            ...activeSite,
+            tenantId: OTHER_TENANT,
+          });
+          await expect(c.run(d, TENANT)).rejects.toBeInstanceOf(
+            ResourceNotFoundException,
+          );
+          expect(d.access.assertCanWriteSite).not.toHaveBeenCalled();
+          expect(c.repo(d).create).not.toHaveBeenCalled();
+        });
+
+        it('sede inexistente: 404 (fail-closed)', async () => {
+          const d = build();
+          d.sitesRepo.findById.mockResolvedValue(null);
+          await expect(c.run(d, TENANT)).rejects.toBeInstanceOf(
+            ResourceNotFoundException,
+          );
+          expect(c.repo(d).create).not.toHaveBeenCalled();
+        });
+
+        it('sin administrar la org ni la sucursal: 403 y no crea', async () => {
+          const d = build();
+          d.sitesRepo.findById.mockResolvedValue(activeSite);
+          d.access.assertCanWriteSite.mockRejectedValue(
+            new ForbiddenException('no'),
+          );
+          await expect(c.run(d, TENANT)).rejects.toBeInstanceOf(
+            ForbiddenException,
+          );
+          expect(c.repo(d).create).not.toHaveBeenCalled();
+          expect(d.historyRepo.append).not.toHaveBeenCalled();
+          expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+        });
+
+        it('admin del tenant: crea, autoriza contra ese tenant y versiona', async () => {
+          const d = build();
+          d.sitesRepo.findById.mockResolvedValue(activeSite);
+          c.repo(d).create.mockReturnValue(c.created);
+          await c.run(d, TENANT);
+          expect(d.access.assertCanWriteSite).toHaveBeenCalledWith(
+            d.tx,
+            activeSite,
+            actor,
+          );
+          expect(c.repo(d).create).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ tenantId: TENANT }),
+          );
+          expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({
+              eventType: 'practice.clinical_unit.created',
+              tenantId: TENANT,
+              aggregateId: c.created.id,
+            }),
+          );
+          expect(d.historyRepo.append).toHaveBeenCalledWith(
+            d.tx,
+            c.history,
+            c.created.id,
+            expect.objectContaining({
+              operationConceptId: AUD.OPERATION_INSERT,
+              changedByUserId: actor.id,
+              tenantId: TENANT,
+              dataSnapshot: expect.objectContaining({ id: c.created.id }),
+            }),
+          );
+        });
+      });
+    }
   });
 
   describe('publishHealthcareService (UC-14-06, A-6, A-13)', () => {

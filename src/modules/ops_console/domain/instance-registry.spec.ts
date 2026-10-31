@@ -1,116 +1,96 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from '@jest/globals';
 import {
-  applyRequiredWorkers,
-  findInstance,
-  INSTANCE_REGISTRY,
-  OPTIONAL_WORKER_DOMAINS,
-  WORKER_DOMAINS,
+  INFRASTRUCTURE_INSTANCES,
+  KNOWN_WORKER_IDS,
+  NOT_MEASURED,
+  OPTIONAL_WORKERS,
+  WORKER_INSTANCES,
+  WORKER_INSTANCE_PREFIX,
+  buildInstanceRegistry,
 } from './instance-registry';
-import {
-  loadInstanceLivenessEnv,
-  resolveRegistry,
-} from './instance-liveness.env';
 
-// Jest corre desde la raíz del repo (`import.meta`/`__dirname` no existen aquí).
-const SRC = join(process.cwd(), 'src');
-const COMPOSE = join(process.cwd(), 'docker-compose.yml');
+const ROOT = process.cwd();
 
-describe('registro de instancias esperadas', () => {
-  it('U24a: los workers declarados son exactamente los src/worker-*.ts', () => {
-    const onDisk = readdirSync(SRC)
-      .filter((f) => /^worker-.+\.ts$/.test(f))
-      .map((f) => f.replace(/\.ts$/, ''))
-      .sort();
-    const declared = INSTANCE_REGISTRY.filter((i) => i.type === 'worker')
-      .map((i) => i.id)
-      .sort();
-    expect(declared).toEqual(onDisk);
-    expect(declared).toHaveLength(25);
+/** `src/worker-<dominio>.ts` → `worker-<dominio>`. */
+function workerIdsOnDisk(): string[] {
+  return readdirSync(join(ROOT, 'src'))
+    .filter((name) => /^worker-.+\.ts$/.test(name))
+    .map((name) => name.replace(/\.ts$/, ''))
+    .sort();
+}
+
+/** Servicios `worker-*` declarados en el compose de desarrollo. */
+function workerServicesInCompose(): string[] {
+  const compose = readFileSync(join(ROOT, 'docker-compose.yml'), 'utf8');
+  return [...compose.matchAll(/^ {2}(worker-[a-z0-9_-]+):\s*$/gm)]
+    .map((match) => match[1])
+    .sort();
+}
+
+describe('instance-registry', () => {
+  it('U24: los workers del registro son exactamente los entrypoints src/worker-*.ts', () => {
+    const registry = WORKER_INSTANCES.map((w) => w.id).sort();
+    expect(registry).toEqual(workerIdsOnDisk());
+    expect(registry).toHaveLength(25);
   });
 
-  it('U24b: los workers declarados son exactamente los servicios worker-* de docker-compose.yml', () => {
-    const compose = readFileSync(COMPOSE, 'utf-8');
-    const services = [...compose.matchAll(/^ {2}(worker-[a-z_-]+):\s*$/gm)]
-      .map((m) => m[1])
-      .sort();
-    const declared = INSTANCE_REGISTRY.filter((i) => i.type === 'worker')
-      .map((i) => i.id)
-      .sort();
-    expect(declared).toEqual(services);
+  it('U24: y los servicios worker-* de docker-compose.yml', () => {
+    expect(WORKER_INSTANCES.map((w) => w.id).sort()).toEqual(
+      workerServicesInCompose(),
+    );
   });
 
-  it('ids únicos y sin worker duplicado', () => {
-    const ids = INSTANCE_REGISTRY.map((i) => i.id);
-    expect(new Set(ids).size).toBe(ids.length);
-    expect(new Set(WORKER_DOMAINS).size).toBe(WORKER_DOMAINS.length);
-  });
-
-  it('por defecto: 24 workers requeridos y worker-files opt-in no requerido', () => {
-    const workers = INSTANCE_REGISTRY.filter((i) => i.type === 'worker');
-    expect(workers.filter((w) => w.required)).toHaveLength(24);
-    expect(findInstance('worker-files')?.required).toBe(false);
-    expect(OPTIONAL_WORKER_DOMAINS).toEqual(['files']);
-  });
-
-  it('sólo los workers viven de latidos; api es self; bases y servicios se sondean', () => {
-    expect(findInstance('api')?.source).toBe('self');
-    for (const id of ['postgresql', 'mongodb', 'redis', 'opensearch']) {
-      expect(findInstance(id)?.source).toBe('probe');
+  it('cada id de worker lleva el prefijo y un label no vacío; sólo worker-files es opcional', () => {
+    for (const worker of WORKER_INSTANCES) {
+      expect(worker.id.startsWith(WORKER_INSTANCE_PREFIX)).toBe(true);
+      expect(worker.type).toBe('WORKER');
+      expect(worker.label.trim().length).toBeGreaterThan(0);
+      expect(worker.required).toBe(!OPTIONAL_WORKERS.includes(worker.id));
     }
     expect(
-      INSTANCE_REGISTRY.filter((i) => i.source === 'heartbeat').every(
-        (i) => i.type === 'worker',
-      ),
-    ).toBe(true);
+      WORKER_INSTANCES.filter((w) => !w.required).map((w) => w.id),
+    ).toEqual(['worker-files']);
+    expect(KNOWN_WORKER_IDS.has('worker-messaging')).toBe(true);
+    expect(KNOWN_WORKER_IDS.has('api')).toBe(false);
   });
 
-  it('findInstance devuelve undefined para lo no declarado', () => {
-    expect(findInstance('worker-inventado')).toBeUndefined();
-  });
-});
-
-describe('OPS_LIVENESS_REQUIRED_WORKERS', () => {
-  it('sin configurar rige el registro por defecto', () => {
-    expect(loadInstanceLivenessEnv({})).toEqual({ requiredWorkers: null });
-    expect(
-      loadInstanceLivenessEnv({ OPS_LIVENESS_REQUIRED_WORKERS: '  ' }),
-    ).toEqual({
-      requiredWorkers: null,
-    });
-  });
-
-  it('Coolify: 4 workers requeridos; los demás pasan a no requeridos', () => {
-    const env = loadInstanceLivenessEnv({
-      OPS_LIVENESS_REQUIRED_WORKERS:
-        'messaging, scheduling,workflow,worker-read_models',
-    });
-    const registry = resolveRegistry(env);
-    const required = registry
-      .filter((i) => i.type === 'worker' && i.required)
-      .map((i) => i.id);
-    expect(required.sort()).toEqual([
-      'worker-messaging',
-      'worker-read_models',
-      'worker-scheduling',
-      'worker-workflow',
+  it('la infraestructura son los 8 ids fijos del contrato y los no sondados no son requeridos', () => {
+    expect(INFRASTRUCTURE_INSTANCES.map((i) => i.id)).toEqual([
+      'api',
+      'postgresql',
+      'mongodb',
+      'redis',
+      'opensearch',
+      'minio',
+      'clamav',
+      'mock-provider-server',
     ]);
-    // La infraestructura no se toca.
-    expect(registry.find((i) => i.id === 'redis')?.required).toBe(true);
+    expect(
+      INFRASTRUCTURE_INSTANCES.filter((i) => !i.required).map((i) => i.id),
+    ).toEqual(['minio', 'clamav', 'mock-provider-server']);
+    expect(NOT_MEASURED).toEqual([
+      'replicasOfApi',
+      'storageObjectStore',
+      'malwareScanner',
+      'providerEmulator',
+      'processInternals',
+    ]);
   });
 
-  it('U22: un worker desconocido aborta el arranque', () => {
-    expect(() =>
-      applyRequiredWorkers(INSTANCE_REGISTRY, ['messaging', 'inventado']),
-    ).toThrow(/worker-inventado/);
-  });
-
-  it('U22: un nombre con caracteres inválidos aborta el arranque', () => {
-    expect(() =>
-      loadInstanceLivenessEnv({
-        OPS_LIVENESS_REQUIRED_WORKERS: 'messaging;rm -rf',
-      }),
-    ).toThrow(/inválido/);
+  it('buildInstanceRegistry marca requeridos sólo los workers indicados y conserva 33 instancias sin repetir ids', () => {
+    const registry = buildInstanceRegistry(
+      new Set(['worker-messaging', 'worker-scheduling']),
+    );
+    expect(registry).toHaveLength(33);
+    expect(new Set(registry.map((i) => i.id)).size).toBe(33);
+    expect(registry[0].id).toBe('api');
+    expect(
+      registry
+        .filter((i) => i.type === 'WORKER' && i.required)
+        .map((i) => i.id)
+        .sort(),
+    ).toEqual(['worker-messaging', 'worker-scheduling']);
   });
 });

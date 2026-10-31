@@ -182,4 +182,26 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
       display: 'Administrative suspension',
     },
     REASON_EXPIRED: { code: 'DA_RSN_EXPIRED', display: 'Expired by sweep' },
+
+    // --- Enlace compartido de receta (shared_access_links / _uses) ---
+    // El estado del enlace usa `CONCEPTS.STATE_ACTIVE/REVOKED/EXPIRED`.
+    // Tipo de recurso (resource_type_concept_id): la receta de una consulta o
+    // un fármaco suelto.
+    SHARE_RESOURCE_PRESCRIPTION_ENCOUNTER: {
+      code: 'DA_SHARE_RES_PRESCRIPTION_ENCOUNTER',
+      display: 'Prescription of an encounter',
+    },
+    SHARE_RESOURCE_MEDICATION_REQUEST: {
+      code: 'DA_SHARE_RES_MEDICATION_REQUEST',
+      display: 'Single medication request',
+    },
+    // Alcance (scope_concept_id): lo que deja hacer el enlace.
+    SHARE_SCOPE_PHARMACY_DISPENSE: {
+      code: 'DA_SHARE_SCOPE_PHARMACY_DISPENSE',
+      display: 'Pharmacy dispense',
+    },
+    // Acción y resultado de cada uso (action_concept_id / outcome_concept_id).
+    SHARE_ACTION_OPEN: { code: 'DA_SHARE_ACT_OPEN', display: 'Open' },
+    SHARE_OUTCOME_OPENED: { code: 'DA_SHARE_OUT_OPENED', display: 'Opened' },
+    SHARE_OUTCOME_DENIED: { code: 'DA_SHARE_OUT_DENIED', display: 'Denied' },
   });

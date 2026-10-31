@@ -1,176 +1,129 @@
 /**
- * Registro de instancias esperadas de la sonda de vida.
+ * Registro cerrado de las instancias cuya vida mide la sonda
+ * (`GET /admin/ops/instances/liveness`).
  *
- * Es una lista **declarada**, no descubierta: la API sólo afirma el estado de lo
- * que está aquí. Una instancia que nadie declaró no existe para la sonda, y un
- * latido que llega con un `instanceId` fuera de esta lista se rechaza.
- *
- * Fuentes (verificadas leyendo el repositorio, ver `instance-registry.spec.ts`,
- * que falla si derivan):
- *  - Workers: un `src/worker-<dominio>.ts` por entrypoint; el `instanceId` es
- *    `worker-<dominio>` (el mismo nombre que `bootstrapWorker` recibe).
- *  - `worker-files` está bajo el perfil opt-in `malware-scan` de
- *    `docker-compose.yml`: puede no existir sin que sea una falla.
- *  - `docker-compose.coolify.yml` sólo declara 4 workers (`messaging`,
- *    `scheduling`, `workflow`, `read_models`): en ese entorno hay que declarar
- *    `OPS_LIVENESS_REQUIRED_WORKERS` (ver `instance-liveness.env.ts`).
+ * Es una lista escrita a mano a propósito: la sonda tiene que poder decir
+ * «nunca vista» de un proceso que **debería** existir, y eso exige saber de
+ * antemano cuáles son. Un latido de una instancia que no está acá se rechaza
+ * (`422 INSTANCE_UNKNOWN`), así que nadie puede fabricar una instancia nueva
+ * desde fuera. La prueba `instance-registry.spec.ts` compara los workers con
+ * los entrypoints `src/worker-*.ts` para que la lista no derive del código.
  */
 
-export type InstanceType = 'api' | 'worker' | 'database' | 'service';
-
-/** De dónde sale la evidencia de vida de una instancia. */
-export type InstanceSource = 'self' | 'heartbeat' | 'probe';
+export type InstanceType = 'API' | 'WORKER' | 'DATABASE' | 'SERVICE';
 
 export interface InstanceDefinition {
+  /** `worker-<dominio>` exacto del entrypoint, o el nombre del servicio de infraestructura. */
   readonly id: string;
   readonly label: string;
   readonly type: InstanceType;
-  readonly source: InstanceSource;
-  /** Valor por defecto; `OPS_LIVENESS_REQUIRED_WORKERS` lo sobrescribe en workers. */
+  /**
+   * `true` si su ausencia o caída pesa en `overall`. `false` para lo opcional
+   * (`worker-files` corre bajo un perfil opt-in) y para lo que no se sonda.
+   */
   readonly required: boolean;
 }
 
-/** Dominios de `src/worker-<dominio>.ts` (25 entrypoints). */
-export const WORKER_DOMAINS = [
-  'audio-assets',
-  'automation',
-  'billing',
-  'community',
-  'consent',
-  'cross_store_consistency',
-  'data_catalog',
-  'delegated_access',
-  'files',
-  'health_context',
-  'identity_assurance',
-  'integrations',
-  'lakehouse',
-  'messaging',
-  'pharmacy_inventory',
-  'profiles',
-  'promotions',
-  'qa_lab',
-  'read_models',
-  'reporting',
-  'scheduling',
-  'time_series',
-  'tracking',
-  'vector_rag',
-  'workflow',
-] as const;
+/** Prefijo de los `instanceId` de worker: `worker-<dominio>`. */
+export const WORKER_INSTANCE_PREFIX = 'worker-';
 
-/** Workers que pueden no existir sin ser una falla (perfil opt-in del compose). */
-export const OPTIONAL_WORKER_DOMAINS: readonly string[] = ['files'];
+/** Workers opcionales por defecto: existen sólo bajo un perfil de Compose. */
+export const OPTIONAL_WORKERS: readonly string[] = ['worker-files'];
 
-export const workerInstanceId = (domain: string): string => `worker-${domain}`;
-
-const WORKERS: readonly InstanceDefinition[] = WORKER_DOMAINS.map((domain) => ({
-  id: workerInstanceId(domain),
-  label: `Worker ${domain}`,
-  type: 'worker' as const,
-  source: 'heartbeat' as const,
-  required: !OPTIONAL_WORKER_DOMAINS.includes(domain),
-}));
-
-const INFRASTRUCTURE: readonly InstanceDefinition[] = [
-  {
-    id: 'api',
-    label: 'API',
-    type: 'api',
-    source: 'self',
-    required: true,
-  },
-  {
-    id: 'postgresql',
-    label: 'PostgreSQL',
-    type: 'database',
-    source: 'probe',
-    required: true,
-  },
-  {
-    id: 'mongodb',
-    label: 'MongoDB',
-    type: 'database',
-    source: 'probe',
-    required: true,
-  },
-  {
-    id: 'redis',
-    label: 'Redis',
-    type: 'service',
-    source: 'probe',
-    required: true,
-  },
-  {
-    id: 'opensearch',
-    label: 'OpenSearch',
-    type: 'service',
-    source: 'probe',
-    required: true,
-  },
+/** Los 25 dominios con proceso worker propio (`src/worker-<dominio>.ts`). */
+const WORKER_DOMAINS: ReadonlyArray<readonly [string, string]> = [
+  ['audio-assets', 'Audio'],
+  ['automation', 'Automatización'],
+  ['billing', 'Facturación'],
+  ['community', 'Comunidad'],
+  ['consent', 'Consentimientos'],
+  ['cross_store_consistency', 'Consistencia entre almacenes'],
+  ['data_catalog', 'Catálogo de datos'],
+  ['delegated_access', 'Acceso delegado'],
+  ['files', 'Archivos'],
+  ['health_context', 'Contexto clínico'],
+  ['identity_assurance', 'Verificación de identidad'],
+  ['integrations', 'Integraciones'],
+  ['lakehouse', 'Lakehouse'],
+  ['messaging', 'Mensajería'],
+  ['pharmacy_inventory', 'Inventario de farmacia'],
+  ['profiles', 'Perfiles'],
+  ['promotions', 'Promociones'],
+  ['qa_lab', 'Laboratorio QA'],
+  ['read_models', 'Modelos de lectura'],
+  ['reporting', 'Reportería'],
+  ['scheduling', 'Agenda'],
+  ['time_series', 'Series de tiempo'],
+  ['tracking', 'Seguimiento'],
+  ['vector_rag', 'Búsqueda vectorial'],
+  ['workflow', 'Flujos de trabajo'],
 ];
 
-export const INSTANCE_REGISTRY: readonly InstanceDefinition[] = [
-  ...INFRASTRUCTURE,
-  ...WORKERS,
+export const WORKER_INSTANCES: readonly InstanceDefinition[] =
+  WORKER_DOMAINS.map(([domain, label]) => {
+    const id = `${WORKER_INSTANCE_PREFIX}${domain}`;
+    return {
+      id,
+      label,
+      type: 'WORKER' as const,
+      required: !OPTIONAL_WORKERS.includes(id),
+    };
+  });
+
+/** Dependencias que la API sonda en la propia petición (mismo código que `/readiness`). */
+export const PROBED_DEPENDENCIES: readonly string[] = [
+  'postgresql',
+  'mongodb',
+  'redis',
+  'opensearch',
 ];
 
-/** Lo que existe en el despliegue pero esta sonda NO mide. Se declara, no se rellena. */
-export const NOT_MEASURED: readonly { id: string; reason: string }[] = [
-  {
-    id: 'minio',
-    reason: 'Sin sonda en esta versión: no hay evidencia de vida.',
-  },
-  {
-    id: 'clamav',
-    reason: 'Sin sonda en esta versión: no hay evidencia de vida.',
-  },
+export const INFRASTRUCTURE_INSTANCES: readonly InstanceDefinition[] = [
+  { id: 'api', label: 'API', type: 'API', required: true },
+  { id: 'postgresql', label: 'PostgreSQL', type: 'DATABASE', required: true },
+  { id: 'mongodb', label: 'MongoDB', type: 'DATABASE', required: true },
+  { id: 'redis', label: 'Redis', type: 'SERVICE', required: true },
+  { id: 'opensearch', label: 'OpenSearch', type: 'SERVICE', required: true },
+  // Sin sonda en esta versión: se listan para que su «sin dato» sea visible,
+  // no para fingir que se miden.
+  { id: 'minio', label: 'MinIO', type: 'SERVICE', required: false },
+  { id: 'clamav', label: 'ClamAV', type: 'SERVICE', required: false },
   {
     id: 'mock-provider-server',
-    reason: 'Sin sonda en esta versión: no hay evidencia de vida.',
-  },
-  {
-    id: 'api-replicas',
-    reason:
-      'Sólo se evidencia la instancia de la API que respondió; no se detectan otras réplicas.',
+    label: 'Emulador de proveedores',
+    type: 'SERVICE',
+    required: false,
   },
 ];
 
-/** Definición de una instancia por id, o `undefined` si no está declarada. */
-export function findInstance(id: string): InstanceDefinition | undefined {
-  return INSTANCE_REGISTRY.find((instance) => instance.id === id);
-}
+/** Qué no mide esta versión de la sonda; viaja en `notMeasured`. */
+export const NOT_MEASURED: readonly string[] = [
+  'replicasOfApi',
+  'storageObjectStore',
+  'malwareScanner',
+  'providerEmulator',
+  'processInternals',
+];
+
+/** Ids de worker conocidos, para rechazar latidos de instancias inventadas. */
+export const KNOWN_WORKER_IDS: ReadonlySet<string> = new Set(
+  WORKER_INSTANCES.map((instance) => instance.id),
+);
 
 /**
- * Aplica `OPS_LIVENESS_REQUIRED_WORKERS` (lista de dominios o ids) sobre el
- * registro. `null` = sin configurar: rigen los valores por defecto.
- *
- * Un nombre que no corresponde a ningún worker declarado **aborta**: una lista
- * mal escrita dejaría workers fuera de `overall` sin que nadie lo note.
+ * Registro efectivo del entorno: los workers de `requiredWorkers` pesan en
+ * `overall`; el resto se lista con `required:false` (Coolify arranca 4 de los
+ * 25, y un worker que ese despliegue no corre no puede ser una alarma).
  */
-export function applyRequiredWorkers(
-  registry: readonly InstanceDefinition[],
-  requiredWorkers: readonly string[] | null,
-): InstanceDefinition[] {
-  if (requiredWorkers === null) return [...registry];
-  const wanted = new Set(
-    requiredWorkers.map((name) =>
-      name.startsWith('worker-') ? name : workerInstanceId(name),
-    ),
-  );
-  const known = new Set(
-    registry.filter((i) => i.type === 'worker').map((i) => i.id),
-  );
-  for (const id of wanted) {
-    if (!known.has(id)) {
-      throw new Error(
-        `OPS_LIVENESS_REQUIRED_WORKERS menciona "${id}", que no es un worker declarado`,
-      );
-    }
-  }
-  return registry.map((instance) =>
-    instance.type === 'worker'
-      ? { ...instance, required: wanted.has(instance.id) }
-      : instance,
-  );
+export function buildInstanceRegistry(
+  requiredWorkers: ReadonlySet<string>,
+): readonly InstanceDefinition[] {
+  return [
+    INFRASTRUCTURE_INSTANCES[0],
+    ...WORKER_INSTANCES.map((worker) => ({
+      ...worker,
+      required: requiredWorkers.has(worker.id),
+    })),
+    ...INFRASTRUCTURE_INSTANCES.slice(1),
+  ];
 }

@@ -58,9 +58,11 @@ import {
   type ChargeType,
 } from '../dto';
 import type { ProcedureCases } from '../entities';
+import { AuthzClinicalScopeService } from '../../authz/services/authz-clinical-scope.service';
 import { PERIOP } from '../procedures_perioperative.concepts';
 import {
   assertCaseInScope,
+  assertPatientInScope,
   assertProcedureOfCasePatient,
   loadCaseForUpdateInScope,
   periopCaseNotFound,
@@ -206,6 +208,7 @@ export class PeriopCasesService {
    * @param clinicalRead - Política de acceso al paciente (detalle del caso).
    * @param reacceptance - Invalidación de las aceptaciones del equipo.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalScope - Pertenencia del paciente al tenant (`authz`, #893).
    */
   constructor(
     private readonly em: EntityManager,
@@ -222,6 +225,8 @@ export class PeriopCasesService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly reacceptance: PeriopReacceptanceService,
     private readonly logger: PinoLogger,
+    // Regla de `authz` para el paciente del caso (#893).
+    private readonly clinicalScope: AuthzClinicalScopeService,
   ) {
     this.logger.setContext(PeriopCasesService.name);
   }
@@ -270,6 +275,15 @@ export class PeriopCasesService {
     const custodianTenantId = requireTenantId();
 
     return this.em.transactional(async (tx) => {
+      // El paciente también lo manda el cliente: sin vínculo con este tenant
+      // ni base clínica del actor responde como inexistente (#893).
+      await assertPatientInScope(
+        { clinicalScope: this.clinicalScope, clinicalRead: this.clinicalRead },
+        tx,
+        dto.patientProfileId,
+        custodianTenantId,
+        actor,
+      );
       // El procedimiento principal lo manda el cliente: se cruza con el paciente
       // del caso y el tenant antes de enlazarlo (404 uniforme si no es suyo).
       if (dto.primaryProcedureId) {
@@ -456,6 +470,16 @@ export class PeriopCasesService {
             ProceduresPerioperativeErrorReason.PATIENT_CHANGE_BLOCKED_BY_DEPENDENCIES,
           );
         }
+        await assertPatientInScope(
+          {
+            clinicalScope: this.clinicalScope,
+            clinicalRead: this.clinicalRead,
+          },
+          tx,
+          dto.patientProfileId,
+          surgicalCase.custodianTenantId,
+          actor,
+        );
         surgicalCase.patientProfileId = dto.patientProfileId;
         patientChanged = true;
         relevantChanges.push('patientProfileId');

@@ -202,6 +202,8 @@ function build() {
     tenantAdministration as any,
     orderChat as any,
     accountLinks as any,
+    // El alta del pedido no se ejercita acá: el guard de receta no se usa.
+    {} as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {

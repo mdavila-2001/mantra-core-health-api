@@ -42,8 +42,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -110,10 +110,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -147,7 +147,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `forms.field_assignments` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedForm → ClinicalFormsSeedService.seedField | `src/common/seed/clinical-forms-seed.service.ts:799` |
 | `forms.field_definition_sets` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedExtensionPolicy | `src/common/seed/clinical-forms-seed.service.ts:467` |
 | `forms.field_definition_sets` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedExtensionPolicy | `src/common/seed/clinical-forms-seed.service.ts:466` |
-| `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CredentialsRepository.createPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:280` |
+| `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CredentialsRepository.createPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:315` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount | `src/common/seed/provider-accounts-seed.service.ts:146` |
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:42` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
