@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { ServiceCatalogRepository } from '../../billing/repositories';
 import {
@@ -37,10 +38,13 @@ import {
 import { MedicalGroupsErrorReason } from '../medical_groups.error-reasons';
 import type {
   CreateMedicalGroupDto,
+  MedicalGroupMemberInputDto,
   MedicalGroupConditionOptionDto,
   MedicalGroupEligibleMemberDto,
   MedicalGroupDto,
   MedicalGroupPageDto,
+  UpdateMedicalGroupDto,
+  UpdateMedicalGroupMemberDto,
 } from '../dto';
 
 /** Ventana en la que el expediente admite notas del procedimiento (AC-21-18/19). */
@@ -168,23 +172,11 @@ export class MedicalGroupsService {
           );
         }
         seenPractitioners.add(member.practitionerProfileId);
-        const invited = await this.practitionerProfilesRepo.findById(
+        await this.assertInvitable(
           tx,
+          tenantPracticeIds,
           member.practitionerProfileId,
         );
-        if (invited === null) {
-          throw this.practitionerNotAvailable();
-        }
-        // Un invitado sólo entra si está vinculado a una práctica de la misma
-        // organización del grupo: invitar a un profesional de otro tenant le
-        // mostraría el paciente, el servicio y los términos del equipo.
-        const invitedPracticeIds =
-          await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
-            member.practitionerProfileId,
-          );
-        if (!invitedPracticeIds.some((id) => tenantPracticeIds.has(id))) {
-          throw this.practitionerNotAvailable();
-        }
       }
 
       // Términos y condiciones (AC-21-10/11/12/13): default del servicio +
@@ -665,7 +657,272 @@ export class MedicalGroupsService {
     });
   }
 
+  /* ==================== edición y baja ==================================== */
+
+  async update(
+    groupId: string,
+    dto: UpdateMedicalGroupDto,
+    actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.em.transactional(async (tx) => {
+      const { group, members, practitionerProfileId } =
+        await this.loadForCreatorEdit(tx, groupId, actor);
+      if (dto.locationText !== undefined) {
+        const location = dto.locationText.trim();
+        if (location === '') {
+          throw new PreconditionFailedException(
+            'El lugar de realización no puede quedar vacío',
+          );
+        }
+        group.locationText = location;
+      }
+      if (dto.notesText !== undefined) {
+        const notes = dto.notesText.trim();
+        group.notesText = notes === '' ? undefined : notes;
+      }
+      touch(group, actor.id);
+      await tx.flush();
+      return this.toDto(tx, group, members, practitionerProfileId);
+    });
+  }
+
+  async remove(groupId: string, actor: AuthenticatedUser): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const { group } = await this.loadForCreatorEdit(tx, groupId, actor);
+      await this.membersRepo.removeByGroup(tx, group.id);
+      this.groupsRepo.remove(tx, group);
+      await tx.flush();
+      this.logger.info(
+        { operation: 'medical-groups.remove', groupId },
+        'Medical group removed',
+      );
+    });
+  }
+
+  async addMember(
+    groupId: string,
+    dto: MedicalGroupMemberInputDto,
+    actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.em.transactional(async (tx) => {
+      const { group, members, practitionerProfileId } =
+        await this.loadForCreatorEdit(tx, groupId, actor);
+      if (
+        members.some(
+          (m) => m.practitionerProfileId === dto.practitionerProfileId,
+        )
+      ) {
+        throw new ConflictException(
+          'Un mismo profesional no puede repetirse (ni ser también el creador)',
+          { practitionerProfileId: dto.practitionerProfileId },
+        );
+      }
+      const tenantPracticeIds = new Set(
+        await this.practiceTenantLookup.findActivePracticeIdsForTenant(
+          group.tenantId,
+        ),
+      );
+      await this.assertInvitable(
+        tx,
+        tenantPracticeIds,
+        dto.practitionerProfileId,
+      );
+      this.membersRepo.create(tx, {
+        groupId,
+        practitionerProfileId: dto.practitionerProfileId,
+        roleTitle: dto.roleTitle,
+        agreedPaymentAmount: dto.agreedPaymentAmount,
+        agreedPaymentCurrencyConceptId: dto.agreedPaymentCurrencyConceptId,
+        additionalTermsText: dto.additionalTermsText,
+        isCreator: false,
+        invitationStatus: MEDICAL_GROUP_MEMBER_INVITATION_STATUS.PENDING,
+        actorUserId: actor.id,
+      });
+      await this.syncTeamStatus(tx, group, actor);
+      await tx.flush();
+      return this.toDto(
+        tx,
+        group,
+        await this.membersRepo.findByGroup(tx, groupId),
+        practitionerProfileId,
+      );
+    });
+  }
+
+  /**
+   * Cambiar el cargo, el pago o los términos de alguien es cambiar lo que esa
+   * persona aceptó: su invitación vuelve a quedar sin responder.
+   */
+  async updateMember(
+    groupId: string,
+    memberId: string,
+    dto: UpdateMedicalGroupMemberDto,
+    actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.em.transactional(async (tx) => {
+      const { group, members, practitionerProfileId } =
+        await this.loadForCreatorEdit(tx, groupId, actor);
+      const member = members.find((m) => m.id === memberId);
+      if (member === undefined) {
+        throw new ResourceNotFoundException('Integrante no encontrado', {
+          memberId,
+        });
+      }
+      if (member.isCreator) {
+        throw new PreconditionFailedException(
+          'El cargo de quien creó el grupo no se modifica',
+        );
+      }
+      if (dto.roleTitle !== undefined) member.roleTitle = dto.roleTitle.trim();
+      if (dto.agreedPaymentAmount !== undefined) {
+        member.agreedPaymentAmount = dto.agreedPaymentAmount;
+      }
+      if (dto.additionalTermsText !== undefined) {
+        const terms = dto.additionalTermsText.trim();
+        member.additionalTermsText = terms === '' ? undefined : terms;
+      }
+      member.invitationStatus = MEDICAL_GROUP_MEMBER_INVITATION_STATUS.PENDING;
+      member.respondedAt = undefined;
+      touch(member, actor.id);
+      await this.syncTeamStatus(tx, group, actor);
+      await tx.flush();
+      return this.toDto(
+        tx,
+        group,
+        await this.membersRepo.findByGroup(tx, groupId),
+        practitionerProfileId,
+      );
+    });
+  }
+
+  async removeMember(
+    groupId: string,
+    memberId: string,
+    actor: AuthenticatedUser,
+  ): Promise<MedicalGroupDto> {
+    return this.em.transactional(async (tx) => {
+      const { group, members, practitionerProfileId } =
+        await this.loadForCreatorEdit(tx, groupId, actor);
+      const member = members.find((m) => m.id === memberId);
+      if (member === undefined) {
+        throw new ResourceNotFoundException('Integrante no encontrado', {
+          memberId,
+        });
+      }
+      if (member.isCreator) {
+        throw new PreconditionFailedException(
+          'Quien creó el grupo no se puede quitar del equipo',
+        );
+      }
+      this.membersRepo.remove(tx, member);
+      await tx.flush();
+      await this.syncTeamStatus(tx, group, actor);
+      await tx.flush();
+      return this.toDto(
+        tx,
+        group,
+        await this.membersRepo.findByGroup(tx, groupId),
+        practitionerProfileId,
+      );
+    });
+  }
+
   /* ==================== helpers ============================================ */
+
+  /**
+   * Un invitado sólo entra si existe y está vinculado a una práctica de la
+   * misma organización del grupo: invitar a un profesional de otro tenant le
+   * mostraría el paciente, el servicio y los términos del equipo.
+   */
+  private async assertInvitable(
+    tx: EntityManager,
+    tenantPracticeIds: ReadonlySet<string>,
+    practitionerProfileId: string,
+  ): Promise<void> {
+    const invited = await this.practitionerProfilesRepo.findById(
+      tx,
+      practitionerProfileId,
+    );
+    if (invited === null) {
+      throw this.practitionerNotAvailable();
+    }
+    const invitedPracticeIds =
+      await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+        practitionerProfileId,
+      );
+    if (!invitedPracticeIds.some((id) => tenantPracticeIds.has(id))) {
+      throw this.practitionerNotAvailable();
+    }
+  }
+
+  /**
+   * Edición y baja: sólo el creador, y sólo mientras el grupo no se realizó ni
+   * se cerró. Quien no ve el grupo recibe 404; quien lo ve como integrante
+   * recibe 403.
+   */
+  private async loadForCreatorEdit(
+    tx: EntityManager,
+    groupId: string,
+    actor: AuthenticatedUser,
+  ): Promise<{
+    group: MedicalGroups;
+    members: MedicalGroupMembers[];
+    practitionerProfileId: string;
+  }> {
+    const practitionerProfileId = this.requirePractitioner(actor);
+    const group = await this.groupsRepo.findById(tx, groupId);
+    if (group === null) {
+      throw new ResourceNotFoundException('Grupo médico no encontrado', {
+        id: groupId,
+      });
+    }
+    const members = await this.membersRepo.findByGroup(tx, groupId);
+    this.assertActorSeesGroup(group, members, actor);
+    if (group.requestingPractitionerId !== practitionerProfileId) {
+      // 403 y no 401: el front cierra la sesión ante un 401.
+      throw new InsufficientRoleException(
+        'Sólo quien creó el grupo puede modificarlo o eliminarlo',
+      );
+    }
+    const justClosed = await this.closeIfExpired(tx, group);
+    if (justClosed || isClosedNow(group)) {
+      throw new PreconditionFailedException(
+        'El expediente ya está cerrado y es inmutable',
+      );
+    }
+    if (isRealizedNow(group)) {
+      throw new PreconditionFailedException(
+        'El grupo ya se realizó: sólo admite las notas del procedimiento',
+      );
+    }
+    return { group, members, practitionerProfileId };
+  }
+
+  /**
+   * Con equipo sin responder el grupo espera al equipo; sin nadie pendiente
+   * está programado. Un cambio de horario por resolver no se pisa.
+   */
+  private async syncTeamStatus(
+    tx: EntityManager,
+    group: MedicalGroups,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (
+      group.status !== MEDICAL_GROUP_STATUS.PENDING_TEAM &&
+      group.status !== MEDICAL_GROUP_STATUS.SCHEDULED
+    ) {
+      return;
+    }
+    // `hasPendingInvites` cuenta en la base: se vuelca antes lo que cambió.
+    await tx.flush();
+    const next = (await this.membersRepo.hasPendingInvites(tx, group.id))
+      ? MEDICAL_GROUP_STATUS.PENDING_TEAM
+      : MEDICAL_GROUP_STATUS.SCHEDULED;
+    if (next !== group.status) {
+      group.status = next;
+      touch(group, actor.id);
+    }
+  }
 
   /**
    * Exige base clínica para leer la historia del paciente. El 403 del gate
