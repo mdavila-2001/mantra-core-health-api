@@ -19,7 +19,14 @@ import { PINV } from './pharmacy_inventory.concepts';
  * La decisión es por producto y no por sede: que la sede lleve lotes de unos
  * productos no apaga los demás. Antes bastaba una posición para pasar la sede
  * entera al libro, y un producto publicado después no aparecía en ella hasta
- * que alguien le escribiera una posición (D-06-3).
+ * que alguien le escribiera una posición. D-06-3 resolvía eso al revés
+ * —completando posiciones para todos los productos de la sede—; esta regla
+ * por producto lo reemplazó y dejó de inicializar desde el catálogo, porque
+ * `stock_quantity` es de toda la farmacia y se copiaba a cada sede.
+ *
+ * Lo que se ofrece por lo declarado no tiene unidades en el libro: un pedido
+ * lo recibe «por confirmar», sin reservar, y la farmacia dice al confirmarlo
+ * si lo tiene y con cuánto (`application/pharmacy-orders/pending-order-lines.ts`).
  *
  * Siempre, en las dos: lo que la farmacia marcó «no tengo»
  * (`out_of_stock_declared`) **no** está disponible aunque el libro diga otra

@@ -439,7 +439,11 @@ export class SiteEstablishmentService {
         licenseId,
         tenantId,
       );
-      if (!license || !license.practiceSiteId) {
+      if (
+        !license ||
+        license.tenantId !== tenantId ||
+        !license.practiceSiteId
+      ) {
         throw new ResourceNotFoundException('Habilitación no encontrada', {
           licenseId,
         });

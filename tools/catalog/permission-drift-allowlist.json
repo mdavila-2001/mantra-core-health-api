@@ -695,6 +695,21 @@
         "POST /profiles/practitioners/me/admission/resubmit",
         "POST /profiles/practitioners/me/admission/withdraw"
       ]
+    },
+    {
+      "reason": "Personal de apoyo (secretarias) del hospital activo: OWNER/ADMIN activo de ese tenant o un rol de plataforma que lo alcance (`assertOrganizationAdmin`). Un rol global no distingue de qué hospital es: los dueños de una organización entran con `USER`.",
+      "evidence": [
+        "src/modules/delegated_access/services/support-staff.service.ts#assertOrganizationAdmin",
+        "src/modules/delegated_access/services/support-staff.service.ts#decideForOrganization"
+      ],
+      "routes": [
+        "GET /org/support-catalog",
+        "GET /org/support-engagement-requests",
+        "GET /org/support-engagements",
+        "POST /org/support-engagement-requests/:id/decision",
+        "POST /org/support-engagements/:id/end",
+        "POST /org/team/invitations"
+      ]
     }
   ]
 }

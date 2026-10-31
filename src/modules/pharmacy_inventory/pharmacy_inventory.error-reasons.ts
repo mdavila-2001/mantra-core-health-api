@@ -43,6 +43,17 @@ export enum PharmacyInventoryErrorReason {
    * una sede no la apaga. Se quita desde el catálogo.
    */
   PRODUCT_OUT_OF_STOCK_DECLARED = 'PRODUCT_OUT_OF_STOCK_DECLARED',
+  /**
+   * Ninguna línea del pedido tiene stock real en la sede: todas son «No lo
+   * tengo» o no tienen unidades para reservar. El pedido no se escribe. Basta
+   * una línea con stock, o una «por confirmar», para que el pedido entre.
+   */
+  PRODUCT_OUT_OF_STOCK = 'PRODUCT_OUT_OF_STOCK',
+  /**
+   * Un ajuste de la confirmación no cuadra con la línea: confirmar existencia
+   * sobre una línea que no está «por confirmar», o sin decir la cantidad.
+   */
+  ORDER_LINE_NOT_PENDING_CONFIRMATION = 'ORDER_LINE_NOT_PENDING_CONFIRMATION',
   /** El producto es un borrador o está retirado: no se ofrece en ninguna sede. */
   PRODUCT_NOT_PUBLISHED = 'PRODUCT_NOT_PUBLISHED',
   /**

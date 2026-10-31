@@ -18,6 +18,28 @@ export interface AnalyticsScope {
 
 /** Máximo de filas por ranking: un top, no un volcado. */
 const TOP_LIMIT = 20;
+/** Máximo de filas por desglose de dispositivos (versiones de app incluidas). */
+const DEVICE_BREAKDOWN_LIMIT = 50;
+/** Código del cubo de contextos sin dato en esa dimensión. */
+export const DEVICE_UNSPECIFIED = 'UNSPECIFIED';
+/**
+ * Dimensiones de concepto de `client_contexts` que se desglosan. Son literales
+ * internos (nunca entrada del usuario): lo único que se interpola en el SQL.
+ */
+const DEVICE_CONCEPT_COLUMNS = {
+  deviceType: 'device_type_concept_id',
+  osFamily: 'os_family_concept_id',
+  browserFamily: 'browser_family_concept_id',
+} as const;
+type DeviceConceptDimension = keyof typeof DEVICE_CONCEPT_COLUMNS;
+
+/** Fila de un desglose de dispositivos: código, etiqueta resuelta y conteo. */
+export interface DeviceBreakdownRow {
+  code: string;
+  label: string;
+  contexts: number;
+}
+
 /** Máximo de eventos en el timeline de una sesión. */
 const TIMELINE_LIMIT = 500;
 
@@ -443,5 +465,77 @@ export class TelemetryAnalyticsRepository {
       [...ctx.params, ...tenant.params],
     );
     return { ingest, clients };
+  }
+
+  /**
+   * Desglose de dispositivos sobre `client_contexts` en la ventana, acotado al
+   * tenant por la sesión del contexto (igual que `pipelineHealth`).
+   *
+   * Los bots (`is_bot = true`) se cuentan aparte y no entran en ningún
+   * desglose; `is_bot IS NULL` no es bot demostrado y sí entra (se informa).
+   * Sólo agregados: ningún id de sesión, sujeto, hash ni IP sale de aquí.
+   */
+  async devices(scope: AnalyticsScope) {
+    const ctx = this.scope('created_at', scope, 'cc');
+    const tenant = this.sessionInTenant('cc.session_id', scope.tenantId);
+    const where = `${ctx.where} AND ${tenant.sql}`;
+    const params = [...ctx.params, ...tenant.params];
+
+    const [totals] = await this.sql<{
+      contexts: number;
+      bots: number;
+      bot_unknown: number;
+      last_context_at: Date | null;
+    }>(
+      `SELECT count(*) FILTER (WHERE cc.is_bot IS NOT TRUE)::int AS contexts,
+              count(*) FILTER (WHERE cc.is_bot)::int AS bots,
+              count(*) FILTER (WHERE cc.is_bot IS NULL)::int AS bot_unknown,
+              max(cc.created_at) AS last_context_at
+         FROM telemetry.client_contexts cc
+        WHERE ${where}`,
+      params,
+    );
+
+    const byConcept = async (dimension: DeviceConceptDimension) => {
+      const column = DEVICE_CONCEPT_COLUMNS[dimension];
+      return this.sql<DeviceBreakdownRow>(
+        `SELECT code, label, contexts FROM (
+           SELECT coalesce(k.code, cc.${column}::text, '${DEVICE_UNSPECIFIED}') AS code,
+                  min(coalesce(nullif(k.display, ''), k.code, cc.${column}::text,
+                               '${DEVICE_UNSPECIFIED}')) AS label,
+                  count(*)::int AS contexts
+             FROM telemetry.client_contexts cc
+             LEFT JOIN terminology.catalog_concepts k ON k.id = cc.${column}
+            WHERE ${where} AND cc.is_bot IS NOT TRUE
+            GROUP BY 1
+         ) d
+         ORDER BY contexts DESC, code COLLATE "C" ASC
+         LIMIT ?`,
+        [...params, DEVICE_BREAKDOWN_LIMIT],
+      );
+    };
+
+    const byDeviceType = await byConcept('deviceType');
+    const byOsFamily = await byConcept('osFamily');
+    const byBrowserFamily = await byConcept('browserFamily');
+    const byAppVersion = await this.sql<DeviceBreakdownRow>(
+      `SELECT code, code AS label, contexts FROM (
+         SELECT coalesce(nullif(btrim(cc.app_version), ''), '${DEVICE_UNSPECIFIED}') AS code,
+                count(*)::int AS contexts
+           FROM telemetry.client_contexts cc
+          WHERE ${where} AND cc.is_bot IS NOT TRUE
+          GROUP BY 1
+       ) d
+       ORDER BY contexts DESC, code COLLATE "C" ASC
+       LIMIT ?`,
+      [...params, DEVICE_BREAKDOWN_LIMIT],
+    );
+    return {
+      totals,
+      byDeviceType,
+      byOsFamily,
+      byBrowserFamily,
+      byAppVersion,
+    };
   }
 }

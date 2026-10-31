@@ -198,6 +198,19 @@ describe('TenantAdministrationService', () => {
       ).resolves.toBeUndefined();
     });
 
+    it('rechaza a la secretaria: su membresía no lee la organización entera', async () => {
+      // Ve sólo las sedes, servicios, pisos y doctores de sus vínculos
+      // aceptados (`GET /me/support-access`), no la estructura completa.
+      const { service, tx } = build({ tenantRoleConceptId: DIR.ROLE_SUPPORT });
+
+      await expect(
+        service.assertCanRead(tx, 'tenant-1', {
+          id: 'u1',
+          roles: ['USER', 'SUPPORT_STAFF'],
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
     it('rechaza a quien no pertenece a la organización', async () => {
       // Es lo que impide que un listado se convierta en una fuga entre organizaciones.
       const { service, tx } = build(null);

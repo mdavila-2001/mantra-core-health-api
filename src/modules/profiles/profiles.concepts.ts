@@ -35,6 +35,10 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'PROFILE_PRACTITIONER',
       display: 'Practitioner profile type',
     },
+    PROFILE_TYPE_SECRETARY: {
+      code: 'PROFILE_SECRETARY',
+      display: 'Secretary (support staff) profile type',
+    },
     PROFILE_ACTIVE: { code: 'PROFILE_ACTIVE', display: 'Profile active' },
 
     // Estado de vinculación (MPI) del paciente

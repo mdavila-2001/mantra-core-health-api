@@ -38,10 +38,14 @@ export const RESERVING_ORDER_STATUS_IDS: readonly string[] = [
  *   stock del original se devuelve, y su total se vuelve a reservar sobre la
  *   línea del genérico, que es del mismo fármaco. Contarla descontaría dos
  *   veces. La entrega solo toma líneas `CONFIRMED`, así que nunca se entrega.
+ * - `POR_CONFIRMAR`: la sede la ofrece por su catálogo y la farmacia todavía
+ *   no dijo si la tiene. Se guarda con `reserved_quantity = 0` y no tiene nada
+ *   reservado hasta que la farmacia la confirme.
  */
 export const NON_RESERVING_LINE_STATUS_IDS: readonly string[] = [
   PINV.RES_LINE_OUT_OF_STOCK,
   PINV.RES_LINE_RELEASED,
+  PINV.RES_LINE_PENDING_CONFIRMATION,
 ];
 
 /** Lo entregado y lo reservado de una receta, por fármaco. */

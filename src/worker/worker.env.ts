@@ -89,6 +89,17 @@ export const workerEnvSchema = Joi.object({
   /** Espera máxima a que terminen los ticks en vuelo durante el apagado. */
   WORKER_DRAIN_TIMEOUT_MS: Joi.number().integer().min(0).default(20_000),
   /**
+   * Cada cuánto el worker emite su latido (`POST /internal/ops/heartbeats`)
+   * hacia la API, que lo guarda para la sonda de vida de instancias
+   * (`GET /admin/ops/instances/liveness`). Los umbrales de «degradada» y
+   * «caída» de esa sonda se declaran en la API en segundos y deben ser
+   * mayores o iguales que este intervalo; ver `worker-heartbeat.service.ts`.
+   */
+  WORKER_HEARTBEAT_INTERVAL_MS: Joi.number()
+    .integer()
+    .min(1000)
+    .default(15_000),
+  /**
    * Plazo total del apagado. Al agotarse, el proceso sale con código 1 dejando
    * en el log qué seguía pendiente. Debe quedar **por debajo** del plazo de
    * gracia del orquestador (10 s en `docker stop` por defecto,
@@ -194,6 +205,8 @@ export interface WorkerEnv {
   stuckTickMs: number;
   drainTimeoutMs: number;
   shutdownTimeoutMs: number;
+  /** Intervalo del latido hacia la API, en milisegundos. */
+  heartbeatIntervalMs: number;
   httpRetryAttempts: number;
   httpMaxConcurrent: number;
   messagingQueueCodes: string[];
@@ -258,6 +271,10 @@ export function loadWorkerEnv(): WorkerEnv {
     stuckTickMs: numberFromEnv('WORKER_STUCK_TICK_MS', 10 * 60_000),
     drainTimeoutMs: numberFromEnv('WORKER_DRAIN_TIMEOUT_MS', 20_000),
     shutdownTimeoutMs: numberFromEnv('WORKER_SHUTDOWN_TIMEOUT_MS', 30_000),
+    heartbeatIntervalMs: Math.max(
+      1000,
+      numberFromEnv('WORKER_HEARTBEAT_INTERVAL_MS', 15_000),
+    ),
     httpRetryAttempts: numberFromEnv('WORKER_HTTP_RETRY_ATTEMPTS', 3),
     httpMaxConcurrent: numberFromEnv('WORKER_HTTP_MAX_CONCURRENT', 16),
     messagingQueueCodes: (process.env.MESSAGING_QUEUE_CODES ?? '')

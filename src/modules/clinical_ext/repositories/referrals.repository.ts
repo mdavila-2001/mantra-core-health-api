@@ -104,7 +104,8 @@ export class ReferralsRepository {
    *
    * Mismo encuentro, mismo tipo y mismo destino: con servicio, el servicio (y
    * el profesional, o su ausencia); sin servicio, el profesional y la
-   * especialidad, como antes. Las derivaciones anteriores al tipo (`null`)
+   * especialidad, como antes; sin servicio ni profesional, la organización
+   * destino (`targetTenantId`). Las derivaciones anteriores al tipo (`null`)
    * cuentan como consulta, que es el valor por defecto.
    */
   findDuplicate(
@@ -116,6 +117,7 @@ export class ReferralsRepository {
       targetProfileId?: string;
       specialtyConceptId?: string;
       targetServiceCatalogId?: string;
+      targetTenantId?: string;
     },
   ): Promise<Referrals | null> {
     const where: Record<string, unknown> = {
@@ -132,6 +134,12 @@ export class ReferralsRepository {
     if (criteria.targetServiceCatalogId) {
       where.targetServiceCatalogId = criteria.targetServiceCatalogId;
       where.targetProfileId = criteria.targetProfileId ?? null;
+    } else if (!criteria.targetProfileId && criteria.targetTenantId) {
+      // Derivación a la organización sin profesional ni servicio: el destino es
+      // el tenant. La especialidad no distingue, como pide la regla de negocio.
+      where.targetTenantId = criteria.targetTenantId;
+      where.targetProfileId = null;
+      where.targetServiceCatalogId = null;
     } else {
       where.targetProfileId = criteria.targetProfileId;
       where.specialtyConceptId = criteria.specialtyConceptId;

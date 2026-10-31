@@ -12,6 +12,8 @@ import { PORTAL_READ_ROLES } from '../../data_catalog.constants';
 import {
   BusquedaQueryDto,
   HallazgoIdParamDto,
+  LinajeAristasQueryDto,
+  LinajeNodosQueryDto,
   OperacionesQueryDto,
   OperacionIdParamDto,
   PaginacionQueryDto,
@@ -27,7 +29,9 @@ import {
   GrafoDto,
   HallazgoDetalleDto,
   HallazgoResumenDto,
+  LinajeAristasPaginaDto,
   LinajeDto,
+  LinajeNodosPaginaDto,
   LinajeTablaDto,
   MapaPaginaDto,
   OperacionDetalleDto,
@@ -185,6 +189,24 @@ export class AdminPortalController {
   @ApiOperation({ summary: 'Métricas del linaje de datos' })
   linaje(): LinajeDto {
     return this.portal.linaje();
+  }
+
+  /** Nodos del grafo de linaje, paginados. */
+  @Get('linaje/nodos')
+  @ApiOkResponse({ type: LinajeNodosPaginaDto })
+  @ApiOperation({ summary: 'Nodos del linaje (operaciones, tablas, dominios)' })
+  linajeNodos(@Query() query: LinajeNodosQueryDto): LinajeNodosPaginaDto {
+    return this.portal.linajeNodos(query);
+  }
+
+  /** Aristas del grafo de linaje, paginadas. */
+  @Get('linaje/aristas')
+  @ApiOkResponse({ type: LinajeAristasPaginaDto })
+  @ApiOperation({
+    summary: 'Aristas del linaje (lee, escribe, borra, referencia, pertenece)',
+  })
+  linajeAristas(@Query() query: LinajeAristasQueryDto): LinajeAristasPaginaDto {
+    return this.portal.linajeAristas(query);
   }
 
   /** Qué operaciones tocan una tabla y con qué tablas se relaciona. */

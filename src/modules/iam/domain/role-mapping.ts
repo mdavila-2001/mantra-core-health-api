@@ -8,6 +8,10 @@ import { CONCEPTS } from '../../../common/constants/concepts';
  * (`@Roles(..., 'PATIENT')` en scheduling). Sin él en esta lista, el claim
  * `roles` del token nunca podría contenerlo -`conceptIdsToRoleCodes` descarta
  * lo desconocido- y todo el portal del paciente respondería 403.
+ *
+ * `SUPPORT_STAFF` es la secretaria (personal de apoyo hospitalario): lo da su
+ * alta y es el que exigen sus rutas `/me/support-*`. Qué hospitales, doctores y
+ * pisos ve lo deciden sus vínculos aceptados, no el rol.
  */
 export type RoleCode =
   | 'USER'
@@ -15,7 +19,8 @@ export type RoleCode =
   | 'SUPERADMIN'
   | 'PATIENT'
   | 'PRACTITIONER'
-  | 'CLINICIAN';
+  | 'CLINICIAN'
+  | 'SUPPORT_STAFF';
 
 /** Código de rol → concept id (`role_concept_id`). */
 export const ROLE_CONCEPT_BY_CODE: Readonly<Record<RoleCode, string>> = {
@@ -25,6 +30,7 @@ export const ROLE_CONCEPT_BY_CODE: Readonly<Record<RoleCode, string>> = {
   PATIENT: CONCEPTS.ROLE_PATIENT,
   PRACTITIONER: CONCEPTS.ROLE_PRACTITIONER,
   CLINICIAN: CONCEPTS.ROLE_CLINICIAN,
+  SUPPORT_STAFF: CONCEPTS.ROLE_SUPPORT_STAFF,
 };
 
 /** Concept id → código de rol (para construir el `roles` del JWT). */
@@ -35,6 +41,7 @@ export const ROLE_CODE_BY_CONCEPT: Readonly<Record<string, RoleCode>> = {
   [CONCEPTS.ROLE_PATIENT]: 'PATIENT',
   [CONCEPTS.ROLE_PRACTITIONER]: 'PRACTITIONER',
   [CONCEPTS.ROLE_CLINICIAN]: 'CLINICIAN',
+  [CONCEPTS.ROLE_SUPPORT_STAFF]: 'SUPPORT_STAFF',
 };
 
 /** Traduce una lista de `role_concept_id` a códigos, descartando desconocidos. */

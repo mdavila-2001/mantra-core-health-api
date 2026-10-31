@@ -131,6 +131,20 @@ export const CLINICAL_ROLE_CODES: readonly string[] = CLINICAL_ROLE_SEED.map(
     completo y no pretende serlo: cada fila entra cuando un caso de uso la pide.
     ========================================================================== */
 
+/** De dónde sale un permiso o dato de catálogo sembrado (regla 97.4: todo dato lleva procedencia). */
+export interface SeedProvenance {
+  /** Catálogo al que pertenece: interno (lo define el producto), no oficial ni aportado. */
+  catalog: 'INTERNO';
+  /** Fuente que lo define. */
+  source: string;
+  /** Archivo o documento de referencia. */
+  reference: string;
+  /** Fecha en que se obtuvo (AAAA-MM-DD). */
+  obtainedAt: string;
+  /** Licencia o condición de uso. */
+  license: string;
+}
+
 /** Un permiso de sistema que algún flujo del producto nombra por código. */
 export interface PlatformPermissionSeed {
   /** Identificador determinista de la fila en `authz.permissions`. */
@@ -145,6 +159,20 @@ export interface PlatformPermissionSeed {
   action: 'READ' | 'WRITE' | 'CREATE' | 'DELETE' | 'EXECUTE' | 'APPROVE';
   /** Ámbito por defecto de la concesión. */
   scope: RoleScope;
+  /**
+   * Si se puede conceder directo a un usuario (`user_permission_grants`). Por omisión no: el único
+   * camino es un grant sobre un recurso concreto, que es lo que lo hace acotado y temporal.
+   */
+  allowDirectUserGrant?: boolean;
+  /** Si es peligroso: la consola lo marca y exige confirmación al concederlo. */
+  isDangerous?: boolean;
+  /**
+   * Códigos de rol a los que se concede `ALLOW` al sembrar. Un rol que no existe como fila de
+   * `authz.roles` se omite y se informa: no se inventa.
+   */
+  grantToRoleCodes?: readonly string[];
+  /** Procedencia del permiso. */
+  provenance?: SeedProvenance;
 }
 
 /** Deriva el id determinista de un permiso de sistema por su código. */
@@ -162,6 +190,27 @@ export function platformPermissionId(code: string): string {
  */
 export const DIAGNOSTIC_RESULT_READ_PERMISSION_CODE = 'DIAGNOSTIC_RESULT_READ';
 
+/** Permisos finos del motor de cargas masivas (`src/modules/bulk_import`). */
+export const BULK_IMPORT_USERS_PERMISSION_CODE = 'bulk_import.users';
+export const BULK_IMPORT_CLINICAL_PERMISSION_CODE = 'bulk_import.clinical';
+
+/** Procedencia de los permisos del motor de cargas masivas. */
+const BULK_IMPORT_PROVENANCE: SeedProvenance = {
+  catalog: 'INTERNO',
+  source:
+    'Contrato del motor de cargas masivas: el PDP resuelve estos permisos con resource = código y acción EXECUTE',
+  reference:
+    'src/modules/bulk_import/bulk-import.constants.ts (BULK_IMPORT_PERMISSIONS) y adapters/pdp-access-policy.adapter.ts',
+  obtainedAt: '2026-10-31',
+  license: 'Interno de la plataforma',
+};
+
+/**
+ * Quiénes reciben los permisos del motor de cargas masivas al sembrar. `SECURITY_ADMIN` es un rol
+ * global de `iam`: sólo recibe la concesión si existe una fila `authz.roles` con ese código.
+ */
+const BULK_IMPORT_ROLE_CODES = ['SECURITY_ADMIN', 'PLATFORM_ADMIN'] as const;
+
 /** Los permisos de sistema, en el orden en que se siembran. */
 export const PLATFORM_PERMISSION_SEED: readonly PlatformPermissionSeed[] = [
   {
@@ -171,5 +220,29 @@ export const PLATFORM_PERMISSION_SEED: readonly PlatformPermissionSeed[] = [
     resource: 'diagnostics.diagnostic_report',
     action: 'READ',
     scope: 'SELF',
+  },
+  {
+    id: platformPermissionId(BULK_IMPORT_USERS_PERMISSION_CODE),
+    code: BULK_IMPORT_USERS_PERMISSION_CODE,
+    name: 'Cargar usuarios en lote',
+    resource: BULK_IMPORT_USERS_PERMISSION_CODE,
+    action: 'EXECUTE',
+    scope: 'TENANT',
+    allowDirectUserGrant: true,
+    isDangerous: true,
+    grantToRoleCodes: BULK_IMPORT_ROLE_CODES,
+    provenance: BULK_IMPORT_PROVENANCE,
+  },
+  {
+    id: platformPermissionId(BULK_IMPORT_CLINICAL_PERMISSION_CODE),
+    code: BULK_IMPORT_CLINICAL_PERMISSION_CODE,
+    name: 'Cargar historias clínicas en lote',
+    resource: BULK_IMPORT_CLINICAL_PERMISSION_CODE,
+    action: 'EXECUTE',
+    scope: 'TENANT',
+    allowDirectUserGrant: true,
+    isDangerous: true,
+    grantToRoleCodes: BULK_IMPORT_ROLE_CODES,
+    provenance: BULK_IMPORT_PROVENANCE,
   },
 ] as const;
