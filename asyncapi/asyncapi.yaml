@@ -37,6 +37,8 @@ channels:
         $ref: '#/components/messages/DomainEvent'
       practiceStructureEvent:
         $ref: '#/components/messages/PracticeStructureEvent'
+      infrastructureOpsEvent:
+        $ref: '#/components/messages/InfrastructureOpsEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -148,6 +150,22 @@ components:
         dice reasonProvided).
       payload:
         $ref: '#/components/schemas/PracticeStructureEventPayload'
+
+    InfrastructureOpsEvent:
+      name: InfrastructureOpsEvent
+      title: Operación de espacios (practice, F2)
+      summary: >
+        Cambios de los ejes operativos de un espacio (disponibilidad, higiene,
+        aislamiento, ocupación derivada), bloqueos y órdenes de limpieza
+        (CONTRATO-F2-F5 §F2.3). Se publican en la misma transacción que el
+        cambio (src/modules/practice/services/ops/ops-events.ts).
+        `practice.care_space.status_changed` equivale a HL7 ADT^A20 / NPU y su
+        payload lleva careSpaceId, siteId, axis, from, to, v2Code (HL7 v2-0116),
+        reasonCode, reasonText, expectedUntil, source, sourceRefId, occurredAt,
+        requestId y opsVersion. Las órdenes de limpieza nunca llevan datos de
+        paciente.
+      payload:
+        $ref: '#/components/schemas/InfrastructureOpsEventPayload'
 
     OutboxMessage:
       name: OutboxMessage
@@ -290,3 +308,53 @@ components:
               format: uuid
             rowVersion:
               type: integer
+
+    InfrastructureOpsEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - practice.care_space.status_changed
+            - practice.care_space.block_started
+            - practice.care_space.block_ended
+            - practice.care_space.block_cancelled
+            - practice.care_space.block_overdue
+            - practice.cleaning_order.created
+            - practice.cleaning_order.assigned
+            - practice.cleaning_order.started
+            - practice.cleaning_order.finished
+            - practice.cleaning_order.inspected
+            - practice.cleaning_order.rejected
+            - practice.cleaning_order.cancelled
+        aggregateType:
+          type: string
+          enum:
+            - practice.care_spaces
+            - practice.care_space_blocks
+            - practice.cleaning_orders
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+          properties:
+            careSpaceId:
+              type: string
+              format: uuid
+            siteId:
+              type: string
+              format: uuid
+            axis:
+              type: string
+              enum: [AVAILABILITY, HYGIENE, ISOLATION, OCCUPANCY]
+            v2Code:
+              type: string
+              enum: [C, H, I, K, O, U, R]
+            requestId:
+              type: string

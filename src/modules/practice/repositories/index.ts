@@ -14,3 +14,4 @@ export * from './structure-rules.repository';
 export * from './space-unit-assignments.repository';
 export * from './site-declared-capacities.repository';
 export * from './retire-blockers.repository';
+export * from './care-space-ops.repository';

@@ -19,6 +19,7 @@ import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { SecretCipherError } from '../errors/secret-cipher.error';
 import { redactShareTokenInUrl } from '../../logging/share-token-redaction';
+import { exclusionReasonOf } from './exclusion-constraint-reasons';
 import {
   APP_ATTR,
   TracingService,
@@ -789,7 +790,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // este caso caía al 500 genérico del `default`, y quien movía un horario
       // veía "Ocurrió un error inesperado" en vez de que hubo un choque —el
       // pedido explícito era mostrar el conflicto, no esconderlo.
-      case '23P01':
+      case '23P01': {
+        // CONTRATO-F2-F5 §0.2: la restricción conocida responde con su
+        // `reason` de contrato (la misma que la pre-validación de la API).
+        const mapped = exclusionReasonOf(
+          typeof cause.constraint === 'string' ? cause.constraint : undefined,
+        );
+        if (mapped) {
+          return {
+            status: HttpStatus.CONFLICT,
+            code: ErrorCode.CONFLICT,
+            message: mapped.message,
+            reason: mapped.reason,
+            internals,
+          };
+        }
         return {
           status: HttpStatus.CONFLICT,
           code: ErrorCode.CONFLICT,
@@ -798,6 +813,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           reason: SystemErrorReason.EXCLUSION_CONSTRAINT_VIOLATION,
           internals,
         };
+      }
       // Valor ausente, fuera de restricción o con sintaxis inválida: es un
       // defecto de forma del cuerpo, así que 400 + `VALIDATION_FAILED`, igual
       // que cuando lo detecta el `ValidationPipe`. Antes salía 422 con ese

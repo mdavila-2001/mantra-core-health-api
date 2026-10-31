@@ -20,3 +20,4 @@ export * from './care-space-attributes.dto';
 export * from './infrastructure.dto';
 export * from './infrastructure-responses.dto';
 export * from './create-organization-practice.dto';
+export * from './care-space-ops.dto';
