@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
+import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
 
 /**
  * Cuerpo de `PUT /pharmacies/:pharmacyId/sites/:siteId/products/:productId/availability`.
@@ -13,10 +21,8 @@ export class SetSiteAvailabilityDto {
   @ApiProperty({ description: '«Lo tengo» en esta sucursal' })
   // Se valida lo que llegó en el cuerpo y no lo ya convertido: con la
   // conversión implícita del `ValidationPipe`, `"false"` (un texto no vacío)
-  // llegaría como `true` y guardaría «Lo tengo». `obj` conserva el valor
-  // original, y un texto no pasa `@IsBoolean()`.
-  @Transform(({ obj }: { obj: Record<string, unknown> }) => obj?.available)
-  @IsBoolean()
+  // llegaría como `true` y guardaría «Lo tengo» (ver `IsStrictBoolean`).
+  @IsStrictBoolean()
   available!: boolean;
 
   /**
@@ -62,4 +68,19 @@ export class SiteAvailabilityResponseDto {
    */
   @ApiProperty({ format: 'date-time' })
   stockUpdatedAt!: string;
+}
+
+/**
+ * Fila de `POST /pharmacies/:pharmacyId/sites/:siteId/availability/bulk`: un
+ * producto de la farmacia, por su código, en la sucursal de la ruta. Es el
+ * cuerpo del `PUT` de una sede con el código en lugar del id.
+ */
+export class BulkSiteAvailabilityRowDto extends SetSiteAvailabilityDto {
+  /**
+   * Código del producto en el catálogo de la farmacia: la clave de la fila.
+   */
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  productCode!: string;
 }

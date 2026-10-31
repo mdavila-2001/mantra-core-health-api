@@ -1,12 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsIn,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
 
 /** Cuerpo de `POST /pharmacy/:siteId/inventory-locations` (bootstrap de ubicación). */
 export class CreateLocationDto {
@@ -42,7 +36,7 @@ export class CreateLocationDto {
    */
   @ApiPropertyOptional({ description: 'Requiere acceso controlado' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   controlledAccess?: boolean;
 
   /** F5c: espacio físico donde vive la ubicación (perfil `stockPoint`, misma sede). */

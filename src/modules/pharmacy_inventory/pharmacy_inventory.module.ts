@@ -66,6 +66,7 @@ import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notific
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
 import { PharmacyProcurementUseCases } from './application/pharmacy-procurement/pharmacy-procurement.use-cases';
 import { SetSiteProductAvailabilityUseCase } from './application/site-availability/set-site-product-availability.use-case';
+import { BulkSiteAvailabilityUseCase } from './application/site-availability/bulk-site-availability.use-case';
 import { SiteStockWriter } from './application/site-availability/site-stock-writer';
 import {
   PharmacyProcurementController,
@@ -258,6 +259,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyProcurementUseCases,
     SiteStockWriter,
     SetSiteProductAvailabilityUseCase,
+    BulkSiteAvailabilityUseCase,
     SyncExternalPharmacyCatalogUseCase,
     IntegrationReadService,
     PharmacyProcurementService,

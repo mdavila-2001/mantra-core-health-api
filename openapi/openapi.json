@@ -107815,6 +107815,91 @@
         ]
       }
     },
+    "/pharmacies/{pharmacyId}/sites/{siteId}/availability/bulk": {
+      "post": {
+        "operationId": "PharmacySiteAvailabilityController_bulkSiteAvailability",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa",
+        "tags": [
+          "pharmacy-inventory"
+        ],
+        "description": "Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/tracking/trackable-subjects": {
       "post": {
         "description": "El número de seguimiento es opaco: no deja deducir qué se transporta.",
@@ -138140,6 +138225,12 @@
             "description": "Requiere receta; `null` lo borra",
             "nullable": true
           },
+          "medicationConceptId": {
+            "type": "string",
+            "description": "Medicamento del catálogo `medication` con que se receta; `null` lo desvincula. Fuera de ese catálogo es 422.",
+            "format": "uuid",
+            "nullable": true
+          },
           "unitPrice": {
             "description": "Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`.",
             "oneOf": [
@@ -139721,6 +139812,12 @@
             "format": "uuid"
           },
           "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkRowErrorDto"
+            }
+          },
+          "warnings": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BulkRowErrorDto"

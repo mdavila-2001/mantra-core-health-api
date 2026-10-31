@@ -4,7 +4,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsBoolean,
   IsIn,
   IsNotEmpty,
   IsNumber,
@@ -14,9 +13,12 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
 } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 import { CATEGORY_NAME_MAX } from '../services/pharmacy-catalog-rules';
 import { IsCatalogMoney } from './catalog-fields.dto';
+import { CreateProductDto } from './create-product.dto';
 import { UpdateProductDto } from './update-product.dto';
 
 /** Cómo trata la carga una clave que ya existe o que falta. */
@@ -52,10 +54,13 @@ export class BulkRequestDto {
 
   /**
    * Con `true` no escribe nada y responde lo que habría pasado con cada fila.
+   * Booleano estricto o ausente: `0`, `""`, `null`, `"true"`, `[]` o `{}` son un
+   * 400 y no se escribe nada (una vista previa mal tipada no puede cargar).
    */
-  @ApiPropertyOptional({ default: false })
-  @IsOptional()
-  @IsBoolean()
+  @ApiPropertyOptional({ type: Boolean, default: false })
+  // `@IsOptional()` dejaría pasar `null`: sólo la ausencia omite la regla.
+  @ValidateIf((_body: unknown, value: unknown) => value !== undefined)
+  @IsStrictBoolean()
   dryRun?: boolean;
 
   /**
@@ -123,6 +128,14 @@ export class BulkRowResultDto {
    */
   @ApiPropertyOptional({ type: [BulkRowErrorDto] })
   errors?: BulkRowErrorDto[];
+
+  /**
+   * Avisos de una fila que se carga igual (en la vista previa, que se cargaría):
+   * por ejemplo `MEDICATION_NOT_LINKED`, un producto que pide receta sin
+   * medicamento vinculado, que ninguna receta va a encontrar.
+   */
+  @ApiPropertyOptional({ type: [BulkRowErrorDto] })
+  warnings?: BulkRowErrorDto[];
 }
 
 /** Respuesta de una carga masiva: una entrada por fila, en orden. */
@@ -168,6 +181,27 @@ export class BulkPriceRowDto {
   unitPrice!: number | string;
 }
 
+/** Tope del nombre de un medicamento escrito en una fila. */
+export const MEDICATION_NAME_MAX = 300;
+
+/**
+ * Fila de `products/bulk` para dar de alta: el alta de siempre y, opcional, el
+ * medicamento por su nombre.
+ */
+export class BulkProductCreateRowDto extends CreateProductDto {
+  /**
+   * Nombre del medicamento tal como figura en el catálogo con que se receta
+   * (sin importar mayúsculas ni tildes). El servidor lo resuelve a su concepto;
+   * si no está, o nombra a más de uno, la fila se rechaza (también en la vista
+   * previa). No va con `catalogProductId` ni con `medicationConceptId`.
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MEDICATION_NAME_MAX)
+  medicationName?: string;
+}
+
 /** Fila de `products/bulk` para cambiar un producto existente. */
 export class BulkProductUpdateRowDto extends UpdateProductDto {
   /**
@@ -177,6 +211,16 @@ export class BulkProductUpdateRowDto extends UpdateProductDto {
   @IsNotEmpty()
   @MaxLength(100)
   productCode!: string;
+
+  /**
+   * Nombre del medicamento, como en el alta: vincula el producto existente.
+   * Ausente deja el vínculo como está.
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MEDICATION_NAME_MAX)
+  medicationName?: string;
 }
 
 /** Fila de `sites/bulk`: una sede de venta por su código. */
@@ -227,13 +271,13 @@ export class BulkSiteRowDto {
    * Si la sede acepta retiro en mostrador.
    */
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   pickupAvailable?: boolean;
 
   /**
    * Si la sede hace envíos a domicilio.
    */
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   homeDeliveryAvailable?: boolean;
 }

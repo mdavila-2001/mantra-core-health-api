@@ -4,6 +4,7 @@ import * as entities from './entities';
 import { DirectoryModule } from '../directory/directory.module';
 import { PracticeModule } from '../practice/practice.module';
 import { CommonModule } from '../common/common.module';
+import { SystemContextModule } from '../system_context/system_context.module';
 import {
   PharmacyBulkController,
   PharmacyController,
@@ -29,6 +30,7 @@ import {
   ProductsBulkHandler,
   PricesBulkHandler,
   SitesBulkHandler,
+  MedicationCatalogResolver,
 } from './services';
 import {
   PharmaciesRepository,
@@ -69,6 +71,10 @@ import {
     // P47: las imágenes del producto pasan por `AttachableFileService` (archivo
     // vivo, de imagen y subido por quien edita).
     CommonModule,
+    // El vínculo producto → medicamento se resuelve contra el catálogo con que
+    // se receta (la enumeración del campo de la receta). `system_context` no
+    // importa `pharmacy`, así que no cierra ciclo.
+    SystemContextModule,
   ],
   controllers: [
     PharmacyController,
@@ -113,11 +119,18 @@ import {
     ProductsBulkHandler,
     PricesBulkHandler,
     SitesBulkHandler,
+    MedicationCatalogResolver,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga
   // disponibilidad sin duplicar los finders de publicación y precios.
   // `PharmacyProvisioningService` se exporta para `iam`: el alta pública de
   // farmacia la provisiona dentro de su propia transacción (P50).
-  exports: [PharmacyReadRepository, PharmacyProvisioningService],
+  // `PharmacyBulkService` se exporta para que el inventario cargue el stock
+  // por sucursal con el mismo contrato `{ mode, dryRun }` que el catálogo.
+  exports: [
+    PharmacyReadRepository,
+    PharmacyProvisioningService,
+    PharmacyBulkService,
+  ],
 })
 export class PharmacyModule {}

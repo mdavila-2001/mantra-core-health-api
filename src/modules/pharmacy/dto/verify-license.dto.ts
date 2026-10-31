@@ -1,11 +1,6 @@
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify` (UC-24-03). */
 @ApiSchema({ name: 'PharmacyVerifyLicenseDto' })
@@ -18,7 +13,7 @@ export class VerifyLicenseDto {
     default: true,
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   approve?: boolean;
 
   /**

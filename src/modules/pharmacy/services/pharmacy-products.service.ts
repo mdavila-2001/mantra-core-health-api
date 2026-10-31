@@ -40,10 +40,12 @@ import {
 import { displayName, PharmacyReadService } from './pharmacy-read.service';
 import { requireManagedPharmacy } from './pharmacy-scope';
 import { PharmacyCategoriesService } from './pharmacy-categories.service';
+import { MedicationCatalogResolver } from './medication-catalog.resolver';
 import {
   STATUS_CONCEPT,
   applyStockChange,
   normalizeMoney,
+  prescriptionWarnings,
 } from './pharmacy-catalog-rules';
 
 /** Lo que administra la farmacia y comparten el alta y la edición (P47 §3-5). */
@@ -124,6 +126,7 @@ export class PharmacyProductsService {
    * @param categories - Resolución de la categoría por nombre (P47).
    * @param readService - Proyección del producto como lo lista la búsqueda.
    * @param attachableFiles - Regla de «este archivo se puede colgar» (imágenes).
+   * @param medications - El catálogo de medicamentos con que se receta (vínculo).
    */
   constructor(
     private readonly em: EntityManager,
@@ -139,6 +142,7 @@ export class PharmacyProductsService {
     private readonly categories: PharmacyCategoriesService,
     private readonly readService: PharmacyReadService,
     private readonly attachableFiles: AttachableFileService,
+    private readonly medications: MedicationCatalogResolver,
   ) {
     this.logger.setContext(PharmacyProductsService.name);
   }
@@ -229,6 +233,9 @@ export class PharmacyProductsService {
         },
         'Pharmacy product published',
       );
+      // Se mira lo que quedó guardado, con lo derivado del catálogo oficial:
+      // un producto del catálogo sin ATC conocido también queda sin medicamento.
+      const warnings = prescriptionWarnings(product);
       return {
         id: product.id,
         pharmacyId: product.pharmacyId,
@@ -236,6 +243,7 @@ export class PharmacyProductsService {
         status: product.statusConceptId,
         identifierCount: identifiers.length,
         createdAt: product.createdAt,
+        ...(warnings.length > 0 ? { warnings } : {}),
       };
     });
   }
@@ -296,6 +304,9 @@ export class PharmacyProductsService {
       for (const field of changed) {
         Object.assign(product, { [field]: dto[field] });
       }
+      const linked =
+        dto.medicationConceptId !== undefined &&
+        (await this.medications.link(product, dto.medicationConceptId));
 
       if (dto.status === 'WITHDRAWN') {
         if (!retired) await this.retireInTx(tx, product, actor);
@@ -309,7 +320,7 @@ export class PharmacyProductsService {
         dto,
         actor,
       );
-      if (changed.length > 0 || dto.status !== undefined || touched) {
+      if (changed.length > 0 || dto.status !== undefined || touched || linked) {
         touch(product, actor.id);
         await tx.flush();
       }
@@ -320,6 +331,7 @@ export class PharmacyProductsService {
           productId,
           changedFields: [
             ...changed,
+            ...(linked ? ['medicationConceptId'] : []),
             ...CATALOG_FIELD_NAMES.filter((field) => dto[field] !== undefined),
             ...(dto.status !== undefined ? ['status'] : []),
           ],

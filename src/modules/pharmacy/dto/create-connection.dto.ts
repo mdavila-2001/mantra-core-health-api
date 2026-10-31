@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 
 /** Modos de integración soportados. */
 export type IntegrationModeCode = 'REALTIME' | 'BATCH';
@@ -55,7 +56,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta consulta de stock' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsStockQuery?: boolean;
 
   /**
@@ -63,7 +64,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta consulta de precio' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsPriceQuery?: boolean;
 
   /**
@@ -71,7 +72,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta reserva' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsReservation?: boolean;
 
   /**
@@ -79,7 +80,7 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Soporta confirmación de dispensación' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   supportsDispenseConfirmation?: boolean;
 
   /**
@@ -87,6 +88,6 @@ export class CreateConnectionDto {
    */
   @ApiPropertyOptional({ description: 'Permite fallback manual' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   manualFallbackAllowed?: boolean;
 }
