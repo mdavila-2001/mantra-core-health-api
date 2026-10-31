@@ -242,6 +242,31 @@ describe('evaluatePrescriptionOrder', () => {
       });
     });
 
+    it('pedido con la receta: un producto del mismo fármaco que no declara si es de receta también la consume', () => {
+      const prescription = rx({
+        drugs: [
+          { medicationConceptId: X, remaining: 2 },
+          { medicationConceptId: Y, remaining: null, alreadyOrdered: true },
+        ],
+      });
+      expect(
+        evaluatePrescriptionOrder({
+          prescription,
+          lines: [line('prod-y', Y, 1, null), line('prod-x', X, 1, null)],
+        }),
+      ).toEqual({
+        reason: 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+        productIds: ['prod-y'],
+      });
+      // Un producto de venta libre de otro fármaco sigue pasando sin mirar la receta.
+      expect(
+        evaluatePrescriptionOrder({
+          prescription,
+          lines: [line('prod-z', Z, 1, null)],
+        }),
+      ).toBeNull();
+    });
+
     it('con saldo manda el saldo aunque esté marcado como pedido', () => {
       expect(
         evaluatePrescriptionOrder({
