@@ -11,6 +11,7 @@ import { ReferralTargetsRepository } from './referral-targets.repository';
 import { CONCEPTS } from '../../../common';
 import { COMM } from '../../community/community.concepts';
 import { PRAC } from '../../practice/practice.concepts';
+import { DIR } from '../../directory/directory.concepts';
 
 /**
  * Sin base de datos en las pruebas unitarias, lo que se fija acá es el
@@ -48,6 +49,7 @@ describe('ReferralTargetsRepository', () => {
         COMM.PROFILE_VISIBILITY_PUBLIC,
         CONCEPTS.STATE_ACTIVE,
         '%ana%',
+        CONCEPTS.TENANT_ACTIVE,
         20,
       ]);
       // Por igualdad: ni «distinto de privado» ni un OR que deje pasar nulos.
@@ -169,6 +171,164 @@ describe('ReferralTargetsRepository', () => {
       await expect(d.repo.isListableOrganization(d.em, 't1')).resolves.toBe(
         false,
       );
+    });
+  });
+
+  /**
+   * #1201: el WHERE real, evaluado contra filas en memoria. La consulta se
+   * interpreta tal cual la manda el repositorio: cada `?` se liga en orden a
+   * su parámetro, y cada comparación `alias.columna = ?` (o `pp.target_id =
+   * t.id`) se evalúa sobre las filas sembradas. Si la consulta trae un
+   * predicado que este intérprete no conoce, el test falla en vez de
+   * ignorarlo.
+   */
+  describe('estados del tenant evaluados en memoria (#1201)', () => {
+    const PUBLIC_ORG = {
+      target_type_concept_id: COMM.PROFILE_TARGET_ORGANIZATION,
+      visibility_concept_id: COMM.PROFILE_VISIBILITY_PUBLIC,
+      status_concept_id: CONCEPTS.STATE_ACTIVE,
+    };
+    const db = {
+      tenants: [
+        { id: 'ten-activo', status_concept_id: CONCEPTS.TENANT_ACTIVE },
+        { id: 'ten-inactivo', status_concept_id: DIR.TENANT_SUSPENDED },
+        // Activo pero sin vitrina pública: no listable como organización.
+        { id: 'ten-sin-vitrina', status_concept_id: CONCEPTS.TENANT_ACTIVE },
+      ] as Record<string, unknown>[],
+      public_profiles: [
+        { target_id: 'ten-activo', ...PUBLIC_ORG },
+        // El inactivo tiene vitrina: queda fuera por su estado, no por ella.
+        { target_id: 'ten-inactivo', ...PUBLIC_ORG },
+      ] as Record<string, unknown>[],
+    };
+
+    /** Ejecuta la consulta de tenants contra `db`, sin base de datos. */
+    function inMemory(sql: string, params: unknown[]): { ok: number }[] {
+      const text = flat(sql);
+      expect(text).toContain('FROM directory.tenants t WHERE');
+      const comparisons = [...text.matchAll(/\b(t|pp)\.(\w+) = (\?|t\.id)/g)];
+      // Toda marca `?` corresponde a una comparación conocida.
+      expect(comparisons.filter((m) => m[3] === '?')).toHaveLength(
+        (text.match(/\?/g) ?? []).length,
+      );
+      let next = 0;
+      const tenantPreds: [string, unknown][] = [];
+      const profilePreds: [string, unknown][] = [];
+      let joinsProfile = false;
+      for (const [, alias, column, rhs] of comparisons) {
+        if (rhs === 't.id') {
+          expect(`${alias}.${column}`).toBe('pp.target_id');
+          joinsProfile = true;
+          continue;
+        }
+        (alias === 't' ? tenantPreds : profilePreds).push([
+          column,
+          params[next++],
+        ]);
+      }
+      expect(next).toBe(params.length);
+      const hit = (row: Record<string, unknown>, preds: [string, unknown][]) =>
+        preds.every(([column, value]) => row[column] === value);
+      return db.tenants
+        .filter((t) => hit(t, tenantPreds))
+        .filter(
+          (t) =>
+            !joinsProfile ||
+            db.public_profiles.some(
+              (pp) => pp.target_id === t.id && hit(pp, profilePreds),
+            ),
+        )
+        .map(() => ({ ok: 1 }));
+    }
+
+    function buildInMemory() {
+      const execute = mockFn((sql: string, params: unknown[]) =>
+        Promise.resolve(inMemory(sql, params)),
+      );
+      const em: any = { getConnection: () => ({ execute }) };
+      return { repo: new ReferralTargetsRepository(), em };
+    }
+
+    it.each(['ten-inexistente', 'ten-inactivo', 'ten-sin-vitrina'])(
+      'isListableOrganization(%s) es false',
+      async (tenantId) => {
+        const d = buildInMemory();
+        await expect(
+          d.repo.isListableOrganization(d.em, tenantId),
+        ).resolves.toBe(false);
+      },
+    );
+
+    it('isListableOrganization de un tenant activo con vitrina es true', async () => {
+      const d = buildInMemory();
+      await expect(
+        d.repo.isListableOrganization(d.em, 'ten-activo'),
+      ).resolves.toBe(true);
+    });
+
+    it.each(['ten-inexistente', 'ten-inactivo'])(
+      'isActiveTenant(%s) es false',
+      async (tenantId) => {
+        const d = buildInMemory();
+        await expect(d.repo.isActiveTenant(d.em, tenantId)).resolves.toBe(
+          false,
+        );
+      },
+    );
+
+    it('isActiveTenant no pide vitrina: activo con o sin ella es true', async () => {
+      const d = buildInMemory();
+      await expect(d.repo.isActiveTenant(d.em, 'ten-activo')).resolves.toBe(
+        true,
+      );
+      await expect(
+        d.repo.isActiveTenant(d.em, 'ten-sin-vitrina'),
+      ).resolves.toBe(true);
+    });
+
+    /**
+     * `searchPractitioners` filtra por el tenant de la práctica principal. Se
+     * evalúa su `NOT EXISTS` real, con el parámetro que el repositorio liga,
+     * para cada `pr.tenant_id` posible.
+     */
+    describe('searchPractitioners: tenant de la práctica principal', () => {
+      async function tenantFilter() {
+        const d = build();
+        await d.repo.searchPractitioners(
+          d.em,
+          'ana',
+          PRAC.ROLE_ASSIGNMENT_ACTIVE,
+          20,
+        );
+        const [sql, params] = d.execute.mock.calls[0];
+        const text = flat(sql);
+        const clause =
+          'NOT EXISTS ( SELECT 1 FROM directory.tenants tn WHERE tn.id = pr.tenant_id AND tn.status_concept_id IS DISTINCT FROM ? )';
+        const at = text.indexOf(clause);
+        expect(at).toBeGreaterThan(-1);
+        // El parámetro de esta marca: tantas `?` antes como posiciones.
+        const status = params[(text.slice(0, at).match(/\?/g) ?? []).length];
+        expect(status).toBe(CONCEPTS.TENANT_ACTIVE);
+        // `pr.tenant_id` viene del LATERAL de la práctica principal.
+        expect(text).toContain('pr ON TRUE');
+        return (prTenantId: string | null) =>
+          !db.tenants.some(
+            (tn) => tn.id === prTenantId && tn.status_concept_id !== status,
+          );
+      }
+
+      it('fuera si la práctica principal es de un tenant inactivo', async () => {
+        const passes = await tenantFilter();
+        expect(passes('ten-inactivo')).toBe(false);
+      });
+
+      it('dentro con tenant activo (con o sin vitrina) y sin práctica vigente', async () => {
+        const passes = await tenantFilter();
+        expect(passes('ten-activo')).toBe(true);
+        expect(passes('ten-sin-vitrina')).toBe(true);
+        // Sin práctica: `tenantId` nulo, derivable sin organización.
+        expect(passes(null)).toBe(true);
+      });
     });
   });
 });

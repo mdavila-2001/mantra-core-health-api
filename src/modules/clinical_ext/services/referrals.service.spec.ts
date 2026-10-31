@@ -823,6 +823,57 @@ describe('ReferralsService', () => {
         expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
       });
 
+      describe('orden respecto de las demás comprobaciones', () => {
+        it('sin escritura sobre la historia, responde el error de acceso y no mira el tenant', async () => {
+          const d = build();
+          d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+            new ForbiddenException('sin acceso'),
+          );
+          d.tenantsRepo.findById.mockResolvedValue(null);
+          const err = await createWith(d, { targetTenantId: 'ten-x' });
+          expect(err).toBeInstanceOf(ForbiddenException);
+          expect(d.tenantsRepo.findById).not.toHaveBeenCalled();
+          expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        });
+
+        it('el profesional destino se valida antes que el tenant', async () => {
+          const d = build();
+          d.practitionersRepo.findById.mockResolvedValue(null);
+          d.tenantsRepo.findById.mockResolvedValue(null);
+          const err = await createWith(d, {
+            targetProfileId: 'hp-x',
+            targetTenantId: 'ten-x',
+          });
+          expect(err.reason).toBe(
+            ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+          );
+          // El 404 es el del profesional, no el del tenant.
+          expect(httpBody(err).details).toEqual({ targetProfileId: 'hp-x' });
+          expect(d.tenantsRepo.findById).not.toHaveBeenCalled();
+        });
+
+        it('el 404 del tenant derivado del servicio sale antes de mirar el encuentro', async () => {
+          const d = build();
+          d.serviceCatalogRepo.findById.mockResolvedValue(service);
+          d.practicesRepo.findById.mockResolvedValue({
+            id: 'pr-1',
+            tenantId: 'ten-servicio',
+          });
+          d.tenantsRepo.findById.mockResolvedValue(
+            inactiveTenant('ten-servicio'),
+          );
+          // Un encuentro ajeno daría REFERRAL_ENCOUNTER_NOT_FOUND si se llegara.
+          d.encountersRepo.findById.mockResolvedValue(null);
+          const err = await createWith(d, {
+            targetServiceCatalogId: 'svc-1',
+          });
+          expect(err.reason).toBe(
+            ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+          );
+          expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+        });
+      });
+
       it('un tenant activo, indicado o derivado, se sigue creando y avisando', async () => {
         const d = build();
         d.encountersRepo.findById.mockResolvedValue(encounter);
@@ -863,10 +914,13 @@ describe('ReferralsService', () => {
         expect(d.notifier.notifyRecommended).toHaveBeenCalledTimes(2);
       });
 
-      it('GET /referrals/target-services: inexistente, inactivo y no listable dan el mismo 404, byte a byte', async () => {
-        // El repositorio responde por los tres casos con la misma consulta
-        // (`isListableOrganization`: existe, `TENANT_ACTIVE` y con vitrina);
-        // acá se simula cada uno y se compara el cuerpo.
+      it('GET /referrals/target-services: con el destino no listable, el 404 no depende del tenant ni consulta su estado aparte', async () => {
+        // Los tres casos comparten `isListableOrganization -> false`: lo que se
+        // prueba acá es que el servicio no agrega una consulta de existencia o
+        // estado que distinga el caso, y que el 404 sale sin leer el catálogo.
+        // Que la consulta real devuelva `false` para un tenant inexistente,
+        // inactivo o sin vitrina se prueba en
+        // `referral-targets.repository.spec.ts`, evaluando su WHERE.
         const d = build();
         d.tenantsRepo.findById.mockResolvedValue(null);
         d.targetsRepo.isListableOrganization.mockResolvedValue(false);
