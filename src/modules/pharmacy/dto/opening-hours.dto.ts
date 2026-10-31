@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { IsString, Matches, ValidateIf } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 import { ISO_INSTANT_WITH_OFFSET } from '../services/opening-hours.time';
 
 /** Quién declaró el turno (P34, D1). */
