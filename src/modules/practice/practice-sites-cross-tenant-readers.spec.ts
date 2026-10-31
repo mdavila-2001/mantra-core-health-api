@@ -54,6 +54,10 @@ const KNOWN_READERS: Record<string, string> = {
     'Puerto del adaptador anterior (tipos).',
   'pharmacy_inventory/application/pharmacy-inventory-read/read-pharmacy-inventory.use-case.ts':
     'Consume el puerto de directorio de farmacias.',
+  'delegated_access/repositories/support-links.repository.ts':
+    'Vínculos de la secretaria (personal de apoyo): valida y nombra sedes, servicios y pisos del hospital al que pide ' +
+    'entrar —todavía sin membresía— y los de sus vínculos en varios hospitales (rutas sin tenant activo). ' +
+    'Cruza tenants por diseño; con RLS_ENFORCE necesita contexto SYSTEM, igual que affiliation-organizations.',
   'billing/repositories/patient-spending.repository.ts':
     'SQL: une practice_sites con directory.tenants por managing_tenant_id para el gasto del paciente (cruza tenants). Contexto de RLS pendiente de decidir (#1167).',
   'clinical/repositories/procedure-centers-read.repository.ts':
