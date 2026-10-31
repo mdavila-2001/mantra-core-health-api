@@ -154,6 +154,30 @@ Variables (ver `.env.example`): `TELEMETRY_WEB_ANALYTICS_ENABLED`,
 `TELEMETRY_WEB_ANALYTICS_SITE_URL`, `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`,
 `GA4_DEBUG_VALIDATION`.
 
+## Uso y errores de la app (F2-APP, 31/10/2026)
+
+| Pieza | Dónde | Notas |
+|---|---|---|
+| `POST /telemetry/client-errors` | `telemetry-client-errors.controller.ts`, `domain/client-error-sanitizer.ts` | Público, 60 lotes/min/IP, `@NotAudited`; saneado en servidor; inserción sin `RETURNING`; actor sólo con token válido. |
+| `GET /admin/analytics/errors[/fingerprints[/:fp]|/routes-not-found]` | `telemetry-errors-analytics.*` | Lee `client_error_events`. |
+| `GET /admin/analytics/parts[/:routeCode]` | `telemetry-parts-analytics.*`, `domain/parts-registry.ts` | `route_template` → `frontend_routes` (siembra en `modules/read_models/seed`). |
+| `GET /admin/analytics/heatmap?metric=clicks\|rage\|dead\|scroll` | `telemetry-click-heatmap.*` | SQL parametrizado pivotado sobre propiedades del esquema `ux_interaccion` v2. |
+| `POST /telemetry/retention/purge` (`SYSTEM`) | `telemetry-retention.*`, worker `telemetry` | Purga por `default_retention_days` del propósito. |
+
+### `@PlatformScopeOptional()` va por MÉTODO, nunca en la clase
+
+Sin `X-Tenant-Id`, un rol de plataforma global agrega entre organizaciones con
+`minSample` (`TELEMETRY_PLATFORM_MIN_SAMPLE`, por defecto 5): `application/analytics-scope.ts`.
+Sólo las lecturas de agregados lo llevan (`overview`, `timeseries`, `web-vitals`,
+`pipeline-health`, `devices`, `heatmap`, `parts*`, `errors*`). `sessions`, el timeline y
+el reporte de embudo siguen exigiendo organización, y ningún `POST` es de alcance plataforma:
+un método nuevo que mute debe NO llevarlo.
+
+### Maqueta de onboarding
+
+`telemetry-onboarding-analytics.*` queda `@deprecated` (en memoria, cifras fijas): el front
+aún la consume. Qué falta para retirarla está en el TSDoc del servicio.
+
 ## Pruebas
 
 `corepack yarn test src/modules/telemetry --runInBand --silent` aprobó 14 suites y

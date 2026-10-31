@@ -11,7 +11,8 @@ const ELEMENT_LIMIT = 20;
 export const CLICK_EVENT_NAME = 'clic';
 
 export interface HeatmapScope {
-  tenantId: string;
+  /** Ausente = alcance plataforma (agrega entre organizaciones; ver `analytics-scope.ts`). */
+  tenantId?: string;
   route: string;
   window: AnalyticsWindow;
   portalConceptId?: string;
@@ -23,16 +24,35 @@ export interface HeatmapTotalsRow {
   positioned: number;
   keyboard: number;
   repeated: number;
+  /** Clics sobre un elemento interactivo sin efecto (`es_clic_muerto`). */
+  dead: number;
+  /** Personas distintas (`user_id`): sólo para decidir la supresión; no sale del servicio. */
+  subjects: number;
 }
 export interface HeatmapCellRow {
   col: number;
   row: number;
   clicks: number;
+  rage: number;
+  dead: number;
+  /** Personas distintas en la celda (supresión bajo `minSample`). */
+  subjects: number;
 }
 export interface HeatmapElementRow {
   target: string;
   clicks: number;
   repeated: number;
+  dead: number;
+  subjects: number;
+}
+export interface HeatmapScrollRow {
+  /** Páginas abandonadas (`pagina_abandonada`) de la ruta. */
+  pages: number;
+  /** De ellas, las que traen `profundidad_max`. */
+  measured: number;
+  subjects: number;
+  /** `reached[i]` = páginas con profundidad ≥ (i + 1) / 10. */
+  reached: number[];
 }
 export interface HeatmapSizeRow {
   screen_size: string;
@@ -58,13 +78,13 @@ export class TelemetryClickHeatmapRepository {
 
   /** CTE con un renglón por clic. Sus parámetros van primero en cada consulta. */
   private clicks(scope: HeatmapScope) {
-    const params: unknown[] = [
-      CLICK_EVENT_NAME,
-      scope.route,
-      scope.tenantId,
-      scope.window.from,
-      scope.window.to,
-    ];
+    const params: unknown[] = [CLICK_EVENT_NAME, scope.route];
+    let tenant = '';
+    if (scope.tenantId) {
+      tenant = ' AND e.tenant_id = ?';
+      params.push(scope.tenantId);
+    }
+    params.push(scope.window.from, scope.window.to);
     let portal = '';
     if (scope.portalConceptId) {
       portal = ' AND e.portal_type_concept_id = ?';
@@ -78,10 +98,12 @@ export class TelemetryClickHeatmapRepository {
              max(p.value_string) FILTER (WHERE p.property_name = 'tamano_pantalla') AS screen_size,
              max(p.value_string) FILTER (WHERE p.property_name = 'objetivo') AS target,
              coalesce(bool_or(p.value_boolean) FILTER (WHERE p.property_name = 'es_teclado'), false) AS keyboard,
-             coalesce(bool_or(p.value_boolean) FILTER (WHERE p.property_name = 'es_clic_repetido'), false) AS repeated
+             coalesce(bool_or(p.value_boolean) FILTER (WHERE p.property_name = 'es_clic_repetido'), false) AS repeated,
+             coalesce(bool_or(p.value_boolean) FILTER (WHERE p.property_name = 'es_clic_muerto'), false) AS dead,
+             e.user_id AS uid
         FROM telemetry.user_activity_events e
         LEFT JOIN telemetry.user_activity_event_properties p ON p.user_activity_event_id = e.id
-       WHERE e.event_name = ? AND e.route_template = ? AND e.tenant_id = ?
+       WHERE e.event_name = ? AND e.route_template = ?${tenant}
          AND e.occurred_at >= ? AND e.occurred_at < ?${portal}
        GROUP BY e.id
     ), positioned AS (
@@ -106,11 +128,15 @@ export class TelemetryClickHeatmapRepository {
        SELECT count(*)::int AS clicks,
               count(*) FILTER (WHERE NOT keyboard AND x IS NOT NULL AND y_px IS NOT NULL AND doc_px > 0)::int AS positioned,
               count(*) FILTER (WHERE keyboard)::int AS keyboard,
-              count(*) FILTER (WHERE repeated)::int AS repeated
+              count(*) FILTER (WHERE repeated)::int AS repeated,
+              count(*) FILTER (WHERE dead)::int AS dead,
+              count(DISTINCT uid)::int AS subjects
          FROM clicks${where}`,
       params,
     );
-    return row ?? { clicks: 0, positioned: 0, keyboard: 0, repeated: 0 };
+    return (
+      row ?? { clicks: 0, positioned: 0, keyboard: 0, repeated: 0, dead: 0, subjects: 0 }
+    );
   }
 
   cells(scope: HeatmapScope): Promise<HeatmapCellRow[]> {
@@ -122,7 +148,10 @@ export class TelemetryClickHeatmapRepository {
       `${sql}
        SELECT least(floor(least(greatest(x, 0), 1) * ${c}), ${c - 1})::int AS col,
               least(floor(least(greatest(y_px / doc_px, 0), 1) * ${r}), ${r - 1})::int AS row,
-              count(*)::int AS clicks
+              count(*)::int AS clicks,
+              count(*) FILTER (WHERE repeated)::int AS rage,
+              count(*) FILTER (WHERE dead)::int AS dead,
+              count(DISTINCT uid)::int AS subjects
          FROM positioned${where}
         GROUP BY 1, 2
         ORDER BY 2, 1`,
@@ -135,7 +164,8 @@ export class TelemetryClickHeatmapRepository {
     const where = this.size(scope, params);
     return this.sql<HeatmapElementRow>(
       `${sql}
-       SELECT target, count(*)::int AS clicks, count(*) FILTER (WHERE repeated)::int AS repeated
+       SELECT target, count(*)::int AS clicks, count(*) FILTER (WHERE repeated)::int AS repeated,
+              count(*) FILTER (WHERE dead)::int AS dead, count(DISTINCT uid)::int AS subjects
          FROM clicks${where ? `${where} AND target IS NOT NULL` : ' WHERE target IS NOT NULL'}
         GROUP BY 1
         ORDER BY 2 DESC, 1
@@ -155,5 +185,78 @@ export class TelemetryClickHeatmapRepository {
         ORDER BY 2 DESC, 1`,
       params,
     );
+  }
+
+  /**
+   * Profundidad de scroll: de `pagina_abandonada.profundidad_max`, cuántas
+   * páginas alcanzaron cada décima (0,1 … 1,0). Se filtra por tamaño de pantalla
+   * con la propiedad `tamano_pantalla` del mismo evento.
+   */
+  async scroll(scope: HeatmapScope): Promise<HeatmapScrollRow> {
+    const params: unknown[] = ['pagina_abandonada', scope.route];
+    let tenant = '';
+    if (scope.tenantId) {
+      tenant = ' AND e.tenant_id = ?';
+      params.push(scope.tenantId);
+    }
+    params.push(scope.window.from, scope.window.to);
+    let portal = '';
+    if (scope.portalConceptId) {
+      portal = ' AND e.portal_type_concept_id = ?';
+      params.push(scope.portalConceptId);
+    }
+    let size = '';
+    if (scope.screenSize) {
+      size = ' WHERE screen_size = ?';
+      params.push(scope.screenSize);
+    }
+    const buckets = Array.from(
+      { length: 10 },
+      (_, i) => `count(*) FILTER (WHERE depth >= ${(i + 1) / 10})::int AS r${i}`,
+    ).join(', ');
+    const [row] = await this.sql<Record<string, number>>(
+      `WITH pages AS (
+         SELECT e.id, e.user_id AS uid,
+                max(p.value_number) FILTER (WHERE p.property_name = 'profundidad_max') AS depth,
+                max(p.value_string) FILTER (WHERE p.property_name = 'tamano_pantalla') AS screen_size
+           FROM telemetry.user_activity_events e
+           LEFT JOIN telemetry.user_activity_event_properties p ON p.user_activity_event_id = e.id
+          WHERE e.event_name = ? AND e.route_template = ?${tenant}
+            AND e.occurred_at >= ? AND e.occurred_at < ?${portal}
+          GROUP BY e.id
+       )
+       SELECT count(*)::int AS pages, count(depth)::int AS measured,
+              count(DISTINCT uid)::int AS subjects, ${buckets}
+         FROM pages${size}`,
+      params,
+    );
+    return {
+      pages: row?.pages ?? 0,
+      measured: row?.measured ?? 0,
+      subjects: row?.subjects ?? 0,
+      reached: Array.from({ length: 10 }, (_, i) => Number(row?.[`r${i}`] ?? 0)),
+    };
+  }
+
+  /** Vistas de la ruta (`pagina_vista`) en la ventana: el denominador natural de los clics. */
+  async views(scope: HeatmapScope): Promise<number> {
+    const params: unknown[] = [scope.route, scope.window.from, scope.window.to];
+    let tenant = '';
+    if (scope.tenantId) {
+      tenant = ' AND e.tenant_id = ?';
+      params.push(scope.tenantId);
+    }
+    let portal = '';
+    if (scope.portalConceptId) {
+      portal = ' AND e.portal_type_concept_id = ?';
+      params.push(scope.portalConceptId);
+    }
+    const [row] = await this.sql<{ n: number }>(
+      `SELECT count(*)::int AS n FROM telemetry.user_activity_events e
+        WHERE e.route_template = ? AND e.occurred_at >= ? AND e.occurred_at < ?${tenant}${portal}
+          AND e.event_name IN ('pagina_vista', 'page_view')`,
+      params,
+    );
+    return row?.n ?? 0;
   }
 }

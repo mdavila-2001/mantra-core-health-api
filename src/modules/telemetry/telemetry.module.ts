@@ -10,8 +10,10 @@ import {
 import { TelemetryOnboardingAnalyticsController } from './presentation/controllers/telemetry-onboarding-analytics.controller';
 import { TelemetryClientErrorsController } from './presentation/controllers/telemetry-client-errors.controller';
 import { TelemetryErrorsAnalyticsController } from './presentation/controllers/telemetry-errors-analytics.controller';
+import { TelemetryPartsAnalyticsController } from './presentation/controllers/telemetry-parts-analytics.controller';
 import { TelemetryClientErrorsService } from './application/services/telemetry-client-errors.service';
 import { TelemetryErrorsAnalyticsService } from './application/services/telemetry-errors-analytics.service';
+import { TelemetryPartsAnalyticsService } from './application/services/telemetry-parts-analytics.service';
 import { TelemetryClientErrorsRepository } from './infrastructure/repositories/telemetry-client-errors.repository';
 import { TelemetryClientErrorsReadRepository } from './infrastructure/repositories/telemetry-client-errors-read.repository';
 import { TelemetryPartsRepository } from './infrastructure/repositories/telemetry-parts.repository';
@@ -72,6 +74,7 @@ import {
     TelemetryClickHeatmapController,
     TelemetryClientErrorsController,
     TelemetryErrorsAnalyticsController,
+    TelemetryPartsAnalyticsController,
   ],
   providers: [
     // Repositorios
@@ -116,6 +119,7 @@ import {
     TelemetryClickHeatmapService,
     TelemetryClientErrorsService,
     TelemetryErrorsAnalyticsService,
+    TelemetryPartsAnalyticsService,
     TelemetryOnboardingAnalyticsService,
   ],
   exports: [

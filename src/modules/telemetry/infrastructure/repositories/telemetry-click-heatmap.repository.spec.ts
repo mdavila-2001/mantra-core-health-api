@@ -80,6 +80,8 @@ describe('TelemetryClickHeatmapRepository (SQL capturado, base doblada)', () => 
       positioned: 0,
       keyboard: 0,
       repeated: 0,
+      dead: 0,
+      subjects: 0,
     });
   });
 });
