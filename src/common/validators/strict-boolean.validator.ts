@@ -13,8 +13,10 @@ import { IsBoolean, type ValidationOptions } from 'class-validator';
  * así un texto o un número es un 400 y no una decisión tomada por el cliente.
  *
  * Es el único `IsBoolean` de los DTO de `pharmacy` y `pharmacy_inventory`: lo
- * exige `strict-boolean.rule.spec.ts`. No toca `undefined` ni `null`: si el campo
- * es opcional lo sigue decidiendo `@IsOptional()` o `@ValidateIf()`.
+ * exige `strict-boolean.rule.spec.ts`. Vive en `common` porque no es de ningún
+ * contexto: lo usan los DTO de los dos módulos sin que uno entre al otro. No
+ * toca `undefined` ni `null`: si el campo es opcional lo sigue decidiendo
+ * `@IsOptional()` o `@ValidateIf()`.
  */
 export function IsStrictBoolean(
   options?: ValidationOptions,

@@ -21,7 +21,7 @@ const MODULES = ['pharmacy', 'pharmacy_inventory'].map((name) =>
 );
 const DECORATOR_FILE = join(
   process.cwd(),
-  'src/modules/pharmacy/dto/strict-boolean.ts',
+  'src/common/validators/strict-boolean.validator.ts',
 );
 
 function sourceFiles(dir: string): string[] {

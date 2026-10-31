@@ -20,7 +20,10 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../../common';
-import { BulkRequestDto, BulkResponseDto } from '../../../pharmacy/dto';
+import {
+  BulkRequestDto,
+  BulkResponseDto,
+} from '../../../../common/dto/bulk-load.dto';
 import { BulkSiteAvailabilityUseCase } from '../../application/site-availability/bulk-site-availability.use-case';
 import { SetSiteProductAvailabilityUseCase } from '../../application/site-availability/set-site-product-availability.use-case';
 import { SetSiteAvailabilityDto, SiteAvailabilityResponseDto } from '../dto';

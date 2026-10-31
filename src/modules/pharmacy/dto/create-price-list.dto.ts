@@ -8,7 +8,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { IsStrictBoolean } from './strict-boolean';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 
 /** Tipos de lista de precios soportados. */
 export type PriceListTypeCode = 'PUBLIC' | 'INSURER';

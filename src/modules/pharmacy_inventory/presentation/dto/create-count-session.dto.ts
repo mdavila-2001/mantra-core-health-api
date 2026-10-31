@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsOptional, IsUUID, ValidateNested } from 'class-validator';
-import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
+import { IsStrictBoolean } from '../../../../common/validators/strict-boolean.validator';
 
 /** Un producto/lote a incluir en el snapshot de conteo. */
 export class CountSessionItemDto {
