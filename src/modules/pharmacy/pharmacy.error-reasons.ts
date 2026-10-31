@@ -50,4 +50,13 @@ export enum PharmacyErrorReason {
   CATALOG_PRODUCT_TAKEN = 'CATALOG_PRODUCT_TAKEN',
   /** Carga masiva de precios: no hay producto con ese código. */
   PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
+  /**
+   * El vínculo con el código externo no existe o es de otra conexión: ambos
+   * casos responden igual.
+   */
+  EXTERNAL_MAPPING_NOT_AVAILABLE = 'EXTERNAL_MAPPING_NOT_AVAILABLE',
+  /** El producto ya tiene un vínculo en esta conexión: se corrige ese. */
+  EXTERNAL_MAPPING_PRODUCT_TAKEN = 'EXTERNAL_MAPPING_PRODUCT_TAKEN',
+  /** La corrección de un vínculo no trae ningún campo. */
+  EXTERNAL_MAPPING_EMPTY_UPDATE = 'EXTERNAL_MAPPING_EMPTY_UPDATE',
 }
