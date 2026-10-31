@@ -256,6 +256,12 @@ jobs:
       - name: Guardrails ALOVIDA — antipatrones prohibidos por las reglas canónicas
         run: yarn alovida:guardrails
 
+      # O3-3 / H-1: ningún endpoint de escritura sin @Roles, @Public ni revisión documentada.
+      - name: ORPHAN_ENDPOINT — mutantes sin @Roles, @Public ni revisión documentada
+        run: |
+          node --test tools/alovida/coverage-report.test.mjs
+          node tools/alovida/coverage-report.mjs --fail-on-orphan
+
       # El inventario (`inventario/`, `docs/inventario/`) se genera desde el código Y
       # desde el repo del modelo (propósito, dominio y tablas de cada módulo), así que
       # verificarlo exige tener el modelo al lado. El repo es público: no hace falta
