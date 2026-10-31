@@ -19,6 +19,7 @@ import {
 } from '../dto';
 import { Encounters } from '../entities';
 import { CLIN } from '../clinical.concepts';
+import { PRAC } from '../../practice/practice.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { EncounterSealService } from './encounter-seal.service';
 import { ClinicalReadService } from './clinical-read.service';
@@ -173,6 +174,24 @@ export class EncountersService {
         );
         if (appointmentEncounter) {
           return appointmentEncounter;
+        }
+      }
+
+      // F3 (CONTRATO-F2-F5 §F3.3): las camas sólo se ocupan por ADT; un
+      // check-in en una cama esquivaría la compatibilidad, el EXCLUDE de
+      // ocupación y el evento A20.
+      if (dto.location?.careSpaceId) {
+        const [space] = await tx.execute<{ form_concept_id: string | null }[]>(
+          'SELECT form_concept_id FROM practice.care_spaces WHERE id = ?',
+          [dto.location.careSpaceId],
+          'all',
+        );
+        if (space?.form_concept_id === PRAC.LOC_FORM_BED) {
+          throw new PreconditionFailedException(
+            'Las camas se ocupan por internación (ADT), no por check-in',
+            { careSpaceId: dto.location.careSpaceId },
+            'BED_ASSIGNMENT_REQUIRES_ADT',
+          );
         }
       }
 

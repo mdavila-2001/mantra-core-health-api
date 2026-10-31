@@ -179,10 +179,10 @@ export class CareSpaceOpsRepository {
               location_status_concept_id AS status_id, period_start
          FROM clinical.encounter_locations
         WHERE care_space_id = ANY(?::uuid[]) AND is_bed_assignment
-          AND ((location_status_concept_id = ? AND period_start <= now()
-                AND (period_end IS NULL OR period_end > now()))
+          AND ((location_status_concept_id = ? AND period_start <= clock_timestamp()
+                AND (period_end IS NULL OR period_end > clock_timestamp()))
             OR (location_status_concept_id = ?
-                AND (period_end IS NULL OR period_end > now())))`,
+                AND (period_end IS NULL OR period_end > clock_timestamp())))`,
       [`{${spaceIds.join(',')}}`, CLIN.LOCATION_ACTIVE, CLIN.LOCATION_RESERVED],
       'all',
     );

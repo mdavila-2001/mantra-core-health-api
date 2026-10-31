@@ -157,6 +157,31 @@ import { DataAccessLogRepository } from '../audit/repositories';
 // La comprobación vive en `forms` y es una clase sin estado por `EntityManager`:
 // se provee suelta, sin importar `FormsModule` entero, igual que el resto.
 import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
+// F3 internación / ADT (CONTRATO-F2-F5 §F3): la cama se opera por
+// `CareSpaceOpsPort` y se autoriza con el evaluador de §0.3, los dos de
+// `PracticeModule`, que no importa `clinical` (sin ciclo).
+import { PracticeModule } from '../practice/practice.module';
+import {
+  ClinicalAdtController,
+  ClinicalCensusController,
+} from './controllers/clinical-adt.controller';
+import { InpatientRepository } from './repositories/inpatient.repository';
+import { AdtSupport } from './services/inpatient/adt-support';
+import {
+  AdmitPatientUseCase,
+  AssignBedUseCase,
+  CancelLocationUseCase,
+  DischargePatientUseCase,
+  ReviewPlacementIncidentUseCase,
+  SwapBedsUseCase,
+  TransferPatientUseCase,
+} from './services/inpatient/adt.use-cases';
+import { InpatientCensusUseCases } from './services/inpatient/census.use-cases';
+import { InpatientReadUseCases } from './services/inpatient/inpatient-read.use-cases';
+import { InpatientAdtService } from './services/inpatient-adt.service';
+import { InpatientCensusService } from './services/inpatient-census.service';
+import { InpatientIndicatorsService } from './services/inpatient-indicators.service';
+import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -172,8 +197,11 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     CommonModule,
     AuthzModule,
     TerminologyModule,
+    PracticeModule,
   ],
   controllers: [
+    ClinicalAdtController,
+    ClinicalCensusController,
     ClinicalEncountersController,
     // D-B (FT-22): `GET|PUT /clinical/me/medical-aspects`. Sin `@Roles`, el
     // titular sale del vínculo de la cuenta. `clinical.module.spec.ts` exige
@@ -194,6 +222,21 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalPrescriptionExpiryController,
   ],
   providers: [
+    InpatientRepository,
+    AdtSupport,
+    AdmitPatientUseCase,
+    AssignBedUseCase,
+    TransferPatientUseCase,
+    SwapBedsUseCase,
+    DischargePatientUseCase,
+    CancelLocationUseCase,
+    ReviewPlacementIncidentUseCase,
+    InpatientCensusUseCases,
+    InpatientReadUseCases,
+    InpatientAdtService,
+    InpatientCensusService,
+    InpatientIndicatorsService,
+    InfraF3PolicyRegistrar,
     // Repositorios
     FormInstanceOriginValidator,
     // Recomendación de ejecutor de la orden: lee ofertas y afiliaciones de las
