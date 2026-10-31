@@ -63,6 +63,9 @@ export const { seeds: TELEMETRY_CONCEPT_SEEDS, ids: TELE } =
     },
     RATING_POOR: { code: 'POOR', display: 'Poor' },
     NAV_NAVIGATE: { code: 'NAVIGATE', display: 'Navigate' },
+    // Estado de un esquema de evento reemplazado por una versión nueva: sigue
+    // existiendo (sus filas viejas lo referencian) pero ya no acepta eventos.
+    SCHEMA_DEPRECATED: { code: 'DEPRECATED', display: 'Schema deprecated' },
   });
 
 /** Métrica Web Vital (código) -> concepto. */

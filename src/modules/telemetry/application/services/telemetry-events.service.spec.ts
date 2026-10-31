@@ -60,6 +60,10 @@ function build() {
       decisionConceptId: TELE.DECISION_GRANTED,
     }),
   };
+  // Por defecto el propósito exige consentimiento: el gate funciona como antes.
+  const purposesRepo = {
+    findById: mockFn().mockResolvedValue({ requiresConsent: true }),
+  };
   // Sólo las sesiones de A son de A: `belongsToUser` compara contra su id real.
   const sessionsRepo = {
     findIdByToken: mockFn((_tx: unknown, userId: string, token: string) =>
@@ -90,6 +94,7 @@ function build() {
     conversionsRepo,
     subjectsRepo as any,
     consentsRepo as any,
+    purposesRepo as any,
     sessionsRepo as any,
     webAnalytics as any,
     logger as any,
@@ -107,6 +112,7 @@ function build() {
     conversionsRepo,
     subjectsRepo,
     consentsRepo,
+    purposesRepo,
     sessionsRepo,
     webAnalytics,
   };
@@ -363,6 +369,291 @@ describe('TelemetryEventsService', () => {
       // Lo que el gate descarta tampoco puede salir hacia la analítica externa.
       expect(d.webAnalytics.trackActivityEvents).toHaveBeenCalledWith([], {
         tenantId: undefined,
+      });
+    });
+
+    describe('uso agregado sin consentimiento (PLATFORM_USAGE_AGGREGATE)', () => {
+      const ANON_SCHEMA = 'anon-schema';
+      const anonSchema = (over: Record<string, unknown> = {}) =>
+        schemaWith({
+          id: ANON_SCHEMA,
+          eventName: 'pagina_vista_anonima',
+          purposeDefinitionId: 'p-anon',
+          propertySchemaJson: { type: 'object', properties: {} },
+          ...over,
+        });
+      /** Esquema anónimo, propósito sin consentimiento y sin decisión del usuario. */
+      const withoutConsentDecision = () => {
+        const d = build();
+        d.schemasRepo.findById.mockResolvedValue(anonSchema());
+        d.purposesRepo.findById.mockResolvedValue({ requiresConsent: false });
+        d.consentsRepo.findLatest.mockResolvedValue(null);
+        d.eventsRepo.create.mockReturnValue({ id: 'e-anon' });
+        return d;
+      };
+
+      it('Correcto: sin decisión de consentimiento la vista anónima entra sin usuario, sesión ni sujeto', async () => {
+        const d = withoutConsentDecision();
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                eventName: 'pagina_vista',
+                routeTemplate: '/pacientes/:id/agenda',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 1, skipped: 0 });
+        expect(res.sessionJourneyId).toBeUndefined();
+        const row = d.eventsRepo.create.mock.calls[0][1];
+        expect(row.userId).toBeUndefined();
+        expect(row.sessionId).toBeUndefined();
+        expect(row.analyticsSubjectId).toBeUndefined();
+        expect(row.eventName).toBe('pagina_vista');
+        expect(row.routeTemplate).toBe('/pacientes/:id/agenda');
+        // No consulta el consentimiento, no abre journey, no reenvía.
+        expect(d.consentsRepo.findLatest).not.toHaveBeenCalled();
+        expect(d.journeysRepo.create).not.toHaveBeenCalled();
+        expect(d.journeysRepo.findOpenBySession).not.toHaveBeenCalled();
+        expect(d.webAnalytics.trackActivityEvents).toHaveBeenCalledWith([], {
+          tenantId: undefined,
+        });
+      });
+
+      it('Límite: otro nombre de evento se guarda con el del esquema y la clave se acota a los anónimos', async () => {
+        const d = withoutConsentDecision();
+        d.eventsRepo.findByIdempotencyKey.mockResolvedValue(null);
+
+        await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                eventName: 'clic',
+                eventIdempotencyKey: 'k1',
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(d.eventsRepo.create.mock.calls[0][1].eventName).toBe(
+          'pagina_vista_anonima',
+        );
+        expect(d.eventsRepo.findByIdempotencyKey).toHaveBeenCalledWith(
+          expect.anything(),
+          'k1',
+          null,
+        );
+      });
+
+      it('Límite: el reenvío anónimo con la misma clave no inserta', async () => {
+        const d = withoutConsentDecision();
+        d.eventsRepo.findByIdempotencyKey.mockResolvedValue({ id: 'previo' });
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                eventIdempotencyKey: 'k1',
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 0, skipped: 1 });
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['sin plantilla de ruta', undefined],
+        ['con un correo en la ruta', '/u/ana@correo.com'],
+        ['con un documento en la ruta', '/pacientes/12345678/ficha'],
+      ])('Error 422: %s', async (_name, routeTemplate) => {
+        const d = withoutConsentDecision();
+
+        const error = await failure(
+          d.service.captureActivityEvents(
+            {
+              events: [{ eventSchemaDefinitionId: ANON_SCHEMA, routeTemplate }],
+            },
+            actor,
+          ),
+        );
+
+        expect(error.reason).toBe(TelemetryErrorReason.ANONYMOUS_ROUTE_INVALID);
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('Error 422: el esquema anónimo no admite propiedades', async () => {
+        const d = withoutConsentDecision();
+
+        const error = await failure(
+          d.service.captureActivityEvents(
+            {
+              events: [
+                {
+                  eventSchemaDefinitionId: ANON_SCHEMA,
+                  routeTemplate: '/inicio',
+                  properties: [{ propertyName: 'x_doc', valueNumber: 0.5 }],
+                },
+              ],
+            },
+            actor,
+          ),
+        );
+
+        expect(error.reason).toBe(
+          TelemetryErrorReason.EVENT_PROPERTY_NOT_ALLOWED,
+        );
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('Autorización negativa: un evento con sujeto sigue descartado sin consentimiento aunque el propósito no lo exija', async () => {
+        const d = withoutConsentDecision();
+        d.subjectsRepo.findById.mockResolvedValue({
+          id: 'subj-a',
+          userId: 'user-a',
+        });
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                analyticsSubjectId: 'subj-a',
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 0, skipped: 1 });
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('Autorización negativa: el sujeto de otro usuario sigue respondiendo 404', async () => {
+        const d = withoutConsentDecision();
+        d.subjectsRepo.findById.mockResolvedValue({
+          id: 'subj-b',
+          userId: 'user-b',
+        });
+
+        const error = await failure(
+          d.service.captureActivityEvents(
+            {
+              events: [
+                {
+                  eventSchemaDefinitionId: ANON_SCHEMA,
+                  analyticsSubjectId: 'subj-b',
+                  routeTemplate: '/inicio',
+                },
+              ],
+            },
+            actor,
+          ),
+        );
+
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('Autorización negativa: un propósito sin dato de requires_consent exige consentimiento', async () => {
+        const d = withoutConsentDecision();
+        d.purposesRepo.findById.mockResolvedValue({ requiresConsent: null });
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 0, skipped: 1 });
+      });
+
+      it('Autorización negativa: el clic identificable de ux_interaccion se descarta sin decisión', async () => {
+        const d = build();
+        d.schemasRepo.findById.mockResolvedValue(schemaWith());
+        d.purposesRepo.findById.mockResolvedValue({ requiresConsent: true });
+        d.consentsRepo.findLatest.mockResolvedValue(null);
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: 's1',
+                eventName: 'clic',
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 0, skipped: 1 });
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('Lote mixto sin decisión: entra la vista anónima y se descarta el clic', async () => {
+        const d = build();
+        d.schemasRepo.findById.mockImplementation((_tx: unknown, id: string) =>
+          Promise.resolve(id === ANON_SCHEMA ? anonSchema() : schemaWith()),
+        );
+        d.purposesRepo.findById.mockImplementation((_tx: unknown, id: string) =>
+          Promise.resolve({ requiresConsent: id !== 'p-anon' }),
+        );
+        d.consentsRepo.findLatest.mockResolvedValue(null);
+        d.eventsRepo.create.mockReturnValue({ id: 'e-anon' });
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              { eventSchemaDefinitionId: 's1', eventName: 'clic' },
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 1, skipped: 1 });
+        expect(d.eventsRepo.create).toHaveBeenCalledTimes(1);
+      });
+
+      it('412: un esquema DEPRECATED ya no acepta eventos', async () => {
+        const d = build();
+        d.schemasRepo.findById.mockResolvedValue(
+          schemaWith({ statusConceptId: TELE.SCHEMA_DEPRECATED }),
+        );
+
+        const error = await failure(
+          d.service.captureActivityEvents(
+            { events: [{ eventSchemaDefinitionId: 's1' }] },
+            actor,
+          ),
+        );
+
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect(error.reason).toBe(TelemetryErrorReason.EVENT_SCHEMA_NOT_ACTIVE);
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
       });
     });
 

@@ -312,6 +312,7 @@ describe('Google Analytics Measurement Protocol (contract)', () => {
           decisionConceptId: TELE.DECISION_GRANTED,
         })),
       } as any,
+      { findById: mockFn(async () => ({ requiresConsent: true })) } as any,
       {
         findIdByToken: mockFn(
           async () => '9f1c1f2e-1f7a-4d1c-9a1e-4d2b6c8e0a11',

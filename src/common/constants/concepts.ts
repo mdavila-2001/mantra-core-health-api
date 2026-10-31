@@ -123,6 +123,26 @@ export const SEED = {
     'seed:telemetry:event-schema:ux_interaccion:1',
   ),
   /**
+   * `ux_interaccion` v2: la misma interacción con `propertySchemaJson`
+   * completo (la v1 no declaraba ninguna propiedad y rechazaba todas). La v1
+   * queda `DEPRECATED`; el front apunta a este id.
+   */
+  uxHeatmapEventSchemaV2Id: deterministicId(
+    'seed:telemetry:event-schema:ux_interaccion:2',
+  ),
+  /**
+   * Uso agregado de la plataforma, sin consentimiento, sin sujeto y con
+   * `user_id` nulo, y su esquema `pagina_vista_anonima` (sólo la plantilla de
+   * ruta). Los siembra `TelemetryUxHeatmapSeedService`.
+   */
+  platformUsageAggregatePurposeId: deterministicId(
+    'seed:telemetry:purpose:PLATFORM_USAGE_AGGREGATE',
+  ),
+  platformUsageAggregatePurposeCode: 'PLATFORM_USAGE_AGGREGATE',
+  pageViewAnonymousEventSchemaId: deterministicId(
+    'seed:telemetry:event-schema:pagina_vista_anonima:1',
+  ),
+  /**
    * Cuenta de servicio de los 17 procesos worker (`src/worker-<dominio>.ts`,
    * `src/worker/bootstrap.ts`). No tiene
    * credencial de login: el worker firma su propio access token con

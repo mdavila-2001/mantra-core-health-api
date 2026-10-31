@@ -403,3 +403,23 @@ export function validateEventProperties(
   }
   return accepted;
 }
+
+/**
+ * Comprueba que una plantilla de ruta pueda guardarse sin sujeto: no vacía y
+ * sin correo ni corridas de 7 o más dígitos (los mismos patrones que se niegan
+ * a un valor de propiedad). Una ruta con un id en claro identificaría a quien
+ * la visitó, y un evento anónimo no tiene otro control.
+ *
+ * @param routeTemplate - Plantilla de ruta recibida.
+ * @returns `true` si puede guardarse en un evento anónimo.
+ */
+export function isAnonymousSafeRouteTemplate(
+  routeTemplate: string | undefined,
+): routeTemplate is string {
+  if (routeTemplate === undefined || routeTemplate.trim().length === 0) {
+    return false;
+  }
+  return !BASELINE_PROHIBITED_VALUE_PATTERNS.some((pattern) =>
+    pattern.test(routeTemplate),
+  );
+}

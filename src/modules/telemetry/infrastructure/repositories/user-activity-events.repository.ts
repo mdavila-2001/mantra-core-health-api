@@ -73,13 +73,14 @@ export class UserActivityEventsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param key - Clave de idempotencia.
-   * @param userId - Usuario autenticado dueño de la clave.
+   * @param userId - Usuario autenticado dueño de la clave; `null` para los eventos
+   *   de uso agregado, que se guardan sin usuario.
    * @returns El evento previo, o `null`.
    */
   findByIdempotencyKey(
     em: EntityManager,
     key: string,
-    userId: string,
+    userId: string | null,
   ): Promise<UserActivityEvents | null> {
     return em.findOne(UserActivityEvents, { eventIdempotencyKey: key, userId });
   }
