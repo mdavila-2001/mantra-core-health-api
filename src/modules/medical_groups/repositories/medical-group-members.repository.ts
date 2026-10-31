@@ -86,6 +86,15 @@ export class MedicalGroupMembersRepository {
       .then((rows) => [...new Set(rows.map((row) => row.groupId))]);
   }
 
+  remove(em: EntityManager, member: MedicalGroupMembers): void {
+    em.remove(member);
+  }
+
+  /** Borra todo el equipo del grupo, antes de borrar el grupo. */
+  async removeByGroup(em: EntityManager, groupId: string): Promise<void> {
+    await em.nativeDelete(MedicalGroupMembers, { groupId });
+  }
+
   hasPendingInvites(em: EntityManager, groupId: string): Promise<boolean> {
     return em
       .count(MedicalGroupMembers, {
