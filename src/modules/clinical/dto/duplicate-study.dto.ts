@@ -10,6 +10,7 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { IsConceptId } from './concept-id.validator';
 import {
   DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
   MAX_DUPLICATE_STUDY_WINDOW_DAYS,
@@ -37,7 +38,7 @@ export class CheckDuplicateStudyDto {
   @ValidateIf(
     (o: CheckDuplicateStudyDto) => o.diagnosticStudyOfferingId === undefined,
   )
-  @IsUUID()
+  @IsConceptId()
   codeConceptId?: string;
 
   @ApiPropertyOptional({
@@ -77,7 +78,7 @@ export class CheckDuplicateStudyDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   bodySiteConceptId?: string;
 
   @ApiPropertyOptional({
@@ -85,7 +86,7 @@ export class CheckDuplicateStudyDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   lateralityConceptId?: string;
 
   @ApiPropertyOptional({
@@ -98,7 +99,7 @@ export class CheckDuplicateStudyDto {
   @IsArray()
   @ArrayMaxSize(500)
   @ArrayUnique()
-  @IsUUID(undefined, { each: true })
+  @IsConceptId({ each: true })
   componentConceptIds?: string[];
 }
 

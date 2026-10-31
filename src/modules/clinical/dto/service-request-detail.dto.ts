@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsConceptId } from './concept-id.validator';
 
 /**
  * Detalle de imagen de una orden (v4.2.80). Todos los campos son opcionales en
@@ -13,7 +14,7 @@ export class ImagingDetailDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   modalityConceptId?: string;
 
   @ApiPropertyOptional({
@@ -22,7 +23,7 @@ export class ImagingDetailDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   bodySiteConceptId?: string;
 
   @ApiPropertyOptional({
@@ -31,7 +32,7 @@ export class ImagingDetailDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   lateralityConceptId?: string;
 
   @ApiPropertyOptional({
@@ -40,7 +41,7 @@ export class ImagingDetailDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   contrastConceptId?: string;
 }
 

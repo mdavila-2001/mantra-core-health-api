@@ -4,10 +4,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ParseConceptIdPipe } from '../../clinical/dto/concept-id.validator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -92,7 +92,7 @@ export class StudyCatalogController {
       'Componentes anidados (laboratorio), muestra sugerida y elegibles, modalidad, regiones permitidas, lateralidad, contraste y avisos de licencia (LOINC, DICOM, SNOMED, RadLex, UBERON). 404 si el concepto no es un estudio del catálogo.',
   })
   detail(
-    @Param('conceptId', ParseUUIDPipe) conceptId: string,
+    @Param('conceptId', ParseConceptIdPipe) conceptId: string,
   ): Promise<StudyCatalogDetailDto> {
     return this.service.detail(conceptId);
   }

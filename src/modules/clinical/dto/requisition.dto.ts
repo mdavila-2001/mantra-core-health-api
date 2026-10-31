@@ -15,6 +15,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+import { IsConceptId } from './concept-id.validator';
 import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
@@ -60,7 +61,7 @@ export class RequisitionItemDto {
     description: 'Estudio pedido (concept id de service-request-code)',
     format: 'uuid',
   })
-  @IsUUID()
+  @IsConceptId()
   codeConceptId!: string;
 
   @ApiPropertyOptional({ enum: ANALYSIS_CATEGORIES })
@@ -70,7 +71,7 @@ export class RequisitionItemDto {
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   categoryConceptId?: string;
 
   @ApiPropertyOptional({
@@ -78,7 +79,7 @@ export class RequisitionItemDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   specimenTypeConceptId?: string;
 
   @ApiPropertyOptional({
@@ -91,7 +92,7 @@ export class RequisitionItemDto {
   @IsArray()
   @ArrayMaxSize(500)
   @ArrayUnique()
-  @IsUUID(undefined, { each: true })
+  @IsConceptId({ each: true })
   componentConceptIds?: string[];
 
   @ApiPropertyOptional({ type: () => ImagingDetailDto })

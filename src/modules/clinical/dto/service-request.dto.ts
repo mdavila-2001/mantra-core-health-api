@@ -14,6 +14,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+import { IsConceptId } from './concept-id.validator';
 import {
   ANALYSIS_CATEGORIES,
   type AnalysisCategory,
@@ -78,7 +79,7 @@ export class CreateServiceRequestDto {
     description: 'Código del servicio pedido (concept id)',
     format: 'uuid',
   })
-  @IsUUID()
+  @IsConceptId()
   codeConceptId!: string;
 
   /**
@@ -89,7 +90,7 @@ export class CreateServiceRequestDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   categoryConceptId?: string;
 
   /**
@@ -206,7 +207,7 @@ export class CreateServiceRequestDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @IsConceptId()
   specimenTypeConceptId?: string;
 
   /**
@@ -224,7 +225,7 @@ export class CreateServiceRequestDto {
   @IsArray()
   @ArrayMaxSize(500)
   @ArrayUnique()
-  @IsUUID(undefined, { each: true })
+  @IsConceptId({ each: true })
   componentConceptIds?: string[];
 
   /**
