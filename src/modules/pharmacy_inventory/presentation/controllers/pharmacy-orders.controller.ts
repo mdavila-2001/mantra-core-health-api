@@ -102,7 +102,7 @@ export class PharmacyOrdersController {
   @ApiOperation({
     summary: 'Crear un pedido de farmacia (FAR-E1)',
     description:
-      'El paciente sale del token. Reserva parcial: una línea sin stock queda SIN_STOCK y no tumba el pedido. Repetir la misma idempotencyKey devuelve el pedido ya creado.',
+      'El paciente sale del token. Reserva parcial: una línea sin stock queda SIN_STOCK y no tumba el pedido. Un producto que la sede ofrece por su catálogo, sin existencia propia, entra por confirmar (PINV_RES_LINE_PENDING_CONFIRMATION) sin reservar. Si ninguna línea tiene stock ni queda por confirmar: 422 PRODUCT_OUT_OF_STOCK y no se escribe nada. Repetir la misma idempotencyKey devuelve el pedido ya creado.',
   })
   create(
     @Body() dto: CreatePharmacyOrderDto,
@@ -232,7 +232,7 @@ export class PharmacyOrdersController {
   @ApiOperation({
     summary: 'Confirmar el pedido (FAR-E2)',
     description:
-      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea. PROPONER_GENERICO (con proposedProductId del mismo medicamento) persiste la propuesta con sus precios congelados y deja el pedido en ACEPTACION_PENDIENTE: decide el paciente.',
+      'Sella confirmed_at. Un ajuste NO_DISPONIBLE libera solo esa línea. PROPONER_GENERICO (con proposedProductId del mismo medicamento) persiste la propuesta con sus precios congelados y deja el pedido en ACEPTACION_PENDIENTE: decide el paciente. Una línea por confirmar (PINV_RES_LINE_PENDING_CONFIRMATION) se confirma con lo pedido, o con CONFIRMAR_STOCK y quantity (lo que la sede tiene para vender): se escribe la existencia de la sede y se reserva; con NO_DISPONIBLE o PROPONER_GENERICO queda sin stock. CONFIRMAR_STOCK sobre otra línea o sin quantity: 422 ORDER_LINE_NOT_PENDING_CONFIRMATION.',
   })
   confirm(
     @Param('id', ParseUUIDPipe) id: string,

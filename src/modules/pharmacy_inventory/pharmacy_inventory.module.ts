@@ -55,6 +55,7 @@ import { DispenseMedicationUseCase } from './application/medication-dispensation
 import { ReverseMedicationDispensationUseCase } from './application/medication-dispensations/reverse-medication-dispensation.use-case';
 import { PrescriptionBalanceRepository } from './infrastructure/repositories/prescription-balance.repository';
 import { PrescriptionOrderGuard } from './application/pharmacy-orders/prescription-order-guard';
+import { PendingOrderLines } from './application/pharmacy-orders/pending-order-lines';
 import { ReadPharmacyInventoryUseCase } from './application/pharmacy-inventory-read/read-pharmacy-inventory.use-case';
 import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notifications/notify-pharmacy-order.use-case';
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
@@ -250,6 +251,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     InventoryReservationsService,
     PharmacyOrdersService,
     PrescriptionOrderGuard,
+    PendingOrderLines,
     PharmacyOrderNotificationsService,
     MedicationDispensationsService,
     InventoryCountService,
