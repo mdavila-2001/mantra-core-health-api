@@ -52,6 +52,7 @@ import {
   activeItemsOf,
   earliestDate,
   itemsOfLink,
+  itemsSharedAtCreation,
   resourceIdsOf,
   sharesEncounter,
   shareResourceTypeOf,
@@ -502,8 +503,12 @@ export class PrescriptionSharesService {
       : await this.single(em, link.resourceId);
     // Los ítems tienen que ser del mismo paciente del enlace: si no, no se
     // muestran (defensa ante un `resource_id` que no corresponde).
-    const ownItems = allItems.filter(
-      (item) => item.patientProfileId === link.patientProfileId,
+    // Y emitidos antes de compartir: lo emitido después no tiene consentimiento.
+    const ownItems = itemsSharedAtCreation(
+      link,
+      allItems.filter(
+        (item) => item.patientProfileId === link.patientProfileId,
+      ),
     );
     const activeItems = activeItemsOf(ownItems, now);
     return {
