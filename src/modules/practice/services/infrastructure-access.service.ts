@@ -591,6 +591,86 @@ export class InfrastructureAccessService {
   }
 
   /**
+   * ¿Puede el actor `action` en alguna sede del tenant (a nivel sede o por
+   * una asignación de unidad/espacio)? No dice dónde: sirve para cortar antes
+   * de consultar un recurso cuyo estado no debe filtrarse.
+   *
+   * @param tx - Contexto.
+   * @param actor - Actor.
+   * @param tenantId - Tenant activo.
+   * @param action - Acción registrada.
+   */
+  async canAnywhere(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    tenantId: string,
+    action: string,
+  ): Promise<boolean> {
+    const sites = await tx.execute<
+      { id: string; practice_id: string; branch_id: string | null }[]
+    >(
+      `SELECT s.id, s.practice_id, s.branch_id FROM practice.practice_sites s
+         JOIN practice.practices p ON p.id = s.practice_id
+        WHERE p.tenant_id = ? ORDER BY s.id LIMIT 500`,
+      [tenantId],
+      'all',
+    );
+    for (const s of sites) {
+      const site = {
+        id: s.id,
+        practiceId: s.practice_id,
+        tenantId,
+        branchId: s.branch_id ?? undefined,
+      } as unknown as PracticeSites;
+      const scope = await this.actorScope(tx, actor, site);
+      if (
+        this.canAtSiteLevel(action, scope, {
+          id: s.id,
+          practiceId: s.practice_id,
+        })
+      )
+        return true;
+      for (const g of scope.grants) {
+        if (
+          (g.scope === 'UNIT' || g.scope === 'SPACE') &&
+          g.siteId === s.id &&
+          this.can(action, new Set<InfraRole>([g.role]), false, scope)
+        )
+          return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Acciones (con alguno de los prefijos) que el actor puede sobre el
+   * objetivo, sin lanzar por rol: un objetivo de otro tenant sigue siendo 404.
+   *
+   * @param actor - Actor.
+   * @param target - Espacio, sede o unidad.
+   * @param tx - Contexto.
+   * @param tenantId - Tenant activo.
+   * @param prefixes - Prefijos de acción.
+   */
+  async actionsOn(
+    actor: AuthenticatedUser,
+    target: InfraTarget,
+    tx: EntityManager,
+    tenantId: string,
+    prefixes: readonly string[] = ['f2.', 'f3.'],
+  ): Promise<string[]> {
+    const resolved = await this.resolve(tx, target, tenantId);
+    const scope = await this.actorScope(tx, actor, resolved.site);
+    const roles = this.rolesOn(scope, this.siteWide(resolved, scope));
+    return this.allowedActions(
+      roles,
+      resolved.isOperatingRoom,
+      scope,
+      prefixes,
+    );
+  }
+
+  /**
    * `true` si los roles alcanzan para la acción (sin lanzar).
    *
    * @param action - Acción registrada.
