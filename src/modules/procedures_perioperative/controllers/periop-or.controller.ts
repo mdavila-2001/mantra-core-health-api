@@ -13,13 +13,19 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  ArrayUnique,
   IsArray,
   IsDate,
   IsIn,
   IsInt,
+  IsISO8601,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
@@ -56,11 +62,21 @@ export class RoomEventDto {
 
 /** Recurrencia semanal de un bloque. */
 export class OrBlockRecurrenceDto {
-  @ApiProperty({ type: [Number], description: 'Días ISO 1–7' })
+  @ApiProperty({ type: [Number], description: 'Días ISO 1–7, sin repetir' })
   @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(7)
+  @ArrayUnique()
   @IsInt({ each: true })
+  @Min(1, { each: true })
+  @Max(7, { each: true })
   weekdays!: number[];
-  @ApiProperty({ description: 'yyyy-mm-dd' }) @IsString() until!: string;
+  @ApiProperty({
+    description: 'yyyy-mm-dd, como mucho un año después del inicio',
+  })
+  @IsISO8601({ strict: true })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  until!: string;
 }
 
 /** `POST /sites/:siteId/or-blocks`. */
@@ -92,7 +108,12 @@ export class CreateOrBlocksDto {
   @Type(() => Date)
   @IsDate()
   endsAt!: Date;
-  @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) releaseHours?: number;
+  @ApiPropertyOptional({ maximum: 720 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(720)
+  releaseHours?: number;
   @ApiPropertyOptional({ type: OrBlockRecurrenceDto })
   @IsOptional()
   @ValidateNested()

@@ -82,6 +82,17 @@ export class ChangeIsolationUseCase {
             })
           ).filter((s) => s.id !== space.id)
         : [];
+      // Las camas hermanas reciben (o pierden) el bloqueo de cohorte: también
+      // se autorizan, no basta la cama pedida (revisión de seguridad F2).
+      for (const sibling of siblings) {
+        await this.access.assertCan(
+          req.actor,
+          'f2.availability.clinical',
+          { careSpaceId: sibling.id },
+          tx,
+          req.tenantId,
+        );
+      }
       await this.core.lock(tx, [space.id, ...siblings.map((s) => s.id)]);
       await tx.refresh(space);
       assertIfMatchOps(ifMatchOps, space.opsVersion);

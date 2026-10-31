@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsDate,
@@ -54,7 +55,9 @@ export class PlacementOverrideDto {
     description: 'Reglas forzadas (SEX, AGE, ISOLATION_COHORT, LEVEL_OF_CARE)',
   })
   @IsArray()
+  @ArrayMaxSize(10)
   @IsString({ each: true })
+  @MaxLength(40, { each: true })
   ruleCodes!: string[];
 }
 
@@ -205,6 +208,7 @@ export class CloseCensusDto {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(200)
   @IsUUID('all', { each: true })
   unitIds?: string[];
 }

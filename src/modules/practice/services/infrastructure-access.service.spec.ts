@@ -32,6 +32,39 @@ function build(
     chain: jest.fn<any>().mockResolvedValue([{ id: bed.id }, { id: 'room-1' }]),
     unitsOf: jest.fn<any>().mockResolvedValue(['unit-1']),
     grants: jest.fn<any>().mockResolvedValue(grants),
+    siteScopeIndex: jest.fn<any>().mockResolvedValue({
+      spaces: [
+        {
+          id: 'room-1',
+          parent_space_id: null,
+          space_type_concept_id: PRAC.SPACE_FN_INPATIENT_ROOM,
+          clinical_unit_id: null,
+        },
+        {
+          id: 'bed-1',
+          parent_space_id: 'room-1',
+          space_type_concept_id: PRAC.SPACE_FN_BED_STANDARD,
+          clinical_unit_id: null,
+        },
+        {
+          id: 'bed-2',
+          parent_space_id: null,
+          space_type_concept_id: PRAC.SPACE_FN_BED_STANDARD,
+          clinical_unit_id: null,
+        },
+        {
+          id: 'or-1',
+          parent_space_id: null,
+          space_type_concept_id: PRAC.SPACE_FN_OPERATING_ROOM,
+          clinical_unit_id: null,
+        },
+      ],
+      links: [{ care_space_id: 'room-1', clinical_unit_id: 'unit-A' }],
+      units: [
+        { id: 'unit-A', parent_unit_id: null },
+        { id: 'unit-B', parent_unit_id: null },
+      ],
+    }),
   };
   const sitesRepo = { findById: jest.fn<any>().mockResolvedValue(site) };
   const spacesRepo = { findById: jest.fn<any>().mockResolvedValue(space) };
@@ -283,6 +316,65 @@ describe('alcance por unidad en colecciones (revisión de seguridad F3)', () => 
     const scope = await svc.actorScope({} as any, actor, site as any);
     expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(true);
     expect(svc.canOnUnit('f2.board.read', scope, site, 'unit-B')).toBe(true);
+  });
+});
+
+describe('scopeFilter / assertTargetInScope (raíz de la revisión F2–F4)', () => {
+  it('unidad A: sólo los espacios bajo A; un id fuera del alcance o de otra sede → 404', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_UNIT, {
+        clinical_unit_id: 'unit-A',
+      }),
+    ]);
+    const f = await svc.scopeFilter(
+      actor,
+      'f2.board.read',
+      site.id,
+      {} as any,
+      TENANT,
+    );
+    expect(f.allSite).toBe(false);
+    expect([...f.careSpaceIds].sort()).toEqual(['bed-1', 'room-1']);
+    expect([...f.clinicalUnitIds]).toEqual(['unit-A']);
+    expect(() =>
+      svc.assertTargetInScope(f, { careSpaceId: 'bed-2' }),
+    ).toThrow();
+    expect(() => svc.assertTargetInScope(f, { unitId: 'unit-B' })).toThrow();
+    expect(() =>
+      svc.assertTargetInScope(f, { careSpaceId: 'bed-1', unitId: 'unit-A' }),
+    ).not.toThrow();
+  });
+
+  it('nivel sede: toda la sede, pero un espacio de otra sede sigue siendo 404', async () => {
+    const { svc } = build([grant(DELEG.ASSIGN_ROLE_NURSE, DELEG.SCOPE_SITE)]);
+    const f = await svc.scopeFilter(
+      actor,
+      'f2.board.read',
+      site.id,
+      {} as any,
+      TENANT,
+    );
+    expect(f.allSite).toBe(true);
+    expect(f.allowsSpace('bed-2')).toBe(true);
+    expect(() =>
+      svc.assertTargetInScope(f, { careSpaceId: 'espacio-de-otra-sede' }),
+    ).toThrow();
+  });
+
+  it('Jefe QX por espacio: sólo su quirófano', async () => {
+    const { svc } = build([
+      grant(DELEG.ASSIGN_ROLE_OR_MANAGER, DELEG.SCOPE_SPACE, {
+        care_space_id: 'or-1',
+      }),
+    ]);
+    const f = await svc.scopeFilter(
+      actor,
+      'f2.board.read',
+      site.id,
+      {} as any,
+      TENANT,
+    );
+    expect([...f.careSpaceIds]).toEqual(['or-1']);
   });
 });
 

@@ -304,4 +304,98 @@ describe('Infraestructura F4 · quirófanos', () => {
       .send({})
       .expect(404);
   });
+
+  it('alcance: Jefe QX de un solo quirófano no ve ni filtra por otro (404); listas acotadas', async () => {
+    const building2 = await q<{ parent_space_id: string }>(
+      'select parent_space_id from practice.care_spaces where id = ?',
+      [orId],
+    );
+    const or2 = await http()
+      .post(`/sites/${orgA.siteId}/care-spaces`)
+      .set(como(orgA))
+      .send({
+        code: `QX2-${tag}`,
+        name: 'Quirófano 2',
+        formCode: 'LOC_FORM_ROOM',
+        functionCode: 'SPACE_FN_OPERATING_ROOM',
+        parentSpaceId: building2[0].parent_space_id,
+        activate: true,
+        areaM2: 40,
+        pressureCode: 'PRESSURE_POSITIVE',
+        airChangesPerHour: 20,
+        hvacValidatedOn: new Date().toISOString().slice(0, 10),
+      })
+      .expect(201);
+    const solo1 = await crearPersonal(
+      ctx,
+      orgA,
+      `F4S-${tag}`,
+      DELEG.ASSIGN_ROLE_OR_MANAGER,
+      { space: orId },
+    );
+    await http()
+      .get(`/sites/${orgA.siteId}/or-blocks?operatingRoomId=${or2.body.id}`)
+      .set(como(solo1))
+      .expect(404);
+    await http()
+      .get(
+        `/sites/${orgA.siteId}/or-utilization?from=${day}&to=${day}&operatingRoomId=${or2.body.id}`,
+      )
+      .set(como(solo1))
+      .expect(404);
+    const salas = await http()
+      .get(`/sites/${orgA.siteId}/operating-rooms`)
+      .set(como(solo1))
+      .expect(200);
+    expect(salas.body.map((r: any) => r.careSpace.id)).toEqual([orId]);
+    const todas = await http()
+      .get(`/sites/${orgA.siteId}/operating-rooms`)
+      .set(como(manager))
+      .expect(200);
+    expect(todas.body.map((r: any) => r.careSpace.id).sort()).toEqual(
+      [orId, or2.body.id].sort(),
+    );
+    await http()
+      .post(`/sites/${orgA.siteId}/or-blocks`)
+      .set(como(solo1))
+      .send({
+        operatingRoomId: or2.body.id,
+        ownerKind: 'SURGEON',
+        surgeonProfileId: surgeonId,
+        startsAt: at('18:00'),
+        endsAt: at('19:00'),
+      })
+      .expect(403);
+  });
+
+  it('serie de bloques: días repetidos 400; fin a más de un año 422', async () => {
+    await http()
+      .post(`/sites/${orgA.siteId}/or-blocks`)
+      .set(como(manager))
+      .send({
+        operatingRoomId: orId,
+        ownerKind: 'SURGEON',
+        surgeonProfileId: surgeonId,
+        startsAt: at('19:00'),
+        endsAt: at('20:00'),
+        recurrence: { weekdays: [1, 1], until: day },
+      })
+      .expect(400);
+    const lejos = new Date(Date.now() + 800 * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    const res = await http()
+      .post(`/sites/${orgA.siteId}/or-blocks`)
+      .set(como(manager))
+      .send({
+        operatingRoomId: orId,
+        ownerKind: 'SURGEON',
+        surgeonProfileId: surgeonId,
+        startsAt: at('19:00'),
+        endsAt: at('20:00'),
+        recurrence: { weekdays: [1, 3], until: lejos },
+      })
+      .expect(422);
+    expect(res.body.code).toBe('PRECONDITION_FAILED');
+  });
 });

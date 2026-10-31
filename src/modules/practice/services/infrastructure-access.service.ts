@@ -80,6 +80,19 @@ export interface ResolvedTarget {
   readonly isOperatingRoom: boolean;
 }
 
+/** Alcance de un actor sobre una sede (`scopeFilter`). */
+export interface ScopeFilter {
+  readonly allSite: boolean;
+  readonly site: PracticeSites;
+  readonly scope: ActorScope;
+  readonly careSpaceIds: ReadonlySet<string>;
+  readonly clinicalUnitIds: ReadonlySet<string>;
+  /** `true` si el espacio es de la sede y está en el alcance. */
+  allowsSpace(careSpaceId: string): boolean;
+  /** `true` si la unidad está en el alcance. */
+  allowsUnit(unitId: string | null | undefined): boolean;
+}
+
 /** Lo que el evaluador sabe del actor dentro de un tenant. */
 export interface ActorScope {
   /** Plataforma y administración: valen sobre cualquier objetivo del tenant. */
@@ -339,6 +352,133 @@ export class InfrastructureAccessService {
       spaceChain: [],
     });
     return this.can(action, roles, false, scope);
+  }
+
+  /**
+   * Filtro de alcance único para colecciones y para ids que manda el cliente
+   * (revisión de seguridad F2–F4). Autoriza la acción sobre la sede (404 de
+   * otro tenant, 403 sin ningún rol) y devuelve:
+   * - `allSite`: el actor tiene la acción a nivel sede u organización;
+   * - `careSpaceIds`: si no, los espacios de la sede sobre los que la tiene
+   *   (por SITE/UNIT/SPACE, camino de padres y vínculos vigentes; los roles de
+   *   quirófano sólo sobre quirófanos);
+   * - `clinicalUnitIds`: las unidades de la sede sobre las que la tiene.
+   *
+   * @param actor - Actor.
+   * @param action - Acción registrada.
+   * @param siteId - Sede.
+   * @param tx - Contexto.
+   * @param tenantId - Tenant activo.
+   */
+  async scopeFilter(
+    actor: AuthenticatedUser,
+    action: string,
+    siteId: string,
+    tx: EntityManager,
+    tenantId: string,
+  ): Promise<ScopeFilter> {
+    const { target, scope } = await this.assertCan(
+      actor,
+      action,
+      { siteId },
+      tx,
+      tenantId,
+    );
+    const allSite = this.canAtSiteLevel(action, scope, target.site);
+    const careSpaceIds = new Set<string>();
+    const clinicalUnitIds = new Set<string>();
+    const index = await this.opsRepo.siteScopeIndex(tx, siteId);
+    const siteSpaces = new Set(index.spaces.map((sp) => sp.id));
+    const siteUnits = new Set(index.units.map((u) => u.id));
+    if (!allSite) {
+      const byId = new Map(index.spaces.map((sp) => [sp.id, sp]));
+      const unitParent = new Map(
+        index.units.map((u) => [u.id, u.parent_unit_id]),
+      );
+      const linksBySpace = new Map<string, string[]>();
+      for (const l of index.links) {
+        linksBySpace.set(l.care_space_id, [
+          ...(linksBySpace.get(l.care_space_id) ?? []),
+          l.clinical_unit_id,
+        ]);
+      }
+      for (const u of index.units) {
+        if (this.canOnUnit(action, scope, target.site, u.id))
+          clinicalUnitIds.add(u.id);
+      }
+      for (const sp of index.spaces) {
+        const chain: string[] = [];
+        let cur: string | null | undefined = sp.id;
+        while (cur && chain.length < 32 && !chain.includes(cur)) {
+          chain.push(cur);
+          cur = byId.get(cur)?.parent_space_id;
+        }
+        const direct = new Set<string>();
+        for (const id of chain) {
+          for (const u of linksBySpace.get(id) ?? []) direct.add(u);
+          const own = byId.get(id)?.clinical_unit_id;
+          if (own) direct.add(own);
+        }
+        const units = new Set<string>();
+        for (const u of direct) {
+          let c: string | null | undefined = u;
+          while (c && !units.has(c)) {
+            units.add(c);
+            c = unitParent.get(c);
+          }
+        }
+        const roles = rolesOn(scope.base, scope.grants, {
+          practiceId: target.site.practiceId,
+          siteId,
+          unitIds: [...units],
+          spaceChain: chain,
+        });
+        if (
+          this.can(
+            action,
+            roles,
+            sp.space_type_concept_id === PRAC.SPACE_FN_OPERATING_ROOM,
+            scope,
+          )
+        ) {
+          careSpaceIds.add(sp.id);
+        }
+      }
+    }
+    return {
+      allSite,
+      site: target.site,
+      scope,
+      careSpaceIds,
+      clinicalUnitIds,
+      allowsSpace: (id) =>
+        siteSpaces.has(id) && (allSite || careSpaceIds.has(id)),
+      allowsUnit: (id) =>
+        !!id && siteUnits.has(id) && (allSite || clinicalUnitIds.has(id)),
+    };
+  }
+
+  /**
+   * Un id que manda el cliente (espacio o unidad) dentro del alcance del
+   * filtro, o 404 (sin decir si existe fuera).
+   *
+   * @param filter - Resultado de `scopeFilter`.
+   * @param ref - Espacio o unidad pedidos.
+   */
+  assertTargetInScope(
+    filter: ScopeFilter,
+    ref: { careSpaceId?: string | null; unitId?: string | null },
+  ): void {
+    if (ref.careSpaceId && !filter.allowsSpace(ref.careSpaceId)) {
+      throw new ResourceNotFoundException('Espacio no encontrado', {
+        spaceId: ref.careSpaceId,
+      });
+    }
+    if (ref.unitId && !filter.allowsUnit(ref.unitId)) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        unitId: ref.unitId,
+      });
+    }
   }
 
   /**

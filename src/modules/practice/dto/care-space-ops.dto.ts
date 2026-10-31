@@ -227,6 +227,7 @@ export class CleaningOrderQueryDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   cursor?: string;
 
   @ApiPropertyOptional({ minimum: 1, maximum: 200 })
@@ -253,11 +254,13 @@ export class BedBoardQueryDto {
   @ApiPropertyOptional({ description: 'Funciones separadas por coma' })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   functionCodes?: string;
 
   @ApiPropertyOptional({ description: 'Códigos v2-0116 separados por coma' })
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   v2Codes?: string;
 
   @ApiPropertyOptional({
@@ -265,6 +268,7 @@ export class BedBoardQueryDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   cursor?: string;
 }
 
@@ -294,6 +298,7 @@ export class StatusEventsQueryDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   cursor?: string;
 }
 

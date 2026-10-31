@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   PreconditionFailedException,
+  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../common';
 import { CONCEPTS } from '../../../../common/constants/concepts';
@@ -75,8 +76,17 @@ export class OperatingRoomsReadUseCases {
    */
   async list(siteId: string, actor: AuthenticatedUser, tenantId: string) {
     const em = this.em.fork();
-    await this.access.assertCan(actor, 'f4.or.read', { siteId }, em, tenantId);
-    const rooms = await this.rooms(em, siteId);
+    const filter = await this.access.scopeFilter(
+      actor,
+      'f4.or.read',
+      siteId,
+      em,
+      tenantId,
+    );
+    // Sin rol de sede u organización, sólo las salas del alcance.
+    const rooms = (await this.rooms(em, siteId)).filter((r) =>
+      filter.allowsSpace(r.id),
+    );
     const dayStart = new Date(new Date().toISOString().slice(0, 10));
     const dayEnd = new Date(dayStart.getTime() + 86_400_000);
     const out = [];
@@ -121,13 +131,23 @@ export class OperatingRoomsReadUseCases {
     tenantId: string,
   ) {
     const em = this.em.fork();
-    await this.access.assertCan(
+    const filter = await this.access.scopeFilter(
       actor,
       'f4.utilization.read',
-      { siteId },
+      siteId,
       em,
       tenantId,
     );
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(q.from ?? '') ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(q.to ?? '')
+    ) {
+      throw new PreconditionFailedException(
+        'Rango de fechas inválido',
+        {},
+        R.INDICATOR_RANGE_TOO_LONG,
+      );
+    }
     const from = new Date(`${q.from}T00:00:00Z`);
     const to = new Date(new Date(`${q.to}T00:00:00Z`).getTime() + 86_400_000);
     if (!(to > from) || (to.getTime() - from.getTime()) / 86_400_000 > 366) {
@@ -137,7 +157,15 @@ export class OperatingRoomsReadUseCases {
         R.INDICATOR_RANGE_TOO_LONG,
       );
     }
-    const rooms = (await this.rooms(em, siteId)).filter(
+    const allowed = (await this.rooms(em, siteId)).filter((r) =>
+      filter.allowsSpace(r.id),
+    );
+    if (q.operatingRoomId && !allowed.some((r) => r.id === q.operatingRoomId)) {
+      throw new ResourceNotFoundException('Quirófano no encontrado', {
+        operatingRoomId: q.operatingRoomId,
+      });
+    }
+    const rooms = allowed.filter(
       (r) => !q.operatingRoomId || r.id === q.operatingRoomId,
     );
     const result = [];
