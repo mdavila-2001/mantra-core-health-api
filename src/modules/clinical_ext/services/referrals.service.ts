@@ -277,19 +277,30 @@ export class ReferralsService {
         );
       }
 
+      // Derivación a la organización: sin profesional ni servicio, el tenant
+      // es el destino. Sin esta rama, un doble envío creaba dos derivaciones
+      // y dos avisos.
+      const toOrganizationOnly =
+        !dto.targetServiceCatalogId &&
+        !dto.targetProfileId &&
+        !!dto.targetTenantId;
       if (
         dto.sourceEncounterId &&
         (dto.targetServiceCatalogId ||
-          (dto.targetProfileId && dto.specialtyConceptId))
+          (dto.targetProfileId && dto.specialtyConceptId) ||
+          toOrganizationOnly)
       ) {
         // El DDL no impide el duplicado: se serializa a quien emite la misma
         // referencia para que el segundo vea la fila del primero. Con
         // servicio, el servicio identifica el destino; sin él, profesional y
-        // especialidad, como siempre. El tipo distingue «consulta» de
+        // especialidad, como siempre; sin ninguno de los dos, la organización.
+        // El tipo distingue «consulta» de
         // «tratamiento» al mismo destino.
         await lockLogicalKey(
           tx,
-          `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId ?? '-'}:${dto.targetServiceCatalogId ?? dto.specialtyConceptId}:${referralType}`,
+          toOrganizationOnly
+            ? `clinical_ext.referral:${dto.sourceEncounterId}:org:${dto.targetTenantId}:${referralType}`
+            : `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId ?? '-'}:${dto.targetServiceCatalogId ?? dto.specialtyConceptId}:${referralType}`,
         );
         const dup = await this.referralsRepo.findDuplicate(tx, {
           sourceEncounterId: dto.sourceEncounterId,
@@ -298,6 +309,7 @@ export class ReferralsService {
           targetProfileId: dto.targetProfileId,
           specialtyConceptId: dto.specialtyConceptId,
           targetServiceCatalogId: dto.targetServiceCatalogId,
+          targetTenantId: toOrganizationOnly ? dto.targetTenantId : undefined,
         });
         if (dup) {
           throw new ConflictException(

@@ -65,8 +65,10 @@ const NOTICE_PRIORITY = 4;
  * Una derivación a una **organización** (tenant destino sin profesional)
  * también avisa: «Su médico le derivó a {organización}», con el servicio si lo
  * hay, y enlace a la ficha pública de la organización sólo si tiene una
- * pública y activa (la misma regla con la que `GET o/:slug` la sirve). Sin ficha, el
- * aviso sale sin enlace.
+ * pública y activa (la misma regla con la que `GET o/:slug` la sirve). Sin
+ * ficha, el aviso sale sin enlace. No lleva el motivo (texto libre del médico):
+ * la paciente lo lee en «Mis derivaciones». Si el tenant destino no existe o no
+ * está activo, no hay aviso.
  *
  * No hay aviso por correo ni por push todavía: cada canal nuevo es un adaptador
  * nuevo, no un `if` más acá.
@@ -120,8 +122,8 @@ export class ReferralNotifier {
               em,
               targetTenantId as string,
               referral.targetServiceCatalogId ?? null,
-              referral.reasonText,
             );
+      if (notice === null) return false;
       const { subject, bodyText } = notice;
       const actor: AuthenticatedUser = {
         id: SEED.systemWorkerUserId,
@@ -207,16 +209,24 @@ export class ReferralNotifier {
    * El aviso de una derivación a una organización: «Su médico le derivó a
    * {organización}», con el servicio si lo hay. El enlace sale sólo si la
    * organización tiene ficha pública activa.
+   *
+   * No lleva el motivo: es texto libre del médico (dato de salud) y la paciente
+   * lo lee en «Mis derivaciones», a la que llega por `referralId`.
+   *
+   * @returns `null` si el tenant destino no existe o no está activo: no se
+   *   manda a la paciente a una organización que no la puede atender.
    */
   private async organizationNotice(
     em: EntityManager,
     targetTenantId: string,
     targetServiceCatalogId: string | null,
-    reason: string | undefined | null,
-  ): Promise<Notice> {
+  ): Promise<Notice | null> {
     const tenant = await em.findOne(Tenants, { id: targetTenantId });
-    const trade = tenant?.tradeName?.trim();
-    const organization = trade ? trade : (tenant?.legalName ?? null);
+    if (!tenant || tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
+      return null;
+    }
+    const trade = tenant.tradeName?.trim();
+    const organization = trade ? trade : (tenant.legalName ?? null);
     const service =
       targetServiceCatalogId === null
         ? null
@@ -238,7 +248,6 @@ export class ReferralNotifier {
       subject: `Su médico le derivó a ${to}`,
       bodyText:
         endWithPeriod(`Su médico le derivó a ${to}${what}`) +
-        reasonSentence(reason) +
         (route === null
           ? ''
           : ' Puede ver su ficha y reservar una cita desde su portal.'),
