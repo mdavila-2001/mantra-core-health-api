@@ -1,6 +1,7 @@
 import { CONCEPTS } from '../../../common';
 import {
   effectiveShareStatus,
+  shareEndedReason,
   shareExpiresAt,
   shareStatusOf,
 } from './prescription-share-expiry';
@@ -92,6 +93,37 @@ describe('prescription-share-expiry', () => {
       expect(effectiveShareStatus({ ...active, revokedAt: now }, 0, now)).toBe(
         'REVOKED',
       );
+    });
+  });
+
+  describe('shareEndedReason (H12-09)', () => {
+    const active = {
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      expiresAt: inDays(3),
+    };
+
+    it('en plazo y sin ítems vigentes: la receta dejó de valer, no venció', () => {
+      expect(shareEndedReason(active, 0, now)).toBe('PRESCRIPTION_NOT_ACTIVE');
+    });
+
+    it('con el plazo pasado: venció el enlace', () => {
+      expect(
+        shareEndedReason({ ...active, expiresAt: inDays(-1) }, 0, now),
+      ).toBe('LINK_EXPIRED');
+      expect(
+        shareEndedReason(
+          { ...active, statusConceptId: CONCEPTS.STATE_EXPIRED },
+          2,
+          now,
+        ),
+      ).toBe('LINK_EXPIRED');
+    });
+
+    it('vigente o revocado no tiene motivo de vencimiento', () => {
+      expect(shareEndedReason(active, 2, now)).toBeNull();
+      expect(
+        shareEndedReason({ ...active, revokedAt: now }, 0, now),
+      ).toBeNull();
     });
   });
 });

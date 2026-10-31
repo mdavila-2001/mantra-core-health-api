@@ -46,6 +46,7 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
       const result = await service.readPublic(token);
       expect(result).toEqual({
         status: 'VALID',
+        endedReason: null,
         issuedAt,
         prescriberName: 'Dra. Sintética Prueba',
         prescriberLicense: {
@@ -87,6 +88,7 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
       repo.findItemsByEncounter.mockResolvedValue([item()]);
       expect(await service.readPublic(token)).toEqual({
         status: 'REVOKED',
+        endedReason: null,
         issuedAt: null,
         prescriberName: null,
         prescriberLicense: null,
@@ -98,7 +100,7 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
     describe('registro de la apertura pública (S-4)', () => {
       const context = { sourceIp: '203.0.113.9', userAgent: 'agente-prueba' };
 
-      it('válido: un uso OPEN/OPENED con IP y agente, sin el token', async () => {
+      it('válido: un uso PUBLIC_VIEW/OPENED con IP y agente, sin el token: no es una apertura de farmacia', async () => {
         const { service, repo, committedUses } = build();
         const { token, tokenHash } = issueShareToken();
         repo.findByTokenHash.mockResolvedValue(link({ tokenHash }));
@@ -108,7 +110,7 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
         expect(committedUses).toEqual([
           {
             sharedAccessLinkId: SHARE,
-            actionConceptId: DELEG.SHARE_ACTION_OPEN,
+            actionConceptId: DELEG.SHARE_ACTION_PUBLIC_VIEW,
             outcomeConceptId: DELEG.SHARE_OUTCOME_OPENED,
             sourceIp: '203.0.113.9',
             userAgent: 'agente-prueba',
@@ -118,7 +120,7 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
         expect(JSON.stringify(committedUses)).not.toContain(token);
       });
 
-      it('vencido: 200 con EXPIRED y un uso OPEN/DENIED', async () => {
+      it('vencido: 200 con EXPIRED y un uso PUBLIC_VIEW/DENIED', async () => {
         const { service, repo, committedUses } = build();
         const { token } = issueShareToken();
         repo.findByTokenHash.mockResolvedValue(
@@ -129,13 +131,13 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
         expect(result.status).toBe('EXPIRED');
         expect(committedUses).toEqual([
           expect.objectContaining({
-            actionConceptId: DELEG.SHARE_ACTION_OPEN,
+            actionConceptId: DELEG.SHARE_ACTION_PUBLIC_VIEW,
             outcomeConceptId: DELEG.SHARE_OUTCOME_DENIED,
           }),
         ]);
       });
 
-      it('revocado: 200 con REVOKED y un uso OPEN/DENIED', async () => {
+      it('revocado: 200 con REVOKED y un uso PUBLIC_VIEW/DENIED', async () => {
         const { service, repo, committedUses } = build();
         const { token } = issueShareToken();
         repo.findByTokenHash.mockResolvedValue(
@@ -190,6 +192,25 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
         await expect(service.readPublic(token, context)).rejects.toBe(failure);
       });
 
+      it('receta anulada: 410 que no dice «venció» (H12-09)', async () => {
+        const { service, repo } = build();
+        const { token } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(link());
+        repo.findItemsByEncounter.mockResolvedValue([
+          item({ statusConceptId: CLIN.MEDICATION_REQUEST_INVALIDATED }),
+        ]);
+        const error = await thrown(service.openForPharmacy(token));
+        expect(error).toBeInstanceOf(GoneException);
+        const body = error.getResponse() as {
+          message: string;
+          details: object;
+        };
+        expect(body.message).not.toContain('venció');
+        expect(body.details).toMatchObject({
+          endedReason: 'PRESCRIPTION_NOT_ACTIVE',
+        });
+      });
+
       it('si falla el lector del prescriptor no queda un OPENED', async () => {
         const { service, repo, committedUses, prescriberIdentity } = build();
         const { token } = issueShareToken();
@@ -199,6 +220,18 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
         await thrown(service.readPublic(token, context));
         expect(committedUses).toEqual([]);
       });
+    });
+
+    it('receta anulada: EXPIRED con motivo PRESCRIPTION_NOT_ACTIVE (H12-09)', async () => {
+      const { service, repo } = build();
+      const { token } = issueShareToken();
+      repo.findByTokenHash.mockResolvedValue(link());
+      repo.findItemsByEncounter.mockResolvedValue([
+        item({ statusConceptId: CLIN.MEDICATION_REQUEST_INVALIDATED }),
+      ]);
+      const result = await service.readPublic(token);
+      expect(result.status).toBe('EXPIRED');
+      expect(result.endedReason).toBe('PRESCRIPTION_NOT_ACTIVE');
     });
 
     it('token desconocido es 404', async () => {

@@ -217,6 +217,12 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
     },
     // Acción y resultado de cada uso (action_concept_id / outcome_concept_id).
     SHARE_ACTION_OPEN: { code: 'DA_SHARE_ACT_OPEN', display: 'Open' },
+    // La vista sin sesión (`GET /public/prescription-shares/:token`): queda
+    // registrada, pero no es una apertura de farmacia ni cuenta como tal.
+    SHARE_ACTION_PUBLIC_VIEW: {
+      code: 'DA_SHARE_ACT_PUBLIC_VIEW',
+      display: 'Public view',
+    },
     SHARE_OUTCOME_OPENED: { code: 'DA_SHARE_OUT_OPENED', display: 'Opened' },
     SHARE_OUTCOME_DENIED: { code: 'DA_SHARE_OUT_DENIED', display: 'Denied' },
   });
