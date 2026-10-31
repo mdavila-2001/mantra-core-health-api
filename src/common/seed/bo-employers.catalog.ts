@@ -828,6 +828,7 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
     name: 'Pollos Copacabana',
     sector: 'Comercio y retail',
   },
+  { code: 'SALTORE', name: 'Saltore', sector: 'Comercio y retail' },
   { code: 'TIENDAS_TIA', name: 'Tiendas Tía', sector: 'Comercio y retail' },
   { code: 'TOYOSA', name: 'Toyosa', sector: 'Comercio y retail' },
 
@@ -1915,11 +1916,6 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
   {
     code: 'PWC_BOLIVIA',
     name: 'PwC Bolivia',
-    sector: 'Servicios profesionales y tecnología',
-  },
-  {
-    code: 'SALTORE',
-    name: 'Saltore',
     sector: 'Servicios profesionales y tecnología',
   },
 
