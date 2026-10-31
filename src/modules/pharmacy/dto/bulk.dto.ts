@@ -18,6 +18,7 @@ import {
 import { IsStrictBoolean } from './strict-boolean';
 import { CATEGORY_NAME_MAX } from '../services/pharmacy-catalog-rules';
 import { IsCatalogMoney } from './catalog-fields.dto';
+import { CreateProductDto } from './create-product.dto';
 import { UpdateProductDto } from './update-product.dto';
 
 /** Cómo trata la carga una clave que ya existe o que falta. */
@@ -180,6 +181,27 @@ export class BulkPriceRowDto {
   unitPrice!: number | string;
 }
 
+/** Tope del nombre de un medicamento escrito en una fila. */
+export const MEDICATION_NAME_MAX = 300;
+
+/**
+ * Fila de `products/bulk` para dar de alta: el alta de siempre y, opcional, el
+ * medicamento por su nombre.
+ */
+export class BulkProductCreateRowDto extends CreateProductDto {
+  /**
+   * Nombre del medicamento tal como figura en el catálogo con que se receta
+   * (sin importar mayúsculas ni tildes). El servidor lo resuelve a su concepto;
+   * si no está, o nombra a más de uno, la fila se rechaza (también en la vista
+   * previa). No va con `catalogProductId` ni con `medicationConceptId`.
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MEDICATION_NAME_MAX)
+  medicationName?: string;
+}
+
 /** Fila de `products/bulk` para cambiar un producto existente. */
 export class BulkProductUpdateRowDto extends UpdateProductDto {
   /**
@@ -189,6 +211,16 @@ export class BulkProductUpdateRowDto extends UpdateProductDto {
   @IsNotEmpty()
   @MaxLength(100)
   productCode!: string;
+
+  /**
+   * Nombre del medicamento, como en el alta: vincula el producto existente.
+   * Ausente deja el vínculo como está.
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MEDICATION_NAME_MAX)
+  medicationName?: string;
 }
 
 /** Fila de `sites/bulk`: una sede de venta por su código. */

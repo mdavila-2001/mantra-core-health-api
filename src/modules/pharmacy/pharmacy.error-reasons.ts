@@ -38,6 +38,8 @@ export enum PharmacyErrorReason {
   MEDICATION_NOT_FOUND = 'MEDICATION_NOT_FOUND',
   /** Carga masiva de productos: el nombre coincide con más de un medicamento. */
   MEDICATION_AMBIGUOUS = 'MEDICATION_AMBIGUOUS',
+  /** Carga masiva de productos: el medicamento viene del catálogo oficial, no se escribe. */
+  MEDICATION_FROM_CATALOG = 'MEDICATION_FROM_CATALOG',
   /** El concepto no es un medicamento del catálogo con que se receta. */
   MEDICATION_NOT_IN_CATALOG = 'MEDICATION_NOT_IN_CATALOG',
   /** Aviso: el producto pide receta y no tiene medicamento vinculado. */
