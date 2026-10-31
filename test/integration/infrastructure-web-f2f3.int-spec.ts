@@ -178,10 +178,15 @@ describe('Infraestructura F2/F3 · lo que consume la web', () => {
   });
 
   it('estancia vigente del paciente y profesionales a cargo: permitido y fail-closed', async () => {
-    await http()
-      .get(`/clinical/patients/${p1.patientProfileId}/inpatient-stay`)
-      .set(como(admission))
-      .expect(404);
+    // Sin permiso clínico sobre el paciente: la misma respuesta para un
+    // internado y para uno que no lo está (nada se revela antes de autorizar).
+    const stayOf = (who: Record<string, string>, patient: string) =>
+      http().get(`/clinical/patients/${patient}/inpatient-stay`).set(who);
+    const adminA = {
+      Authorization: `Bearer ${ctx.adminToken}`,
+      'X-Tenant-Id': orgA.tenantId,
+    };
+    const before = await stayOf(adminA, p1.patientProfileId).expect(404);
     const adm = await http()
       .post('/clinical/admissions')
       .set(como(admission))
@@ -196,21 +201,38 @@ describe('Infraestructura F2/F3 · lo que consume la web', () => {
       .expect(201);
     expect(adm.body.requestId).toEqual(expect.any(String));
     expect(adm.body.requestId).toBe(adm.headers['x-request-id']);
-    const stay = await http()
-      .get(`/clinical/patients/${p1.patientProfileId}/inpatient-stay`)
-      .set(como(admission))
-      .expect(200);
+    const p2 = await registrarPaciente(
+      ctx,
+      orgA,
+      `WP2${tag}`,
+      (await camposObligatoriosDePaciente(ctx)) as unknown as Record<
+        string,
+        unknown
+      >,
+    );
+    const shape = (r: request.Response) => ({
+      status: r.status,
+      code: r.body.code,
+      reason: r.body.reason ?? null,
+      message: r.body.message,
+    });
+    for (const who of [como(admission), como(cleaner), como(nurseUnit)]) {
+      const internado = await stayOf(who, p1.patientProfileId);
+      const noInternado = await stayOf(who, p2.patientProfileId);
+      const inexistente = await stayOf(who, randomUUID());
+      expect(internado.status).toBe(404);
+      expect(shape(internado)).toEqual(shape(noInternado));
+      expect(shape(internado)).toEqual(shape(inexistente));
+    }
+    expect(shape(before)).toEqual(
+      shape(await stayOf(adminA, p2.patientProfileId)),
+    );
+    // Con permiso (plataforma: lectura clínica y f3.adt.read) ve la estancia.
+    const stay = await stayOf(adminA, p1.patientProfileId).expect(200);
     expect(stay.body.encounter?.id ?? stay.body.encounterId).toBe(
       adm.body.encounterId,
     );
-    const cleanerStay = await http()
-      .get(`/clinical/patients/${p1.patientProfileId}/inpatient-stay`)
-      .set(como(cleaner));
-    expect([403, 404]).toContain(cleanerStay.status);
-    await http()
-      .get(`/clinical/patients/${p1.patientProfileId}/inpatient-stay`)
-      .set(como(orgB))
-      .expect(404);
+    await stayOf(como(orgB), p1.patientProfileId).expect(404);
 
     const list = await http()
       .get(`/sites/${orgA.siteId}/attending-practitioners`)

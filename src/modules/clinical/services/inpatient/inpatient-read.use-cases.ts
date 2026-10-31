@@ -16,7 +16,10 @@ import { findPractitionerNames } from '../../../profiles/infrastructure/read-mod
 import { PRAC } from '../../../practice/practice.concepts';
 import { AdtSupport, type AdtRequest } from './adt-support';
 import { ClinicalReadService } from '../clinical-read.service';
-import { ResourceNotFoundException } from '../../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { locationView } from './adt.use-cases';
 
 /**
@@ -140,7 +143,18 @@ export class InpatientReadUseCases {
    * @param req - Actor y tenant.
    */
   async currentStayOfPatient(patientProfileId: string, req: AdtRequest) {
+    // Revisión de seguridad: nada del estado del paciente (existe, internado,
+    // no internado) se revela antes de autorizar. Sin permiso, paciente
+    // inexistente, no internado o estancia no autorizada responden el MISMO
+    // 404 genérico.
     const em = this.em.fork();
+    const notFound = () =>
+      new ResourceNotFoundException('Estancia no encontrada');
+    const actor = req.actor as never as AuthenticatedUser;
+    if (
+      !(await this.access.canAnywhere(em, actor, req.tenantId, 'f3.adt.read'))
+    )
+      throw notFound();
     if (
       !(await this.patients.isPatientInTenant(
         em,
@@ -148,9 +162,12 @@ export class InpatientReadUseCases {
         req.tenantId,
       ))
     )
-      throw new ResourceNotFoundException('Paciente no encontrado', {
-        patientProfileId,
-      });
+      throw notFound();
+    try {
+      await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
+    } catch {
+      throw notFound();
+    }
     const [row] = await em.execute<{ id: string }[]>(
       `SELECT id FROM clinical.encounters
         WHERE patient_profile_id = ? AND tenant_id = ? AND class_concept_id = ? AND status_concept_id = ?
@@ -163,12 +180,15 @@ export class InpatientReadUseCases {
       ],
       'all',
     );
-    if (!row)
-      throw new ResourceNotFoundException('El paciente no está internado', {
-        patientProfileId,
-      });
-    // La ficha se autoriza igual que `GET /clinical/encounters/:id/stay`.
-    return this.stay(row.id, req);
+    if (!row) throw notFound();
+    try {
+      // La ficha se autoriza igual que `GET /clinical/encounters/:id/stay`.
+      return await this.stay(row.id, req);
+    } catch (error) {
+      const status = (error as { getStatus?: () => number }).getStatus?.();
+      if (status === 403 || status === 404) throw notFound();
+      throw error;
+    }
   }
 
   /**
