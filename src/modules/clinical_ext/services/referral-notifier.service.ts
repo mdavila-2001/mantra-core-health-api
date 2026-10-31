@@ -222,6 +222,9 @@ export class ReferralNotifier {
     targetServiceCatalogId: string | null,
   ): Promise<Notice | null> {
     const tenant = await em.findOne(Tenants, { id: targetTenantId });
+    // `POST /referrals` ya rechaza un tenant inexistente o inactivo (#1201).
+    // Esta rama queda como defensa: el aviso corre después del commit y el
+    // tenant puede desactivarse en medio.
     if (!tenant || tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
       return null;
     }
