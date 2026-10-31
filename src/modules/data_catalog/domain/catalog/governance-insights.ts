@@ -34,6 +34,19 @@ export function rankSql(columna: string): string {
 export const PII_SORTS = ['name', 'sensitivity'] as const;
 export type PiiSort = (typeof PII_SORTS)[number];
 
+/**
+ * Conciliación del catálogo (observado y aprobado) con el registro declarado `system_ops.field_registry`.
+ *  - `MISSING_IN_REGISTRY`: columna personal con ficha aprobada que el registro no declara.
+ *  - `REGISTRY_DISAGREES`: el registro la declara pero sin marca PII/PHI.
+ *  - `ORPHAN_IN_REGISTRY`: el registro declara un campo que el último escaneo no observa.
+ */
+export const PII_RECONCILIATION_KINDS = [
+  'MISSING_IN_REGISTRY',
+  'REGISTRY_DISAGREES',
+  'ORPHAN_IN_REGISTRY',
+] as const;
+export type PiiReconciliationKind = (typeof PII_RECONCILIATION_KINDS)[number];
+
 // ---- reglas de calidad del catálogo --------------------------------------------------------
 
 export const QUALITY_SEVERITIES = ['HIGH', 'MEDIUM', 'LOW'] as const;

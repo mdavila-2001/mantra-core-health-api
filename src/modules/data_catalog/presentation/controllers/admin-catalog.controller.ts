@@ -59,6 +59,7 @@ import {
 import {
   PiiColumnsPageDto,
   PiiColumnsQueryDto,
+  PiiReconciliationQueryDto,
   PiiSummaryDto,
   QualityIssuesPageDto,
   QualityIssuesQueryDto,
@@ -415,6 +416,22 @@ export class AdminCatalogController {
   @ApiResponse({ status: 200, type: PiiColumnsPageDto })
   piiColumns(@Query() q: PiiColumnsQueryDto) {
     return this.insights.piiColumns(q);
+  }
+
+  @Get('pii/reconciliation')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Conciliación de las columnas personales del catálogo con el registro declarado de gobierno',
+    description:
+      'Tres clases de discrepancia: personal aprobada sin declarar, declarada sin marca PII/PHI y declarada pero no observada. Sólo metadatos; `notMeasured` declara el registro vacío o el catálogo sin escanear.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resumen y página de discrepancias',
+  })
+  piiReconciliation(@Query() q: PiiReconciliationQueryDto) {
+    return this.insights.piiReconciliation(q);
   }
 
   @Get('quality/rules')

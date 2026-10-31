@@ -7,6 +7,7 @@ import {
 } from '../../domain/catalog/catalog.constants';
 import {
   rankSql,
+  type PiiReconciliationKind,
   type PiiSort,
   type QualitySeverity,
 } from '../../domain/catalog/governance-insights';
@@ -92,6 +93,33 @@ export interface QualityCountRow {
   rule_code: string;
   severity: QualitySeverity;
   issues: number;
+}
+
+/** Una discrepancia entre la clasificación del catálogo y el registro declarado. Sólo metadatos. */
+export interface PiiReconciliationRow {
+  kind: PiiReconciliationKind;
+  schema_name: string;
+  object_name: string;
+  column_name: string;
+  object_id: string | null;
+  column_id: string | null;
+  sensitivity: Sensitivity | null;
+  review_status: ReviewStatus | null;
+  entity_registry_id: string | null;
+  field_registry_id: string | null;
+}
+
+export interface PiiReconciliationFilter {
+  kind?: PiiReconciliationKind;
+  schema?: string;
+  cursor?: { s: string; o: string; c: string; k: string };
+  limit: number;
+}
+
+export interface PiiReconciliationTotalsRow {
+  approved_personal: number;
+  declared_fields: number;
+  observed_objects: number;
 }
 
 const RANK_PERSONAL = 5;
@@ -238,6 +266,128 @@ export class CatalogInsightsRepository {
         fields: 0,
         fields_personal: 0,
       }
+    );
+  }
+
+  // ---- conciliación con el registro declarado ----------------------------------------------
+
+  /**
+   * Las tres clases de discrepancia como una sola relación `(kind, schema, objeto, columna, …)`.
+   * `ORPHAN_IN_REGISTRY` sólo se calcula si el catálogo observó algo: sin escaneo, todo campo
+   * declarado parecería huérfano y la cifra sería falsa.
+   */
+  private reconciliationCte(): string {
+    const rank = rankSql('a.sensitivity');
+    return `with base as (
+      select o.schema_name::text as schema_name, o.object_name::text as object_name, c.column_name::text as column_name,
+             o.id as object_id, c.id as column_id, a.sensitivity::text as sensitivity, a.review_status::text as review_status,
+             (select er.id from system_ops.entity_registry er
+               where er.schema_name = o.schema_name and er.table_name = o.object_name) as entity_registry_id,
+             (select fr.id from system_ops.field_registry fr
+                join system_ops.entity_registry er on er.id = fr.entity_registry_id
+               where er.schema_name = o.schema_name and er.table_name = o.object_name
+                 and fr.column_name = c.column_name) as field_registry_id,
+             (select bool_or(coalesce(fr.is_pii, false) or coalesce(fr.is_phi, false))
+                from system_ops.field_registry fr
+                join system_ops.entity_registry er on er.id = fr.entity_registry_id
+               where er.schema_name = o.schema_name and er.table_name = o.object_name
+                 and fr.column_name = c.column_name) as registry_marks_personal
+        ${COLUMNAS_OBSERVADAS}
+         and ${rank} >= ${RANK_PERSONAL}
+         and a.review_status = 'APPROVED' and a.approved_revision_no = a.current_revision_no
+    ), rec as (
+      select (case when field_registry_id is null then 'MISSING_IN_REGISTRY' else 'REGISTRY_DISAGREES' end)::text as kind,
+             schema_name, object_name, column_name, object_id, column_id, sensitivity, review_status,
+             entity_registry_id, field_registry_id
+        from base
+       where field_registry_id is null or not coalesce(registry_marks_personal, false)
+      union all
+      select 'ORPHAN_IN_REGISTRY', er.schema_name::text, er.table_name::text, fr.column_name::text,
+             null::uuid, null::uuid, null::text, null::text, er.id, fr.id
+        from system_ops.field_registry fr
+        join system_ops.entity_registry er on er.id = fr.entity_registry_id
+       where exists (select 1 from data_catalog.catalog_objects oo
+                      where oo.source_code = ${ORIGEN} and oo.observation_status = 'OBSERVED')
+         and not exists (select 1 from data_catalog.catalog_columns cc
+                           join data_catalog.catalog_objects oo on oo.id = cc.object_id
+                          where oo.source_code = ${ORIGEN} and oo.observation_status = 'OBSERVED'
+                            and cc.observation_status = 'OBSERVED'
+                            and oo.schema_name = er.schema_name and oo.object_name = er.table_name
+                            and cc.column_name = fr.column_name)
+    )`;
+  }
+
+  private reconciliationWhere(f: {
+    kind?: PiiReconciliationKind;
+    schema?: string;
+  }): { where: string[]; params: unknown[] } {
+    const where: string[] = [];
+    const params: unknown[] = [];
+    if (f.kind) {
+      where.push('kind = ?');
+      params.push(f.kind);
+    }
+    if (f.schema) {
+      where.push('schema_name = ?');
+      params.push(f.schema);
+    }
+    return { where, params };
+  }
+
+  /** Discrepancias en orden `(schema, objeto, columna, clase)`, con un elemento de más. */
+  piiReconciliation(
+    em: EntityManager,
+    f: PiiReconciliationFilter,
+  ): Promise<PiiReconciliationRow[]> {
+    const { where, params } = this.reconciliationWhere(f);
+    if (f.cursor) {
+      where.push(
+        '(schema_name, object_name, column_name, kind) > (?, ?, ?, ?)',
+      );
+      params.push(f.cursor.s, f.cursor.o, f.cursor.c, f.cursor.k);
+    }
+    return this.q<PiiReconciliationRow[]>(
+      em,
+      `${this.reconciliationCte()}
+       select * from rec
+       ${where.length ? `where ${where.join(' and ')}` : ''}
+       order by schema_name, object_name, column_name, kind
+       limit ?`,
+      [...params, f.limit + 1],
+    );
+  }
+
+  /** Cuántas discrepancias hay de cada clase bajo el filtro de schema, sin paginar. */
+  piiReconciliationCounts(
+    em: EntityManager,
+    f: { schema?: string },
+  ): Promise<{ kind: PiiReconciliationKind; total: number }[]> {
+    const { where, params } = this.reconciliationWhere({ schema: f.schema });
+    return this.q(
+      em,
+      `${this.reconciliationCte()}
+       select kind, count(*)::int as total from rec
+       ${where.length ? `where ${where.join(' and ')}` : ''}
+       group by kind`,
+      params,
+    );
+  }
+
+  /** Bases de la conciliación: personales aprobadas, campos declarados y objetos observados. */
+  async piiReconciliationTotals(
+    em: EntityManager,
+  ): Promise<PiiReconciliationTotalsRow> {
+    const rank = rankSql('a.sensitivity');
+    const [fila] = await this.q<PiiReconciliationTotalsRow[]>(
+      em,
+      `select (select count(*) ${COLUMNAS_OBSERVADAS} and ${rank} >= ${RANK_PERSONAL}
+                  and a.review_status = 'APPROVED' and a.approved_revision_no = a.current_revision_no)::int as approved_personal,
+              (select count(*) from system_ops.field_registry)::int as declared_fields,
+              (select count(*) from data_catalog.catalog_objects
+                where source_code = ${ORIGEN} and observation_status = 'OBSERVED')::int as observed_objects`,
+    );
+    return (
+      fila ?? { approved_personal: 0, declared_fields: 0, observed_objects: 0 }
     );
   }
 
