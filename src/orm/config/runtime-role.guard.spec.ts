@@ -266,4 +266,30 @@ describe('credenciales de migración y de runtime separadas (HZ-05)', () => {
       ),
     ).toEqual({ user: 'dueno', password: 'clave-dueno-sintetica' });
   });
+
+  it('la migración usa el rol dueño aunque llegue DB_APP_USER (Coolify rellena el vacío)', () => {
+    expect(
+      resolveRuntimeCredentials(
+        { user: 'dueno', password: 'clave-dueno-sintetica' },
+        {
+          DB_APP_USER: 'mantra_app',
+          DB_APP_PASSWORD: 'clave-app-sintetica',
+          DB_ROLE_PURPOSE: 'migration',
+        },
+      ),
+    ).toEqual({ user: 'dueno', password: 'clave-dueno-sintetica' });
+  });
+
+  it('otro DB_ROLE_PURPOSE no cambia nada: el runtime sigue con el rol de aplicación', () => {
+    expect(
+      resolveRuntimeCredentials(
+        { user: 'dueno', password: 'clave-dueno-sintetica' },
+        {
+          DB_APP_USER: 'mantra_app',
+          DB_APP_PASSWORD: 'clave-app-sintetica',
+          DB_ROLE_PURPOSE: 'runtime',
+        },
+      ),
+    ).toEqual({ user: 'mantra_app', password: 'clave-app-sintetica' });
+  });
 });
