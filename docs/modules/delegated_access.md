@@ -84,10 +84,15 @@ la tabla que ya lo modelaba:
 - con un doctor: `practice.practitioner_support_assignments` sobre su vinculación
   (`practitioner_role_assignment_id`).
 
-Todo vínculo nace `PENDING` y lo decide **la otra parte** (`domain/support-links.ts`): lo que pide
+Quién lo inició se guarda al crearlo en `initiated_by_party_concept_id` (`DA_INITIATOR_*`, parche
+`database/SQL/patches/2026-10-31_secretaria_iniciador_vinculos.sql`): `ORGANIZATION` sólo lo escribe
+la invitación del hospital después de comprobar que quien invita lo administra; sin iniciador, el
+vínculo no lo decide nadie ni abre nada. Todo vínculo nace `PENDING` y lo decide **la otra parte**
+(`domain/support-links.ts`): lo que pide
 la secretaria lo acepta el hospital (OWNER/ADMIN) o, si es con un doctor, el doctor o el hospital;
-lo que ofrecen el hospital o el doctor lo acepta ella. Cuando el hospital la aprobó (un vínculo de
-lugar, o uno con un doctor que aceptó la administración u ofreció el hospital), su membresía del
+lo que ofrecen el hospital o el doctor lo acepta ella. Sólo cuando el hospital la aprobó
+(`grantsOrganizationAccess`: su administración aceptó lo que ella pidió, o ella aceptó lo que el
+hospital ofreció; un doctor nunca, ni para un piso), su membresía del
 tenant (`DIR_ROLE_SUPPORT`, creada `INVITED` con el pedido) pasa a `ACTIVE` y el hospital entra a
 su token. Un vínculo que sólo aceptó el doctor no abre la membresía: da la agenda de ese doctor y
 nada más del hospital (`organizationAccess: false` en `GET /me/support-access`); esa membresía no lee la estructura completa del hospital
