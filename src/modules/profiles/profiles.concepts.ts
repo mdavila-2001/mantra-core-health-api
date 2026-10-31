@@ -511,14 +511,17 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       display: 'Employment affiliation type',
     },
 
-    // Idiomas clínicos
+    // Idiomas clínicos. Los dos son miembros de `VS_LANGUAGE` y
+    // `VS_LANGUAGE_PROFICIENCY` (paquete del modelo, v4.2.75), y el editor del
+    // perfil muestra su `display` tal cual: por eso va en castellano. El
+    // paquete los espeja con estos mismos valores.
     LANGUAGE_SPANISH: {
       code: 'LANGUAGE_SPANISH',
-      display: 'Spanish clinical language',
+      display: 'Español',
     },
     LANG_PROFICIENCY_NATIVE: {
       code: 'LANG_PROFICIENCY_NATIVE',
-      display: 'Native language proficiency',
+      display: 'Nativo',
     },
 
     // Vínculos de identidad externa (MPI)

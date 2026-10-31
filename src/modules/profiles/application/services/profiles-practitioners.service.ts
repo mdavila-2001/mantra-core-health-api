@@ -1554,11 +1554,11 @@ export class ProfilesPractitionersService {
    * idioma que sigue declarado conserva su fila —y su fecha de alta— y sólo
    * cambia el dominio o si interpreta en consulta.
    *
-   * No se valida contra `VS_LANGUAGE`, igual que el alta: el idioma por
-   * defecto que escribe el alta (`LANGUAGE_SPANISH`) no es miembro sembrado de
-   * ese catálogo, y validar haría imposible volver a guardar lo que el alta
-   * dejó. Un concepto inexistente lo frena la FK de
-   * `practitioner_languages.language_concept_id`.
+   * No se valida contra `VS_LANGUAGE`, igual que el alta: desde v4.2.75 el
+   * idioma por defecto que escribe el alta (`LANGUAGE_SPANISH`) es miembro del
+   * catálogo, pero una base sembrada antes no lo tiene, y validar haría
+   * imposible volver a guardar lo que el alta dejó. Un concepto inexistente lo
+   * frena la FK de `practitioner_languages.language_concept_id`.
    *
    * @throws PreconditionFailedException si la lista repite un idioma.
    */
