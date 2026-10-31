@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -15,6 +16,7 @@ import type {
   TransferResponseDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 const num = (value: string | null | undefined): number =>
@@ -82,6 +84,19 @@ export class TransferInventoryUseCase {
         pharmacyProductId: dto.pharmacyProductId,
         inventoryLotId: dto.inventoryLotId,
       });
+      if (
+        from?.locationTypeConceptId === PINV.LOCATION_TYPE_WARD_STOCK &&
+        (!fromPosition || num(fromPosition.availableQuantity) < dto.quantity)
+      ) {
+        throw new ConflictException(
+          'Stock disponible insuficiente en el botiquín',
+          {
+            available: fromPosition ? num(fromPosition.availableQuantity) : 0,
+            requested: dto.quantity,
+          },
+          PharmacyInventoryErrorReason.INSUFFICIENT_AVAILABLE_STOCK,
+        );
+      }
       if (!fromPosition || num(fromPosition.availableQuantity) < dto.quantity) {
         throw new PreconditionFailedException(
           'Stock disponible insuficiente en origen',

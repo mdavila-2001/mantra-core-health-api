@@ -3,6 +3,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
 import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
+import { MessagingModule } from '../messaging/messaging.module';
+import { EquipmentF5aService } from './services/equipment-f5a.service';
+import { InfraF5aPolicyRegistrar } from './policies/infra-f5a.policy';
 import * as entities from './entities';
 import {
   DiagnosticUnitsController,
@@ -55,6 +58,7 @@ import {
     CommunityModule,
     CommonModule,
     PracticeModule,
+    MessagingModule,
   ],
   controllers: [
     DiagnosticUnitsController,
@@ -83,6 +87,8 @@ import {
     DiagnosticStudiesService,
     DiagnosticPricingService,
     DiagnosticEquipmentService,
+    EquipmentF5aService,
+    InfraF5aPolicyRegistrar,
     DiagnosticUnitsReadService,
     DiagnosticUnitsAdminReadService,
     DiagnosticUnitsSearchService,

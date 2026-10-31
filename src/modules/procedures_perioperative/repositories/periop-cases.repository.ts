@@ -1,3 +1,4 @@
+import { SurgicalSafetyChecklists } from '../entities';
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
@@ -241,8 +242,15 @@ export class PeriopCasesRepository {
   findCaseByNumber(
     em: EntityManager,
     caseNumber: string,
+    custodianTenantId?: string,
   ): Promise<ProcedureCases | null> {
-    return em.findOne(ProcedureCases, { caseNumber });
+    // El número es único por tenant (`uk_procedure_cases_tenant_number`): sin
+    // el tenant, con RLS apagado, los casos de otro tenant agotaban los cinco
+    // intentos de `nextCaseNumber`.
+    return em.findOne(ProcedureCases, {
+      caseNumber,
+      ...(custodianTenantId ? { custodianTenantId } : {}),
+    });
   }
 
   /**
@@ -708,6 +716,12 @@ export class PeriopCasesRepository {
     em: EntityManager,
     data: {
       /**
+       * Tenant de la sala (= `custodian_tenant_id` del caso, por la FK
+       * compuesta de F4). NOT NULL desde la integración F2–F5 y con RLS forzada:
+       * la API lo escribe siempre en vez de depender del trigger de relleno.
+       */
+      tenantId: string;
+      /**
        * Identificador asociado a operating room.
        */
       operatingRoomId: string;
@@ -744,6 +758,7 @@ export class PeriopCasesRepository {
     return em.create(
       OperatingRoomUtilizationEvents,
       {
+        tenantId: data.tenantId,
         operatingRoomId: data.operatingRoomId,
         procedureCaseId: data.procedureCaseId,
         eventTypeConceptId: data.eventTypeConceptId,
@@ -877,5 +892,23 @@ export class PeriopCasesRepository {
       { procedureCaseId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Check-list OMS del caso (F4, gates de §F4.3).
+   *
+   * @param em - Transacción.
+   * @param procedureCaseId - Caso.
+   * @param checklistTypeConceptId - Tipo (`CHECKLIST_WHO`).
+   */
+  findSafetyChecklistByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+    checklistTypeConceptId: string,
+  ): Promise<SurgicalSafetyChecklists | null> {
+    return em.findOne(SurgicalSafetyChecklists, {
+      procedureCaseId,
+      checklistTypeConceptId,
+    });
   }
 }

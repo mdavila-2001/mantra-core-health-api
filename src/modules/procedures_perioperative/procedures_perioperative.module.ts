@@ -1,3 +1,15 @@
+import { PracticeModule } from '../practice/practice.module';
+import { PeriopOrController } from './controllers/periop-or.controller';
+import { OperatingRoomValidator } from './services/or/operating-room.validator';
+import { CaseOrViewBuilder } from './services/or/case-or-view';
+import {
+  OrBlocksUseCases,
+  OrTurnoverObserver,
+  RecordRoomEventUseCase,
+  SafetyChecklistUseCases,
+} from './services/or/or.use-cases';
+import { OperatingRoomsReadUseCases } from './services/or/or-read.use-cases';
+import { InfraF4PolicyRegistrar } from './policies/infra-f4.policy';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -42,10 +54,21 @@ import { AuthzModule } from '../authz/authz.module';
     // El paciente del caso se prueba contra el tenant con la regla de `authz`
     // (`AuthzClinicalScopeService.isPatientInTenant`, #893).
     AuthzModule,
+    // F4 (CONTRATO-F2-F5 §F4): quirófano = espacio de F2 (puerto, evaluador
+    // §0.3, observadores de limpieza). `practice` no importa periop.
+    PracticeModule,
   ],
-  controllers: [PeriopController, DentalController],
+  controllers: [PeriopController, DentalController, PeriopOrController],
   providers: [
     PeriopCasesRepository,
+    OperatingRoomValidator,
+    CaseOrViewBuilder,
+    SafetyChecklistUseCases,
+    RecordRoomEventUseCase,
+    OrBlocksUseCases,
+    OrTurnoverObserver,
+    OperatingRoomsReadUseCases,
+    InfraF4PolicyRegistrar,
     PeriopPreopRepository,
     PeriopIntraopRepository,
     PeriopInstrumentsRepository,

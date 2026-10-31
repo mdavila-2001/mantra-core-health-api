@@ -37,6 +37,11 @@ export const { seeds: PHARMACY_INVENTORY_CONCEPT_SEEDS, ids: PINV } =
       code: 'PINV_LOCATION_TYPE_SHELF',
       display: 'Shelf location',
     },
+    /** Botiquín de una unidad clínica (F5c; uno activo por unidad). */
+    LOCATION_TYPE_WARD_STOCK: {
+      code: 'PINV_LOCATION_TYPE_WARD_STOCK',
+      display: 'Ward stock (unit medicine cabinet)',
+    },
     TEMPERATURE_ZONE_AMBIENT: {
       code: 'PINV_TEMP_ZONE_AMBIENT',
       display: 'Ambient temperature zone',

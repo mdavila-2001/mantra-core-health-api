@@ -99,7 +99,7 @@ Un estado `VIVA` sólo se emite con evidencia fresca y verificable, calculada co
 el reloj de la API; todo lo demás degrada, nunca se rellena. El cliente no
 calcula estados: pinta lo que el servidor declara.
 
-- **Workers (25).** Cada proceso `src/worker-<dominio>.ts` emite un latido cada
+- **Workers (26).** Cada proceso `src/worker-<dominio>.ts` emite un latido cada
   `WORKER_HEARTBEAT_INTERVAL_MS` (15 s) a `POST /internal/ops/heartbeats` con el
   `SystemApiClient` que ya usan sus jobs (`src/worker/worker-heartbeat.service.ts`).
   La API guarda el cuerpo en Redis (`HSET ops:heartbeat:v1 <instanceId>`, TTL de

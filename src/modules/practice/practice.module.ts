@@ -16,6 +16,7 @@ import {
   OrganizationPracticesController,
   PracticeInvitationsController,
   PractitionerInvitationsController,
+  CareSpaceOpsController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -38,7 +39,40 @@ import {
   PracticeAdministrationService,
   HealthcareServiceOffersService,
   PracticeAffiliationInvitationsService,
+  InfrastructureAccessService,
+  InfraPolicyRegistry,
+  INFRA_POLICIES,
+  CARE_SPACE_OPS_PORT,
+  CareSpaceOpsService,
+  CleaningOrdersService,
+  BedBoardReadService,
+  CleaningOrderObservers,
 } from './services';
+import { CareSpaceOpsCore } from './services/ops/care-space-ops-core';
+import { OpsCellBuilder } from './services/ops/ops-cell-builder';
+import { PracticeCareSpaceOpsAdapter } from './services/ops/care-space-ops.adapter';
+import { ChangeAvailabilityUseCase } from './services/ops/use-cases/change-availability.use-case';
+import {
+  CancelBlockUseCase,
+  EndBlockUseCase,
+} from './services/ops/use-cases/close-block.use-cases';
+import { ChangeHygieneUseCase } from './services/ops/use-cases/change-hygiene.use-case';
+import { ChangeIsolationUseCase } from './services/ops/use-cases/change-isolation.use-case';
+import {
+  AssignCleaningOrderUseCase,
+  CancelCleaningOrderUseCase,
+  CreateCleaningOrderUseCase,
+  FinishCleaningOrderUseCase,
+  InspectCleaningOrderUseCase,
+  StartCleaningOrderUseCase,
+} from './services/ops/use-cases/cleaning-order.use-cases';
+import { RunBlocksTickUseCase } from './services/ops/use-cases/run-blocks-tick.use-case';
+import { INFRA_F2_POLICY } from './policies/infra-f2.policy';
+import { INFRA_F5_ASSETS_POLICY } from './policies/infra-f5-assets.policy';
+import { SpaceAssetsController } from './controllers/space-assets.controller';
+import { InfrastructureAccessController } from './controllers/infrastructure-access.controller';
+import { InfrastructureAccessMeService } from './services/infrastructure-access-me.service';
+import { SpaceAssetsReadService } from './services/space-assets-read.service';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -56,6 +90,7 @@ import {
   SpaceUnitAssignmentsRepository,
   SiteDeclaredCapacitiesRepository,
   RetireBlockersRepository,
+  CareSpaceOpsRepository,
 } from './repositories';
 // F1 infraestructura: las habilitaciones de la sede son
 // `organization_extensions.facility_licenses` (orden del orquestador, no una
@@ -125,6 +160,9 @@ import {
     OrganizationPracticesController,
     PracticeInvitationsController,
     PractitionerInvitationsController,
+    CareSpaceOpsController,
+    SpaceAssetsController,
+    InfrastructureAccessController,
   ],
   providers: [
     // Repositorios
@@ -182,6 +220,41 @@ import {
     PracticeAdministrationService,
     HealthcareServiceOffersService,
     PracticeAffiliationInvitationsService,
+    // F2 operación (CONTRATO-F2-F5 §F2.3) y evaluador único de §0.3. Cada
+    // franja registra su política en `INFRA_POLICIES` al arrancar su módulo.
+    CareSpaceOpsRepository,
+    {
+      provide: INFRA_POLICIES,
+      useFactory: () => {
+        const registry = new InfraPolicyRegistry();
+        registry.register(INFRA_F2_POLICY);
+        registry.register(INFRA_F5_ASSETS_POLICY);
+        return registry;
+      },
+    },
+    InfrastructureAccessService,
+    SpaceAssetsReadService,
+    InfrastructureAccessMeService,
+    CareSpaceOpsCore,
+    OpsCellBuilder,
+    CleaningOrderObservers,
+    PracticeCareSpaceOpsAdapter,
+    { provide: CARE_SPACE_OPS_PORT, useExisting: PracticeCareSpaceOpsAdapter },
+    ChangeAvailabilityUseCase,
+    EndBlockUseCase,
+    CancelBlockUseCase,
+    ChangeHygieneUseCase,
+    ChangeIsolationUseCase,
+    CreateCleaningOrderUseCase,
+    AssignCleaningOrderUseCase,
+    StartCleaningOrderUseCase,
+    FinishCleaningOrderUseCase,
+    InspectCleaningOrderUseCase,
+    CancelCleaningOrderUseCase,
+    RunBlocksTickUseCase,
+    CareSpaceOpsService,
+    CleaningOrdersService,
+    BedBoardReadService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
@@ -204,6 +277,13 @@ import {
     OwnSiteProvisioningService,
     PracticesRepository,
     PracticeSitesRepository,
+    // F2–F5: el puerto de operación (F3/F4/F5 lo llaman dentro de su
+    // transacción), el evaluador de §0.3 y su registro de políticas, y los
+    // observadores de órdenes de limpieza (periop, recambio de quirófano).
+    CARE_SPACE_OPS_PORT,
+    InfrastructureAccessService,
+    INFRA_POLICIES,
+    CleaningOrderObservers,
   ],
 })
 export class PracticeModule {}

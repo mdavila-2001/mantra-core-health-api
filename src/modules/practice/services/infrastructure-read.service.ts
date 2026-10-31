@@ -27,6 +27,12 @@ import {
   conceptsByPrefix,
 } from '../domain/structure/structure-catalog';
 import { StructureAccessService } from './structure-access.service';
+import { opsCatalogGroups } from '../domain/ops/ops-catalog';
+import { PRACTICE_CONCEPT_BY_ID as CONCEPT_BY_ID } from '../domain/structure/structure-catalog';
+
+/** Grupos de operación de F2 en el catálogo. */
+const opsCatalog = () =>
+  opsCatalogGroups((id) => CONCEPT_BY_ID.get(id)?.display ?? '');
 import {
   childrenIndex,
   toAssignment,
@@ -104,6 +110,7 @@ export class InfrastructureReadService {
         licenseStatus: group(CONCEPT_GROUPS.licenseStatus),
         capacityKind: group(CONCEPT_GROUPS.capacityKind),
       },
+      ...opsCatalog(),
     };
   }
 

@@ -150,6 +150,8 @@ export { buildCorsOptions, loadCorsAllowedOrigins } from './http/cors-origins';
 export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
 export { ParseUuidListPipe } from './http/parse-uuid-list.pipe';
 export { ParseOptionalDatePipe } from './http/parse-optional-date.pipe';
+export { RequestId } from './http/request-id.decorator';
+export { RequestIdBodyInterceptor } from './http/request-id-body.interceptor';
 
 // Almacenamiento de archivos (adaptador seleccionado por entorno)
 export { FileStorageModule } from './storage/file-storage.module';

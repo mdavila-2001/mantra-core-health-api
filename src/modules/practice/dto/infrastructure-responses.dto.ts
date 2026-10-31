@@ -29,6 +29,18 @@ export class FunctionProfileDto extends ConceptDto {
   @ApiProperty() requiresHvac!: boolean;
 }
 
+/** Motivo de bloqueo con los tipos a los que aplica (F2). */
+export class BlockReasonConceptDto extends ConceptDto {
+  @ApiProperty({ type: [String] }) kinds!: string[];
+}
+
+/** Regla del mapeo a HL7 v2-0116 (F2, primera que aplica). */
+export class V2MapRuleDto {
+  @ApiProperty() order!: number;
+  @ApiProperty() condition!: string;
+  @ApiProperty({ enum: ['C', 'K', 'I', 'O', 'R', 'H', 'U'] }) v2Code!: string;
+}
+
 /** Regla padre→hijo. */
 export class ParentRuleDto {
   @ApiProperty({
@@ -80,6 +92,16 @@ export class InfrastructureCatalogDto {
   attributes!: CatalogAttributesDto;
   @ApiProperty({ type: CatalogRegulatoryDto })
   regulatory!: CatalogRegulatoryDto;
+  // --- F2 operación (CONTRATO-F2-F5 §F2.3, extiende el catálogo de F1) -------
+  @ApiProperty({ type: [ConceptDto] }) availability!: ConceptDto[];
+  @ApiProperty({ type: [ConceptDto] }) hygiene!: ConceptDto[];
+  @ApiProperty({ type: [ConceptDto] }) isolation!: ConceptDto[];
+  @ApiProperty({ type: [ConceptDto] }) occupancy!: ConceptDto[];
+  @ApiProperty({ type: [BlockReasonConceptDto] })
+  blockReasons!: BlockReasonConceptDto[];
+  @ApiProperty({ type: [ConceptDto] }) cleaningTypes!: ConceptDto[];
+  @ApiProperty({ type: [ConceptDto] }) cleaningPriorities!: ConceptDto[];
+  @ApiProperty({ type: [V2MapRuleDto] }) v2Map!: V2MapRuleDto[];
 }
 
 /** Nodo del árbol físico (contrato §3, `CareSpaceNode`). */
