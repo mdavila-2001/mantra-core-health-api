@@ -49,6 +49,17 @@ const EXPLICITLY_WIRED_SOURCES = new Set([
   'practice.practice_sites',
   'practice.clinical_units',
   'practice.care_spaces',
+  // F2–F5 (CONTRATO-F2-F5 §0.1): cada caso de uso versiona su mutación con
+  // `HistoryRepository.append` (con `tenant_id`); el espejo duplicaría.
+  'practice.care_space_blocks',
+  'practice.cleaning_orders',
+  'practice.care_space_category_periods',
+  'clinical.encounter_locations',
+  'clinical.placement_incidents',
+  'procedures_perioperative.operating_room_block_series',
+  'procedures_perioperative.operating_room_blocks',
+  'billing.space_tariffs',
+  'billing.charge_captures',
 ]);
 
 /**

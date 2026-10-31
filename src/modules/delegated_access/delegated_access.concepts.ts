@@ -43,12 +43,49 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
       code: 'DA_ASSIGN_BILLING',
       display: 'Billing assignment',
     },
+    // Roles de infraestructura hospitalaria (CONTRATO-F2-F5 §0.3). La clave
+    // `ASSIGN_ROLE_UNIT_HEAD` la fija el modelo por literal
+    // (`ex_org_user_assignments_unit_head`, «Desvíos» M-F5-ops).
+    ASSIGN_ROLE_NURSE_SUPERVISOR: {
+      code: 'DA_ASSIGN_NURSE_SUPERVISOR',
+      display: 'Nursing supervision assignment',
+    },
+    ASSIGN_ROLE_ADMISSION: {
+      code: 'DA_ASSIGN_ADMISSION',
+      display: 'Admission assignment',
+    },
+    ASSIGN_ROLE_HOUSEKEEPING: {
+      code: 'DA_ASSIGN_HOUSEKEEPING',
+      display: 'Housekeeping assignment',
+    },
+    ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR: {
+      code: 'DA_ASSIGN_HOUSEKEEPING_SUPERVISOR',
+      display: 'Housekeeping supervision assignment',
+    },
+    ASSIGN_ROLE_MAINTENANCE: {
+      code: 'DA_ASSIGN_MAINTENANCE',
+      display: 'Maintenance (incl. biomedical) assignment',
+    },
+    ASSIGN_ROLE_OR_MANAGER: {
+      code: 'DA_ASSIGN_OR_MANAGER',
+      display: 'Operating room manager assignment',
+    },
+    ASSIGN_ROLE_INFECTION_CONTROL: {
+      code: 'DA_ASSIGN_INFECTION_CONTROL',
+      display: 'Infection control assignment',
+    },
+    ASSIGN_ROLE_UNIT_HEAD: {
+      code: 'DA_ASSIGN_UNIT_HEAD',
+      display: 'Clinical unit head assignment',
+    },
 
     // --- Alcance de acceso (access_scope_concept_id) ---
     SCOPE_TENANT: { code: 'DA_SCOPE_TENANT', display: 'Tenant scope' },
     SCOPE_PRACTICE: { code: 'DA_SCOPE_PRACTICE', display: 'Practice scope' },
     SCOPE_SITE: { code: 'DA_SCOPE_SITE', display: 'Site scope' },
     SCOPE_UNIT: { code: 'DA_SCOPE_UNIT', display: 'Clinical unit scope' },
+    // F2–F5 §0.3: alcance de un espacio (`organization_user_assignments.care_space_id`).
+    SCOPE_SPACE: { code: 'DA_SCOPE_SPACE', display: 'Care space scope' },
 
     // --- Tipo de delegado del set de permisos (delegate_type_concept_id) ---
     DELEGATE_TYPE_SECRETARY: {
