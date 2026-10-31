@@ -68,6 +68,9 @@ import {
 } from './services/ops/use-cases/cleaning-order.use-cases';
 import { RunBlocksTickUseCase } from './services/ops/use-cases/run-blocks-tick.use-case';
 import { INFRA_F2_POLICY } from './policies/infra-f2.policy';
+import { INFRA_F5_ASSETS_POLICY } from './policies/infra-f5-assets.policy';
+import { SpaceAssetsController } from './controllers/space-assets.controller';
+import { SpaceAssetsReadService } from './services/space-assets-read.service';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -156,6 +159,7 @@ import {
     PracticeInvitationsController,
     PractitionerInvitationsController,
     CareSpaceOpsController,
+    SpaceAssetsController,
   ],
   providers: [
     // Repositorios
@@ -221,10 +225,12 @@ import {
       useFactory: () => {
         const registry = new InfraPolicyRegistry();
         registry.register(INFRA_F2_POLICY);
+        registry.register(INFRA_F5_ASSETS_POLICY);
         return registry;
       },
     },
     InfrastructureAccessService,
+    SpaceAssetsReadService,
     CareSpaceOpsCore,
     OpsCellBuilder,
     CleaningOrderObservers,

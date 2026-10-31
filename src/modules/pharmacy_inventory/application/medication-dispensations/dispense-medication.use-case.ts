@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   touch,
   type AuthenticatedUser,
@@ -17,6 +18,7 @@ import {
   MovementResponseDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
@@ -101,8 +103,12 @@ export class DispenseMedicationUseCase {
         dto.patientProfileId,
         dto.medicationRequestId,
       );
+      // F5c: un botiquín sólo entrega lo disponible (no lo reservado por otros).
+      const wardStock = new Set<string>();
       for (const line of dto.lines) {
-        await this.scope.requireStockKey(tx, site, line);
+        const location = await this.scope.requireStockKey(tx, site, line);
+        if (location?.locationTypeConceptId === PINV.LOCATION_TYPE_WARD_STOCK)
+          wardStock.add(line.inventoryLocationId);
       }
 
       if (dto.inventoryReservationId) {
@@ -152,6 +158,22 @@ export class DispenseMedicationUseCase {
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
         });
+        if (
+          wardStock.has(line.inventoryLocationId) &&
+          !dto.inventoryReservationId &&
+          (!position ||
+            num(position.availableQuantity) < line.dispensedQuantity)
+        ) {
+          throw new ConflictException(
+            'Stock disponible insuficiente en el botiquín',
+            {
+              productId: line.pharmacyProductId,
+              available: position ? num(position.availableQuantity) : 0,
+              requested: line.dispensedQuantity,
+            },
+            PharmacyInventoryErrorReason.INSUFFICIENT_AVAILABLE_STOCK,
+          );
+        }
         if (
           !position ||
           num(position.onHandQuantity) < line.dispensedQuantity

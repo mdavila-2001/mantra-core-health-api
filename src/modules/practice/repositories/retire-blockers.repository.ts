@@ -15,7 +15,16 @@ export interface ExternalSpaceBlockers {
   readonly futureProcedures: BlockingRows;
   readonly futureBookings: BlockingRows;
   readonly schedulableResources: BlockingRows;
+  /** F5c: ubicaciones de inventario con existencias en el subárbol. */
+  readonly inventoryLocations: BlockingRows;
 }
+
+/** Espacio y sus descendientes (hasta 32 niveles). */
+const SUBTREE = `WITH RECURSIVE sub AS (
+    SELECT id, 0 AS depth FROM practice.care_spaces WHERE id = ?
+    UNION ALL
+    SELECT c.id, sub.depth + 1 FROM practice.care_spaces c JOIN sub ON c.parent_space_id = sub.id
+     WHERE sub.depth < 32)`;
 
 const SAMPLE = 5;
 
@@ -43,6 +52,8 @@ const SAMPLE = 5;
  * - `SCHEDULABLE_RESOURCE`: `schedulable_resources` activos con
  *   `resource_ref_id` = espacio (referencia sin FK, ver PLAN §1) y horarios de
  *   `practitioner_schedules` del espacio con vigencia abierta o futura.
+ * - `INVENTORY_LOCATION` (F5c): ubicaciones de `pharmacy_inventory` del espacio
+ *   o de su subárbol con alguna posición `on_hand_quantity > 0`.
  */
 @Injectable()
 export class RetireBlockersRepository {
@@ -56,26 +67,31 @@ export class RetireBlockersRepository {
     em: EntityManager,
     careSpaceId: string,
   ): Promise<ExternalSpaceBlockers> {
-    const [activeEncounters, futureProcedures, futureBookings, resources] =
-      await Promise.all([
-        this.ids(
-          em,
-          `SELECT id FROM clinical.encounter_locations
+    const [
+      activeEncounters,
+      futureProcedures,
+      futureBookings,
+      resources,
+      inventoryLocations,
+    ] = await Promise.all([
+      this.ids(
+        em,
+        `SELECT id FROM clinical.encounter_locations
             WHERE care_space_id = ?
               AND (period_end IS NULL OR period_end > now())`,
-          [careSpaceId],
-        ),
-        this.ids(
-          em,
-          `SELECT id FROM procedures_perioperative.procedure_cases
+        [careSpaceId],
+      ),
+      this.ids(
+        em,
+        `SELECT id FROM procedures_perioperative.procedure_cases
             WHERE operating_room_id = ?
               AND scheduled_start_at > now()
               AND status_concept_id NOT IN (?, ?)`,
-          [careSpaceId, CONCEPTS.CASE_CANCELLED, CONCEPTS.CASE_COMPLETED],
-        ),
-        this.ids(
-          em,
-          `SELECT s.id FROM scheduling.availability_slots s
+        [careSpaceId, CONCEPTS.CASE_CANCELLED, CONCEPTS.CASE_COMPLETED],
+      ),
+      this.ids(
+        em,
+        `SELECT s.id FROM scheduling.availability_slots s
             WHERE s.care_space_id = ?
               AND s.appointment_id IS NOT NULL
               AND s.start_at > now()
@@ -86,30 +102,40 @@ export class RetireBlockersRepository {
             WHERE r.resource_ref_id = ?
               AND bs.start_at > now()
               AND b.status_concept_id NOT IN (?, ?, ?)`,
-          [
-            careSpaceId,
-            careSpaceId,
-            CONCEPTS.BOOKING_CANCELLED,
-            SCHED.BOOKING_COMPLETED,
-            SCHED.BOOKING_NO_SHOW,
-          ],
-        ),
-        this.ids(
-          em,
-          `SELECT id FROM scheduling.schedulable_resources
+        [
+          careSpaceId,
+          careSpaceId,
+          CONCEPTS.BOOKING_CANCELLED,
+          SCHED.BOOKING_COMPLETED,
+          SCHED.BOOKING_NO_SHOW,
+        ],
+      ),
+      this.ids(
+        em,
+        `SELECT id FROM scheduling.schedulable_resources
             WHERE resource_ref_id = ? AND state_concept_id = ?
            UNION ALL
            SELECT id FROM scheduling.practitioner_schedules
             WHERE care_space_id = ?
               AND (valid_to IS NULL OR valid_to >= current_date)`,
-          [careSpaceId, CONCEPTS.STATE_ACTIVE, careSpaceId],
-        ),
-      ]);
+        [careSpaceId, CONCEPTS.STATE_ACTIVE, careSpaceId],
+      ),
+      this.ids(
+        em,
+        `${SUBTREE}
+           SELECT l.id FROM pharmacy_inventory.inventory_locations l
+            WHERE l.care_space_id IN (SELECT id FROM sub)
+              AND EXISTS (SELECT 1 FROM pharmacy_inventory.inventory_stock_positions sp
+                           WHERE sp.inventory_location_id = l.id AND sp.on_hand_quantity > 0)`,
+        [careSpaceId],
+      ),
+    ]);
     return {
       activeEncounters,
       futureProcedures,
       futureBookings,
       schedulableResources: resources,
+      inventoryLocations,
     };
   }
 
