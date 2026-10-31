@@ -49,6 +49,21 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
     SCOPE_PRACTICE: { code: 'DA_SCOPE_PRACTICE', display: 'Practice scope' },
     SCOPE_SITE: { code: 'DA_SCOPE_SITE', display: 'Site scope' },
     SCOPE_UNIT: { code: 'DA_SCOPE_UNIT', display: 'Clinical unit scope' },
+    SCOPE_SPACE: { code: 'DA_SCOPE_SPACE', display: 'Care space scope' },
+    // Quién inició un vínculo de secretaria (`initiated_by_party_concept_id`).
+    // Se escribe al crear el vínculo y nunca se infiere de quién escribió la fila.
+    INITIATOR_SUPPORT_STAFF: {
+      code: 'DA_INITIATOR_SUPPORT_STAFF',
+      display: 'Initiated by the support staff member',
+    },
+    INITIATOR_ORGANIZATION: {
+      code: 'DA_INITIATOR_ORGANIZATION',
+      display: 'Initiated by an organization administrator',
+    },
+    INITIATOR_PRACTITIONER: {
+      code: 'DA_INITIATOR_PRACTITIONER',
+      display: 'Initiated by the practitioner',
+    },
 
     // --- Tipo de delegado del set de permisos (delegate_type_concept_id) ---
     DELEGATE_TYPE_SECRETARY: {

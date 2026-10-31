@@ -7,3 +7,4 @@ export * from './delegation-scope.service';
 export * from './prescription-shares.service';
 export * from './prescription-share-token';
 export * from './prescription-share-expiry';
+export * from './support-staff.service';

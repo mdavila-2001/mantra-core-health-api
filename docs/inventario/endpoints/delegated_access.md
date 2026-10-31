@@ -3,9 +3,9 @@
 # Endpoints del módulo `delegated_access`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 17 (17 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 12 · BAJO 3
-- **Tablas distintas que tocan:** 18
+- **Operaciones:** 36 (17 en el contrato, 19 sólo en el código)
+- **Riesgo:** ALTO 5 · MEDIO 20 · BAJO 11
+- **Tablas distintas que tocan:** 31
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/delegated-access.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -22,13 +22,32 @@
 | 8 | GET | `/delegated-permission-sets` | Listar los sets de permisos delegados del tenant | BAJO | 1 | SECURITY_ADMIN |
 | 9 | POST | `/delegated-permission-sets` | Publicar set de permisos delegados (scoped) | MEDIO | 3 | SECURITY_ADMIN |
 | 10 | POST | `/delegated-permission-sets/{id}/versions` | Versionar set de permisos delegados | ALTO | 4 | SECURITY_ADMIN |
-| 11 | POST | `/org/{tenantMembershipId}/user-assignments` | Asignar usuario de organización con alcance y vigencia | MEDIO | 2 | SECURITY_ADMIN |
-| 12 | PATCH | `/org/user-assignments/{id}` | Reasignar supervisor / suspender asignación de organización | MEDIO | 3 | SECURITY_ADMIN |
-| 13 | POST | `/practitioner-delegates` | Crear asignación de delegado de practitioner | MEDIO | 7 | SECURITY_ADMIN |
-| 14 | POST | `/practitioner-delegates/{id}/access-requests` | Solicitar acceso delegado (aprobación previa) | MEDIO | 4 | SECURITY_ADMIN |
-| 15 | POST | `/practitioner-delegates/{id}/grants` | Otorgar grant delegado por-propósito y temporal | MEDIO | 6 | SECURITY_ADMIN |
-| 16 | POST | `/practitioner-delegates/{id}/revoke` | Revocar delegación de forma inmediata (cascada authz) | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | GET | `/public/prescription-shares/{token}` | Comprobar un enlace de receta compartida | ALTO | 6 | pública |
+| 11 | POST | `/me/practitioner/support-invitations` | Invita a una secretaria registrada (por su documento) a asistirlo. | MEDIO | 17 | PRACTITIONER, CLINICIAN |
+| 12 | GET | `/me/practitioner/support-team` | Sus secretarias, activas y pendientes. | BAJO | 12 | PRACTITIONER, CLINICIAN |
+| 13 | POST | `/me/practitioner/support-team/{id}/end` | Termina el vínculo con una secretaria suya. | MEDIO | 13 | PRACTITIONER, CLINICIAN |
+| 14 | GET | `/me/support-access` | Lo que puede ver: hospitales, sedes, servicios, pisos y doctores. | BAJO | 12 | SUPPORT_STAFF |
+| 15 | GET | `/me/support-agenda` | Agenda de un doctor al que asiste (sólo con vínculo activo con él). | BAJO | 16 | SUPPORT_STAFF |
+| 16 | GET | `/me/support-catalog` | Catálogo de un hospital para armar el pedido. | BAJO | 9 | SUPPORT_STAFF |
+| 17 | GET | `/me/support-engagements` | Sus vínculos y, aparte, los pendientes. | BAJO | 12 | SUPPORT_STAFF |
+| 18 | POST | `/me/support-engagements/{id}/confirm` | Acepta una invitación del hospital o de un doctor. | MEDIO | 14 | SUPPORT_STAFF |
+| 19 | POST | `/me/support-engagements/{id}/decline` | Rechaza una invitación. | MEDIO | 14 | SUPPORT_STAFF |
+| 20 | POST | `/me/support-engagements/{id}/leave` | Deja un vínculo o retira un pedido propio. | MEDIO | 13 | SUPPORT_STAFF |
+| 21 | POST | `/org/{tenantMembershipId}/user-assignments` | Asignar usuario de organización con alcance y vigencia | MEDIO | 2 | SECURITY_ADMIN |
+| 22 | GET | `/org/support-catalog` | Catálogo del hospital activo, para invitar. | BAJO | 8 | sesión (sin roles) |
+| 23 | GET | `/org/support-engagement-requests` | Bandeja del hospital: vínculos en un estado (por defecto pendientes). | BAJO | 12 | sesión (sin roles) |
+| 24 | POST | `/org/support-engagement-requests/{id}/decision` | El hospital acepta o rechaza lo que pidió una secretaria. | ALTO | 14 | sesión (sin roles) |
+| 25 | GET | `/org/support-engagements` | Personal de apoyo del hospital (vínculos activos y pendientes). | BAJO | 12 | sesión (sin roles) |
+| 26 | POST | `/org/support-engagements/{id}/end` | El hospital termina un vínculo o retira una invitación. | ALTO | 13 | sesión (sin roles) |
+| 27 | POST | `/org/team/invitations` | El hospital invita a una secretaria registrada (por su documento). | ALTO | 17 | sesión (sin roles) |
+| 28 | PATCH | `/org/user-assignments/{id}` | Reasignar supervisor / suspender asignación de organización | MEDIO | 3 | SECURITY_ADMIN |
+| 29 | POST | `/practitioner-delegates` | Crear asignación de delegado de practitioner | MEDIO | 7 | SECURITY_ADMIN |
+| 30 | POST | `/practitioner-delegates/{id}/accept` | Acepta a la secretaria que pidió asistirlo. | MEDIO | 14 | PRACTITIONER, CLINICIAN |
+| 31 | POST | `/practitioner-delegates/{id}/access-requests` | Solicitar acceso delegado (aprobación previa) | MEDIO | 4 | SECURITY_ADMIN |
+| 32 | POST | `/practitioner-delegates/{id}/grants` | Otorgar grant delegado por-propósito y temporal | MEDIO | 6 | SECURITY_ADMIN |
+| 33 | POST | `/practitioner-delegates/{id}/reject` | Rechaza a la secretaria que pidió asistirlo. | MEDIO | 14 | PRACTITIONER, CLINICIAN |
+| 34 | POST | `/practitioner-delegates/{id}/revoke` | Revocar delegación de forma inmediata (cascada authz) | MEDIO | 5 | SECURITY_ADMIN |
+| 35 | GET | `/public/prescription-shares/{token}` | Comprobar un enlace de receta compartida | ALTO | 6 | pública |
+| 36 | POST | `/support-engagement-requests` | La secretaria pide entrar a un hospital o asistir a sus doctores. | MEDIO | 16 | SUPPORT_STAFF |
 
 ---
 
@@ -45,7 +64,7 @@
 
 Aprobar/Denegar solicitud y emitir grant scoped. Caso de uso UC-29-05: Aprobar/Denegar y emitir grant scoped. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:99`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -57,11 +76,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/access-requests.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/access-requests.controller.ts:33` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -157,7 +176,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Evaluar actor efectivo por propósito (step-up). Caso de uso UC-29-09: Evaluar actor efectivo por propósito (step-up). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:103`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -169,10 +188,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -281,9 +300,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -365,10 +384,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -461,9 +480,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: shareId | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:123` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -535,8 +554,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -598,7 +617,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Expirar delegaciones y grants vencidos (barrido). Caso de uso UC-29-08: Expirar delegaciones y grants vencidos. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:102`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -610,8 +629,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -685,8 +704,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -758,7 +777,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Publicar set de permisos delegados (scoped). Caso de uso UC-29-02: Publicar set de permisos delegados (v1). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -770,10 +789,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -880,7 +899,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Versionar set de permisos delegados. Caso de uso UC-29-02: Versionar set (reemplazo all-or-nothing). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:96`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -892,11 +911,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -983,7 +1002,1072 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 11. POST /org/{tenantMembershipId}/user-assignments
+## 11. POST /me/practitioner/support-invitations
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Invita a una secretaria registrada (por su documento) a asistirlo.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerSupportController.invite` — `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117`
+
+### Qué es y para qué sirve (negocio)
+
+Invita a una secretaria registrada (por su documento) a asistirlo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /me/practitioner/support-invitations` la atiende `PractitionerSupportController.invite` (src/modules/delegated_access/controllers/practitioner-support.controller.ts:117). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `PractitionerInviteSupportDto` (2 campos, 2 obligatorios). Delega en `SupportStaffService.inviteForPractitioner`. Crea filas en delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practitioner_support_assignments. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites y 6 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:774` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:629` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:346` |
+| `iam.authentication_credentials` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
+| `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportLinksRepository.findActiveRoleAssignmentsOfPractitioner | `src/modules/delegated_access/repositories/support-links.repository.ts:454` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportLinksRepository.findActiveRoleAssignmentsOfPractitioner | `src/modules/delegated_access/repositories/support-links.repository.ts:454` |
+| `practice.practitioner_support_assignments` | ESCRIBE | CREA | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:795` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
+| `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.secretary_profiles` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
+
+### Cuerpo — DTO `PractitionerInviteSupportDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `nationalId` | `string` | Sí | longitud mínima 4; longitud máxima 40; patrón runtime NATIONAL_ID_PATTERN | `@IsString()` `@MinLength(4)` `@MaxLength(40)` `@Matches(NATIONAL_ID_PATTERN, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad con el que la secretaria inicia sesión. | `src/modules/delegated_access/dto/support-staff.dto.ts:137` |
+| `practitionerRoleAssignmentId` | `string` | Sí | formato uuid | `@IsUUID()` | Su vinculación con el hospital donde la secretaria lo va a asistir. | `src/modules/delegated_access/dto/support-staff.dto.ts:142` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinksCreatedDto>` · DTO `SupportLinksCreatedDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Id del primer vínculo creado. | `src/modules/delegated_access/dto/support-staff.dto.ts:278` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:279` |
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:280` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación no encontrada; ResourceNotFoundException: No hay una secretaria registrada con ese documento; ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya hay un vínculo vivo con ese mismo objetivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:PractitionerSupportController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 12. GET /me/practitioner/support-team
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Sus secretarias, activas y pendientes.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerSupportController.team` — `src/modules/delegated_access/controllers/practitioner-support.controller.ts:52`
+
+### Qué es y para qué sirve (negocio)
+
+Sus secretarias, activas y pendientes. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/practitioner/support-team` la atiende `PractitionerSupportController.team` (src/modules/delegated_access/controllers/practitioner-support.controller.ts:52). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SupportStaffService.practitionerTeam`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:52` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:52` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.team → SupportStaffService.practitionerTeam → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportLinkListDto>` · DTO `SupportLinkListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:270` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:271` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:272` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:PractitionerSupportController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 13. POST /me/practitioner/support-team/{id}/end
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Termina el vínculo con una secretaria suya.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerSupportController.end` — `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98`
+
+### Qué es y para qué sirve (negocio)
+
+Termina el vínculo con una secretaria suya. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /me/practitioner/support-team/{id}/end` la atiende `PractitionerSupportController.end` (src/modules/delegated_access/controllers/practitioner-support.controller.ts:98). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SupportLinkReasonDto` (1 campo, 0 obligatorios). Delega en `SupportStaffService.endForPractitioner`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:707` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SupportLinkReasonDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se termina un vínculo activo o pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:PractitionerSupportController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. GET /me/support-access
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Lo que puede ver: hospitales, sedes, servicios, pisos y doctores.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.access` — `src/modules/delegated_access/controllers/support-staff.controller.ts:76`
+
+### Qué es y para qué sirve (negocio)
+
+Lo que puede ver: hospitales, sedes, servicios, pisos y doctores. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-access` la atiende `SupportStaffController.access` (src/modules/delegated_access/controllers/support-staff.controller.ts:76). Exige sesión con alguno de los roles SUPPORT_STAFF. Delega en `SupportStaffService.myAccess`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:76` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:76` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportLinksRepository.findActiveMembershipTenantIds | `src/modules/delegated_access/repositories/support-links.repository.ts:333` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportAccessResponseDto>` · DTO `SupportAccessResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `tenants` | `array<SupportTenantScopeDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:344` |
+| `tenants[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:324` |
+| `tenants[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:326` |
+| `tenants[].wholeOrganization` | `boolean` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:327` |
+| `tenants[].organizationAccess` | `boolean` | Sí | — | — | El hospital aprobó a la secretaria y entra a su token. false = sólo un doctor la aceptó: ve su agenda y nada más del hospital. | `src/modules/delegated_access/dto/support-staff.dto.ts:332` |
+| `tenants[].practiceSiteIds` | `array<string>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:333` |
+| `tenants[].clinicalUnitIds` | `array<string>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:334` |
+| `tenants[].careSpaceIds` | `array<string>` | Sí | — | — | Pisos y espacios. | `src/modules/delegated_access/dto/support-staff.dto.ts:336` |
+| `tenants[].practitioners` | `array<SupportScopePractitionerDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:338` |
+| `tenants[].practitioners[].linkId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:315` |
+| `tenants[].practitioners[].practitionerRoleAssignmentId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:316` |
+| `tenants[].practitioners[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:318` |
+| `tenants[].practitioners[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:319` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. GET /me/support-agenda
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Agenda de un doctor al que asiste (sólo con vínculo activo con él).
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.agenda` — `src/modules/delegated_access/controllers/support-staff.controller.ts:180`
+
+### Qué es y para qué sirve (negocio)
+
+Agenda de un doctor al que asiste (sólo con vínculo activo con él). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-agenda` la atiende `SupportStaffController.agenda` (src/modules/delegated_access/controllers/support-staff.controller.ts:180). Exige sesión con alguno de los roles SUPPORT_STAFF. Delega en `SupportStaffService.agenda`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 8 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:180` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:180` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findActiveRoleAssignmentInTenant | `src/modules/delegated_access/repositories/support-links.repository.ts:432` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findActiveRoleAssignmentInTenant | `src/modules/delegated_access/repositories/support-links.repository.ts:432` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:593` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:593` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:593` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:593` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:593` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `SupportAgendaQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportAgendaResponseDto>` · DTO `SupportAgendaResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<SupportAgendaItemDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:361` |
+| `items[].bookingId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:349` |
+| `items[].startAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:350` |
+| `items[].endAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:351` |
+| `items[].statusCode` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:353` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:354` |
+| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:356` |
+| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:362` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rango tiene que ser positivo y de {MAX_AGENDA_DAYS} días como mucho |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. GET /me/support-catalog
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Catálogo de un hospital para armar el pedido.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.catalog` — `src/modules/delegated_access/controllers/support-staff.controller.ts:89`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo de un hospital para armar el pedido. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-catalog` la atiende `SupportStaffController.catalog` (src/modules/delegated_access/controllers/support-staff.controller.ts:89). Exige sesión con alguno de los roles SUPPORT_STAFF. Delega en `SupportStaffService.catalogForSupport`. Lee directory.tenants, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links, profiles.persons y 1 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:89` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:89` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:346` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:509` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:497` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:482` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:482` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:523` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:269` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:523` |
+| `profiles.secretary_profiles` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:269` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `SupportCatalogQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportCatalogResponseDto>` · DTO `SupportCatalogResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:297` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:299` |
+| `sites` | `array<SupportCatalogEntryDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:301` |
+| `sites[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `sites[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `sites[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `sites[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `sites[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+| `services` | `array<SupportCatalogEntryDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:303` |
+| `services[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `services[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `services[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `services[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `services[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+| `floors` | `array<SupportCatalogEntryDto>` | Sí | — | — | Pisos. | `src/modules/delegated_access/dto/support-staff.dto.ts:305` |
+| `floors[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `floors[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `floors[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `floors[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `floors[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+| `practitioners` | `array<SupportCatalogEntryDto>` | Sí | — | — | Doctores: `id` es su vinculación con el hospital. | `src/modules/delegated_access/dto/support-staff.dto.ts:310` |
+| `practitioners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `practitioners[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `practitioners[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `practitioners[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `practitioners[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 17. GET /me/support-engagements
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Sus vínculos y, aparte, los pendientes.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.mine` — `src/modules/delegated_access/controllers/support-staff.controller.ts:65`
+
+### Qué es y para qué sirve (negocio)
+
+Sus vínculos y, aparte, los pendientes. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-engagements` la atiende `SupportStaffController.mine` (src/modules/delegated_access/controllers/support-staff.controller.ts:65). Exige sesión con alguno de los roles SUPPORT_STAFF. Delega en `SupportStaffService.listMine`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:65` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:65` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.mine → SupportStaffService.listMine → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MySupportEngagementsResponseDto>` · DTO `MySupportEngagementsResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:259` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:260` |
+| `requests` | `array<SupportLinkViewDto>` | Sí | — | — | Los vínculos todavía PENDING (pedidos o invitaciones). | `src/modules/delegated_access/dto/support-staff.dto.ts:265` |
+| `requests[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `requests[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `requests[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `requests[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `requests[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `requests[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `requests[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `requests[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `requests[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `requests[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `requests[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `requests[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `requests[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `requests[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `requests[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `requests[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `requests[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 18. POST /me/support-engagements/{id}/confirm
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Acepta una invitación del hospital o de un doctor.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.confirm` — `src/modules/delegated_access/controllers/support-staff.controller.ts:125`
+
+### Qué es y para qué sirve (negocio)
+
+Acepta una invitación del hospital o de un doctor. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /me/support-engagements/{id}/confirm` la atiende `SupportStaffController.confirm` (src/modules/delegated_access/controllers/support-staff.controller.ts:125). Exige sesión con alguno de los roles SUPPORT_STAFF. Delega en `SupportStaffService.confirmMine`. Crea filas en directory.tenant_memberships. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:125` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:125` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:125` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:677` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 19. POST /me/support-engagements/{id}/decline
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Rechaza una invitación.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.decline` — `src/modules/delegated_access/controllers/support-staff.controller.ts:143`
+
+### Qué es y para qué sirve (negocio)
+
+Rechaza una invitación. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /me/support-engagements/{id}/decline` la atiende `SupportStaffController.decline` (src/modules/delegated_access/controllers/support-staff.controller.ts:143). Exige sesión con alguno de los roles SUPPORT_STAFF. Valida el cuerpo como `SupportLinkReasonDto` (1 campo, 0 obligatorios). Delega en `SupportStaffService.declineMine`. Crea filas en directory.tenant_memberships. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:143` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:143` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:677` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SupportLinkReasonDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 20. POST /me/support-engagements/{id}/leave
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Deja un vínculo o retira un pedido propio.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.leave` — `src/modules/delegated_access/controllers/support-staff.controller.ts:162`
+
+### Qué es y para qué sirve (negocio)
+
+Deja un vínculo o retira un pedido propio. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /me/support-engagements/{id}/leave` la atiende `SupportStaffController.leave` (src/modules/delegated_access/controllers/support-staff.controller.ts:162). Exige sesión con alguno de los roles SUPPORT_STAFF. Delega en `SupportStaffService.leaveMine`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:162` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:162` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:162` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:707` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se termina un vínculo activo o pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 21. POST /org/{tenantMembershipId}/user-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar usuario de organización con alcance y vigencia
@@ -996,7 +2080,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Asignar usuario de organización con alcance y vigencia. Caso de uso UC-29-01: Asignar usuario de organización (scoped, vigente). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1008,11 +2092,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantMembershipId | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:39` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -1101,7 +2185,687 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 12. PATCH /org/user-assignments/{id}
+## 22. GET /org/support-catalog
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Catálogo del hospital activo, para invitar.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.orgCatalog` — `src/modules/delegated_access/controllers/support-staff.controller.ts:196`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo del hospital activo, para invitar. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /org/support-catalog` la atiende `SupportStaffController.orgCatalog` (src/modules/delegated_access/controllers/support-staff.controller.ts:196). Exige sesión; el controlador no declara roles. Delega en `SupportStaffService.catalogForOrganization`. Lee directory.tenant_memberships, directory.tenants, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.persons.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:196` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.assertOrganizationAdmin → SupportLinksRepository.isOrganizationAdmin | `src/modules/delegated_access/repositories/support-links.repository.ts:319` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:346` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:509` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:497` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:482` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:482` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:523` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:523` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportCatalogResponseDto>` · DTO `SupportCatalogResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:297` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:299` |
+| `sites` | `array<SupportCatalogEntryDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:301` |
+| `sites[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `sites[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `sites[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `sites[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `sites[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+| `services` | `array<SupportCatalogEntryDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:303` |
+| `services[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `services[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `services[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `services[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `services[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+| `floors` | `array<SupportCatalogEntryDto>` | Sí | — | — | Pisos. | `src/modules/delegated_access/dto/support-staff.dto.ts:305` |
+| `floors[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `floors[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `floors[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `floors[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `floors[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+| `practitioners` | `array<SupportCatalogEntryDto>` | Sí | — | — | Doctores: `id` es su vinculación con el hospital. | `src/modules/delegated_access/dto/support-staff.dto.ts:310` |
+| `practitioners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:285` |
+| `practitioners[].name` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:286` |
+| `practitioners[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:288` |
+| `practitioners[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:290` |
+| `practitioners[].practitionerProfileId` | `string` | No | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:292` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 23. GET /org/support-engagement-requests
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Bandeja del hospital: vínculos en un estado (por defecto pendientes).
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.orgRequests` — `src/modules/delegated_access/controllers/support-staff.controller.ts:205`
+
+### Qué es y para qué sirve (negocio)
+
+Bandeja del hospital: vínculos en un estado (por defecto pendientes). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /org/support-engagement-requests` la atiende `SupportStaffController.orgRequests` (src/modules/delegated_access/controllers/support-staff.controller.ts:205). Exige sesión; el controlador no declara roles. Delega en `SupportStaffService.listForOrganization`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:205` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.orgRequests → SupportStaffService.listForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `ListSupportRequestsQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportLinkListDto>` · DTO `SupportLinkListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:270` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:271` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:272` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 24. POST /org/support-engagement-requests/{id}/decision
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** El hospital acepta o rechaza lo que pidió una secretaria.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.decide` — `src/modules/delegated_access/controllers/support-staff.controller.ts:224`
+
+### Qué es y para qué sirve (negocio)
+
+El hospital acepta o rechaza lo que pidió una secretaria. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /org/support-engagement-requests/{id}/decision` la atiende `SupportStaffController.decide` (src/modules/delegated_access/controllers/support-staff.controller.ts:224). Exige sesión; el controlador no declara roles. Valida el cuerpo como `DecideSupportLinkDto` (2 campos, 1 obligatorio). Delega en `SupportStaffService.decideForOrganization`. Crea filas en directory.tenant_memberships. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:224` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:224` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:677` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `DecideSupportLinkDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | Aceptar o rechazar. | `src/modules/delegated_access/dto/support-staff.dto.ts:150` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:157` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "decision": "APPROVED"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "decision": "APPROVED",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. GET /org/support-engagements
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Personal de apoyo del hospital (vínculos activos y pendientes).
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.orgEngagements` — `src/modules/delegated_access/controllers/support-staff.controller.ts:246`
+
+### Qué es y para qué sirve (negocio)
+
+Personal de apoyo del hospital (vínculos activos y pendientes). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /org/support-engagements` la atiende `SupportStaffController.orgEngagements` (src/modules/delegated_access/controllers/support-staff.controller.ts:246). Exige sesión; el controlador no declara roles. Delega en `SupportStaffService.listEngagementsForOrganization`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:246` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.orgEngagements → SupportStaffService.listEngagementsForOrganization → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportLinkListDto>` · DTO `SupportLinkListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:270` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:271` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:272` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 26. POST /org/support-engagements/{id}/end
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** El hospital termina un vínculo o retira una invitación.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.end` — `src/modules/delegated_access/controllers/support-staff.controller.ts:258`
+
+### Qué es y para qué sirve (negocio)
+
+El hospital termina un vínculo o retira una invitación. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /org/support-engagements/{id}/end` la atiende `SupportStaffController.end` (src/modules/delegated_access/controllers/support-staff.controller.ts:258). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SupportLinkReasonDto` (1 campo, 0 obligatorios). Delega en `SupportStaffService.endForOrganization`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:258` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:258` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:707` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SupportLinkReasonDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. POST /org/team/invitations
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** El hospital invita a una secretaria registrada (por su documento).
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.invite` — `src/modules/delegated_access/controllers/support-staff.controller.ts:275`
+
+### Qué es y para qué sirve (negocio)
+
+El hospital invita a una secretaria registrada (por su documento). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /org/team/invitations` la atiende `SupportStaffController.invite` (src/modules/delegated_access/controllers/support-staff.controller.ts:275). Exige sesión; el controlador no declara roles. Valida el cuerpo como `InviteSupportStaffDto` (7 campos, 3 obligatorios). Delega en `SupportStaffService.inviteForOrganization`. Crea filas en delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practitioner_support_assignments. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites y 6 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:275` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/delegated_access/controllers/support-staff.controller.ts:275` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:774` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:629` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:346` |
+| `iam.authentication_credentials` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | ESCRIBE | CREA | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:795` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.secretary_profiles` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
+
+### Cuerpo — DTO `InviteSupportStaffDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `nationalId` | `string` | Sí | longitud mínima 4; longitud máxima 40; patrón runtime NATIONAL_ID_PATTERN | `@IsString()` `@MinLength(4)` `@MaxLength(40)` `@Matches(NATIONAL_ID_PATTERN, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad con el que la secretaria inicia sesión. | `src/modules/delegated_access/dto/support-staff.dto.ts:115` |
+| `items` | `array<SupportTargetDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => SupportTargetDto)` | Lo que se le ofrece. | `src/modules/delegated_access/dto/support-staff.dto.ts:124` |
+| `items[].targetKind` | `object` | Sí | — | `@IsIn(SUPPORT_TARGET_KINDS)` | Qué nombra el vínculo. | `src/modules/delegated_access/dto/support-staff.dto.ts:42` |
+| `items[].practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede (`targetKind: SITE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:48` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio / unidad clínica (`targetKind: SERVICE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:54` |
+| `items[].careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Piso u otro espacio (`targetKind: SPACE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:60` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Vinculación del doctor con el hospital (`targetKind: PRACTITIONER`). | `src/modules/delegated_access/dto/support-staff.dto.ts:66` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "targetKind": {}
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "targetKind": {},
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+      "careSpaceId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinksCreatedDto>` · DTO `SupportLinksCreatedDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Id del primer vínculo creado. | `src/modules/delegated_access/dto/support-staff.dto.ts:278` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:279` |
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:280` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay una secretaria registrada con ese documento; ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya hay un vínculo vivo con ese mismo objetivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 28. PATCH /org/user-assignments/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Reasignar supervisor / suspender asignación de organización
@@ -1114,7 +2878,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Reasignar supervisor / suspender asignación de organización. Caso de uso UC-29-10: Reasignar supervisor / suspender (cascada). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:104`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1126,11 +2890,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:59` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -1208,7 +2972,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 13. POST /practitioner-delegates
+## 29. POST /practitioner-delegates
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear asignación de delegado de practitioner
@@ -1221,7 +2985,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Crear asignación de delegado de practitioner. Caso de uso UC-29-03: Crear delegación de practitioner. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:97`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1233,10 +2997,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -1327,7 +3091,110 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 14. POST /practitioner-delegates/{id}/access-requests
+## 30. POST /practitioner-delegates/{id}/accept
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Acepta a la secretaria que pidió asistirlo.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerSupportController.accept` — `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61`
+
+### Qué es y para qué sirve (negocio)
+
+Acepta a la secretaria que pidió asistirlo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /practitioner-delegates/{id}/accept` la atiende `PractitionerSupportController.accept` (src/modules/delegated_access/controllers/practitioner-support.controller.ts:61). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SupportStaffService.acceptForPractitioner`. Crea filas en directory.tenant_memberships. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:677` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:PractitionerSupportController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 31. POST /practitioner-delegates/{id}/access-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitar acceso delegado (aprobación previa)
@@ -1340,7 +3207,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Solicitar acceso delegado (aprobación previa). Caso de uso UC-29-04: Solicitar acceso delegado (aprobación previa). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:98`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1352,11 +3219,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -1437,7 +3304,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 15. POST /practitioner-delegates/{id}/grants
+## 32. POST /practitioner-delegates/{id}/grants
 
 - **Origen:** CONTRATO
 - **Nombre:** Otorgar grant delegado por-propósito y temporal
@@ -1450,7 +3317,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Otorgar grant delegado por-propósito y temporal. Caso de uso UC-29-06: Grant pre-autorizado por-propósito y temporal. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:100`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1462,11 +3329,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -1553,7 +3420,128 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 16. POST /practitioner-delegates/{id}/revoke
+## 33. POST /practitioner-delegates/{id}/reject
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Rechaza a la secretaria que pidió asistirlo.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerSupportController.reject` — `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79`
+
+### Qué es y para qué sirve (negocio)
+
+Rechaza a la secretaria que pidió asistirlo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /practitioner-delegates/{id}/reject` la atiende `PractitionerSupportController.reject` (src/modules/delegated_access/controllers/practitioner-support.controller.ts:79). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SupportLinkReasonDto` (1 campo, 0 obligatorios). Delega en `SupportStaffService.rejectForPractitioner`. Crea filas en directory.tenant_memberships. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:835` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:677` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:700` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:836` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SupportLinkReasonDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinkViewDto>` · DTO `SupportLinkViewDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:PractitionerSupportController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 34. POST /practitioner-delegates/{id}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar delegación de forma inmediata (cascada authz)
@@ -1566,7 +3554,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Revocar delegación de forma inmediata (cascada authz). Caso de uso UC-29-07: Revocar delegación inmediata (cascada). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:101`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1578,11 +3566,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
 
 ### Tablas que afecta
 
@@ -1654,7 +3642,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ---
 
-## 17. GET /public/prescription-shares/{token}
+## 35. GET /public/prescription-shares/{token}
 
 - **Origen:** CONTRATO
 - **Nombre:** Comprobar un enlace de receta compartida
@@ -1735,6 +3723,151 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 ### Flujos
 
 - Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:PrescriptionSharesPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 36. POST /support-engagement-requests
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** La secretaria pide entrar a un hospital o asistir a sus doctores.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SupportStaffController.request` — `src/modules/delegated_access/controllers/support-staff.controller.ts:103`
+
+### Qué es y para qué sirve (negocio)
+
+La secretaria pide entrar a un hospital o asistir a sus doctores. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /support-engagement-requests` la atiende `SupportStaffController.request` (src/modules/delegated_access/controllers/support-staff.controller.ts:103). Exige sesión con alguno de los roles SUPPORT_STAFF. Valida el cuerpo como `CreateEngagementRequestDto` (9 campos, 3 obligatorios). Delega en `SupportStaffService.request`. Crea filas en delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practitioner_support_assignments. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, iam.users, practice.care_spaces, practice.clinical_units, practice.practice_sites, practice.practices y 5 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:103` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:103` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/delegated_access/controllers/support-staff.controller.ts:103` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:774` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:641` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:629` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:346` |
+| `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `practice.practitioner_support_assignments` | ESCRIBE | CREA | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:795` |
+| `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:269` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
+| `profiles.secretary_profiles` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:269` |
+
+### Cuerpo — DTO `CreateEngagementRequestDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Hospital al que pide entrar. | `src/modules/delegated_access/dto/support-staff.dto.ts:74` |
+| `roleTemplateCode` | `string` | No | valores: SECRETARY | `@IsOptional()` `@IsIn(['SECRETARY'])` | Rol de apoyo. Hoy sólo existe la secretaria; se acepta para no romper al cliente del PR #1175, que lo mandaba siempre. | `src/modules/delegated_access/dto/support-staff.dto.ts:83` |
+| `message` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Mensaje para quien decide. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:90` |
+| `items` | `array<SupportTargetDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => SupportTargetDto)` | Lo que pide: hospital, sedes, servicios, pisos y doctores. | `src/modules/delegated_access/dto/support-staff.dto.ts:99` |
+| `items[].targetKind` | `object` | Sí | — | `@IsIn(SUPPORT_TARGET_KINDS)` | Qué nombra el vínculo. | `src/modules/delegated_access/dto/support-staff.dto.ts:42` |
+| `items[].practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede (`targetKind: SITE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:48` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio / unidad clínica (`targetKind: SERVICE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:54` |
+| `items[].careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Piso u otro espacio (`targetKind: SPACE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:60` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Vinculación del doctor con el hospital (`targetKind: PRACTITIONER`). | `src/modules/delegated_access/dto/support-staff.dto.ts:66` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "targetKind": {}
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "roleTemplateCode": "SECRETARY",
+  "message": "valor-ejemplo",
+  "items": [
+    {
+      "targetKind": {},
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+      "careSpaceId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SupportLinksCreatedDto>` · DTO `SupportLinksCreatedDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Id del primer vínculo creado. | `src/modules/delegated_access/dto/support-staff.dto.ts:278` |
+| `tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:279` |
+| `items` | `array<SupportLinkViewDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:280` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:214` |
+| `items[].kind` | `string` | Sí | valores: LOCATION, PRACTITIONER | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:215` |
+| `items[].targetKind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof SUPPORT_TARGET_KINDS)[number] | `src/modules/delegated_access/dto/support-staff.dto.ts:216` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:217` |
+| `items[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:219` |
+| `items[].userId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:220` |
+| `items[].personName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:222` |
+| `items[].status` | `string` | Sí | valores: PENDING, ACTIVE, REJECTED, ENDED | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:224` |
+| `items[].initiatedBy` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide. | `src/modules/delegated_access/dto/support-staff.dto.ts:231` |
+| `items[].awaiting` | `string` | No | valores: SUPPORT_STAFF, ORGANIZATION, PRACTITIONER | — | Quién tiene que aceptar o rechazar; null si ya se decidió. | `src/modules/delegated_access/dto/support-staff.dto.ts:237` |
+| `items[].practiceSiteId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:239` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:241` |
+| `items[].careSpaceId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:243` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:245` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:247` |
+| `items[].targetName` | `string` | No | admite null | — | Nombre del doctor, la sede, el servicio o el piso. | `src/modules/delegated_access/dto/support-staff.dto.ts:253` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:254` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya hay un vínculo vivo con ese mismo objetivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `ctrl:SupportStaffController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
