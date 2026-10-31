@@ -212,7 +212,7 @@ consume sabe de dónde sale cada cifra y no debe sumar ni comparar una con otra:
 |                                               | Políticas, cambios, registro        | `GET /admin/governance/{policies,change-log,entity-registry,domains,legal-holds,retention-executions}` | `system_ops.*` (declarado, no observado)                                                            |
 
 Las lecturas de `admin/governance/*` viven aquí (`review-queue`, `jobs`) y en `system_ops` (el resto)
-bajo el mismo prefijo; ambas usan `GOVERNANCE_VIEW_ROLES` (`system_ops/governance-read.roles.ts`) =
+bajo el mismo prefijo; ambas usan `GOVERNANCE_VIEW_ROLES` (`common/auth/governance-read.roles.ts`) =
 `PORTAL_READ_ROLES`.
 
 ## Roles de gobierno: dos nombres, alias SOLO de lectura

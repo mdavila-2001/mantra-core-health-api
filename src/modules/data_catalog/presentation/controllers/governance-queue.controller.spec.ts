@@ -15,7 +15,7 @@ import { TenantScopeGuard } from '../../../../common/auth/tenant-scope.guard';
 import { TokenService } from '../../../../common/auth/token.service';
 import { AllExceptionsFilter } from '../../../../common/filters/all-exceptions.filter';
 import { TracingService } from '../../../../observability';
-import { GOVERNANCE_VIEW_ROLES } from '../../../system_ops/governance-read.roles';
+import { GOVERNANCE_VIEW_ROLES } from '../../../../common/auth/governance-read.roles';
 import { GovernanceQueueService } from '../../application/governance-queue.service';
 import { GovernanceQueueRepository } from '../../infrastructure/repositories/governance-queue.repository';
 import { GovernanceQueueController } from './governance-queue.controller';
