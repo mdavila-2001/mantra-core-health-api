@@ -102,7 +102,7 @@ export function resolveDayWindow(from: string, to: string): DayWindow {
 export class InsightsFactsService {
   constructor(private readonly repo: InsightsFactsRepository) {}
 
-  private async meta(
+  async meta(
     window: InsightsMetaDto['window'],
     notMeasured: InsightsMetaDto['notMeasured'],
   ): Promise<InsightsMetaDto> {

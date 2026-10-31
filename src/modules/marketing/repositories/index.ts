@@ -16,3 +16,5 @@ export type {
   CreateAttributionTouchData,
 } from './marketing-journeys.repository';
 export { InsightsFactsRepository } from './insights-facts.repository';
+export { InsightsWorkflowRepository } from './insights-workflow.repository';
+export { InsightsWorkspaceRepository } from './insights-workspace.repository';
