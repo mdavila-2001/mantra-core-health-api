@@ -6,6 +6,7 @@ import {
   isInStock,
   isLowStock,
   normalizeMoney,
+  SELLABLE_STOCK_FILTER,
   toCents,
 } from './pharmacy-catalog-rules';
 
@@ -68,6 +69,13 @@ describe('reglas del catálogo de la farmacia (P47)', () => {
       expect(isInStock({ stockQuantity: 9, outOfStockDeclared: true })).toBe(
         false,
       );
+    });
+
+    it('el filtro de lo vendible no mira el conteo del catálogo: cuánto hay en cada sede lo dice la regla por sede', () => {
+      // Un producto con catálogo en 0 que una sede marcó «Lo tengo» tiene que
+      // poder verse, pedirse y reservarse; sólo el «no tengo» de toda la
+      // farmacia lo saca antes de mirar la sede.
+      expect(SELLABLE_STOCK_FILTER).toEqual({ outOfStockDeclared: false });
     });
 
     it('bajo umbral: sólo con conteo y en stock; umbral por defecto 5', () => {
