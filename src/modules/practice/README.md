@@ -78,7 +78,7 @@ SCHEDULING_ADMIN, | `sites` |
 ## Infraestructura hospitalaria (F1, 2026-10-30)
 
 Contrato: `SALUD/Arquitectura/infraestructura-hospitalaria/CONTRATO-F0-F1.md` §3
-(repo de documentación). Trabajo: `docs/trabajo/2026-10-29-f1-api-infraestructura/`.
+(repo de documentación). Plan y estado: mdavila-2001/mantra-core-health-api#1167.
 
 Todas exigen sesión y `X-Tenant-Id` (`requireTenantId()`); un recurso de otro
 tenant responde **404**. Sin `@Roles`: la autorización vive en

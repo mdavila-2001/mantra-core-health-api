@@ -170,3 +170,7 @@ Mantra Core Health Context/
 # Cada corrida genera su volcado e informe con fecha: son evidencia de esa
 # máquina y ese momento, no fuente. Lo que se conserva del ensayo va al runbook.
 .drill/
+
+# Salida por defecto de tools/terminology-import/measure-sources.mjs: es
+# evidencia de una corrida, no fuente (AGENTS.md §2.1).
+/docs/progress/
