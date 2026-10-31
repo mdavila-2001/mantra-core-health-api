@@ -56,13 +56,32 @@ export class AdmitPatientUseCase {
    */
   execute(dto: CreateAdmissionDto, req: AdtRequest): Promise<AdtResultDto> {
     return this.em.transactional(async (tx) => {
-      const { target, roles } = await this.access.assertCan(
+      const site = await this.access.assertCan(
         req.actor as never,
         'f3.adt.place',
         { siteId: dto.practiceSiteId },
         tx,
         req.tenantId,
       );
+      const { target } = site;
+      // Con cama, el permiso se decide sobre la cama (alcance UNIT/SPACE); sin
+      // cama, hace falta un rol de nivel sede (revisión de seguridad F3).
+      const { roles } = dto.bed
+        ? await this.access.assertCan(
+            req.actor as never,
+            'f3.adt.place',
+            { careSpaceId: dto.bed.careSpaceId },
+            tx,
+            req.tenantId,
+          )
+        : (() => {
+            const levelRoles = this.access.siteLevelRoles(
+              site.scope,
+              target.site,
+            );
+            this.access.decide('f3.adt.place', levelRoles, false, site.scope);
+            return { roles: levelRoles };
+          })();
       if (
         !(await this.scope.isPatientInTenant(
           tx,
@@ -779,6 +798,14 @@ export class CancelLocationUseCase {
         id: loc.previousEncounterLocationId as string,
       });
       if (!prev?.careSpaceId) throw adtError('LOCATION_NOT_CANCELLABLE');
+      // Reabrir la ubicación previa toca otro espacio: también se autoriza.
+      await this.access.assertCan(
+        req.actor as never,
+        'f3.adt.place',
+        { careSpaceId: prev.careSpaceId },
+        tx,
+        req.tenantId,
+      );
       await this.support.port.lockSpaces(tx, [
         loc.careSpaceId,
         prev.careSpaceId,

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import type { AuthenticatedUser } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CareSpaces,
   CleaningOrders,
@@ -88,6 +91,14 @@ export class BedBoardReadService {
       em,
       tenantId,
     );
+    if (
+      query.unitId &&
+      !this.access.canOnUnit('f2.board.read', scope, target.site, query.unitId)
+    ) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        unitId: query.unitId,
+      });
+    }
     const index = await this.index(em, siteId);
     const functionIds = (query.functionCodes ?? '')
       .split(',')
@@ -338,6 +349,19 @@ export class BedBoardReadService {
       em,
       tenantId,
     );
+    if (
+      query.unitId &&
+      !this.access.canOnUnit(
+        'f2.cleaning.read',
+        scope,
+        target.site,
+        query.unitId,
+      )
+    ) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        unitId: query.unitId,
+      });
+    }
     const index = await this.index(em, siteId);
     const limit = query.limit ?? ORDER_PAGE;
     const rows = await em.find(

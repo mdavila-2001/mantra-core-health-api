@@ -272,6 +272,76 @@ export class InfrastructureAccessService {
   }
 
   /**
+   * Roles de nivel sede u organización: los base (plataforma, admin) más las
+   * asignaciones TENANT/PRACTICE/SITE que contienen la sede. Una asignación
+   * de unidad o de espacio **no** cuenta: sirve para decidir si una colección
+   * por sede se devuelve entera o filtrada a lo permitido.
+   *
+   * @param scope - Alcance del actor.
+   * @param site - Sede.
+   */
+  siteLevelRoles(
+    scope: ActorScope,
+    site: { id: string; practiceId: string },
+  ): Set<InfraRole> {
+    return rolesOn(
+      scope.base,
+      scope.grants.filter(
+        (g) =>
+          g.scope === 'TENANT' || g.scope === 'PRACTICE' || g.scope === 'SITE',
+      ),
+      {
+        practiceId: site.practiceId,
+        siteId: site.id,
+        unitIds: [],
+        spaceChain: [],
+      },
+    );
+  }
+
+  /**
+   * `true` si el actor puede `action` sobre la sede entera.
+   *
+   * @param action - Acción registrada.
+   * @param scope - Alcance del actor.
+   * @param site - Sede.
+   */
+  canAtSiteLevel(
+    action: string,
+    scope: ActorScope,
+    site: { id: string; practiceId: string },
+  ): boolean {
+    return this.can(action, this.siteLevelRoles(scope, site), false, scope);
+  }
+
+  /**
+   * `true` si el actor puede `action` sobre una unidad concreta de la sede
+   * (nivel sede, o asignación UNIT de esa misma unidad). Fail-closed: una
+   * unidad `null` (camas sin unidad) sólo la ve el nivel sede.
+   *
+   * @param action - Acción registrada.
+   * @param scope - Alcance del actor.
+   * @param site - Sede.
+   * @param unitId - Unidad.
+   */
+  canOnUnit(
+    action: string,
+    scope: ActorScope,
+    site: { id: string; practiceId: string },
+    unitId: string | null,
+  ): boolean {
+    if (this.canAtSiteLevel(action, scope, site)) return true;
+    if (!unitId) return false;
+    const roles = rolesOn(scope.base, scope.grants, {
+      practiceId: site.practiceId,
+      siteId: site.id,
+      unitIds: [unitId],
+      spaceChain: [],
+    });
+    return this.can(action, roles, false, scope);
+  }
+
+  /**
    * Exige poder hacer `action` sobre el objetivo; devuelve el objetivo
    * resuelto y los roles para que el caso de uso no vuelva a consultarlos.
    *
