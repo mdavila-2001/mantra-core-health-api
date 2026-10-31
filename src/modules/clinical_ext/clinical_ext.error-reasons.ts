@@ -49,4 +49,26 @@ export enum ClinicalExtErrorReason {
    * consentimiento registrado con `targetType='REFERRAL'` sobre la derivación.
    */
   REFERRAL_CONSENT_LINK_NOT_ALLOWED = 'REFERRAL_CONSENT_LINK_NOT_ALLOWED',
+
+  // --- Datos de traslado (v4274) ---
+  /** Con `required=true` hacen falta `transportMode` y `departureCondition`. */
+  TRANSFER_INCOMPLETE = 'TRANSFER_INCOMPLETE',
+  /**
+   * Paciente inestable o crítico sin ambulancia (básica, avanzada o aérea) o
+   * sin personal de salud que acompañe.
+   */
+  TRANSFER_UNSAFE_TRANSPORT = 'TRANSFER_UNSAFE_TRANSPORT',
+  /**
+   * Paciente inestable o crítico sin aviso previo al receptor
+   * (`receiverContacted=true` y `receiverContactName`).
+   */
+  TRANSFER_RECEIVER_NOT_CONTACTED = 'TRANSFER_RECEIVER_NOT_CONTACTED',
+  /** Signo vital fuera de rango, o diastólica no menor que la sistólica. */
+  TRANSFER_VITALS_OUT_OF_RANGE = 'TRANSFER_VITALS_OUT_OF_RANGE',
+  /** `transportMode=OTHER` sin `transportDetail`. */
+  TRANSFER_DETAIL_REQUIRED = 'TRANSFER_DETAIL_REQUIRED',
+  /** La llegada es anterior a la salida registrada. */
+  TRANSFER_ARRIVAL_BEFORE_DEPARTURE = 'TRANSFER_ARRIVAL_BEFORE_DEPARTURE',
+  /** La llegada ya está registrada: el traslado no se corrige ni se repite. */
+  REFERRAL_ARRIVAL_ALREADY_RECORDED = 'REFERRAL_ARRIVAL_ALREADY_RECORDED',
 }
