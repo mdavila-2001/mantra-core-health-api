@@ -9,31 +9,33 @@
 # Módulo `marketing`
 
 **Fuente:** [`src/modules/marketing/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/marketing/README.md)
-· 2 controllers · 2 services · 2 repositories · 14 entidades · 1 DTO
+· 3 controllers · 3 services · 3 repositories · 36 entidades · 3 DTO
 
 ---
 
 # Módulo 50 — Marketing Automation, Journeys y Atribución
 
 Segmentación de audiencia, campañas multicanal, plantillas de contenido versionadas, journeys con
-inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-touch.
+inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-touch. Además sirve el
+dataset de **plataforma** de AloVida Insights (`/marketing/insights/*`, tablas `insights_*` sin
+`tenant_id`): por ahora sus dos lecturas de campañas, `catalog` y `campaign-facts`.
 
 ## Rutas HTTP y alcance (medido)
 
-<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+<!-- Medido el 2026-10-31 sobre origin/dev (f02f6544) más la rama claude/insights-f3-lecturas. Repetir con:
   find src/modules/marketing -name '*.controller.ts' | wc -l
   find src/modules/marketing -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
   find src/modules/marketing -name '*.entity.ts' | wc -l
   find src/modules/marketing -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **2 controllers, 15 rutas HTTP, 14 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 17 rutas HTTP, 36 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Su `*.module.ts` no declara `imports` de otros módulos.
 
-Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`, `campaign_dispatch_recipients`, `campaign_dispatches`, `campaign_members`, `campaign_schedules`, `content_templates`, `journey_enrollments`, `journey_steps`, `journeys`, `marketing_campaigns`, `marketing_touchpoints`, `segment_members`, `segments`, `tracked_links`.
+Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): las 14 del módulo (`attribution_touches`, `campaign_dispatch_recipients`, `campaign_dispatches`, `campaign_members`, `campaign_schedules`, `content_templates`, `journey_enrollments`, `journey_steps`, `journeys`, `marketing_campaigns`, `marketing_touchpoints`, `segment_members`, `segments`, `tracked_links`) y las 22 de AloVida Insights, todas con prefijo `insights_` (`insights_alert_rules`, `insights_alert_transitions`, `insights_alerts`, `insights_app_daily_facts`, `insights_app_onboarding_facts`, `insights_app_screen_daily_facts`, `insights_campaign_daily_facts`, `insights_campaign_hourly_facts`, `insights_campaigns`, `insights_creatives`, `insights_data_sources`, `insights_environment_items`, `insights_mentions`, `insights_milestones`, `insights_notification_preferences`, `insights_reports`, `insights_saved_views`, `insights_search_signals`, `insights_sector_trends`, `insights_social_daily_facts`, `insights_social_posts`, `insights_user_preferences`). Las lecturas de esta franja solo usan `insights_campaigns`, `insights_creatives`, `insights_milestones`, `insights_data_sources` e `insights_campaign_daily_facts`.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
@@ -52,8 +54,10 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`,
 | `POST /marketing/touchpoints` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/attribution/compute` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `GET /r/:code` | pública | `tracked-link-redirect` |
+| `GET /marketing/insights/catalog` | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN (+ SUPERADMIN) | `insights-facts` |
+| `GET /marketing/insights/campaign-facts` | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN (+ SUPERADMIN) | `insights-facts` |
 
-## Casos de uso cubiertos (12)
+## Casos de uso cubiertos (14)
 
 | UC | Endpoint | Descripción |
 | --- | --- | --- |
@@ -69,6 +73,8 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`,
 | UC-50-10 | `POST /marketing/tracked-links` · `GET /r/:code` | Enlace rastreable y click |
 | UC-50-11 | `POST /marketing/touchpoints` | Registrar touchpoint (append-only) |
 | UC-50-12 | `POST /marketing/attribution/compute` | Atribución multi-touch |
+| UC-50-13 | `GET /marketing/insights/catalog` | Catálogo de Insights: campañas (con canales derivados de sus creativos) e hitos |
+| UC-50-14 | `GET /marketing/insights/campaign-facts` | Hechos diarios por campaña y canal en una ventana de hasta 92 días, con `meta` (`dataset`, `asOf`, `notMeasured`) |
 
 ## Entidades
 
@@ -128,6 +134,18 @@ touchpoints del miembro en ventana ── attribution/compute ──> reparto co
 
 ## Permisos
 
+**AloVida Insights** (`/marketing/insights/*`, decisión D-7): `@Roles('MARKETING_MANAGER',
+'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en cada handler (`SUPERADMIN` entra por el comodín de
+`RolesGuard`) y `@PlatformTenantOptional('SUPERADMIN', 'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en
+la clase. Nunca `BUSINESS_ADMIN`. `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` son roles globales y leen
+sin cabecera. `MARKETING_MANAGER` está sembrado con ámbito de **tenant**: no está en la lista
+tenant-opcional a propósito, así que necesita `X-Tenant-Id` (o una sola membresía) y solo autoriza
+en el tenant donde se le concedió (`403 ROLE_INSUFFICIENT` en otro; `403 TENANT_AMBIGUOUS` /
+`TENANT_REQUIRED` sin cabecera con varias o ninguna membresía). Esa cadena está fijada por
+`insights-access.spec.ts`, que ejecuta `TenantScopeGuard` y `RolesGuard` reales.
+
+**Resto del módulo:**
+
 `MARKETING_MANAGER` en todo el módulo. `CONTENT_EDITOR` para publicar plantillas. `SYSTEM` en lo
 que ejecutan los workers: refresco de segmento, materialización, avance y salida de inscripciones,
 touchpoints y atribución. `GET /r/:code` es **público**: quien hace click es el destinatario del
@@ -136,6 +154,12 @@ mensaje, no un usuario con sesión; por eso no declara quién es: presenta el to
 al destinatario).
 
 ## Alcance por tenant
+
+**Excepción: AloVida Insights es «plataforma, sin tenant».** Las tablas `marketing.insights_*` no
+llevan `tenant_id` y las lecturas de `/marketing/insights/*` no se filtran por tenant: lo que
+protege el dato es el rol (ver *Permisos*), no la fila. Para `MARKETING_MANAGER` el tenant solo
+sirve para pasar los guards; el contenido devuelto es el mismo en cualquier tenant. Lo que sigue
+describe el resto del módulo.
 
 El tenant sale del contexto autenticado (`requireTenantId()`), nunca del cuerpo: `tenantId` en los
 DTO de alta es opcional y, si llega, debe coincidir con el activo (`412 MARKETING_TENANT_MISMATCH`).
@@ -161,8 +185,12 @@ ni el contenido de las plantillas.
 
 ## Pruebas
 
-`corepack yarn test src/modules/marketing --runInBand --silent` — 3 suites, 80 pruebas (revisión
-2026-10-04).
+`corepack yarn test src/modules/marketing --runInBand --silent` — incluye, para Insights,
+`insights-access.spec.ts` (guards reales, casos a-f de D-7), `insights-facts.controller.spec.ts`
+(metadatos de rol y de tenant-opcional, ningún handler sin rol), `insights-facts.service.spec.ts`
+(ventana, `NULL` a `notMeasured`, mapeos) y `insights-query.dto.spec.ts`. La integración opt-in con
+PostgreSQL real es `test/integration/marketing-insights.int-spec.ts` (`DATA_CATALOG_IT_DB_URL`, base
+desechable).
 
 ## Revisión backend 2026-10-04
 

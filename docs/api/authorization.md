@@ -126,6 +126,18 @@ del sistema — fija el tenant activo para la request/transacción. Que Row-Leve
 (`RLS_ENFORCE`) esté activo depende de la configuración de cada entorno, no sólo del código — ver
 [aislamiento por tenant](../security/tenant-isolation.md).
 
+### Datasets de plataforma: AloVida Insights
+
+`/marketing/insights/*` sirve tablas sin `tenant_id` (`marketing.insights_*`), así que no aísla por
+tenant: aísla por rol. Cada handler declara `@Roles('MARKETING_MANAGER', 'PLATFORM_ADMIN',
+'DATA_PLATFORM_ADMIN')` y la clase `@PlatformTenantOptional('SUPERADMIN', 'PLATFORM_ADMIN',
+'DATA_PLATFORM_ADMIN')`. `MARKETING_MANAGER` es un rol de **tenant** (`scopedRoles`): no entra en la
+lista tenant-opcional, así que `TenantScopeGuard` le exige `X-Tenant-Id` o una única membresía
+(`403 TENANT_AMBIGUOUS` / `TENANT_REQUIRED` si no hay forma de resolverlo) y `RolesGuard` solo lo
+autoriza en el tenant donde se le concedió (`403 ROLE_INSUFFICIENT` en otro). El dato devuelto es el
+mismo en cualquier tenant. Los roles globales `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` leen sin
+cabecera. `BUSINESS_ADMIN` nunca. Lo fija `src/modules/marketing/insights-access.spec.ts`.
+
 ### Prácticas visibles para un `PRACTITIONER`
 
 El tenant no basta para aislar a los médicos auto-registrados: todos comparten el tenant `DEFAULT`.
