@@ -17,6 +17,7 @@ import { AllExceptionsFilter } from '../../../common/filters/all-exceptions.filt
 import { RouteMetadataService } from '../../../observability/route-index/route-metadata.service';
 import { TracingService } from '../../../observability';
 import { AuditQueryRepository } from '../repositories/audit-query.repository';
+import { AuditOversightReadService } from '../services/audit-oversight-read.service';
 import { AuditQueryService } from '../services/audit-query.service';
 import {
   AUDIT_READ_ROLES,
@@ -57,6 +58,8 @@ describe('AuditQueryController (HTTP, repositorio doble)', () => {
       controllers: [AuditQueryController],
       providers: [
         AuditQueryService,
+        // Las lecturas agregadas y DSAR tienen su propia suite (audit-oversight.controller.spec.ts).
+        { provide: AuditOversightReadService, useValue: {} },
         { provide: AuditQueryRepository, useValue: repo },
         { provide: RouteMetadataService, useValue: rutas },
         // El servicio sólo hace `em.fork()` y se lo pasa al repositorio doble.
