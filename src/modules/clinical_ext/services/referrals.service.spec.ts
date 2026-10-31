@@ -148,6 +148,7 @@ function build() {
   );
   return {
     service: inTenant(raw),
+    raw,
     tx,
     referralsRepo,
     accountLinksRepo,
@@ -475,6 +476,7 @@ describe('ReferralsService', () => {
           targetServiceCatalogId: null,
           targetDisplayName: null,
           targetServiceName: null,
+          transfer: null,
         },
       ]);
     });
@@ -634,6 +636,7 @@ describe('ReferralsService', () => {
           targetServiceCatalogId: null,
           targetDisplayName: null,
           targetServiceName: null,
+          transfer: null,
         },
       ]);
     });
@@ -1467,8 +1470,421 @@ describe('ReferralsService', () => {
           targetServiceCatalogId: 'svc-1',
           targetDisplayName: 'Clínica Norte',
           targetServiceName: 'Fisioterapia',
+          transfer: null,
         },
       ]);
+    });
+  });
+
+  describe('traslado (v4274)', () => {
+    const critical = {
+      required: true,
+      transportMode: 'AMBULANCE_ADVANCED' as const,
+      departureCondition: 'CRITICAL' as const,
+      escortProfessionalName: 'Lic. Enf. Ana Rojas',
+      receiverContacted: true,
+      receiverContactName: 'Dr. Guardia',
+      departedAt: '2026-10-31T10:00:00Z',
+    };
+    /** Profesional del tenant destino. */
+    const destTenantActor = {
+      id: 'u2',
+      roles: ['CLINICIAN'],
+      tenantIds: [ACTIVE_TENANT],
+    } as any;
+
+    describe('create', () => {
+      it('persists the transfer object and returns it', async () => {
+        const d = build();
+        const row: any = {
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+          createdAt: new Date(),
+        };
+        d.referralsRepo.create.mockReturnValue(row);
+        const res = await d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetTenantId: 'ten-dest',
+            transfer: {
+              ...critical,
+              vitals: { systolicBp: 85, diastolicBp: 50, glasgow: 12 },
+            },
+          },
+          actor,
+        );
+        expect(row.transportMode).toBe('AMBULANCE_ADVANCED');
+        expect(row.vitalGlasgow).toBe(12);
+        expect(row.departedAt).toEqual(new Date('2026-10-31T10:00:00Z'));
+        expect(res.transfer).toMatchObject({
+          required: true,
+          departureCondition: 'CRITICAL',
+          vitals: { systolicBp: 85, diastolicBp: 50, glasgow: 12 },
+          arrivedAt: null,
+        });
+      });
+
+      it('returns transfer=null when none was sent', async () => {
+        const d = build();
+        d.referralsRepo.create.mockReturnValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+          createdAt: new Date(),
+        });
+        const res = await d.service.create(
+          { patientProfileId: 'p1', targetTenantId: 'ten-dest' },
+          actor,
+        );
+        expect(res.transfer).toBeNull();
+      });
+
+      it('400 TRANSFER_UNSAFE_TRANSPORT before creating anything', async () => {
+        const d = build();
+        await expectReason(
+          d.service.create(
+            {
+              patientProfileId: 'p1',
+              targetTenantId: 'ten-dest',
+              transfer: { ...critical, transportMode: 'PRIVATE_VEHICLE' },
+            },
+            actor,
+          ),
+          400,
+          ClinicalExtErrorReason.TRANSFER_UNSAFE_TRANSPORT,
+        );
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('validates the transfer only after the write authorization', async () => {
+        const d = build();
+        d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+          new ForbiddenException(),
+        );
+        await expect(
+          d.service.create(
+            {
+              patientProfileId: 'p1',
+              targetTenantId: 'ten-dest',
+              transfer: { required: true },
+            },
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+    });
+
+    describe('PATCH transfer (quien deriva)', () => {
+      it('completes the departure after checking write access', async () => {
+        const d = build();
+        const referral: any = {
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+          transferRequired: true,
+          transportMode: 'AMBULANCE_BASIC',
+          departureCondition: 'STABLE',
+        };
+        d.referralsRepo.findById.mockResolvedValue(referral);
+        const res = await d.service.updateTransfer(
+          'ref1',
+          { companionName: 'María Pérez', departedAt: '2026-10-31T10:00:00Z' },
+          actor,
+        );
+        expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+          'p1',
+          actor,
+        );
+        expect(referral.transportMode).toBe('AMBULANCE_BASIC');
+        expect(res.transfer).toMatchObject({
+          companionName: 'María Pérez',
+          transportMode: 'AMBULANCE_BASIC',
+        });
+      });
+
+      it('evaluates the rules on the merged transfer', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+          transferRequired: true,
+          transportMode: 'PRIVATE_VEHICLE',
+          departureCondition: 'STABLE',
+        });
+        await expectReason(
+          d.service.updateTransfer(
+            'ref1',
+            { departureCondition: 'UNSTABLE' },
+            actor,
+          ),
+          400,
+          ClinicalExtErrorReason.TRANSFER_UNSAFE_TRANSPORT,
+        );
+      });
+
+      it('403 for who cannot write the history', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+        });
+        d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+          new ForbiddenException(),
+        );
+        await expect(
+          d.service.updateTransfer('ref1', { required: false }, actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+
+      it.each([
+        ['REJECTED', CEXT.REFERRAL_REJECTED],
+        ['CANCELLED', CEXT.REFERRAL_CANCELLED],
+        ['COMPLETED', CEXT.REFERRAL_COMPLETED],
+      ])('422 REFERRAL_ALREADY_CLOSED when %s', async (_name, status) => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: status,
+        });
+        await expectReason(
+          d.service.updateTransfer('ref1', { required: false }, actor),
+          422,
+          ClinicalExtErrorReason.REFERRAL_ALREADY_CLOSED,
+        );
+      });
+
+      it('422 REFERRAL_ARRIVAL_ALREADY_RECORDED once the patient arrived', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+          arrivedAt: new Date(),
+        });
+        await expectReason(
+          d.service.updateTransfer('ref1', { required: false }, actor),
+          422,
+          ClinicalExtErrorReason.REFERRAL_ARRIVAL_ALREADY_RECORDED,
+        );
+      });
+
+      it('404 for an unknown referral', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue(null);
+        await expectReason(
+          d.service.updateTransfer('ref1', { required: false }, actor),
+          404,
+          ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+        );
+      });
+    });
+
+    describe('PATCH arrival (sólo el destino)', () => {
+      const arrival = {
+        arrivedAt: '2026-10-31T11:30:00Z',
+        arrivalCondition: 'STABLE' as const,
+        arrivalNotes: 'Ingresa a emergencias',
+      };
+
+      it('the destination tenant records the arrival', async () => {
+        const d = build();
+        const referral: any = {
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: ACTIVE_TENANT,
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+          departedAt: new Date('2026-10-31T10:00:00Z'),
+        };
+        d.referralsRepo.findById.mockResolvedValue(referral);
+        const res = await d.service.recordArrival(
+          'ref1',
+          arrival,
+          destTenantActor,
+        );
+        expect(referral.arrivedAt).toEqual(new Date(arrival.arrivedAt));
+        expect(res.transfer).toMatchObject({
+          arrivalCondition: 'STABLE',
+          arrivalNotes: 'Ingresa a emergencias',
+        });
+        expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      });
+
+      it('the destination practitioner records it', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetProfileId: 'pr-dest',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+        });
+        const res = await d.service.recordArrival('ref1', arrival, destActor);
+        expect(res.transfer?.arrivalCondition).toBe('STABLE');
+      });
+
+      it('the destination branch tenant records it', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetBranchId: 'br1',
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+        });
+        d.tx.findOne.mockResolvedValue({ id: 'br1', tenantId: ACTIVE_TENANT });
+        const res = await d.service.recordArrival(
+          'ref1',
+          arrival,
+          destTenantActor,
+        );
+        expect(res.transfer?.arrivalCondition).toBe('STABLE');
+      });
+
+      it('404 (como inexistente) for whoever deriva or any other clinician', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetProfileId: 'pr-dest',
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+        });
+        await expectReason(
+          d.service.recordArrival('ref1', arrival, doctor),
+          404,
+          ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+        );
+      });
+
+      it('404 for the destination tenant actor without X-Tenant-Id', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: ACTIVE_TENANT,
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+        });
+        await expectReason(
+          d.raw.recordArrival('ref1', arrival, destTenantActor),
+          404,
+          ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+        );
+      });
+
+      it('404 for an actor of another tenant', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: 'ten-other',
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+        });
+        await expectReason(
+          d.service.recordArrival('ref1', arrival, destTenantActor),
+          404,
+          ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+        );
+      });
+
+      it('external-only destination: recorded by who can write the history', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetExternalName: 'Hospital Externo',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+        });
+        const res = await d.service.recordArrival('ref1', arrival, actor);
+        expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+          'p1',
+          actor,
+        );
+        expect(res.transfer?.arrivalCondition).toBe('STABLE');
+      });
+
+      it('external-only destination: 403 without write access', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetExternalName: 'Hospital Externo',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+        });
+        d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+          new ForbiddenException(),
+        );
+        await expect(
+          d.service.recordArrival('ref1', arrival, actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+
+      it('400 TRANSFER_ARRIVAL_BEFORE_DEPARTURE', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: ACTIVE_TENANT,
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+          departedAt: new Date('2026-10-31T12:00:00Z'),
+        });
+        await expectReason(
+          d.service.recordArrival('ref1', arrival, destTenantActor),
+          400,
+          ClinicalExtErrorReason.TRANSFER_ARRIVAL_BEFORE_DEPARTURE,
+        );
+      });
+
+      it.each([
+        ['REJECTED', CEXT.REFERRAL_REJECTED],
+        ['CANCELLED', CEXT.REFERRAL_CANCELLED],
+      ])('422 REFERRAL_ALREADY_CLOSED when %s', async (_name, status) => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: ACTIVE_TENANT,
+          statusConceptId: status,
+        });
+        await expectReason(
+          d.service.recordArrival('ref1', arrival, destTenantActor),
+          422,
+          ClinicalExtErrorReason.REFERRAL_ALREADY_CLOSED,
+        );
+      });
+
+      it('accepts the arrival of a completed referral (counter-referral first)', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: ACTIVE_TENANT,
+          statusConceptId: CEXT.REFERRAL_COMPLETED,
+        });
+        const res = await d.service.recordArrival(
+          'ref1',
+          arrival,
+          destTenantActor,
+        );
+        expect(res.status).toBe('COMPLETED');
+        expect(res.transfer?.arrivedAt).toEqual(new Date(arrival.arrivedAt));
+      });
+
+      it('422 REFERRAL_ARRIVAL_ALREADY_RECORDED', async () => {
+        const d = build();
+        d.referralsRepo.findById.mockResolvedValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          targetTenantId: ACTIVE_TENANT,
+          statusConceptId: CEXT.REFERRAL_ACCEPTED,
+          arrivedAt: new Date('2026-10-31T11:00:00Z'),
+        });
+        await expectReason(
+          d.service.recordArrival('ref1', arrival, destTenantActor),
+          422,
+          ClinicalExtErrorReason.REFERRAL_ARRIVAL_ALREADY_RECORDED,
+        );
+      });
     });
   });
 });
