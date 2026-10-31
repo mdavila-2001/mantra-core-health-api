@@ -516,6 +516,29 @@ describe('Infraestructura F5 · integración', () => {
       'diagnostic_units.equipment.resource_linked',
       'diagnostic_units.equipment.status_changed',
     ]);
+
+    // Desubicar (careSpaceId null): el permiso sobre la sala no alcanza (403);
+    // el nivel sede sí.
+    await http()
+      .patch(`/diagnostic-equipment/${equipment}`)
+      .set(como(supSala))
+      .send({ careSpaceId: null })
+      .expect(403);
+    const [sigue] = await q(
+      'select care_space_id from diagnostic_units.diagnostic_equipment where id = ?',
+      [equipment],
+    );
+    expect(sigue.care_space_id).toBe(room.body.id);
+    await http()
+      .patch(`/diagnostic-equipment/${equipment}`)
+      .set(como(orgA))
+      .send({ careSpaceId: null })
+      .expect(200);
+    const [fuera] = await q(
+      'select care_space_id from diagnostic_units.diagnostic_equipment where id = ?',
+      [equipment],
+    );
+    expect(fuera.care_space_id).toBeNull();
   });
 
   it('F5g: alcance SPACE con espacio propio 201; segundo jefe vigente de la unidad → 409; espacio de otro tenant → 404', async () => {
