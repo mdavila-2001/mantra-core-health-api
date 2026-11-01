@@ -174,9 +174,11 @@ fusionan**: cada una conserva su id de origen; el ancla común con la receta es 
   supersede sus precios vigentes e inactiva sus mapeos externos.
 - **Cierre de lista:** cerrar una lista la marca `CLOSED` (`valid_to = now`) y
   supersede todos sus precios vigentes.
-- **Integración:** `connection_id` es una FK NOT NULL auto-referente; si el cliente
-  no aporta una conexión externa la fila se auto-referencia por su propio id. El
-  mapeo exige conexión `ACTIVE` que soporte consulta de stock o de precio.
+- **Integración:** `connection_id` es opcional y apunta a
+  `integrations.provider_connections`; el alta no lo recibe y la fila lo guarda
+  nulo hasta que la farmacia tenga configurado su sistema externo (mientras tanto
+  trabaja en manual). Un `connectionId` en el cuerpo del alta se rechaza con 400.
+  El mapeo exige conexión `ACTIVE` que soporte consulta de stock o de precio.
 - **Unicidad (a nivel de aplicación):** `(tenant, code)` de farmacia,
   `(pharmacy, code)` de sede/lista, `(pharmacy, product_code)` de producto,
   `(connection, product)` de mapeo → `409 Conflict`.

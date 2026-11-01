@@ -609,6 +609,13 @@ services:
       # Retardo del veredicto: la autoridad acepta la solicitud al instante y
       # tarda en resolverla. Es lo que ejercita el bucle de espera del worker.
       IDENTITY_VERIFICATION_DELAY_MS: ${MOCK_IDENTITY_DELAY_MS:-10000}
+      # Sistema de las farmacias (Estándar ALOVIDA y cadena simulada). Una clave
+      # por farmacia, `CODIGO=clave;OTRO=clave`, o un JSON montado en el
+      # contenedor (ver `mock-provider-server/pharmacy-keys.example.json`).
+      # Vacías: ninguna farmacia autentica hasta que se le da una clave.
+      PHARMACY_ERP_PHARMACY_KEYS: ${MOCK_PHARMACY_ERP_PHARMACY_KEYS:-}
+      PHARMACY_ERP_PHARMACY_KEYS_FILE: ${MOCK_PHARMACY_ERP_PHARMACY_KEYS_FILE:-}
+      PHARMACY_ERP_FAILURE_RATE: ${MOCK_PHARMACY_ERP_FAILURE_RATE:-0}
     ports:
       - "${MOCK_PROVIDER_PORT:-4100}:4100"
     healthcheck:

@@ -18,18 +18,6 @@ export class CreateConnectionDto {
   integrationMode!: IntegrationModeCode;
 
   /**
-   * Identificador asociado a connection.
-   */
-  @ApiPropertyOptional({
-    description:
-      'Conexión de integración externa registrada; si se omite, la fila se auto-referencia',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  connectionId?: string;
-
-  /**
    * Identificador asociado a pharmacy site.
    */
   @ApiPropertyOptional({

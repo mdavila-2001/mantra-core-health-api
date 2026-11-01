@@ -15,9 +15,9 @@ export interface CreateConnectionData {
    */
   pharmacySiteId?: string;
   /**
-   * Id de la conexión de integración externa. `connection_id` es una FK NOT NULL
-   * (auto-referencia a esta misma tabla): si el cliente no aporta una conexión
-   * existente, la fila se auto-referencia usando su propio id.
+   * Id de la conexión registrada en `integrations.provider_connections`.
+   * `connection_id` es opcional: sin valor, la farmacia todavía no tiene
+   * configurado su sistema externo y trabaja en manual.
    */
   connectionId?: string;
   /**
@@ -93,8 +93,7 @@ export class PharmacyIntegrationConnectionsRepository {
         id,
         pharmacyId: data.pharmacyId,
         pharmacySiteId: data.pharmacySiteId,
-        // Auto-referencia si no se aporta una conexión externa registrada.
-        connectionId: data.connectionId ?? id,
+        connectionId: data.connectionId,
         integrationModeConceptId: data.integrationModeConceptId,
         inventoryAuthorityConceptId: data.inventoryAuthorityConceptId,
         supportsStockQuery: data.supportsStockQuery,
