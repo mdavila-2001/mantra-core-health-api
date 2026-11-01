@@ -146,7 +146,7 @@ export class OrderStockSourceResolver {
       const [products, lines] = await Promise.race([
         Promise.all([
           requiresUnitCatalog
-            ? catalog.listProducts(record.config.pharmacyCode)
+            ? catalog.listProducts()
             : Promise.resolve([]),
           catalog.stockForSite(siteCode, record.config.pharmacyCode),
         ]),

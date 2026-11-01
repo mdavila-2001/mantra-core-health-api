@@ -126,7 +126,7 @@ describe('A02: connected orders preserve C8 unit validation', () => {
         mode: 'CONNECTED',
         liveQuantities: accepted ? new Map([['P1', 7]]) : new Map(),
       });
-      expect(d.adapter.listProducts).toHaveBeenCalledWith('FARM');
+      expect(d.adapter.listProducts).toHaveBeenCalledWith();
     },
   );
 
