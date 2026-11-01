@@ -14,6 +14,16 @@ import { CommunityModule } from '../community/community.module';
 import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
 import { EXTERNAL_PHARMACY_CATALOG_PORT } from './application/ports/external-pharmacy-catalog.port';
 import { HttpExternalPharmacyCatalogAdapter } from './infrastructure/adapters/http-external-pharmacy-catalog.adapter';
+import {
+  PHARMACY_CATALOG_FACTORY_PORT,
+  PHARMACY_CONNECTION_CIPHER_PORT,
+} from './application/ports/external-pharmacy-catalog.port';
+import { PharmacyCatalogFactory } from './infrastructure/adapters/pharmacy-catalog.factory';
+import { PharmacyConnectionCipher } from './infrastructure/adapters/pharmacy-connection-cipher.adapter';
+import { ErpConnectionRepository } from './infrastructure/repositories/erp-connection.repository';
+import { ErpConnectionUseCases } from './application/erp-connection/erp-connection.use-cases';
+import { OrderStockSourceResolver } from './application/erp-connection/order-stock-source.resolver';
+import { PharmacyErpConnectionController } from './presentation/controllers/pharmacy-erp-connection.controller';
 import { PharmacyCatalogBulkLoadAdapter } from './infrastructure/adapters/pharmacy-catalog-bulk-load.adapter';
 import { CATALOG_BULK_LOAD_PORT } from './application/ports/catalog-bulk-load.port';
 import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
@@ -150,6 +160,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyInventoryReadController,
     PharmacySiteAvailabilityController,
     PharmacyIntegrationSyncController,
+    PharmacyErpConnectionController,
   ],
   providers: [
     // Repositorios
@@ -231,6 +242,20 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
       provide: EXTERNAL_PHARMACY_CATALOG_PORT,
       useExisting: HttpExternalPharmacyCatalogAdapter,
     },
+    // FAR-C9: el sistema de CADA farmacia, con la dirección y la clave que ella cargó.
+    PharmacyCatalogFactory,
+    {
+      provide: PHARMACY_CATALOG_FACTORY_PORT,
+      useExisting: PharmacyCatalogFactory,
+    },
+    PharmacyConnectionCipher,
+    {
+      provide: PHARMACY_CONNECTION_CIPHER_PORT,
+      useExisting: PharmacyConnectionCipher,
+    },
+    ErpConnectionRepository,
+    ErpConnectionUseCases,
+    OrderStockSourceResolver,
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,

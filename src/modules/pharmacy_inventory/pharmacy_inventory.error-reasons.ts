@@ -86,6 +86,21 @@ export enum PharmacyInventoryErrorReason {
   PHARMACY_INTEGRATION_UNAVAILABLE = 'PHARMACY_INTEGRATION_UNAVAILABLE',
   /** La conexión no está activa o no admite consultar stock. */
   PHARMACY_INTEGRATION_CONNECTION_INACTIVE = 'PHARMACY_INTEGRATION_CONNECTION_INACTIVE',
+  /**
+   * FAR-C9: el servidor no tiene `PHARMACY_CONNECTION_SECRET_KEY` y no puede
+   * guardar ni usar la clave de la conexión de una farmacia.
+   */
+  PHARMACY_CONNECTION_ENCRYPTION_NOT_CONFIGURED = 'PHARMACY_CONNECTION_ENCRYPTION_NOT_CONFIGURED',
+  /** FAR-C9: el tipo de sistema elegido no está dado de alta (falta su fila de proveedor). */
+  PHARMACY_SYSTEM_NOT_AVAILABLE = 'PHARMACY_SYSTEM_NOT_AVAILABLE',
+  /** FAR-C9: conectar exige la clave, y la conexión no tiene una guardada. */
+  PHARMACY_CONNECTION_KEY_REQUIRED = 'PHARMACY_CONNECTION_KEY_REQUIRED',
+  /** FAR-C9: un código de sucursal se cargó para una sede que no es de la farmacia. */
+  PHARMACY_CONNECTION_SITE_NOT_IN_PHARMACY = 'PHARMACY_CONNECTION_SITE_NOT_IN_PHARMACY',
+  /** FAR-C9: se pidió probar la conexión guardada y la farmacia no tiene una. */
+  PHARMACY_CONNECTION_NOT_FOUND = 'PHARMACY_CONNECTION_NOT_FOUND',
+  /** FAR-C9: «Conectada» sin tipo de sistema, dirección o código de farmacia. */
+  PHARMACY_CONNECTION_INCOMPLETE = 'PHARMACY_CONNECTION_INCOMPLETE',
   /** F5c: el espacio o la unidad no son de la sede de práctica de la sede de farmacia. */
   STOCK_POINT_SITE_MISMATCH = 'STOCK_POINT_SITE_MISMATCH',
   /** F5c: la función del espacio no tiene perfil `stockPoint` o el espacio no está activo. */

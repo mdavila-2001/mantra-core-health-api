@@ -100,6 +100,7 @@ import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
 import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import { SeedCensusService } from './seed-census.service';
 import { ToolRegistrySeedService } from './tool-registry-seed.service';
+import { PharmacySystemProvidersSeedService } from './pharmacy-system-providers-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -215,6 +216,7 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,
+    PharmacySystemProvidersSeedService,
     FrontendRoutesSeedService,
   ],
   exports: [
@@ -260,6 +262,7 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,
+    PharmacySystemProvidersSeedService,
   ],
 })
 export class SeedModule {}

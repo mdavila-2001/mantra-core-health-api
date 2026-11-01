@@ -52,6 +52,41 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /pharmacy/:pharmacyId/purchase-orders` | SECURITY_ADMIN | `pharmacy-procurement` |
 | `POST /pharmacy/:pharmacyId/goods-receipts` | SECURITY_ADMIN | `pharmacy-procurement` |
 
+## Conexión de cada farmacia con su sistema (FAR-C9)
+
+Cada farmacia configura en su pestaña Integración la conexión con su propio
+sistema: tipo, dirección, clave, código de farmacia y código de cada sucursal.
+
+- **Endpoints** (`PharmacyErpConnectionController`, rol de la farmacia o
+  `SECURITY_ADMIN`): `GET`/`PUT /pharmacies/:pharmacyId/erp-connection`,
+  `POST …/erp-connection/test` (prueba los datos del formulario sin guardarlos)
+  y `POST …/erp-connection/test-saved` (prueba lo guardado y deja su estado).
+- **Dónde se guarda**, sin columnas nuevas: el tipo es una fila de
+  `integrations.external_providers` (`ALOVIDA_STANDARD`, `SIMULATED_CHAIN`, por
+  el seed «tipos de sistema de farmacia»); la conexión, una
+  `integrations.provider_connections` del tenant de la farmacia, apuntada por
+  `pharmacy_integration_connections.connection_id`; dirección, códigos, últimos
+  4 de la clave y último estado van en su `config_json`; la clave, cifrada en
+  `provider_credentials.secret_ref` (`enc:v1:`, AES-256-GCM con
+  `PHARMACY_CONNECTION_SECRET_KEY`). Sin esa variable la API arranca, y guardar
+  o probar responde «falta configurar el cifrado de conexiones». La clave nunca
+  vuelve: solo `••••` y sus últimos 4 caracteres.
+- **La regla del modo** vive en un solo lugar:
+  `domain/erp-connection/pharmacy-stock-mode.ts`. **Manual** (por defecto): las
+  líneas del pedido entran «por confirmar» y la sucursal confirma con
+  `CONFIRMAR_STOCK`. **Conectada**: al pedir se consulta en vivo el stock de la
+  sucursal (3 s como máximo, sin reintentos); con stock se reserva y con 0 la
+  línea queda sin stock. Si el sistema no responde o rechaza la clave, la
+  conexión queda «con error» (`UNREACHABLE` o `AUTH_REJECTED`), el pedido sigue
+  como manual y la siguiente llamada que funcione la deja activa otra vez.
+- **Adaptadores**: uno por tipo, detrás de `ExternalPharmacyCatalogPort`
+  (`infrastructure/adapters/pharmacy-catalog.factory.ts`). El contrato del
+  **Estándar ALOVIDA** está publicado en
+  [`docs/integrations/pharmacy-standard.openapi.yaml`](../../../docs/integrations/pharmacy-standard.openapi.yaml).
+- **«Sincronizar ahora» (FAR-07)** sigue usando la configuración única del
+  servidor (`PHARMACY_ERP_BASE_URL`) como respaldo: el pedido ya no depende de
+  ella.
+
 ## Contenido
 
 ### Subcarpetas

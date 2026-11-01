@@ -29,6 +29,7 @@ import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service'
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
+import { PharmacySystemProvidersSeedService } from './pharmacy-system-providers-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { StickerPackSeedService } from './sticker-pack-seed.service';
@@ -314,6 +315,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly toolRegistry?: ToolRegistrySeedService,
     @Optional()
     private readonly frontendRoutes?: FrontendRoutesSeedService,
+    @Optional()
+    private readonly pharmacySystems?: PharmacySystemProvidersSeedService,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -646,6 +649,18 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'core',
         run: () => this.identityVerification.run(),
       },
+      // FAR-C9: los tipos de sistema con que una farmacia conecta su API. Núcleo:
+      // sin ellos, guardar una conexión responde que el tipo no está disponible.
+      ...(this.pharmacySystems
+        ? [
+            {
+              id: 'tipos-de-sistema-de-farmacia',
+              name: 'tipos de sistema de farmacia',
+              kind: 'core' as const,
+              run: () => this.pharmacySystems!.run(),
+            },
+          ]
+        : []),
       // Depende de los conceptos de rol base y de ámbito del catálogo `authz`.
       {
         name: 'roles asistenciales',
