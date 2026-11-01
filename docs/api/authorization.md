@@ -59,6 +59,27 @@ el concedido sin ámbito vale en cualquier organización; el acotado al tenant A
 administra, lee y cambia los dueños de A, pero en el tenant B solo cuenta su membresía en B (sin ella,
 `403`). Cada operación del servicio recibe el tenant objetivo, así que no existe un atajo «sin tenant».
 
+La misma regla rige en los demás atajos de plataforma que deciden sobre un recurso. Cuando el recurso
+tiene tenant, el rol se mide **en ese tenant**; cuando no lo tiene, solo pasa el rol **global**
+(`roleAuthorizesInTenant(actor, rol, undefined)` es verdadero solo si el código no figura en
+`scopedRoles`):
+
+| Atajo | Tenant contra el que se mide |
+|---|---|
+| `CommunityVisibilityService.isPlatform` (`SECURITY_ADMIN`, `SUPERADMIN`, `SYSTEM`): leer perfiles, bandejas, grupos secretos o de público autorizado, directorio completo de grupos | el del perfil (`public_profiles.tenant_id`), el del grupo o el del directorio; un grupo sin tenant o un perfil inexistente, solo global |
+| `StructureAccessService` (`SECURITY_ADMIN`, `SUPERADMIN`): estructura de sedes y organización | el de la sede o la organización |
+| `InfrastructureAccessService.actorScope` (`SECURITY_ADMIN`, `PLATFORM_ADMIN`, `SUPERADMIN`) | el de la sede |
+| `PharmacyTenantScopeGuard` (`SECURITY_ADMIN`, `SUPERADMIN`) en `/pharmacies/:pharmacyId/*` | el de la farmacia; sin `pharmacyId` (operación de plataforma), solo global |
+| Verificación SNIS y estado de habilitaciones de una sede (`SECURITY_ADMIN`, `SUPERADMIN`) | ninguno: solo global, también en el propio tenant (sería la organización verificándose a sí misma) |
+| `BookingAccess.assertResourceInActiveTenant` y las sedes de las reservas flexibles y por servicio (`SUPERADMIN`) | el del recurso de agenda |
+| `FileLinkTargetGuard` (`SUPERADMIN`): elegir cualquier dueño en `POST /common/files/:id/links` | sin tenant (el dueño puede ser una persona u otra organización): solo global; el acotado vincula a su usuario o a su tenant resuelto |
+| `ClinicalReadService.assertCanReadHistory/assertCanWriteHistory` (`SUPERADMIN`) y `GET /profiles/patients/:profileId` (`SECURITY_ADMIN`) | sin tenant (la historia y el perfil de una persona no son de ninguna organización): solo global; el acotado sigue la regla de quien atiende |
+| Rol de analítica de `InsuranceAnalyticsService` (`INSURANCE_OPERATOR`, `SECURITY_ADMIN`, `SUPERADMIN`) | el de la aseguradora activa |
+| Pista `422 TENANT_REQUIRED` de las campañas de seguro sin `X-Tenant-Id` | sin tenant: solo global; el acotado recibe el `403` auditado de cualquier actor sin tenant |
+
+`SYSTEM` lo emiten los workers y los chats de pedido y turno sin `scopedRoles`, así que sigue siendo
+global.
+
 **Rutas de farmacia, laboratorio y gastos del paciente.**
 
 - `GET /patient-spending/me` lleva `@Roles('PATIENT')` y no recibe identificador de persona: el titular

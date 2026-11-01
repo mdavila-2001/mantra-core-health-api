@@ -26,6 +26,7 @@ import {
   CurrentUser,
   Roles,
   AccessLogged,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../common';
 import { ProfilesPatientsService } from '../../application/services';
@@ -441,7 +442,10 @@ export class ProfilesPatientsController {
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientDetailResponseDto> {
-    if (!actor.roles.includes('SECURITY_ADMIN')) {
+    // El perfil de persona no es de ningún tenant: el atajo es del
+    // SECURITY_ADMIN global. El acotado a una organización (`scopedRoles`)
+    // pasa `@Roles` en su tenant, pero aquí sigue la regla de quien atiende (#1241).
+    if (!roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', undefined)) {
       await this.clinicalHistoryAccess.assertCanReadHistory(profileId, actor);
     }
     return this.patientsService.getPatientById(profileId);
