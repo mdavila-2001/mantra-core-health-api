@@ -38,7 +38,8 @@ export const LAB_CLINICAL_ROLES: readonly string[] = [
  * ## La regla
  *
  * Pasa, en este orden:
- * 1. `SUPERADMIN` (el mismo comodín que `RolesGuard`);
+ * 1. `SUPERADMIN` (el mismo comodín que `RolesGuard`, medido en el tenant
+ *    activo: el acotado en `scopedRoles` sólo vale en el suyo);
  * 2. un rol de {@link LAB_CLINICAL_ROLES} que autorice en el tenant activo
  *    —lo que ya pasaba: el laboratorio de un hospital lo opera su personal
  *    clínico—;
@@ -78,9 +79,12 @@ export class LabStaffGuard implements CanActivate {
     // Ruta sin sujeto: `JwtAuthGuard` ya la habrá rechazado si no es pública.
     if (!actor) return true;
 
-    if (actor.roles.includes('SUPERADMIN')) return true;
-
     const tenantId = request.resolvedTenantId;
+    // El comodín de plataforma se mide en el tenant activo: global en
+    // cualquiera (también sin tenant); acotado en `scopedRoles`, sólo en el
+    // suyo (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)) return true;
+
     if (
       tenantId !== undefined &&
       LAB_CLINICAL_ROLES.some((role) =>

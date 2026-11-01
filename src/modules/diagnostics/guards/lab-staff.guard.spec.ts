@@ -122,6 +122,24 @@ describe('LabStaffGuard', () => {
       );
     });
 
+    it('SUPERADMIN acotado a otro tenant no es comodín aquí; acotado a éste sí (#1241)', async () => {
+      const { guard, ctx } = build();
+      const scopedTo = (tenantId: string) => ({
+        id: 'root-scoped',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+      });
+      await expect(
+        guard.canActivate(ctx(scopedTo(CLINIC), LAB)),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        guard.canActivate(ctx(scopedTo(CLINIC))),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(guard.canActivate(ctx(scopedTo(LAB), LAB))).resolves.toBe(
+        true,
+      );
+    });
+
     it('ruta sin sujeto: la decide JwtAuthGuard, no este guard', async () => {
       const { guard, ctx } = build();
       await expect(guard.canActivate(ctx(undefined, LAB))).resolves.toBe(true);
