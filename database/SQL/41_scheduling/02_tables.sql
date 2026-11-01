@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 41 · schema scheduling
+-- SALUD v4.2.82 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
 
@@ -136,6 +136,8 @@ CREATE TABLE IF NOT EXISTS "scheduling"."bookable_slots" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "care_space_id" uuid,
+    "healthcare_service_id" uuid,
     CONSTRAINT "pk_bookable_slots" PRIMARY KEY ("id")
 );
 
@@ -207,6 +209,9 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_bookings" (
     "pre_visit_instructions_snapshot" text,
     "follow_up_of_booking_id" uuid,
     "form_instance_id" uuid,
+    "care_space_id" uuid,
+    "healthcare_service_id" uuid,
+    "booked_via_grant_id" uuid,
     CONSTRAINT "pk_appointment_bookings" PRIMARY KEY ("id")
 );
 

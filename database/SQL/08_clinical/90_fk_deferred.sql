@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 08 · schema clinical
+-- SALUD v4.2.82 · módulo 08 · schema clinical
 -- Generado de diagram_08_clinical.puml — NO editar a mano.
 
 
@@ -772,6 +772,41 @@ DO $$ BEGIN
         REFERENCES "practice"."care_spaces" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_requests"
+        ADD CONSTRAINT "fk_service_requests_specimen_type_concept_id" FOREIGN KEY ("specimen_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_requests"
+        ADD CONSTRAINT "fk_service_requests_modality_concept_id" FOREIGN KEY ("modality_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_requests"
+        ADD CONSTRAINT "fk_service_requests_body_site_concept_id" FOREIGN KEY ("body_site_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_requests"
+        ADD CONSTRAINT "fk_service_requests_laterality_concept_id" FOREIGN KEY ("laterality_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_requests"
+        ADD CONSTRAINT "fk_service_requests_contrast_concept_id" FOREIGN KEY ("contrast_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
 -- destino: directory.tenants (requiere schema directory)
 DO $$ BEGIN
     ALTER TABLE "clinical"."diagnostic_reports"
@@ -853,6 +888,27 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "clinical"."service_request_notes"
         ADD CONSTRAINT "fk_service_request_notes_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_request_components"
+        ADD CONSTRAINT "fk_service_request_components_custodian_tenant_id" FOREIGN KEY ("custodian_tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_request_components"
+        ADD CONSTRAINT "fk_service_request_components_component_concept_id" FOREIGN KEY ("component_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_request_components"
+        ADD CONSTRAINT "fk_service_request_components_created_by_user_id" FOREIGN KEY ("created_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
@@ -1593,6 +1649,55 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención
 
 -- destino: directory.tenants (requiere schema directory)
 DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.patient_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_patient_profile_id" FOREIGN KEY ("patient_profile_id")
+        REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practice_sites (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_practice_site_id" FOREIGN KEY ("practice_site_id")
+        REFERENCES "practice"."practice_sites" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_admission_origin_concept_id" FOREIGN KEY ("admission_origin_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_identity_verification__4ddbb04f" FOREIGN KEY ("identity_verification_method_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: clinical_ext.referrals (requiere schema clinical_ext)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_referral_id" FOREIGN KEY ("referral_id")
+        REFERENCES "clinical_ext"."referrals" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."patient_admission_footprints"
+        ADD CONSTRAINT "fk_patient_admission_footprints_recorded_by_user_id" FOREIGN KEY ("recorded_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
     ALTER TABLE "clinical"."inpatient_census_entries"
         ADD CONSTRAINT "fk_inpatient_census_entries_tenant_id" FOREIGN KEY ("tenant_id")
         REFERENCES "directory"."tenants" ("id");
@@ -1695,46 +1800,3 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_observation_notes_author_user_id" FOREIGN KEY ("author_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
--- + patient_admission_footprints (Admisión crea el vínculo, 2026-10-31)
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_tenant_id" FOREIGN KEY ("tenant_id")
-        REFERENCES "directory"."tenants" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_patient_profile_id" FOREIGN KEY ("patient_profile_id")
-        REFERENCES "profiles"."patient_profiles" ("profile_id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_practice_site_id" FOREIGN KEY ("practice_site_id")
-        REFERENCES "practice"."practice_sites" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_admission_origin_concept_id" FOREIGN KEY ("admission_origin_concept_id")
-        REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
-
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_identity_verification__4ddbb04f" FOREIGN KEY ("identity_verification_method_concept_id")
-        REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
-
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_referral_id" FOREIGN KEY ("referral_id")
-        REFERENCES "clinical_ext"."referrals" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "clinical"."patient_admission_footprints"
-        ADD CONSTRAINT "fk_patient_admission_footprints_recorded_by_user_id" FOREIGN KEY ("recorded_by_user_id")
-        REFERENCES "iam"."users" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)

@@ -1,8 +1,8 @@
--- SALUD v4.2.68 · perfil pay · base pay_connectors · DDL completo en orden (generado de diagram_70_pay_connectors.puml)
+-- SALUD v4.2.82 · perfil pay · base pay_connectors · DDL completo en orden (generado de diagram_70_pay_connectors.puml)
 -- Archivo SQL plano, apto para `pool.query(readFileSync(...))`. NO editar a mano.
 
 -- >>> 02_tables.sql
--- SALUD v4.2.68 · módulo 70 · schema pay_connectors
+-- SALUD v4.2.82 · módulo 70 · schema pay_connectors
 -- Generado de diagram_70_pay_connectors.puml — NO editar a mano.
 
 
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS "idempotency_keys" (
 );
 
 -- >>> 03_fk_intra.sql
--- SALUD v4.2.68 · módulo 70 · schema pay_connectors
+-- SALUD v4.2.82 · módulo 70 · schema pay_connectors
 -- Generado de diagram_70_pay_connectors.puml — NO editar a mano.
 
 
@@ -206,7 +206,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- >>> 04_indexes.sql
--- SALUD v4.2.68 · módulo 70 · schema pay_connectors
+-- SALUD v4.2.82 · módulo 70 · schema pay_connectors
 -- Generado de diagram_70_pay_connectors.puml — NO editar a mano.
 
 
@@ -247,7 +247,7 @@ CREATE INDEX IF NOT EXISTS "outbox_events_pending_idx" ON "outbox_events" ("seq"
 CREATE INDEX IF NOT EXISTS "idempotency_keys_expires_at_idx" ON "idempotency_keys" ("expires_at");
 
 -- >>> 05_constraints.sql
--- SALUD v4.2.68 · perfil pay · módulo 70 · base pay_connectors
+-- SALUD v4.2.82 · perfil pay · módulo 70 · base pay_connectors
 -- Generado de diagram_70_pay_connectors.puml — NO editar a mano.
 
 -- Complementos del perfil pay (gen_ddl_pay.py): funciones, CHECK, FK compuestas y triggers.
@@ -443,3 +443,18 @@ CREATE TRIGGER connector_transfers_monotone_trg BEFORE UPDATE ON connector_trans
 
 DROP TRIGGER IF EXISTS "connector_refunds_monotone_trg" ON "connector_refunds";
 CREATE TRIGGER connector_refunds_monotone_trg BEFORE UPDATE ON connector_refunds FOR EACH ROW EXECUTE FUNCTION connector_money_flags_monotone();
+
+-- connector_callback_events (huella de deduplicación y auditoría de lo que dijo el banco) y connector_api_attempts (cada llamada saliente: la evidencia de «timeout, luego ok» de la regla 11)
+-- son de SOLO-AGREGAR: apply.ts y provider-gateway.ts solo hacen INSERT (el primero con ON CONFLICT DO NOTHING) y no hay UPDATE/DELETE/TRUNCATE en services/*/src. Guardián solo de
+-- UPDATE/DELETE/TRUNCATE, NO de INSERT: connector_api_attempts es de alto volumen y no paga costo por llamada.
+DROP TRIGGER IF EXISTS "connector_callback_events_immutable" ON "connector_callback_events";
+CREATE TRIGGER connector_callback_events_immutable BEFORE UPDATE OR DELETE ON connector_callback_events FOR EACH ROW EXECUTE FUNCTION forbid_mutation();
+
+DROP TRIGGER IF EXISTS "connector_callback_events_no_truncate" ON "connector_callback_events";
+CREATE TRIGGER connector_callback_events_no_truncate BEFORE TRUNCATE ON connector_callback_events FOR EACH STATEMENT EXECUTE FUNCTION forbid_mutation();
+
+DROP TRIGGER IF EXISTS "connector_api_attempts_immutable" ON "connector_api_attempts";
+CREATE TRIGGER connector_api_attempts_immutable BEFORE UPDATE OR DELETE ON connector_api_attempts FOR EACH ROW EXECUTE FUNCTION forbid_mutation();
+
+DROP TRIGGER IF EXISTS "connector_api_attempts_no_truncate" ON "connector_api_attempts";
+CREATE TRIGGER connector_api_attempts_no_truncate BEFORE TRUNCATE ON connector_api_attempts FOR EACH STATEMENT EXECUTE FUNCTION forbid_mutation();
