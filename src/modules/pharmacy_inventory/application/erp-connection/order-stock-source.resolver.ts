@@ -8,7 +8,10 @@ import {
   type OrderStockSource,
 } from '../../domain/erp-connection/pharmacy-stock-mode';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
-import { resolveExternalCodes } from '../../domain/sync/external-mapping';
+import {
+  resolveExternalCodes,
+  unitIssue,
+} from '../../domain/sync/external-mapping';
 import { ErpConnectionRepository } from '../../infrastructure/repositories/erp-connection.repository';
 import { IntegrationReadRepository } from '../../infrastructure/repositories/integration-read.repository';
 import {
@@ -131,10 +134,36 @@ export class OrderStockSourceResolver {
     const siteCode = record.config.siteCodes[site.id] ?? site.code;
     let result: ConnectionCheckResult;
     let live: ReadonlyMap<string, number> | null = null;
+    let reportedUnits: ReadonlyMap<string, string | undefined> = new Map();
+    let deadline: ReturnType<typeof setTimeout> | undefined;
     try {
-      const lines = await catalog.stockForSite(
-        siteCode,
-        record.config.pharmacyCode,
+      const requiresUnitCatalog = [...codeOf.values()].some((code) => {
+        const mapping = resolved.get(code);
+        return mapping?.status === 'MAPPED' && mapping.externalUnitCode?.trim();
+      });
+      // Catalog and stock share one deadline; adding unit validation must not
+      // turn the three-second ERP lookup into two consecutive time budgets.
+      const [products, lines] = await Promise.race([
+        Promise.all([
+          requiresUnitCatalog
+            ? catalog.listProducts(record.config.pharmacyCode)
+            : Promise.resolve([]),
+          catalog.stockForSite(siteCode, record.config.pharmacyCode),
+        ]),
+        new Promise<never>((_, reject) => {
+          deadline = setTimeout(
+            () =>
+              reject(
+                new ExternalCatalogUnavailableError(
+                  'Order stock lookup deadline exceeded',
+                ),
+              ),
+            PHARMACY_SYSTEM_TIMEOUT_MS,
+          );
+        }),
+      ]);
+      reportedUnits = new Map(
+        products.map((product) => [product.code, product.unitCode]),
       );
       live = new Map(lines.map((line) => [line.code, line.quantity]));
       result = 'OK';
@@ -153,12 +182,31 @@ export class OrderStockSourceResolver {
         },
         'El sistema de la farmacia falló: el pedido entra «por confirmar»',
       );
+    } finally {
+      if (deadline !== undefined) clearTimeout(deadline);
     }
     await this.recordStatus(record.connection.id, result);
     if (!live) return MANUAL;
 
     const liveQuantities = new Map<string, number>();
     for (const [productId, code] of codeOf) {
+      const mapping = resolved.get(code);
+      if (mapping?.status !== 'MAPPED') continue;
+      const issue = unitIssue(
+        mapping.externalUnitCode,
+        reportedUnits.get(code),
+      );
+      if (issue) {
+        this.logger.warn(
+          {
+            operation: 'pharmacy_inventory.order.unit',
+            productId,
+            reason: issue,
+          },
+          'La unidad externa no permite interpretar el stock: se conserva el libro local',
+        );
+        continue;
+      }
       // Un código que el sistema no lista es un producto que no tiene: 0.
       liveQuantities.set(productId, live.get(code) ?? 0);
     }
