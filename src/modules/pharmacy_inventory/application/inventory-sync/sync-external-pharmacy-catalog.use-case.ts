@@ -36,6 +36,10 @@ import {
   type ExternalPharmacyCatalogPort,
 } from '../ports/external-pharmacy-catalog.port';
 import {
+  EXTERNAL_PHARMACY_SYSTEM_PORT,
+  type ExternalPharmacySystemPort,
+} from '../ports/external-pharmacy-system.port';
+import {
   PharmacyInventoryScopePolicy,
   type PharmacyScope,
 } from '../scope/pharmacy-inventory-scope.policy';
@@ -43,6 +47,7 @@ import { SiteStockWriter } from '../site-availability/site-stock-writer';
 import { CreateInventorySyncBatchUseCase } from './create-inventory-sync-batch.use-case';
 import {
   integrationConnectionInactive,
+  integrationHostNotAllowed,
   integrationNotConfigured,
   integrationUnavailable,
 } from './integration-errors';
@@ -63,6 +68,12 @@ interface SyncPlan {
   readonly pharmacyCode: string;
   readonly sites: readonly ActiveSiteRow[];
   readonly mappings: readonly ExternalMapping[];
+  /** El sistema con que se habla: el de la farmacia o el del servidor. */
+  readonly source: {
+    catalog: ExternalPharmacyCatalogPort;
+    pharmacyCode?: string;
+    siteCodes: Readonly<Record<string, string>>;
+  };
 }
 
 /** Lo que se le pide a la sede para un producto, con su línea de origen. */
@@ -132,7 +143,9 @@ export class SyncExternalPharmacyCatalogUseCase {
     private readonly reconcile: ReconcileInventorySyncBatchUseCase,
     private readonly writer: SiteStockWriter,
     @Inject(EXTERNAL_PHARMACY_CATALOG_PORT)
-    private readonly external: ExternalPharmacyCatalogPort,
+    private readonly serverCatalog: ExternalPharmacyCatalogPort,
+    @Inject(EXTERNAL_PHARMACY_SYSTEM_PORT)
+    private readonly systems: ExternalPharmacySystemPort,
     private readonly logger: PinoLogger,
     private readonly erp: ErpConnectionUseCases,
   ) {}
@@ -150,15 +163,7 @@ export class SyncExternalPharmacyCatalogUseCase {
       'Syncing external pharmacy catalog',
     );
     const plan = await this.plan(ref, actor);
-    const source = await this.erp.catalogForConnection(
-      this.em.fork({ keepTransactionContext: true }),
-      ref.pharmacyId,
-      ref.connectionId,
-      this.external,
-    );
-    if (!source.catalog.isConfigured()) throw integrationNotConfigured();
-
-    const { catalog, stockBySite } = await this.fetch(plan, source);
+    const { catalog, stockBySite } = await this.fetch(plan, plan.source);
 
     const items: TranslatedSyncItem[] = [];
     const unmapped = new Map<string, UnmappedExternalProduct>();
@@ -204,7 +209,7 @@ export class SyncExternalPharmacyCatalogUseCase {
     for (const site of plan.sites) {
       const siteCandidates = candidates.get(site.id) ?? [];
       const outcome = await this.applySite(
-        { ...plan, erpConnection: source.pharmacyCode !== undefined },
+        { ...plan, erpConnection: plan.source.pharmacyCode !== undefined },
         site,
         siteCandidates,
         units,
@@ -279,7 +284,31 @@ export class SyncExternalPharmacyCatalogUseCase {
           externalUnitCode: mapping.externalUnitCode ?? null,
         }),
       );
-      return { pharmacy, pharmacyCode, sites, mappings };
+      const source = await this.erp.catalogForConnection(
+        tx,
+        pharmacy.pharmacyId,
+        connection.id,
+        async () => {
+          const system = await this.systems.resolve(
+            tx,
+            pharmacy.tenantId,
+            connection.connectionId ?? null,
+          );
+          if (system.status === 'NOT_CONFIGURED')
+            throw integrationNotConfigured();
+          if (system.status === 'HOST_NOT_ALLOWED')
+            throw integrationHostNotAllowed();
+          return system.client;
+        },
+      );
+      if (!source.catalog.isConfigured()) throw integrationNotConfigured();
+      return {
+        pharmacy,
+        pharmacyCode,
+        sites,
+        mappings,
+        source,
+      };
     });
   }
 

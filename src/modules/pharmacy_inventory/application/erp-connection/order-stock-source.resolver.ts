@@ -8,6 +8,7 @@ import {
   type OrderStockSource,
 } from '../../domain/erp-connection/pharmacy-stock-mode';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
+import { parseExternalSystemConfig } from '../../domain/sync/external-system';
 import {
   resolveExternalCodes,
   unitIssue,
@@ -85,6 +86,8 @@ export class OrderStockSourceResolver {
     const site = await this.connections.findSite(em, siteId);
     if (!site) return MANUAL;
     const record = await this.connections.findForPharmacy(em, site.pharmacyId);
+    if (record && parseExternalSystemConfig(record.connection.configJson))
+      return MANUAL;
     const mode = resolveStockMode(
       record && {
         linked: true,

@@ -466,3 +466,100 @@ describe('ErpConnectionUseCases (FAR-C9)', () => {
     );
   });
 });
+
+describe('coexistencia con el configurador de sistemas externos de dev', () => {
+  const foreignConfig = {
+    kind: 'PHARMACY_EXTERNAL_SYSTEM',
+    format: 'ALOVIDA_STANDARD',
+    baseUrl: 'https://synthetic.invalid',
+    externalPharmacyCode: 'SYNTHETIC',
+  };
+  function foreign(d: ReturnType<typeof doubles>) {
+    d.connections.findForPharmacy.mockResolvedValue(
+      record({
+        connection: {
+          ...record().connection,
+          configJson: foreignConfig,
+        },
+      }),
+    );
+  }
+
+  it('resuelve el catálogo del otro formato sin descifrar con la llave ERP', async () => {
+    const d = doubles();
+    foreign(d);
+    const catalog = { isConfigured: () => true } as never;
+    const resolve = fn(async () => catalog);
+    expect(
+      (
+        await d.useCases.catalogForConnection(
+          {} as never,
+          'ph-1',
+          'link-1',
+          resolve,
+        )
+      ).catalog,
+    ).toBe(catalog);
+    expect(resolve).toHaveBeenCalledTimes(1);
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    expect(d.catalogs.forAccess).not.toHaveBeenCalled();
+  });
+
+  it('no resuelve ni prueba el proveedor alternativo cuando el ERP propio es válido', async () => {
+    const d = doubles();
+    const resolve = fn(async () => {
+      throw new Error('wrong provider');
+    });
+    expect(
+      (
+        await d.useCases.catalogForConnection(
+          {} as never,
+          'ph-1',
+          'link-1',
+          resolve,
+        )
+      ).catalog,
+    ).toBe(d.adapter);
+    expect(resolve).not.toHaveBeenCalled();
+  });
+
+  it('no cambia ni rota credenciales del otro formato mediante guardar ERP', async () => {
+    const d = doubles();
+    foreign(d);
+    await expect(
+      d.useCases.save(
+        'ph-1',
+        { mode: 'CONNECTED', apiKey: 'synthetic-only' } as never,
+        ACTOR,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.connections.updateConnection).not.toHaveBeenCalled();
+    expect(d.connections.rotateCredential).not.toHaveBeenCalled();
+    expect(d.cipher.encrypt).not.toHaveBeenCalled();
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+  });
+
+  it('no usa la clave ajena al probar la configuración guardada ERP', async () => {
+    const d = doubles();
+    foreign(d);
+    await expect(d.useCases.testSaved('ph-1', ACTOR)).rejects.toBeInstanceOf(
+      PreconditionFailedException,
+    );
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    expect(d.adapter.checkHealth).not.toHaveBeenCalled();
+  });
+
+  it('no considera el otro formato como ERP conectado para los pedidos', async () => {
+    const d = doubles();
+    foreign(d);
+    expect(await d.resolver.resolve('site-1', ['prod-1'])).toEqual({
+      mode: 'MANUAL',
+    });
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    expect(d.adapter.stockForSite).not.toHaveBeenCalled();
+    expect(await d.useCases.view('ph-1', ACTOR)).toMatchObject({
+      mode: 'MANUAL',
+      integrationConnectionId: null,
+    });
+  });
+});

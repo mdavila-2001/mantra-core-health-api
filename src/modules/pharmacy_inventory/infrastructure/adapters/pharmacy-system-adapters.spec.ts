@@ -7,6 +7,11 @@ import { PharmacyCatalogFactory } from './pharmacy-catalog.factory';
 type Reply = { status?: number; body?: unknown; delayMs?: number };
 
 describe('adaptadores del sistema de cada farmacia (FAR-C9)', () => {
+  const allowedHosts = process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS;
+  beforeEach(() => {
+    process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS = '127.0.0.1';
+  });
+
   it.each([
     'http://user:synthetic@farmacia.test/std',
     'http://farmacia.test/std?apiKey=synthetic',
@@ -38,6 +43,9 @@ describe('adaptadores del sistema de cada farmacia (FAR-C9)', () => {
     if (server) await new Promise((resolve) => server!.close(resolve));
     server = undefined;
     seen = [];
+    if (allowedHosts === undefined)
+      delete process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS;
+    else process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS = allowedHosts;
   });
 
   async function serve(

@@ -9,7 +9,7 @@
 # Módulo `pharmacy_inventory`
 
 **Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/README.md)
-· 10 controllers · 12 services · 21 repositories · 21 entidades · 22 DTO
+· 10 controllers · 12 services · 22 repositories · 21 entidades · 23 DTO
 
 ---
 
@@ -28,44 +28,44 @@ Entidades (21, `find src/modules/pharmacy_inventory -name '*.entity.ts' | wc -l`
   find src/modules/pharmacy_inventory -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **6 controllers, 29 rutas HTTP, 21 entidad y 11 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **6 controllers, 29 rutas HTTP, 21 entidad y 11 servicios** (incluye los ya documentados más abajo). La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `InsurancePatientSettlementModule`, `PharmacyModule`, `MessagingModule`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /pharmacy/:pharmacyId/dispensations` | SECURITY_ADMIN | `pharmacy-dispensing` |
-| `POST /pharmacy/dispensations/:id/reverse` | SECURITY_ADMIN | `pharmacy-dispensing` |
-| `POST /internal/reservations/expire` | SYSTEM, SECURITY_ADMIN | `pharmacy-inventory-internal` |
-| `POST /internal/inventory-sync-batches` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
-| `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
-| `GET /pharmacy-inventory/sites/:siteId/stock` | sesión | `pharmacy-inventory-read` |
-| `GET /pharmacy-inventory/availability` | sesión | `pharmacy-inventory-read` |
-| `GET /pharmacy-inventory/availability/medications` | sesión | `pharmacy-inventory-read` |
-| `POST /pharmacy/:siteId/inventory-locations` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `POST /pharmacy/:pharmacyId/reservations` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `POST /pharmacy/:pharmacyId/transfers` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `POST /pharmacy/:siteId/count-sessions` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `POST /pharmacy/count-sessions/:id/approve` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `POST /pharmacy/recall-holds` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `POST /pharmacy/recall-holds/:id/release` | SECURITY_ADMIN | `pharmacy-inventory` |
-| `GET /pharmacy/orders` | SECURITY_ADMIN | `pharmacy-orders` |
-| `POST /pharmacy/orders` | PATIENT | `pharmacy-orders` |
-| `GET /pharmacy/orders/me` | PATIENT | `pharmacy-orders` |
-| `GET /pharmacy/orders/:id` | sesión | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/cancel` | PATIENT | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/review` | SECURITY_ADMIN | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/confirm` | SECURITY_ADMIN | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/accept-substitutions` | PATIENT | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/prefer-original` | PATIENT | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/reject` | SECURITY_ADMIN | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/ready` | SECURITY_ADMIN | `pharmacy-orders` |
-| `POST /pharmacy/orders/:id/dispense` | SECURITY_ADMIN | `pharmacy-orders` |
-| `POST /pharmacy/:pharmacyId/suppliers` | SECURITY_ADMIN | `pharmacy-procurement` |
-| `POST /pharmacy/:pharmacyId/purchase-orders` | SECURITY_ADMIN | `pharmacy-procurement` |
-| `POST /pharmacy/:pharmacyId/goods-receipts` | SECURITY_ADMIN | `pharmacy-procurement` |
+| Método y ruta                                      | Acceso                 | Controller                    |
+| -------------------------------------------------- | ---------------------- | ----------------------------- |
+| `POST /pharmacy/:pharmacyId/dispensations`         | SECURITY_ADMIN         | `pharmacy-dispensing`         |
+| `POST /pharmacy/dispensations/:id/reverse`         | SECURITY_ADMIN         | `pharmacy-dispensing`         |
+| `POST /internal/reservations/expire`               | SYSTEM, SECURITY_ADMIN | `pharmacy-inventory-internal` |
+| `POST /internal/inventory-sync-batches`            | SECURITY_ADMIN         | `pharmacy-inventory-internal` |
+| `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN         | `pharmacy-inventory-internal` |
+| `GET /pharmacy-inventory/sites/:siteId/stock`      | sesión                 | `pharmacy-inventory-read`     |
+| `GET /pharmacy-inventory/availability`             | sesión                 | `pharmacy-inventory-read`     |
+| `GET /pharmacy-inventory/availability/medications` | sesión                 | `pharmacy-inventory-read`     |
+| `POST /pharmacy/:siteId/inventory-locations`       | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `POST /pharmacy/:pharmacyId/reservations`          | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `POST /pharmacy/:pharmacyId/transfers`             | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `POST /pharmacy/:siteId/count-sessions`            | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `POST /pharmacy/count-sessions/:id/approve`        | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `POST /pharmacy/recall-holds`                      | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `POST /pharmacy/recall-holds/:id/release`          | SECURITY_ADMIN         | `pharmacy-inventory`          |
+| `GET /pharmacy/orders`                             | SECURITY_ADMIN         | `pharmacy-orders`             |
+| `POST /pharmacy/orders`                            | PATIENT                | `pharmacy-orders`             |
+| `GET /pharmacy/orders/me`                          | PATIENT                | `pharmacy-orders`             |
+| `GET /pharmacy/orders/:id`                         | sesión                 | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/cancel`                 | PATIENT                | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/review`                 | SECURITY_ADMIN         | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/confirm`                | SECURITY_ADMIN         | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/accept-substitutions`   | PATIENT                | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/prefer-original`        | PATIENT                | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/reject`                 | SECURITY_ADMIN         | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/ready`                  | SECURITY_ADMIN         | `pharmacy-orders`             |
+| `POST /pharmacy/orders/:id/dispense`               | SECURITY_ADMIN         | `pharmacy-orders`             |
+| `POST /pharmacy/:pharmacyId/suppliers`             | SECURITY_ADMIN         | `pharmacy-procurement`        |
+| `POST /pharmacy/:pharmacyId/purchase-orders`       | SECURITY_ADMIN         | `pharmacy-procurement`        |
+| `POST /pharmacy/:pharmacyId/goods-receipts`        | SECURITY_ADMIN         | `pharmacy-procurement`        |
 
 ## Conexión de cada farmacia con su sistema (FAR-C9)
 
@@ -144,17 +144,17 @@ sistema: tipo, dirección, clave, código de farmacia y código de cada sucursal
 
 ### Archivos
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `pharmacy_inventory.concepts.ts` | Conceptos de terminología del módulo. |
-| `pharmacy_inventory.module.ts` | Composición de dependencias del módulo NestJS. |
+| Archivo                          | Responsabilidad                                |
+| -------------------------------- | ---------------------------------------------- |
+| `pharmacy_inventory.concepts.ts` | Conceptos de terminología del módulo.          |
+| `pharmacy_inventory.module.ts`   | Composición de dependencias del módulo NestJS. |
 
 ## Cara de lectura (carril E2 · `/pharmacy-inventory`)
 
-| Método y ruta | Resumen |
-| --- | --- |
-| `GET /pharmacy-inventory/sites/{siteId}/stock?product=` | Stock disponible de una sede, agregado por producto sobre sus ubicaciones activas |
-| `GET /pharmacy-inventory/availability?products=a,b&lat=&lng=&limit=` | Qué sedes pueden surtir un pedido: completas primero, luego distancia y precio |
+| Método y ruta                                                                       | Resumen                                                                                                                                  |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /pharmacy-inventory/sites/{siteId}/stock?product=`                             | Stock disponible de una sede, agregado por producto sobre sus ubicaciones activas                                                        |
+| `GET /pharmacy-inventory/availability?products=a,b&lat=&lng=&limit=`                | Qué sedes pueden surtir un pedido: completas primero, luego distancia y precio                                                           |
 | `GET /pharmacy-inventory/availability/medications?medications=a,b&lat=&lng=&limit=` | Lo mismo por medicamento de una receta, en toda la red: un producto propio por medicamento en cada sede y los medicamentos que le faltan |
 
 La visibilidad es la del directorio de farmacias (módulo 24) y se **reutiliza**
@@ -168,6 +168,49 @@ Haversine sobre las coordenadas de `common.addresses` (vía
 se inventa: `distanceKm` va `null` y la sede ordena al final. El total de una
 sede sólo existe si **todos** sus disponibles tienen precio publicado en la
 misma moneda.
+
+## Sistema propio de cada farmacia (FAR-C9 · C9-3)
+
+Cada conexión de la pestaña Integración puede hablar con el sistema **de esa
+farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07).
+
+| Método y ruta                                                                       | Qué hace                                                                                                                                  |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUT /pharmacies/:pharmacyId/integration-connections/:connectionId/external-system` | Guarda formato, dirección, código y clave. **Prueba antes de guardar**: si el sistema no responde con esa clave, 502 y no se escribe nada |
+| `POST …/external-system/test`                                                       | Prueba el sistema que usa hoy la conexión; dice si es el de la farmacia o el del servidor                                                 |
+| `DELETE …/external-system`                                                          | Pausa la conexión de integraciones, retira la clave y deja `connection_id` en nulo                                                        |
+
+- **Dónde queda.** En el módulo de integraciones: un proveedor por formato
+  (`external_providers`, `PHARMACY_ALOVIDA_STANDARD` y `PHARMACY_SIMULATED_CHAIN`),
+  una `provider_connections` por conexión de farmacia (dirección y código en
+  `config_json`) y la clave en su `provider_credentials` activa, cifrada con
+  `encryptSecret` (`MFA_ENCRYPTION_KEY`). `pharmacy_integration_connections.connection_id`
+  apunta a esa conexión (v4.2.83). Guardar otra vez retira la clave anterior.
+- **Formatos.** `ALOVIDA_STANDARD` es el contrato que publica la plataforma
+  (`docs/integrations/pharmacy-standard.openapi.yaml`).
+  `SIMULATED_CHAIN` es la cadena de `mock-provider-server/`, a propósito distinta
+  (Bearer, paginada, otros nombres). Cada uno tiene su cliente en
+  `infrastructure/adapters/external-system-clients.ts`; la sincronización no sabe
+  con cuál habla.
+- **La clave no sale nunca**: ni en respuestas (`apiKeyConfigured` dice si hay
+  una), ni en logs, ni en los mensajes de error, y solo viaja en el cuerpo del `PUT`.
+- **Hosts.** La dirección la escribe la farmacia y la llama el servidor. Solo
+  `http`/`https` sin usuario ni consulta, y solo los hosts de
+  `PHARMACY_EXTERNAL_ALLOWED_HOSTS`: **sin lista no se llama a nadie**, en
+  cualquier entorno (422 `PHARMACY_INTEGRATION_HOST_NOT_ALLOWED`). Solo fuera
+  de producción, `PHARMACY_EXTERNAL_ALLOW_ANY_HOST=true` lo abre a propósito
+  (una máquina local con el simulador). En producción solo vale `https` y el
+  cliente rechaza **al conectar** las IP internas (loopback, privadas,
+  link-local y metadatos de la nube, CGNAT), así un nombre permitido que
+  resuelve adentro no pasa. La regla se vuelve a aplicar en cada llamada, no
+  solo al guardar, y antes de llamar se comprueba que la conexión sea del actor.
+- **Topes.** Cada respuesta, 10 MB como máximo; un listado paginado, 200
+  páginas y 20.000 filas en total. Pasado eso cuenta como sistema caído.
+- **Sin sistema propio** la conexión usa el del servidor, como en FAR-07; si
+  tampoco hay, 422 `PHARMACY_INTEGRATION_NOT_CONFIGURED`.
+- `GET …/integration-connections` agrega `system` (formato, dirección, código,
+  `apiKeyConfigured`) a cada conexión, y `providerConfigured` pasa a ser por
+  conexión: el sistema propio o, si no tiene, el del servidor.
 
 ## Criterios de mantenimiento
 
@@ -191,3 +234,17 @@ Los comandos administrativos aceptan relaciones de inventario sin alcance de
 tenant, y los asientos de conteo/recall usan IDs de sede o ubicación como
 farmacia: el movimiento de stock no está validado sobre PostgreSQL con FK
 activas.
+
+## Compatibilidad de configuradores ERP
+
+El contrato ERP con configuración `version: 1` utiliza su llave específica
+`PHARMACY_CONNECTION_SECRET_KEY`. El contrato de sistema externo con marca
+`PHARMACY_EXTERNAL_SYSTEM` conserva `MFA_ENCRYPTION_KEY` y sus endpoints propios.
+Los lectores y la sincronización seleccionan el cliente por la forma persistida;
+no convierten configuraciones ni descifran con la llave de otro formato. Guardar
+o quitar mediante el configurador equivocado se rechaza sin rotar credenciales.
+Ambos caminos de catálogo respetan la política de hosts permitidos del sistema
+externo, además de sus controles de destino. La consulta viva del pedido corresponde
+al contrato ERP; una conexión del otro formato conserva el camino manual del pedido.
+La separación de claves y la evolución del contrato se describen en
+[FAR-C9 #1258](https://github.com/mdavila-2001/mantra-core-health-api/issues/1258).

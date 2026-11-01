@@ -44,6 +44,7 @@ it('usa el catálogo ERP de la farmacia aunque el proveedor global no esté conf
     allowAllScope(),
     reads as never,
     external as never,
+    { serverConfigured: () => false, describe: async () => new Map() } as never,
     erp as never,
   );
   const actor = { id: 'synthetic-user' } as never;

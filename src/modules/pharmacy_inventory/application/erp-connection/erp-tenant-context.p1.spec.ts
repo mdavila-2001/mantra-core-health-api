@@ -318,6 +318,10 @@ describe('A03: direct C9 integration readers and sync caller', () => {
       d.scope as never,
       reads as never,
       external as never,
+      {
+        serverConfigured: () => false,
+        describe: async () => new Map(),
+      } as never,
       d.useCases,
     );
     const sync = new SyncExternalPharmacyCatalogUseCase(
@@ -330,6 +334,7 @@ describe('A03: direct C9 integration readers and sync caller', () => {
       { execute: jest.fn(async () => undefined) } as never,
       {} as never,
       external as never,
+      {} as never,
       d.logger as never,
       d.useCases,
     );

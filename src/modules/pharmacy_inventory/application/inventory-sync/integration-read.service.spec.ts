@@ -25,12 +25,24 @@ function build(mappings: Record<string, unknown>[]) {
       { code: 'ERP-0003', name: 'Amoxicilina' },
     ]),
     stockForSite: jest.fn(async () => []),
+    checkHealth: jest.fn(async () => undefined),
+  };
+  // Sin sistema propio: la conexión habla con el del servidor.
+  const systems = {
+    serverConfigured: jest.fn(() => true),
+    resolve: jest.fn(async () => ({
+      status: 'READY' as const,
+      source: 'SERVER' as const,
+      client: external,
+    })),
+    describe: jest.fn(async () => new Map()),
   };
   const service = new IntegrationReadService(
     em as any,
     allowAllScope(),
     reads as any,
     external,
+    systems as any,
     {
       catalogForConnection: async () => ({ catalog: external, siteCodes: {} }),
     } as never,

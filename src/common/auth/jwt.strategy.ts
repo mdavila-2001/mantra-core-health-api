@@ -17,6 +17,7 @@ export function toAuthenticatedUser(payload: JwtPayload): AuthenticatedUser {
   return {
     id: payload.sub,
     sessionId: payload.sid,
+    tokenExpiresAt: payload.exp,
     roles: payload.roles ?? [],
     scopedRoles: payload.scopedRoles,
     tenantIds: payload.tenants ?? [],

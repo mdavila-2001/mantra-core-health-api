@@ -7,6 +7,7 @@ import {
   type TraceSpan,
 } from '../../../../observability';
 import * as argon2 from 'argon2';
+import { SessionValidator } from '../../../../common/auth/session-validator';
 import { verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
@@ -35,6 +36,7 @@ import {
   PurgeResultDto,
 } from '../../presentation/dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 import {
   ACCOUNT_PROFILE_IDS_PORT,
   type AccountProfileIdsPort,
@@ -80,23 +82,6 @@ function withPharmacyStaffRole(
     : roles;
 }
 
-/**
- * Abre el contexto de sistema de RLS en la transacción que arma el token.
- *
- * Al iniciar sesión o refrescar todavía no hay organización elegida, así que
- * `app.current_tenant_id` está vacío. Con la API conectada como `mantra_app`
- * (RLS forzado, O3-1) las lecturas de `directory.tenant_memberships` y de las
- * asignaciones de rol por organización devolvían 0 filas: el token salía sin
- * `tenants` ni `scopedRoles` y toda ruta respondía 403 `TENANT_REQUIRED`.
- *
- * Es seguro porque cada consulta de estas transacciones va filtrada por el
- * sujeto que se autentica (o por la fila del refresh token): no lista datos de
- * otros. `set_config(..., true)` vale sólo hasta el fin de la transacción.
- */
-async function enterAuthBoundaryContext(tx: EntityManager): Promise<void> {
-  await tx.execute("select set_config('app.system_context', 'true', true)");
-}
-
 @Injectable()
 export class IamAuthService {
   /**
@@ -140,6 +125,7 @@ export class IamAuthService {
     private readonly tenantClaims: TenantClaimsPort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly sessionValidator: SessionValidator,
     private readonly mfaRepo?: MfaFactorsRepository,
   ) {
     this.logger.setContext(IamAuthService.name);
@@ -730,7 +716,7 @@ export class IamAuthService {
     // tokens de sistema que firman los workers.
     if (!actor.sessionId) return { revoked: false };
 
-    return this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const session = await this.sessionsRepo.findActiveByTokenId(
         tx,
         actor.sessionId as string,
@@ -754,6 +740,13 @@ export class IamAuthService {
 
       return { revoked: true };
     });
+    if (result.revoked && actor.sessionId) {
+      await this.sessionValidator.revokeSession(
+        actor.sessionId,
+        actor.tokenExpiresAt,
+      );
+    }
+    return result;
   }
 
   /** UC-01-11: expira sesiones y refresh tokens ya vencidos. */
@@ -805,6 +798,9 @@ export class IamAuthService {
     ip: string | undefined,
   ): Promise<void> {
     await this.em.transactional(async (tx) => {
+      // `iam.account_lockouts` tiene RLS forzado: sin esto el bloqueo no se ve
+      // ni se puede insertar, y el intento que alcanza el umbral daba 500.
+      await enterAuthBoundaryContext(tx);
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
         outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,

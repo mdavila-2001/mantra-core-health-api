@@ -62783,6 +62783,150 @@ paths:
       description: >-
         Últimas sincronizaciones de una conexión. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system:
+    put:
+      operationId: PharmacyIntegrationSyncController_configureExternalSystem
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigureExternalSystemDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalSystemResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Configurar el sistema propio de la farmacia
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Configurar el sistema propio de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: PharmacyIntegrationSyncController_removeExternalSystem
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Quitar el sistema propio de la farmacia
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Quitar el sistema propio de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-system/test:
+    post:
+      operationId: PharmacyIntegrationSyncController_probeExternalSystem
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalSystemProbeDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Probar el sistema de la farmacia
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Probar el sistema de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /ops/change-requests:
     post:
       description: Atarla a una ventana obliga a que el cambio quepa dentro de ella.
@@ -124702,6 +124846,11 @@ components:
             - INACTIVE
         providerConfigured:
           type: boolean
+        system:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ExternalSystemSummaryDto'
         createdAt:
           type: string
           format: date-time
@@ -124711,6 +124860,7 @@ components:
         - supportsStockQuery
         - status
         - providerConfigured
+        - system
         - createdAt
     IntegrationConnectionListDto:
       type: object
@@ -137809,6 +137959,80 @@ components:
           format: date-time
         path:
           type: string
+    ConfigureExternalSystemDto:
+      type: object
+      properties:
+        format:
+          type: string
+          enum:
+            - ALOVIDA_STANDARD
+            - SIMULATED_CHAIN
+        baseUrl:
+          type: string
+          description: Dirección que la plataforma va a llamar (http o https)
+        externalPharmacyCode:
+          type: string
+          description: Código de la farmacia (o de la cadena) en ese sistema
+        apiKey:
+          type: string
+          description: Clave de la farmacia en ese sistema
+          writeOnly: true
+      required:
+        - format
+        - baseUrl
+        - externalPharmacyCode
+        - apiKey
+      additionalProperties: false
+    ExternalSystemSummaryDto:
+      type: object
+      properties:
+        format:
+          type: string
+          enum:
+            - ALOVIDA_STANDARD
+            - SIMULATED_CHAIN
+        baseUrl:
+          type: string
+        externalPharmacyCode:
+          type: string
+        apiKeyConfigured:
+          type: boolean
+        configuredAt:
+          type: string
+          format: date-time
+      required:
+        - format
+        - baseUrl
+        - externalPharmacyCode
+        - apiKeyConfigured
+        - configuredAt
+    ExternalSystemResponseDto:
+      type: object
+      properties:
+        system:
+          $ref: '#/components/schemas/ExternalSystemSummaryDto'
+        probe:
+          type: string
+          enum:
+            - OK
+      required:
+        - system
+        - probe
+    ExternalSystemProbeDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - OK
+        source:
+          type: string
+          enum:
+            - PHARMACY
+            - SERVER
+      required:
+        - status
+        - source
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

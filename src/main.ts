@@ -1,3 +1,5 @@
+process.env.UV_THREADPOOL_SIZE = process.env.UV_THREADPOOL_SIZE ?? '16';
+
 // PRIMERA IMPORTACIÓN DEL PROCESO, y debe seguir siéndolo. Las instrumentaciones
 // automáticas de OpenTelemetry parchean `http`, `express`, `pg` e `ioredis` en el
 // momento en que Node los carga; si NestJS se importa antes, el parcheo llega

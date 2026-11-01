@@ -39,3 +39,14 @@ export function integrationConnectionInactive(): PreconditionFailedException {
     reason,
   );
 }
+
+/** 422: el sistema de la farmacia está en una dirección que la plataforma no llama. */
+export function integrationHostNotAllowed(): PreconditionFailedException {
+  const reason =
+    PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_HOST_NOT_ALLOWED;
+  return new PreconditionFailedException(
+    'La dirección del sistema de la farmacia no está permitida',
+    { reason },
+    reason,
+  );
+}

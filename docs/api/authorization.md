@@ -45,13 +45,13 @@ existan. `routes` lleva las rutas **sin revisar**, que no tienen motivo escrito.
 actor?»; hay decisiones que necesitan otro dato y por eso se toman en el servicio o en un guard
 propio. Las rutas revisadas caen en estas clases:
 
-| Clase | Quién decide | Ejemplos |
-|---|---|---|
-| Autoservicio por sesión | El sujeto sale de la sesión (`/me`, vínculo de la cuenta), no de un parámetro | `/profiles/*/me`, `/charts/me`, `/forms/me`, telemetría, cuestionarios del paciente |
-| Titularidad del recurso | El servicio compara el dueño con el actor (`ProfileOwnershipService`, `CommunityVisibilityService.assertActsAsProfile`, `canActorMutateOwnFile`) | perfiles, archivos, red social, encuestas, MFA y dispositivos de `/iam/users/:id` |
-| Membresía de la organización | `TenantAdministrationService.assertCanAdminister/assertCanRead/administersByMembership`, `InsurerContextService`, `LinkedClaimAccessService` | `/tenants/:tenantId/*`, agenda de la organización, seguros, listado de prácticas y sedes (`GET /practices`, `GET /practices/:practiceId/sites`: un rol clínico o de programación (respetando `scopedRoles`) **o** `OWNER`/`ADMIN` activo de la organización por membresía, con el mismo 403 `ROLE_INSUFFICIENT` para el resto) |
-| Guard propio | Un guard de clase en lugar de `@Roles` | `LabStaffGuard` en recepción de muestras y laboratorio |
-| Catálogo de lectura abierta | Datos publicados, iguales para toda sesión, acotados por tenant (RLS) | directorio de farmacias y de unidades diagnósticas, terminología, temas de la comunidad |
+| Clase                        | Quién decide                                                                                                                                     | Ejemplos                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Autoservicio por sesión      | El sujeto sale de la sesión (`/me`, vínculo de la cuenta), no de un parámetro                                                                    | `/profiles/*/me`, `/charts/me`, `/forms/me`, telemetría, cuestionarios del paciente                                                                                                                                                                                                                                            |
+| Titularidad del recurso      | El servicio compara el dueño con el actor (`ProfileOwnershipService`, `CommunityVisibilityService.assertActsAsProfile`, `canActorMutateOwnFile`) | perfiles, archivos, red social, encuestas, MFA y dispositivos de `/iam/users/:id`                                                                                                                                                                                                                                              |
+| Membresía de la organización | `TenantAdministrationService.assertCanAdminister/assertCanRead/administersByMembership`, `InsurerContextService`, `LinkedClaimAccessService`     | `/tenants/:tenantId/*`, agenda de la organización, seguros, listado de prácticas y sedes (`GET /practices`, `GET /practices/:practiceId/sites`: un rol clínico o de programación (respetando `scopedRoles`) **o** `OWNER`/`ADMIN` activo de la organización por membresía, con el mismo 403 `ROLE_INSUFFICIENT` para el resto) |
+| Guard propio                 | Un guard de clase en lugar de `@Roles`                                                                                                           | `LabStaffGuard` en recepción de muestras y laboratorio                                                                                                                                                                                                                                                                         |
+| Catálogo de lectura abierta  | Datos publicados, iguales para toda sesión, acotados por tenant (RLS)                                                                            | directorio de farmacias y de unidades diagnósticas, terminología, temas de la comunidad                                                                                                                                                                                                                                        |
 
 En la clase de membresía, `TenantAdministrationService` deja pasar sin consultar membresías a un
 `SECURITY_ADMIN` o `SUPERADMIN` que autoriza **en el tenant objetivo** según `roleAuthorizesInTenant`:
@@ -148,11 +148,11 @@ se exige además un **alcance clínico vigente**, evaluado por el PDP
 
 **Rango de acción vs. nivel de grant** (`CLINICAL_ACTION_RANK`, orden creciente):
 
-| Acción | Rango exigido | Nivel de grant mínimo |
-|---|---:|---|
-| `READ` | 1 | El más bajo cubre lectura |
-| `WRITE`, `CREATE` | 2 | Requiere nivel intermedio |
-| `DELETE`, `EXECUTE`, `APPROVE` | 3 | Requiere nivel `FULL` — acciones destructivas/administrativas |
+| Acción                         | Rango exigido | Nivel de grant mínimo                                         |
+| ------------------------------ | ------------: | ------------------------------------------------------------- |
+| `READ`                         |             1 | El más bajo cubre lectura                                     |
+| `WRITE`, `CREATE`              |             2 | Requiere nivel intermedio                                     |
+| `DELETE`, `EXECUTE`, `APPROVE` |             3 | Requiere nivel `FULL` — acciones destructivas/administrativas |
 
 Un grant solo cubre una acción si su nivel alcanza el rango exigido. Esto es lo que memoria de
 sesiones previas describe como "PDP clínico conjuntivo": rol **Y** alcance clínico vigente, no
@@ -168,6 +168,26 @@ decisiones; revocar un consentimiento o una relación asistencial debe invalidar
 del sistema — fija el tenant activo para la request/transacción. Que Row-Level Security
 (`RLS_ENFORCE`) esté activo depende de la configuración de cada entorno, no sólo del código — ver
 [aislamiento por tenant](../security/tenant-isolation.md).
+
+### Espacio personal (personas sin organización)
+
+Pertenecer a una organización no es requisito para usar la plataforma. Un paciente, o un médico que
+atiende de forma independiente, opera en el **espacio personal**: el tenant por defecto
+(`SEED.tenantId`), con una membresía `ACTIVE` explícita (`ROLE_STAFF`, `SCOPE_ALL_TENANT`). Esa
+membresía la crea el autorregistro. Para las cuentas anteriores o dadas de alta sin ella, el paso de
+seed `membresias-espacio-personal` (`personal-space-memberships-seed.service.ts`, núcleo, idempotente; corre
+al arrancar con `SEED_ON_BOOT=true` o con `seed-cli --only=membresias-espacio-personal`) la crea, pero solo a quien tiene un rol personal global (`PATIENT`, `PRACTITIONER`, `CLINICIAN`,
+`SUPPORT_STAFF`) y **ninguna** fila de membresía.
+
+Reglas que no cambian:
+
+- La API **no inventa membresías** al resolver el tenant ni al emitir el token. Una cuenta sin
+  membresía recibe `403 TENANT_REQUIRED`; una suspendida o revocada sigue sin contexto.
+- Quien tiene un rol personal **y** un rol administrativo global no se repara solo (`needsReview`).
+- Con varias membresías y sin `X-Tenant-Id`, la respuesta sigue siendo `403 TENANT_AMBIGUOUS`: elegir
+  el espacio personal o una organización es una decisión explícita de la persona.
+
+Fijado por `src/common/seed/personal-space-memberships-seed.service.spec.ts`.
 
 ### Datasets de plataforma: AloVida Insights
 

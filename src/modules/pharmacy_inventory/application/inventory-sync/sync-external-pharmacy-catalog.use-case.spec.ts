@@ -131,6 +131,19 @@ function build(
         (line) => !options.sentCodes || options.sentCodes.includes(line.code),
       ),
     ),
+    checkHealth: jest.fn(async () => undefined),
+  };
+  // Sin sistema propio: la conexión habla con el del servidor, si lo tiene.
+  const systems = {
+    resolve: jest.fn(async () =>
+      external.isConfigured()
+        ? {
+            status: 'READY' as const,
+            source: 'SERVER' as const,
+            client: external,
+          }
+        : { status: 'NOT_CONFIGURED' as const },
+    ),
   };
   const logger = { info: jest.fn(), warn: jest.fn() };
   const erp = {
@@ -151,6 +164,7 @@ function build(
     reconcile as any,
     writer as any,
     external,
+    systems as any,
     logger as any,
     erp as never,
   );

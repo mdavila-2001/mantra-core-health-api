@@ -30,6 +30,11 @@ export interface ExternalPharmacyCatalogPort {
     siteCode: string,
     pharmacyCode?: string,
   ): Promise<ExternalStockLine[]>;
+  /**
+   * Si el sistema responde y acepta la clave. No devuelve nada: un sistema que
+   * no responde, o que rechaza la clave, lanza `ExternalCatalogUnavailableError`.
+   */
+  checkHealth(): Promise<void>;
 }
 
 /** Token de inyección del puerto (resuelto por el adaptador HTTP). */

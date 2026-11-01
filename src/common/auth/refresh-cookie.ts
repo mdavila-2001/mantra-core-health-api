@@ -60,9 +60,7 @@ const SAME_SITE_VALUES = ['strict', 'lax', 'none'] as const;
  * tiene que ser una decisión coordinada con el front y no un efecto colateral de
  * desplegar una versión nueva.
  *
- * `Secure` sigue a `NODE_ENV` salvo que se declare explícitamente: en producción
- * una cookie de sesión sin `Secure` viaja en claro si algo degrada la conexión a
- * HTTP, y en desarrollo local (http://localhost) el navegador la descartaría.
+ * Al habilitarse, la cookie siempre fuerza `Secure` y `SameSite=Strict`.
  *
  * @param source - Origen de variables; `process.env` salvo en pruebas.
  * @returns Configuración efectiva de la cookie.
@@ -77,12 +75,16 @@ export function loadRefreshCookieEnv(
   return {
     name: source.AUTH_REFRESH_COOKIE_NAME || REFRESH_COOKIE_NAME,
     path: source.AUTH_REFRESH_COOKIE_PATH || REFRESH_COOKIE_PATH,
-    sameSite: sameSite ?? 'strict',
+    sameSite:
+      source.AUTH_REFRESH_COOKIE_ENABLED === 'true'
+        ? 'strict'
+        : (sameSite ?? 'strict'),
     enabled: source.AUTH_REFRESH_COOKIE_ENABLED === 'true',
     secure:
-      explicitSecure === undefined || explicitSecure === ''
+      source.AUTH_REFRESH_COOKIE_ENABLED === 'true' ||
+      (explicitSecure === undefined || explicitSecure === ''
         ? source.NODE_ENV === 'production'
-        : explicitSecure === 'true',
+        : explicitSecure === 'true'),
     ttlDays: Number(source.JWT_REFRESH_TTL_DAYS ?? 30),
   };
 }
@@ -107,8 +109,8 @@ export function setRefreshCookie(
 ): void {
   res.cookie(env.name ?? REFRESH_COOKIE_NAME, refreshToken, {
     httpOnly: true,
-    sameSite: env.sameSite ?? 'strict',
-    secure: env.secure,
+    sameSite: 'strict',
+    secure: true,
     path: env.path ?? REFRESH_COOKIE_PATH,
     maxAge: env.ttlDays * 24 * 60 * 60 * 1000,
   });
@@ -126,8 +128,8 @@ export function setRefreshCookie(
 export function clearRefreshCookie(res: Response, env: RefreshCookieEnv): void {
   res.clearCookie(env.name ?? REFRESH_COOKIE_NAME, {
     httpOnly: true,
-    sameSite: env.sameSite ?? 'strict',
-    secure: env.secure,
+    sameSite: 'strict',
+    secure: true,
     path: env.path ?? REFRESH_COOKIE_PATH,
   });
 }

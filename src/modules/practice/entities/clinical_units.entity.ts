@@ -94,15 +94,27 @@ export class ClinicalUnits {
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 
+  /**
+   * Identificador asociado a responsible user.
+   */
   @Property({ fieldName: 'responsible_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   responsibleUserId?: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar', nullable: true })
   description?: string;
 
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   @Property({
     fieldName: 'valid_from',
     columnType: 'timestamptz',
@@ -110,6 +122,9 @@ export class ClinicalUnits {
   })
   validFrom?: Date;
 
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   @Property({
     fieldName: 'valid_to',
     columnType: 'timestamptz',

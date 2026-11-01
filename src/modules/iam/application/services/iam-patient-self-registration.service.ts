@@ -57,6 +57,7 @@ import {
   type ProfileRegistrationPort,
 } from '../ports/profile-registration.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -171,6 +172,7 @@ export class IamPatientSelfRegistrationService {
     );
 
     const created = await this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       // Primero el cerrojo por documento y después la comprobación: así dos
       // altas simultáneas con la misma cédula no pasan las dos (7.1).
       await this.credentialsRepo.lockSubjectForRegistration(tx, dto.nationalId);
@@ -536,6 +538,7 @@ export class IamPatientSelfRegistrationService {
     // "activos" ya vencidos). Por eso este caso devuelve un resultado en vez de
     // lanzar, y el `throw` real ocurre después de que el commit ya se hizo.
     const outcome = await this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       const verification = await this.emailVerificationsRepo.findByTokenHash(
         tx,
         tokenHash,

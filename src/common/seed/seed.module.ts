@@ -97,6 +97,7 @@ import { CommonModule } from '../../modules/common/common.module';
 import { CommunityModule } from '../../modules/community/community.module';
 import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { PersonalSpaceMembershipsSeedService } from './personal-space-memberships-seed.service';
 import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import { SeedCensusService } from './seed-census.service';
 import { ToolRegistrySeedService } from './tool-registry-seed.service';
@@ -213,6 +214,7 @@ import { PharmacySystemProvidersSeedService } from './pharmacy-system-providers-
     StickerPackSeedService,
     PadronOrganizationsSeedService,
     PadronOrgAdminsSeedService,
+    PersonalSpaceMembershipsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,
@@ -259,6 +261,7 @@ import { PharmacySystemProvidersSeedService } from './pharmacy-system-providers-
     StickerPackSeedService,
     PadronOrganizationsSeedService,
     PadronOrgAdminsSeedService,
+    PersonalSpaceMembershipsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,

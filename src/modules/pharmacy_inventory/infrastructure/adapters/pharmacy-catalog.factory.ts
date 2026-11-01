@@ -1,4 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import {
+  externalSystemUrlProblem,
+  loadExternalSystemHostPolicy,
+} from '../../domain/sync/external-system';
+import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
 import type {
   ConnectedPharmacyCatalog,
   PharmacyCatalogFactoryPort,
@@ -26,6 +31,15 @@ const ADAPTERS: Record<
 export class PharmacyCatalogFactory implements PharmacyCatalogFactoryPort {
   forAccess(access: PharmacySystemAccess): ConnectedPharmacyCatalog {
     const Adapter = ADAPTERS[access.systemCode];
-    return new Adapter(access);
+    const catalog = new Adapter(access);
+    const problem = externalSystemUrlProblem(
+      access.baseUrl,
+      loadExternalSystemHostPolicy(),
+    );
+    if (problem)
+      throw new ExternalCatalogUnavailableError(
+        problem === 'URL_INVALID' ? 'INVALID_BASE_URL' : 'HOST_NOT_ALLOWED',
+      );
+    return catalog;
   }
 }

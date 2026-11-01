@@ -19,3 +19,4 @@ export * from './patient-settlement.dto';
 export * from './site-availability.dto';
 export * from './integration-sync.dto';
 export * from './erp-connection.dto';
+export * from './external-system.dto';

@@ -14,6 +14,7 @@ import {
 } from '../../domain/erp-connection/pharmacy-stock-mode';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
+import { parseExternalSystemConfig } from '../../domain/sync/external-system';
 import {
   ErpConnectionRepository,
   type ErpConnectionConfig,
@@ -114,15 +115,25 @@ export class ErpConnectionUseCases {
     em: EntityManager,
     pharmacyId: string,
     linkId: string,
-    fallback: ExternalPharmacyCatalogPort,
+    fallback:
+      | ExternalPharmacyCatalogPort
+      | (() => Promise<ExternalPharmacyCatalogPort>),
   ): Promise<{
     catalog: ExternalPharmacyCatalogPort;
     pharmacyCode?: string;
     siteCodes: Readonly<Record<string, string>>;
   }> {
     const current = await this.connections.findForPharmacy(em, pharmacyId);
-    if (!current || current.link.id !== linkId)
-      return { catalog: fallback, siteCodes: {} };
+    if (
+      !current ||
+      current.link.id !== linkId ||
+      parseExternalSystemConfig(current.connection.configJson)
+    ) {
+      return {
+        catalog: typeof fallback === 'function' ? await fallback() : fallback,
+        siteCodes: {},
+      };
+    }
     if (current.connection.stateConceptId !== INTEG.CONN_ACTIVE)
       throw integrationConnectionInactive();
     if (!this.cipher.isConfigured()) throw encryptionNotConfigured();
@@ -150,6 +161,10 @@ export class ErpConnectionUseCases {
       const pharmacy = await this.connections.findPharmacy(tx, pharmacyId);
       if (!pharmacy) throw connectionNotFound();
       const current = await this.connections.findForPharmacy(tx, pharmacyId);
+      // A different persisted format has its own configurator and cipher.
+      // Never convert it or overwrite its credentials through this contract.
+      if (current && parseExternalSystemConfig(current.connection.configJson))
+        throw connectionIncomplete();
       const enabled = dto.mode === 'CONNECTED';
 
       if (!enabled && !current) return; // Manual y nunca configurada: nada que guardar.
@@ -315,6 +330,8 @@ export class ErpConnectionUseCases {
 
   /** Con qué hablarle al sistema guardado (la clave, descifrada en memoria). */
   accessFor(record: ErpConnectionRecord): PharmacySystemAccess {
+    if (parseExternalSystemConfig(record.connection.configJson))
+      throw connectionIncomplete();
     if (!record.systemCode || !record.credential?.secretRef) {
       throw connectionNotFound();
     }
@@ -373,15 +390,21 @@ export class ErpConnectionUseCases {
     em: EntityManager,
     pharmacyId: string,
   ): Promise<ErpConnectionDto> {
-    const record = await this.connections.findForPharmacy(em, pharmacyId);
+    const loaded = await this.connections.findForPharmacy(em, pharmacyId);
+    const record =
+      loaded && !parseExternalSystemConfig(loaded.connection.configJson)
+        ? loaded
+        : null;
     const sites = await this.connections.findActiveSites(em, pharmacyId);
     const mode = resolveStockMode(
-      record && {
-        linked: true,
-        enabled: record.connection.stateConceptId === INTEG.CONN_ACTIVE,
-        hasCredential: record.credential !== null,
-        supportedSystem: record.systemCode !== null,
-      },
+      record && !parseExternalSystemConfig(record.connection.configJson)
+        ? {
+            linked: true,
+            enabled: record.connection.stateConceptId === INTEG.CONN_ACTIVE,
+            hasCredential: record.credential !== null,
+            supportedSystem: record.systemCode !== null,
+          }
+        : null,
     );
     const config = record?.config;
     const failing = config?.statusCode === 'PINV_ERP_CONNECTION_ERROR';
