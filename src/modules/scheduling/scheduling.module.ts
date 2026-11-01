@@ -93,6 +93,7 @@ import {
   SlotPolicyResolver,
 } from './application/bookings/support';
 import { bookingUseCases } from './application/bookings/use-cases';
+import { BookingStateTransitionHandler } from './application/bookings/booking-state-transition.handler';
 import {
   AgendaOverlapGuard,
   CatalogAccess,
@@ -204,6 +205,7 @@ import { BillingBookingAdapter } from './infrastructure/adapters/billing-booking
     EncountersRepository,
     SchedulingCatalogService,
     SchedulingBookingsService,
+    BookingStateTransitionHandler,
     SchedulingWaitlistService,
     SchedulingConfirmationService,
     SchedulingAgendaService,
