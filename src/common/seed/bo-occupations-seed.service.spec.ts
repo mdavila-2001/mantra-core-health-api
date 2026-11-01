@@ -12,6 +12,7 @@ import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import {
   BO_OCCUPATION_GROUP_PROPERTY_CODE,
   BO_OCCUPATION_VALUE_SET,
+  BO_OCCUPATION_VERSION,
   BO_OCCUPATIONS,
   boOccupationConceptCode,
   boOccupationConceptId,
@@ -93,6 +94,7 @@ describe('BoOccupationsSeedService', () => {
       expect(version).toMatchObject({
         id: boOccupationVersionId(),
         valueSetId: boOccupationValueSetId(),
+        version: '2026.11.0',
         isDefault: true,
       });
     });
