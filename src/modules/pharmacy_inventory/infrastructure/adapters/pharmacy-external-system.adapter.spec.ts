@@ -59,6 +59,9 @@ const CONFIG = {
 
 describe('PharmacyExternalSystemAdapter (FAR-C9 · C9-3)', () => {
   const env = { ...process.env };
+  beforeEach(() => {
+    process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS = 'sim';
+  });
   afterEach(() => {
     process.env = { ...env };
   });

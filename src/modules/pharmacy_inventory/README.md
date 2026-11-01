@@ -115,10 +115,17 @@ farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07
 - **La clave no sale nunca**: ni en respuestas (`apiKeyConfigured` dice si hay
   una), ni en logs, ni en los mensajes de error, y solo viaja en el cuerpo del `PUT`.
 - **Hosts.** La dirección la escribe la farmacia y la llama el servidor. Solo
-  `http`/`https` sin usuario ni consulta; con `PHARMACY_EXTERNAL_ALLOWED_HOSTS`,
-  solo esos hosts. En producción la lista es obligatoria y solo vale `https`:
-  sin lista no se llama a nadie (422 `PHARMACY_INTEGRATION_HOST_NOT_ALLOWED`). La
-  regla se vuelve a aplicar en cada llamada, no solo al guardar.
+  `http`/`https` sin usuario ni consulta, y solo los hosts de
+  `PHARMACY_EXTERNAL_ALLOWED_HOSTS`: **sin lista no se llama a nadie**, en
+  cualquier entorno (422 `PHARMACY_INTEGRATION_HOST_NOT_ALLOWED`). Solo fuera
+  de producción, `PHARMACY_EXTERNAL_ALLOW_ANY_HOST=true` lo abre a propósito
+  (una máquina local con el simulador). En producción solo vale `https` y el
+  cliente rechaza **al conectar** las IP internas (loopback, privadas,
+  link-local y metadatos de la nube, CGNAT), así un nombre permitido que
+  resuelve adentro no pasa. La regla se vuelve a aplicar en cada llamada, no
+  solo al guardar, y antes de llamar se comprueba que la conexión sea del actor.
+- **Topes.** Cada respuesta, 10 MB como máximo; un listado paginado, 200
+  páginas y 20.000 filas en total. Pasado eso cuenta como sistema caído.
 - **Sin sistema propio** la conexión usa el del servidor, como en FAR-07; si
   tampoco hay, 422 `PHARMACY_INTEGRATION_NOT_CONFIGURED`.
 - `GET …/integration-connections` agrega `system` (formato, dirección, código,

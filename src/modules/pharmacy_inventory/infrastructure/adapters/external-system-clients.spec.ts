@@ -1,7 +1,10 @@
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
-import { createExternalSystemClient } from './external-system-clients';
+import {
+  createExternalSystemClient,
+  isForbiddenAddress,
+} from './external-system-clients';
 
 /** Un sistema de farmacia de verdad, por HTTP, con dos formatos. */
 function startSystem(): Promise<{
@@ -186,5 +189,52 @@ describe('external system clients (FAR-C9 · C9-3)', () => {
     await expect(xApiKey.checkHealth()).rejects.toBeInstanceOf(
       ExternalCatalogUnavailableError,
     );
+  });
+
+  it('internal addresses are never called in production, public ones are', () => {
+    for (const ip of [
+      '127.0.0.1',
+      '10.1.2.3',
+      '172.20.0.5',
+      '192.168.1.1',
+      '169.254.169.254',
+      '100.64.0.1',
+      '0.0.0.0',
+      '::1',
+      'fe80::1',
+      'fd00::1',
+      '::ffff:127.0.0.1',
+      'not-an-ip',
+    ]) {
+      expect([ip, isForbiddenAddress(ip)]).toEqual([ip, true]);
+    }
+    for (const ip of ['8.8.8.8', '190.104.1.1', '2800:cd0::1']) {
+      expect([ip, isForbiddenAddress(ip)]).toEqual([ip, false]);
+    }
+  });
+
+  it('in production the client refuses to connect to an internal address', async () => {
+    const previous = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const before = system.seen.length;
+    try {
+      const client = createExternalSystemClient(
+        {
+          format: 'ALOVIDA_STANDARD',
+          // Un nombre que resuelve a 127.0.0.1: la IP se valida al conectar.
+          baseUrl: `${system.base.replace('127.0.0.1', 'localhost')}/std`,
+          externalPharmacyCode: 'F 1',
+        },
+        'k-std',
+        2000,
+      );
+      await expect(client.checkHealth()).rejects.toBeInstanceOf(
+        ExternalCatalogUnavailableError,
+      );
+      // La petición no llegó: se cortó en la resolución, no en la respuesta.
+      expect(system.seen.length).toBe(before);
+    } finally {
+      process.env.NODE_ENV = previous;
+    }
   });
 });

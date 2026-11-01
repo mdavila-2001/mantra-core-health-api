@@ -54,6 +54,8 @@ export class ConfigureExternalSystemUseCase {
       baseUrl: normalizeBaseUrl(dto.baseUrl),
       externalPharmacyCode: dto.externalPharmacyCode.trim(),
     };
+    // Primero el ámbito: sin una conexión del actor no se llama a nadie.
+    await this.em.transactional((tx) => this.requireConnection(tx, ref, actor));
     const problem = this.systems.urlProblem(config.baseUrl);
     if (problem === 'URL_INVALID') throw urlInvalid();
     if (problem === 'HOST_NOT_ALLOWED') throw integrationHostNotAllowed();
