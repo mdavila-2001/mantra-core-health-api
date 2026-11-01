@@ -185,7 +185,7 @@ export class CareSpaces {
     fieldName: 'sex_restriction_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   sexRestrictionConceptId?: string;
 
   /**
@@ -201,7 +201,7 @@ export class CareSpaces {
     fieldName: 'bed_category_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   bedCategoryConceptId?: string;
 
   /**
@@ -237,13 +237,23 @@ export class CareSpaces {
   validTo?: Date;
 
   /**
+   * Valor de location path mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'location_path',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  locationPath?: string;
+
+  /**
    * Identificador asociado a availability reason concept.
    */
   @Property({
     fieldName: 'availability_reason_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   availabilityReasonConceptId?: string;
 
   /**
@@ -273,7 +283,7 @@ export class CareSpaces {
     fieldName: 'hygiene_status_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   hygieneStatusConceptId?: string;
 
   /**

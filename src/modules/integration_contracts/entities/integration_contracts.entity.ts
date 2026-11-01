@@ -18,7 +18,7 @@ export class IntegrationContracts {
    * tenant (previo a la columna) no pertenece a ningún tenant y no es
    * accesible hasta que se le asigne uno.
    */
-  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
+  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants (inferida)
   tenantId?: string;
 
   /**

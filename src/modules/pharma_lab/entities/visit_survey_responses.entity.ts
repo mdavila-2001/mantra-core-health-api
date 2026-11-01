@@ -21,25 +21,25 @@ export class VisitSurveyResponses {
   /**
    * Encuesta emitida.
    */
-  @Property({ fieldName: 'visit_survey_id', type: 'uuid' }) // FK → pharma_lab.visit_surveys
+  @Property({ fieldName: 'visit_survey_id', type: 'uuid' }) // FK → pharma_lab.visit_surveys (inferida)
   visitSurveyId!: string;
 
   /**
    * Visita que la origina.
    */
-  @Property({ fieldName: 'visit_record_id', type: 'uuid' }) // FK → pharma_lab.visit_records
+  @Property({ fieldName: 'visit_record_id', type: 'uuid' }) // FK → pharma_lab.visit_records (inferida)
   visitRecordId!: string;
 
   /**
    * Único destinatario autorizado a responder.
    */
-  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   doctorUserId!: string;
 
   /**
    * Estado: pendiente o enviada.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
@@ -73,13 +73,13 @@ export class VisitSurveyResponses {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -16,6 +16,12 @@ export class PractitionerDelegateAssignments {
   id: string = randomUUID();
 
   /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  /**
    * Identificador asociado a practitioner role assignment.
    */
   @Property({ fieldName: 'practitioner_role_assignment_id', type: 'uuid' }) // FK → practice.practitioner_role_assignments
@@ -140,4 +146,34 @@ export class PractitionerDelegateAssignments {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de may reply on behalf mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'may_reply_on_behalf',
+    type: 'boolean',
+    default: false,
+  })
+  mayReplyOnBehalf!: boolean;
+
+  /**
+   * Identificador asociado a reply disclosure concept.
+   */
+  @Property({
+    fieldName: 'reply_disclosure_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  replyDisclosureConceptId?: string;
+
+  /**
+   * Valor de accepted at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'accepted_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  acceptedAt?: Date;
 }

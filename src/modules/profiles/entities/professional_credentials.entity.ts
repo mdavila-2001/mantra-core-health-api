@@ -87,7 +87,7 @@ export class ProfessionalCredentials {
     fieldName: 'profession_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   professionConceptId?: string;
 
   /**

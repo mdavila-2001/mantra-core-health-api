@@ -22,25 +22,25 @@ export class VisitRequests {
   /**
    * Visitador solicitante.
    */
-  @Property({ fieldName: 'medical_visitor_id', type: 'uuid' }) // FK → pharma_lab.medical_visitors
+  @Property({ fieldName: 'medical_visitor_id', type: 'uuid' }) // FK → pharma_lab.medical_visitors (inferida)
   medicalVisitorId!: string;
 
   /**
    * Laboratorio al que representa en esta visita.
    */
-  @Property({ fieldName: 'pharma_lab_id', type: 'uuid' }) // FK → pharma_lab.pharma_labs
+  @Property({ fieldName: 'pharma_lab_id', type: 'uuid' }) // FK → pharma_lab.pharma_labs (inferida)
   pharmaLabId!: string;
 
   /**
    * Doctor visitado.
    */
-  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   doctorUserId!: string;
 
   /**
    * Organización del doctor bajo la que se atiende la visita.
    */
-  @Property({ fieldName: 'doctor_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
+  @Property({ fieldName: 'doctor_tenant_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   doctorTenantId?: string;
 
   /**
@@ -71,7 +71,7 @@ export class VisitRequests {
   /**
    * Modalidad solicitada.
    */
-  @Property({ fieldName: 'modality_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'modality_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   modalityConceptId!: string;
 
   /**
@@ -95,7 +95,7 @@ export class VisitRequests {
   /**
    * Estado de la visita, dentro de la lista cerrada de spec 5382-5394.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
@@ -131,11 +131,7 @@ export class VisitRequests {
   /**
    * Solicitud de la que ésta es reprogramación, si la hay.
    */
-  @Property({
-    fieldName: 'rescheduled_from_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → pharma_lab.visit_requests
+  @Property({ fieldName: 'rescheduled_from_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   rescheduledFromId?: string;
 
   /**
@@ -153,13 +149,13 @@ export class VisitRequests {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -18,7 +18,7 @@ export class PractitionerSimpleRecords {
   /**
    * Identificador asociado a practice.
    */
-  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
+  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices (inferida)
   practiceId!: string;
 
   /**
@@ -36,7 +36,7 @@ export class PractitionerSimpleRecords {
   /**
    * Identificador asociado a account (el tipo del registro).
    */
-  @Property({ fieldName: 'account_id', type: 'uuid' }) // FK → accounting.practitioner_simple_accounts
+  @Property({ fieldName: 'account_id', type: 'uuid' }) // FK → accounting.accounts (inferida)
   accountId!: string;
 
   /**
@@ -66,13 +66,13 @@ export class PractitionerSimpleRecords {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**
