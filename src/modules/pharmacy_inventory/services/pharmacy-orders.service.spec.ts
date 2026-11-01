@@ -14,6 +14,7 @@ import {
   PharmacyOrdersService,
 } from '../application/pharmacy-orders/pharmacy-orders.service';
 import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
+import type { OrderStockSource } from '../domain/erp-connection/pharmacy-stock-mode';
 import { PendingOrderLines } from '../application/pharmacy-orders/pending-order-lines';
 import { PrescriptionOrderGuard } from '../application/pharmacy-orders/prescription-order-guard';
 import { toPrescriptionOrderItem } from '../infrastructure/repositories/prescription-balance.repository';
@@ -190,6 +191,12 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn() };
   // El escritor por sede: por defecto no escribe nada.
   const siteStockWriter = { write: mockFn(async () => []) };
+  const stockSource = {
+    resolve: mockFn(async (): Promise<OrderStockSource> => ({
+      mode: 'CONNECTED',
+      liveQuantities: new Map(),
+    })),
+  };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
@@ -211,10 +218,14 @@ function build() {
     prescriptionGuard,
     // Las líneas «por confirmar», con el escritor por sede doblado.
     new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
+    // FAR-C9: el modo de la farmacia, doblado. Por defecto, conectada sin
+    // stock en vivo: decide el libro de la sede, como antes de D-7.
+    stockSource as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    stockSource,
     balances,
     orderChat,
     accountLinks,
@@ -2041,5 +2052,144 @@ describe('PharmacyOrdersService', () => {
       expect(res.expiredCount).toBe(0);
       expect(d.outbox.publish).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('PharmacyOrdersService · create según el modo de la farmacia (FAR-C9, D-7)', () => {
+  function createWith(
+    d: ReturnType<typeof build>,
+    lines: { productId: string; quantity: number }[],
+  ) {
+    return runWithTenant('tenant-a', () =>
+      d.service.create({ siteId: 'site-1', lines }, patient),
+    );
+  }
+
+  it('manual (sin conexión): la línea entra «por confirmar» aunque el libro de la sede tenga stock, y no reserva nada', async () => {
+    const d = build();
+    d.stockSource.resolve.mockResolvedValue({ mode: 'MANUAL' });
+    d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+    withReading(d, order(), []);
+
+    await createWith(d, [{ productId: 'prod-1', quantity: 3 }]);
+
+    expect(d.stockSource.resolve).toHaveBeenCalledWith('site-1', ['prod-1']);
+    expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        pharmacyProductId: 'prod-1',
+        reservedQuantity: '0',
+        statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+      }),
+    );
+    expect(d.stockRepo.findByKeyForUpdate).not.toHaveBeenCalled();
+    expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+    expect(d.siteStockWriter.write).not.toHaveBeenCalled();
+  });
+
+  it('manual: todo «No lo tengo» sigue respondiendo el 422 de C3', async () => {
+    const d = build();
+    d.stockSource.resolve.mockResolvedValue({ mode: 'MANUAL' });
+    d.inventoryReadRepo.findStockPositions.mockResolvedValue([
+      position({ onHandQuantity: '0', availableQuantity: '0' }),
+    ]);
+
+    await expect(
+      createWith(d, [{ productId: 'prod-1', quantity: 1 }]),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.reservationsRepo.createLine).not.toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+      }),
+    );
+  });
+
+  it('conectada con stock en vivo: escribe en la sede lo que dice la farmacia y reserva', async () => {
+    const d = build();
+    d.stockSource.resolve.mockResolvedValue({
+      mode: 'CONNECTED',
+      liveQuantities: new Map([['prod-1', 5]]),
+    });
+    // Antes del alta la sede no tenía posición; tras escribir el stock en vivo, sí.
+    const live = position({
+      inventoryLotId: undefined,
+      onHandQuantity: '5',
+      availableQuantity: '5',
+    });
+    d.inventoryReadRepo.findStockPositions
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([live]);
+    d.stockRepo.findByKeyForUpdate.mockResolvedValue(live);
+    withReading(d, order(), []);
+
+    await createWith(d, [{ productId: 'prod-1', quantity: 2 }]);
+
+    expect(d.siteStockWriter.write).toHaveBeenCalledWith(
+      d.tx,
+      { tenantId: 'tenant-a', pharmacyId: 'ph-1', siteId: 'site-1' },
+      [{ productId: 'prod-1', availableQuantity: 5 }],
+      expect.objectContaining({
+        movementTypeConceptId: PINV.MV_SYNC_ADJUSTMENT,
+      }),
+    );
+    expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        reservedQuantity: '2',
+        statusConceptId: PINV.RES_LINE_CONFIRMED,
+      }),
+    );
+    expect(live.availableQuantity).toBe('3');
+  });
+
+  it('conectada con 0 en vivo: la línea queda sin stock aunque el libro diga otra cosa', async () => {
+    const d = build();
+    d.stockSource.resolve.mockResolvedValue({
+      mode: 'CONNECTED',
+      liveQuantities: new Map([
+        ['prod-1', 0],
+        ['prod-2', 4],
+      ]),
+    });
+    d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
+      PRODUCT,
+      { ...PRODUCT, id: 'prod-2' },
+    ]);
+    const other = position({
+      pharmacyProductId: 'prod-2',
+      inventoryLotId: undefined,
+    });
+    d.inventoryReadRepo.findStockPositions
+      .mockResolvedValueOnce([position()])
+      .mockResolvedValue([other]);
+    d.stockRepo.findByKeyForUpdate.mockResolvedValue(other);
+    withReading(d, order(), []);
+
+    await createWith(d, [
+      { productId: 'prod-1', quantity: 1 },
+      { productId: 'prod-2', quantity: 1 },
+    ]);
+
+    expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        pharmacyProductId: 'prod-1',
+        reservedQuantity: '0',
+        statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+      }),
+    );
+  });
+
+  it('conectada con 0 en todas las líneas: 422, como cualquier pedido sin stock', async () => {
+    const d = build();
+    d.stockSource.resolve.mockResolvedValue({
+      mode: 'CONNECTED',
+      liveQuantities: new Map([['prod-1', 0]]),
+    });
+
+    await expect(
+      createWith(d, [{ productId: 'prod-1', quantity: 1 }]),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 });

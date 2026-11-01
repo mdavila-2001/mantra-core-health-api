@@ -41,10 +41,16 @@ import { PrescriptionOrderGuard } from './prescription-order-guard';
 import {
   PendingOrderLines,
   entersPendingConfirmation,
+  ledgerView,
   noStockForAnyLine,
   pendingLineData,
   reservationLineWriter,
 } from './pending-order-lines';
+import {
+  decideOrderLine,
+  type OrderStockSource,
+} from '../../domain/erp-connection/pharmacy-stock-mode';
+import { OrderStockSourceResolver } from '../erp-connection/order-stock-source.resolver';
 import { addressText } from '../../domain/address-text';
 import { isRetailList } from '../../domain/pricing/is-retail-list';
 import {
@@ -336,6 +342,7 @@ export class PharmacyOrdersUseCases {
    * @param logger - Logger estructurado (ids y conteos; nunca datos clínicos).
    * @param orderChat - El hilo paciente ↔ vitrina de la farmacia (community).
    * @param accountLinks - La cuenta del paciente titular, para el chat.
+   * @param stockSource - Manual o conectada, y el stock en vivo (FAR-C9).
    */
   constructor(
     private readonly em: EntityManager,
@@ -363,6 +370,7 @@ export class PharmacyOrdersUseCases {
     private readonly accountLinks: PersonAccountLinksPort,
     private readonly prescriptionGuard: PrescriptionOrderGuard,
     private readonly pendingLines: PendingOrderLines,
+    private readonly stockSource: OrderStockSourceResolver,
   ) {
     this.logger.setContext('PharmacyOrdersService');
   }
@@ -383,6 +391,11 @@ export class PharmacyOrdersUseCases {
     const patientProfileId = this.requirePatientProfile(actor);
     this.assertNoDuplicateProducts(dto);
     const deliveryModeConceptId = this.resolveDeliveryMode(dto.deliveryMode);
+    // FAR-C9: manual o conectada, y la consulta en vivo, fuera de la transacción.
+    const stock = await this.stockSource.resolve(
+      dto.siteId,
+      dto.lines.map((line) => line.productId),
+    );
 
     const orderId = await this.em.transactional(async (tx) => {
       if (dto.idempotencyKey) {
@@ -485,6 +498,7 @@ export class PharmacyOrdersUseCases {
         actor,
         frozenPrices,
         products,
+        { source: stock, tenantId: pharmacy.tenantId },
       );
       // Todas «No lo tengo» o sin unidades: 422 y la transacción no deja nada.
       if (outOfStock === dto.lines.length) {
@@ -2260,6 +2274,7 @@ export class PharmacyOrdersUseCases {
     actor: AuthenticatedUser,
     frozenPrices: ReadonlyMap<string, FrozenPrice>,
     products: readonly PharmacyProductSnapshot[],
+    stock: { readonly source: OrderStockSource; readonly tenantId: string },
   ): Promise<number> {
     const locations = await this.inventoryReadRepo.findActiveLocationsBySites(
       tx,
@@ -2279,9 +2294,19 @@ export class PharmacyOrdersUseCases {
 
     let outOfStock = 0;
     for (const line of dto.lines) {
-      const held = byProduct.get(line.productId) ?? [];
+      let held = byProduct.get(line.productId) ?? [];
       const product = products.find((item) => item.id === line.productId);
-      if (entersPendingConfirmation(product, held)) {
+      // La regla del modo (FAR-C9, D-7): `pharmacy-stock-mode.ts`.
+      const decision = decideOrderLine(
+        stock.source,
+        line.productId,
+        line.quantity,
+        ledgerView(held, product),
+      );
+      if (
+        decision.kind === 'PENDING_CONFIRMATION' ||
+        (decision.kind === 'LEDGER' && entersPendingConfirmation(product, held))
+      ) {
         this.reservationsRepo.createLine(
           tx,
           pendingLineData(
@@ -2293,6 +2318,17 @@ export class PharmacyOrdersUseCases {
           ),
         );
         continue;
+      }
+      if (decision.kind === 'OUT_OF_STOCK') held = [];
+      if (decision.kind === 'RESERVE_LIVE') {
+        held = await this.pendingLines.writeLiveStock(
+          tx,
+          reservation,
+          stock.tenantId,
+          line.productId,
+          decision.liveQuantity,
+          actor.id,
+        );
       }
       const candidates = held
         .filter((position) => num(position.availableQuantity) > 0)

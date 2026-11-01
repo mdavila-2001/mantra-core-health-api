@@ -1,3 +1,4 @@
+import type { SiteLedgerView } from '../../domain/erp-connection/pharmacy-stock-mode';
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
@@ -64,6 +65,24 @@ export function entersPendingConfirmation(
   if (sitePositions.length > 0) return false;
   const declared = product?.stockQuantity;
   return declared === null || declared === undefined || declared > 0;
+}
+
+/**
+ * Lo que el libro de la sede dice de un producto, para la regla del modo
+ * (FAR-C9): si tiene posición y cuánto hay disponible.
+ */
+export function ledgerView(
+  sitePositions: readonly InventoryStockPositions[],
+  product?: DeclaredProductStock,
+): SiteLedgerView {
+  return {
+    declaredStock: product?.stockQuantity,
+    hasPositions: sitePositions.length > 0,
+    available: sitePositions.reduce(
+      (sum, position) => sum + Number(position.availableQuantity ?? 0),
+      0,
+    ),
+  };
 }
 
 /**
@@ -288,6 +307,35 @@ export class PendingOrderLines {
       })),
       unavailable,
     };
+  }
+
+  /**
+   * FAR-C9: escribe en la sede el stock que el sistema de la farmacia acaba de
+   * informar para un producto (`MV_SYNC_ADJUSTMENT`, como «Sincronizar
+   * ahora») y devuelve sus posiciones para reservar contra ellas. El sistema
+   * de la farmacia es la autoridad de su existencia.
+   */
+  async writeLiveStock(
+    tx: EntityManager,
+    order: InventoryReservations,
+    tenantId: string,
+    productId: string,
+    quantity: number,
+    actorUserId: string,
+  ): Promise<InventoryStockPositions[]> {
+    await this.writer.write(
+      tx,
+      { tenantId, pharmacyId: order.pharmacyId, siteId: order.pharmacySiteId },
+      [{ productId, availableQuantity: quantity }],
+      {
+        movementTypeConceptId: PINV.MV_SYNC_ADJUSTMENT,
+        sourceId: order.id,
+        actorUserId,
+      },
+    );
+    return (
+      (await this.sitePositions(tx, order, [productId])).get(productId) ?? []
+    );
   }
 
   /** Las posiciones de unos productos en las ubicaciones activas de la sede. */

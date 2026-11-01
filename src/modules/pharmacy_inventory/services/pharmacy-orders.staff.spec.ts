@@ -11,6 +11,7 @@ import {
   PICKUP_CODE_UNIQUE_INDEX,
 } from '../application/pharmacy-orders/pharmacy-orders.service';
 import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
+import type { OrderStockSource } from '../domain/erp-connection/pharmacy-stock-mode';
 import { PendingOrderLines } from '../application/pharmacy-orders/pending-order-lines';
 import { SiteStockWriter } from '../application/site-availability/site-stock-writer';
 import { pharmacyInventoryIndexes } from '../../../orm/catalog/indexes/pharmacy_inventory.idx';
@@ -237,6 +238,12 @@ function build() {
       async (_tx: unknown, key: any) => byKey(key),
     );
   };
+  const stockSource = {
+    resolve: mockFn(async (): Promise<OrderStockSource> => ({
+      mode: 'CONNECTED',
+      liveQuantities: new Map(),
+    })),
+  };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
@@ -259,10 +266,14 @@ function build() {
     {} as any,
     // Las líneas «por confirmar», con el escritor por sede doblado.
     new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
+    // FAR-C9: el modo de la farmacia, doblado. Por defecto, conectada sin
+    // stock en vivo: decide el libro de la sede, como antes de D-7.
+    stockSource as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    stockSource,
     orderChat,
     accountLinks,
     settlements,
