@@ -99280,10 +99280,6 @@ components:
           enum:
             - REALTIME
             - BATCH
-        connectionId:
-          type: string
-          description: Conexión de integración externa registrada; si se omite, la fila se auto-referencia
-          format: uuid
         pharmacySiteId:
           type: string
           description: Sede a la que aplica la conexión

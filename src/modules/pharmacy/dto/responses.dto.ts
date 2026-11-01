@@ -266,10 +266,11 @@ export class ConnectionResponseDto {
   pharmacyId!: string;
 
   /**
-   * Identificador asociado a connection.
+   * Conexión registrada en integraciones; nulo mientras la farmacia no tiene
+   * configurado su sistema externo.
    */
-  @ApiProperty({ format: 'uuid' })
-  connectionId!: string;
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  connectionId!: string | null;
 
   /**
    * Valor de status mantenido por la instancia.
