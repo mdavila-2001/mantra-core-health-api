@@ -162,7 +162,7 @@ export class SearchChatContactsRequestDto {
   @IsInt()
   @Min(1)
   @Max(20)
-  limit = 10;
+  limit: number = 10;
 }
 
 /** Persona que se puede elegir para iniciar un chat autenticado. */
