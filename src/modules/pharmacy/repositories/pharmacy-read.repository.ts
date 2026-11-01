@@ -213,6 +213,24 @@ export class PharmacyReadRepository {
   }
 
   /**
+   * Los productos publicados y vendibles de unos medicamentos del vademécum,
+   * de cualquier farmacia: la disponibilidad por medicamento los cruza después
+   * con las farmacias visibles y con la regla por sede. Un producto sin
+   * `medication_concept_id` no entra: no hay con qué emparejarlo.
+   */
+  findSellableProductsByMedicationConcepts(
+    em: EntityManager,
+    conceptIds: readonly string[],
+  ): Promise<PharmacyProducts[]> {
+    if (conceptIds.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyProducts, {
+      medicationConceptId: { $in: [...conceptIds] },
+      statusConceptId: PHARM.PRODUCT_ACTIVE,
+      ...SELLABLE_STOCK_FILTER,
+    });
+  }
+
+  /**
    * De unos productos, los que una sede tiene **disponibles** hoy según la
    * regla única por sede (`siteProductAvailabilitySql`): el libro si el
    * producto tiene posición en la sede, lo declarado en el catálogo si no. Es

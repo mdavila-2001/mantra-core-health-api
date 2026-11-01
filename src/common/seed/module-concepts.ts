@@ -2,6 +2,9 @@ import type { ConceptSeed } from './concept-seed';
 import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.concepts';
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
 import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
+import { AUTHZ_GOVERNANCE_CONCEPT_SEEDS } from '../../modules/authz/authz-governance.concepts';
+import { GOVERNANCE_ADMIN_CONCEPT_SEEDS } from '../../modules/governance_admin/governance_admin.constants';
+import { RUNTIME_PIECES_CONCEPT_SEEDS } from '../../modules/platform_ops/runtime_pieces/runtime-pieces.concepts';
 import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
 import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
@@ -32,6 +35,7 @@ import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures
 import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
 import { PLATFORM_OPS_CONCEPT_SEEDS } from '../../modules/platform_ops/platform_ops.concepts';
 import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
+import { STUDY_CATALOG_CONCEPT_SEEDS } from '../../modules/study_catalog/study_catalog.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -48,6 +52,9 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...DIRECTORY_CONCEPT_SEEDS,
   ...PROFILES_CONCEPT_SEEDS,
   ...AUTHZ_CONCEPT_SEEDS,
+  ...AUTHZ_GOVERNANCE_CONCEPT_SEEDS,
+  ...GOVERNANCE_ADMIN_CONCEPT_SEEDS,
+  ...RUNTIME_PIECES_CONCEPT_SEEDS,
   ...CONSENT_CONCEPT_SEEDS,
   ...FORMS_CONCEPT_SEEDS,
   ...CLINICAL_CONCEPT_SEEDS,
@@ -78,4 +85,5 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...SURVEYS_CONCEPT_SEEDS,
   ...ALLERGY_CONCEPT_SEEDS,
   ...PLATFORM_OPS_CONCEPT_SEEDS,
+  ...STUDY_CATALOG_CONCEPT_SEEDS,
 ];

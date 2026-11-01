@@ -13,6 +13,7 @@ import {
 } from '../../infrastructure/repositories/telemetry-click-heatmap.repository';
 import { TELE } from '../../telemetry.concepts';
 import type { ClickHeatmapQueryDto } from '../../presentation/dto/click-heatmap.dto';
+import type { AnalyticsActorScope } from '../analytics-scope';
 
 /** 4 decimales: suficiente para una fracción de celda y sin ruido de coma flotante. */
 const ratio = (num: number, den: number) =>
@@ -32,7 +33,11 @@ const center = (index: number, size: number) =>
 export class TelemetryClickHeatmapService {
   constructor(private readonly repo: TelemetryClickHeatmapRepository) {}
 
-  private scope(query: ClickHeatmapQueryDto, tenantId: string): HeatmapScope {
+  private scope(
+    query: ClickHeatmapQueryDto,
+    actor: string | AnalyticsActorScope,
+  ): HeatmapScope {
+    const tenantId = typeof actor === 'string' ? actor : actor.tenantId;
     let window: AnalyticsWindow;
     try {
       window = resolveWindow({ from: query.from, to: query.to });
@@ -60,20 +65,91 @@ export class TelemetryClickHeatmapService {
     };
   }
 
-  async heatmap(query: ClickHeatmapQueryDto, tenantId: string) {
+  async heatmap(
+    query: ClickHeatmapQueryDto,
+    tenantId: string | AnalyticsActorScope,
+  ) {
     const scope = this.scope(query, tenantId);
-    const [totals, cells, elements, sizes] = await Promise.all([
-      this.repo.totals(scope),
-      this.repo.cells(scope),
-      this.repo.elements(scope),
-      this.repo.sizes(scope),
-    ]);
+    const metric = query.metric ?? 'clicks';
+    const platformMin =
+      typeof tenantId === 'string' || tenantId.tenantId !== undefined
+        ? undefined
+        : tenantId.minSample;
+    const small = (subjects: number | undefined) =>
+      platformMin !== undefined && (subjects ?? 0) < platformMin;
+    const [rawTotals, rawCells, rawElements, sizes, rawScroll, views] =
+      await Promise.all([
+        this.repo.totals(scope),
+        this.repo.cells(scope),
+        this.repo.elements(scope),
+        this.repo.sizes(scope),
+        this.repo.scroll(scope),
+        this.repo.views(scope),
+      ]);
+    // Alcance plataforma: si la ruta entera tiene menos de `minSample` personas
+    // no sale nada; si no, se suprimen las celdas y los elementos pequeños.
+    const hidden = small(rawTotals.subjects) && rawTotals.clicks > 0;
+    const totals = rawTotals;
+    const cells = hidden ? [] : rawCells.filter((c) => !small(c.subjects));
+    const elements = hidden
+      ? []
+      : rawElements.filter((e) => !small(e.subjects));
+    const suppressedCells = rawCells.length - cells.length;
+    const suppressedElements = rawElements.length - elements.length;
+    const scroll =
+      small(rawScroll.subjects) && rawScroll.pages > 0 ? null : rawScroll;
+    const value = (c: { clicks: number; rage?: number; dead?: number }) =>
+      metric === 'rage'
+        ? (c.rage ?? 0)
+        : metric === 'dead'
+          ? (c.dead ?? 0)
+          : c.clicks;
+    const shown =
+      metric === 'scroll'
+        ? []
+        : cells.filter((c) => metric === 'clicks' || value(c) > 0);
+    const shownTotal = shown.reduce((a, c) => a + value(c), 0);
     const withoutPosition = Math.max(
       0,
       totals.clicks - totals.positioned - totals.keyboard,
     );
 
     const notMeasured: Array<{ metric: string; reason: string }> = [
+      ...(hidden
+        ? [
+            {
+              metric: 'minSample',
+              reason: `Menos de ${platformMin} personas distintas hicieron clic en esta ruta: alcance plataforma (agregado entre organizaciones), todo se suprime.`,
+            },
+          ]
+        : suppressedCells + suppressedElements > 0
+          ? [
+              {
+                metric: 'minSample',
+                reason: `${suppressedCells} celda(s) y ${suppressedElements} elemento(s) con menos de ${platformMin} personas se suprimieron (alcance plataforma).`,
+              },
+            ]
+          : []),
+      ...(scroll === null
+        ? [
+            {
+              metric: 'scroll',
+              reason: `Menos de ${platformMin} personas con abandono de página registrado: la profundidad de scroll se suprime (alcance plataforma).`,
+            },
+          ]
+        : rawScroll.pages > rawScroll.measured
+          ? [
+              {
+                metric: 'scrollDepthWithoutValue',
+                reason: `${rawScroll.pages - rawScroll.measured} página(s) abandonada(s) llegaron sin profundidad_max.`,
+              },
+            ]
+          : []),
+      {
+        metric: 'deadClicks',
+        reason:
+          'es_clic_muerto lo marca el portal (sin navegación, petición ni cambio del DOM en 1 s); un clic anterior a esa captura no lo trae y cuenta como no muerto.',
+      },
       {
         metric: 'keyboardClicks',
         reason:
@@ -114,26 +190,69 @@ export class TelemetryClickHeatmapService {
         screenSize: query.screenSize ?? null,
       },
       grid: { columns: HEATMAP_COLUMNS, rows: HEATMAP_ROWS },
-      totals: {
-        clicks: totals.clicks,
-        positioned: totals.positioned,
-        keyboard: totals.keyboard,
-        withoutPosition,
-        repeated: totals.repeated,
-      },
-      cells: cells.map((cell) => ({
+      metric,
+      scope:
+        platformMin !== undefined ||
+        (typeof tenantId !== 'string' && tenantId.tenantId === undefined)
+          ? {
+              level: 'platform',
+              tenantId: null,
+              minSample: platformMin ?? null,
+            }
+          : {
+              level: 'tenant',
+              tenantId: scope.tenantId ?? null,
+              minSample: null,
+            },
+      views,
+      totals: hidden
+        ? {
+            clicks: null,
+            positioned: null,
+            keyboard: null,
+            withoutPosition: null,
+            repeated: null,
+            dead: null,
+          }
+        : {
+            clicks: totals.clicks,
+            positioned: totals.positioned,
+            keyboard: totals.keyboard,
+            withoutPosition,
+            repeated: totals.repeated,
+            dead: totals.dead,
+          },
+      cells: shown.map((cell) => ({
         column: cell.col,
         row: cell.row,
         x: center(cell.col, HEATMAP_COLUMNS),
         y: center(cell.row, HEATMAP_ROWS),
         clicks: cell.clicks,
-        share: ratio(cell.clicks, totals.positioned),
+        rage: cell.rage ?? 0,
+        dead: cell.dead ?? 0,
+        value: value(cell),
+        share:
+          metric === 'clicks'
+            ? ratio(cell.clicks, totals.positioned)
+            : ratio(value(cell), shownTotal),
       })),
       byElement: elements.map((element) => ({
         target: element.target,
         clicks: element.clicks,
         repeated: element.repeated,
+        dead: element.dead ?? 0,
       })),
+      scroll: scroll
+        ? {
+            pages: scroll.pages,
+            measured: scroll.measured,
+            buckets: scroll.reached.map((reached, i) => ({
+              depth: (i + 1) / 10,
+              pagesReached: reached,
+              share: ratio(reached, scroll.measured),
+            })),
+          }
+        : null,
       byScreenSize: sizes.map((size) => ({
         screenSize: size.screen_size,
         clicks: size.clicks,

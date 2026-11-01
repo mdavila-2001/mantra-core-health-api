@@ -16,6 +16,12 @@ export class IdentityVerificationCases {
   id: string = randomUUID();
 
   /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants (inferida)
+  tenantId?: string;
+
+  /**
    * Identificador asociado a subject type concept.
    */
   @Property({ fieldName: 'subject_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

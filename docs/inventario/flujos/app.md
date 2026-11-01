@@ -120,7 +120,7 @@ Sonda de readiness de dependencias obligatorias
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar; SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')}; SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}; Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: El rol de runtime {violations.join('; ')}: las políticas no aíslan nada |
+| 500 | `INTERNAL` | SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar; SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')}; SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: El rol de runtime {violations.join('; ')}: las políticas no aíslan nada |
 
 ```mermaid
 flowchart TD
@@ -129,60 +129,52 @@ flowchart TD
   n1 --> n2
   n3["Llama a AppReadinessService.check"]:::llamada
   n2 --> n3
-  n4["Transacción: probe(…)"]:::transaccion
+  n4["Llama a AppReadinessService.collect"]:::llamada
   n3 --> n4
-  n5["Llama a AppReadinessService.checkSchemaIntegrity"]:::llamada
+  n5["Transacción: probe(…)"]:::transaccion
   n4 --> n5
-  n6{"this.schemaIntegrity && !this.schemaIntegrity.isComplete()"}:::decision
+  n6["Llama a AppReadinessService.checkSchemaIntegrity"]:::llamada
   n5 --> n6
-  n7(["500 INTERNAL Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a AppReadinessService.checkSeedCore"]:::llamada
-  n6 -->|"no"| n8
-  n9{"failed.length › 0"}:::decision
-  n8 --> n9
-  n10(["500 INTERNAL Seeds núcleo fallidos: {failed.join(', ')}"]):::error
-  n9 -->|"sí"| n10
-  n11[("LEE terminology.catalog_concepts")]:::efecto
-  n9 -->|"no"| n11
-  n12{"present ‹ ids.length"}:::decision
-  n11 --> n12
-  n13(["500 INTERNAL Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a DocumentStoreService.ping"]:::llamada
-  n12 -->|"no"| n14
-  n15["Llama a DocumentStoreRepository.ping"]:::llamada
-  n14 --> n15
-  n16["Llama a MongoConnection.ping"]:::llamada
+  n7{"this.schemaIntegrity && !this.schemaIntegrity.isComplete()"}:::decision
+  n6 --> n7
+  n8(["500 INTERNAL Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a AppReadinessService.checkSeedCore"]:::llamada
+  n7 -->|"no"| n9
+  n10{"failed.length › 0"}:::decision
+  n9 --> n10
+  n11(["500 INTERNAL Seeds núcleo fallidos: {failed.join(', ')}"]):::error
+  n10 -->|"sí"| n11
+  n12[("LEE terminology.catalog_concepts")]:::efecto
+  n10 -->|"no"| n12
+  n13{"present ‹ ids.length"}:::decision
+  n12 --> n13
+  n14(["500 INTERNAL Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a RedisRuntimeService.ping"]:::llamada
+  n13 -->|"no"| n15
+  n16{"response !== 'PONG'"}:::decision
   n15 --> n16
-  n17{"result.ok !== 1"}:::decision
-  n16 --> n17
-  n18(["500 INTERNAL MongoDB no confirmó el ping"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a RedisRuntimeService.ping"]:::llamada
-  n17 -->|"no"| n19
-  n20{"response !== 'PONG'"}:::decision
-  n19 --> n20
-  n21(["500 INTERNAL Redis no respondió PONG"]):::error
-  n20 -->|"sí"| n21
-  n22["Llama a SearchIndexService.ping"]:::llamada
-  n20 -->|"no"| n22
-  n23{"response.body.status === 'red'"}:::decision
-  n22 --> n23
-  n24(["500 INTERNAL OpenSearch está en estado red"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a AppReadinessService.checkRls"]:::llamada
-  n23 -->|"no"| n25
-  n26{"violations.length › 0"}:::decision
-  n25 --> n26
-  n27(["500 INTERNAL El rol de runtime {violations.join('; ')}: las políticas no aíslan nada"]):::error
-  n26 -->|"sí"| n27
-  n28{"Object.values(checks).some((check) =› check.status === 'down')"}:::decision
-  n26 -->|"no"| n28
-  n29(["↩ (relanza el error capturado)"]):::error
-  n28 -->|"sí"| n29
-  n30(("200 Responde con éxito")):::ok
-  n28 -->|"no"| n30
+  n17(["500 INTERNAL Redis no respondió PONG"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a SearchIndexService.ping"]:::llamada
+  n16 -->|"no"| n18
+  n19{"response.body.status === 'red'"}:::decision
+  n18 --> n19
+  n20(["500 INTERNAL OpenSearch está en estado red"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a AppReadinessService.checkRls"]:::llamada
+  n19 -->|"no"| n21
+  n22{"violations.length › 0"}:::decision
+  n21 --> n22
+  n23(["500 INTERNAL El rol de runtime {violations.join('; ')}: las políticas no aíslan nada"]):::error
+  n22 -->|"sí"| n23
+  n24{"Object.values(checks).some((check) =› check.status === 'down')"}:::decision
+  n22 -->|"no"| n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 -->|"sí"| n25
+  n26(("200 Responde con éxito")):::ok
+  n24 -->|"no"| n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

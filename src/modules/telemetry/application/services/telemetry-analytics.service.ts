@@ -19,6 +19,7 @@ import {
   type DeviceBreakdownRow,
 } from '../../infrastructure/repositories/telemetry-analytics.repository';
 import { TELE } from '../../telemetry.concepts';
+import type { AnalyticsActorScope } from '../analytics-scope';
 import { TelemetryErrorReason } from '../../telemetry.error-reasons';
 
 export const PORTAL_CODES = ['WEB', 'MOBILE'] as const;
@@ -97,7 +98,13 @@ const num = (value: string | null) =>
 export class TelemetryAnalyticsService {
   constructor(private readonly repo: TelemetryAnalyticsRepository) {}
 
-  private scope(query: WindowQuery, tenantId: string): AnalyticsScope {
+  /** Acepta el tenant a secas (tenant) o el alcance resuelto (tenant o plataforma). */
+  private scope(
+    query: WindowQuery,
+    actor: string | AnalyticsActorScope,
+  ): AnalyticsScope {
+    const tenantId = typeof actor === 'string' ? actor : actor.tenantId;
+    const minSample = typeof actor === 'string' ? undefined : actor.minSample;
     let window: AnalyticsWindow;
     try {
       window = resolveWindow(query);
@@ -114,9 +121,41 @@ export class TelemetryAnalyticsService {
     }
     return {
       tenantId,
+      minSample,
       window,
       portalConceptId: query.portal ? PORTAL_ID[query.portal] : undefined,
     };
+  }
+
+  /** Nota de alcance de plataforma: qué se agregó y con qué umbral. */
+  private scopeView(scope: AnalyticsScope) {
+    return scope.tenantId
+      ? { level: 'tenant' as const, tenantId: scope.tenantId, minSample: null }
+      : {
+          level: 'platform' as const,
+          tenantId: null,
+          minSample: scope.minSample ?? null,
+        };
+  }
+
+  /** `true` si el grupo es demasiado pequeño para mostrarse en alcance plataforma. */
+  private tooSmall(scope: AnalyticsScope, sample: number | undefined): boolean {
+    return (
+      scope.tenantId === undefined &&
+      scope.minSample !== undefined &&
+      (sample ?? 0) < scope.minSample
+    );
+  }
+
+  private suppressedNote(scope: AnalyticsScope, what: string, n: number) {
+    return n > 0
+      ? [
+          {
+            metric: 'minSample',
+            reason: `${n} ${what} con menos de ${scope.minSample} sujetos se suprimieron (alcance plataforma: agregado entre organizaciones).`,
+          },
+        ]
+      : [];
   }
 
   private windowView(scope: AnalyticsScope, query: WindowQuery) {
@@ -129,50 +168,84 @@ export class TelemetryAnalyticsService {
     };
   }
 
-  async overview(query: WindowQuery, tenantId: string) {
+  async overview(query: WindowQuery, tenantId: string | AnalyticsActorScope) {
     const scope = this.scope(query, tenantId);
     const { totals, topRoutes, topEvents } = await this.repo.overview(scope);
+    const keepRoutes = topRoutes.filter((r) => !this.tooSmall(scope, r.sample));
+    const keepEvents = topEvents.filter((r) => !this.tooSmall(scope, r.sample));
+    const totalsHidden = this.tooSmall(scope, totals?.sample);
     return {
       window: this.windowView(scope, query),
-      totals: {
-        events: totals?.events ?? 0,
-        sessions: totals?.sessions ?? 0,
-        pseudonymousSubjects: totals?.subjects ?? 0,
-        pageViews: totals?.page_views ?? 0,
-        lastEventAt: iso(totals?.last_event_at),
-      },
+      scope: this.scopeView(scope),
+      totals: totalsHidden
+        ? null
+        : {
+            events: totals?.events ?? 0,
+            sessions: totals?.sessions ?? 0,
+            pseudonymousSubjects: totals?.subjects ?? 0,
+            pageViews: totals?.page_views ?? 0,
+            lastEventAt: iso(totals?.last_event_at),
+          },
       definitions: {
         sessions: 'session_id distintos con al menos un evento en la ventana',
         pseudonymousSubjects:
           'analytics_subject_id distintos: sujetos seudónimos con consentimiento, no usuarios únicos',
-        pageViews: 'eventos con event_name = page_view',
+        pageViews:
+          "eventos con event_name = 'pagina_vista' (o el histórico 'page_view')",
       },
-      topRoutes,
-      topEvents: topEvents.map((row) => ({
+      topRoutes: keepRoutes.map(({ sample: _sample, ...row }) => row),
+      topEvents: keepEvents.map((row) => ({
         eventName: row.event_name,
         events: row.events,
         sessions: row.sessions,
       })),
+      notMeasured: [
+        ...(totalsHidden
+          ? [
+              {
+                metric: 'totals',
+                reason: `Menos de ${scope.minSample} sujetos en toda la ventana: el total se suprime (alcance plataforma).`,
+              },
+            ]
+          : []),
+        ...this.suppressedNote(
+          scope,
+          'ruta(s) o evento(s)',
+          topRoutes.length -
+            keepRoutes.length +
+            (topEvents.length - keepEvents.length),
+        ),
+      ],
     };
   }
 
-  async timeseries(query: WindowQuery, tenantId: string) {
+  async timeseries(query: WindowQuery, tenantId: string | AnalyticsActorScope) {
     const scope = this.scope(query, tenantId);
     const rows = await this.repo.timeseries(scope);
     return {
       window: this.windowView(scope, query),
+      scope: this.scopeView(scope),
       points: rows.map((row) => ({
         bucket: iso(row.bucket),
-        events: Number(row.events),
-        sessions: Number(row.sessions),
+        events: this.tooSmall(scope, Number(row.sample))
+          ? null
+          : Number(row.events),
+        sessions: this.tooSmall(scope, Number(row.sample))
+          ? null
+          : Number(row.sessions),
       })),
+      notMeasured: this.suppressedNote(
+        scope,
+        'cubo(s) de la serie',
+        rows.filter((r) => this.tooSmall(scope, Number(r.sample))).length,
+      ),
       note: 'Las sesiones por cubo no se suman: una sesión que cruza dos cubos cuenta en ambos.',
     };
   }
 
   async webVitals(
     query: WindowQuery & { route?: string; metric?: VitalMetric },
-    tenantId: string,
+    tenantId: string | AnalyticsActorScope,
   ) {
     const scope = this.scope(query, tenantId);
     const { percentiles, ratings } = await this.repo.webVitals(
@@ -180,7 +253,12 @@ export class TelemetryAnalyticsService {
       query.route,
     );
     const ratingByMetric = new Map<string, Record<string, number>>();
+    const hiddenRatings = new Set<string>();
     for (const row of ratings) {
+      if (this.tooSmall(scope, row.subjects)) {
+        hiddenRatings.add(row.metric_concept_id);
+        continue;
+      }
       const bucket = ratingByMetric.get(row.metric_concept_id) ?? {};
       bucket[code(row.rating_concept_id)] = row.n;
       ratingByMetric.set(row.metric_concept_id, bucket);
@@ -190,7 +268,13 @@ export class TelemetryAnalyticsService {
       : null;
     return {
       window: this.windowView(scope, query),
+      scope: this.scopeView(scope),
       route: query.route ?? null,
+      notMeasured: this.suppressedNote(
+        scope,
+        'métrica(s) de web vitals',
+        percentiles.filter((r) => this.tooSmall(scope, r.subjects)).length,
+      ),
       method:
         'percentile_cont sobre todas las muestras de la ventana (no promedio de percentiles)',
       metrics: percentiles.map((row) => {
@@ -198,11 +282,15 @@ export class TelemetryAnalyticsService {
         return {
           metric,
           unit: METRIC_UNIT[metric] ?? null,
-          samples: row.samples,
-          p50: num(row.p50),
-          p75: num(row.p75),
-          p95: num(row.p95),
-          ratings: ratingByMetric.get(row.metric_concept_id) ?? {},
+          samples: this.tooSmall(scope, row.subjects) ? null : row.samples,
+          p50: this.tooSmall(scope, row.subjects) ? null : num(row.p50),
+          p75: this.tooSmall(scope, row.subjects) ? null : num(row.p75),
+          p95: this.tooSmall(scope, row.subjects) ? null : num(row.p95),
+          ratings:
+            hiddenRatings.has(row.metric_concept_id) ||
+            this.tooSmall(scope, row.subjects)
+              ? null
+              : (ratingByMetric.get(row.metric_concept_id) ?? {}),
           deprecated:
             metric === 'FID' ? 'Sustituida por INP en Core Web Vitals' : null,
         };
@@ -213,8 +301,8 @@ export class TelemetryAnalyticsService {
             unit: METRIC_UNIT[query.metric!],
             routes: byRoute.map((row) => ({
               route: row.route,
-              samples: row.samples,
-              p75: num(row.p75),
+              samples: this.tooSmall(scope, row.subjects) ? null : row.samples,
+              p75: this.tooSmall(scope, row.subjects) ? null : num(row.p75),
             })),
           }
         : null,
@@ -359,6 +447,11 @@ export class TelemetryAnalyticsService {
     };
   }
 
+  /**
+   * Sólo por organización: sus conteos (eventos, contextos, bots) no pasan por
+   * `minSample`, así que no hay alcance plataforma (un actor de plataforma indica
+   * `X-Tenant-Id`).
+   */
   async pipelineHealth(query: WindowQuery, tenantId: string) {
     const scope = this.scope(query, tenantId);
     const { ingest, clients } = await this.repo.pipelineHealth(scope);
@@ -409,12 +502,18 @@ export class TelemetryAnalyticsService {
    * los contextos de cliente. Los bots se cuentan aparte; una etiqueta sólo se
    * muestra si hay concepto que la respalde, si no, `label = code`.
    */
-  async devices(query: WindowQuery, tenantId: string) {
+  async devices(query: WindowQuery, tenantId: string | AnalyticsActorScope) {
     const scope = this.scope(query, tenantId);
     const result = await this.repo.devices(scope);
     const botUnknown = result.totals?.bot_unknown ?? 0;
+    let hidden = 0;
     const view = (rows: readonly DeviceBreakdownRow[]) =>
       [...rows]
+        .filter((row) => {
+          const small = this.tooSmall(scope, row.sample);
+          if (small) hidden += 1;
+          return !small;
+        })
         .map((row) => ({
           code: row.code,
           label: row.label || row.code,
@@ -427,18 +526,24 @@ export class TelemetryAnalyticsService {
             b.contexts - a.contexts ||
             (a.code < b.code ? -1 : a.code > b.code ? 1 : 0),
         );
+    const byDeviceType = view(result.byDeviceType);
+    const byOsFamily = view(result.byOsFamily);
+    const byBrowserFamily = view(result.byBrowserFamily);
+    const byAppVersion = view(result.byAppVersion);
     return {
       window: this.windowView(scope, query),
+      scope: this.scopeView(scope),
       totals: {
         contexts: result.totals?.contexts ?? 0,
         bots: result.totals?.bots ?? 0,
       },
-      byDeviceType: view(result.byDeviceType),
-      byOsFamily: view(result.byOsFamily),
-      byBrowserFamily: view(result.byBrowserFamily),
-      byAppVersion: view(result.byAppVersion),
+      byDeviceType,
+      byOsFamily,
+      byBrowserFamily,
+      byAppVersion,
       lastContextAt: iso(result.totals?.last_context_at),
       notMeasured: [
+        ...this.suppressedNote(scope, 'grupo(s) de dispositivo', hidden),
         {
           metric: 'trackingConsent',
           reason:

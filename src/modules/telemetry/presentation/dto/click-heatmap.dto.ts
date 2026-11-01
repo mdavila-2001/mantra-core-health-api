@@ -1,7 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsIn,
+  IsInt,
   IsISO8601,
+  Max,
+  Min,
   IsOptional,
   IsString,
   MaxLength,
@@ -15,6 +19,10 @@ import {
 /** Segmentos de pantalla que el cliente manda en `tamano_pantalla`. */
 export const SCREEN_SIZES = ['movil', 'tableta', 'escritorio'] as const;
 export type ScreenSize = (typeof SCREEN_SIZES)[number];
+
+/** Magnitudes que repinta el mapa (mismo matiz; no se mezclan en un solo mapa). */
+export const HEATMAP_METRICS = ['clicks', 'rage', 'dead', 'scroll'] as const;
+export type HeatmapMetric = (typeof HEATMAP_METRICS)[number];
 
 /** Query de `GET /admin/analytics/heatmap`. `route` es obligatoria: un mapa es de UNA pantalla. */
 export class ClickHeatmapQueryDto {
@@ -58,4 +66,27 @@ export class ClickHeatmapQueryDto {
   @IsOptional()
   @IsIn(SCREEN_SIZES)
   screenSize?: ScreenSize;
+
+  @ApiPropertyOptional({
+    enum: HEATMAP_METRICS,
+    default: 'clicks',
+    description:
+      'clicks: todos los clics posicionados; rage: clics repetidos; dead: clics sobre algo interactivo sin efecto; scroll: profundidad de lectura (sin celdas).',
+  })
+  @IsOptional()
+  @IsIn(HEATMAP_METRICS)
+  metric?: HeatmapMetric;
+
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: 1000,
+    description:
+      'Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de personas por celda/elemento; nunca baja del piso del servidor.',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  minSample?: number;
 }

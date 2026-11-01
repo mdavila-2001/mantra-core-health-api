@@ -1,5 +1,5 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
-import { CurrentUser, type AuthenticatedUser } from '../../../../common';
+import { CurrentUser, type AuthenticatedUser, Roles } from '../../../../common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -29,6 +29,8 @@ import {
  * Las escrituras del catálogo siguen en `InsuranceBackboneController` y siguen
  * siendo administrativas: esto añade la cara de lectura que faltaba, no
  * relaja la de escritura.
+ *
+ * `@Roles()` vacío en cada ruta (O3-3) deja escrita esa decisión.
  */
 @ApiTags('insurance-read')
 @ApiBearerAuth()
@@ -47,6 +49,7 @@ export class InsuranceReadController {
    * @returns Listado con el volumen de catálogo de cada una.
    */
   @Get('insurance-carriers')
+  @Roles()
   @ApiOperation({ summary: 'Listar las aseguradoras del tenant activo' })
   @ApiOkResponse({ type: CarrierDirectoryResponseDto })
   listCarriers(
@@ -62,6 +65,7 @@ export class InsuranceReadController {
    * @returns Productos con sus planes y beneficios, y las redes activas.
    */
   @Get('insurance-carriers/:id')
+  @Roles()
   @ApiOperation({
     summary: 'Consultar el catálogo y la red de una aseguradora',
   })
@@ -79,6 +83,7 @@ export class InsuranceReadController {
    * @returns Listado con su situación de vinculación vigente.
    */
   @Get('insurance-brokers')
+  @Roles()
   @ApiOperation({ summary: 'Listar los brokers del tenant activo' })
   @ApiOkResponse({ type: BrokerDirectoryResponseDto })
   listBrokers(): Promise<BrokerDirectoryResponseDto> {
@@ -92,6 +97,7 @@ export class InsuranceReadController {
    * @returns Perfil y acuerdos, marcando cuáles siguen vigentes.
    */
   @Get('insurance-brokers/:id')
+  @Roles()
   @ApiOperation({
     summary: 'Consultar el perfil y las vinculaciones de un broker',
   })
@@ -110,6 +116,7 @@ export class InsuranceReadController {
    * @returns Relaciones broker–cliente.
    */
   @Get('insurance-brokers/:id/clients')
+  @Roles()
   @ApiOperation({
     summary: 'Listar la cartera comercial de un broker (sin datos clínicos)',
   })

@@ -3,7 +3,6 @@ import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
-  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -14,6 +13,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsStrictBoolean } from '../../../common/validators/strict-boolean.validator';
 import { CATALOG_STATUSES, IsCatalogMoney } from './catalog-fields.dto';
 import {
   CATEGORY_NAME_MAX,
@@ -105,8 +105,27 @@ export class UpdateProductDto {
     type: Boolean,
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   requiresPrescription?: boolean | null;
+
+  /**
+   * Medicamento con que se receta (el concepto elegido del catálogo
+   * `medication`, el mismo que usa la receta); `null` lo desvincula. Es lo que
+   * cruza el producto con una receta compartida. Un concepto que no está en ese
+   * catálogo es 422 `MEDICATION_NOT_IN_CATALOG`. En un producto del catálogo
+   * universal sólo completa el que falta: el que trajo el registro oficial no
+   * se cambia (400).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Medicamento del catálogo `medication` con que se receta; `null` lo desvincula. Fuera de ese catálogo es 422.',
+    format: 'uuid',
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID()
+  medicationConceptId?: string | null;
 
   /*
    * P47 §3-5 · lo que administra la propia farmacia. Valen también para un
@@ -157,7 +176,7 @@ export class UpdateProductDto {
       '`false` = «no lo tengo»; `true` vuelve a tenerlo (si el conteo estaba en 0 queda «sin conteo»). Junto con `stock` es 422.',
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   inStock?: boolean;
 
   /** Publicado, borrador o retirado. */

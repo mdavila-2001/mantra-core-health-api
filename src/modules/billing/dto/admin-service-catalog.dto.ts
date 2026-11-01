@@ -262,3 +262,48 @@ export class AdminServicePageDto {
   @ApiProperty({ nullable: true, type: String })
   nextCursor!: string | null;
 }
+
+/** Un tipo de organización con el que se filtra el editor de servicios. */
+export class AdminServiceScopeTypeDto {
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  @ApiProperty()
+  code!: string;
+
+  @ApiProperty()
+  display!: string;
+}
+
+/** Una práctica activa de la organización del actor. */
+export class AdminServiceScopePracticeDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty()
+  name!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  typeConceptId!: string;
+}
+
+/** Una moneda admitida en el catálogo de servicios. */
+export class AdminServiceScopeCurrencyDto {
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  @ApiProperty()
+  code!: string;
+}
+
+/** Respuesta de `GET /admin/catalogs/services/scopes`: con qué se arma el editor. */
+export class AdminServiceScopesDto {
+  @ApiProperty({ type: [AdminServiceScopeTypeDto] })
+  types!: AdminServiceScopeTypeDto[];
+
+  @ApiProperty({ type: [AdminServiceScopePracticeDto] })
+  practices!: AdminServiceScopePracticeDto[];
+
+  @ApiProperty({ type: [AdminServiceScopeCurrencyDto] })
+  currencies!: AdminServiceScopeCurrencyDto[];
+}

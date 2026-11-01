@@ -77,4 +77,20 @@ export class AvailabilityExceptions {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a source kind concept.
+   */
+  @Property({
+    fieldName: 'source_kind_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  sourceKindConceptId?: string;
+
+  /**
+   * Identificador asociado a source ref.
+   */
+  @Property({ fieldName: 'source_ref_id', type: 'uuid', nullable: true })
+  sourceRefId?: string;
 }

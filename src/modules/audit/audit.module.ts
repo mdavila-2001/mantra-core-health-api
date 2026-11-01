@@ -14,6 +14,7 @@ import {
   AuditEventsService,
   AuditHistoryService,
   AuditQueryService,
+  AuditOversightReadService,
   AuditTrailService,
   ComplianceService,
   ModerationService,
@@ -23,6 +24,7 @@ import {
 import {
   AuditLogRepository,
   AuditQueryRepository,
+  AuditOversightReadRepository,
   DataAccessLogRepository,
   AnalyticsGovernanceLogRepository,
   DsarRequestsRepository,
@@ -62,6 +64,7 @@ import {
     // Repositorios
     AuditLogRepository,
     AuditQueryRepository,
+    AuditOversightReadRepository,
     DataAccessLogRepository,
     AnalyticsGovernanceLogRepository,
     DsarRequestsRepository,
@@ -75,6 +78,7 @@ import {
     AuditEventsService,
     AuditHistoryService,
     AuditQueryService,
+    AuditOversightReadService,
     AuditTrailService,
     ComplianceService,
     ModerationService,

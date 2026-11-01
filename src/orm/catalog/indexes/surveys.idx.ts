@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `surveys`.
- * 23 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 26 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const surveysIndexes: readonly IndexTuple[] = [
@@ -13,6 +13,9 @@ export const surveysIndexes: readonly IndexTuple[] = [
   ['survey_assignments', 'ix_survey_assignments_tenant_target', ['tenant_id', 'target_id', 'active'], false, 'btree'],
   ['survey_assignments', 'ix_survey_assignments_version', ['survey_version_id'], false, 'btree'],
   ['survey_assignments', 'uq_survey_assignments_active_target', ['survey_version_id', 'target_type_concept_id', 'target_id'], true, 'btree', 'active = true'],
+  ['survey_invitation_reminders', 'uq_survey_invitation_reminders_number', ['survey_invitation_id', 'reminder_number'], true, 'btree'],
+  ['survey_invitation_reminders', 'ix_survey_invitation_reminders_channel_concept_id', ['channel_concept_id'], false, 'btree'],
+  ['survey_invitation_reminders', 'ix_survey_invitation_reminders_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['survey_invitations', 'ix_survey_invitations_patient_issued', ['patient_profile_id', 'issued_at desc'], false, 'btree'],
   ['survey_invitations', 'ix_survey_invitations_booking', ['appointment_booking_id'], false, 'btree'],
   ['survey_invitations', 'ix_survey_invitations_version', ['survey_version_id'], false, 'btree'],

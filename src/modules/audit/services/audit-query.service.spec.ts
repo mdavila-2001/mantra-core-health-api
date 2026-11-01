@@ -92,6 +92,14 @@ describe('AuditQueryService.log', () => {
     expect(filtro.matcher).toBeUndefined();
   });
 
+  it('con sólo `to`, la ventana por omisión termina en `to` (no en ahora)', async () => {
+    const { service, repo } = armar();
+    await service.log({ to: '2026-08-01T00:00:00.000Z' }, AHORA);
+    const filtro = repo.auditLog.mock.calls[0][1];
+    expect(filtro.from.toISOString()).toBe('2026-07-02T00:00:00.000Z');
+    expect(filtro.to.toISOString()).toBe('2026-08-01T00:00:00.000Z');
+  });
+
   it('traduce el resultado a su concepto y pasa actor, tenant, acción y entidad', async () => {
     const { service, repo } = armar();
     await service.log(
@@ -254,14 +262,14 @@ describe('AuditQueryService.log', () => {
         {
           cursor: encodeKeysetCursor({
             t: '2026-10-24T10:00:00.000000Z',
-            i: 'a9',
+            i: '00000000-0000-4000-8000-0000000000a9',
           }),
         },
         AHORA,
       );
       expect(repo.auditLog.mock.calls[0][1].cursor).toEqual({
         t: '2026-10-24T10:00:00.000000Z',
-        i: 'a9',
+        i: '00000000-0000-4000-8000-0000000000a9',
       });
     });
   });

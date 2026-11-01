@@ -11,6 +11,7 @@ import {
   Audited,
   CurrentUser,
   type AuthenticatedUser,
+  Roles,
 } from '../../../../common';
 import { PrimaryPractitionerService } from '../../application/services/primary-practitioner.service';
 import {
@@ -25,7 +26,7 @@ import {
  *
  * Todas las rutas son `me`: el paciente y el profesional salen de la sesión,
  * nunca de la URL, así que nadie puede elegir por otro ni leer la lista de
- * otro profesional. **Sin `@Roles`**, como el resto de las rutas `me` del
+ * otro profesional. **`@Roles()` vacío** —sin rol global—, como el resto de las rutas `me` del
  * módulo: el filtro real es tener perfil de paciente o profesional, que el
  * servicio comprueba y responde con 404 / 422.
  */
@@ -36,6 +37,7 @@ export class PrimaryPractitionerController {
   constructor(private readonly primary: PrimaryPractitionerService) {}
 
   @Get('patients/me/primary-practitioner')
+  @Roles()
   @AccessLogged({ resourceType: 'PRIMARY_PRACTITIONER', patient: 'actor' })
   @ApiOperation({ summary: 'Consultar el propio médico de cabecera' })
   @ApiOkResponse({ type: OwnPrimaryPractitionerDto })
@@ -50,6 +52,7 @@ export class PrimaryPractitionerController {
     entity: 'patient_primary_practitioner',
   })
   @Put('patients/me/primary-practitioner')
+  @Roles()
   @ApiOperation({
     summary: 'Elegir o cambiar el propio médico de cabecera',
     description:
@@ -69,6 +72,7 @@ export class PrimaryPractitionerController {
     entity: 'patient_primary_practitioner',
   })
   @Delete('patients/me/primary-practitioner')
+  @Roles()
   @ApiOperation({ summary: 'Quitar el propio médico de cabecera' })
   @ApiOkResponse({ type: OwnPrimaryPractitionerDto })
   removeOwn(
@@ -78,6 +82,7 @@ export class PrimaryPractitionerController {
   }
 
   @Get('practitioners/me/primary-patients')
+  @Roles()
   @AccessLogged({ resourceType: 'PRIMARY_PATIENT_LIST' })
   @ApiOperation({
     summary: 'Listar los pacientes que me eligieron como médico de cabecera',

@@ -5,6 +5,7 @@ import type {
   LoggerNamespace,
   LoggerOptions,
 } from '@mikro-orm/core';
+import { sqlSink } from '../../observability/capture/sql-sink';
 import { QueryMetrics } from './query-metrics';
 import {
   redactDriverMessage,
@@ -84,6 +85,15 @@ export class OrmLogger extends DefaultLogger {
     const isSlow = took >= this.slowQueryMs;
 
     this.metrics.record(context.query, took, isSlow);
+
+    // Captura persistida (módulo 70, `OBSERVABILITY_ENABLED`). MikroORM invoca
+    // `logQuery` en cada consulta con `took`, esté o no el modo debug; una prueba
+    // lo fija. El sink acota el SQL a su forma normalizada y nunca lanza.
+    sqlSink.record(context.query, took, {
+      slow: isSlow,
+      failed: context.level === 'error',
+      rows: context.results ?? context.affected,
+    });
 
     if (isSlow) {
       // Se registra siempre, aunque el modo debug esté apagado: una consulta

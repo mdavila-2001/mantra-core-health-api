@@ -7,6 +7,11 @@
  */
 export enum PharmacyInventoryErrorReason {
   /**
+   * Una fila de la carga por sucursal nombra un código que el catálogo de la
+   * farmacia no tiene. Misma clave que la carga del catálogo de `pharmacy`.
+   */
+  PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
+  /**
    * La farmacia, sede, ubicación, producto, lote, proveedor, orden, reserva,
    * dispensación, conteo, recall, paciente o receta no existe o no pertenece
    * al ámbito del actor. Ambos casos responden igual a propósito.
@@ -29,6 +34,12 @@ export enum PharmacyInventoryErrorReason {
    * entregado − reservado), cuando la unidad recetada es comparable.
    */
   QUANTITY_EXCEEDS_PRESCRIPTION = 'QUANTITY_EXCEEDS_PRESCRIPTION',
+  /**
+   * Lo pedido de un fármaco sin saldo comparable ya se pidió: cada ítem de la
+   * receta de ese fármaco tiene una entrega o un pedido vivo. Un pedido
+   * cancelado, rechazado o vencido no cuenta. El estado clínico no cambia.
+   */
+  PRESCRIPTION_ITEM_ALREADY_ORDERED = 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
   /** Un pedido sin receta trae un producto de receta obligatoria. */
   PRESCRIPTION_REQUIRED = 'PRESCRIPTION_REQUIRED',
   /**
@@ -75,4 +86,23 @@ export enum PharmacyInventoryErrorReason {
   PHARMACY_INTEGRATION_UNAVAILABLE = 'PHARMACY_INTEGRATION_UNAVAILABLE',
   /** La conexión no está activa o no admite consultar stock. */
   PHARMACY_INTEGRATION_CONNECTION_INACTIVE = 'PHARMACY_INTEGRATION_CONNECTION_INACTIVE',
+  /**
+   * La dirección del sistema de la farmacia no es http(s) válida o no está en la
+   * lista de hosts permitidos (`PHARMACY_EXTERNAL_ALLOWED_HOSTS`): no se llama.
+   */
+  PHARMACY_INTEGRATION_HOST_NOT_ALLOWED = 'PHARMACY_INTEGRATION_HOST_NOT_ALLOWED',
+  /** La dirección no es una URL http(s) válida (sin usuario, sin consulta). */
+  PHARMACY_INTEGRATION_URL_INVALID = 'PHARMACY_INTEGRATION_URL_INVALID',
+  /** F5c: el espacio o la unidad no son de la sede de práctica de la sede de farmacia. */
+  STOCK_POINT_SITE_MISMATCH = 'STOCK_POINT_SITE_MISMATCH',
+  /** F5c: la función del espacio no tiene perfil `stockPoint` o el espacio no está activo. */
+  SPACE_NOT_STOCK_POINT = 'SPACE_NOT_STOCK_POINT',
+  /** F5c: un botiquín (`WARD_STOCK`) exige su unidad clínica. */
+  WARD_STOCK_REQUIRES_UNIT = 'WARD_STOCK_REQUIRES_UNIT',
+  /** F5c: la unidad ya tiene un botiquín activo. */
+  WARD_STOCK_ALREADY_EXISTS = 'WARD_STOCK_ALREADY_EXISTS',
+  /** F5c: retiro o dispensa desde un botiquín sin `available_quantity` suficiente. */
+  INSUFFICIENT_AVAILABLE_STOCK = 'INSUFFICIENT_AVAILABLE_STOCK',
+  /** F5c: la reserva indicada para dispensar desde un botiquín no está confirmada o venció. */
+  RESERVATION_NOT_ACTIVE = 'RESERVATION_NOT_ACTIVE',
 }

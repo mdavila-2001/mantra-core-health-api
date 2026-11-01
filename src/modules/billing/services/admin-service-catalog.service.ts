@@ -15,6 +15,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../../practice/practice.concepts';
+import { CatalogConcepts } from '../../terminology/entities';
 import { PracticesRepository } from '../../practice/repositories';
 import { BillingErrorReason } from '../billing.error-reasons';
 import {
@@ -23,6 +24,7 @@ import {
   type AdminListServicesQueryDto,
   type AdminServiceItemDto,
   type AdminServicePageDto,
+  type AdminServiceScopesDto,
   type AdminUpdateServiceDto,
 } from '../dto/admin-service-catalog.dto';
 import { ServiceCatalogRepository } from '../repositories';
@@ -80,6 +82,40 @@ export class AdminServiceCatalogService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AdminServiceCatalogService.name);
+  }
+
+  /**
+   * Tipos de organización, prácticas activas y monedas con las que se arma el
+   * editor. Sólo de la organización del token (`requireTenantId()`).
+   */
+  async scopes(): Promise<AdminServiceScopesDto> {
+    const tenantId = requireTenantId();
+    const em = this.em.fork();
+    const practices = await this.practices.findByTenant(
+      em,
+      tenantId,
+      PRAC.PRACTICE_ACTIVE,
+    );
+    const typeIds = [...new Set(practices.map((p) => p.typeConceptId))];
+    const concepts =
+      typeIds.length === 0
+        ? []
+        : await em.find(CatalogConcepts, { id: { $in: typeIds } });
+    return {
+      types: concepts
+        .map((c) => ({ conceptId: c.id, code: c.code, display: c.display }))
+        .sort((a, b) => a.display.localeCompare(b.display)),
+      practices: practices
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          typeConceptId: p.typeConceptId,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      currencies: Object.entries(CURRENCY_CODE_BY_CONCEPT).map(
+        ([conceptId, code]) => ({ conceptId, code }),
+      ),
+    };
   }
 
   /** Página de servicios de las prácticas activas de la organización del actor. */

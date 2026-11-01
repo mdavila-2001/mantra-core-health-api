@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1665,
+    "total": 1925,
     "porOrigen": {
-      "CONTRATO": 1655,
-      "CONTRATO_AUSENTE": 10
+      "CONTRATO": 1839,
+      "CONTRATO_AUSENTE": 86
     },
     "porRiesgo": {
-      "BAJO": 547,
-      "MEDIO": 904,
-      "ALTO": 214
+      "BAJO": 718,
+      "MEDIO": 938,
+      "ALTO": 269
     },
-    "conTablas": 1598,
-    "sinTablasSinDeterminar": 0,
-    "sinExplicacionDeNegocio": 0,
-    "conPruebas": 961,
-    "conRequerimientos": 1665
+    "conTablas": 1842,
+    "sinTablasSinDeterminar": 15,
+    "sinExplicacionDeNegocio": 20,
+    "conPruebas": 1047,
+    "conRequerimientos": 1925
   },
   "endpoints": [
     {
@@ -188,6 +188,38 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AccountingSpaceController_listCostCenters",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/cost-centers",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Centros de costo con su unidad (F5f)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingSpaceController_linkUnit",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/accounting/cost-centers/{id}/unit-link",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Ligar un centro de costo a una unidad (F5f)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AccountingAssetController_runDepreciation",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -338,6 +370,38 @@
       ],
       "tablas": 5,
       "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingSpaceController_listItems",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/infrastructure-items",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Activos de infraestructura con su espacio (F5f)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingSpaceController_locateItem",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/accounting/infrastructure-items/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Ubicar un activo en un espacio (F5f)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
@@ -1793,6 +1857,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AuditQueryController_dataAccessSummary",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/audit/data-access/summary",
+      "modulo": "audit",
+      "bloque": "Auditoría y Reporting",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...AUDIT_SUMMARY_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AuditController_recordEvent",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -1862,6 +1944,26 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuditQueryController_filterCatalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/audit/log/filter-catalog",
+      "modulo": "audit",
+      "bloque": "Auditoría y Reporting",
+      "nombre": "Filtros que acepta la bitácora, sus límites y lo que no se puede consultar",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "AUDITOR",
+        "DPO",
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -1957,6 +2059,26 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PrivacyController_listDsar",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/privacy/dsar",
+      "modulo": "audit",
+      "bloque": "Auditoría y Reporting",
+      "nombre": "Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares).",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "AUDITOR",
+        "DPO",
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PrivacyController_createDsar",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -1972,6 +2094,26 @@
       "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PrivacyController_getDsar",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/privacy/dsar/{id}",
+      "modulo": "audit",
+      "bloque": "Auditoría y Reporting",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "AUDITOR",
+        "DPO",
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -2213,6 +2355,42 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AuthzGovernanceController_reviews",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/access-reviews",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Historia de revisiones de accesos, paginada",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceController_dueReviews",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/access-reviews/due",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Cuentas con acceso administrativo sin revisión reciente",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AuthzCareRelationshipsController_listCareRelationships",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -2245,7 +2423,7 @@
         "CLINICIAN",
         "SECURITY_ADMIN"
       ],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -2322,6 +2500,24 @@
       "tablas": 1,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzModulesCatalogController_modules",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/authz/catalog/modules",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -2410,7 +2606,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -2501,7 +2697,7 @@
         "CLINICAL_APPROVER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 1,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -2520,7 +2716,7 @@
         "CLINICAL_APPROVER",
         "SECURITY_ADMIN"
       ],
-      "tablas": 11,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -2598,6 +2794,42 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AuthzGovernanceController_holders",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/permissions/{permissionId}/holders",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Quiénes tienen un permiso, con el camino por el que lo tienen",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceExtController_scopeGrants",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/authz/resource-scope-grants",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AuthzGrantsController_grantResourceScope",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -2613,6 +2845,24 @@
       "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceExtController_endScopeGrant",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "DELETE",
+      "ruta": "/authz/resource-scope-grants/{grantId}",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": null,
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -2649,6 +2899,24 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceExtController_fieldPermissions",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/authz/roles/{roleId}/field-permissions",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -2706,6 +2974,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AuthzGovernanceController_simulate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/authz/simulations",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Simular una decisión de acceso con el PDP real",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AuthzPoliciesController_create",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -2724,6 +3010,60 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AuthzGovernanceController_accessMap",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/users/{userId}/access-map",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "«Quién puede qué» de un usuario: roles, conteos y última revisión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceController_recordReview",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/authz/users/{userId}/access-reviews",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Registrar que revisaste los accesos de una cuenta",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceController_directGrants",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/users/{userId}/permission-grants",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Excepciones de permiso por usuario, paginadas",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AuthzGrantsController_grantPermission",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -2739,6 +3079,42 @@
       "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceController_scopeGrants",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/users/{userId}/resource-scope-grants",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Grants sobre un recurso concreto cuyo sujeto es el usuario, paginados",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AuthzGovernanceController_restrictedFields",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/authz/users/{userId}/restricted-fields",
+      "modulo": "authz",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Campos restringidos que alcanzan al usuario por sus roles efectivos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -3126,6 +3502,148 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AdminServiceCatalogController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalogs/services",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Listar servicios de la organización, filtrable por tipo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminServiceCatalogController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/catalogs/services",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Crear un servicio (idempotente por práctica y código)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminServiceCatalogController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalogs/services/{id}",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Ver un servicio con su versión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminServiceCatalogController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/admin/catalogs/services/{id}",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Editar un servicio con precondición de versión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminServiceCatalogController_deactivate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/catalogs/services/{id}/deactivate",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Desactivar un servicio (no se borra)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminServiceCatalogController_reactivate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/catalogs/services/{id}/reactivate",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Reactivar un servicio desactivado",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminServiceCatalogController_scopes",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/catalogs/services/scopes",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_stays",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/bed-day/stays",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Estancias de internación de una sede (F5e)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "BillingPayablesController_registerBill",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -3141,6 +3659,22 @@
       "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_void",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/charge-captures/{id}/void",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Anular un cargo devengado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -3175,6 +3709,38 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_run",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/encounters/{encounterId}/bed-day-charges/run",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Devengar los días-cama de un encuentro",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 1,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_pending",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/encounters/{encounterId}/pending-charges",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Cargos devengados pendientes",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3229,9 +3795,9 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 5,
-      "eventos": 0,
-      "pruebas": 1,
+      "tablas": 9,
+      "eventos": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -3629,8 +4195,8 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 18,
-      "eventos": 0,
+      "tablas": 22,
+      "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
@@ -3763,6 +4329,73 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "BillingSpaceChargesController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/space-tariffs",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Tarifas de espacios",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/space-tariffs",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Crear una tarifa de espacio",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_close",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/space-tariffs/{id}/close",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Cerrar la vigencia de una tarifa",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingSpaceChargesController_runInternal",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/internal/billing/bed-day-charges/run",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Devengar día-cama y quirófano (worker)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM",
+        "SYSTEM_WORKER"
+      ],
+      "tablas": 19,
+      "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PatientSpendingController_listMine",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -3778,6 +4411,139 @@
       "tablas": 11,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/bulk-imports",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Lotes de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/bulk-imports",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/bulk-imports/{id}",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Estado, vista previa y avance de un lote",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_confirm",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/bulk-imports/{id}/confirm",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Confirma un lote VALIDADO y lo encola (idempotente por Idempotency-Key)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_report",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/bulk-imports/{id}/report",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Informe de un lote: creados, omitidos y rechazados con su motivo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_catalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/bulk-imports/templates",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Catálogo de plantillas, topes y estado declarado del motor",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BulkImportController_template",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/bulk-imports/templates/{kind}",
+      "modulo": "bulk_import",
+      "bloque": null,
+      "nombre": "Descarga la plantilla de un tipo de carga en CSV o JSON",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4206,6 +4972,38 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalCensusController_adjust",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/census-days/{id}/adjustments",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Ajustar un día de censo cerrado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_admit",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/admissions",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Internar a un paciente",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 29,
+      "eventos": 1,
+      "pruebas": 4,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalRecordsController_createAllergy",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -4261,6 +5059,38 @@
       "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_prospectiveCompatibility",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/bed-compatibility",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Compatibilidad prospectiva de una cama con un paciente",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_swap",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/bed-swaps",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Intercambiar camas entre dos pacientes",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 21,
+      "eventos": 1,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4397,6 +5227,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalAdtController_cancelLocation",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/encounter-locations/{id}/cancel",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Anular una reserva o un traslado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 1,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalEncountersController_listEncounterAttachments",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -4436,6 +5282,38 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalAdtController_assignBed",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/encounters/{id}/bed-assignment",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Asignar o reservar cama",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 21,
+      "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_compatibility",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/encounters/{id}/bed-compatibility",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Compatibilidad de una cama con el encuentro",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalEncountersController_close",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -4455,6 +5333,54 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalAdtController_discharge",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/encounters/{id}/discharge",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Dar de alta (egreso)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 26,
+      "eventos": 1,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_stay",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical/encounters/{id}/stay",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Ficha de internación",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 28,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_transfer",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/encounters/{id}/transfer",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Trasladar de cama",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 21,
+      "eventos": 1,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalEncountersController_checkIn",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -4468,7 +5394,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 29,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 8,
       "revision": "AUTO_DETECTADA"
@@ -4791,6 +5717,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalAdtController_currentStay",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical/patients/{id}/inpatient-stay",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Estancia de internación vigente del paciente",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 30,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalReadController_getReceivedServices",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -4828,6 +5770,22 @@
       "tablas": 9,
       "eventos": 0,
       "pruebas": 6,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_reviewIncident",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/clinical/placement-incidents/{id}",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Revisar un incidente de ubicación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 1,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4946,6 +5904,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalOrdersController_createRequisition",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical/requisitions",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Crear una requisición: varios estudios con su detalle, atómicos",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 37,
+      "eventos": 2,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalOrdersController_createServiceRequest",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -4959,9 +5936,28 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 29,
-      "eventos": 1,
+      "tablas": 36,
+      "eventos": 2,
       "pruebas": 6,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalOrdersController_getServiceRequest",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical/service-requests/{id}",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Leer una orden de servicio con su detalle",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 24,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4984,6 +5980,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalCensusController_tick",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/internal/clinical/census-close-tick",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cerrar los censos vencidos (worker)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM",
+        "SYSTEM_WORKER"
+      ],
+      "tablas": 15,
+      "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalPrescriptionsPublicController_verify",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -4997,6 +6012,86 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_attendingPractitioners",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/attending-practitioners",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Profesionales a cargo posibles en la sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalCensusController_view",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/census",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Censo de un día",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalCensusController_close",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/census/{date}/close",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cerrar el censo de un día",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 1,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalCensusController_indicators",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/inpatient-indicators",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Indicadores hospitalarios (OPS)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalAdtController_inpatients",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/inpatients",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Pacientes internados de una sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -5397,7 +6492,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 38,
+      "tablas": 40,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5417,6 +6512,25 @@
         "PRACTITIONER"
       ],
       "tablas": 21,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ReferralsController_recordArrival",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/referrals/{id}/arrival",
+      "modulo": "clinical_ext",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Registrar la llegada del paciente derivado",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5474,6 +6588,25 @@
         "PRACTITIONER"
       ],
       "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ReferralsController_updateTransfer",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/referrals/{id}/transfer",
+      "modulo": "clinical_ext",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Completar o corregir el traslado de una derivación",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -8851,13 +9984,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 2,
       "eventos": 0,
@@ -8895,6 +10022,24 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogFitController_latest",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/catalog/fit",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN",
         "GOVERNANCE_ADMIN",
@@ -8903,7 +10048,27 @@
         "AUDITOR",
         "DATA_STEWARD"
       ],
-      "tablas": 3,
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogFitController_run",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/catalog/fit/run",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DATA_STEWARD"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -8919,13 +10084,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 3,
       "eventos": 0,
@@ -8943,13 +10102,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 5,
       "eventos": 0,
@@ -8987,13 +10140,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 4,
       "eventos": 0,
@@ -9011,13 +10158,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 4,
       "eventos": 0,
@@ -9035,13 +10176,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 3,
       "eventos": 0,
@@ -9079,13 +10214,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 5,
       "eventos": 0,
@@ -9103,13 +10232,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 4,
       "eventos": 0,
@@ -9127,15 +10250,99 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogController_piiColumns",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalog/pii/columns",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": "Columnas clasificadas como datos personales, con su sensibilidad y estado de revisión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogController_piiReconciliation",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/catalog/pii/reconciliation",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogController_piiSummary",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalog/pii/summary",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": "Datos personales: cuántas columnas son personales según el catálogo y qué declaró el registro de gobierno",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogController_qualityIssues",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalog/quality/issues",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": "Incidencias de calidad del catálogo (derivadas al leer), paginadas",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminCatalogController_qualityRules",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalog/quality/rules",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": "Reglas de calidad del catálogo, con las incidencias abiertas de cada una",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9151,13 +10358,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 1,
       "eventos": 0,
@@ -9195,13 +10396,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 1,
       "eventos": 0,
@@ -9219,15 +10414,59 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceQueueController_jobs",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/jobs",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN",
         "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
         "DATA_PLATFORM_ADMIN",
         "DPO",
         "AUDITOR",
         "DATA_STEWARD"
       ],
-      "tablas": 2,
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceQueueController_reviewQueue",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/review-queue",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9243,13 +10482,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9267,13 +10500,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9291,13 +10518,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9315,13 +10536,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9339,13 +10554,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9363,13 +10572,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9387,13 +10590,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9411,13 +10608,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9435,13 +10626,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9459,13 +10644,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9483,13 +10662,43 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminPortalController_linajeAristas",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/portal/linaje/aristas",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": "Aristas del linaje (lee, escribe, borra, referencia, pertenece)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminPortalController_linajeNodos",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/portal/linaje/nodos",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": "Nodos del linaje (operaciones, tablas, dominios)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9507,13 +10716,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9531,13 +10734,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9555,13 +10752,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9579,13 +10770,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
       "eventos": 0,
@@ -9603,15 +10788,27 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN",
-        "PLATFORM_ADMIN",
-        "GOVERNANCE_ADMIN",
-        "DATA_PLATFORM_ADMIN",
-        "DPO",
-        "AUDITOR",
-        "DATA_STEWARD"
+        "...PORTAL_VIEW_ROLES"
       ],
       "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InternalCatalogFitController_run",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/internal/catalog/fit/run",
+      "modulo": "data_catalog",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9838,6 +11035,189 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_invite",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/practitioner/support-invitations",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Invitar a una secretaria a asistirme",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_team",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/practitioner/support-team",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mi equipo de apoyo (secretarias)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_end",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/practitioner/support-team/{id}/end",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Terminar el vínculo con una secretaria",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_access",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-access",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mi alcance: hospitales, doctores y pisos de mis vínculos activos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_agenda",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-agenda",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Agenda de un doctor asignado (403 si no hay vínculo activo)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_catalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-catalog",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Sedes, servicios, pisos y doctores de un hospital para pedir",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_mine",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-engagements",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mis vínculos de apoyo y mis solicitudes",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_confirm",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-engagements/{id}/confirm",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Aceptar una invitación de apoyo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_decline",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-engagements/{id}/decline",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Rechazar una invitación de apoyo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_leave",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-engagements/{id}/leave",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Dejar un vínculo o retirar mi pedido",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "OrgUserAssignmentsController_create",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -9852,7 +11232,103 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_orgCatalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-catalog",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Sedes, servicios, pisos y doctores para invitar",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_orgRequests",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-engagement-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Solicitudes e invitaciones de apoyo del hospital",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_decide",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/support-engagement-requests/{id}/decision",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Aceptar o rechazar una solicitud de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_orgEngagements",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-engagements",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Personal de apoyo del hospital",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_end",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/support-engagements/{id}/end",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Terminar un vínculo de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportStaffController_invite",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/team/invitations",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Invitar a una secretaria a lugares o doctores",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -9868,9 +11344,9 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 3,
-      "eventos": 0,
-      "pruebas": 1,
+      "tablas": 7,
+      "eventos": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -9889,6 +11365,25 @@
       "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_accept",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioner-delegates/{id}/accept",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Aceptar a una secretaria",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -9928,6 +11423,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_reject",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioner-delegates/{id}/reject",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Rechazar a una secretaria",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PractitionerDelegatesController_revoke",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -9962,6 +11476,40 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "SupportStaffController_request",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/support-engagement-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPPORT_STAFF"
+      ],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticEquipmentController_detail",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-equipment/{id}",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Detalle de un equipo con su sala (F5a)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "DiagnosticEquipmentController_updateEquipment",
       "origen": "CONTRATO",
       "metodo": "PATCH",
@@ -9969,14 +11517,44 @@
       "modulo": "diagnostic_units",
       "bloque": "Clínico y Diagnóstico",
       "nombre": "Actualizar estado/calibración de un equipo",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 4,
+      "roles": [],
+      "tablas": 14,
+      "eventos": 2,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticEquipmentController_mwlStation",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostic-equipment/{id}/mwl-station",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Estación MWL del equipo (F5a)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticEquipmentController_createResource",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostic-equipment/{id}/resource",
+      "modulo": "diagnostic_units",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Crear el recurso agendable del equipo (F5a)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 1,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10454,7 +12032,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -10686,7 +12264,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -10746,6 +12324,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "DiagnosticsReceptionController_getServiceRequest",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/diagnostics/service-requests/{id}",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Detalle de una orden dirigida al tenant activo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "DiagnosticsReceptionController_listInbox",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -10756,9 +12350,25 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 10,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "DiagnosticsReceptionController_listWorklist",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/diagnostics/service-requests/worklist",
+      "modulo": "diagnostics",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Bandeja del ejecutor: órdenes de laboratorio o imagen con estado derivado",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10772,9 +12382,9 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10836,9 +12446,9 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 1,
+      "tablas": 6,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -11045,7 +12655,7 @@
       "roles": [],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12663,6 +14273,123 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AdminDataQualityController_issues",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/data-quality/issues",
+      "modulo": "governance_admin",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminDataQualityController_issue",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/data-quality/issues/{id}",
+      "modulo": "governance_admin",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminDataQualityController_resolve",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/governance/data-quality/issues/{id}/resolution",
+      "modulo": "governance_admin",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DATA_STEWARD",
+        "PLATFORM_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminDataQualityController_rules",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/data-quality/rules",
+      "modulo": "governance_admin",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminDataQualityController_rule",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/data-quality/rules/{id}",
+      "modulo": "governance_admin",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "GraphQueryController_defineAccessScope",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -13602,7 +15329,7 @@
       "roles": [],
       "tablas": 23,
       "eventos": 0,
-      "pruebas": 62,
+      "pruebas": 66,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13650,7 +15377,7 @@
       "roles": [],
       "tablas": 40,
       "eventos": 0,
-      "pruebas": 24,
+      "pruebas": 27,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13666,7 +15393,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 37,
+      "pruebas": 38,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13680,9 +15407,25 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 65,
+      "tablas": 72,
       "eventos": 0,
       "pruebas": 38,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAuthController_registerSupportStaff",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/auth/register-support-staff",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Registrarse como secretaria (personal de apoyo hospitalario)",
+      "riesgo": "ALTO",
+      "publica": true,
+      "roles": [],
+      "tablas": 21,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -14022,6 +15765,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "IamUsersController_deactivate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/users/{id}/deactivate",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Dar de baja la cuenta con motivo (sin borrado físico; idempotente)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "IamUsersController_listDevices",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -14092,6 +15853,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "IamUsersController_lifecycle",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/iam/users/{id}/lifecycle",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Estado de ciclo de vida de la cuenta y su historia, paginada",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "IamUsersController_lock",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -14144,6 +15923,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "IamUsersController_reactivate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/users/{id}/reactivate",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Reactivar una cuenta suspendida con motivo (idempotente)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "IamUsersController_listSessions",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -14162,6 +15959,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "IamUsersController_suspend",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/users/{id}/suspend",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Suspender la cuenta con motivo (idempotente, cierra sus sesiones)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "IamUsersController_assistedPractitionerRegistration",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -14174,7 +15989,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 62,
+      "tablas": 69,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15627,6 +17442,54 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "InsurerPractitionerRequestsController_listReceived",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance/practitioner-requests",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Solicitudes de profesionales que piden trabajar con la aseguradora activa",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsurerPractitionerRequestsController_approve",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/insurance/practitioner-requests/{id}/approve",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Aprobar la solicitud de un profesional",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsurerPractitionerRequestsController_reject",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/insurance/practitioner-requests/{id}/reject",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Rechazar la solicitud de un profesional",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "InsurerReceivedClaimsController_listReceivedClaims",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -15783,6 +17646,60 @@
         "PATIENT"
       ],
       "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerInsurerRequestsController_listOwn",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/practitioners/me/insurer-requests",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Mis solicitudes a aseguradoras",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerInsurerRequestsController_requestOwn",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioners/me/insurer-requests",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Pedir trabajar con aseguradoras",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerInsurerRequestsController_withdrawOwn",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioners/me/insurer-requests/{id}/withdraw",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Retirar una solicitud pendiente a una aseguradora",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16812,6 +18729,311 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "InsightsWorkflowController_listRules",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/alert-rules",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkflowController_patchRule",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/marketing/insights/alert-rules/{code}",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkflowController_listWorkflow",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/alert-workflow",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkflowController_putWorkflow",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PUT",
+      "ruta": "/marketing/insights/alert-workflow/{fingerprint}",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsFactsController_campaignFacts",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/campaign-facts",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsFactsController_catalog",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/catalog",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_getNotificationPreferences",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/notification-preferences",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_putNotificationPreferences",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PUT",
+      "ruta": "/marketing/insights/notification-preferences",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_listReports",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/reports",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_deleteReport",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "DELETE",
+      "ruta": "/marketing/insights/reports/{id}",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_putReport",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PUT",
+      "ruta": "/marketing/insights/reports/{id}",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_listSavedViews",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/saved-views",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_deleteSavedView",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "DELETE",
+      "ruta": "/marketing/insights/saved-views/{id}",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_putSavedView",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PUT",
+      "ruta": "/marketing/insights/saved-views/{id}",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_getUserPreferences",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/marketing/insights/user-preferences",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "MARKETING_MANAGER",
+        "PLATFORM_ADMIN",
+        "DATA_PLATFORM_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsightsWorkspaceController_putUserPreferences",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PUT",
+      "ruta": "/marketing/insights/user-preferences",
+      "modulo": "marketing",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "...INSIGHTS_WRITE_ROLES"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "MarketingController_createJourney",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -17047,6 +19269,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "MedicalGroupsController_remove",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/medical-groups/{id}",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Eliminar un grupo médico no realizado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "MedicalGroupsController_findOne",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -17066,6 +19307,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "MedicalGroupsController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/medical-groups/{id}",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Corregir el lugar o las notas del grupo médico",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "MedicalGroupsController_updateExerciseNotes",
       "origen": "CONTRATO",
       "metodo": "PATCH",
@@ -17080,6 +19340,63 @@
         "CLINICIAN"
       ],
       "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalGroupsController_addMember",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/medical-groups/{id}/members",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Agregar un cargo al equipo del grupo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalGroupsController_removeMember",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/medical-groups/{id}/members/{memberId}",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Quitar un cargo del equipo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalGroupsController_updateMember",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/medical-groups/{id}/members/{memberId}",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Modificar un cargo del equipo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -17846,6 +20163,307 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ObservabilityController_coverage",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/coverage",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_endpoints",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/endpoints",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_errorEvents",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/errors/events",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_errorGroups",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/errors/groups",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_errorGroup",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/errors/groups/{id}",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_changeErrorGroupState",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/admin/observability/errors/groups/{id}",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": "Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que exige una organización elegida (o un rol global con resolución propia, como `SUPERADMIN`). Es la decisión conservadora; ver el README del módulo.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_modules",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/modules",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_request",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/requests/{requestId}",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_sqlSlow",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/sql/slow",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_sqlStatements",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/sql/statements",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_sqlStatement",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/sql/statements/{hash}",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_summary",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/summary",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilityController_timeseries",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/observability/timeseries",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ObservabilitySelftestController_fail",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/internal/observability/selftest/fail",
+      "modulo": "observability",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "OpsConsoleController_backups",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -17956,6 +20574,28 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "OpsLivenessController_instancesLiveness",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/ops/instances/liveness",
+      "modulo": "ops_console",
+      "bloque": null,
+      "nombre": "Vida de cada instancia (VIVA/DEGRADADA/CAIDA/SIN_DATO) con causa y evidencia",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "OpsConsoleController_readiness",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -18039,6 +20679,40 @@
         "GOVERNANCE_ADMIN"
       ],
       "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OpsHeartbeatController_record",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/internal/ops/heartbeats",
+      "modulo": "ops_console",
+      "bloque": null,
+      "nombre": "Latido de un worker hacia la sonda de vida de instancias",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OpsToolsController_tools",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/ops/tools",
+      "modulo": "ops-console",
+      "bloque": null,
+      "nombre": "Herramientas e integraciones de la API: catálogo, adaptador en uso, configuración y salud",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20176,6 +22850,44 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PharmacyController_unmapProduct",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Deshacer un vínculo con un código de proveedor externo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_updateMapping",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId}",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Corregir un vínculo con un código de proveedor externo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PharmacyController_updateInventory",
       "origen": "CONTRATO",
       "metodo": "PATCH",
@@ -20208,7 +22920,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20379,7 +23091,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 17,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20816,7 +23528,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20836,6 +23548,25 @@
         "PHARMACY_STAFF"
       ],
       "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacySiteAvailabilityController_bulkSiteAvailability",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/availability/bulk",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Marcar en lote qué productos tiene una sucursal, y cuántos, con vista previa",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20867,6 +23598,22 @@
       "modulo": "pharmacy_inventory",
       "bloque": "Farmacia",
       "nombre": "Consultar qué sedes pueden surtir un conjunto de productos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyInventoryReadController_availabilityByMedication",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/pharmacy-inventory/availability/medications",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Consultar qué sedes de la red pueden surtir unos medicamentos",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
@@ -21030,8 +23777,8 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 4,
-      "eventos": 0,
+      "tablas": 7,
+      "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
@@ -21069,6 +23816,24 @@
       "tablas": 10,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyInventoryController_relocateLocation",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacy/inventory-locations/{id}/relocate",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Reubicar una ubicación de inventario (F5c)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21137,7 +23902,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 26,
+      "tablas": 25,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21174,7 +23939,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 37,
+      "tablas": 40,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21357,6 +24122,113 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "RuntimePiecesController_list",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/ops/runtime-pieces",
+      "modulo": "platform_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "RuntimePiecesController_detail",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/ops/runtime-pieces/{id}",
+      "modulo": "platform_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "RuntimePiecesController_discover",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/ops/runtime-pieces/discover",
+      "modulo": "platform_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OpsToolsController_list",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/ops/tools",
+      "modulo": "platform_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OpsToolsController_detail",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/ops/tools/{code}",
+      "modulo": "platform_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Una herramienta con su historial corto de comprobaciones",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN",
+        "RELEASE_MANAGER",
+        "GOVERNANCE_ADMIN"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21958,6 +24830,441 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "CareSpaceOpsController_cancelBlock",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-space-blocks/{id}/cancel",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cancelar un bloqueo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_endBlock",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-space-blocks/{id}/end",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Terminar un bloqueo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_detail",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Ficha de un espacio de atención",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/care-spaces/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Editar un espacio de atención",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_changeAvailability",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-spaces/{id}/availability",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cambiar la disponibilidad de un espacio",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 25,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_blocks",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/blocks",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Bloqueos de un espacio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SpaceAssetsController_spaceEquipment",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/equipment",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Equipos ubicados en un espacio (F5a)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_history",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/history",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Historial de un espacio de atención",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_changeHygiene",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-spaces/{id}/hygiene",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Marcar un espacio sucio o contaminado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 19,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_changeIsolation",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-spaces/{id}/isolation",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cambiar el aislamiento de un espacio",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 22,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_lifecycle",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-spaces/{id}/lifecycle",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cambiar el ciclo de vida de un espacio",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 20,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_move",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-spaces/{id}/move",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Mover un espacio de atención",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_operationalState",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/operational-state",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Estado operativo de un espacio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_retireCheck",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/retire-check",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Bloqueos para retirar un espacio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 3,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_statusEvents",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/status-events",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Historial de estados de un espacio (A20)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SpaceAssetsController_stock",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/care-spaces/{id}/stock",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Stock ubicado en un espacio (F5c)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_addAssignment",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/care-spaces/{id}/unit-assignments",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Vincular un espacio a una unidad clínica",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpacesController_removeAssignment",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/care-spaces/{id}/unit-assignments/{assignmentId}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Desvincular un espacio de una unidad clínica",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_assign",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/cleaning-orders/{id}/assign",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Asignar una orden de limpieza",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_cancel",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/cleaning-orders/{id}/cancel",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cancelar una orden de limpieza",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_finish",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/cleaning-orders/{id}/finish",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Terminar una orden de limpieza",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_inspect",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/cleaning-orders/{id}/inspect",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Inspeccionar una limpieza",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_start",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/cleaning-orders/{id}/start",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Iniciar una orden de limpieza",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalUnitsController_detail",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical-units/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Ficha de una unidad clínica",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalUnitsController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/clinical-units/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Editar una unidad clínica",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ClinicalUnitsController_lifecycle",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/clinical-units/{id}/lifecycle",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cambiar el ciclo de vida de una unidad clínica",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_blocksTick",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/internal/practice/blocks-tick",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Aplicar bloqueos programados y avisar vencidos (worker)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM",
+        "SYSTEM_WORKER"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "InventoryItemsController_recordMovement",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -21973,6 +25280,38 @@
       "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InfrastructureAccessController_read",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/practice/infrastructure-access/me",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Acceso del actor a la infraestructura del tenant activo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InfrastructureCatalogController_catalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/practice/infrastructure-catalog",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Catálogo de infraestructura hospitalaria",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22006,7 +25345,7 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 6,
+      "pruebas": 10,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22227,14 +25566,12 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Dar de alta un sitio de práctica",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 4,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 7,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22245,14 +25582,12 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Desmantelar un sitio en cascada (soft-delete)",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 10,
+      "roles": [],
+      "tablas": 12,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22533,6 +25868,54 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "SiteLicensesController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/site-licenses/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Editar una habilitación del establecimiento",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_bedBoard",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/bed-board",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Tablero de camas de una sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 3,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_capacity",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/capacity",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Capacidad declarada vs. derivada del establecimiento",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "SitesController_listCareSpaces",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -22553,7 +25936,7 @@
       ],
       "tablas": 3,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22564,11 +25947,89 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Crear un espacio de atención bajo una unidad/sitio",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 8,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_bulk",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/care-spaces/bulk",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Alta masiva de espacios por patrón",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_importRows",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/care-spaces/import",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Importar espacios (dryRun=true valida sin escribir)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_cleaningOrders",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/cleaning-orders",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Cola de limpieza de una sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 4,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CareSpaceOpsController_createCleaningOrder",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/cleaning-orders",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Crear una orden de limpieza",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_listUnits",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/clinical-units",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Listar las unidades clínicas de la sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
       "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
@@ -22582,14 +26043,156 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Crear una unidad clínica jerárquica",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 3,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_declareCapacity",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/declared-capacities",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Declarar capacidad del establecimiento",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SpaceAssetsController_siteEquipment",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/diagnostic-equipment",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Equipos diagnósticos de una sede (F5a)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_listLicenses",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/licenses",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Habilitaciones del establecimiento",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_createLicense",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/licenses",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Registrar una habilitación del establecimiento",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_getRegulatory",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/regulatory",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Datos regulatorios del establecimiento",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_updateRegulatory",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/sites/{siteId}/regulatory",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Editar los datos regulatorios del establecimiento",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_verifySnis",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/regulatory/verify-snis",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Verificar el código SNIS del establecimiento (plataforma)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SpaceAssetsController_collectionPoints",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/sample-collection-points",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Puntos de toma de muestra de una sede (F5b)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SiteInfrastructureController_structure",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/structure",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Estructura de la sede (espacios, unidades, vínculos)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22666,6 +26269,57 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PeriopOrController_tick",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/internal/periop/or-blocks-release-tick",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Liberar bloques vencidos (worker)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM",
+        "SYSTEM_WORKER"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_cancel",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/or-blocks/{id}/cancel",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Cancelar un bloque",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_release",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/or-blocks/{id}/release",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Liberar un bloque",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PeriopController_recordPacuAssessment",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -22721,9 +26375,9 @@
         "SURGERY_SCHEDULER",
         "PERIOP_ADMIN"
       ],
-      "tablas": 1,
+      "tablas": 5,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22741,9 +26395,9 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 6,
+      "tablas": 14,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22763,9 +26417,9 @@
         "SURGERY_SCHEDULER",
         "PERIOP_ADMIN"
       ],
-      "tablas": 30,
+      "tablas": 42,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22783,7 +26437,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 8,
+      "tablas": 16,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23096,8 +26750,8 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 30,
-      "eventos": 1,
+      "tablas": 37,
+      "eventos": 2,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
@@ -23119,6 +26773,71 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_roomEvent",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/procedure-cases/{id}/room-events",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Registrar un evento de sala",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PERIOP_ADMIN",
+        "PERIOP_NURSE",
+        "SURGEON",
+        "ANESTHESIOLOGIST"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_createChecklist",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/procedure-cases/{id}/safety-checklists",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Crear el check-list OMS del caso (201; 200 si ya existe)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PERIOP_ADMIN",
+        "PERIOP_NURSE",
+        "SURGEON",
+        "ANESTHESIOLOGIST",
+        "SURGERY_SCHEDULER"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_getChecklist",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/procedure-cases/{id}/safety-checklists/{checklistId}",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Check-list OMS por fases",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PERIOP_ADMIN",
+        "PERIOP_NURSE",
+        "SURGEON",
+        "ANESTHESIOLOGIST",
+        "SURGERY_SCHEDULER"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -23245,6 +26964,70 @@
       ],
       "tablas": 7,
       "eventos": 1,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_operatingRooms",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/operating-rooms",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Quirófanos de una sede",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_listBlocks",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/or-blocks",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Bloques de quirófano",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_createBlocks",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/sites/{siteId}/or-blocks",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Crear un bloque de quirófano",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PeriopOrController_utilization",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/sites/{siteId}/or-utilization",
+      "modulo": "procedures_perioperative",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Utilización de quirófanos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
@@ -23608,7 +27391,7 @@
       ],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 7,
+      "pruebas": 8,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -26144,6 +29927,27 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ReportingMoneyController_money",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/money",
+      "modulo": "reporting",
+      "bloque": "Auditoría y Reporting",
+      "nombre": "Dinero por módulo, tipo (facturado/cobrado/cotizado) y moneda; lo no medido se declara",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "PAYMENTS_ADMIN",
+        "ACCOUNTING_APPROVER"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ReportingController_createDashboard",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -26403,9 +30207,9 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 49,
+      "tablas": 50,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -26423,7 +30227,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -26463,7 +30267,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 19,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -26484,9 +30288,9 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 10,
+      "tablas": 11,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -27012,7 +30816,7 @@
         "SCHEDULING_AGENT",
         "PATIENT"
       ],
-      "tablas": 18,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -27032,7 +30836,7 @@
         "SCHEDULING_AGENT",
         "PATIENT"
       ],
-      "tablas": 46,
+      "tablas": 49,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -27148,9 +30952,9 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 4,
-      "eventos": 0,
-      "pruebas": 22,
+      "tablas": 9,
+      "eventos": 1,
+      "pruebas": 24,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -27348,7 +31152,7 @@
       ],
       "tablas": 5,
       "eventos": 0,
-      "pruebas": 14,
+      "pruebas": 15,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -27532,7 +31336,7 @@
       ],
       "tablas": 35,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -27741,6 +31545,38 @@
         "SYSTEM"
       ],
       "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "StudyCatalogController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical/study-catalog",
+      "modulo": "study_catalog",
+      "bloque": null,
+      "nombre": "Catálogo de estudios pedibles, con búsqueda y paginación",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "StudyCatalogController_detail",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical/study-catalog/{conceptId}",
+      "modulo": "study_catalog",
+      "bloque": null,
+      "nombre": "Detalle de un estudio del catálogo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28372,6 +32208,30 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "GovernanceReadController_changeLog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/governance/change-log",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Cambios de gobierno de datos: quién cambió qué y cuándo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ResidencyController_recordTransfer",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -28383,6 +32243,31 @@
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceOperationsReadController_domains",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/domains",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
       ],
       "tablas": 2,
       "eventos": 0,
@@ -28426,6 +32311,30 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "GovernanceReadController_entityRegistry",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/governance/entity-registry",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "GovernanceCatalogController_catalogEntity",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -28441,6 +32350,30 @@
       "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceReadController_fields",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/governance/entity-registry/{id}/fields",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -28516,6 +32449,29 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "GovernanceOperationsReadController_legalHolds",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/legal-holds",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DPO",
+        "AUDITOR"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "LegalHoldController_place",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -28552,6 +32508,81 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "MutabilityController_list",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/mutability",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MutabilityController_detail",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/mutability/{schema}/{table}",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MutabilityController_summary",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/mutability/summary",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AssessmentController_publishFramework",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -28565,6 +32596,54 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceReadController_policies",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/governance/policies",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceReadController_policy",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/governance/policies/{policyType}/{id}",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Una política: ajustes, estado y a qué tablas o columnas se aplica",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28601,6 +32680,31 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "GovernanceOperationsReadController_retentionExecutions",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/governance/retention-executions",
+      "modulo": "system_ops",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PLATFORM_ADMIN",
+        "GOVERNANCE_ADMIN",
+        "DATA_GOVERNANCE_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "DPO",
+        "AUDITOR",
+        "DATA_STEWARD"
+      ],
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28750,6 +32854,116 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "TelemetryAnalyticsController_devices",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/devices",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Desglose de dispositivos (tipo, SO, navegador, versión de app); bots aparte; lo no medido se declara",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryErrorsAnalyticsController_summary",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/errors",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryErrorsAnalyticsController_fingerprints",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/errors/fingerprints",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryErrorsAnalyticsController_fingerprint",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/errors/fingerprints/{fingerprint}",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryErrorsAnalyticsController_routesNotFound",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/errors/routes-not-found",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TelemetryAnalyticsController_listFunnels",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -28791,6 +33005,28 @@
       "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryClickHeatmapController_getHeatmap",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/heatmap",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Mapa de calor de clics de una pantalla: celdas normalizadas, elementos y tamaño; lo no medido se declara",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -28857,6 +33093,50 @@
       "tablas": 1,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryPartsAnalyticsController_list",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/parts",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryPartsAnalyticsController_detail",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/parts/{routeCode}",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -29016,6 +33296,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "TelemetryClientErrorsController_capture",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/telemetry/client-errors",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "ALTO",
+      "publica": true,
+      "roles": [],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TelemetryEventsController_recordConversion",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -29118,6 +33414,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "TelemetryRetentionController_purge",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/telemetry/retention/purge",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": null,
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TelemetryEventsController_closeJourney",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -29210,6 +33524,116 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminGlossaryController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalogs/glossary",
+      "modulo": "terminology",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Listar términos del glosario por tipo de usuario",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "SUPERADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminGlossaryController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/catalogs/glossary",
+      "modulo": "terminology",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Crear un término (idempotente por slug)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminGlossaryController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/catalogs/glossary/{conceptId}",
+      "modulo": "terminology",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Ver un término con su versión",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "SUPERADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminGlossaryController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/admin/catalogs/glossary/{conceptId}",
+      "modulo": "terminology",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Editar un término con precondición de versión",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminGlossaryController_deactivate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/catalogs/glossary/{conceptId}/deactivate",
+      "modulo": "terminology",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Retirar un término (no se borra)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPERADMIN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminGlossaryController_reactivate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/admin/catalogs/glossary/{conceptId}/reactivate",
+      "modulo": "terminology",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Reactivar un término retirado",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SUPERADMIN"
+      ],
       "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
@@ -29552,7 +33976,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -30130,6 +34554,166 @@
       "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_elements",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/ui-visibility/elements",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_createElement",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/ui-visibility/elements",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_syncElements",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/ui-visibility/elements/sync",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_preview",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/ui-visibility/preview",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_rules",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/admin/ui-visibility/rules",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_createRule",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/ui-visibility/rules",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_updateRule",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/admin/ui-visibility/rules/{id}",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AdminUiVisibilityController_endRule",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/admin/ui-visibility/rules/{id}/end",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MeUiVisibilityController_mine",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/me/ui-visibility",
+      "modulo": "ui_visibility",
+      "bloque": null,
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {

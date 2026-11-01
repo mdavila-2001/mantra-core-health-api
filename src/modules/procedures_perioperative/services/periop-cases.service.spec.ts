@@ -82,6 +82,13 @@ function build() {
     createCase: mockFn(),
     findCaseById: caseLookupMock(),
     findCaseForUpdate: caseLookupMock(),
+    // F4 (§F4.3): check-list OMS con las tres fases completas; los casos
+    // bloqueantes tienen su propia prueba.
+    findSafetyChecklistByCase: mockFn().mockResolvedValue({
+      signInCompletedAt: new Date(),
+      timeOutCompletedAt: new Date(),
+      signOutCompletedAt: new Date(),
+    }),
     findCaseByNumber: mockFn(),
     countCases: mockFn(),
     findOverlappingCases: mockFn(),
@@ -156,6 +163,18 @@ function build() {
   const clinicalScope = {
     isPatientInTenant: mockFn().mockResolvedValue(true),
   };
+  // F4: el validador del quirófano (solape de la ventana reservada, bloques,
+  // recurso) tiene su propia prueba; acá aprueba la sala.
+  const orValidator = {
+    validate: mockFn().mockResolvedValue({
+      schedulableResourceId: 'res-1',
+      operatingRoomBlockId: null,
+      prepMinutes: 0,
+      cleanupMinutes: 0,
+      reservedStartAt: new Date(),
+      reservedEndAt: new Date(),
+    }),
+  };
   const service = new PeriopCasesService(
     em as any,
     casesRepo,
@@ -169,8 +188,10 @@ function build() {
     new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
     clinicalScope as any,
+    orValidator as any,
   );
   return {
+    orValidator,
     service: inTenant(service, TENANT_A),
     raw: service,
     clinicalRead,
@@ -238,6 +259,7 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          tenantId: TENANT,
           eventTypeConceptId: CONCEPTS.OR_EVENT_RESERVED,
         }),
       );
@@ -375,13 +397,20 @@ describe('PeriopCasesService', () => {
     it('refuses to double-book the operating room', async () => {
       const d = build();
       wire(d);
-      d.casesRepo.findOverlappingCases.mockResolvedValue([
-        { id: 'other-case' },
-      ]);
+      // El solape de la ventana reservada lo detecta el validador de F4
+      // (operating-room.validator.spec.ts); el servicio no crea nada.
+      d.orValidator.validate.mockRejectedValue(
+        new ConflictException(
+          'El quirófano ya está reservado en esa ventana',
+          {},
+          'OPERATING_ROOM_SLOT_CONFLICT',
+        ),
+      );
 
       await expect(
         d.service.scheduleCase(scheduleDto(), actor as any),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
     });
 
     it('rejects a window that ends before it starts', async () => {
@@ -1168,6 +1197,32 @@ describe('PeriopCasesService', () => {
       expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
     });
 
+    it.each(['PERIOP_ADMIN', 'SUPERADMIN'])(
+      '%s acotado a otro tenant no acepta por el integrante; acotado a éste o global sí (#1241)',
+      async (role) => {
+        const scopedTo = (tenantId: string) => ({
+          id: 'admin-scoped',
+          roles: [role],
+          scopedRoles: { [tenantId]: [role] },
+        });
+        const denied = withTeam();
+        await expect(
+          denied.d.service.acceptTeamMember(
+            CASE,
+            'm-1',
+            scopedTo(TENANT_B) as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(denied.member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+
+        for (const who of [scopedTo(TENANT), { id: 'g', roles: [role] }]) {
+          const { d, member } = withTeam();
+          await d.service.acceptTeamMember(CASE, 'm-1', who as any);
+          expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+        }
+      },
+    );
+
     it('rechaza al integrante que no pertenece al caso', async () => {
       const { d } = withTeam();
 
@@ -1296,6 +1351,34 @@ describe('PeriopCasesService', () => {
       expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
     });
 
+    it.each(['PERIOP_ADMIN', 'SUPERADMIN'])(
+      '%s acotado a otro tenant no responde por el integrante; acotado a éste o global sí (#1241)',
+      async (role) => {
+        const scopedTo = (tenantId: string) => ({
+          id: 'admin-scoped',
+          roles: [role],
+          scopedRoles: { [tenantId]: [role] },
+        });
+        const dto = { response: 'DECLINE', reasonText: 'Motivo' } as any;
+        const denied = withTeam();
+        await expect(
+          denied.d.service.respondTeamMember(
+            CASE,
+            'm-1',
+            dto,
+            scopedTo(TENANT_B) as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(denied.member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+
+        for (const who of [scopedTo(TENANT), { id: 'g', roles: [role] }]) {
+          const { d, member } = withTeam();
+          await d.service.respondTeamMember(CASE, 'm-1', dto, who as any);
+          expect(member.statusConceptId).toBe(PERIOP.TEAM_DECLINED);
+        }
+      },
+    );
+
     it('rechaza responder sobre un caso cancelado', async () => {
       const { d, titular } = withTeam();
       d.casesRepo.findCaseForUpdate.mockResolvedValue({
@@ -1339,6 +1422,7 @@ describe('PeriopCasesService', () => {
       const d = build();
       const surgicalCase: any = {
         id: CASE,
+        custodianTenantId: TENANT,
         statusConceptId: CONCEPTS.CASE_SCHEDULED,
         operatingRoomId: ROOM,
       };
@@ -1356,6 +1440,7 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          tenantId: TENANT,
           eventTypeConceptId: CONCEPTS.OR_EVENT_SLOT_RELEASED,
         }),
       );
@@ -1449,6 +1534,41 @@ describe('PeriopCasesService', () => {
         ...overrides,
       };
     }
+
+    it('F5e: un cargo de sala (OR_TIME) → 422 ROOM_CHARGE_IS_AUTOMATIC y no se carga nada', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(completedCase());
+      d.casesRepo.findChargeItemsForUpdate.mockResolvedValue([]);
+      await expect(
+        d.service.postCharges(
+          CASE,
+          dto({
+            items: [
+              {
+                chargeType: 'OR_TIME',
+                billableItemId: BILLABLE,
+                quantity: '60',
+                unitPrice: '10.00',
+              },
+            ],
+          }),
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: 'ROOM_CHARGE_IS_AUTOMATIC' });
+      expect(d.casesRepo.createChargeItem).not.toHaveBeenCalled();
+    });
+
+    it('F4: sin la Salida OMS no se factura (422 CHECKLIST_SIGN_OUT_REQUIRED)', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(completedCase());
+      d.casesRepo.findSafetyChecklistByCase.mockResolvedValue({
+        signInCompletedAt: new Date(),
+        timeOutCompletedAt: new Date(),
+      });
+      await expect(
+        d.service.postCharges(CASE, dto(), actor),
+      ).rejects.toMatchObject({ reason: 'CHECKLIST_SIGN_OUT_REQUIRED' });
+    });
 
     it('posts the charges and totals them', async () => {
       const d = build();

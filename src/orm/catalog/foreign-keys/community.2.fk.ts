@@ -2,13 +2,47 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `community` (parte 2/2).
- * 58 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 93 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['post_shares', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['prestige_awards', 'awarded_by_user_id', 'iam', 'users', 'id'],
+  ['prestige_awards', 'direction_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_awards', 'public_profile_id', 'community', 'public_profiles', 'id'],
+  ['prestige_awards', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_awards', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['prestige_awards', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_awards', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['prestige_scores', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['prestige_scores', 'last_award_id', 'community', 'prestige_awards', 'id'],
+  ['prestige_scores', 'level_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_scores', 'public_profile_id', 'community', 'public_profiles', 'id'],
+  ['prestige_scores', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_scores', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_scores', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['prestige_scores', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['public_profiles', 'avatar_file_id', 'common', 'files', 'id'],
+  ['public_profiles', 'cover_file_id', 'common', 'files', 'id'],
+  ['public_profiles', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['public_profiles', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['public_profiles', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['public_profiles', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['public_profiles', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['public_profiles', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['public_profiles', 'visibility_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['reactions', 'actor_profile_id', 'community', 'public_profiles', 'id'],
+  ['reactions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['reactions', 'reactable_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reactions', 'reaction_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reactions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['reply_templates', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['reply_templates', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['reply_templates', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['reply_templates', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['reply_templates', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['reply_templates', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['review_dimension_scores', 'dimension_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['review_dimension_scores', 'review_id', 'community', 'service_reviews', 'id'],
   ['review_responses', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -24,6 +58,7 @@ export const communityForeignKeys2: readonly ForeignKeyTuple[] = [
   ['service_reviews', 'target_public_profile_id', 'community', 'public_profiles', 'id'],
   ['service_reviews', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['service_reviews', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_reviews', 'verified_crm_case_id', 'crm', 'crm_cases', 'id'],
   ['service_reviews', 'verified_encounter_id', 'clinical', 'encounters', 'id'],
   ['social_follows', 'created_by_user_id', 'iam', 'users', 'id'],
   ['social_follows', 'followable_type_concept_id', 'terminology', 'catalog_concepts', 'id'],

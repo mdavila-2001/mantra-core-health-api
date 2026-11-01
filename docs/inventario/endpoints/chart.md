@@ -63,10 +63,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-care-plans.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -75,7 +75,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.care_plan_activities` | ESCRIBE | CREA | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → CarePlansRepository.createActivity | `src/modules/chart/repositories/care-plans.repository.ts:240` |
 | `chart.care_plans` | ESCRIBE | CREA | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → CarePlansRepository.createPlan | `src/modules/chart/repositories/care-plans.repository.ts:210` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → ChartEncounterScopeService.assertConditionBelongsToPatient → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | ChartCarePlansController.createCarePlan → ChartCarePlansService.createCarePlan → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
 
 ### Cuerpo — DTO `CreateCarePlanDto` · `application/json`
@@ -191,11 +191,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-care-plans.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId, activityId | `src/modules/chart/controllers/chart-care-plans.controller.ts:65` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -314,10 +314,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-documents.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -325,7 +325,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `chart.document_record_files` | ESCRIBE | CREA | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → DocumentsRepository.createFile | `src/modules/chart/repositories/documents.repository.ts:224` |
 | `chart.document_records` | ESCRIBE | CREA | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → DocumentsRepository.createRecord | `src/modules/chart/repositories/documents.repository.ts:192` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ChartDocumentsController.createDocument → ChartDocumentsService.createDocument → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 
@@ -449,9 +449,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: documentId, fileId | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -547,9 +547,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-encounters.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/chart/controllers/chart-encounters.controller.ts:48` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -573,7 +573,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_record_files` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
 | `chart.document_records` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
 | `common.files` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → EncounterPdfService.compose → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartEncountersController.getEncounterPdf → EncounterPdfService.render → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
@@ -652,8 +652,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -739,9 +739,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: documentId, fileId | `src/modules/chart/controllers/chart-me.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -820,9 +820,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/chart/controllers/chart-me.controller.ts:123` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -835,7 +835,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_record_files` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
 | `chart.document_records` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
 | `common.files` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ChartMeController.getMyEncounterPdf → EncounterPdfService.renderForPatient → EncounterPdfService.compose → EncounterPdfService.resolvePractitionerName → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
@@ -908,8 +908,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/chart/controllers/chart-me.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -999,8 +999,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1103,10 +1103,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1115,7 +1115,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.clinical_note_headers` | ESCRIBE | ACTUALIZA | POR_TIPO | ChartNotesController.createNote → ChartNotesService.createNote | `src/modules/chart/services/chart-notes.service.ts:131` |
 | `chart.clinical_note_headers` | ESCRIBE | CREA | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ClinicalNotesRepository.createHeader | `src/modules/chart/repositories/clinical-notes.repository.ts:414` |
 | `chart.clinical_note_versions` | ESCRIBE | CREA | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ClinicalNotesRepository.createVersion | `src/modules/chart/repositories/clinical-notes.repository.ts:440` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ChartNotesController.createNote → ChartNotesService.createNote → ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 
 ### Cuerpo — DTO `CreateNoteDto` · `application/json`
 
@@ -1235,11 +1235,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:173` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId | `src/modules/chart/controllers/chart-notes.controller.ts:173` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1379,11 +1379,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId | `src/modules/chart/controllers/chart-notes.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1519,11 +1519,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId, versionId | `src/modules/chart/controllers/chart-notes.controller.ts:155` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1645,11 +1645,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noteId, versionId | `src/modules/chart/controllers/chart-notes.controller.ts:137` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1773,11 +1773,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:224` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/chart/controllers/chart-notes.controller.ts:224` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1907,11 +1907,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/chart/controllers/chart-notes.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2026,11 +2026,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-notes.controller.ts:207` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/chart/controllers/chart-notes.controller.ts:207` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2145,9 +2145,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/chart/controllers/chart-read.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/chart/controllers/chart-read.controller.ts:51` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2276,8 +2276,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2389,10 +2389,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2568,9 +2568,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/chart/controllers/chart-templates.controller.ts:109` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2683,11 +2683,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/chart/controllers/chart-templates.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: templateId | `src/modules/chart/controllers/chart-templates.controller.ts:49` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

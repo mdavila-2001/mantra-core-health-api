@@ -100,24 +100,45 @@ export class CareSpaces {
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 
+  /**
+   * Valor de prep minutes mantenido por la instancia.
+   */
   @Property({ fieldName: 'prep_minutes', columnType: 'int', nullable: true })
   prepMinutes?: number;
 
+  /**
+   * Valor de cleanup minutes mantenido por la instancia.
+   */
   @Property({ fieldName: 'cleanup_minutes', columnType: 'int', nullable: true })
   cleanupMinutes?: number;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
+  /**
+   * Identificador asociado a form concept.
+   */
   @Property({ fieldName: 'form_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   formConceptId?: string;
 
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar', nullable: true })
   description?: string;
 
+  /**
+   * Valor de floor number mantenido por la instancia.
+   */
   @Property({ fieldName: 'floor_number', columnType: 'int', nullable: true })
   floorNumber?: number;
 
+  /**
+   * Valor de area m2 mantenido por la instancia.
+   */
   @Property({
     fieldName: 'area_m2',
     columnType: 'numeric(10,2)',
@@ -125,12 +146,21 @@ export class CareSpaces {
   })
   areaM2?: string;
 
+  /**
+   * Identificador asociado a asepsis concept.
+   */
   @Property({ fieldName: 'asepsis_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   asepsisConceptId?: string;
 
+  /**
+   * Identificador asociado a pressure concept.
+   */
   @Property({ fieldName: 'pressure_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   pressureConceptId?: string;
 
+  /**
+   * Valor de air changes per hour mantenido por la instancia.
+   */
   @Property({
     fieldName: 'air_changes_per_hour',
     columnType: 'numeric(6,2)',
@@ -138,6 +168,9 @@ export class CareSpaces {
   })
   airChangesPerHour?: string;
 
+  /**
+   * Valor de hvac validated on mantenido por la instancia.
+   */
   @Property({
     fieldName: 'hvac_validated_on',
     columnType: 'date',
@@ -145,29 +178,47 @@ export class CareSpaces {
   })
   hvacValidatedOn?: Date;
 
+  /**
+   * Identificador asociado a sex restriction concept.
+   */
   @Property({
     fieldName: 'sex_restriction_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   sexRestrictionConceptId?: string;
 
+  /**
+   * Identificador asociado a age group concept.
+   */
   @Property({ fieldName: 'age_group_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   ageGroupConceptId?: string;
 
+  /**
+   * Identificador asociado a bed category concept.
+   */
   @Property({
     fieldName: 'bed_category_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   bedCategoryConceptId?: string;
 
+  /**
+   * Valor de censable mantenido por la instancia.
+   */
   @Property({ type: 'boolean', nullable: true })
   censable?: boolean;
 
+  /**
+   * Valor de gln mantenido por la instancia.
+   */
   @Property({ columnType: 'varchar(13)', nullable: true })
   gln?: string;
 
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   @Property({
     fieldName: 'valid_from',
     columnType: 'timestamptz',
@@ -175,10 +226,115 @@ export class CareSpaces {
   })
   validFrom?: Date;
 
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   @Property({
     fieldName: 'valid_to',
     columnType: 'timestamptz',
     nullable: true,
   })
   validTo?: Date;
+
+  /**
+   * Valor de location path mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'location_path',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  locationPath?: string;
+
+  /**
+   * Identificador asociado a availability reason concept.
+   */
+  @Property({
+    fieldName: 'availability_reason_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  availabilityReasonConceptId?: string;
+
+  /**
+   * Valor de availability expected until mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'availability_expected_until',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  availabilityExpectedUntil?: Date;
+
+  /**
+   * Valor de availability changed at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'availability_changed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  availabilityChangedAt?: Date;
+
+  /**
+   * Identificador asociado a hygiene status concept.
+   */
+  @Property({
+    fieldName: 'hygiene_status_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  hygieneStatusConceptId?: string;
+
+  /**
+   * Valor de hygiene changed at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'hygiene_changed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  hygieneChangedAt?: Date;
+
+  /**
+   * Valor de terminal cleaning required mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'terminal_cleaning_required',
+    type: 'boolean',
+    default: false,
+  })
+  terminalCleaningRequired!: boolean;
+
+  /**
+   * Identificador asociado a isolation concept.
+   */
+  @Property({ fieldName: 'isolation_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  isolationConceptId?: string;
+
+  /**
+   * Valor de isolation organism text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'isolation_organism_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  isolationOrganismText?: string;
+
+  /**
+   * Valor de isolation changed at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'isolation_changed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  isolationChangedAt?: Date;
+
+  /**
+   * Valor de ops version mantenido por la instancia.
+   */
+  @Property({ fieldName: 'ops_version', columnType: 'int' })
+  opsVersion!: number;
 }

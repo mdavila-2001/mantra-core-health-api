@@ -211,7 +211,7 @@ export class PracticeSitesService {
       // vinculación es para el profesional, que sólo ve donde trabaja.
       administers
         ? Promise.resolve(null)
-        : this.access.allowedPracticeIds(actor),
+        : this.access.allowedPracticeIds(actor, tenantId),
     ]);
     return practices
       .filter(

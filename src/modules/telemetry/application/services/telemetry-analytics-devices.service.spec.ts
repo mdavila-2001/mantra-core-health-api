@@ -76,6 +76,7 @@ describe('TelemetryAnalyticsService.devices', () => {
         byAppVersion: [{ code: '2.4.1', label: '2.4.1', contexts: 7 }],
         lastContextAt: '2026-10-07T12:30:00.000Z',
         notMeasured: expect.any(Array),
+        scope: { level: 'tenant', tenantId: 'tenant-a', minSample: null },
       });
     });
 

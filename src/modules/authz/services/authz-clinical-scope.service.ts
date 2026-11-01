@@ -126,6 +126,36 @@ export class AuthzClinicalScopeService {
   }
 
   /**
+   * «Admisión crea el vínculo»: ¿se puede internar a este paciente creándole
+   * la huella en el tenant? Sólo si el perfil existe, NO tiene huella en el
+   * tenant y NO tiene huella propia en otro tenant (un paciente de otra
+   * organización no se adopta internándolo). La búsqueda en otros tenants
+   * corre en una transacción aparte con contexto de sistema y devuelve sólo
+   * el booleano; la del llamador no cambia.
+   *
+   * @param patientProfileId - Paciente.
+   * @param tenantId - Tenant activo.
+   */
+  async canAdmitWithoutFootprint(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    if (!(await this.scopeRepo.patientExists(em, patientProfileId)))
+      return false;
+    return em.fork().transactional(async (sys) => {
+      await sys.execute(
+        "select set_config('app.system_context', 'true', true)",
+      );
+      return !(await this.scopeRepo.hasFootprintElsewhere(
+        sys,
+        patientProfileId,
+        tenantId,
+      ));
+    });
+  }
+
+  /**
    * Exige sólo que el paciente exista. Es para la solicitud de relación que un
    * profesional le hace a un paciente encontrado en el padrón: el paciente aún no
    * tiene vínculo con el tenant y la relación nace `PENDING`, sin conceder nada
@@ -199,9 +229,11 @@ export class AuthzClinicalScopeService {
    *   historia y no hay otro tenant que lo limite.
    * - Cualquier otro actor revoca sólo en el tenant activo: una base de otro tenant
    *   responde igual que una inexistente.
-   * - Un actor de plataforma (`SUPERADMIN` o `SYSTEM`) que no fija tenant revoca
-   *   por id sin acotar; revocar sólo reduce acceso y esos roles ya autorizan en
-   *   toda la API. Cualquier otro actor sin tenant recibe `TENANT_REQUIRED`.
+   * - Un actor de plataforma global (`SUPERADMIN` o `SYSTEM` sin ámbito en
+   *   `scopedRoles`) que no fija tenant revoca por id sin acotar; revocar sólo
+   *   reduce acceso y esos roles ya autorizan en toda la API. Cualquier otro
+   *   actor sin tenant —también uno de plataforma acotado— recibe
+   *   `TENANT_REQUIRED`.
    *
    * @param resource - Base de acceso ya cargada por id, o `null` si no existe.
    * @param actor - Quien revoca.
@@ -224,8 +256,10 @@ export class AuthzClinicalScopeService {
     }
     const activeTenantId = getCurrentTenantId();
     if (activeTenantId === undefined) {
+      // Sin tenant activo no hay contra qué medir un rol acotado: el atajo es
+      // del rol global; el acotado fija su tenant como cualquiera (#1241).
       const isPlatformActor =
-        actor.roles.includes('SUPERADMIN') ||
+        roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
         roleAuthorizesInTenant(actor, 'SYSTEM', undefined);
       if (!isPlatformActor) requireTenantId();
       if (!resource) throw this.notFound(failure);

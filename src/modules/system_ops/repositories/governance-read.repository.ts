@@ -130,19 +130,19 @@ export class GovernanceReadRepository {
 
   private policiesCte(): string {
     return `with p as (
-      select 'WRITE'::text as policy_type, w.id, w.code::text as code, w.name::text as name, sc.code::text as state,
+      select 'WRITE'::text as policy_type, w.id, w.code::text as code, w.name::text as name, regexp_replace(sc.code, '^.*:', '')::text as state,
              w.row_version, w.updated_at
         from system_ops.write_policies w
         left join terminology.catalog_concepts sc on sc.id = w.state_concept_id
       union all
-      select 'RETENTION', r.id, r.code::text, r.name::text, sc.code::text, r.row_version, r.updated_at
+      select 'RETENTION', r.id, r.code::text, r.name::text, regexp_replace(sc.code, '^.*:', '')::text, r.row_version, r.updated_at
         from system_ops.retention_policies r
         left join terminology.catalog_concepts sc on sc.id = r.state_concept_id
       union all
       select 'ANONYMIZATION', a.id, a.code::text, null::text, null::text, a.row_version, a.updated_at
         from system_ops.anonymization_rules a
       union all
-      select 'RESIDENCY', d.id, d.code::text, null::text, sc.code::text, d.row_version, d.updated_at
+      select 'RESIDENCY', d.id, d.code::text, null::text, regexp_replace(sc.code, '^.*:', '')::text, d.row_version, d.updated_at
         from system_ops.data_residency_policies d
         left join terminology.catalog_concepts sc on sc.id = d.status_concept_id
     )`;
@@ -208,8 +208,8 @@ export class GovernanceReadRepository {
        ${isoTimestampSql(`${alias}.updated_at`)} as updated_at, ${isoTimestampSql(`${alias}.created_at`)} as created_at,
        ${alias}.created_by_user_id, ${alias}.updated_by_user_id`;
     const consultas: Record<PolicyType, string> = {
-      WRITE: `select 'WRITE'::text as policy_type, ${comunes('w', 'w.name::text', 'sc.code::text')},
-          jsonb_build_object('insertMode', im.code, 'updateMode', um.code, 'deleteMode', dm.code,
+      WRITE: `select 'WRITE'::text as policy_type, ${comunes('w', 'w.name::text', "regexp_replace(sc.code, '^.*:', '')::text")},
+          jsonb_build_object('insertMode', regexp_replace(im.code, '^.*:', ''), 'updateMode', regexp_replace(um.code, '^.*:', ''), 'deleteMode', regexp_replace(dm.code, '^.*:', ''),
             'requiresReason', w.requires_reason, 'requiresApproval', w.requires_approval,
             'dualControl', w.dual_control, 'maxBatchSize', w.max_batch_size) as settings
         from system_ops.write_policies w
@@ -218,9 +218,9 @@ export class GovernanceReadRepository {
         left join terminology.catalog_concepts um on um.id = w.update_mode_concept_id
         left join terminology.catalog_concepts dm on dm.id = w.delete_mode_concept_id
        where w.id = ?::uuid`,
-      RETENTION: `select 'RETENTION'::text as policy_type, ${comunes('r', 'r.name::text', 'sc.code::text')},
-          jsonb_build_object('retentionPeriodDays', r.retention_period_days, 'legalBasis', lb.code,
-            'disposition', dp.code, 'jurisdiction', jc.code) as settings
+      RETENTION: `select 'RETENTION'::text as policy_type, ${comunes('r', 'r.name::text', "regexp_replace(sc.code, '^.*:', '')::text")},
+          jsonb_build_object('retentionPeriodDays', r.retention_period_days, 'legalBasis', regexp_replace(lb.code, '^.*:', ''),
+            'disposition', regexp_replace(dp.code, '^.*:', ''), 'jurisdiction', regexp_replace(jc.code, '^.*:', '')) as settings
         from system_ops.retention_policies r
         left join terminology.catalog_concepts sc on sc.id = r.state_concept_id
         left join terminology.catalog_concepts lb on lb.id = r.legal_basis_concept_id
@@ -228,15 +228,15 @@ export class GovernanceReadRepository {
         left join terminology.catalog_concepts jc on jc.id = r.jurisdiction_concept_id
        where r.id = ?::uuid`,
       ANONYMIZATION: `select 'ANONYMIZATION'::text as policy_type, ${comunes('a', 'null::text', 'null::text')},
-          jsonb_build_object('technique', tc.code, 'description', a.description,
+          jsonb_build_object('technique', regexp_replace(tc.code, '^.*:', ''), 'description', a.description,
             'parameterKeys', coalesce((select jsonb_agg(k order by k) from jsonb_object_keys(
                case when jsonb_typeof(a.parameters_json) = 'object' then a.parameters_json else '{}'::jsonb end) k), '[]'::jsonb)) as settings
         from system_ops.anonymization_rules a
         left join terminology.catalog_concepts tc on tc.id = a.technique_concept_id
        where a.id = ?::uuid`,
-      RESIDENCY: `select 'RESIDENCY'::text as policy_type, ${comunes('d', 'null::text', 'sc.code::text')},
-          jsonb_build_object('jurisdiction', jc.code, 'dataClassification', dc.code,
-            'crossBorderTransferBasis', tb.code,
+      RESIDENCY: `select 'RESIDENCY'::text as policy_type, ${comunes('d', 'null::text', "regexp_replace(sc.code, '^.*:', '')::text")},
+          jsonb_build_object('jurisdiction', regexp_replace(jc.code, '^.*:', ''), 'dataClassification', dc.code,
+            'crossBorderTransferBasis', regexp_replace(tb.code, '^.*:', ''),
             'transferImpactAssessmentRequired', d.transfer_impact_assessment_required,
             'encryptionKeyRegionLocked', d.encryption_key_region_locked,
             'validFrom', ${isoTimestampSql('d.valid_from')}, 'validTo', ${isoTimestampSql('d.valid_to')}) as settings
@@ -300,7 +300,7 @@ export class GovernanceReadRepository {
       );
     return this.q<ChangeLogRow[]>(
       em,
-      `select g.id, g.target_type, g.target_id, ac.code::text as action, g.changed_by_user_id, g.reason,
+      `select g.id, g.target_type, g.target_id, regexp_replace(ac.code, '^.*:', '')::text as action, g.changed_by_user_id, g.reason,
               ${isoTimestampSql('g.recorded_at')} as recorded_at
          from system_ops.governance_change_log g
          left join terminology.catalog_concepts ac on ac.id = g.action_concept_id
@@ -389,7 +389,7 @@ export class GovernanceReadRepository {
     return this.q<FieldRegistryRow[]>(
       em,
       `select fr.id, fr.column_name::text as column_name, dc.code::text as classification, fr.is_pii, fr.is_phi,
-              ms.code::text as masking_strategy, ar.code::text as anonymization_rule_code
+              regexp_replace(ms.code, '^.*:', '')::text as masking_strategy, ar.code::text as anonymization_rule_code
          from system_ops.field_registry fr
          left join system_ops.data_classifications dc on dc.id = fr.classification_id
          left join terminology.catalog_concepts ms on ms.id = fr.masking_strategy_concept_id

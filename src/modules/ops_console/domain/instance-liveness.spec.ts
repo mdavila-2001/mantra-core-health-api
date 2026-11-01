@@ -204,7 +204,7 @@ describe('evaluateInstance · workers', () => {
     const results = WORKER_INSTANCES.map((definition) =>
       evaluateInstance(definition, context({ heartbeats: null })),
     );
-    expect(results).toHaveLength(25);
+    expect(results).toHaveLength(27);
     for (const result of results) {
       expect(result).toMatchObject({
         state: 'SIN_DATO',
@@ -351,7 +351,7 @@ describe('U23: contrato de forma', () => {
     const all = [...INFRASTRUCTURE_INSTANCES, ...WORKER_INSTANCES].map((d) =>
       evaluateInstance(d, context({ heartbeats, probes })),
     );
-    expect(all).toHaveLength(33);
+    expect(all).toHaveLength(35);
     for (const instance of all) {
       expect(['VIVA', 'DEGRADADA', 'CAIDA', 'SIN_DATO']).toContain(
         instance.state,

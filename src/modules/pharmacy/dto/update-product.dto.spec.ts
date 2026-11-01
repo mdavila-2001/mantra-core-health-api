@@ -107,6 +107,19 @@ describe('UpdateProductDto', () => {
     });
   });
 
+  it('accepts the medication concept to link, and null to unlink', async () => {
+    const id = '22222222-2222-4222-8222-222222222222';
+    await expect(parse({ medicationConceptId: id })).resolves.toMatchObject({
+      medicationConceptId: id,
+    });
+    await expect(parse({ medicationConceptId: null })).resolves.toMatchObject({
+      medicationConceptId: null,
+    });
+    await expect(
+      parse({ medicationConceptId: 'Amoxicilina' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
   it('accepts null to clear the price, the category and the description', async () => {
     const body = { unitPrice: null, category: null, description: null };
     await expect(parse(body)).resolves.toMatchObject(body);

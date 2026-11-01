@@ -263,6 +263,24 @@ describe('MedicationsService', () => {
           'hp-otro',
         );
       });
+
+      it('SUPERADMIN acotado (al tenant custodio o a otro) no prescribe por otro profesional (#1241)', async () => {
+        for (const tenantId of ['t1', 't-otra']) {
+          const d = build();
+          await expect(
+            d.service.prescribe(
+              { ...registration, prescriberProfileId: 'hp-otro' },
+              {
+                id: 'root-scoped',
+                roles: ['SUPERADMIN'],
+                practitionerProfileId: 'hp-1',
+                scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+              } as any,
+            ),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(d.requestsRepo.create).not.toHaveBeenCalled();
+        }
+      });
     });
 
     // P24 / CL-03 — «otro motivo» escrito a mano.
@@ -1006,6 +1024,27 @@ describe('MedicationsService · MCH-007', () => {
     expect((request as any).signedByUserId).toBe('user-autor');
   });
 
+  it('SUPERADMIN acotado no firma por otro profesional; el global sí (#1241)', async () => {
+    for (const tenantId of ['t1', 't-otra']) {
+      const d = build();
+      const request = draft();
+      d.requestsRepo.findById.mockResolvedValue(request);
+      await expect(
+        d.service.sign('mr1', {
+          id: 'root-scoped',
+          roles: ['SUPERADMIN'],
+          scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect((request as any).signedAt).toBeUndefined();
+    }
+    const d = build();
+    const request = draft();
+    d.requestsRepo.findById.mockResolvedValue(request);
+    await d.service.sign('mr1', { id: 'root', roles: ['SUPERADMIN'] } as any);
+    expect((request as any).signedByUserId).toBe('root');
+  });
+
   it('una receta ya firmada no devuelve 200 a quien no es su prescriptor', async () => {
     const d = build();
     d.requestsRepo.findById.mockResolvedValue({
@@ -1016,6 +1055,135 @@ describe('MedicationsService · MCH-007', () => {
 
     await expect(d.service.sign('mr1', otherDoctor)).rejects.toBeInstanceOf(
       ForbiddenException,
+    );
+  });
+});
+
+describe('MedicationsService · validTo en el pasado', () => {
+  const PAST = '2020-01-01T00:00:00.000Z';
+  const FUTURE = '2999-01-01T00:00:00.000Z';
+
+  /** El 422 del motivo, sin escribir nada. */
+  async function expectValidToInPast(
+    d: ReturnType<typeof build>,
+    promise: Promise<unknown>,
+  ) {
+    const error: any = await promise.then(
+      () => {
+        throw new Error('se esperaba un rechazo');
+      },
+      (caught: unknown) => caught,
+    );
+    expect(error).toBeInstanceOf(PreconditionFailedException);
+    expect(error.getStatus()).toBe(422);
+    expect(error.getResponse().reason).toBe('MEDICATION_VALID_TO_IN_PAST');
+    expect(d.requestsRepo.create).not.toHaveBeenCalled();
+    expect(d.historyRepo.append).not.toHaveBeenCalled();
+  }
+
+  const draft = (extra: Record<string, unknown> = {}): any => ({
+    id: 'mr1',
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    medicationConceptId: 'm1',
+    statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+    updatedAt: new Date(),
+    createdAt: new Date(),
+    ...extra,
+  });
+
+  it('prescribe con validTo pasado → 422 MEDICATION_VALID_TO_IN_PAST', async () => {
+    const d = build();
+    await expectValidToInPast(
+      d,
+      d.service.prescribe(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          medicationConceptId: 'm1',
+          validTo: PAST,
+        },
+        actor,
+      ),
+    );
+  });
+
+  it('prescribe con validTo futuro sigue naciendo borrador', async () => {
+    const d = build();
+    d.requestsRepo.create.mockReturnValue(draft());
+    const res = await d.service.prescribe(
+      {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        medicationConceptId: 'm1',
+        validTo: FUTURE,
+      },
+      actor,
+    );
+    expect(res.status).toBe(CLIN.MEDICATION_REQUEST_DRAFT);
+  });
+
+  it('editar el borrador a un validTo pasado → 422, sin cambiar la fila', async () => {
+    const d = build();
+    const request = draft({ validTo: new Date(FUTURE) });
+    d.requestsRepo.findById.mockResolvedValue(request);
+    await expectValidToInPast(
+      d,
+      d.service.editDraft('mr1', { validTo: PAST } as any, actor),
+    );
+    expect(request.validTo).toEqual(new Date(FUTURE));
+  });
+
+  it('emitir un borrador cuyo validTo ya pasó → 422, sigue en borrador', async () => {
+    const d = build();
+    const request = draft({ validTo: new Date(PAST) });
+    d.requestsRepo.findById.mockResolvedValue(request);
+    await expectValidToInPast(d, d.service.issue('mr1', actor));
+    expect(request.statusConceptId).toBe(CLIN.MEDICATION_REQUEST_DRAFT);
+    expect(d.auditTrail.record).not.toHaveBeenCalled();
+  });
+
+  it('reemplazar con validTo pasado, o heredando uno pasado → 422, el original sigue emitido', async () => {
+    for (const [dto, inherited] of [
+      [{ reasonText: 'corrección', validTo: PAST }, undefined],
+      [{ reasonText: 'corrección' }, new Date(PAST)],
+    ] as const) {
+      const d = build();
+      const original = draft({
+        statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
+        validTo: inherited,
+      });
+      d.requestsRepo.findById.mockResolvedValue(original);
+      await expectValidToInPast(d, d.service.replace('mr1', dto as any, actor));
+      expect(original.statusConceptId).toBe(CLIN.MEDICATION_REQUEST_ISSUED);
+    }
+  });
+
+  it('reemplazar una receta con validTo pasado dando uno futuro → pasa', async () => {
+    const d = build();
+    d.requestsRepo.findById.mockResolvedValue(
+      draft({
+        statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
+        validTo: new Date(PAST),
+      }),
+    );
+    d.requestsRepo.create.mockReturnValue(draft({ id: 'mr2' }));
+    const res = await d.service.replace(
+      'mr1',
+      { reasonText: 'corrección', validTo: FUTURE } as any,
+      actor,
+    );
+    expect(res.id).toBe('mr2');
+  });
+
+  it('renovar con validTo pasado → 422', async () => {
+    const d = build();
+    d.requestsRepo.findById.mockResolvedValue(
+      draft({ statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED }),
+    );
+    await expectValidToInPast(
+      d,
+      d.service.renew('mr1', { validTo: PAST } as any, actor),
     );
   });
 });

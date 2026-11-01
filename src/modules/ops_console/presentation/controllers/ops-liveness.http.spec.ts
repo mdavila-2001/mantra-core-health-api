@@ -303,8 +303,8 @@ describe('sonda de vida de instancias (HTTP)', () => {
           'processInternals',
         ],
       });
-      expect(res.body.summary.total).toBe(33);
-      expect(res.body.instances).toHaveLength(33);
+      expect(res.body.summary.total).toBe(35);
+      expect(res.body.instances).toHaveLength(35);
       expect(res.body.instances[0]).toMatchObject({
         id: 'api',
         type: 'API',
@@ -352,7 +352,7 @@ describe('sonda de vida de instancias (HTTP)', () => {
       const workers = res.body.instances.filter(
         (i: { type: string }) => i.type === 'WORKER',
       );
-      expect(workers).toHaveLength(25);
+      expect(workers).toHaveLength(27);
       for (const worker of workers) {
         expect(worker).toMatchObject({
           state: 'SIN_DATO',

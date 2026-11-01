@@ -141,4 +141,64 @@ export class Encounters {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a level of care concept.
+   */
+  @Property({
+    fieldName: 'level_of_care_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  levelOfCareConceptId?: string;
+
+  /**
+   * Identificador asociado a admission source concept.
+   */
+  @Property({
+    fieldName: 'admission_source_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  admissionSourceConceptId?: string;
+
+  /**
+   * Identificador asociado a discharge disposition concept.
+   */
+  @Property({
+    fieldName: 'discharge_disposition_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  dischargeDispositionConceptId?: string;
+
+  /**
+   * Identificador asociado a isolation precaution concept.
+   */
+  @Property({
+    fieldName: 'isolation_precaution_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  isolationPrecautionConceptId?: string;
+
+  /**
+   * Valor de isolation organism text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'isolation_organism_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  isolationOrganismText?: string;
+
+  /**
+   * Valor de expected discharge at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'expected_discharge_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  expectedDischargeAt?: Date;
 }

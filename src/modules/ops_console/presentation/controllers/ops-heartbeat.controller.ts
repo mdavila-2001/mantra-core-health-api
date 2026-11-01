@@ -5,14 +5,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '../../../../common';
+import { NotAudited, Roles } from '../../../../common';
 import { InstanceLivenessService } from '../../application/instance-liveness.service';
 import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
 
 /**
  * Ingesta de latidos de los workers. Sólo el rol `SYSTEM` (el que firma
  * `SystemApiClient`): un administrador no puede fabricar la vida de un
- * proceso. Sin `@Audited` a propósito: 25 workers × 4/min serían 100 filas de
+ * proceso. Sin `@Audited` a propósito: 27 workers × 4/min serían 108 filas de
  * auditoría por minuto sin valor. La ruta está excluida de la medición HTTP
  * (`EXCLUDED_HTTP_PATHS`).
  */
@@ -23,6 +23,9 @@ export class OpsHeartbeatController {
   constructor(private readonly liveness: InstanceLivenessService) {}
 
   @Post('heartbeats')
+  @NotAudited(
+    'Latido de 27 workers × 4/min: sobrescribe el estado de la instancia; auditarlo serían ~108 filas/min sin valor.',
+  )
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

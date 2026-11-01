@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { loadInstanceLivenessEnv } from './instance-liveness.env';
 
 describe('loadInstanceLivenessEnv', () => {
-  it('sin variables: 15 s de intervalo, 30 s degradada, 60 s caída y los 24 workers no opcionales', () => {
+  it('sin variables: 15 s de intervalo, 30 s degradada, 60 s caída y los 26 workers no opcionales', () => {
     const env = loadInstanceLivenessEnv({});
     expect(env.thresholds).toEqual({
       workerHeartbeatIntervalMs: 15_000,
@@ -12,7 +12,7 @@ describe('loadInstanceLivenessEnv', () => {
       dependencyProbeTimeoutMs: 3_000,
       clockToleranceMs: 5_000,
     });
-    expect(env.requiredWorkers.size).toBe(24);
+    expect(env.requiredWorkers.size).toBe(26);
     expect(env.requiredWorkers.has('worker-files')).toBe(false);
     expect(env.requiredWorkers.has('worker-messaging')).toBe(true);
   });

@@ -40,6 +40,7 @@ import {
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
+  DiagnosticsWorklistService,
   DiagnosticsScopeService,
   DiagnosticsPatientAccessService,
 } from './services';
@@ -53,6 +54,7 @@ import {
   MediaQualityRepository,
   DiagnosticOrdersRepository,
   LabReceptionRepository,
+  ServiceRequestWorklistRepository,
   ClinicalRefsRepository,
 } from './repositories';
 
@@ -97,6 +99,7 @@ import {
     // `scheduling` provee `AppointmentsRepository`.
     DiagnosticOrdersRepository,
     LabReceptionRepository,
+    ServiceRequestWorklistRepository,
     ClinicalRefsRepository,
     // Nombre de la sede sugerida en la orden: lectura sin estado, se registra la clase.
     SuggestedSiteNamesReader,
@@ -111,6 +114,7 @@ import {
     DiagnosticsOrdersService,
     DiagnosticsPatientResultsService,
     DiagnosticsReceptionService,
+    DiagnosticsWorklistService,
     // Alcance de tenant de los writes clínicos y política paciente–profesional.
     DiagnosticsScopeService,
     DiagnosticsPatientAccessService,

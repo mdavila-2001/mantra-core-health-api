@@ -19,11 +19,19 @@ import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { SecretCipherError } from '../errors/secret-cipher.error';
 import { redactShareTokenInUrl } from '../../logging/share-token-redaction';
+import { exclusionReasonOf } from './exclusion-constraint-reasons';
 import {
   APP_ATTR,
   TracingService,
   applyTraceHeader,
 } from '../../observability';
+import { errorSink } from '../../observability/capture/error-sink';
+import {
+  currentRequestContext,
+  requestIdOf,
+  routeTemplateOfRequest,
+} from '../../observability/capture/request-context';
+import { currentTraceContext } from '../../observability/trace-context.service';
 import {
   describeForDiagnostics,
   errorDiagnosticsEnabled,
@@ -256,6 +264,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: pathOf(request),
     };
 
+    this.captureForObservability(request, {
+      status,
+      code,
+      reason,
+      exception,
+      message,
+      details,
+      internals,
+      correlationId,
+      userId,
+    });
+
     // La traza se marca ANTES de escribir la respuesta, mientras el span HTTP
     // sigue activo. Y la cabecera `x-trace-id` se aplica también aquí: un fallo
     // rechazado por un guard (401/403) no llega nunca al interceptor global, y
@@ -322,6 +342,56 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     response.status(status).json(body);
+  }
+
+  /**
+   * Entrega el error al sink del portal «Sistema» (`observability.error_*`).
+   *
+   * Corre ANTES de armar la respuesta pero no la toca: ni el cuerpo ni el log
+   * cambian. Todo lo que pueda fallar queda dentro del `try`: medir un error
+   * no puede producir otro.
+   */
+  private captureForObservability(
+    request: Request & {
+      id?: string | number;
+      resolvedTenantId?: string;
+    },
+    captured: {
+      status: number;
+      code: string;
+      reason?: string;
+      exception: unknown;
+      message: string;
+      details?: unknown;
+      internals?: unknown;
+      correlationId?: string;
+      userId?: string;
+    },
+  ): void {
+    if (!errorSink.isEnabled) return;
+    try {
+      const context = currentRequestContext();
+      errorSink.record({
+        status: captured.status,
+        code: captured.code,
+        reason: captured.reason,
+        exception: captured.exception,
+        clientMessage: captured.message,
+        method: request.method,
+        routeTemplate: routeTemplateOfRequest(request),
+        requestId: captured.correlationId ?? requestIdOf(request),
+        traceId: currentTraceContext().trace_id,
+        userId: captured.userId,
+        actorTenantId: request.resolvedTenantId,
+        durationMs: context
+          ? Number(process.hrtime.bigint() - context.startedAtNs) / 1e6
+          : undefined,
+        internals: captured.internals,
+        details: captured.details,
+      });
+    } catch {
+      // Medir no puede romper la respuesta de error.
+    }
   }
 
   /**
@@ -789,7 +859,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // este caso caía al 500 genérico del `default`, y quien movía un horario
       // veía "Ocurrió un error inesperado" en vez de que hubo un choque —el
       // pedido explícito era mostrar el conflicto, no esconderlo.
-      case '23P01':
+      case '23P01': {
+        // CONTRATO-F2-F5 §0.2: la restricción conocida responde con su
+        // `reason` de contrato (la misma que la pre-validación de la API).
+        const mapped = exclusionReasonOf(
+          typeof cause.constraint === 'string' ? cause.constraint : undefined,
+        );
+        if (mapped) {
+          return {
+            status: HttpStatus.CONFLICT,
+            code: ErrorCode.CONFLICT,
+            message: mapped.message,
+            reason: mapped.reason,
+            internals,
+          };
+        }
         return {
           status: HttpStatus.CONFLICT,
           code: ErrorCode.CONFLICT,
@@ -798,6 +882,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           reason: SystemErrorReason.EXCLUSION_CONSTRAINT_VIOLATION,
           internals,
         };
+      }
       // Valor ausente, fuera de restricción o con sintaxis inválida: es un
       // defecto de forma del cuerpo, así que 400 + `VALIDATION_FAILED`, igual
       // que cuando lo detecta el `ValidationPipe`. Antes salía 422 con ese

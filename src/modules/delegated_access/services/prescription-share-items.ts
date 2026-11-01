@@ -14,6 +14,8 @@ export interface ShareResourceRef {
   readonly patientProfileId: string;
   readonly resourceTypeConceptId: string;
   readonly resourceId: string;
+  /** Cuándo se creó el enlace: lo emitido después no se comparte. */
+  readonly createdAt?: Date;
 }
 
 /** Concepto del tipo de recurso → nombre que viaja en la API. */
@@ -49,6 +51,28 @@ export function sharesEncounter(link: ShareResourceRef): boolean {
 }
 
 /**
+ * Lo que el enlace compartió al crearse. Un enlace de encuentro se resuelve al
+ * leer, así que un ítem emitido en ese encuentro después de compartir (incluso
+ * por otro médico) aparecería sin un consentimiento nuevo: se descarta por su
+ * `issued_at` frente al `created_at` del enlace. Un ítem sin `issued_at` no
+ * está emitido y ya no es vigente. El enlace de un solo ítem no cambia.
+ *
+ * @param link - Fila del enlace.
+ * @param items - Ítems del recurso del enlace.
+ * @returns Los ítems sin los emitidos después de crear el enlace.
+ */
+export function itemsSharedAtCreation(
+  link: ShareResourceRef,
+  items: readonly MedicationRequests[],
+): MedicationRequests[] {
+  const createdAt = link.createdAt;
+  if (!sharesEncounter(link) || !createdAt) return [...items];
+  return items.filter(
+    (item) => !item.issuedAt || item.issuedAt.getTime() <= createdAt.getTime(),
+  );
+}
+
+/**
  * Los ítems emitidos y vigentes (S-2).
  *
  * @param items - Ítems de la receta, en cualquier estado.
@@ -68,19 +92,23 @@ export function activeItemsOf(
  *
  * @param link - Fila del enlace.
  * @param items - Ítems leídos.
- * @returns Los del encuentro (o el fármaco) del enlace.
+ * @returns Los del encuentro (o el fármaco) del enlace, sin los emitidos
+ * después de crearlo ({@link itemsSharedAtCreation}).
  */
 export function itemsOfLink(
   link: ShareResourceRef,
   items: readonly MedicationRequests[],
 ): MedicationRequests[] {
   const isEncounter = sharesEncounter(link);
-  return items.filter(
-    (item) =>
-      item.patientProfileId === link.patientProfileId &&
-      (isEncounter
-        ? item.encounterId === link.resourceId
-        : item.id === link.resourceId),
+  return itemsSharedAtCreation(
+    link,
+    items.filter(
+      (item) =>
+        item.patientProfileId === link.patientProfileId &&
+        (isEncounter
+          ? item.encounterId === link.resourceId
+          : item.id === link.resourceId),
+    ),
   );
 }
 

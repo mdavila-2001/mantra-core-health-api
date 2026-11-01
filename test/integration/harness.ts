@@ -11,6 +11,7 @@ import {
   TokenService,
   createGlobalValidationPipe,
   createdBy,
+  stripEtagOnNoStore,
 } from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
@@ -222,6 +223,8 @@ export async function bootstrapTestApp(
   app.useLogger(app.get(Logger));
   app.flushLogs();
   app.useGlobalPipes(createGlobalValidationPipe());
+  // Mismo middleware que `main.ts` (api#1242): `no-store` sale sin `ETag`.
+  app.use(stripEtagOnNoStore);
   // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando
   // Nest conecta cada `@WebSocketGateway` al servidor.
   if (opts.realtime) {
@@ -652,12 +655,30 @@ async function readSchemaGraph(client: pg.Client): Promise<SchemaGraph> {
 }
 
 /**
+ * Filas que la limpieza no pudo borrar porque una tabla WORM las sigue
+ * nombrando, directa o transitivamente: tabla calificada → claves primarias.
+ */
+type Residuo = Map<string, Set<string>>;
+
+/**
  * Borra filas y todo lo que dependa de ellas, hijas antes que madre.
  *
  * El recorrido corta por ciclos con un registro de lo ya visitado:
  * `profiles.persons` se referencia a sí misma (`related_persons`) y sin ese corte
  * la recursión no terminaría. Los ids viajan como texto para no depender del tipo
  * de cada clave.
+ *
+ * Una fila que una tabla WORM nombra no se borra (el trigger lo prohíbe y la FK
+ * lo impide, y ninguna de las dos se debilita desde una prueba), y tampoco las
+ * filas de las que ella depende por una columna que no se puede anular: la
+ * admisión de un profesional queda nombrada por su bitácora inmutable
+ * (`practitioner_admission_events`, v4267), y con ella su perfil y su persona.
+ * Esas filas no se tocan: se anotan en `residuo` para que quien llama las
+ * declare como residuo permanente con {@link declararResiduoPermanente}, la
+ * misma regla que rige para los tenants fijados por `audit.audit_log`. Lo que
+ * cuelga de ellas y sí se puede borrar se borra igual.
+ *
+ * @param residuo - Acumulador compartido por toda la limpieza; se completa acá.
  */
 async function deleteWithDependents(
   client: pg.Client,
@@ -665,6 +686,7 @@ async function deleteWithDependents(
   table: string,
   ids: readonly string[],
   visited: Set<string>,
+  residuo: Residuo,
 ): Promise<number> {
   const pk = graph.primaryKey.get(table);
   if (pk === undefined || ids.length === 0 || graph.noBorrables.has(table))
@@ -675,10 +697,29 @@ async function deleteWithDependents(
   for (const id of pending) visited.add(`${table}:${id}`);
 
   let borradas = 0;
+  // Filas de esta tabla que una hija que no se puede borrar sigue reteniendo.
+  const retenidas = new Set<string>();
   // Hijas que se borran DESPUÉS de esta tabla, no antes. Ver `esDependenciaCircular`.
   const diferidas: { tabla: string; ids: string[] }[] = [];
   for (const edge of graph.edges.filter((e) => e.parentTable === table)) {
+    // Una referencia que se puede anular no retiene: el corte de ciclos de abajo
+    // la pone en NULL antes del `delete`.
+    const retiene =
+      !edge.childNullable || graph.noActualizables.has(edge.childTable);
+    if (graph.noBorrables.has(edge.childTable)) {
+      if (!retiene) continue;
+      const { rows } = await client.query<{ id: string }>(
+        `select t."${pk}"::text as id from ${table} t
+          where t."${pk}"::text = any($1::text[])
+            and exists (select 1 from ${edge.childTable} c
+                         where c."${edge.childColumn}"::text = t."${edge.parentColumn}"::text)`,
+        [pending],
+      );
+      for (const r of rows) retenidas.add(r.id);
+      continue;
+    }
     if (!graph.primaryKey.has(edge.childTable)) continue;
+    const childPk = graph.primaryKey.get(edge.childTable) as string;
     const referidos = await client.query<{
       /**
        * Valor de valor mantenido por la instancia.
@@ -698,25 +739,47 @@ async function deleteWithDependents(
        */
       id: string;
     }>(
-      `select "${graph.primaryKey.get(edge.childTable) as string}"::text as id
+      `select "${childPk}"::text as id
          from ${edge.childTable} where "${edge.childColumn}"::text = any($1::text[])`,
       [claves],
     );
+    const idsHijas = hijas.rows.map((r) => r.id);
     if (esDependenciaCircular(graph, edge)) {
-      diferidas.push({
-        tabla: edge.childTable,
-        ids: hijas.rows.map((r) => r.id),
-      });
+      diferidas.push({ tabla: edge.childTable, ids: idsHijas });
       continue;
     }
     borradas += await deleteWithDependents(
       client,
       graph,
       edge.childTable,
-      hijas.rows.map((r) => r.id),
+      idsHijas,
       visited,
+      residuo,
     );
+
+    const hijasRetenidas = idsHijas.filter((id) =>
+      residuo.get(edge.childTable)?.has(id),
+    );
+    if (retiene && hijasRetenidas.length > 0) {
+      const { rows } = await client.query<{ id: string }>(
+        `select t."${pk}"::text as id from ${table} t
+          where t."${pk}"::text = any($1::text[])
+            and t."${edge.parentColumn}"::text in (
+              select c."${edge.childColumn}"::text from ${edge.childTable} c
+               where c."${childPk}"::text = any($2::text[]))`,
+        [pending, hijasRetenidas],
+      );
+      for (const r of rows) retenidas.add(r.id);
+    }
   }
+
+  const borrables = pending.filter((id) => !retenidas.has(id));
+  if (retenidas.size > 0) {
+    const anotadas = residuo.get(table) ?? new Set<string>();
+    for (const id of retenidas) anotadas.add(id);
+    residuo.set(table, anotadas);
+  }
+  if (borrables.length === 0) return borradas;
 
   // Corte de ciclos: dos tablas pueden apuntarse entre sí —una nota tiene versiones
   // y a la vez declara cuál es su versión vigente—, así que el recorrido no alcanza:
@@ -734,13 +797,13 @@ async function deleteWithDependents(
         where "${edge.childColumn}"::text in (
           select "${edge.parentColumn}"::text from ${table}
            where "${pk}"::text = any($1::text[]))`,
-      [pending],
+      [borrables],
     );
   }
 
   const res = await client.query(
     `delete from ${table} where "${pk}"::text = any($1::text[])`,
-    [pending],
+    [borrables],
   );
   borradas += res.rowCount ?? 0;
 
@@ -752,9 +815,74 @@ async function deleteWithDependents(
       tabla,
       hijasDiferidas,
       visited,
+      residuo,
     );
   }
   return borradas;
+}
+
+/**
+ * Admite el residuo que dejó la limpieza, o falla explicando por qué no.
+ *
+ * Misma guarda que los tenants fijados por la bitácora
+ * ({@link deleteRegisteredOrganizations}): una fila que una tabla WORM nombra
+ * queda para siempre, así que sólo se acepta en una base que se declare
+ * descartable ({@link assertPermanentResidueTarget}). Sobre una base compartida
+ * la limpieza lanza con el detalle, y nunca desactiva un trigger.
+ *
+ * @param residuo - Lo que no se pudo borrar, por tabla.
+ * @param descripcion - Qué se estaba limpiando, para el mensaje.
+ * @throws Si hay residuo y la base no se declara descartable.
+ */
+function declararResiduoPermanente(
+  residuo: Residuo,
+  descripcion: string,
+): void {
+  if (residuo.size === 0) return;
+  try {
+    assertPermanentResidueTarget(resolveResetTarget(process.env), process.env);
+  } catch (err) {
+    const detalle = [...residuo]
+      .map(([tabla, ids]) => `${tabla} (${ids.size})`)
+      .join(', ');
+    throw new Error(
+      `No se pudo limpiar el fixture ${descripcion}: una tabla WORM (trigger ` +
+        `forbid) sigue nombrando ${detalle} y no se puede borrar. ` +
+        (err as Error).message,
+    );
+  }
+}
+
+/**
+ * Cuentas que alguna fila del residuo nombra por FK: no se pueden borrar sin
+ * romper esa FK, así que se anonimizan como las que fija la bitácora.
+ *
+ * @param client - Conexión ya abierta.
+ * @param graph - El grafo de FK, ya leído.
+ * @param residuo - Lo que no se pudo borrar, por tabla.
+ * @returns Los ids de `iam.users` que el residuo referencia.
+ */
+async function cuentasNombradasPorResiduo(
+  client: pg.Client,
+  graph: SchemaGraph,
+  residuo: Residuo,
+): Promise<Set<string>> {
+  const cuentas = new Set<string>();
+  for (const [tabla, ids] of residuo) {
+    const pk = graph.primaryKey.get(tabla);
+    if (pk === undefined) continue;
+    for (const edge of graph.edges.filter(
+      (e) => e.childTable === tabla && e.parentTable === 'iam.users',
+    )) {
+      const { rows } = await client.query<{ id: string }>(
+        `select distinct "${edge.childColumn}"::text as id from ${tabla}
+          where "${pk}"::text = any($1::text[]) and "${edge.childColumn}" is not null`,
+        [[...ids]],
+      );
+      for (const r of rows) cuentas.add(r.id);
+    }
+  }
+  return cuentas;
 }
 
 /**
@@ -827,14 +955,23 @@ export async function deleteFixturesByRunMark(
         where patient_code like $2`,
       [medicos, pacientes],
     );
+    const residuo: Residuo = new Map();
     await deleteWithDependents(
       client,
       graph,
       'profiles.persons',
       rows.map((r) => r.id),
       new Set<string>(),
+      residuo,
     );
+    declararResiduoPermanente(residuo, `con la marca ${marca}`);
 
+    // Lo que una tabla WORM retuvo ya quedó declarado arriba; cualquier otro
+    // sobreviviente es un huérfano.
+    const declarados = [
+      ...(residuo.get('profiles.health_practitioner_profiles') ?? []),
+      ...(residuo.get('profiles.patient_profiles') ?? []),
+    ];
     const { rows: resto } = await client.query<{
       /**
        * Valor de total mantenido por la instancia.
@@ -842,10 +979,12 @@ export async function deleteFixturesByRunMark(
       total: string;
     }>(
       `select (select count(*) from profiles.health_practitioner_profiles
-                where practitioner_code like $1)
+                where practitioner_code like $1
+                  and not (profile_id::text = any($3::text[])))
             + (select count(*) from profiles.patient_profiles
-                where patient_code like $2) as total`,
-      [medicos, pacientes],
+                where patient_code like $2
+                  and not (profile_id::text = any($3::text[]))) as total`,
+      [medicos, pacientes, declarados],
     );
     const pendientes = Number(resto[0]?.total ?? 0);
     if (pendientes > 0) {
@@ -959,6 +1098,9 @@ const OWNER_SIN_FK = [
  * @param conservadas - Cuentas que no se borran aunque ninguna tabla WORM las
  *   nombre, porque una fila que quien llama deja viva las referencia; se
  *   anonimizan igual que las fijadas por la bitácora.
+ * @param residuo - Lo que la limpieza ya no pudo borrar (compartido con quien
+ *   llama). Se declara con {@link declararResiduoPermanente}, y las cuentas
+ *   del fixture que esas filas nombran se anonimizan en vez de borrarse.
  * @throws Si algo sobrevive al borrado: un huérfano en silencio es
  *   exactamente el defecto que este helper existe para impedir.
  */
@@ -970,6 +1112,7 @@ async function deleteAccounts(
   personIds: readonly string[],
   descripcion: string,
   conservadas: ReadonlySet<string> = new Set(),
+  residuo: Residuo = new Map(),
 ): Promise<void> {
   for (const { table, column } of CUENTA_ESCRIBE_EN) {
     const pk = graph.primaryKey.get(table);
@@ -984,8 +1127,19 @@ async function deleteAccounts(
       table,
       rows.map((r) => r.id),
       visited,
+      residuo,
     );
   }
+
+  declararResiduoPermanente(residuo, descripcion);
+  // Una fila del residuo que nombra a una cuenta del fixture (p. ej. la admisión
+  // retenida por su bitácora, `created_by_user_id`) impide borrarla: se anonimiza.
+  // Sólo las del fixture: el residuo también puede nombrar al admin de pruebas.
+  const nombradas = await cuentasNombradasPorResiduo(client, graph, residuo);
+  const conservar = new Set([
+    ...conservadas,
+    ...userIds.filter((id) => nombradas.has(id)),
+  ]);
 
   // Después de CUENTA_ESCRIBE_EN: `practice_sites.address_id` apunta acá.
   for (const tabla of OWNER_SIN_FK) {
@@ -999,7 +1153,7 @@ async function deleteAccounts(
     client,
     graph,
     userIds,
-    conservadas,
+    conservar,
   );
   const borrables = userIds.filter((id) => !anonimizadas.has(id));
 
@@ -1156,6 +1310,7 @@ export async function deleteRegisteredPractitioners(
   try {
     const graph = await readSchemaGraph(client);
     const visited = new Set<string>();
+    const residuo: Residuo = new Map();
 
     await deleteWithDependents(
       client,
@@ -1163,6 +1318,7 @@ export async function deleteRegisteredPractitioners(
       'profiles.persons',
       personIds,
       visited,
+      residuo,
     );
 
     await deleteAccounts(
@@ -1172,7 +1328,24 @@ export async function deleteRegisteredPractitioners(
       userIds,
       personIds,
       'de profesional',
+      new Set(),
+      residuo,
     );
+
+    // Una persona que sobrevive sin figurar en el residuo declarado es un
+    // huérfano en silencio, justo lo que esta limpieza existe para impedir.
+    const retenidas = residuo.get('profiles.persons') ?? new Set<string>();
+    const { rows: resto } = await client.query<{ total: string }>(
+      `select count(*)::text as total from profiles.persons
+        where id::text = any($1::text[]) and not (id::text = any($2::text[]))`,
+      [personIds, [...retenidas]],
+    );
+    const pendientes = Number(resto[0]?.total ?? 0);
+    if (pendientes > 0) {
+      throw new Error(
+        `La limpieza dejó ${pendientes} persona(s) de profesional sin declarar en la base compartida.`,
+      );
+    }
   } finally {
     await client.end();
   }
@@ -1274,6 +1447,7 @@ export async function deleteRegisteredOrganizations(
   try {
     const graph = await readSchemaGraph(client);
     const visited = new Set<string>();
+    const residuo: Residuo = new Map();
 
     // Antes de que el bucle de abajo borre las filas de
     // `tenant_legal_representatives`: son las únicas que nombran a estas
@@ -1299,6 +1473,7 @@ export async function deleteRegisteredOrganizations(
         table,
         rows.map((r) => r.id),
         visited,
+        residuo,
       );
     }
 
@@ -1399,6 +1574,7 @@ export async function deleteRegisteredOrganizations(
       'profiles.persons',
       personIds,
       visited,
+      residuo,
     );
 
     await deleteAccounts(
@@ -1409,6 +1585,7 @@ export async function deleteRegisteredOrganizations(
       personIds,
       'de organización',
       conservadas,
+      residuo,
     );
   } finally {
     await client.end();

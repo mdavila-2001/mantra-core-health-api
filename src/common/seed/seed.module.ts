@@ -58,6 +58,9 @@ import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
+import { CatalogDocumentationSeedService } from './catalog/catalog-documentation-seed.service';
+import { MutabilityRegistrySeedService } from './mutability/mutability-registry-seed.service';
+import { FrontendRoutesSeedService } from '../../modules/read_models/seed/frontend-routes-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -94,6 +97,7 @@ import { CommonModule } from '../../modules/common/common.module';
 import { CommunityModule } from '../../modules/community/community.module';
 import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { PersonalSpaceMembershipsSeedService } from './personal-space-memberships-seed.service';
 import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import { SeedCensusService } from './seed-census.service';
 import { ToolRegistrySeedService } from './tool-registry-seed.service';
@@ -174,6 +178,8 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
     TelemetryUxHeatmapSeedService,
+    MutabilityRegistrySeedService,
+    CatalogDocumentationSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     AdminDivisionsSeedService,
@@ -207,9 +213,11 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     StickerPackSeedService,
     PadronOrganizationsSeedService,
     PadronOrgAdminsSeedService,
+    PersonalSpaceMembershipsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,
+    FrontendRoutesSeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -218,6 +226,8 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
     TelemetryUxHeatmapSeedService,
+    MutabilityRegistrySeedService,
+    CatalogDocumentationSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     AdminDivisionsSeedService,
@@ -249,6 +259,7 @@ import { ToolRegistrySeedService } from './tool-registry-seed.service';
     StickerPackSeedService,
     PadronOrganizationsSeedService,
     PadronOrgAdminsSeedService,
+    PersonalSpaceMembershipsSeedService,
     PractitionerShowcaseSeed,
     SeedCensusService,
     ToolRegistrySeedService,

@@ -115,6 +115,9 @@ export class IngestOnboardingEventsDto {
   readonly events!: OnboardingEventDto[];
 }
 
+/**
+ * @deprecated Maqueta en memoria; ver `TelemetryOnboardingAnalyticsService` para lo que falta antes de retirarla. El front aún la consume.
+ */
 @ApiTags('telemetry-onboarding-analytics')
 @Controller()
 export class TelemetryOnboardingAnalyticsController {

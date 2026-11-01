@@ -643,4 +643,143 @@ describe('CommunityVisibilityService', () => {
       });
     });
   });
+  /**
+   * Un `SECURITY_ADMIN`/`SUPERADMIN`/`SYSTEM` concedido sólo en el tenant A
+   * figura en `roles`, pero `scopedRoles` lo limita a A: sobre un perfil o un
+   * grupo del tenant B no es plataforma.
+   */
+  describe('rol de plataforma acotado a un tenant', () => {
+    const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
+    const scopedTo = (role: string, tenantId: string) =>
+      ({
+        id: 'admin-a',
+        roles: [role],
+        scopedRoles: { [tenantId]: [role] },
+      }) as any;
+    const profileOf = (tenantId: string) => ({
+      id: `p-${tenantId}`,
+      tenantId,
+      targetId: 'otra-persona',
+      targetTypeConceptId: 'tipo-persona',
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      createdByUserId: 'otro',
+    });
+
+    it('isPlatform: el acotado a A sólo es plataforma en A; el global, en ambos', () => {
+      const d = build();
+      for (const role of PLATFORM) {
+        const scoped = scopedTo(role, 'tenant-a');
+        expect(d.service.isPlatform(scoped, 'tenant-a')).toBe(true);
+        expect(d.service.isPlatform(scoped, 'tenant-b')).toBe(false);
+        // Sin tenant objetivo sólo cuenta el global.
+        expect(d.service.isPlatform(scoped, undefined)).toBe(false);
+        expect(d.service.isPlatform(scoped, null)).toBe(false);
+
+        const global = {
+          id: 'admin-g',
+          roles: [role, 'CLINICIAN'],
+          scopedRoles: { 'tenant-a': ['CLINICIAN'] },
+        } as any;
+        expect(d.service.isPlatform(global, 'tenant-a')).toBe(true);
+        expect(d.service.isPlatform(global, 'tenant-b')).toBe(true);
+        expect(d.service.isPlatform(global, undefined)).toBe(true);
+      }
+    });
+
+    it('assertOwnProfile: acotado a A NO lee el perfil ajeno de B', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(profileOf('tenant-b'));
+        await expect(
+          d.service.assertOwnProfile(
+            em,
+            'p-tenant-b',
+            scopedTo(role, 'tenant-a'),
+          ),
+        ).rejects.toThrow(ForbiddenException);
+      }
+    });
+
+    it('assertOwnProfile: acotado a A sí lee el perfil ajeno de A', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(profileOf('tenant-a'));
+        await expect(
+          d.service.assertOwnProfile(
+            em,
+            'p-tenant-a',
+            scopedTo(role, 'tenant-a'),
+          ),
+        ).resolves.toBeUndefined();
+      }
+    });
+
+    it('assertOwnProfile: acotado y perfil inexistente, 403 (no hay tenant que lo habilite)', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.assertOwnProfile(
+          em,
+          'p-x',
+          scopedTo('SECURITY_ADMIN', 'tenant-a'),
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('assertOwnMessagingProfile: acotado a A no abre la bandeja de B y sí la de A', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(profileOf('tenant-b'));
+        await expect(
+          d.service.assertOwnMessagingProfile(
+            emWithoutTenant,
+            'p-tenant-b',
+            scopedTo(role, 'tenant-a'),
+          ),
+        ).rejects.toThrow(ForbiddenException);
+
+        d.profilesRepo.findById.mockResolvedValue(profileOf('tenant-a'));
+        await expect(
+          d.service.assertOwnMessagingProfile(
+            emWithoutTenant,
+            'p-tenant-a',
+            scopedTo(role, 'tenant-a'),
+          ),
+        ).resolves.toBe('PLATFORM');
+      }
+    });
+
+    it('resolveActorProfileId: acotado a A no mira con un perfil de B; sí con uno de A', async () => {
+      const d = build();
+      const actor = scopedTo('SECURITY_ADMIN', 'tenant-a');
+      d.profilesRepo.findById.mockResolvedValue(profileOf('tenant-b'));
+      await expect(
+        d.service.resolveActorProfileId(em, actor, 'p-tenant-b'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      d.profilesRepo.findById.mockResolvedValue(profileOf('tenant-a'));
+      await expect(
+        d.service.resolveActorProfileId(em, actor, 'p-tenant-a'),
+      ).resolves.toBe('p-tenant-a');
+    });
+
+    it('global: lee perfiles y bandejas de A y de B sin cargar el perfil', async () => {
+      for (const role of PLATFORM) {
+        const d = build();
+        const actor = { id: 'admin-g', roles: [role] } as any;
+        for (const id of ['p-tenant-a', 'p-tenant-b']) {
+          await expect(
+            d.service.assertOwnProfile(em, id, actor),
+          ).resolves.toBeUndefined();
+          await expect(
+            d.service.assertOwnMessagingProfile(em, id, actor),
+          ).resolves.toBe('PLATFORM');
+          await expect(
+            d.service.resolveActorProfileId(em, actor, id),
+          ).resolves.toBe(id);
+        }
+        expect(d.profilesRepo.findById).not.toHaveBeenCalled();
+      }
+    });
+  });
 });

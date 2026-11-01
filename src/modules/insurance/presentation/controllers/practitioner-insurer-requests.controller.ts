@@ -115,7 +115,7 @@ export class PractitionerInsurerRequestsController {
 /**
  * El lado de la aseguradora: quiénes piden trabajar con ella.
  *
- * **Sin `@Roles`**, como su bandeja de reclamos: la barrera depende de a QUÉ
+ * **`@Roles()` vacío** —sin rol global—, como su bandeja de reclamos: la barrera depende de a QUÉ
  * aseguradora pertenece la sesión, no de un rol fijo. La evalúa
  * `InsurerContextService` y la compañía sale del tenant activo.
  */
@@ -132,6 +132,7 @@ export class InsurerPractitionerRequestsController {
 
   /** La bandeja: pendientes primero, después lo ya decidido. */
   @Get()
+  @Roles()
   @ApiOperation({
     summary:
       'Solicitudes de profesionales que piden trabajar con la aseguradora activa',
@@ -154,6 +155,7 @@ export class InsurerPractitionerRequestsController {
     entityId: 'param:id',
   })
   @Post(':id/approve')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aprobar la solicitud de un profesional' })
   @ApiOkResponse({ type: ReceivedPractitionerInsurerRequestDto })
@@ -175,6 +177,7 @@ export class InsurerPractitionerRequestsController {
     entityId: 'param:id',
   })
   @Post(':id/reject')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rechazar la solicitud de un profesional' })
   @ApiOkResponse({ type: ReceivedPractitionerInsurerRequestDto })

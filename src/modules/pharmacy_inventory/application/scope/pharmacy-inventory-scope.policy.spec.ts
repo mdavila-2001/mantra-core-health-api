@@ -161,7 +161,7 @@ describe('PharmacyInventoryScopePolicy', () => {
           pharmacyProductId: 'prod-1',
           inventoryLotId: 'lot-1',
         }),
-      ).resolves.toBeUndefined();
+      ).resolves.toMatchObject({ id: 'loc-1' });
       await expect(
         policy.requireLocationInPharmacy(tx, pharmacy, 'loc-1b'),
       ).resolves.toMatchObject({ id: 'loc-1b' });
@@ -175,7 +175,7 @@ describe('PharmacyInventoryScopePolicy', () => {
           inventoryLocationId: 'loc-1',
           pharmacyProductId: 'prod-1',
         }),
-      ).resolves.toBeUndefined();
+      ).resolves.toMatchObject({ id: 'loc-1' });
     });
 
     it.each([

@@ -1,7 +1,11 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
+import {
+  getCurrentTenantId,
+  roleAuthorizesInTenant,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../scheduling/infrastructure/repositories';
@@ -216,7 +220,9 @@ export class ClinicalReadService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Comodín sólo el global, como en `RolesGuard`: la historia no es de ningún
+    // tenant, así que un `SUPERADMIN` acotado en `scopedRoles` no pasa (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
 
     if (!actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
       await this.assertOwnRecord(patientProfileId, actor);
@@ -312,7 +318,9 @@ export class ClinicalReadService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Comodín sólo el global, como en `RolesGuard`: la historia no es de ningún
+    // tenant, así que un `SUPERADMIN` acotado en `scopedRoles` no pasa (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
 
     if (actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
       const em = this.em.fork();
@@ -775,6 +783,7 @@ export class ClinicalReadService {
         formInstanceId: row.formInstanceId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
+        quantityDecimal: quantityOf(row.quantityDecimal),
         validFrom: row.validFrom,
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
@@ -857,4 +866,11 @@ export class ClinicalReadService {
     }
     return rows;
   }
+}
+
+/** `numeric` de la cantidad recetada (texto) a número; sin cantidad, ausente. */
+function quantityOf(value: string | null | undefined): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }

@@ -86,7 +86,7 @@ export class AllergyIntolerances {
    * `ix_allergy_intolerances_encounter_id`. Parche para bases ya pobladas:
    * `2026-10-23_allergy_intolerances_encounter_id.sql`.
    */
-  @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters
+  @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters (inferida)
   encounterId?: string;
 
   /**

@@ -13,6 +13,19 @@ export interface OnboardingEventPayload {
   readonly timestamp: string;
 }
 
+/**
+ * @deprecated Maqueta en memoria con cifras fijas (H2.S2.M2 del plan de uso y
+ * errores). El front la sigue consumiendo (`core/onboarding/onboarding-draft.client.ts`,
+ * `core/data-access/admin-portal/platform.client.ts` → `features/admin/web-analytics`
+ * y `measurement`), así que NO se retira todavía. Falta para retirarla:
+ *  1. el front debe emitir los pasos de alta como eventos `alta_inicio`/`alta_paso`/
+ *     `alta_completa` por `POST /telemetry/activity-events`;
+ *  2. sembrar embudos reales (`funnel_definitions`) con esos pasos, para que
+ *     `GET /admin/analytics/funnels/:id/report` reemplace a `onboarding/funnel`;
+ *  3. el heatmap por campo pasa a `GET /admin/analytics/heatmap` (clics por selector
+ *     `objetivo`) y `web-analytics.ts`/`measurement.ts` dejan de llamar a `onboarding/*`.
+ * Hasta entonces nada de esto se persiste ni mide al usuario real.
+ */
 @Injectable()
 export class TelemetryOnboardingAnalyticsService {
   // Almacén en memoria de eventos para cálculo de embudos y mapas de calor

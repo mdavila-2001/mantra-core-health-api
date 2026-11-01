@@ -57,6 +57,12 @@ export interface BulkHandler<
    * filas con la misma clave son la misma cosa (la segunda es un duplicado).
    */
   keyOf(raw: Record<string, unknown>): string | null;
+  /**
+   * Otras claves que dos filas del mismo pedido no pueden compartir, además de
+   * la principal (el mismo producto oficial con dos códigos, por ejemplo). Dos
+   * filas que comparten una se rechazan las dos, como con la principal.
+   */
+  otherKeysOf?(raw: Record<string, unknown>): readonly BulkOtherKey[];
   /** Lo guardado con esa clave en la farmacia, o `null`. */
   findExisting(
     tx: EntityManager,
@@ -75,6 +81,21 @@ export interface BulkHandler<
     existing: Existing,
     row: UpdateRow,
   ): Promise<{ id: string; changed: boolean }>;
+  /**
+   * Avisos de una fila que se carga igual (o se cargaría, en la vista previa),
+   * leídos de lo que quedó guardado en la transacción de la fila.
+   */
+  warningsFor?(
+    tx: EntityManager,
+    ctx: BulkContext,
+    id: string,
+  ): Promise<readonly BulkRowError[]>;
+}
+
+/** Una clave secundaria de la fila y el campo que la trae. */
+export interface BulkOtherKey {
+  readonly field: string;
+  readonly key: string;
 }
 
 /** El texto recortado de un campo de la fila, o `null` si no es un texto con algo. */

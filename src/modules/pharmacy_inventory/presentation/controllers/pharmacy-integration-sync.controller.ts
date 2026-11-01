@@ -1,11 +1,14 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -24,7 +27,11 @@ import {
 } from '../../../../common';
 import { IntegrationReadService } from '../../application/inventory-sync/integration-read.service';
 import { SyncExternalPharmacyCatalogUseCase } from '../../application/inventory-sync/sync-external-pharmacy-catalog.use-case';
+import { ConfigureExternalSystemUseCase } from '../../application/inventory-sync/configure-external-system.use-case';
 import {
+  ConfigureExternalSystemDto,
+  ExternalSystemProbeDto,
+  ExternalSystemResponseDto,
   ExternalCatalogListDto,
   IntegrationConnectionListDto,
   IntegrationMappingListDto,
@@ -47,7 +54,62 @@ export class PharmacyIntegrationSyncController {
   constructor(
     private readonly sync: SyncExternalPharmacyCatalogUseCase,
     private readonly reads: IntegrationReadService,
+    private readonly systems: ConfigureExternalSystemUseCase,
   ) {}
+
+  /**
+   * FAR-C9 · C9-3: la farmacia carga su sistema (formato, dirección, código y
+   * clave). Se prueba antes de guardar; si no responde, no queda nada.
+   */
+  @Audited({
+    action: 'PHARMACY_EXTERNAL_SYSTEM_CONFIGURED',
+    entity: 'pharmacy_integration_connection',
+    entityId: 'param:connectionId',
+  })
+  @Put(':pharmacyId/integration-connections/:connectionId/external-system')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Configurar el sistema propio de la farmacia' })
+  @ApiOkResponse({ type: ExternalSystemResponseDto })
+  configureExternalSystem(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
+    @Body() dto: ConfigureExternalSystemDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExternalSystemResponseDto> {
+    return this.systems.save({ pharmacyId, connectionId }, dto, actor);
+  }
+
+  /** Prueba el sistema que usa hoy la conexión. */
+  @Post(
+    ':pharmacyId/integration-connections/:connectionId/external-system/test',
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Probar el sistema de la farmacia' })
+  @ApiOkResponse({ type: ExternalSystemProbeDto })
+  probeExternalSystem(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExternalSystemProbeDto> {
+    return this.systems.probe({ pharmacyId, connectionId }, actor);
+  }
+
+  /** Quita el sistema propio: la conexión vuelve al del servidor o a manual. */
+  @Audited({
+    action: 'PHARMACY_EXTERNAL_SYSTEM_REMOVED',
+    entity: 'pharmacy_integration_connection',
+    entityId: 'param:connectionId',
+  })
+  @Delete(':pharmacyId/integration-connections/:connectionId/external-system')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Quitar el sistema propio de la farmacia' })
+  async removeExternalSystem(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.systems.remove({ pharmacyId, connectionId }, actor);
+  }
 
   @Audited({
     action: 'PHARMACY_INTEGRATION_SYNCED',

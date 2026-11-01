@@ -31,10 +31,12 @@ const RAW = {
     bot_unknown: 0,
     last_context_at: new Date('2026-10-07T10:00:00.000Z'),
   },
-  byDeviceType: [{ code: 'MOBILE', label: 'Mobile', contexts: 3 }],
-  byOsFamily: [{ code: 'IOS', label: 'iOS', contexts: 3 }],
-  byBrowserFamily: [{ code: 'SAFARI', label: 'Safari', contexts: 3 }],
-  byAppVersion: [{ code: '2.4.1', label: '2.4.1', contexts: 3 }],
+  byDeviceType: [{ code: 'MOBILE', label: 'Mobile', contexts: 3, sample: 3 }],
+  byOsFamily: [{ code: 'IOS', label: 'iOS', contexts: 3, sample: 3 }],
+  byBrowserFamily: [
+    { code: 'SAFARI', label: 'Safari', contexts: 3, sample: 3 },
+  ],
+  byAppVersion: [{ code: '2.4.1', label: '2.4.1', contexts: 3, sample: 3 }],
 };
 const QUERY = '?from=2026-10-01T00:00:00Z&to=2026-10-08T00:00:00Z';
 
@@ -142,6 +144,7 @@ describe('GET /admin/analytics/devices (contrato HTTP, repositorio doblado)', ()
         'byOsFamily',
         'lastContextAt',
         'notMeasured',
+        'scope',
         'totals',
         'window',
       ]);
@@ -217,13 +220,40 @@ describe('GET /admin/analytics/devices (contrato HTTP, repositorio doblado)', ()
       expect(devices).not.toHaveBeenCalled();
     });
 
-    it('sin tenant resuelto no hay barrido global: TENANT_REQUIRED y no consulta', async () => {
-      const res = await get(QUERY, 'SUPERADMIN', null).expect(422);
-      expect(res.body).toMatchObject({
-        code: 'PRECONDITION_FAILED',
-        reason: 'TENANT_REQUIRED',
+    it('X-5: SUPERADMIN sin tenant agrega entre organizaciones y suprime los grupos bajo minSample (piso 5)', async () => {
+      const res = await get(QUERY, 'SUPERADMIN', null).expect(200);
+      expect(res.body.scope).toEqual({
+        level: 'platform',
+        tenantId: null,
+        minSample: 5,
       });
-      expect(devices).not.toHaveBeenCalled();
+      expect(res.body.byDeviceType).toEqual([]);
+      expect(res.body.byAppVersion).toEqual([]);
+      expect(res.body.notMeasured[0]).toMatchObject({ metric: 'minSample' });
+      expect(devices.mock.calls[0][0].tenantId).toBeUndefined();
+      expect(devices.mock.calls[0][0].minSample).toBe(5);
+    });
+
+    it('X-5: minSample de la consulta sólo sube el umbral, nunca baja del piso', async () => {
+      const res = await get(`${QUERY}&minSample=1`, 'SUPERADMIN', null).expect(
+        200,
+      );
+      expect(res.body.scope.minSample).toBe(5);
+      const high = await get(
+        `${QUERY}&minSample=20`,
+        'SUPERADMIN',
+        null,
+      ).expect(200);
+      expect(high.body.scope.minSample).toBe(20);
+    });
+
+    it('con X-Tenant-Id rige la organización: sin supresión y tenant en el alcance', async () => {
+      const res = await get(QUERY, 'SUPERADMIN', TENANT).expect(200);
+      expect(res.body.scope).toMatchObject({
+        level: 'tenant',
+        tenantId: TENANT,
+      });
+      expect(res.body.byDeviceType).toHaveLength(1);
     });
   });
 });

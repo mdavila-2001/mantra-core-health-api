@@ -62,6 +62,11 @@ const DEFAULT_PAGE_SIZE = 50;
 /**
  * Endpoints con scope de tenant sobre `/tenants/{tenantId}`: sub-tenants, branches
  * y ciclo de vida de membresías. Capa fina que delega en los servicios de dominio.
+ *
+ * Las rutas con `@Roles()` vacío (O3-3) no piden rol global: leer exige
+ * membresía activa en esa organización
+ * (`TenantAdministrationService.assertCanRead`) y escribir, ser OWNER/ADMIN de
+ * ella o plataforma (`assertCanAdminister`).
  */
 @ApiTags('directory-tenants')
 @ApiBearerAuth()
@@ -132,6 +137,7 @@ export class TenantsController {
     entityId: 'param:tenantId',
   })
   @Patch(':tenantId')
+  @Roles()
   @ApiOperation({ summary: 'Editar los datos de la propia organización' })
   updateTenant(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -154,6 +160,7 @@ export class TenantsController {
     entityId: 'param:tenantId',
   })
   @Post(':tenantId/affiliation-documents')
+  @Roles()
   @ApiOperation({
     summary: 'Completar los documentos legales de la organización',
     description:
@@ -174,6 +181,7 @@ export class TenantsController {
    * verificarla (los seis papeles y el punto de la casa central).
    */
   @Get(':tenantId/pharmacy-readiness')
+  @Roles()
   @ApiOperation({
     summary: 'Requisitos pendientes para que la farmacia opere',
   })
@@ -189,6 +197,7 @@ export class TenantsController {
    * verificarlo (SEPREC, licencia de funcionamiento y SEDES).
    */
   @Get(':tenantId/laboratory-readiness')
+  @Roles()
   @ApiOperation({
     summary: 'Requisitos pendientes para que el laboratorio opere',
     description:
@@ -202,6 +211,7 @@ export class TenantsController {
   }
 
   @Get(':tenantId')
+  @Roles()
   @ApiOperation({ summary: 'Ficha de una organización' })
   getTenant(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -212,6 +222,7 @@ export class TenantsController {
 
   /** UC-04-03 (cara de lectura). */
   @Get(':tenantId/child-tenants')
+  @Roles()
   @ApiOperation({ summary: 'Sub-organizaciones de una organización' })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -230,6 +241,7 @@ export class TenantsController {
 
   /** UC-04-02 (cara de lectura). */
   @Get(':tenantId/branches')
+  @Roles()
   @ApiOperation({ summary: 'Sucursales de la organización' })
   listBranches(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -240,6 +252,7 @@ export class TenantsController {
 
   /** UC-04-04 (cara de lectura). */
   @Get(':tenantId/memberships')
+  @Roles()
   @ApiOperation({ summary: 'Plantilla de la organización' })
   @ApiQuery({
     name: 'status',
@@ -265,6 +278,7 @@ export class TenantsController {
 
   /** UC-04-05 (cara de lectura). */
   @Get(':tenantId/memberships/:membershipId/branch-assignments')
+  @Roles()
   @ApiOperation({ summary: 'Sucursales asignadas a una membresía' })
   listBranchAssignments(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -303,6 +317,7 @@ export class TenantsController {
     entityId: 'result.id',
   })
   @Post(':tenantId/branches')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear una branch / sede física con geolocalización',
@@ -322,6 +337,7 @@ export class TenantsController {
     entityId: 'param:branchId',
   })
   @Patch(':tenantId/branches/:branchId')
+  @Roles()
   @ApiOperation({ summary: 'Editar una sucursal' })
   updateBranch(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
@@ -339,6 +355,7 @@ export class TenantsController {
     entityId: 'result.id',
   })
   @Post(':tenantId/memberships')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Incorporar un usuario al tenant (membership)' })
   invite(
@@ -356,6 +373,7 @@ export class TenantsController {
     entityId: 'result.id',
   })
   @Post(':tenantId/memberships/:membershipId/branch-assignments')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Asignar la membresía a una branch' })
   assignBranch(
@@ -379,6 +397,7 @@ export class TenantsController {
     entityId: 'param:membershipId',
   })
   @Post(':tenantId/memberships/:membershipId/transfer')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transferir la membresía entre branches' })
   transfer(
@@ -397,6 +416,7 @@ export class TenantsController {
     entityId: 'param:membershipId',
   })
   @Patch(':tenantId/memberships/:membershipId/role')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cambiar rol / scope de la membresía' })
   changeRole(
@@ -420,6 +440,7 @@ export class TenantsController {
     entityId: 'param:membershipId',
   })
   @Post(':tenantId/memberships/:membershipId/offboard')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revocar / offboarding de un miembro' })
   offboard(

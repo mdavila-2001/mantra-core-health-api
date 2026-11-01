@@ -1,11 +1,16 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { IS_TENANT_AGNOSTIC_KEY } from '../tenant/tenant-agnostic.decorator';
 import {
   PLATFORM_TENANT_OPTIONAL_KEY,
   hasOptionalPlatformTenant,
 } from '../tenant/platform-tenant-optional.decorator';
+import {
+  PLATFORM_SCOPE_OPTIONAL_KEY,
+  isPlatformScopeRequest,
+} from '../tenant/platform-scope';
 import { resolveRequestTenantId } from '../tenant/tenant-resolution';
 import type { AuthenticatedRequest } from './authenticated-user.interface';
 
@@ -58,6 +63,20 @@ export class TenantScopeGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
     if (hasOptionalPlatformTenant(user, platformRoles)) return true;
+
+    // Ruta de plataforma de sólo lectura: sin cabecera, alcance plataforma para
+    // quien tiene un rol de plataforma global. Con cabecera se resuelve como
+    // siempre (membresía obligatoria; sólo SUPERADMIN/SYSTEM eligen cualquiera).
+    const platformScope = this.reflector.getAllAndOverride<boolean>(
+      PLATFORM_SCOPE_OPTIONAL_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    const routeRoles = this.reflector.getAllAndOverride<readonly string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isPlatformScopeRequest(platformScope, request, user, routeRoles))
+      return true;
 
     request.resolvedTenantId = resolveRequestTenantId(request, user);
     return true;

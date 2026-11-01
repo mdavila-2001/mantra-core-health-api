@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
@@ -15,7 +16,11 @@ import {
   PracticeSitesRepository,
 } from '../repositories';
 
-/** Roles globales de plataforma (mismos que `TenantAdministrationService`). */
+/**
+ * Roles de plataforma (mismos que `TenantAdministrationService`). Sólo pasan en
+ * el tenant en que autorizan (`roleAuthorizesInTenant`): sin ámbito valen en
+ * cualquiera; acotados en `scopedRoles`, sólo en las sedes de su tenant.
+ */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
 
 /**
@@ -185,9 +190,37 @@ export class StructureAccessService {
     );
   }
 
-  private isPlatform(actor: AuthenticatedUser): boolean {
-    const roles = actor.roles ?? [];
-    return PLATFORM_ROLES.some((role) => roles.includes(role));
+  /**
+   * Nivel de administración del actor sobre una sede (lo usa el evaluador de
+   * infraestructura de F2–F5, §0.3): plataforma, organización entera,
+   * sucursal de la sede, o ninguno.
+   *
+   * @param tx - Contexto.
+   * @param site - Sede (ya comprobada en el tenant).
+   * @param actor - Actor.
+   */
+  async adminLevelOf(
+    tx: EntityManager,
+    site: PracticeSites,
+    actor: AuthenticatedUser,
+  ): Promise<'PLATFORM' | 'ORG' | 'BRANCH' | null> {
+    if (this.isPlatformIn(site.tenantId, actor)) return 'PLATFORM';
+    if (await this.isOrganizationAdmin(tx, site.tenantId, actor)) return 'ORG';
+    if (await this.isBranchAdmin(tx, site, actor)) return 'BRANCH';
+    return null;
+  }
+
+  /**
+   * `true` si un rol de plataforma del actor autoriza **en ese tenant**.
+   *
+   * Mirar sólo `actor.roles` dejaba a un `SECURITY_ADMIN` acotado al tenant A
+   * administrar la estructura de las sedes de B (misma falla que #1241 en
+   * `TenantAdministrationService`).
+   */
+  private isPlatformIn(tenantId: string, actor: AuthenticatedUser): boolean {
+    return PLATFORM_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
   }
 
   private async isOrganizationAdmin(
@@ -195,7 +228,7 @@ export class StructureAccessService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<boolean> {
-    if (this.isPlatform(actor)) return true;
+    if (this.isPlatformIn(tenantId, actor)) return true;
     if (!(await this.tenantAdmin.canAdminister(tx, tenantId, actor))) {
       return false;
     }

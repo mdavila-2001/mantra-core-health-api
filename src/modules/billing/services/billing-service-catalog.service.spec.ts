@@ -798,3 +798,116 @@ describe('BillingServiceCatalogService', () => {
     });
   });
 });
+
+/**
+ * Rol administrativo acotado a un tenant (`scopedRoles`, MCH-001): figura en
+ * `roles`, pero sólo opera el catálogo de las prácticas de su tenant (#1241).
+ */
+describe('BillingServiceCatalogService · administración acotada a un tenant', () => {
+  const scopedTo = (role: string) =>
+    ({
+      id: 'admin-a',
+      roles: [role],
+      scopedRoles: { 'tenant-a': [role] },
+    }) as any;
+  const dto = {
+    practiceId: 'pr1',
+    code: 'NEBU-01',
+    name: 'Nebulización',
+    defaultPrice: '80.00',
+  };
+
+  /** Da de alta en `pr1`, práctica del tenant indicado. */
+  const createAs = (
+    actorUser: unknown,
+    practiceTenant: string | null,
+    contextTenant?: string,
+  ) => {
+    const d = build();
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      practiceTenant,
+    );
+    d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+    d.serviceCatalogRepo.create.mockReturnValue(item);
+    const run = () => d.service.create(dto, actorUser as any);
+    return {
+      d,
+      result:
+        contextTenant === undefined ? run() : runWithTenant(contextTenant, run),
+    };
+  };
+
+  it('acotado a A no da de alta en una práctica de B, con B en contexto ni sin tenant', async () => {
+    for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+      for (const context of ['tenant-b', undefined]) {
+        const { d, result } = createAs(scopedTo(role), 'tenant-b', context);
+        await expect(result).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+      }
+      // Una práctica inexistente tampoco se le abre.
+      const { result } = createAs(scopedTo(role), null, 'tenant-a');
+      await expect(result).rejects.toBeInstanceOf(ResourceNotFoundException);
+    }
+  });
+
+  it('acotado a A da de alta en su tenant; el global, en cualquiera sin consultar el tenant', async () => {
+    for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+      const own = createAs(scopedTo(role), 'tenant-a', 'tenant-a');
+      await expect(own.result).resolves.toEqual(item);
+
+      const global = createAs(
+        { id: 'admin-g', roles: [role] },
+        'tenant-b',
+        'tenant-b',
+      );
+      await expect(global.result).resolves.toEqual(item);
+      expect(
+        global.d.practiceTenantLookup.findTenantOfPractice,
+      ).not.toHaveBeenCalled();
+    }
+  });
+
+  /** Corrige `s1`, servicio de `pr1`, práctica del tenant indicado. */
+  const updateAs = (
+    actorUser: unknown,
+    practiceTenant: string,
+    contextTenant?: string,
+  ) => {
+    const d = build();
+    d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      practiceTenant,
+    );
+    const run = () =>
+      d.service.update('s1', { defaultPrice: '90.00' }, actorUser as any);
+    return contextTenant === undefined
+      ? run()
+      : runWithTenant(contextTenant, run);
+  };
+
+  it('SECURITY_ADMIN acotado a A no corrige un servicio de B, con B en contexto ni sin tenant', async () => {
+    const scoped = scopedTo('SECURITY_ADMIN');
+    await expect(
+      updateAs(scoped, 'tenant-b', 'tenant-b'),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    await expect(updateAs(scoped, 'tenant-b')).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+  });
+
+  it('SECURITY_ADMIN acotado a A corrige los de A; el global, los de cualquiera', async () => {
+    const scoped = scopedTo('SECURITY_ADMIN');
+    await expect(
+      updateAs(scoped, 'tenant-a', 'tenant-a'),
+    ).resolves.toMatchObject({ defaultPrice: '90.00' });
+    await expect(updateAs(scoped, 'tenant-a')).resolves.toMatchObject({
+      defaultPrice: '90.00',
+    });
+    await expect(
+      updateAs(actor, 'tenant-b', 'tenant-b'),
+    ).resolves.toMatchObject({ defaultPrice: '90.00' });
+    await expect(updateAs(actor, 'tenant-b')).resolves.toMatchObject({
+      defaultPrice: '90.00',
+    });
+  });
+});

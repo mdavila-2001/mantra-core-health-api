@@ -17,6 +17,12 @@ import { json, urlencoded } from 'express';
 import type { Server, ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 import { captureGatewayWebhookRawBody } from './modules/payments/gateway/payments-gateway-raw-body';
+import {
+  configureCapture,
+  httpSink,
+  slowRequestSink,
+  loadObservabilityEnv,
+} from './observability/capture';
 import { loadHttpSliEnv } from './observability/http-sli/http-sli.env';
 import { createHttpSliMiddleware } from './observability/http-sli/http-sli.middleware';
 import { httpSliAggregator } from './observability/http-sli/http-sli.tokens';
@@ -28,6 +34,7 @@ import {
   installShutdownWatchdog,
   loadBuildInfo,
   loadCorsAllowedOrigins,
+  stripEtagOnNoStore,
 } from './common';
 
 /**
@@ -164,13 +171,33 @@ async function bootstrap() {
   // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
   app.use(helmet());
 
+  // api#1242 — una respuesta `no-store` sale sin `ETag`. El de Express 5 queda
+  // activo para las rutas cacheables (sus 304 dependen de él); ver el
+  // middleware. El harness de integración registra el mismo.
+  app.use(stripEtagOnNoStore);
+
   // Medición de peticiones HTTP para el portal de superadministración. Va acá, antes
   // de las rutas y de cualquier parseo de cuerpo, y no como interceptor: un
   // interceptor no ve lo que se rechaza antes del handler (cuerpo inválido, ruta
   // inexistente) y esos 4xx son justo lo que se quiere contar. Sólo lee verbo,
   // plantilla de ruta, estado y duración; nunca la URL, el cuerpo ni al usuario.
-  if (loadHttpSliEnv().enabled) {
-    app.use(createHttpSliMiddleware(httpSliAggregator));
+  //
+  // La captura persistida (módulo 70, `OBSERVABILITY_ENABLED`) cuelga del mismo
+  // middleware: suma el código exacto por petición y abre el contexto (ALS)
+  // que une SQL ↔ petición ↔ error. Cada una se apaga por su cuenta y
+  // `/admin/ops/traffic*` sigue leyendo la serie de `http-sli`.
+  const sliEnabled = loadHttpSliEnv().enabled;
+  const observabilityEnv = loadObservabilityEnv();
+  configureCapture(observabilityEnv);
+  if (sliEnabled || observabilityEnv.enabled) {
+    app.use(
+      createHttpSliMiddleware(sliEnabled ? httpSliAggregator : null, {
+        sink: observabilityEnv.enabled ? httpSink : undefined,
+        slowSink: observabilityEnv.enabled ? slowRequestSink : undefined,
+        // La ruta de pruebas del propio portal no cuenta en las series.
+        sinkExcludedPrefixes: ['/internal/observability/'],
+      }),
+    );
   }
 
   // Límite explícito de tamaño de payload. El default de Express (100 kb) queda

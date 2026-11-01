@@ -63,6 +63,42 @@ export const { seeds: TELEMETRY_CONCEPT_SEEDS, ids: TELE } =
     },
     RATING_POOR: { code: 'POOR', display: 'Poor' },
     NAV_NAVIGATE: { code: 'NAVIGATE', display: 'Navigate' },
+    // Clase de error del cliente (client_error_events.error_class_concept_id)
+    ERROR_CLASS_JS: {
+      code: 'ERROR_CLASS_JS',
+      display: 'Client JavaScript error',
+    },
+    ERROR_CLASS_PROMISE: {
+      code: 'ERROR_CLASS_PROMISE',
+      display: 'Client unhandled promise rejection',
+    },
+    ERROR_CLASS_HTTP: {
+      code: 'ERROR_CLASS_HTTP',
+      display: 'Client-observed HTTP failure',
+    },
+    ERROR_CLASS_ROUTE: {
+      code: 'ERROR_CLASS_ROUTE',
+      display: 'Client route not found',
+    },
+    ERROR_CLASS_CHUNK: {
+      code: 'ERROR_CLASS_CHUNK',
+      display: 'Client lazy chunk load failure',
+    },
+    ERROR_CLASS_HYDRATION: {
+      code: 'ERROR_CLASS_HYDRATION',
+      display: 'Client hydration error',
+    },
+    ERROR_CLASS_TEMPLATE: {
+      code: 'ERROR_CLASS_TEMPLATE',
+      display: 'Client template error',
+    },
+    ERROR_CLASS_NATIVE: {
+      code: 'ERROR_CLASS_NATIVE',
+      display: 'Native (mobile) error',
+    },
+    // Estado de un esquema de evento reemplazado por una versión nueva: sigue
+    // existiendo (sus filas viejas lo referencian) pero ya no acepta eventos.
+    SCHEMA_DEPRECATED: { code: 'DEPRECATED', display: 'Schema deprecated' },
   });
 
 /** Métrica Web Vital (código) -> concepto. */
@@ -102,3 +138,28 @@ export const WEB_VITAL_METRIC_CODES = [
  * Define el tipo de dominio web vital metric code.
  */
 export type WebVitalMetricCode = (typeof WEB_VITAL_METRIC_CODES)[number];
+
+/** Clases de error del cliente que admite `POST /telemetry/client-errors`. */
+export const CLIENT_ERROR_CLASSES = [
+  'JS',
+  'PROMISE',
+  'HTTP',
+  'ROUTE',
+  'CHUNK',
+  'HYDRATION',
+  'TEMPLATE',
+  'NATIVE',
+] as const;
+export type ClientErrorClass = (typeof CLIENT_ERROR_CLASSES)[number];
+
+/** Clase (código corto) -> concepto. */
+export const ERROR_CLASS_CONCEPT_BY_CODE: Record<ClientErrorClass, string> = {
+  JS: TELE.ERROR_CLASS_JS,
+  PROMISE: TELE.ERROR_CLASS_PROMISE,
+  HTTP: TELE.ERROR_CLASS_HTTP,
+  ROUTE: TELE.ERROR_CLASS_ROUTE,
+  CHUNK: TELE.ERROR_CLASS_CHUNK,
+  HYDRATION: TELE.ERROR_CLASS_HYDRATION,
+  TEMPLATE: TELE.ERROR_CLASS_TEMPLATE,
+  NATIVE: TELE.ERROR_CLASS_NATIVE,
+};

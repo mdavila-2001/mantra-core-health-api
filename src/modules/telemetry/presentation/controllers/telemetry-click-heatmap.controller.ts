@@ -1,13 +1,24 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles, requireTenantId } from '../../../../common';
+import {
+  CurrentUser,
+  Roles,
+  getCurrentTenantId,
+  type AuthenticatedUser,
+} from '../../../../common';
+import { PlatformScopeOptional } from '../../../../common/tenant/platform-scope';
+import { resolveAnalyticsScope } from '../../application/analytics-scope';
 import { TelemetryClickHeatmapService } from '../../application/services/telemetry-click-heatmap.service';
 import { ClickHeatmapQueryDto } from '../dto/click-heatmap.dto';
 import { ANALYTICS_READ_ROLES } from './telemetry-analytics.controller';
 
 /**
  * CONTRATO — `GET /admin/analytics/heatmap?route&from&to[&portal][&screenSize]` (H2.S1.M3).
- * Solo lectura; roles `ANALYTICS_READ_ROLES`; acotado al tenant activo (sin barrido global).
+ * Solo lectura; roles `ANALYTICS_READ_ROLES`; acotado al tenant activo. Un rol de
+ * plataforma global sin `X-Tenant-Id` (`@PlatformScopeOptional()` por método)
+ * agrega entre organizaciones y suprime celdas/elementos con menos de `minSample`
+ * personas (`notMeasured`). `metric=clicks|rage|dead|scroll`; `scroll` devuelve
+ * `scroll.buckets` y ninguna celda.
  * Detalle: `mantra-core-health/docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H2-dinero-y-heatmap.md`.
  *
  * ```
@@ -37,11 +48,19 @@ export class TelemetryClickHeatmapController {
 
   @Get('heatmap')
   @Roles(...ANALYTICS_READ_ROLES)
+  @PlatformScopeOptional()
   @ApiOperation({
     summary:
       'Mapa de calor de clics de una pantalla: celdas normalizadas, elementos y tamaño; lo no medido se declara',
   })
-  getHeatmap(@Query() query: ClickHeatmapQueryDto) {
-    return this.heatmap.heatmap(query, requireTenantId());
+  getHeatmap(
+    @Query() query: ClickHeatmapQueryDto,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.heatmap.heatmap(
+      query,
+      getCurrentTenantId() ??
+        resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample),
+    );
   }
 }

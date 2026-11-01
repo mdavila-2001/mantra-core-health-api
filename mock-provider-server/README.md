@@ -88,7 +88,9 @@ esté arriba.
 | `SIMULATED_LATENCY_MS` | `50` | Latencia añadida a cada respuesta |
 | `IDENTITY_VERIFICATION_DELAY_MS` | `10000` | Cuánto tarda la autoridad en dar el veredicto (mientras tanto, `/verify` responde `PENDING`) |
 | `IDENTITY_VERIFICATION_REJECTION_RATE` | `0` | Probabilidad (0-1) de que la verificación acabe `REJECTED` |
-| `PHARMACY_ERP_FAILURE_RATE` | `0` | Probabilidad (0-1) de que `/pharmacy-erp/*` responda 503 |
+| `PHARMACY_ERP_FAILURE_RATE` | `0` | Probabilidad (0-1) de que `/pharmacy-erp/*`, `/alovida-standard/*` y `/simulated-chain/*` respondan 503 |
+| `PHARMACY_ERP_PHARMACY_KEYS` | (vacío) | Clave de cada farmacia simulada: `CODIGO=clave;OTRO=clave` |
+| `PHARMACY_ERP_PHARMACY_KEYS_FILE` | (vacío) | Ruta a un JSON `{ "CODIGO": "clave" }` (semilla; ver `pharmacy-keys.example.json`). La variable anterior pisa a este archivo por código |
 
 ## Cómo lo consume el backend principal
 
@@ -122,12 +124,51 @@ defecto**: sin ella, «Sincronizar ahora» responde que la conexión no está
 configurada. Para probarla en local se apunta a este emulador
 (`PHARMACY_ERP_BASE_URL=http://127.0.0.1:4100`, con la misma clave que
 `MOCK_API_KEY` si se definió). El `siteCode` que pide la API es el código de
-su sede (`pharmacy_sites.code`).
+su sede (`pharmacy_sites.code`) y el `pharmacyCode`, el de su farmacia
+(`pharmacies.code`): el stock sale de los dos, así que dos farmacias con sedes
+del mismo código no comparten stock. Con `NODE_ENV=production` la API no
+arranca si `PHARMACY_ERP_BASE_URL` trae valor.
+
+## El sistema de una farmacia, como un tercero real
+
+Además de `/pharmacy-erp/*` (la sincronización de un único ERP configurado en el
+servidor, que sigue igual), el simulador expone el sistema de **cada farmacia**
+en dos formatos, para que la plataforma se conecte con la dirección y la clave
+que la farmacia carga en su pestaña Integración:
+
+| | Estándar ALOVIDA | Cadena simulada |
+| --- | --- | --- |
+| Dirección que se carga | `http://<simulador>:4100/alovida-standard` | `http://<simulador>:4100/simulated-chain/api/v2` |
+| Clave | `X-Api-Key: <clave>` | `Authorization: Bearer <clave>` |
+| Salud | `GET /v1/pharmacies/{farmacia}/health` | `GET /chains/{cadena}/ping` |
+| Catálogo | `GET /v1/pharmacies/{farmacia}/products` → `{ items: [{ code, name, presentation, unitCode }] }` | `GET /chains/{cadena}/catalog?page=&per_page=` → `{ data: [{ sku, description, pack: { label, unit } }], meta }` |
+| Stock | `GET /v1/pharmacies/{farmacia}/sites/{sucursal}/stock?codes=` → `{ items: [{ code, quantity }], validUntil }` | `GET /chains/{cadena}/branches/{sucursal}/inventory?page=` → `{ data: [{ sku, on_hand: { units } }], meta }` |
+| Precios | `GET /v1/pharmacies/{farmacia}/prices` → `{ currency: "BOB", items: [{ code, unitPrice }] }` | `GET /chains/{cadena}/catalog/prices?page=` → `{ data: [{ sku, price: { amount_cents, currency } }], meta }` |
+
+El Estándar ALOVIDA es el contrato que publica la API
+(`docs/integrations/pharmacy-standard.openapi.yaml`). La cadena simulada es
+**distinta a propósito**: otra autenticación, otros nombres, datos anidados y
+paginación de 5 en 5, para probar el camino de un adaptador antes de tener la
+documentación de una cadena real.
+
+- **Clave por farmacia.** Cada código de farmacia (o de cadena) tiene la suya
+  (`PHARMACY_ERP_PHARMACY_KEYS` o el archivo de semilla). Una clave equivocada,
+  la de otra farmacia o un código sin clave dan **401**. Sin claves
+  configuradas, nadie autentica.
+- **Stock por ventanas de 5 minutos.** Dentro de una ventana, dos consultas dan
+  lo mismo (`validUntil` dice cuándo cierra). Entre ventanas baja según el ritmo
+  de venta de cada producto, se repone cada 30 minutos y a veces llega a 0. Es
+  determinista por farmacia, sucursal, producto y ventana, sin estado en
+  memoria: reiniciar el simulador no cambia lo que responde.
+- **Dos farmacias con el mismo código de sucursal no comparten stock**: la
+  farmacia entra en el cálculo.
+- **Precios** estables por farmacia y producto, en bolivianos.
+- `PHARMACY_ERP_FAILURE_RATE` simula que la farmacia no responde (503).
 
 ## Tests
 
 ```bash
-yarn test        # unitarios (16 casos: notifications, deletions, embeddings, api-key guard)
+yarn test        # unitarios: notifications, deletions, embeddings, api-key guard, sistema de farmacias
 yarn lint
 yarn build
 ```

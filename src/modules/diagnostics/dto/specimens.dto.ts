@@ -92,6 +92,12 @@ export class CreateSpecimenDto {
   @IsOptional()
   @IsUUID()
   collectorProfileId?: string;
+
+  /** F5b: punto de toma (espacio `SPACE_FN_SAMPLE_COLLECTION`) donde se tomó. */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Punto de toma (F5b)' })
+  @IsOptional()
+  @IsUUID()
+  collectionCareSpaceId?: string;
 }
 
 /** Cuerpo de `POST /diagnostics/accessions` (UC-20-01). */

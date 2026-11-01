@@ -10,6 +10,7 @@ import {
 } from '../domain/catalog/catalog.constants';
 import {
   DEFAULT_MIN_PII_SENSITIVITY,
+  PII_RECONCILIATION_KINDS,
   QUALITY_RULES,
   QUALITY_SEVERITIES,
 } from '../domain/catalog/governance-insights';
@@ -17,6 +18,7 @@ import { DEFAULT_PAGE_SIZE } from '../data_catalog.constants';
 import { CatalogInsightsRepository } from '../infrastructure/repositories/catalog-insights.repository';
 import type {
   PiiColumnsQueryDto,
+  PiiReconciliationQueryDto,
   QualityIssuesQueryDto,
 } from '../presentation/dto/insights.dto';
 
@@ -170,6 +172,88 @@ export class CatalogInsightsService {
       s: k.s,
       o: k.o,
       c: k.c,
+    };
+  }
+
+  // ---- conciliación con el registro declarado ----------------------------------------------
+
+  async piiReconciliation(q: PiiReconciliationQueryDto) {
+    const limit = q.limit ?? DEFAULT_PAGE_SIZE;
+    let cursor: { s: string; o: string; c: string; k: string } | undefined;
+    if (q.cursor) {
+      const k = decodeKeysetCursor(q.cursor);
+      if (!esTexto(k.s) || !esTexto(k.o) || !esTexto(k.c) || !esTexto(k.k))
+        throw new BadRequestException(CURSOR_INVALIDO);
+      cursor = { s: k.s, o: k.o, c: k.c, k: k.k };
+    }
+    const em = this.db();
+    const [filas, conteos, bases] = await Promise.all([
+      this.repo.piiReconciliation(em, {
+        kind: q.kind,
+        schema: q.schema,
+        cursor,
+        limit,
+      }),
+      this.repo.piiReconciliationCounts(em, { schema: q.schema }),
+      this.repo.piiReconciliationTotals(em),
+    ]);
+    const hayMas = filas.length > limit;
+    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const ultima = pagina[pagina.length - 1];
+    const porClase: Record<string, number> = Object.fromEntries(
+      PII_RECONCILIATION_KINDS.map((k) => [k, 0]),
+    );
+    for (const c of conteos) porClase[c.kind] = c.total;
+    const notMeasured: { field: string; reason: string }[] = [];
+    if (bases.observed_objects === 0)
+      notMeasured.push({
+        field: 'catalog',
+        reason:
+          'El catálogo no tiene objetos observados: falta un escaneo (POST /admin/catalog/scans). Sin él no se puede conciliar ni detectar campos huérfanos',
+      });
+    if (bases.declared_fields === 0)
+      notMeasured.push({
+        field: 'declaredRegistry.fields',
+        reason:
+          'system_ops.field_registry está vacío: ninguna columna personal está declarada, así que toda columna personal aprobada figura como faltante',
+      });
+    notMeasured.push({
+      field: 'unapprovedColumns',
+      reason:
+        'Sólo se concilian columnas con ficha aprobada y revisión vigente; las pendientes de revisión están en GET /admin/catalog/pii/columns',
+    });
+    return {
+      summary: {
+        approvedPersonalColumns: bases.approved_personal,
+        declaredFields: bases.declared_fields,
+        registryEmpty: bases.declared_fields === 0,
+        byKind: porClase,
+        total: Object.values(porClase).reduce((a, b) => a + b, 0),
+      },
+      items: pagina.map((f) => ({
+        kind: f.kind,
+        schemaName: f.schema_name,
+        objectName: f.object_name,
+        columnName: f.column_name,
+        objectId: f.object_id,
+        columnId: f.column_id,
+        sensitivity: f.sensitivity,
+        reviewStatus: f.review_status,
+        entityRegistryId: f.entity_registry_id,
+        fieldRegistryId: f.field_registry_id,
+      })),
+      nextCursor:
+        hayMas && ultima
+          ? encodeKeysetCursor({
+              s: ultima.schema_name,
+              o: ultima.object_name,
+              c: ultima.column_name,
+              k: ultima.kind,
+            })
+          : null,
+      limit,
+      order: 'schema_name, object_name, column_name, kind',
+      notMeasured,
     };
   }
 

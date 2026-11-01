@@ -13,6 +13,7 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 | `auth.module.ts` | Composición del módulo; registra los `APP_GUARD` en orden (ver abajo). |
 | `authenticated-user.interface.ts` | `AuthenticatedUser` y `AuthenticatedRequest`: el contrato que ven controladores y servicios. |
 | `current-user.decorator.ts` | `@CurrentUser()`: inyecta `request.user`. |
+| `governance-read.roles.ts` | Roles de lectura del gobierno de datos (matriz §3.12); los comparten `system_ops` y `data_catalog`. |
 | `jwt-auth.guard.ts` | Guard global de autenticación; deja pasar `@Public()` sin verificar token. |
 | `jwt-payload.interface.ts` | Claims firmados dentro del access token (`JwtPayload`). |
 | `jwt.strategy.ts` | Verifica firma, expiración y tipo del access token, exige sesión viva y reconstruye `AuthenticatedUser`. |

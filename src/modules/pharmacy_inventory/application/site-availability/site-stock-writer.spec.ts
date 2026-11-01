@@ -105,6 +105,52 @@ describe('SiteStockWriter', () => {
     );
   });
 
+  it('locks every position of the write before the ledger: site → positions → ledger', async () => {
+    const d = build({});
+    const order: string[] = [];
+    d.tx.execute.mockImplementation((async (_sql: string, params: string[]) => {
+      order.push(params[0]);
+      return [];
+    }) as any);
+    d.positions.findByKeyForUpdate.mockImplementation((async (
+      _tx: unknown,
+      key: { pharmacyProductId: string },
+    ) => {
+      order.push(`position:${key.pharmacyProductId}`);
+      return null;
+    }) as any);
+    d.ledger.nextSequence.mockImplementation(async () => {
+      order.push('ledger');
+      return '41';
+    });
+
+    await d.writer.write(
+      d.tx as any,
+      SITE,
+      [
+        { productId: 'product-a', availableQuantity: 2 },
+        { productId: 'product-b', availableQuantity: 5 },
+      ],
+      movement,
+    );
+
+    expect(order).toEqual([
+      'pharmacy_inventory.site:site-1',
+      'position:product-a',
+      'position:product-b',
+      'ledger',
+    ]);
+  });
+
+  it('lockSite takes the same site lock as a write', async () => {
+    const d = build({});
+    await d.writer.lockSite(d.tx as any, 'site-9');
+    expect(d.tx.execute).toHaveBeenCalledWith(
+      'select pg_advisory_xact_lock(hashtext(?))',
+      ['pharmacy_inventory.site:site-9'],
+    );
+  });
+
   it('writes only the requested products: a product without a position stays on the catalogue', async () => {
     const d = build({});
 

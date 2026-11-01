@@ -57,6 +57,7 @@ describe('PharmacyIntegrationSyncController', () => {
     const controller = new PharmacyIntegrationSyncController(
       sync as any,
       {} as any,
+      {} as any,
     );
     const response = await controller.syncNow('f', 'c', { id: 'u' } as any);
     expect(Object.keys(response).sort()).toEqual([
@@ -82,6 +83,7 @@ describe('PharmacyIntegrationSyncController', () => {
     const controller = new PharmacyIntegrationSyncController(
       {} as any,
       reads as any,
+      {} as any,
     );
     const actor = { id: 'u' } as any;
     await controller.listConnections('f', actor);

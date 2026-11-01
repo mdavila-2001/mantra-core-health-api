@@ -17,6 +17,7 @@ import { AllExceptionsFilter } from '../../../common/filters/all-exceptions.filt
 import { RouteMetadataService } from '../../../observability/route-index/route-metadata.service';
 import { TracingService } from '../../../observability';
 import { AuditQueryRepository } from '../repositories/audit-query.repository';
+import { AuditOversightReadService } from '../services/audit-oversight-read.service';
 import { AuditQueryService } from '../services/audit-query.service';
 import {
   AUDIT_READ_ROLES,
@@ -57,6 +58,8 @@ describe('AuditQueryController (HTTP, repositorio doble)', () => {
       controllers: [AuditQueryController],
       providers: [
         AuditQueryService,
+        // Las lecturas agregadas y DSAR tienen su propia suite (audit-oversight.controller.spec.ts).
+        { provide: AuditOversightReadService, useValue: {} },
         { provide: AuditQueryRepository, useValue: repo },
         { provide: RouteMetadataService, useValue: rutas },
         // El servicio sólo hace `em.fork()` y se lo pasa al repositorio doble.
@@ -288,6 +291,21 @@ describe('AuditQueryController (HTTP, repositorio doble)', () => {
           ['AUDITOR'],
         ).expect(200);
       }
+    });
+  });
+
+  describe('cursor forjado → 400 INVALID_CURSOR, nunca 500', () => {
+    const forjado = (o: Record<string, unknown>): string =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    it.each([
+      ['/audit/log', { t: 'abc', i: 'x' }],
+      ['/audit/log', { t: '2026-10-01T00:00:00.000000Z', i: 'x' }],
+      ['/audit/data-access', { t: 'abc', i: 'x' }],
+    ])('%s con %j', async (ruta, cursor) => {
+      const res = await get(`${ruta}?cursor=${forjado(cursor)}`, [
+        'AUDITOR',
+      ]).expect(400);
+      expect(res.body.reason).toBe('INVALID_CURSOR');
     });
   });
 });

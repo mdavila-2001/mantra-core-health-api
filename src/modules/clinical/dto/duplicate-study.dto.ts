@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
   IsInt,
   IsOptional,
   IsUUID,
@@ -7,6 +10,7 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { IsConceptId } from './concept-id.validator';
 import {
   DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
   MAX_DUPLICATE_STUDY_WINDOW_DAYS,
@@ -34,7 +38,7 @@ export class CheckDuplicateStudyDto {
   @ValidateIf(
     (o: CheckDuplicateStudyDto) => o.diagnosticStudyOfferingId === undefined,
   )
-  @IsUUID()
+  @IsConceptId()
   codeConceptId?: string;
 
   @ApiPropertyOptional({
@@ -67,6 +71,36 @@ export class CheckDuplicateStudyDto {
   @Min(1)
   @Max(MAX_DUPLICATE_STUDY_WINDOW_DAYS)
   windowDays?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'V10: región del estudio de imagen. Con ella (y la lateralidad) «mano izquierda» y «mano derecha» no se confunden',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsConceptId()
+  bodySiteConceptId?: string;
+
+  @ApiPropertyOptional({
+    description: 'V10: lateralidad del estudio de imagen',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsConceptId()
+  lateralityConceptId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'V10: componentes marcados; los que el informe previo no cubre no son duplicado',
+    type: [String],
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(500)
+  @ArrayUnique()
+  @IsConceptId({ each: true })
+  componentConceptIds?: string[];
 }
 
 /** El estudio previo que satisface (o casi satisface) el pedido nuevo. */

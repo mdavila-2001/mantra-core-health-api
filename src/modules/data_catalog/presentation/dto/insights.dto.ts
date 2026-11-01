@@ -15,6 +15,8 @@ import {
 } from '../../domain/catalog/catalog.constants';
 import {
   PII_MIN_SENSITIVITIES,
+  PII_RECONCILIATION_KINDS,
+  type PiiReconciliationKind,
   PII_SORTS,
   QUALITY_RULE_CODES,
   QUALITY_SEVERITIES,
@@ -82,6 +84,23 @@ export class PiiColumnsQueryDto extends PaginacionQueryDto {
   sort?: PiiSort;
 }
 
+/** Filtros de `GET /admin/catalog/pii/reconciliation`. */
+export class PiiReconciliationQueryDto extends PaginacionQueryDto {
+  @ApiPropertyOptional({
+    enum: PII_RECONCILIATION_KINDS,
+    description:
+      '`MISSING_IN_REGISTRY`: personal aprobada sin declarar. `REGISTRY_DISAGREES`: declarada sin marca PII/PHI. `ORPHAN_IN_REGISTRY`: declarada pero no observada',
+  })
+  @IsOptional()
+  @IsIn(PII_RECONCILIATION_KINDS)
+  kind?: PiiReconciliationKind;
+
+  @ApiPropertyOptional({ description: 'Schema de PostgreSQL' })
+  @IsOptional()
+  @Matches(SCHEMA)
+  schema?: string;
+}
+
 export class PiiColumnDto {
   @ApiProperty({ format: 'uuid' }) columnId!: string;
   @ApiProperty({ format: 'uuid' }) objectId!: string;
@@ -125,6 +144,58 @@ export class PiiLevelDto {
 export class NotMeasuredDto {
   @ApiProperty() field!: string;
   @ApiProperty() reason!: string;
+}
+
+export class PiiReconciliationByKindDto {
+  @ApiProperty() MISSING_IN_REGISTRY!: number;
+  @ApiProperty() REGISTRY_DISAGREES!: number;
+  @ApiProperty() ORPHAN_IN_REGISTRY!: number;
+}
+
+export class PiiReconciliationSummaryDto {
+  @ApiProperty() approvedPersonalColumns!: number;
+  @ApiProperty() declaredFields!: number;
+  @ApiProperty({ description: '`system_ops.field_registry` está vacío' })
+  registryEmpty!: boolean;
+  @ApiProperty({ type: PiiReconciliationByKindDto })
+  byKind!: PiiReconciliationByKindDto;
+  @ApiProperty() total!: number;
+}
+
+export class PiiReconciliationItemDto {
+  @ApiProperty({ enum: PII_RECONCILIATION_KINDS }) kind!: string;
+  @ApiProperty() schemaName!: string;
+  @ApiProperty() objectName!: string;
+  @ApiProperty() columnName!: string;
+  @ApiProperty({
+    format: 'uuid',
+    nullable: true,
+    type: String,
+    description: '`null` si la columna está declarada pero no observada',
+  })
+  objectId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  columnId!: string | null;
+  @ApiProperty({ enum: SENSITIVITIES, nullable: true, type: String })
+  sensitivity!: string | null;
+  @ApiProperty({ enum: REVIEW_STATUSES, nullable: true, type: String })
+  reviewStatus!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  entityRegistryId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  fieldRegistryId!: string | null;
+}
+
+export class PiiReconciliationPageDto {
+  @ApiProperty({ type: PiiReconciliationSummaryDto })
+  summary!: PiiReconciliationSummaryDto;
+  @ApiProperty({ type: [PiiReconciliationItemDto] })
+  items!: PiiReconciliationItemDto[];
+  @ApiPropertyOptional({ nullable: true, type: String })
+  nextCursor!: string | null;
+  @ApiProperty() limit!: number;
+  @ApiProperty() order!: string;
+  @ApiProperty({ type: [NotMeasuredDto] }) notMeasured!: NotMeasuredDto[];
 }
 
 export class PiiRegistryDto {

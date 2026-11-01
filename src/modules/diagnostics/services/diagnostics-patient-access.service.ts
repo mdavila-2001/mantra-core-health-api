@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -26,7 +27,8 @@ import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
  *
  * Sin vínculo responde `404` con el mismo mensaje y `reason` que un paciente
  * inexistente: distinguirlos le diría a un tercero qué personas existen.
- * `SUPERADMIN` conserva el comodín que ya tiene `RolesGuard`.
+ * `SUPERADMIN` global conserva el comodín que ya tiene `RolesGuard`; uno
+ * acotado en `scopedRoles` no, porque el paciente no es de ningún tenant.
  */
 @Injectable()
 export class DiagnosticsPatientAccessService {
@@ -56,7 +58,10 @@ export class DiagnosticsPatientAccessService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Los estudios de una persona no son de ninguna organización: el comodín
+    // es del `SUPERADMIN` global; el acotado en `scopedRoles` sigue la regla
+    // de quien atiende (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
 
     const em = this.em.fork();
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);

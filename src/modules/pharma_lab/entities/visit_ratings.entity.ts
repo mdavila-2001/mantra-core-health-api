@@ -22,20 +22,20 @@ export class VisitRatings {
   /**
    * Registro de visita calificado.
    */
-  @Property({ fieldName: 'visit_record_id', type: 'uuid' }) // FK → pharma_lab.visit_records
+  @Property({ fieldName: 'visit_record_id', type: 'uuid' }) // FK → pharma_lab.visit_records (inferida)
   visitRecordId!: string;
 
   /**
    * Doctor que califica.
    */
-  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'doctor_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   doctorUserId!: string;
 
   /**
    * Naturaleza del registro: calificación interna, encuesta privada o
    * reclamación formal.
    */
-  @Property({ fieldName: 'kind_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'kind_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   kindConceptId!: string;
 
   /**
@@ -117,13 +117,13 @@ export class VisitRatings {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -139,10 +139,19 @@ describe('GovernanceReadController (HTTP, repositorio doble)', () => {
       expect(res.body.code).toBe('FORBIDDEN');
     });
 
-    it.each(['AUDITOR', 'DATA_STEWARD', 'PHARMACIST'])(
-      'un rol que lee el catálogo pero no el gobierno (%s) → 403',
+    it.each(['PHARMACIST', 'MEDICAL_DIRECTOR', 'QA_ADMIN'])(
+      'un rol ajeno al gobierno de datos (%s) → 403',
       async (rol) => {
         for (const ruta of RUTAS) await get(ruta, [rol]).expect(403);
+      },
+    );
+
+    // Matriz §3.12 (D-2): el auditor y el custodio leen políticas y bitácora en sólo lectura.
+    it.each(['AUDITOR', 'DATA_STEWARD'])(
+      'el rol %s lee el gobierno (matriz de roles §3.12)',
+      async (rol) => {
+        await get('/admin/governance/policies', [rol]).expect(200);
+        await get('/admin/governance/change-log', [rol]).expect(200);
       },
     );
 
@@ -438,6 +447,35 @@ describe('GovernanceReadController (HTTP, repositorio doble)', () => {
       await get(ruta, ['DPO']).expect(400);
       expect(repo.entityRegistry).not.toHaveBeenCalled();
       expect(repo.fieldRegistry).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cursor forjado → 400 INVALID_CURSOR, nunca 500', () => {
+    const forjado = (o: Record<string, unknown>): string =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    const U = '00000000-0000-4000-8000-0000000000a1';
+    it.each([
+      [
+        '/admin/governance/policies',
+        { m: 'code:asc', k: 'a', t: 'NOPE', i: U },
+      ],
+      [
+        '/admin/governance/policies',
+        { m: 'code:asc', k: 'a', t: 'WRITE', i: 'x' },
+      ],
+      [
+        '/admin/governance/policies?sort=updatedAt',
+        { m: 'updatedAt:asc', k: 'abc', t: 'WRITE', i: U },
+      ],
+      ['/admin/governance/change-log', { t: 'abc', i: 'x' }],
+      ['/admin/governance/entity-registry', { s: 'a', t: 'b', i: 'x' }],
+      [`/admin/governance/entity-registry/${U}/fields`, { c: 'a', i: 'x' }],
+    ])('%s con %j', async (ruta, cursor) => {
+      const sep = ruta.includes('?') ? '&' : '?';
+      const res = await get(`${ruta}${sep}cursor=${forjado(cursor)}`, [
+        'DPO',
+      ]).expect(400);
+      expect(res.body.reason).toBe('INVALID_CURSOR');
     });
   });
 });

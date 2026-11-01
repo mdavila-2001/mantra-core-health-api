@@ -14,6 +14,12 @@ import { CommunityModule } from '../community/community.module';
 import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
 import { EXTERNAL_PHARMACY_CATALOG_PORT } from './application/ports/external-pharmacy-catalog.port';
 import { HttpExternalPharmacyCatalogAdapter } from './infrastructure/adapters/http-external-pharmacy-catalog.adapter';
+import { EXTERNAL_PHARMACY_SYSTEM_PORT } from './application/ports/external-pharmacy-system.port';
+import { PharmacyExternalSystemAdapter } from './infrastructure/adapters/pharmacy-external-system.adapter';
+import { ExternalSystemRepository } from './infrastructure/repositories/external-system.repository';
+import { ConfigureExternalSystemUseCase } from './application/inventory-sync/configure-external-system.use-case';
+import { PharmacyCatalogBulkLoadAdapter } from './infrastructure/adapters/pharmacy-catalog-bulk-load.adapter';
+import { CATALOG_BULK_LOAD_PORT } from './application/ports/catalog-bulk-load.port';
 import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { INSURANCE_PATIENT_SETTLEMENT_PORT } from './application/ports/insurance-patient-settlement.port';
@@ -41,6 +47,10 @@ import * as entities from './entities';
 import { ApproveInventoryCountUseCase } from './application/inventory-count/approve-inventory-count.use-case';
 import { OpenInventoryCountUseCase } from './application/inventory-count/open-inventory-count.use-case';
 import { CreateInventoryLocationUseCase } from './application/inventory-locations/create-inventory-location.use-case';
+import { RelocateInventoryLocationUseCase } from './application/inventory-locations/relocate-inventory-location.use-case';
+import { StockPointGuard } from './application/inventory-locations/stock-point-guard';
+import { CARE_SPACE_STOCK_POINT_PORT } from './application/ports/care-space-stock-point.port';
+import { PracticeCareSpaceStockPointAdapter } from './infrastructure/adapters/practice-care-space-stock-point.adapter';
 import { CreateRecallHoldUseCase } from './application/inventory-recall/create-recall-hold.use-case';
 import { ReleaseRecallHoldUseCase } from './application/inventory-recall/release-recall-hold.use-case';
 import { ReserveInventoryUseCase } from './application/inventory-reservations/reserve-inventory.use-case';
@@ -57,10 +67,12 @@ import { PrescriptionBalanceRepository } from './infrastructure/repositories/pre
 import { PrescriptionOrderGuard } from './application/pharmacy-orders/prescription-order-guard';
 import { PendingOrderLines } from './application/pharmacy-orders/pending-order-lines';
 import { ReadPharmacyInventoryUseCase } from './application/pharmacy-inventory-read/read-pharmacy-inventory.use-case';
+import { ReadMedicationAvailabilityUseCase } from './application/pharmacy-inventory-read/read-medication-availability.use-case';
 import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notifications/notify-pharmacy-order.use-case';
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
 import { PharmacyProcurementUseCases } from './application/pharmacy-procurement/pharmacy-procurement.use-cases';
 import { SetSiteProductAvailabilityUseCase } from './application/site-availability/set-site-product-availability.use-case';
+import { BulkSiteAvailabilityUseCase } from './application/site-availability/bulk-site-availability.use-case';
 import { SiteStockWriter } from './application/site-availability/site-stock-writer';
 import {
   PharmacyProcurementController,
@@ -223,11 +235,26 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
       provide: EXTERNAL_PHARMACY_CATALOG_PORT,
       useExisting: HttpExternalPharmacyCatalogAdapter,
     },
+    // FAR-C9 · C9-3: el sistema propio de cada farmacia, por conexión.
+    ExternalSystemRepository,
+    PharmacyExternalSystemAdapter,
+    {
+      provide: EXTERNAL_PHARMACY_SYSTEM_PORT,
+      useExisting: PharmacyExternalSystemAdapter,
+    },
+    ConfigureExternalSystemUseCase,
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,
     ApproveInventoryCountUseCase,
     CreateInventoryLocationUseCase,
+    RelocateInventoryLocationUseCase,
+    StockPointGuard,
+    PracticeCareSpaceStockPointAdapter,
+    {
+      provide: CARE_SPACE_STOCK_POINT_PORT,
+      useExisting: PracticeCareSpaceStockPointAdapter,
+    },
     CreateRecallHoldUseCase,
     ReleaseRecallHoldUseCase,
     ReserveInventoryUseCase,
@@ -240,11 +267,19 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     ReverseMedicationDispensationUseCase,
     OpenPrescriptionShareUseCase,
     ReadPharmacyInventoryUseCase,
+    ReadMedicationAvailabilityUseCase,
     NotifyPharmacyOrderUseCase,
     PharmacyOrdersUseCases,
     PharmacyProcurementUseCases,
     SiteStockWriter,
     SetSiteProductAvailabilityUseCase,
+    // La carga por sucursal corre en el bucle común de la carga masiva de pharmacy.
+    PharmacyCatalogBulkLoadAdapter,
+    {
+      provide: CATALOG_BULK_LOAD_PORT,
+      useExisting: PharmacyCatalogBulkLoadAdapter,
+    },
+    BulkSiteAvailabilityUseCase,
     SyncExternalPharmacyCatalogUseCase,
     IntegrationReadService,
     PharmacyProcurementService,

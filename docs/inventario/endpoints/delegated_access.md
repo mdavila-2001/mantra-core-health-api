@@ -3,9 +3,9 @@
 # Endpoints del módulo `delegated_access`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 36 (17 en el contrato, 19 sólo en el código)
+- **Operaciones:** 36 (36 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 5 · MEDIO 20 · BAJO 11
-- **Tablas distintas que tocan:** 31
+- **Tablas distintas que tocan:** 33
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/delegated-access.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -22,32 +22,32 @@
 | 8 | GET | `/delegated-permission-sets` | Listar los sets de permisos delegados del tenant | BAJO | 1 | SECURITY_ADMIN |
 | 9 | POST | `/delegated-permission-sets` | Publicar set de permisos delegados (scoped) | MEDIO | 3 | SECURITY_ADMIN |
 | 10 | POST | `/delegated-permission-sets/{id}/versions` | Versionar set de permisos delegados | ALTO | 4 | SECURITY_ADMIN |
-| 11 | POST | `/me/practitioner/support-invitations` | Invita a una secretaria registrada (por su documento) a asistirlo. | MEDIO | 17 | PRACTITIONER, CLINICIAN |
-| 12 | GET | `/me/practitioner/support-team` | Sus secretarias, activas y pendientes. | BAJO | 12 | PRACTITIONER, CLINICIAN |
-| 13 | POST | `/me/practitioner/support-team/{id}/end` | Termina el vínculo con una secretaria suya. | MEDIO | 13 | PRACTITIONER, CLINICIAN |
-| 14 | GET | `/me/support-access` | Lo que puede ver: hospitales, sedes, servicios, pisos y doctores. | BAJO | 12 | SUPPORT_STAFF |
-| 15 | GET | `/me/support-agenda` | Agenda de un doctor al que asiste (sólo con vínculo activo con él). | BAJO | 16 | SUPPORT_STAFF |
-| 16 | GET | `/me/support-catalog` | Catálogo de un hospital para armar el pedido. | BAJO | 9 | SUPPORT_STAFF |
-| 17 | GET | `/me/support-engagements` | Sus vínculos y, aparte, los pendientes. | BAJO | 12 | SUPPORT_STAFF |
-| 18 | POST | `/me/support-engagements/{id}/confirm` | Acepta una invitación del hospital o de un doctor. | MEDIO | 14 | SUPPORT_STAFF |
-| 19 | POST | `/me/support-engagements/{id}/decline` | Rechaza una invitación. | MEDIO | 14 | SUPPORT_STAFF |
-| 20 | POST | `/me/support-engagements/{id}/leave` | Deja un vínculo o retira un pedido propio. | MEDIO | 13 | SUPPORT_STAFF |
+| 11 | POST | `/me/practitioner/support-invitations` | Invitar a una secretaria a asistirme | MEDIO | 17 | PRACTITIONER, CLINICIAN |
+| 12 | GET | `/me/practitioner/support-team` | Mi equipo de apoyo (secretarias) | BAJO | 12 | PRACTITIONER, CLINICIAN |
+| 13 | POST | `/me/practitioner/support-team/{id}/end` | Terminar el vínculo con una secretaria | MEDIO | 13 | PRACTITIONER, CLINICIAN |
+| 14 | GET | `/me/support-access` | Mi alcance: hospitales, doctores y pisos de mis vínculos activos | BAJO | 12 | SUPPORT_STAFF |
+| 15 | GET | `/me/support-agenda` | Agenda de un doctor asignado (403 si no hay vínculo activo) | BAJO | 16 | SUPPORT_STAFF |
+| 16 | GET | `/me/support-catalog` | Sedes, servicios, pisos y doctores de un hospital para pedir | BAJO | 9 | SUPPORT_STAFF |
+| 17 | GET | `/me/support-engagements` | Mis vínculos de apoyo y mis solicitudes | BAJO | 12 | SUPPORT_STAFF |
+| 18 | POST | `/me/support-engagements/{id}/confirm` | Aceptar una invitación de apoyo | MEDIO | 14 | SUPPORT_STAFF |
+| 19 | POST | `/me/support-engagements/{id}/decline` | Rechazar una invitación de apoyo | MEDIO | 14 | SUPPORT_STAFF |
+| 20 | POST | `/me/support-engagements/{id}/leave` | Dejar un vínculo o retirar mi pedido | MEDIO | 13 | SUPPORT_STAFF |
 | 21 | POST | `/org/{tenantMembershipId}/user-assignments` | Asignar usuario de organización con alcance y vigencia | MEDIO | 2 | SECURITY_ADMIN |
-| 22 | GET | `/org/support-catalog` | Catálogo del hospital activo, para invitar. | BAJO | 8 | sesión (sin roles) |
-| 23 | GET | `/org/support-engagement-requests` | Bandeja del hospital: vínculos en un estado (por defecto pendientes). | BAJO | 12 | sesión (sin roles) |
-| 24 | POST | `/org/support-engagement-requests/{id}/decision` | El hospital acepta o rechaza lo que pidió una secretaria. | ALTO | 14 | sesión (sin roles) |
-| 25 | GET | `/org/support-engagements` | Personal de apoyo del hospital (vínculos activos y pendientes). | BAJO | 12 | sesión (sin roles) |
-| 26 | POST | `/org/support-engagements/{id}/end` | El hospital termina un vínculo o retira una invitación. | ALTO | 13 | sesión (sin roles) |
-| 27 | POST | `/org/team/invitations` | El hospital invita a una secretaria registrada (por su documento). | ALTO | 17 | sesión (sin roles) |
-| 28 | PATCH | `/org/user-assignments/{id}` | Reasignar supervisor / suspender asignación de organización | MEDIO | 3 | SECURITY_ADMIN |
+| 22 | GET | `/org/support-catalog` | Sedes, servicios, pisos y doctores para invitar | BAJO | 8 | sesión (sin roles) |
+| 23 | GET | `/org/support-engagement-requests` | Solicitudes e invitaciones de apoyo del hospital | BAJO | 12 | sesión (sin roles) |
+| 24 | POST | `/org/support-engagement-requests/{id}/decision` | Aceptar o rechazar una solicitud de apoyo | ALTO | 14 | sesión (sin roles) |
+| 25 | GET | `/org/support-engagements` | Personal de apoyo del hospital | BAJO | 12 | sesión (sin roles) |
+| 26 | POST | `/org/support-engagements/{id}/end` | Terminar un vínculo de apoyo | ALTO | 13 | sesión (sin roles) |
+| 27 | POST | `/org/team/invitations` | Invitar a una secretaria a lugares o doctores | ALTO | 17 | sesión (sin roles) |
+| 28 | PATCH | `/org/user-assignments/{id}` | Reasignar supervisor / suspender asignación de organización | MEDIO | 7 | SECURITY_ADMIN |
 | 29 | POST | `/practitioner-delegates` | Crear asignación de delegado de practitioner | MEDIO | 7 | SECURITY_ADMIN |
-| 30 | POST | `/practitioner-delegates/{id}/accept` | Acepta a la secretaria que pidió asistirlo. | MEDIO | 14 | PRACTITIONER, CLINICIAN |
+| 30 | POST | `/practitioner-delegates/{id}/accept` | Aceptar a una secretaria | MEDIO | 14 | PRACTITIONER, CLINICIAN |
 | 31 | POST | `/practitioner-delegates/{id}/access-requests` | Solicitar acceso delegado (aprobación previa) | MEDIO | 4 | SECURITY_ADMIN |
 | 32 | POST | `/practitioner-delegates/{id}/grants` | Otorgar grant delegado por-propósito y temporal | MEDIO | 6 | SECURITY_ADMIN |
-| 33 | POST | `/practitioner-delegates/{id}/reject` | Rechaza a la secretaria que pidió asistirlo. | MEDIO | 14 | PRACTITIONER, CLINICIAN |
+| 33 | POST | `/practitioner-delegates/{id}/reject` | Rechazar a una secretaria | MEDIO | 14 | PRACTITIONER, CLINICIAN |
 | 34 | POST | `/practitioner-delegates/{id}/revoke` | Revocar delegación de forma inmediata (cascada authz) | MEDIO | 5 | SECURITY_ADMIN |
 | 35 | GET | `/public/prescription-shares/{token}` | Comprobar un enlace de receta compartida | ALTO | 6 | pública |
-| 36 | POST | `/support-engagement-requests` | La secretaria pide entrar a un hospital o asistir a sus doctores. | MEDIO | 16 | SUPPORT_STAFF |
+| 36 | POST | `/support-engagement-requests` | Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor) | MEDIO | 16 | SUPPORT_STAFF |
 
 ---
 
@@ -76,11 +76,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/access-requests.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/access-requests.controller.ts:33` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -188,10 +188,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -300,9 +300,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -326,13 +326,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:76` |
-| `resourceType` | `string` | Sí | valores: PRESCRIPTION_ENCOUNTER, MEDICATION_REQUEST | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:79` |
-| `resourceId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:83` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:86` |
-| `expiresAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:89` |
-| `status` | `string` | Sí | valores: VALID, EXPIRED, REVOKED | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:92` |
-| `uses` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:96` |
+| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:82` |
+| `resourceType` | `string` | Sí | valores: PRESCRIPTION_ENCOUNTER, MEDICATION_REQUEST | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:85` |
+| `resourceId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:89` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:92` |
+| `expiresAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:95` |
+| `status` | `string` | Sí | valores: VALID, EXPIRED, REVOKED | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:98` |
+| `endedReason` | `string` | Sí | valores: LINK_EXPIRED, PRESCRIPTION_NOT_ACTIVE; admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:110` |
+| `uses` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:114` |
 
 ### Respuestas posibles
 
@@ -384,10 +385,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -400,8 +401,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro de la receta. Excluye a `medicationRequestId`. | `src/modules/delegated_access/dto/prescription-shares.dto.ts:32` |
-| `medicationRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Fármaco suelto. Excluye a `encounterId`. | `src/modules/delegated_access/dto/prescription-shares.dto.ts:41` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro de la receta. Excluye a `medicationRequestId`. | `src/modules/delegated_access/dto/prescription-shares.dto.ts:38` |
+| `medicationRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Fármaco suelto. Excluye a `encounterId`. | `src/modules/delegated_access/dto/prescription-shares.dto.ts:47` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -424,11 +425,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:55` |
-| `url` | `string` | Sí | — | — | Enlace para compartir: `<web>/rx/<token>` | `src/modules/delegated_access/dto/prescription-shares.dto.ts:59` |
-| `token` | `string` | Sí | — | — | Token en claro; se devuelve una sola vez | `src/modules/delegated_access/dto/prescription-shares.dto.ts:63` |
-| `expiresAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:66` |
-| `itemCount` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:70` |
+| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:61` |
+| `url` | `string` | Sí | — | — | Enlace para compartir: `<web>/rx/<token>` | `src/modules/delegated_access/dto/prescription-shares.dto.ts:65` |
+| `token` | `string` | Sí | — | — | Token en claro; se devuelve una sola vez | `src/modules/delegated_access/dto/prescription-shares.dto.ts:69` |
+| `expiresAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:72` |
+| `itemCount` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:76` |
 
 ### Respuestas posibles
 
@@ -480,15 +481,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: shareId | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:123` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.shared_access_links` | ESCRIBE | ACTUALIZA | POR_TIPO | PrescriptionSharesController.revoke → PrescriptionSharesService.revoke | `src/modules/delegated_access/services/prescription-shares.service.ts:270` |
+| `delegated_access.shared_access_links` | ESCRIBE | ACTUALIZA | POR_TIPO | PrescriptionSharesController.revoke → PrescriptionSharesService.revoke | `src/modules/delegated_access/services/prescription-shares.service.ts:237` |
 | `delegated_access.shared_access_links` | LEE | LEE | DIRECTA | PrescriptionSharesController.revoke → PrescriptionSharesService.revoke → SharedAccessLinksRepository.findById | `src/modules/delegated_access/repositories/shared-access-links.repository.ts:109` |
 
 ### Parámetros
@@ -554,8 +555,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT, PRACTITIONER | `src/modules/delegated_access/controllers/prescription-shares.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -577,9 +578,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:102` |
-| `resourceType` | `string` | Sí | valores: PRESCRIPTION_ENCOUNTER, MEDICATION_REQUEST | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:105` |
-| `resourceId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:108` |
+| `shareId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:120` |
+| `resourceType` | `string` | Sí | valores: PRESCRIPTION_ENCOUNTER, MEDICATION_REQUEST | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:123` |
+| `resourceId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:126` |
 
 ### Respuestas posibles
 
@@ -629,8 +630,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -704,8 +705,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -789,10 +790,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -911,11 +912,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1004,8 +1005,8 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ## 11. POST /me/practitioner/support-invitations
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Invita a una secretaria registrada (por su documento) a asistirlo.
+- **Origen:** CONTRATO
+- **Nombre:** Invitar a una secretaria a asistirme
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1013,7 +1014,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ### Qué es y para qué sirve (negocio)
 
-Invita a una secretaria registrada (por su documento) a asistirlo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Invitar a una secretaria a asistirme. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1028,6 +1029,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:117` |
 
 ### Tablas que afecta
@@ -1052,12 +1055,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
 | `profiles.secretary_profiles` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
 
-### Cuerpo — DTO `PractitionerInviteSupportDto`
+### Cuerpo — DTO `PractitionerInviteSupportDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `nationalId` | `string` | Sí | longitud mínima 4; longitud máxima 40; patrón runtime NATIONAL_ID_PATTERN | `@IsString()` `@MinLength(4)` `@MaxLength(40)` `@Matches(NATIONAL_ID_PATTERN, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad con el que la secretaria inicia sesión. | `src/modules/delegated_access/dto/support-staff.dto.ts:137` |
-| `practitionerRoleAssignmentId` | `string` | Sí | formato uuid | `@IsUUID()` | Su vinculación con el hospital donde la secretaria lo va a asistir. | `src/modules/delegated_access/dto/support-staff.dto.ts:142` |
+| `nationalId` | `string` | Sí | longitud mínima 4; longitud máxima 40; patrón runtime NATIONAL_ID_PATTERN | `@IsString()` `@MinLength(4)` `@MaxLength(40)` `@Matches(NATIONAL_ID_PATTERN, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:137` |
+| `practitionerRoleAssignmentId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:142` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1109,6 +1112,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación no encontrada; ResourceNotFoundException: No hay una secretaria registrada con ese documento; ResourceNotFoundException: Organización no encontrada |
@@ -1129,8 +1133,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 12. GET /me/practitioner/support-team
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Sus secretarias, activas y pendientes.
+- **Origen:** CONTRATO
+- **Nombre:** Mi equipo de apoyo (secretarias)
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1138,7 +1142,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Sus secretarias, activas y pendientes. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Mi equipo de apoyo (secretarias). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1153,7 +1157,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:52` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:52` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1224,8 +1228,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 13. POST /me/practitioner/support-team/{id}/end
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Termina el vínculo con una secretaria suya.
+- **Origen:** CONTRATO
+- **Nombre:** Terminar el vínculo con una secretaria
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1233,7 +1237,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Termina el vínculo con una secretaria suya. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Terminar el vínculo con una secretaria. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1249,7 +1253,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:98` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1275,11 +1281,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `SupportLinkReasonDto`
+### Cuerpo — DTO `SupportLinkReasonDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1324,7 +1330,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se termina un vínculo activo o pendiente |
@@ -1344,8 +1350,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 14. GET /me/support-access
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Lo que puede ver: hospitales, sedes, servicios, pisos y doctores.
+- **Origen:** CONTRATO
+- **Nombre:** Mi alcance: hospitales, doctores y pisos de mis vínculos activos
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1353,7 +1359,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Lo que puede ver: hospitales, sedes, servicios, pisos y doctores. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Mi alcance: hospitales, doctores y pisos de mis vínculos activos. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1368,7 +1374,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:76` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:76` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1432,8 +1438,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 15. GET /me/support-agenda
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Agenda de un doctor al que asiste (sólo con vínculo activo con él).
+- **Origen:** CONTRATO
+- **Nombre:** Agenda de un doctor asignado (403 si no hay vínculo activo)
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1441,7 +1447,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Agenda de un doctor al que asiste (sólo con vínculo activo con él). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Agenda de un doctor asignado (403 si no hay vínculo activo). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1456,7 +1462,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:180` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:180` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | practitionerRoleAssignmentId (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1483,7 +1493,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `SupportAgendaQueryDto` | — |
+| `tenantId` | query | Sí | `string` | — |
+| `practitionerRoleAssignmentId` | query | Sí | `string` | — |
+| `from` | query | Sí | `string` | — |
+| `to` | query | Sí | `string` | — |
 
 ### Cuerpo
 
@@ -1507,6 +1520,7 @@ La operación no recibe cuerpo.
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rango tiene que ser positivo y de {MAX_AGENDA_DAYS} días como mucho |
@@ -1526,8 +1540,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 16. GET /me/support-catalog
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Catálogo de un hospital para armar el pedido.
+- **Origen:** CONTRATO
+- **Nombre:** Sedes, servicios, pisos y doctores de un hospital para pedir
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1535,7 +1549,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Catálogo de un hospital para armar el pedido. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Sedes, servicios, pisos y doctores de un hospital para pedir. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1550,7 +1564,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:89` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:89` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| PARAMETRO_QUERY | org (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1570,7 +1585,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `SupportCatalogQueryDto` | — |
+| `org` | query | Sí | `string` | — |
 
 ### Cuerpo
 
@@ -1612,6 +1627,7 @@ La operación no recibe cuerpo.
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
@@ -1631,8 +1647,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 17. GET /me/support-engagements
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Sus vínculos y, aparte, los pendientes.
+- **Origen:** CONTRATO
+- **Nombre:** Mis vínculos de apoyo y mis solicitudes
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1640,7 +1656,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Sus vínculos y, aparte, los pendientes. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Mis vínculos de apoyo y mis solicitudes. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1655,7 +1671,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:65` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:65` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1743,8 +1759,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 18. POST /me/support-engagements/{id}/confirm
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Acepta una invitación del hospital o de un doctor.
+- **Origen:** CONTRATO
+- **Nombre:** Aceptar una invitación de apoyo
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1752,7 +1768,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Acepta una invitación del hospital o de un doctor. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Aceptar una invitación de apoyo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1768,7 +1784,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:125` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:125` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:125` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1846,8 +1862,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 19. POST /me/support-engagements/{id}/decline
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Rechaza una invitación.
+- **Origen:** CONTRATO
+- **Nombre:** Rechazar una invitación de apoyo
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1855,7 +1871,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Rechaza una invitación. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Rechazar una invitación de apoyo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1871,7 +1887,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:143` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:143` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:143` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1898,11 +1916,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `SupportLinkReasonDto`
+### Cuerpo — DTO `SupportLinkReasonDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1947,7 +1965,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
@@ -1967,8 +1985,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 20. POST /me/support-engagements/{id}/leave
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Deja un vínculo o retira un pedido propio.
+- **Origen:** CONTRATO
+- **Nombre:** Dejar un vínculo o retirar mi pedido
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1976,7 +1994,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Deja un vínculo o retira un pedido propio. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Dejar un vínculo o retirar mi pedido. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -1992,7 +2010,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:162` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:162` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:162` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2092,11 +2110,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantMembershipId | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:39` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2115,17 +2133,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `role` | `string` | No | valores: STAFF, SECRETARY, ASSISTANT, NURSE, BILLING | `@IsOptional()` `@IsIn(ROLES)` | Rol de la asignación | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:15` |
-| `accessScope` | `string` | No | valores: TENANT, PRACTICE, SITE, UNIT | `@IsOptional()` `@IsIn(SCOPES)` | Alcance de acceso | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:23` |
-| `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: práctica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:34` |
-| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: sede de práctica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:45` |
-| `clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: unidad clínica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:56` |
-| `careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: care space | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:67` |
-| `diagnosticUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: unidad de diagnóstico | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:78` |
-| `pharmacyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: farmacia | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:89` |
-| `supervisorUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Supervisor responsable | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:100` |
-| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Inicio de vigencia (ISO) | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:111` |
-| `validTo` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fin de vigencia (ISO) | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:122` |
+| `role` | `string` | No | valores: STAFF, SECRETARY, ASSISTANT, NURSE, BILLING, NURSE_SUPERVISOR, ADMISSION, HOUSEKEEPING, HOUSEKEEPING_SUPERVISOR, MAINTENANCE, OR_MANAGER, INFECTION_CONTROL, UNIT_HEAD | `@IsOptional()` `@IsIn(ROLES)` | Rol de la asignación | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:30` |
+| `accessScope` | `string` | No | valores: TENANT, PRACTICE, SITE, UNIT, SPACE | `@IsOptional()` `@IsIn(SCOPES)` | Alcance de acceso | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:38` |
+| `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: práctica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:49` |
+| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: sede de práctica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:60` |
+| `clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: unidad clínica | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:71` |
+| `careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: care space | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:82` |
+| `diagnosticUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: unidad de diagnóstico | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:93` |
+| `pharmacyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nodo de scope: farmacia | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:104` |
+| `supervisorUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Supervisor responsable | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:115` |
+| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Inicio de vigencia (ISO) | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:126` |
+| `validTo` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Fin de vigencia (ISO) | `src/modules/delegated_access/dto/create-org-user-assignment.dto.ts:137` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2177,6 +2195,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:675` |
 | CONTROLADOR | `src/modules/delegated_access/controllers/org-user-assignments.controller.spec.ts:28` |
 
 ### Flujos
@@ -2187,8 +2206,8 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ## 22. GET /org/support-catalog
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Catálogo del hospital activo, para invitar.
+- **Origen:** CONTRATO
+- **Nombre:** Sedes, servicios, pisos y doctores para invitar
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2196,7 +2215,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ### Qué es y para qué sirve (negocio)
 
-Catálogo del hospital activo, para invitar. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Sedes, servicios, pisos y doctores para invitar. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2210,8 +2229,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:196` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2285,8 +2304,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 23. GET /org/support-engagement-requests
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Bandeja del hospital: vínculos en un estado (por defecto pendientes).
+- **Origen:** CONTRATO
+- **Nombre:** Solicitudes e invitaciones de apoyo del hospital
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2294,7 +2313,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Bandeja del hospital: vínculos en un estado (por defecto pendientes). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Solicitudes e invitaciones de apoyo del hospital. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2308,8 +2327,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:205` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2332,7 +2351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ListSupportRequestsQueryDto` | — |
+| `status` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -2386,8 +2405,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 24. POST /org/support-engagement-requests/{id}/decision
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** El hospital acepta o rechaza lo que pidió una secretaria.
+- **Origen:** CONTRATO
+- **Nombre:** Aceptar o rechazar una solicitud de apoyo
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2395,7 +2414,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-El hospital acepta o rechaza lo que pidió una secretaria. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Aceptar o rechazar una solicitud de apoyo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2409,9 +2428,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:224` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:224` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2438,12 +2459,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `DecideSupportLinkDto`
+### Cuerpo — DTO `DecideSupportLinkDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | Aceptar o rechazar. | `src/modules/delegated_access/dto/support-staff.dto.ts:150` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:157` |
+| `decision` | `string` | Sí | valores: APPROVED, REJECTED | `@IsIn(['APPROVED', 'REJECTED'])` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:150` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:157` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2491,7 +2512,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
@@ -2511,8 +2532,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 25. GET /org/support-engagements
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Personal de apoyo del hospital (vínculos activos y pendientes).
+- **Origen:** CONTRATO
+- **Nombre:** Personal de apoyo del hospital
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2520,7 +2541,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Personal de apoyo del hospital (vínculos activos y pendientes). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Personal de apoyo del hospital. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2534,8 +2555,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:246` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2606,8 +2627,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 26. POST /org/support-engagements/{id}/end
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** El hospital termina un vínculo o retira una invitación.
+- **Origen:** CONTRATO
+- **Nombre:** Terminar un vínculo de apoyo
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2615,7 +2636,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-El hospital termina un vínculo o retira una invitación. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Terminar un vínculo de apoyo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2629,9 +2650,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:258` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/support-staff.controller.ts:258` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2657,11 +2680,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `SupportLinkReasonDto`
+### Cuerpo — DTO `SupportLinkReasonDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2706,7 +2729,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2725,8 +2748,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 27. POST /org/team/invitations
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** El hospital invita a una secretaria registrada (por su documento).
+- **Origen:** CONTRATO
+- **Nombre:** Invitar a una secretaria a lugares o doctores
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2734,7 +2757,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-El hospital invita a una secretaria registrada (por su documento). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Invitar a una secretaria a lugares o doctores. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2748,7 +2771,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/delegated_access/controllers/support-staff.controller.ts:275` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/delegated_access/controllers/support-staff.controller.ts:275` |
 
 ### Tablas que afecta
@@ -2773,17 +2798,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
 | `profiles.secretary_profiles` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:293` |
 
-### Cuerpo — DTO `InviteSupportStaffDto`
+### Cuerpo — DTO `InviteSupportStaffDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `nationalId` | `string` | Sí | longitud mínima 4; longitud máxima 40; patrón runtime NATIONAL_ID_PATTERN | `@IsString()` `@MinLength(4)` `@MaxLength(40)` `@Matches(NATIONAL_ID_PATTERN, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad con el que la secretaria inicia sesión. | `src/modules/delegated_access/dto/support-staff.dto.ts:115` |
-| `items` | `array<SupportTargetDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => SupportTargetDto)` | Lo que se le ofrece. | `src/modules/delegated_access/dto/support-staff.dto.ts:124` |
-| `items[].targetKind` | `object` | Sí | — | `@IsIn(SUPPORT_TARGET_KINDS)` | Qué nombra el vínculo. | `src/modules/delegated_access/dto/support-staff.dto.ts:42` |
-| `items[].practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede (`targetKind: SITE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:48` |
-| `items[].clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio / unidad clínica (`targetKind: SERVICE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:54` |
-| `items[].careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Piso u otro espacio (`targetKind: SPACE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:60` |
-| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Vinculación del doctor con el hospital (`targetKind: PRACTITIONER`). | `src/modules/delegated_access/dto/support-staff.dto.ts:66` |
+| `nationalId` | `string` | Sí | longitud mínima 4; longitud máxima 40; patrón runtime NATIONAL_ID_PATTERN | `@IsString()` `@MinLength(4)` `@MaxLength(40)` `@Matches(NATIONAL_ID_PATTERN, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:115` |
+| `items` | `array<SupportTargetDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => SupportTargetDto)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:124` |
+| `items[].targetKind` | `string` | Sí | valores: ORGANIZATION, SITE, SERVICE, SPACE, PRACTITIONER | `@IsIn(SUPPORT_TARGET_KINDS)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:42` |
+| `items[].practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:48` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:54` |
+| `items[].careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:60` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:66` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2792,7 +2817,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "items": [
     {
-      "targetKind": {}
+      "targetKind": "ORGANIZATION"
     }
   ]
 }
@@ -2805,7 +2830,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "items": [
     {
-      "targetKind": {},
+      "targetKind": "ORGANIZATION",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
       "careSpaceId": "00000000-0000-4000-8000-000000000001",
@@ -2847,6 +2872,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: No hay una secretaria registrada con ese documento; ResourceNotFoundException: Organización no encontrada |
@@ -2882,7 +2908,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Cómo se atiende (sistema)
 
-`PATCH /org/user-assignments/{id}` la atiende `OrgUserAssignmentsController.update` (src/modules/delegated_access/controllers/org-user-assignments.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateOrgUserAssignmentDto` (4 campos, 0 obligatorios). Delega en `OrgUserAssignmentsService.updateAssignment`. Actualiza delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments. Lee delegated_access.organization_user_assignments.
+`PATCH /org/user-assignments/{id}` la atiende `OrgUserAssignmentsController.update` (src/modules/delegated_access/controllers/org-user-assignments.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateOrgUserAssignmentDto` (7 campos, 0 obligatorios). Delega en `OrgUserAssignmentsService.updateAssignment`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, messaging.outbox_messages. Publica delegated_access.assignment.scope_changed.
 
 ### Requerimientos
 
@@ -2890,19 +2916,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/org-user-assignments.controller.ts:59` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment | `src/modules/delegated_access/services/org-user-assignments.service.ts:174` |
+| `delegated_access.organization_user_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment | `src/modules/delegated_access/services/org-user-assignments.service.ts:212` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment → OrganizationUserAssignmentsRepository.findById | `src/modules/delegated_access/repositories/organization-user-assignments.repository.ts:84` |
 | `delegated_access.practitioner_delegate_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment → PractitionerDelegateAssignmentsRepository.suspendByDelegateAssignment | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:120` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment | `src/modules/delegated_access/services/org-user-assignments.service.ts:279` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | OrgUserAssignmentsController.update → OrgUserAssignmentsService.updateAssignment → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `delegated_access.assignment.scope_changed` | `src/modules/delegated_access/services/org-user-assignments.service.ts:283` |
 
 ### Parámetros
 
@@ -2914,10 +2950,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `supervisorUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nuevo supervisor | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:17` |
-| `accessScope` | `string` | No | valores: TENANT, PRACTICE, SITE, UNIT | `@IsOptional()` `@IsIn(SCOPES)` | Nuevo alcance de acceso | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:25` |
-| `suspend` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Suspender la asignación (cascada a delegaciones) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:35` |
-| `expectedRowVersion` | `number` | No | — | `@IsOptional()` `@IsInt()` | row_version esperado (concurrencia optimista) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:45` |
+| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede (alcance SITE) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:15` |
+| `clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Unidad (alcance UNIT) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:21` |
+| `careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Espacio (alcance SPACE) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:30` |
+| `supervisorUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nuevo supervisor | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:38` |
+| `accessScope` | `string` | No | valores: TENANT, PRACTICE, SITE, UNIT, SPACE | `@IsOptional()` `@IsIn(SCOPES)` | Nuevo alcance de acceso | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:46` |
+| `suspend` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Suspender la asignación (cascada a delegaciones) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:56` |
+| `expectedRowVersion` | `number` | No | — | `@IsOptional()` `@IsInt()` | row_version esperado (concurrencia optimista) | `src/modules/delegated_access/dto/update-org-user-assignment.dto.ts:66` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2929,6 +2968,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ```json
 {
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
   "supervisorUserId": "00000000-0000-4000-8000-000000000001",
   "accessScope": "TENANT",
   "suspend": true,
@@ -2964,6 +3006,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/infrastructure-f5.int-spec.ts:740` |
 | CONTROLADOR | `src/modules/delegated_access/controllers/org-user-assignments.controller.spec.ts:35` |
 
 ### Flujos
@@ -2997,10 +3040,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3093,8 +3136,8 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ## 30. POST /practitioner-delegates/{id}/accept
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Acepta a la secretaria que pidió asistirlo.
+- **Origen:** CONTRATO
+- **Nombre:** Aceptar a una secretaria
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -3102,7 +3145,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ### Qué es y para qué sirve (negocio)
 
-Acepta a la secretaria que pidió asistirlo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Aceptar a una secretaria. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -3118,7 +3161,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3219,11 +3262,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3329,11 +3372,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3422,8 +3465,8 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ## 33. POST /practitioner-delegates/{id}/reject
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Rechaza a la secretaria que pidió asistirlo.
+- **Origen:** CONTRATO
+- **Nombre:** Rechazar a una secretaria
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -3431,7 +3474,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ### Qué es y para qué sirve (negocio)
 
-Rechaza a la secretaria que pidió asistirlo. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Rechazar a una secretaria. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -3447,7 +3490,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:79` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3474,11 +3519,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `SupportLinkReasonDto`
+### Cuerpo — DTO `SupportLinkReasonDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo, para el registro. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:167` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3523,7 +3568,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese vínculo no está esperando su decisión |
@@ -3566,11 +3611,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:284` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:150` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3695,14 +3740,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `status` | `string` | Sí | valores: VALID, EXPIRED, REVOKED | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:117` |
-| `issuedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:121` |
-| `prescriberName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:124` |
-| `prescriberLicense` | `PrescriberLicenseDto` | No | admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:127` |
+| `status` | `string` | Sí | valores: VALID, EXPIRED, REVOKED | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:135` |
+| `endedReason` | `string` | Sí | valores: LINK_EXPIRED, PRESCRIPTION_NOT_ACTIVE; admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:147` |
+| `issuedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:151` |
+| `prescriberName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:154` |
+| `prescriberLicense` | `PrescriberLicenseDto` | No | admite null | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:157` |
 | `prescriberLicense.number` | `string` | No | — | — | — | sin fuente |
 | `prescriberLicense.authority` | `object` | No | admite null | — | — | sin fuente |
 | `prescriberLicense.state` | `string` | No | valores: ACTIVE, PENDING | — | — | sin fuente |
-| `itemCount` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:131` |
+| `itemCount` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/prescription-shares.dto.ts:161` |
 
 ### Respuestas posibles
 
@@ -3728,8 +3774,8 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ## 36. POST /support-engagement-requests
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** La secretaria pide entrar a un hospital o asistir a sus doctores.
+- **Origen:** CONTRATO
+- **Nombre:** Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor)
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -3737,7 +3783,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 ### Qué es y para qué sirve (negocio)
 
-La secretaria pide entrar a un hospital o asistir a sus doctores. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
+Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -3752,6 +3798,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPPORT_STAFF | `src/modules/delegated_access/controllers/support-staff.controller.ts:103` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/delegated_access/controllers/support-staff.controller.ts:103` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/delegated_access/controllers/support-staff.controller.ts:103` |
 
 ### Tablas que afecta
@@ -3775,19 +3823,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:165` |
 | `profiles.secretary_profiles` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:269` |
 
-### Cuerpo — DTO `CreateEngagementRequestDto`
+### Cuerpo — DTO `CreateEngagementRequestDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Hospital al que pide entrar. | `src/modules/delegated_access/dto/support-staff.dto.ts:74` |
-| `roleTemplateCode` | `string` | No | valores: SECRETARY | `@IsOptional()` `@IsIn(['SECRETARY'])` | Rol de apoyo. Hoy sólo existe la secretaria; se acepta para no romper al cliente del PR #1175, que lo mandaba siempre. | `src/modules/delegated_access/dto/support-staff.dto.ts:83` |
-| `message` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Mensaje para quien decide. No se guarda en la base. | `src/modules/delegated_access/dto/support-staff.dto.ts:90` |
-| `items` | `array<SupportTargetDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => SupportTargetDto)` | Lo que pide: hospital, sedes, servicios, pisos y doctores. | `src/modules/delegated_access/dto/support-staff.dto.ts:99` |
-| `items[].targetKind` | `object` | Sí | — | `@IsIn(SUPPORT_TARGET_KINDS)` | Qué nombra el vínculo. | `src/modules/delegated_access/dto/support-staff.dto.ts:42` |
-| `items[].practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede (`targetKind: SITE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:48` |
-| `items[].clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio / unidad clínica (`targetKind: SERVICE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:54` |
-| `items[].careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Piso u otro espacio (`targetKind: SPACE`). | `src/modules/delegated_access/dto/support-staff.dto.ts:60` |
-| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Vinculación del doctor con el hospital (`targetKind: PRACTITIONER`). | `src/modules/delegated_access/dto/support-staff.dto.ts:66` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:74` |
+| `roleTemplateCode` | `string` | No | valores: SECRETARY | `@IsOptional()` `@IsIn(['SECRETARY'])` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:83` |
+| `message` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:90` |
+| `items` | `array<SupportTargetDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => SupportTargetDto)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:99` |
+| `items[].targetKind` | `string` | Sí | valores: ORGANIZATION, SITE, SERVICE, SPACE, PRACTITIONER | `@IsIn(SUPPORT_TARGET_KINDS)` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:42` |
+| `items[].practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:48` |
+| `items[].clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:54` |
+| `items[].careSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:60` |
+| `items[].practitionerRoleAssignmentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/delegated_access/dto/support-staff.dto.ts:66` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -3796,7 +3844,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "tenantId": "00000000-0000-4000-8000-000000000001",
   "items": [
     {
-      "targetKind": {}
+      "targetKind": "ORGANIZATION"
     }
   ]
 }
@@ -3811,7 +3859,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "message": "valor-ejemplo",
   "items": [
     {
-      "targetKind": {},
+      "targetKind": "ORGANIZATION",
       "practiceSiteId": "00000000-0000-4000-8000-000000000001",
       "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
       "careSpaceId": "00000000-0000-4000-8000-000000000001",
@@ -3853,6 +3901,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |

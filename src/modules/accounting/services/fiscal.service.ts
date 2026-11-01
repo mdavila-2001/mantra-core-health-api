@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -61,8 +62,12 @@ export class FiscalService {
       'Opening fiscal year',
     );
     return this.em.transactional(async (tx) => {
-      await this.scope.practice(dto.practiceId);
-      await this.assertCanOpenFiscalYear(actor, dto.practiceId);
+      const practiceTenantId = await this.scope.practice(dto.practiceId);
+      await this.assertCanOpenFiscalYear(
+        actor,
+        dto.practiceId,
+        practiceTenantId,
+      );
       const clash = await this.fiscalRepo.findYearByCode(
         tx,
         dto.practiceId,
@@ -119,16 +124,21 @@ export class FiscalService {
    * consultorio propio. Otro médico, aunque atienda en esa práctica, recibe 403.
    * Corre después de `scope.practice`: una práctica de otra organización ya
    * respondió 404 y no se distingue de una inexistente.
+   *
+   * El rol administrativo se mide en el tenant de la práctica (#1241): el
+   * acotado en `scopedRoles` a otra organización no abre ejercicios de esta
+   * por tener membresía en ella.
    */
   private async assertCanOpenFiscalYear(
     actor: AuthenticatedUser,
     practiceId: string,
+    practiceTenantId: string,
   ): Promise<void> {
     const { roles } = actor;
     if (
-      roles.includes('SUPERADMIN') ||
-      roles.includes('SECURITY_ADMIN') ||
-      roles.includes('ACCOUNTING_APPROVER')
+      ['SUPERADMIN', 'SECURITY_ADMIN', 'ACCOUNTING_APPROVER'].some((role) =>
+        roleAuthorizesInTenant(actor, role, practiceTenantId),
+      )
     ) {
       return;
     }

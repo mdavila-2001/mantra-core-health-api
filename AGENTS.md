@@ -79,6 +79,12 @@ Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepci
   terminada. Un mock cubre una capa, no prueba la integración.
 - Un test en rojo **bloquea el cierre**. Se corrige, o se declara `BLOQUEADO` con evidencia externa.
 
+### 1.6 Ramas
+
+- **Los cambios van por PR hacia `dev`.**
+- **Prohibido abrir PR hacia `test`.** Está dada de baja desde el 30/10/2026: no despliega nada y
+  `test.alovidasalud.com` redirige a `dev`.
+
 ---
 
 ## 2. Formato obligatorio de trabajo

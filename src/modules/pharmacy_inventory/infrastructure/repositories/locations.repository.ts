@@ -42,6 +42,10 @@ export interface CreateLocationData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** F5c: espacio físico. */
+  careSpaceId?: string;
+  /** F5c: unidad clínica dueña. */
+  clinicalUnitId?: string;
 }
 
 /** Acceso a datos de `pharmacy_inventory.inventory_locations`. */
@@ -71,6 +75,18 @@ export class LocationsRepository {
       { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
       { orderBy: { createdAt: 'asc', id: 'asc' } },
     );
+  }
+
+  /** El botiquín activo de una unidad (F5c), si existe. */
+  findActiveWardStock(
+    em: EntityManager,
+    clinicalUnitId: string,
+  ): Promise<InventoryLocations | null> {
+    return em.findOne(InventoryLocations, {
+      clinicalUnitId,
+      locationTypeConceptId: PINV.LOCATION_TYPE_WARD_STOCK,
+      statusConceptId: PINV.LOCATION_ACTIVE,
+    });
   }
 
   /** Todas las ubicaciones activas de una sede, la primera creada primero. */
@@ -104,6 +120,8 @@ export class LocationsRepository {
         temperatureZoneConceptId: data.temperatureZoneConceptId,
         controlledAccess: data.controlledAccess,
         statusConceptId: data.statusConceptId,
+        ...(data.careSpaceId ? { careSpaceId: data.careSpaceId } : {}),
+        ...(data.clinicalUnitId ? { clinicalUnitId: data.clinicalUnitId } : {}),
         ...createdBy(data.actorUserId),
       },
       { partial: true },

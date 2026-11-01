@@ -37,6 +37,16 @@ channels:
         $ref: '#/components/messages/DomainEvent'
       practiceStructureEvent:
         $ref: '#/components/messages/PracticeStructureEvent'
+      infrastructureOpsEvent:
+        $ref: '#/components/messages/InfrastructureOpsEvent'
+      adtEvent:
+        $ref: '#/components/messages/AdtEvent'
+      operatingRoomEvent:
+        $ref: '#/components/messages/OperatingRoomEvent'
+      spaceBillingEvent:
+        $ref: '#/components/messages/SpaceBillingEvent'
+      spaceIntegrationEvent:
+        $ref: '#/components/messages/SpaceIntegrationEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -148,6 +158,74 @@ components:
         dice reasonProvided).
       payload:
         $ref: '#/components/schemas/PracticeStructureEventPayload'
+
+    InfrastructureOpsEvent:
+      name: InfrastructureOpsEvent
+      title: Operación de espacios (practice, F2)
+      summary: >
+        Cambios de los ejes operativos de un espacio (disponibilidad, higiene,
+        aislamiento, ocupación derivada), bloqueos y órdenes de limpieza
+        (CONTRATO-F2-F5 §F2.3). Se publican en la misma transacción que el
+        cambio (src/modules/practice/services/ops/ops-events.ts).
+        `practice.care_space.status_changed` equivale a HL7 ADT^A20 / NPU y su
+        payload lleva careSpaceId, siteId, axis, from, to, v2Code (HL7 v2-0116),
+        reasonCode, reasonText, expectedUntil, source, sourceRefId, occurredAt,
+        requestId y opsVersion. Las órdenes de limpieza nunca llevan datos de
+        paciente.
+      payload:
+        $ref: '#/components/schemas/InfrastructureOpsEventPayload'
+
+    AdtEvent:
+      name: AdtEvent
+      title: Internación / ADT y censo (clinical, F3)
+      summary: >
+        Movimientos de internación equivalentes a HL7 ADT (A01 ingreso/asignación,
+        A02 traslado con PV1-3 y PV1-6, A17 intercambio, A03 egreso, A12 anulación de
+        traslado), forzados de compatibilidad, revisión de incidentes y cierre/ajuste
+        del censo diario (CONTRATO-F2-F5 §F3.3). Se publican en la misma transacción
+        (src/modules/clinical/services/inpatient/adt-support.ts). El payload lleva ids
+        (encuentro, ubicación, cama), el código HL7 y el requestId; nunca datos del
+        paciente. Cada movimiento de cama publica además
+        practice.care_space.status_changed (eje OCCUPANCY) por CareSpaceOpsPort.
+      payload:
+        $ref: '#/components/schemas/AdtEventPayload'
+
+    OperatingRoomEvent:
+      name: OperatingRoomEvent
+      title: Quirófanos (procedures_perioperative y scheduling, F4)
+      summary: >
+        Recurso agendable ligado a un espacio (R0), check-list OMS creado, eventos de
+        sala en orden (IN_ROOM → ANESTHESIA_START → INCISION → CLOSURE → OUT_OF_ROOM) y
+        bloques de quirófano creados, liberados o cancelados (CONTRATO-F2-F5 §F4.3). Se
+        publican en la misma transacción. El payload lleva ids de caso, sala, bloque y
+        orden de limpieza (el recambio de sala alimenta a F2); nunca datos del paciente.
+      payload:
+        $ref: '#/components/schemas/OperatingRoomEventPayload'
+
+    SpaceBillingEvent:
+      name: SpaceBillingEvent
+      title: Cargos de espacio (billing, F5e)
+      summary: >
+        Tarifas de espacio creadas o cerradas y cargos devengados (día-cama por la regla
+        de medianoche, quirófano por tiempo) creados, sin tarifa vigente o anulados
+        (CONTRATO-F2-F5 §F5e). Se publican en la misma transacción. El payload lleva
+        ids, la clave de idempotencia, la fecha de servicio y el espacio; nunca datos
+        del paciente.
+      payload:
+        $ref: '#/components/schemas/SpaceBillingEventPayload'
+
+    SpaceIntegrationEvent:
+      name: SpaceIntegrationEvent
+      title: Integración de espacios (F5a, F5b, F5c, F5d, F5f, F5g)
+      summary: >
+        Hechos de los módulos que se ligan a un espacio físico (CONTRATO-F2-F5 §F5):
+        ubicaciones de inventario ubicadas o reubicadas (botiquín por unidad), activos de
+        infraestructura ubicados y centros de costo ligados a una unidad (F5f), y los de
+        las demás subfranjas a medida que se suman. Se publican en la misma transacción.
+        El payload lleva ids de la ubicación, el espacio y la unidad; nunca datos del
+        paciente.
+      payload:
+        $ref: '#/components/schemas/SpaceIntegrationEventPayload'
 
     OutboxMessage:
       name: OutboxMessage
@@ -290,3 +368,193 @@ components:
               format: uuid
             rowVersion:
               type: integer
+
+    InfrastructureOpsEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - practice.care_space.status_changed
+            - practice.care_space.block_started
+            - practice.care_space.block_ended
+            - practice.care_space.block_cancelled
+            - practice.care_space.block_overdue
+            - practice.cleaning_order.created
+            - practice.cleaning_order.assigned
+            - practice.cleaning_order.started
+            - practice.cleaning_order.finished
+            - practice.cleaning_order.inspected
+            - practice.cleaning_order.rejected
+            - practice.cleaning_order.cancelled
+        aggregateType:
+          type: string
+          enum:
+            - practice.care_spaces
+            - practice.care_space_blocks
+            - practice.cleaning_orders
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+          properties:
+            careSpaceId:
+              type: string
+              format: uuid
+            siteId:
+              type: string
+              format: uuid
+            axis:
+              type: string
+              enum: [AVAILABILITY, HYGIENE, ISOLATION, OCCUPANCY]
+            v2Code:
+              type: string
+              enum: [C, H, I, K, O, U, R]
+            requestId:
+              type: string
+
+    AdtEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - clinical.adt.admitted
+            - clinical.patient.admitted_without_prior_footprint
+            - clinical.adt.bed_assigned
+            - clinical.adt.reservation_created
+            - clinical.adt.transferred
+            - clinical.adt.swapped
+            - clinical.adt.discharged
+            - clinical.adt.reservation_cancelled
+            - clinical.adt.transfer_cancelled
+            - clinical.adt.placement_override
+            - clinical.adt.placement_incident_reviewed
+            - clinical.census_day.closed
+            - clinical.census_day.adjusted
+        aggregateType:
+          type: string
+          enum:
+            - clinical.encounters
+            - clinical.placement_incidents
+            - clinical.inpatient_census_days
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+          properties:
+            encounterId:
+              type: string
+              format: uuid
+            hl7:
+              type: string
+              enum: [A01, A02, A03, A12, A17]
+            requestId:
+              type: string
+
+    OperatingRoomEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - scheduling.resource.linked_to_space
+            - periop.checklist.created
+            - periop.case.room_event_recorded
+            - periop.or_block.created
+            - periop.or_block.released
+            - periop.or_block.cancelled
+        aggregateType:
+          type: string
+          enum:
+            - scheduling.schedulable_resources
+            - procedures_perioperative.surgical_safety_checklists
+            - procedures_perioperative.procedure_cases
+            - procedures_perioperative.operating_room_blocks
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+
+    SpaceBillingEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - billing.space_tariff.created
+            - billing.space_tariff.closed
+            - billing.charge_capture.created
+            - billing.charge_capture.tariff_missing
+            - billing.charge_capture.voided
+            - billing.charge_capture.invoiced
+        aggregateType:
+          type: string
+          enum:
+            - billing.space_tariffs
+            - billing.charge_captures
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+
+    SpaceIntegrationEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - pharmacy_inventory.location.located
+            - pharmacy_inventory.location.relocated
+            - accounting.infrastructure_item.located
+            - accounting.cost_center.unit_linked
+            - diagnostic_units.equipment.located
+            - diagnostic_units.equipment.status_changed
+            - diagnostic_units.equipment.resource_linked
+            - clinical.service_request.collection_point_suggested
+            - scheduling.template.care_space_set
+            - delegated_access.assignment.scope_changed
+        aggregateType:
+          type: string
+          enum:
+            - pharmacy_inventory.inventory_locations
+            - accounting.infrastructure_items
+            - accounting.cost_centers
+            - diagnostic_units.diagnostic_equipment
+            - clinical.service_requests
+            - scheduling.schedule_templates
+            - delegated_access.organization_user_assignments
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
