@@ -45,8 +45,10 @@ export class StudyCatalogReaderGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const actor = request.user;
     if (!actor) return true;
-    if (actor.roles.includes('SUPERADMIN')) return true;
     const tenantId = request.resolvedTenantId;
+    // El comodín de plataforma se mide en el tenant activo: global en
+    // cualquiera; acotado en `scopedRoles`, sólo en el suyo (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)) return true;
     if (
       STUDY_CATALOG_ROLES.some((role) =>
         roleAuthorizesInTenant(actor, role, tenantId),
