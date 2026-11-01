@@ -627,6 +627,11 @@ describe('IamAuthService', () => {
 
       expect(user.statusConceptId).toBe(CONCEPTS.USER_LOCKED);
       expect(d.lockoutsRepo.create).toHaveBeenCalled();
+      // El bloqueo vive en una tabla con RLS forzado: se busca y se crea con el
+      // contexto de sistema abierto antes.
+      expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+        d.lockoutsRepo.findActiveForUser.mock.invocationCallOrder[0],
+      );
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({

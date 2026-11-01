@@ -44,6 +44,7 @@ import {
   type ProfileRegistrationPort,
 } from '../ports/profile-registration.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 
 /** Vida útil del token de verificación de correo (24 h), igual que el paciente. */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -120,6 +121,7 @@ export class IamSupportStaffSelfRegistrationService {
     );
 
     const created = await this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       await this.credentialsRepo.lockSubjectForRegistration(tx, dto.nationalId);
       const existing = await this.credentialsRepo.findLivePasswordBySubject(
         tx,
