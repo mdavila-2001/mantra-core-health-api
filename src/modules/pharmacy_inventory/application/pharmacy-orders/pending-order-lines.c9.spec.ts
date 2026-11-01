@@ -37,6 +37,59 @@ function fixture(available = 10, reserved = 0) {
 }
 
 describe('C9 pending and connected stock', () => {
+  it('rejects an explicit aggregate confirmation of a pending lot product without changing its stock', async () => {
+    const f = fixture(5, 2);
+    f.position.inventoryLotId = 'lot';
+    const original = { ...f.position };
+    const line = {
+      pharmacyProductId: 'product',
+      requestedQuantity: '3',
+      reservedQuantity: '0',
+      statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+    };
+    await expect(
+      f.service.resolveOnConfirm(
+        {} as never,
+        f.order,
+        [line] as never,
+        [{ productId: 'product', decision: 'CONFIRMAR_STOCK', quantity: 5 }],
+        { tenantId: 'tenant' },
+        { id: 'user' } as never,
+      ),
+    ).rejects.toMatchObject({
+      status: 422,
+      response: expect.objectContaining({
+        reason: 'SITE_PRODUCT_KEPT_BY_LOTS',
+      }),
+    });
+    expect(f.writer.write).not.toHaveBeenCalled();
+    expect(f.position).toEqual(original);
+    expect(line.statusConceptId).toBe(PINV.RES_LINE_PENDING_CONFIRMATION);
+    expect(line.reservedQuantity).toBe('0');
+  });
+
+  it('preserves lot positions when the legacy confirmation supplies no aggregate adjustment', async () => {
+    const f = fixture(5, 2);
+    f.position.inventoryLotId = 'lot';
+    const original = { ...f.position };
+    const line = {
+      pharmacyProductId: 'product',
+      requestedQuantity: '3',
+      statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+    };
+    const result = await f.service.resolveOnConfirm(
+      {} as never,
+      f.order,
+      [line] as never,
+      [],
+      { tenantId: 'tenant' },
+      { id: 'user' } as never,
+    );
+    expect(result.toReserve).toEqual([{ line, positions: [f.position] }]);
+    expect(f.writer.write).not.toHaveBeenCalled();
+    expect(f.position).toEqual(original);
+  });
+
   it('no duplica un conteo agregado encima de posiciones por lote', async () => {
     const f = fixture(5);
     f.position.inventoryLotId = 'lot';
