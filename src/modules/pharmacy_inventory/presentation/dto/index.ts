@@ -18,3 +18,4 @@ export * from './medication-availability.dto';
 export * from './patient-settlement.dto';
 export * from './site-availability.dto';
 export * from './integration-sync.dto';
+export * from './external-system.dto';
