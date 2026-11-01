@@ -35,7 +35,6 @@ import {
   PurgeResultDto,
 } from '../../presentation/dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
-import { effectiveMemberships } from '../../../../common/tenant/tenant-resolution';
 import {
   ACCOUNT_PROFILE_IDS_PORT,
   type AccountProfileIdsPort,
@@ -224,14 +223,8 @@ export class IamAuthService {
   private async loadActiveTenantIds(
     em: EntityManager,
     userId: string,
-    roles: readonly string[],
   ): Promise<string[]> {
-    const tenants = await this.tenantClaims.listActiveTenantIds(em, userId);
-    // Una persona (paciente, profesional, personal de apoyo) sin ninguna
-    // organización opera en su espacio personal: pertenecer a una no es
-    // requisito para usar la plataforma. El token lo dice para que la interfaz
-    // mande el mismo tenant que la API resolvería (`effectiveMemberships`).
-    return [...effectiveMemberships({ tenantIds: tenants, roles: [...roles] })];
+    return this.tenantClaims.listActiveTenantIds(em, userId);
   }
 
   /**
@@ -413,7 +406,7 @@ export class IamAuthService {
         user.id,
         activeRoles,
       );
-      const tenants = await this.loadActiveTenantIds(tx, user.id, roles);
+      const tenants = await this.loadActiveTenantIds(tx, user.id);
       const { tenantNames, tenantTypes } = await this.loadTenantDisplay(
         tx,
         tenants,
@@ -595,11 +588,7 @@ export class IamAuthService {
           session.userId,
           activeRoles,
         );
-        const tenants = await this.loadActiveTenantIds(
-          tx,
-          session.userId,
-          roles,
-        );
+        const tenants = await this.loadActiveTenantIds(tx, session.userId);
         // El refresco tiene que repoblar lo mismo que el login: si no, al rotar el
         // token la interfaz perdería el nombre y el tipo, y volvería a mostrar el
         // uuid o a ofrecerle a la aseguradora el menú de una cuenta cualquiera.

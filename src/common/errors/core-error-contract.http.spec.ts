@@ -170,10 +170,10 @@ describe('Contrato de errores del núcleo (reason estable)', () => {
       });
     });
 
-    it('sin membresías ni cabecera → TENANT_REQUIRED (rol sin espacio personal)', async () => {
-      const res = await get('/core/echo', {
-        'x-test-roles': 'SECURITY_ADMIN',
-      }).expect(403);
+    it('sin membresías ni cabecera → TENANT_REQUIRED', async () => {
+      const res = await get('/core/echo', { 'x-test-roles': 'PATIENT' }).expect(
+        403,
+      );
       expect(res.body).toMatchObject({
         reason: 'TENANT_REQUIRED',
         details: { reason: 'TENANT_REQUIRED' },
