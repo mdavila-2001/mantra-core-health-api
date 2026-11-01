@@ -34,6 +34,7 @@ import {
 } from '../dto/authz-admin.dto';
 import { AuthzAdminReadService } from '../services/authz-admin-read.service';
 import { AuthzAssignmentRevocationService } from '../services/authz-assignment-revocation.service';
+import { RequirePermission } from '../../../common/auth/require-permission.decorator';
 
 /**
  * Administración de acceso: las lecturas y la revocación que le faltaban a `/authz` para operar
@@ -71,6 +72,9 @@ export class AuthzAdminController {
   })
   @Delete('users/:userId/role-assignments/:assignmentId')
   @Roles('SECURITY_ADMIN')
+  @RequirePermission('authz.users_role_assignments.delete', {
+    resourceIdParam: 'assignmentId',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:

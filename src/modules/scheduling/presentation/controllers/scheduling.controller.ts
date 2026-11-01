@@ -79,6 +79,7 @@ import {
   WalkInAppointmentDto,
   WalkInAppointmentResponseDto,
 } from '../dto';
+import { RequirePermission } from '../../../../common/auth/require-permission.decorator';
 
 /**
  * Configuración de agenda y apertura de reservas. Capa fina sobre los servicios;
@@ -328,6 +329,7 @@ export class SchedulingController {
   // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
   // sea del actor con `assertActorResource`.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @RequirePermission('scheduling.templates.delete', { resourceIdParam: 'id' })
   @ApiOperation({
     summary: 'Retirar una plantilla de agenda y soltar sus cupos libres',
     description:
@@ -609,6 +611,7 @@ export class SchedulingController {
   // Mismo alcance que el POST hermano: el servicio verifica que el recurso de
   // la excepción sea del actor (`assertActorResource`).
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @RequirePermission('scheduling.exceptions.delete', { resourceIdParam: 'id' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Eliminar una excepción de disponibilidad',
