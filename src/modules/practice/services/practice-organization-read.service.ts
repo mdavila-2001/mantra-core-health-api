@@ -102,7 +102,7 @@ export class PracticeOrganizationReadService {
     const em = this.em.fork();
     const [practice, allowed] = await Promise.all([
       this.practicesRepo.findById(em, practiceId),
-      this.access.canAccess(actor, practiceId),
+      this.access.canAccess(actor, practiceId, tenantId),
     ]);
     if (!practice || practice.tenantId !== tenantId || !allowed) {
       throw new ResourceNotFoundException('Práctica no encontrada', {

@@ -19,6 +19,7 @@ import { AccountingErrorReason } from '../accounting.error-reasons';
 import { LedgerService } from './ledger.service';
 import {
   TENANT_A,
+  PRACTICE_TENANTS,
   TENANT_B,
   buildScope,
   expectScopeNotFound,
@@ -88,6 +89,10 @@ function build() {
   // `assertPractitionerOwnsPractice`); los tests de PRACTITIONER la fijan.
   const practiceTenantLookup = {
     findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
+    // El tenant de cada práctica, como lo ve la política de alcance.
+    findTenantOfPractice: mockFn((id: string) =>
+      Promise.resolve(PRACTICE_TENANTS[id] ?? null),
+    ),
   };
   // La política de alcance real sobre los mismos dobles de asientos y periodos
   // que ve el servicio; cuentas, centros y prácticas son de `p1` (tenant A).
@@ -548,6 +553,42 @@ describe('LedgerService', () => {
         d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
       ).not.toHaveBeenCalled();
     });
+
+    /**
+     * `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` acotado a otro tenant en
+     * `scopedRoles` no salta la vinculación: el rol se mide en el tenant de
+     * la práctica (#1241).
+     */
+    it.each(['SECURITY_ADMIN', 'ACCOUNTING_APPROVER'])(
+      'createDraft: %s acotado a otro tenant no salta la vinculación (422); en el de la práctica o global, sí',
+      async (role) => {
+        const acotado = (tenant: string) =>
+          ({
+            ...practitioner,
+            roles: ['PRACTITIONER', role],
+            scopedRoles: { [tenant]: [role] },
+          }) as any;
+
+        const foreign = build();
+        await expect(
+          foreign.service.createDraft(balanced as any, acotado(TENANT_B)),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(foreign.journalRepo.createTransaction).not.toHaveBeenCalled();
+
+        const own = build();
+        await expect(
+          own.service.createDraft(balanced as any, acotado(TENANT_A)),
+        ).resolves.toMatchObject({ status: ACCT.TXN_DRAFT });
+
+        const global = build();
+        await expect(
+          global.service.createDraft(balanced as any, {
+            ...practitioner,
+            roles: ['PRACTITIONER', role],
+          }),
+        ).resolves.toMatchObject({ status: ACCT.TXN_DRAFT });
+      },
+    );
 
     it('classify rechaza (422) si el asiento es de una práctica ajena al profesional', async () => {
       const d = build();
