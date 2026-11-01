@@ -59,3 +59,12 @@ export function connectionIncomplete(): PreconditionFailedException {
     Reason.PHARMACY_CONNECTION_INCOMPLETE,
   );
 }
+
+/** 422: cambió la dirección o el tipo y la clave guardada no viaja a otro destino. */
+export function keyRequiredForNewDestination(): PreconditionFailedException {
+  return new PreconditionFailedException(
+    'Al cambiar la dirección o el tipo de sistema hay que volver a cargar la clave',
+    { reason: Reason.PHARMACY_CONNECTION_KEY_REQUIRED },
+    Reason.PHARMACY_CONNECTION_KEY_REQUIRED,
+  );
+}

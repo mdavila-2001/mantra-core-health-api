@@ -242,7 +242,7 @@ describe('ErpConnectionUseCases (FAR-C9)', () => {
 
     await d.useCases.save(
       'ph-1',
-      { mode: 'CONNECTED', baseUrl: 'http://farmacia.test/nueva' } as never,
+      { mode: 'CONNECTED', pharmacyCode: 'FARM-2' } as never,
       ACTOR,
     );
     expect(d.connections.rotateCredential).not.toHaveBeenCalled();
@@ -251,7 +251,7 @@ describe('ErpConnectionUseCases (FAR-C9)', () => {
       expect.objectContaining({
         enabled: true,
         config: expect.objectContaining({
-          baseUrl: 'http://farmacia.test/nueva',
+          pharmacyCode: 'FARM-2',
           keyLast4: '1234',
         }),
       }),
@@ -269,6 +269,50 @@ describe('ErpConnectionUseCases (FAR-C9)', () => {
       expect.objectContaining({ id: 'cred-1' }),
       'enc:v1:15',
       'user-1',
+    );
+  });
+
+  it('la clave guardada no viaja a otra dirección: cambiarla exige volver a cargar la clave', async () => {
+    const d = doubles();
+
+    await expect(
+      d.useCases.save(
+        'ph-1',
+        { mode: 'CONNECTED', baseUrl: 'http://otro-host.test' } as never,
+        ACTOR,
+      ),
+    ).rejects.toThrow('hay que volver a cargar la clave');
+    await expect(
+      d.useCases.testDraft(
+        'ph-1',
+        {
+          systemCode: 'ALOVIDA_STANDARD',
+          baseUrl: 'http://otro-host.test',
+          pharmacyCode: 'FARM-1',
+        },
+        ACTOR,
+      ),
+    ).rejects.toThrow('hay que volver a cargar la clave');
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    expect(d.catalogs.forAccess).not.toHaveBeenCalled();
+  });
+
+  it('«Probar» sin clave hacia la misma dirección usa la guardada', async () => {
+    const d = doubles();
+
+    const result = await d.useCases.testDraft(
+      'ph-1',
+      {
+        systemCode: 'ALOVIDA_STANDARD',
+        baseUrl: 'http://farmacia.test/std/',
+        pharmacyCode: 'FARM-1',
+      },
+      ACTOR,
+    );
+
+    expect(result).toEqual({ result: 'OK' });
+    expect(d.catalogs.forAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ apiKey: 'clave-real-1234' }),
     );
   });
 

@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import type { AuthenticatedUser } from '../../../../common';
+import {
+  assertOutboundUrlAllowed,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { INTEG } from '../../../integrations/integrations.concepts';
 import {
   lastFour,
@@ -35,6 +38,7 @@ import {
   connectionNotFound,
   encryptionNotConfigured,
   keyRequired,
+  keyRequiredForNewDestination,
   siteNotInPharmacy,
   systemNotAvailable,
 } from './erp-connection-errors';
@@ -133,6 +137,16 @@ export class ErpConnectionUseCases {
         throw connectionIncomplete();
       }
       if (enabled && !dto.apiKey && !current?.credential) throw keyRequired();
+      // La clave guardada solo viaja al destino para el que se cargó: si cambia
+      // la dirección o el tipo, hay que volver a cargarla.
+      if (
+        !dto.apiKey &&
+        current?.credential &&
+        destinationChanged(current, systemCode, baseUrl)
+      ) {
+        throw keyRequiredForNewDestination();
+      }
+      if (baseUrl !== '') assertOutboundUrlAllowed(baseUrl);
       const provider = systemCode
         ? await this.connections.findProviderByCode(tx, systemCode)
         : null;
@@ -218,15 +232,20 @@ export class ErpConnectionUseCases {
     if (!this.cipher.isConfigured()) throw encryptionNotConfigured();
     const em = this.em.fork();
     await this.scope.requireManagedPharmacy(em, pharmacyId, actor);
+    const baseUrl = normalizeUrl(dto.baseUrl);
+    assertOutboundUrlAllowed(baseUrl);
     let apiKey = dto.apiKey;
     if (!apiKey) {
       const current = await this.connections.findForPharmacy(em, pharmacyId);
       if (!current?.credential?.secretRef) throw keyRequired();
+      if (destinationChanged(current, dto.systemCode, baseUrl)) {
+        throw keyRequiredForNewDestination();
+      }
       apiKey = this.cipher.decrypt(current.credential.secretRef);
     }
     const result = await this.check({
       systemCode: dto.systemCode,
-      baseUrl: normalizeUrl(dto.baseUrl),
+      baseUrl,
       pharmacyCode: dto.pharmacyCode,
       apiKey,
       timeoutMs: PHARMACY_SYSTEM_TIMEOUT_MS,
@@ -356,6 +375,18 @@ export class ErpConnectionUseCases {
       })),
     };
   }
+}
+
+/** ¿La conexión apunta a otro sistema o a otra dirección que la guardada? */
+function destinationChanged(
+  current: ErpConnectionRecord,
+  systemCode: string | null,
+  baseUrl: string,
+): boolean {
+  return (
+    current.systemCode !== systemCode ||
+    normalizeUrl(current.config.baseUrl) !== baseUrl
+  );
 }
 
 /** Sin barra final: los adaptadores suman sus rutas. */

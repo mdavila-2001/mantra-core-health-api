@@ -1,4 +1,10 @@
+import http from 'node:http';
+import https from 'node:https';
 import axios, { type AxiosInstance } from 'axios';
+import {
+  pinnedLookup,
+  resolveOutboundDestination,
+} from '../../../../common/http/ssrf-guard';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
 
 /**
@@ -18,15 +24,27 @@ export function createPharmacySystemHttp(
   timeoutMs: number,
   headers: Record<string, string>,
 ): AxiosInstance {
-  return axios.create({
+  const client = axios.create({
     baseURL: baseUrl,
     timeout: timeoutMs,
     headers,
     // Una redirección podría llevar la clave a otro host.
     maxRedirects: 0,
-    // Solo se habla JSON; nada de seguir proxies del entorno con la clave.
+    // La clave no pasa por un proxy del entorno.
+    proxy: false,
     validateStatus: (status) => status >= 200 && status < 300,
   });
+  // Anti-SSRF (`common/http/ssrf-guard.ts`): la dirección la carga la farmacia.
+  // Se resuelve una vez, en producción se rechaza todo destino interno, y el
+  // socket se conecta a esa misma dirección ya validada (sin rebinding).
+  client.interceptors.request.use(async (config) => {
+    const destination = await resolveOutboundDestination(baseUrl);
+    const lookup = pinnedLookup(destination) as never;
+    config.httpAgent = new http.Agent({ lookup });
+    config.httpsAgent = new https.Agent({ lookup });
+    return config;
+  });
+  return client;
 }
 
 /** GET que devuelve el cuerpo o lanza el error del dominio con su motivo. */
