@@ -202,6 +202,51 @@ describe('OrderStockSourceResolver (FAR-C9)', () => {
 });
 
 describe('ErpConnectionUseCases (FAR-C9)', () => {
+  it.each([
+    'http://user:synthetic@farmacia.test/std',
+    'http://farmacia.test/std?apiKey=synthetic',
+    'http://farmacia.test/std#synthetic',
+  ])(
+    'rejects credentials or secret-bearing components in baseUrl: %s',
+    async (baseUrl) => {
+      const d = doubles();
+      await expect(
+        d.useCases.save(
+          'ph-1',
+          {
+            mode: 'CONNECTED',
+            systemCode: 'ALOVIDA_STANDARD',
+            baseUrl,
+            pharmacyCode: 'FARM-1',
+            apiKey: 'synthetic-new-key',
+          },
+          ACTOR,
+        ),
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          reason: 'PHARMACY_CONNECTION_INCOMPLETE',
+        }),
+      });
+      expect(d.connections.updateConnection).not.toHaveBeenCalled();
+      expect(d.cipher.encrypt).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    'http://user:synthetic@farmacia.test/std',
+    'http://farmacia.test/std?apiKey=synthetic',
+    'http://farmacia.test/std#synthetic',
+  ])(
+    'does not expose an unsafe historical URL in the view: %s',
+    async (baseUrl) => {
+      const d = doubles();
+      d.connections.findForPharmacy.mockResolvedValue(
+        record({ config: { ...record().config, baseUrl } }),
+      );
+      expect((await d.useCases.view('ph-1', ACTOR)).baseUrl).toBeNull();
+      expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    },
+  );
   it('usa el catálogo y los códigos de la conexión propia y no el global', async () => {
     const d = doubles();
     const fallback = { isConfigured: () => false } as never;

@@ -34,6 +34,7 @@ const URL_OPTIONS = {
   require_protocol: true,
   require_tld: false,
   allow_underscores: true,
+  disallow_auth: true,
 };
 
 /** El código de una sucursal en el sistema de la farmacia. */
@@ -60,6 +61,7 @@ export class ErpConnectionAccessDto {
 
   @ApiProperty({ example: 'https://api.mi-farmacia.bo/alovida-standard' })
   @IsUrl(URL_OPTIONS)
+  @Matches(/^[^?#]*$/)
   @MaxLength(500)
   baseUrl!: string;
 
@@ -103,6 +105,7 @@ export class SaveErpConnectionDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsUrl(URL_OPTIONS)
+  @Matches(/^[^?#]*$/)
   @MaxLength(500)
   baseUrl?: string;
 

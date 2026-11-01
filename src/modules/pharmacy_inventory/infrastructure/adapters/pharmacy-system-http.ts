@@ -6,6 +6,7 @@ import {
   resolveOutboundDestination,
 } from '../../../../common/http/ssrf-guard';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
+import { isSafePharmacySystemBaseUrl } from '../../domain/erp-connection/pharmacy-system-url';
 
 /**
  * Lo común a los adaptadores del sistema de cada farmacia (FAR-C9): un cliente
@@ -24,6 +25,9 @@ export function createPharmacySystemHttp(
   timeoutMs: number,
   headers: Record<string, string>,
 ): AxiosInstance {
+  if (!isSafePharmacySystemBaseUrl(baseUrl)) {
+    throw new ExternalCatalogUnavailableError('INVALID_BASE_URL');
+  }
   const client = axios.create({
     baseURL: baseUrl,
     timeout: timeoutMs,

@@ -7,6 +7,30 @@ import { PharmacyCatalogFactory } from './pharmacy-catalog.factory';
 type Reply = { status?: number; body?: unknown; delayMs?: number };
 
 describe('adaptadores del sistema de cada farmacia (FAR-C9)', () => {
+  it.each([
+    'http://user:synthetic@farmacia.test/std',
+    'http://farmacia.test/std?apiKey=synthetic',
+    'http://farmacia.test/std#synthetic',
+  ])(
+    'refuses an unsafe configured base before creating the HTTP transport: %s',
+    (baseUrl) => {
+      const factory = new PharmacyCatalogFactory();
+      expect(() =>
+        factory.forAccess({
+          systemCode: 'ALOVIDA_STANDARD',
+          baseUrl,
+          pharmacyCode: 'FARM-1',
+          apiKey: 'synthetic-key',
+          timeoutMs: 50,
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          kind: 'UNREACHABLE',
+          detail: 'INVALID_BASE_URL',
+        }),
+      );
+    },
+  );
   let server: Server | undefined;
   let seen: IncomingMessage[] = [];
 

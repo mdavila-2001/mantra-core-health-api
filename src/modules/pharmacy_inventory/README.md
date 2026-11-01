@@ -61,6 +61,10 @@ procedimiento de recifrado o recarga de conexiones. Nunca se publica su valor.
 Las pistas de claves de cuatro caracteres o menos se omiten. Las pistas
 anteriores sin marca de cálculo seguro también se ocultan hasta recargar la
 clave, sin descifrarla para mostrar la configuración.
+Las URLs base no admiten usuario/contraseña, consulta ni fragmento: la clave
+debe ir exclusivamente en su campo cifrado. Las URLs antiguas con esos
+componentes no se devuelven en la vista ni se usan para enviar credenciales.
+Para sanear una configuración antigua así, se deben cargar destino y clave válidos.
 La consulta paginada de la cadena simulada comparte un presupuesto total de
 tiempo entre todas sus páginas; no reinicia ese plazo por página ni reintenta.
 El plazo incluye la resolución del destino. Las lecturas de catálogo y la

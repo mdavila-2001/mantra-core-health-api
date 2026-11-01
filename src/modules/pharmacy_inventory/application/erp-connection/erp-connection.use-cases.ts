@@ -35,6 +35,7 @@ import {
 } from '../ports/external-pharmacy-catalog.port';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 import { integrationConnectionInactive } from '../inventory-sync/integration-errors';
+import { isSafePharmacySystemBaseUrl } from '../../domain/erp-connection/pharmacy-system-url';
 import {
   connectionIncomplete,
   connectionNotFound,
@@ -389,7 +390,10 @@ export class ErpConnectionUseCases {
         : null,
       checkedAt: config?.checkedAt ?? null,
       systemCode: record?.systemCode ?? null,
-      baseUrl: config?.baseUrl || null,
+      baseUrl:
+        config?.baseUrl && isSafePharmacySystemBaseUrl(config.baseUrl)
+          ? config.baseUrl
+          : null,
       pharmacyCode: config?.pharmacyCode || null,
       keyHint: record?.credential ? maskSecretHint(config?.keyLast4) : null,
       encryptionConfigured: this.cipher.isConfigured(),
@@ -418,7 +422,10 @@ function destinationChanged(
 
 /** Sin barra final: los adaptadores suman sus rutas. */
 function normalizeUrl(url: string): string {
-  return url.trim().replace(/\/+$/, '');
+  const value = url.trim().replace(/\/+$/, '');
+  if (value !== '' && !isSafePharmacySystemBaseUrl(value))
+    throw connectionIncomplete();
+  return value;
 }
 
 /** El concepto que deja el estado, para quien lo necesite nombrar. */
