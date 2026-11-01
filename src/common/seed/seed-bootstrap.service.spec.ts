@@ -632,6 +632,27 @@ describe('SeedBootstrapService · seed-cli --only y conteos por paso', () => {
     expect(countInserted({ existing: 3 })).toBeNull();
   });
 
+  it('countInserted no cuenta lo descartado ni lo que ya estaba (mutabilidad y catálogo)', () => {
+    // Segunda corrida real contra Postgres: el registro de mutabilidad informaba
+    // 1430 «insertadas» (las `unchanged`) y el catálogo 462 (aristas descartadas).
+    expect(
+      countInserted({
+        writePolicies: 0,
+        entities: 0,
+        changeLog: 0,
+        unchanged: 1430,
+        drift: 2,
+      }),
+    ).toBe(0);
+    expect(
+      countInserted({
+        inserted: 0,
+        lineageSkippedUncataloged: 462,
+        glossaryDuplicatesDropped: 1,
+      }),
+    ).toBe(0);
+  });
+
   it('el código de salida sigue el resumen: un paso pedido que falla cuenta como fallo', async () => {
     const { service } = build(['people']);
 

@@ -56,8 +56,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.elements → UiVisibilityAdminService.listElements → MikroOrmUiVisibilityStore.listElements | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:169` |
-| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.elements → UiVisibilityAdminService.listElements → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:265` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.elements → UiVisibilityAdminService.listElements → MikroOrmUiVisibilityStore.listElements | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:172` |
+| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.elements → UiVisibilityAdminService.listElements → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:268` |
 
 ### Parámetros
 
@@ -126,8 +126,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:190` |
-| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:265` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
+| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:268` |
 
 ### Cuerpo — DTO `CreateElementDto`
 
@@ -331,12 +331,12 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:432` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:435` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userInTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:442` |
-| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:453` |
-| `iam.user_global_roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:465` |
-| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:414` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userInTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:445` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:456` |
+| `iam.user_global_roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.effectiveRoleCodes | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:468` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.preview → UiVisibilityAdminService.preview → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
 
 ### Parámetros
 
@@ -405,11 +405,11 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:432` |
-| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → MikroOrmUiVisibilityStore.findElementsByKeys | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:182` |
-| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → MikroOrmUiVisibilityStore.listRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:299` |
-| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:424` |
-| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:414` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:435` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → MikroOrmUiVisibilityStore.findElementsByKeys | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:185` |
+| `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → MikroOrmUiVisibilityStore.listRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:302` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.rules → UiVisibilityAdminService.listRules → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
 
 ### Parámetros
 
@@ -478,10 +478,10 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:432` |
-| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:190` |
-| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:424` |
-| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:414` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:435` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
 
 ### Cuerpo — DTO `CreateRuleDto`
 
@@ -579,10 +579,10 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:432` |
-| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:190` |
-| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:424` |
-| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:414` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:435` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.updateRule → UiVisibilityAdminService.updateRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
 
 ### Parámetros
 
@@ -676,10 +676,10 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:432` |
-| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:190` |
-| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:424` |
-| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:414` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.roleNames | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:435` |
+| `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
+| `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
+| `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
 
 ### Parámetros
 
@@ -748,7 +748,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenants` | LEE | LEE | DIRECTA | MeUiVisibilityController.mine → UiVisibilityMeService.resolveMine → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:453` |
+| `directory.tenants` | LEE | LEE | DIRECTA | MeUiVisibilityController.mine → UiVisibilityMeService.resolveMine → MikroOrmUiVisibilityStore.orgTypeOfTenant | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:456` |
 
 ### Parámetros
 

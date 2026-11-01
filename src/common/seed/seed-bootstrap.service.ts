@@ -146,8 +146,11 @@ interface SeedStepDescriptor {
 }
 
 /** Contadores que describen filas que el paso no escribió. */
+// `…Skipped…`/`…Dropped…` (p. ej. `lineageSkippedUncataloged` del catálogo) son filas
+// que el paso descartó, no que escribió; `unchanged` y `drift` (registro de mutabilidad)
+// son filas que ya estaban, iguales o distintas de lo derivado, y que el paso no toca.
 const NOT_INSERTED =
-  /^(orphan|adopted|existing$|skipped$|pendingForPapers$|organizationMissing$)|(Existing|Adopted)$/;
+  /^(orphan|adopted|existing$|skipped$|unchanged$|drift$|pendingForPapers$|organizationMissing$)|(Existing|Adopted)$|Skipped|Dropped/;
 
 /**
  * Suma los contadores numéricos que devuelve un seed.

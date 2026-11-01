@@ -34,6 +34,10 @@ COPY . .
 # de Node (~2 GB) y `nest build` muere con «heap out of memory»: sin esto la
 # imagen no se construye y el servidor se queda con el código anterior.
 RUN NODE_OPTIONS=--max-old-space-size=4096 yarn build
+# La imagen final solo trae `dist/` (sin `src/` ni los compose): el escáner de
+# piezas en ejecución (`/admin/ops/runtime-pieces`) lee entonces este manifiesto,
+# generado aquí desde el código fuente. Sin él responde `available:false`.
+RUN node dist/src/modules/platform_ops/runtime_pieces/runtime-pieces-manifest.cli.js dist/runtime-pieces.manifest.json
 
 # ---- deps de producción only (para la imagen final, sin devDependencies) ----
 FROM node:24-bookworm-slim AS prod-deps

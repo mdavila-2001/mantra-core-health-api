@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
+// `EntityManager` se importa como valor, no como tipo: Nest resuelve la
+// dependencia del constructor por la metadata que emite TypeScript, y un
+// `import type` la deja en `Function` («can't resolve dependencies»).
 import {
   UniqueConstraintViolationException,
-  type EntityManager,
+  EntityManager,
 } from '@mikro-orm/postgresql';
 import { OptimisticLockError, type FilterQuery } from '@mikro-orm/core';
 import { CONCEPTS } from '../../../common';
