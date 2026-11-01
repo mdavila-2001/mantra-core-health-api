@@ -86,3 +86,4 @@ En la fase anterior se implementó la arquitectura modular en memoria con 72 tes
 - [ ] Migración inicial SQL generada o script DDL verificado.
 - [ ] Evidencia guardada en `docs/trabajo/2026-10-31-persistencia-mikroorm-alovida/evidencia/`.
 - [ ] `REPORTE.md` completado con salida de comandos.
+
