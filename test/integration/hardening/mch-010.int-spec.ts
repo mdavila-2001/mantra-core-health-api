@@ -1,7 +1,13 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from '../harness';
-import { SEED, TokenService } from '../../../src/common';
+import {
+  bootstrapTestApp,
+  bearer,
+  ensureTestSession,
+  type TestContext,
+} from '../harness';
+import { CONCEPTS, SEED, TokenService, createdBy } from '../../../src/common';
+import { Users } from '../../../src/modules/iam/entities';
 import {
   configureMinioFromEnv,
   ensureBucket,
@@ -28,11 +34,41 @@ describe('MCH-010 · el objeto se autoriza contra su dueño (integración)', () 
   const http = () => request(ctx.app.getHttpServer());
   let namespace: { id: string; code: string };
 
+  /**
+   * Una identidad sintética con sesión activa. Desde MCH-004 (65da77968) un
+   * access token sólo autentica si su `sid` tiene una fila activa en
+   * `iam.sessions`, y esa fila cuelga de un `iam.users` real: un token firmado
+   * para un uuid suelto da 401 «La sesión ya no está activa» y nunca llega a
+   * la regla de objeto que esta prueba mide.
+   */
+  async function identidadConSesion(sid: string): Promise<string> {
+    const userId = randomUUID();
+    const em = ctx.orm.em.fork();
+    em.create(
+      Users,
+      {
+        id: userId,
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        displayName: `Identidad sintética ${sid}`,
+        mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
+        emailVerified: true,
+        phoneVerified: false,
+        ...createdBy(ctx.adminUserId),
+      },
+      { partial: true },
+    );
+    await em.flush();
+    await ensureTestSession(ctx.orm, userId, sid);
+    return userId;
+  }
+
   /** Emite un token para una identidad sintética con los roles indicados. */
-  function tokenDe(roles: string[], tenants: string[]): string {
+  async function tokenDe(roles: string[], tenants: string[]): Promise<string> {
+    const sid = `mch010-${randomUUID()}`;
+    const userId = await identidadConSesion(sid);
     return ctx.app
       .get(TokenService)
-      .signAccessToken(randomUUID(), `mch010-${randomUUID()}`, roles, tenants);
+      .signAccessToken(userId, sid, roles, tenants);
   }
 
   beforeAll(async () => {
@@ -73,7 +109,7 @@ describe('MCH-010 · el objeto se autoriza contra su dueño (integración)', () 
 
   it('AC01 · un actor de otro tenant no alcanza el objeto', async () => {
     const objeto = await objetoDePaciente();
-    const ajeno = tokenDe(['CLINICIAN', 'STORAGE_ADMIN'], [randomUUID()]);
+    const ajeno = await tokenDe(['CLINICIAN', 'STORAGE_ADMIN'], [randomUUID()]);
 
     const res = await emitir(objeto.versionId, ajeno);
 
@@ -82,7 +118,7 @@ describe('MCH-010 · el objeto se autoriza contra su dueño (integración)', () 
 
   it('AC02 · un clínico del mismo tenant sin vínculo con el paciente tampoco', async () => {
     const objeto = await objetoDePaciente();
-    const sinVinculo = tokenDe(['CLINICIAN'], [SEED.tenantId]);
+    const sinVinculo = await tokenDe(['CLINICIAN'], [SEED.tenantId]);
 
     const res = await emitir(objeto.versionId, sinVinculo);
 
@@ -97,7 +133,7 @@ describe('MCH-010 · el objeto se autoriza contra su dueño (integración)', () 
 
   it('el objeto ajeno responde igual que uno inexistente', async () => {
     const objeto = await objetoDePaciente();
-    const ajeno = tokenDe(['CLINICIAN', 'STORAGE_ADMIN'], [randomUUID()]);
+    const ajeno = await tokenDe(['CLINICIAN', 'STORAGE_ADMIN'], [randomUUID()]);
 
     const existeAjeno = await emitir(objeto.versionId, ajeno);
     const noExiste = await emitir(randomUUID(), ajeno);
@@ -110,7 +146,7 @@ describe('MCH-010 · el objeto se autoriza contra su dueño (integración)', () 
     const objeto = await objetoDePaciente();
     const emitido = await emitir(objeto.versionId, ctx.adminToken).expect(201);
     const token = (emitido.body.url as string).split('/').pop() as string;
-    const ajeno = tokenDe(['CLINICIAN', 'STORAGE_ADMIN'], [randomUUID()]);
+    const ajeno = await tokenDe(['CLINICIAN', 'STORAGE_ADMIN'], [randomUUID()]);
 
     // El enlace es de quien lo pidió, y además el otro actor no tiene custodia.
     await http()
