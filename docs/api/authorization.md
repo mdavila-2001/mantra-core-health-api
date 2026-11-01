@@ -68,6 +68,9 @@ tiene tenant, el rol se mide **en ese tenant**; cuando no lo tiene, solo pasa el
 |---|---|
 | `CommunityVisibilityService.isPlatform` (`SECURITY_ADMIN`, `SUPERADMIN`, `SYSTEM`): leer perfiles, bandejas, grupos secretos o de público autorizado, directorio completo de grupos | el del perfil (`public_profiles.tenant_id`), el del grupo o el del directorio; un grupo sin tenant o un perfil inexistente, solo global |
 | `StructureAccessService` (`SECURITY_ADMIN`, `SUPERADMIN`): estructura de sedes y organización | el de la sede o la organización |
+| `InfrastructureAccessService.actorScope` (`SECURITY_ADMIN`, `PLATFORM_ADMIN`, `SUPERADMIN`) | el de la sede |
+| `PharmacyTenantScopeGuard` (`SECURITY_ADMIN`, `SUPERADMIN`) en `/pharmacies/:pharmacyId/*` | el de la farmacia; sin `pharmacyId` (operación de plataforma), solo global |
+| Verificación SNIS y estado de habilitaciones de una sede (`SECURITY_ADMIN`, `SUPERADMIN`) | ninguno: solo global, también en el propio tenant (sería la organización verificándose a sí misma) |
 | `BookingAccess.assertResourceInActiveTenant` y las sedes de las reservas flexibles y por servicio (`SUPERADMIN`) | el del recurso de agenda |
 | `FileLinkTargetGuard` (`SUPERADMIN`): elegir cualquier dueño en `POST /common/files/:id/links` | sin tenant (el dueño puede ser una persona u otra organización): solo global; el acotado vincula a su usuario o a su tenant resuelto |
 | `ClinicalReadService.assertCanReadHistory/assertCanWriteHistory` (`SUPERADMIN`) y `GET /profiles/patients/:profileId` (`SECURITY_ADMIN`) | sin tenant (la historia y el perfil de una persona no son de ninguna organización): solo global; el acotado sigue la regla de quien atiende |
