@@ -12,7 +12,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Tablas del DDL **sin** entidad | 36 |
 | Entidades del ORM **sin** tabla en el DDL | 76 |
 | Columnas del DDL ausentes en su entidad | 66 |
-| Columnas con nulabilidad divergente | 7 |
+| Columnas con nulabilidad divergente | 8 |
 | Columnas con tipo divergente | 0 |
 | Columnas de la entidad que el DDL no tiene | 56 |
 
@@ -214,6 +214,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Columna | Diferencia |
 |---|---|
 | object_storage.dicom_series_manifests.modality | el modelo dice obligatoria y la entidad opcional |
+| pharmacy.pharmacy_integration_connections.connection_id | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.collection_definitions.routing_key_expression | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.collection_definitions.shard_key_expression | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.residency_policies.forbidden_country_codes | el modelo dice obligatoria y la entidad opcional |
