@@ -43,8 +43,16 @@ const FORBIDDEN_RANGES = (() => {
     list.addSubnet(net, prefix, 'ipv4');
   }
   for (const [net, prefix] of [
-    ['::', 128],
-    ['::1', 128],
+    // Sin especificar, loopback e IPv4 compatible (`::a.b.c.d`).
+    ['::', 96],
+    // Prefijos que llevan una IPv4 adentro y la alcanzan por traducción:
+    // NAT64, NAT64 local, 6to4 y Teredo.
+    ['64:ff9b::', 96],
+    ['64:ff9b:1::', 48],
+    ['2002::', 16],
+    ['2001::', 32],
+    // Descarte, ULA, link-local y multicast.
+    ['100::', 64],
     ['fc00::', 7],
     ['fe80::', 10],
     ['ff00::', 8],
@@ -54,14 +62,61 @@ const FORBIDDEN_RANGES = (() => {
   return list;
 })();
 
+/**
+ * Los ocho grupos de 16 bits de una IPv6 válida (admite `::` y una IPv4 al
+ * final, `::ffff:1.2.3.4`).
+ */
+function ipv6Groups(address: string): number[] {
+  let text = address.toLowerCase();
+  const dotted = /(\d+\.\d+\.\d+\.\d+)$/.exec(text);
+  if (dotted) {
+    const [a, b, c, d] = dotted[1].split('.').map(Number);
+    text =
+      text.slice(0, dotted.index) +
+      `${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+  }
+  const [head, tail] = text.includes('::') ? text.split('::') : [text, null];
+  const left = head ? head.split(':') : [];
+  const right = tail ? tail.split(':') : [];
+  const missing = 8 - left.length - right.length;
+  const groups = [
+    ...left,
+    ...Array<string>(tail === null ? 0 : missing).fill('0'),
+    ...right,
+  ];
+  return groups.map((group) => Number.parseInt(group, 16));
+}
+
 /** Si una IP cae en un rango que no se llama. */
 export function isForbiddenAddress(address: string): boolean {
-  // IPv4 mapeada en IPv6 (`::ffff:127.0.0.1`): vale lo que vale su IPv4.
-  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(address);
-  if (mapped) return isForbiddenAddress(mapped[1]);
   const family = isIP(address);
   if (family === 0) return true;
-  return FORBIDDEN_RANGES.check(address, family === 6 ? 'ipv6' : 'ipv4');
+  if (family === 6) {
+    // IPv4 mapeada (`::ffff:a.b.c.d`, también en hexadecimal): vale lo que
+    // vale su IPv4.
+    const g = ipv6Groups(address);
+    if (g.slice(0, 5).every((group) => group === 0) && g[5] === 0xffff) {
+      return isForbiddenAddress(
+        `${g[6] >> 8}.${g[6] & 0xff}.${g[7] >> 8}.${g[7] & 0xff}`,
+      );
+    }
+    return FORBIDDEN_RANGES.check(address, 'ipv6');
+  }
+  return FORBIDDEN_RANGES.check(address, 'ipv4');
+}
+
+/**
+ * Si la dirección base apunta a una IP literal prohibida. Con una IP en la URL
+ * Node no pasa por `lookup`, así que se mira antes de cada petición.
+ */
+function literalHostForbidden(baseUrl: string): boolean {
+  let host: string;
+  try {
+    host = new URL(baseUrl).hostname.replace(/^\[|\]$/g, '');
+  } catch {
+    return true;
+  }
+  return isIP(host) !== 0 && isForbiddenAddress(host);
 }
 
 /**
@@ -88,10 +143,19 @@ const guardedLookup: LookupFunction = (hostname, options, callback) => {
   });
 };
 
-/** Opciones comunes de los dos clientes. */
-function httpOptions(timeoutMs: number) {
+/**
+ * El cliente HTTP de los dos formatos: sin redirecciones, con tope de tamaño y,
+ * en producción, sin llegar nunca a una IP interna (por nombre o literal).
+ */
+function createHttp(
+  baseUrl: string,
+  headers: Record<string, string>,
+  timeoutMs: number,
+): AxiosInstance {
   const production = process.env.NODE_ENV === 'production';
-  return {
+  const http = axios.create({
+    baseURL: baseUrl,
+    headers,
     timeout: timeoutMs,
     maxRedirects: 0,
     maxContentLength: MAX_RESPONSE_BYTES,
@@ -103,7 +167,16 @@ function httpOptions(timeoutMs: number) {
           httpsAgent: new HttpsAgent({ lookup: guardedLookup }),
         }
       : {}),
-  };
+  });
+  if (production) {
+    http.interceptors.request.use((request) => {
+      if (literalHostForbidden(request.baseURL ?? baseUrl)) {
+        throw new ExternalCatalogUnavailableError('address not allowed');
+      }
+      return request;
+    });
+  }
+  return http;
 }
 
 /**
@@ -186,11 +259,7 @@ class AlovidaStandardClient implements ExternalPharmacyCatalogPort {
   private readonly prefix: string;
 
   constructor(config: ExternalSystemConfig, apiKey: string, timeoutMs: number) {
-    this.http = axios.create({
-      baseURL: config.baseUrl,
-      ...httpOptions(timeoutMs),
-      headers: { 'X-Api-Key': apiKey },
-    });
+    this.http = createHttp(config.baseUrl, { 'X-Api-Key': apiKey }, timeoutMs);
     this.prefix = `/v1/pharmacies/${encodeURIComponent(config.externalPharmacyCode)}`;
   }
 
@@ -247,11 +316,11 @@ class SimulatedChainClient implements ExternalPharmacyCatalogPort {
   private readonly prefix: string;
 
   constructor(config: ExternalSystemConfig, apiKey: string, timeoutMs: number) {
-    this.http = axios.create({
-      baseURL: config.baseUrl,
-      ...httpOptions(timeoutMs),
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
+    this.http = createHttp(
+      config.baseUrl,
+      { Authorization: `Bearer ${apiKey}` },
+      timeoutMs,
+    );
     this.prefix = `/chains/${encodeURIComponent(config.externalPharmacyCode)}`;
   }
 
