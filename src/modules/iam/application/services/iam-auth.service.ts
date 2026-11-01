@@ -7,6 +7,7 @@ import {
   type TraceSpan,
 } from '../../../../observability';
 import * as argon2 from 'argon2';
+import { SessionValidator } from '../../../../common/auth/session-validator';
 import { verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
@@ -123,6 +124,7 @@ export class IamAuthService {
     private readonly tenantClaims: TenantClaimsPort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly sessionValidator: SessionValidator,
     private readonly mfaRepo?: MfaFactorsRepository,
   ) {
     this.logger.setContext(IamAuthService.name);
@@ -711,7 +713,7 @@ export class IamAuthService {
     // tokens de sistema que firman los workers.
     if (!actor.sessionId) return { revoked: false };
 
-    return this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const session = await this.sessionsRepo.findActiveByTokenId(
         tx,
         actor.sessionId as string,
@@ -735,6 +737,13 @@ export class IamAuthService {
 
       return { revoked: true };
     });
+    if (result.revoked && actor.sessionId) {
+      await this.sessionValidator.revokeSession(
+        actor.sessionId,
+        actor.tokenExpiresAt,
+      );
+    }
+    return result;
   }
 
   /** UC-01-11: expira sesiones y refresh tokens ya vencidos. */
