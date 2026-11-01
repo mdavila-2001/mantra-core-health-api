@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { GovernanceCatalogService } from './governance-catalog.service';
 import { ConflictException, ResourceNotFoundException } from '../../../common';
+import { SYSOPS } from '../system_ops.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -218,7 +219,6 @@ describe('GovernanceCatalogService', () => {
         }),
       );
       const created = d.repo.recordChange.mock.calls[0][1] as any;
-      const { SYSOPS } = await import('../system_ops.concepts');
       expect(created.actionConceptId).toBe(SYSOPS.ACTION_UPDATE);
     });
 
@@ -239,7 +239,6 @@ describe('GovernanceCatalogService', () => {
 
       expect(d.repo.createEntity).toHaveBeenCalledTimes(1);
       expect(d.repo.findFieldsByEntity).not.toHaveBeenCalled();
-      const { SYSOPS } = await import('../system_ops.concepts');
       expect(
         (d.repo.recordChange.mock.calls[0][1] as any).actionConceptId,
       ).toBe(SYSOPS.ACTION_CREATE);
