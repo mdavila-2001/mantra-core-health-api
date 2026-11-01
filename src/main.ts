@@ -32,6 +32,7 @@ import {
   installShutdownWatchdog,
   loadBuildInfo,
   loadCorsAllowedOrigins,
+  stripEtagOnNoStore,
 } from './common';
 
 /**
@@ -167,6 +168,11 @@ async function bootstrap() {
   // Cabeceras de seguridad HTTP (HSTS, X-Content-Type-Options, X-Frame-Options,
   // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
   app.use(helmet());
+
+  // api#1242 — una respuesta `no-store` sale sin `ETag`. El de Express 5 queda
+  // activo para las rutas cacheables (sus 304 dependen de él); ver el
+  // middleware. El harness de integración registra el mismo.
+  app.use(stripEtagOnNoStore);
 
   // Medición de peticiones HTTP para el portal de superadministración. Va acá, antes
   // de las rutas y de cualquier parseo de cuerpo, y no como interceptor: un
