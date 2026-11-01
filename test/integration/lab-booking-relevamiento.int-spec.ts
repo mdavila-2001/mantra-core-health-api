@@ -162,6 +162,9 @@ describe('J2 · relevamiento: reservar en un laboratorio con el motor existente'
       .get('/scheduling/bookings')
       .query({ patientProfileId })
       .set(auth())
+      // Desde ba1b7c0e4 (alcance de tenant en scheduling) el listado toma el
+      // tenant del contexto: el SUPERADMIN sin cabecera recibe 422 TENANT_REQUIRED.
+      .set('X-Tenant-Id', SEED.tenantId)
       .expect(200);
 
     expect(res.body.count).toBe(1);
