@@ -90,7 +90,8 @@ export class CreateServiceCatalogItemDto {
     format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  // `loose`: ver `ImportServiceItemDto.conceptId` (ids md5 de los importadores).
+  @IsUUID('loose')
   serviceConceptId?: string;
 
   /**

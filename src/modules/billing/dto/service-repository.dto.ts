@@ -139,7 +139,9 @@ export class ServiceRepositoryFacetsResponseDto {
 export class ImportServiceItemDto {
   /** Concepto del repositorio a importar. */
   @ApiProperty({ format: 'uuid' })
-  @IsUUID()
+  // `loose`: los conceptos que cargan los importadores de terminología tienen
+  // ids deterministas (md5) que no llevan los bits de versión de un UUID v4/v5.
+  @IsUUID('loose')
   conceptId!: string;
 
   /** Precio propio del profesional. */

@@ -17,19 +17,27 @@
 ## H1 — La API busca en el repositorio e importa, y el alta libre queda cerrada
 **CA:** Dado un profesional en su consultorio propio, cuando busca «ecocardiograma» en el repositorio, entonces recibe los servicios de todas las fuentes cargadas con su especialidad y fuente; cuando importa uno con precio, aparece en su catálogo enlazado al concepto; cuando intenta crear uno sin concepto del repositorio, recibe 400.
 **DoD:** `yarn typecheck` exit 0 · `yarn test src/modules/billing` verde · `yarn lint` sin errores nuevos · integración contra Postgres desechable con el repositorio sembrado.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | `ServiceRepositoryService.search` (texto sin acentos, multi-palabra, especialidad, fuente, paginado) | devuelve sólo conceptos de los conjuntos del repositorio | spec unitario + int-spec | TODO |
-| H1.S1.M2 | `GET /billing/service-catalog/repository` | 200 con `items[].specialties[]` y `source` | int-spec | TODO |
-| H1.S2.M1 | `POST /billing/service-catalog/import` (lote ≤ 50, idempotente por concepto) | reimportar no duplica | spec + int-spec | TODO |
-| H1.S2.M2 | `POST /billing/service-catalog` exige `serviceConceptId` del repositorio | sin concepto → 400; concepto ajeno al repositorio → 400 | spec | TODO |
+| H1.S1.M1 | `ServiceRepositoryService.search` (texto sin acentos, multi-palabra, especialidad, fuente, paginado) | devuelve sólo conceptos de los conjuntos del repositorio | spec unitario + int-spec | HECHO |
+| H1.S1.M2 | `GET /billing/service-catalog/repository` | 200 con `items[].specialties[]` y `source` | int-spec | HECHO |
+| H1.S2.M1 | `POST /billing/service-catalog/import` (lote ≤ 50, idempotente por concepto) | reimportar no duplica | spec + int-spec | HECHO |
+| H1.S2.M2 | `POST /billing/service-catalog` exige `serviceConceptId` del repositorio | sin concepto → 400; concepto ajeno al repositorio → 400 | spec | HECHO |
 
 ## H2 — El repositorio cubre todas las especialidades con fuentes verificadas
 **CA:** Dada cualquiera de las 63 especialidades del modelo, cuando se filtra el repositorio por ella, entonces hay servicios con fuente citada; las listas de control de los agentes quedan cruzadas contra el repositorio y los huecos, documentados.
 **DoD:** loader en dry-run y `--apply` contra Postgres desechable; segunda corrida inserta 0; tabla de cobertura por especialidad en el REPORTE.
-**Estado:** EN CURSO (agentes de investigación corriendo)
+**Estado:** A MEDIAS
+
+| ID | Microtarea | CA (binario) | DoD | Estado |
+|---|---|---|---|---|
+| H2.S1.M1 | Cargador `service-repository/` (plan puro + carga idempotente) | 2.ª corrida inserta 0 | `load-service-repository.mjs --apply` ×2 | HECHO |
+| H2.S1.M2 | Adaptadores estructurados: PBS Colombia, FONASA completo, PAMI | corpus con los 3 sistemas | `build-service-repository.mjs` | HECHO |
+| H2.S1.M3 | Adaptador de listas de control con cita (`mantra-curado`) | ítem con código exacto se adjunta, sin código nace curado | `node --test …/test/*.test.mjs` | HECHO |
+| H2.S2.M1 | Adaptadores de PDFs (CUPS 2026 oficial, 9 tarifas españolas, ISFAS) | cada uno con test | `node --test` | TODO |
+| H2.S2.M2 | Listas de control de los 6 grupos de especialidades | 6 JSON en `investigacion/checklists/` | `ls` | A MEDIAS |
 
 ## H3 — Front «Mis servicios»: buscador + importar
 **Estado:** BLOQUEADO (sin acceso al repo del front en esta sesión).
