@@ -1,0 +1,2018 @@
+{
+  "$comentario": "Excepciones al techo de 300 líneas fijadas por reforma estructural en API (2026-11-01). Ningún archivo nuevo puede superar 300 líneas. Los archivos congelados no pueden crecer ni 1 línea. Al tocarlos deben modularizarse (< 300).",
+  "tarea": "REFORMA-300",
+  "fijada": "2026-11-01",
+  "vence": "2027-04-01",
+  "excepciones": {
+    "src/common/constants/concepts.ts": {
+      "lineas": 7030
+    },
+    "src/modules/profiles/application/services/profiles-practitioners.service.ts": {
+      "lineas": 3635
+    },
+    "src/modules/procedures_perioperative/dto/periop.dto.ts": {
+      "lineas": 2004
+    },
+    "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts": {
+      "lineas": 2877
+    },
+    "src/modules/ads/dto/ads.dto.ts": {
+      "lineas": 2752
+    },
+    "src/modules/profiles/application/services/profiles-patients.service.ts": {
+      "lineas": 2605
+    },
+    "src/modules/terminology/services/concepts.service.ts": {
+      "lineas": 1976
+    },
+    "src/modules/community/repositories/public-search.repository.ts": {
+      "lineas": 1898
+    },
+    "src/modules/procedures_perioperative/services/periop-cases.service.ts": {
+      "lineas": 1833
+    },
+    "src/modules/health_data/dto/health-data.dto.ts": {
+      "lineas": 1803
+    },
+    "src/modules/platform_ops/dto/platform-ops.dto.ts": {
+      "lineas": 1782
+    },
+    "src/modules/promotions/dto/promotions.dto.ts": {
+      "lineas": 1775
+    },
+    "src/modules/polyglot_storage/dto/polyglot-storage.dto.ts": {
+      "lineas": 1757
+    },
+    "src/modules/promotions/services/promotions-loyalty.service.ts": {
+      "lineas": 1745
+    },
+    "src/modules/automation/dto/automation.dto.ts": {
+      "lineas": 1684
+    },
+    "src/modules/profiles/application/services/practitioner-admissions.service.ts": {
+      "lineas": 1662
+    },
+    "src/modules/lakehouse/dto/lakehouse.dto.ts": {
+      "lineas": 1566
+    },
+    "src/modules/clinical/clinical.concepts.ts": {
+      "lineas": 1560
+    },
+    "src/modules/graph_intelligence/dto/graph-intelligence.dto.ts": {
+      "lineas": 1547
+    },
+    "src/modules/cross_store_consistency/dto/cross-store.dto.ts": {
+      "lineas": 1535
+    },
+    "src/modules/community/services/community-public.service.ts": {
+      "lineas": 1522
+    },
+    "src/modules/messaging/services/notifications.service.ts": {
+      "lineas": 1474
+    },
+    "src/modules/ads/repositories/ads-data.repository.ts": {
+      "lineas": 1447
+    },
+    "src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts": {
+      "lineas": 1432
+    },
+    "src/modules/vector_rag/dto/vector-rag.dto.ts": {
+      "lineas": 1432
+    },
+    "src/modules/iam/application/services/iam-practitioner-self-registration.service.ts": {
+      "lineas": 1420
+    },
+    "src/modules/scheduling/presentation/dto/scheduling-catalog.dto.ts": {
+      "lineas": 1415
+    },
+    "src/modules/clinical_ext/services/referrals.service.ts": {
+      "lineas": 1398
+    },
+    "src/modules/payments/services/payments-transactions.service.ts": {
+      "lineas": 1397
+    },
+    "src/modules/tracking/services/tracking.service.ts": {
+      "lineas": 1386
+    },
+    "src/modules/system_context/dto/system-context.dto.ts": {
+      "lineas": 1378
+    },
+    "src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts": {
+      "lineas": 1349
+    },
+    "src/modules/practice/services/care-spaces-admin.service.ts": {
+      "lineas": 1345
+    },
+    "src/modules/health_context/dto/health-context.dto.ts": {
+      "lineas": 1336
+    },
+    "src/modules/marketing/dto/marketing.dto.ts": {
+      "lineas": 1333
+    },
+    "src/modules/object_storage/services/object-storage.service.ts": {
+      "lineas": 1327
+    },
+    "src/modules/scheduling/presentation/dto/scheduling-bookings.dto.ts": {
+      "lineas": 1326
+    },
+    "src/modules/billing/services/billing-simulated.service.ts": {
+      "lineas": 1280
+    },
+    "src/modules/object_storage/dto/object-storage.dto.ts": {
+      "lineas": 1278
+    },
+    "src/modules/qa_lab/presentation/dto/qa-lab.dto.ts": {
+      "lineas": 1278
+    },
+    "src/modules/education/dto/education.dto.ts": {
+      "lineas": 1270
+    },
+    "src/modules/scheduling/infrastructure/repositories/scheduling-catalog.repository.ts": {
+      "lineas": 1268
+    },
+    "src/modules/workflow/dto/workflow.dto.ts": {
+      "lineas": 1257
+    },
+    "src/modules/time_series/dto/time-series.dto.ts": {
+      "lineas": 1223
+    },
+    "src/modules/automation/services/automation-execution.service.ts": {
+      "lineas": 1222
+    },
+    "src/modules/iam/presentation/dto/register-practitioner.dto.ts": {
+      "lineas": 1212
+    },
+    "src/modules/medical_groups/services/medical-groups.service.ts": {
+      "lineas": 1212
+    },
+    "src/modules/auth_providers/dto/auth-providers.dto.ts": {
+      "lineas": 1205
+    },
+    "src/modules/reporting/dto/reporting.dto.ts": {
+      "lineas": 1171
+    },
+    "src/modules/observability/application/observability-read.service.ts": {
+      "lineas": 1168
+    },
+    "src/modules/system_context/repositories/system-context.repository.ts": {
+      "lineas": 1151
+    },
+    "src/modules/billing/services/space-charges.service.ts": {
+      "lineas": 1150
+    },
+    "src/modules/erp/dto/erp.dto.ts": {
+      "lineas": 1133
+    },
+    "src/modules/messaging/dto/messaging.dto.ts": {
+      "lineas": 1131
+    },
+    "src/modules/clinical/services/inpatient/adt.use-cases.ts": {
+      "lineas": 1127
+    },
+    "src/modules/education/services/education-learning.service.ts": {
+      "lineas": 1124
+    },
+    "src/modules/community/services/community-messaging.service.ts": {
+      "lineas": 1112
+    },
+    "src/modules/promotions/services/promotions-discounts.service.ts": {
+      "lineas": 1100
+    },
+    "src/modules/insurance/application/services/insurer-received-claims.service.ts": {
+      "lineas": 1072
+    },
+    "src/modules/marketing/services/marketing-journeys.service.ts": {
+      "lineas": 1072
+    },
+    "src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts": {
+      "lineas": 1071
+    },
+    "src/modules/tracking/dto/tracking.dto.ts": {
+      "lineas": 1063
+    },
+    "src/modules/accounting/services/ledger.service.ts": {
+      "lineas": 1034
+    },
+    "src/modules/ads/repositories/ads-campaigns.repository.ts": {
+      "lineas": 1020
+    },
+    "src/modules/community/services/community-social.service.ts": {
+      "lineas": 1018
+    },
+    "src/common/filters/all-exceptions.filter.ts": {
+      "lineas": 1015
+    },
+    "src/modules/procedures_perioperative/services/or/or.use-cases.ts": {
+      "lineas": 1008
+    },
+    "src/modules/health_context/repositories/health-context.repository.ts": {
+      "lineas": 1007
+    },
+    "src/modules/delegated_access/services/support-staff.service.ts": {
+      "lineas": 1005
+    },
+    "src/modules/auth_providers/repositories/auth-providers.repository.ts": {
+      "lineas": 1000
+    },
+    "src/modules/procedures_perioperative/services/periop-preop.service.ts": {
+      "lineas": 992
+    },
+    "src/modules/procedures_perioperative/services/periop-intraop.service.ts": {
+      "lineas": 987
+    },
+    "src/modules/qa_lab/application/services/qa-runs.service.ts": {
+      "lineas": 987
+    },
+    "src/modules/qa_execution/services/qa-execution.service.ts": {
+      "lineas": 986
+    },
+    "src/modules/common/services/files.service.ts": {
+      "lineas": 963
+    },
+    "src/modules/diagnostics/services/diagnostics-patient-results.service.ts": {
+      "lineas": 962
+    },
+    "src/modules/profiles/application/services/practitioner-admissions-read.service.ts": {
+      "lineas": 961
+    },
+    "src/modules/clinical/services/medications.service.ts": {
+      "lineas": 960
+    },
+    "src/modules/iam/presentation/dto/register-organization.dto.ts": {
+      "lineas": 952
+    },
+    "src/modules/workflow/services/transition-execution.service.ts": {
+      "lineas": 951
+    },
+    "src/modules/accounting/services/ledger-read.service.ts": {
+      "lineas": 915
+    },
+    "src/modules/procedures_perioperative/repositories/periop-cases.repository.ts": {
+      "lineas": 915
+    },
+    "src/modules/ads/services/ads-data.service.ts": {
+      "lineas": 908
+    },
+    "src/modules/ads/services/ads-optimization.service.ts": {
+      "lineas": 908
+    },
+    "src/modules/messaging/repositories/notifications.repository.ts": {
+      "lineas": 902
+    },
+    "src/modules/ads/repositories/ads-accounts.repository.ts": {
+      "lineas": 885
+    },
+    "src/modules/clinical/services/clinical-read.service.ts": {
+      "lineas": 877
+    },
+    "src/modules/practice/services/practitioner-sites.service.ts": {
+      "lineas": 874
+    },
+    "src/modules/accounting/services/practitioner-accounting.service.ts": {
+      "lineas": 872
+    },
+    "src/modules/community/services/community-social-read.service.ts": {
+      "lineas": 872
+    },
+    "src/modules/iam/application/services/iam-auth.service.ts": {
+      "lineas": 870
+    },
+    "src/modules/insurance/application/services/insurance-campaigns.service.ts": {
+      "lineas": 868
+    },
+    "src/modules/terminology/services/value-sets.service.ts": {
+      "lineas": 863
+    },
+    "src/modules/scheduling/presentation/controllers/scheduling.controller.ts": {
+      "lineas": 862
+    },
+    "src/modules/ads/repositories/ads-optimization.repository.ts": {
+      "lineas": 858
+    },
+    "src/modules/education/repositories/education-catalog.repository.ts": {
+      "lineas": 857
+    },
+    "src/modules/telemetry/application/services/telemetry-events.service.ts": {
+      "lineas": 857
+    },
+    "src/modules/pharmacy/services/pharmacy-read.service.ts": {
+      "lineas": 851
+    },
+    "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts": {
+      "lineas": 851
+    },
+    "src/modules/pharma_lab/services/visit-requests.service.ts": {
+      "lineas": 848
+    },
+    "src/modules/system_context/services/dynamic-enums.service.ts": {
+      "lineas": 848
+    },
+    "src/modules/forms/services/forms-read.service.ts": {
+      "lineas": 845
+    },
+    "src/modules/delegated_access/repositories/support-links.repository.ts": {
+      "lineas": 844
+    },
+    "src/modules/profiles/profiles.concepts.ts": {
+      "lineas": 836
+    },
+    "src/modules/forms/dto/read-responses.dto.ts": {
+      "lineas": 835
+    },
+    "src/modules/ui_visibility/services/ui-visibility-admin.service.ts": {
+      "lineas": 835
+    },
+    "src/modules/surveys/services/surveys-templates.service.ts": {
+      "lineas": 834
+    },
+    "src/modules/tracking/repositories/tracking.repository.ts": {
+      "lineas": 828
+    },
+    "src/modules/clinical/services/conditions.service.ts": {
+      "lineas": 825
+    },
+    "src/modules/crm/dto/crm.dto.ts": {
+      "lineas": 823
+    },
+    "src/modules/accounting/services/accounting-read.service.ts": {
+      "lineas": 820
+    },
+    "src/modules/iam/presentation/dto/register-patient.dto.ts": {
+      "lineas": 820
+    },
+    "src/modules/platform_ops/services/ops-releases.service.ts": {
+      "lineas": 818
+    },
+    "src/modules/insurance/application/services/claims.service.ts": {
+      "lineas": 816
+    },
+    "src/modules/health_context/services/context-collection.service.ts": {
+      "lineas": 815
+    },
+    "src/modules/auth_providers/services/federated-login.service.ts": {
+      "lineas": 814
+    },
+    "src/modules/profiles/presentation/dto/admissions.dto.ts": {
+      "lineas": 813
+    },
+    "src/modules/graph_intelligence/services/graph-traversal.service.ts": {
+      "lineas": 811
+    },
+    "src/modules/profiles/application/services/profiles-affiliations.service.ts": {
+      "lineas": 809
+    },
+    "src/modules/pharmacy/services/pharmacy-products.service.ts": {
+      "lineas": 808
+    },
+    "src/modules/insurance/application/services/insurance-portability.service.ts": {
+      "lineas": 798
+    },
+    "src/modules/pharmacy/dto/read-responses.dto.ts": {
+      "lineas": 795
+    },
+    "src/modules/promotions/repositories/promotions-loyalty.repository.ts": {
+      "lineas": 794
+    },
+    "src/modules/surveys/services/surveys-responses.service.ts": {
+      "lineas": 794
+    },
+    "src/modules/erp/repositories/erp-operations.repository.ts": {
+      "lineas": 789
+    },
+    "src/modules/practice/services/infrastructure-access.service.ts": {
+      "lineas": 788
+    },
+    "src/modules/community/services/community-messaging-read.service.ts": {
+      "lineas": 783
+    },
+    "src/modules/identity_assurance/services/identity-self-service.service.ts": {
+      "lineas": 779
+    },
+    "src/modules/community/community.concepts.ts": {
+      "lineas": 775
+    },
+    "src/modules/practice/services/site-establishment.service.ts": {
+      "lineas": 766
+    },
+    "src/modules/observability/infrastructure/observability-read.repository.ts": {
+      "lineas": 764
+    },
+    "src/modules/automation/services/agent-catalog.service.ts": {
+      "lineas": 754
+    },
+    "src/modules/insurance/application/services/claims-read.service.ts": {
+      "lineas": 754
+    },
+    "src/modules/clinical/services/prescription-pdf.service.ts": {
+      "lineas": 753
+    },
+    "src/modules/directory/services/directory-read.service.ts": {
+      "lineas": 752
+    },
+    "src/modules/procedures_perioperative/controllers/periop.controller.ts": {
+      "lineas": 745
+    },
+    "src/modules/surveys/services/surveys-assignments.service.ts": {
+      "lineas": 745
+    },
+    "src/modules/profiles/presentation/dto/read-patients.dto.ts": {
+      "lineas": 744
+    },
+    "src/modules/authz/services/authz-care-relationships.service.ts": {
+      "lineas": 739
+    },
+    "src/modules/consent/services/treatment-informed-consents.service.ts": {
+      "lineas": 733
+    },
+    "src/common/storage/storage-lifecycle-coordinator.service.ts": {
+      "lineas": 731
+    },
+    "src/modules/marketing/repositories/marketing-journeys.repository.ts": {
+      "lineas": 729
+    },
+    "src/modules/accounting/services/practitioner-simple-accounting.service.ts": {
+      "lineas": 726
+    },
+    "src/modules/clinical/dto/medication.dto.ts": {
+      "lineas": 726
+    },
+    "src/modules/auth_providers/services/auth-providers-config.service.ts": {
+      "lineas": 723
+    },
+    "src/modules/messaging/services/outbox.service.ts": {
+      "lineas": 722
+    },
+    "src/modules/terminology/repositories/value-sets.repository.ts": {
+      "lineas": 720
+    },
+    "src/modules/system_context/services/system-contexts.service.ts": {
+      "lineas": 713
+    },
+    "src/modules/chart/dto/notes.dto.ts": {
+      "lineas": 709
+    },
+    "src/modules/chart/services/chart-notes.service.ts": {
+      "lineas": 706
+    },
+    "src/modules/billing/services/invoices.service.ts": {
+      "lineas": 703
+    },
+    "src/modules/clinical_ext/dto/referral.dto.ts": {
+      "lineas": 703
+    },
+    "src/modules/common/services/file-upload.service.ts": {
+      "lineas": 703
+    },
+    "src/modules/lakehouse/services/research-release.service.ts": {
+      "lineas": 703
+    },
+    "src/modules/reporting/services/reporting-runs.service.ts": {
+      "lineas": 703
+    },
+    "src/modules/practice/practice.concepts.ts": {
+      "lineas": 702
+    },
+    "src/modules/pharma_lab/services/medical-visitors.service.ts": {
+      "lineas": 696
+    },
+    "src/modules/health_context/services/country-context.service.ts": {
+      "lineas": 694
+    },
+    "src/modules/graph_intelligence/services/graph-projection.service.ts": {
+      "lineas": 692
+    },
+    "src/modules/clinical/services/inpatient/census.use-cases.ts": {
+      "lineas": 691
+    },
+    "src/modules/accounting/repositories/journal.repository.ts": {
+      "lineas": 690
+    },
+    "src/modules/community/services/community-groups.service.ts": {
+      "lineas": 689
+    },
+    "src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts": {
+      "lineas": 689
+    },
+    "src/modules/insurance/infrastructure/repositories/insurance-analytics.repository.ts": {
+      "lineas": 687
+    },
+    "src/modules/surveys/services/surveys-insights.service.ts": {
+      "lineas": 684
+    },
+    "src/modules/erp/repositories/erp-contracts.repository.ts": {
+      "lineas": 683
+    },
+    "src/modules/clinical/services/service-requests.service.ts": {
+      "lineas": 682
+    },
+    "src/modules/directory/services/directory-tenants.service.ts": {
+      "lineas": 679
+    },
+    "src/modules/health_data/services/data-release.service.ts": {
+      "lineas": 678
+    },
+    "src/modules/qa_lab/application/services/qa-catalog.service.ts": {
+      "lineas": 678
+    },
+    "src/modules/system_ops/mutability/extractor/derive.ts": {
+      "lineas": 678
+    },
+    "src/modules/identity_assurance/services/identity-checks.service.ts": {
+      "lineas": 677
+    },
+    "src/modules/practice/services/ops/care-space-ops-core.ts": {
+      "lineas": 676
+    },
+    "src/modules/lakehouse/services/transformation.service.ts": {
+      "lineas": 675
+    },
+    "src/modules/directory/services/tenant-type-profile.service.ts": {
+      "lineas": 674
+    },
+    "src/modules/procedures_perioperative/repositories/periop-preop.repository.ts": {
+      "lineas": 670
+    },
+    "src/modules/search_platform/services/search-index.service.ts": {
+      "lineas": 670
+    },
+    "src/modules/community/repositories/moderation.repository.ts": {
+      "lineas": 668
+    },
+    "src/modules/profiles/application/services/dependent-link-requests.service.ts": {
+      "lineas": 668
+    },
+    "src/modules/iam/application/services/iam-organization-self-registration.service.ts": {
+      "lineas": 667
+    },
+    "src/modules/practice/services/practice-workforce.service.ts": {
+      "lineas": 666
+    },
+    "src/modules/object_storage/repositories/object-storage.repository.ts": {
+      "lineas": 661
+    },
+    "src/modules/payments/repositories/payment-operations.repository.ts": {
+      "lineas": 660
+    },
+    "src/modules/platform_ops/services/ops-incidents.service.ts": {
+      "lineas": 660
+    },
+    "src/modules/payments/services/payments-gateway-charge.service.ts": {
+      "lineas": 653
+    },
+    "src/modules/pharmacy_inventory/application/pharmacy-inventory-read/read-pharmacy-inventory.use-case.ts": {
+      "lineas": 652
+    },
+    "src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts": {
+      "lineas": 652
+    },
+    "src/modules/data_catalog/domain/classification/classification.rules.ts": {
+      "lineas": 650
+    },
+    "src/modules/community/gateways/community-messaging.gateway.ts": {
+      "lineas": 646
+    },
+    "src/modules/platform_ops/repositories/ops-releases.repository.ts": {
+      "lineas": 646
+    },
+    "src/modules/ads/services/ads-campaigns.service.ts": {
+      "lineas": 643
+    },
+    "src/modules/time_series/services/series-ingest.service.ts": {
+      "lineas": 641
+    },
+    "src/modules/vector_rag/services/retrieval.service.ts": {
+      "lineas": 640
+    },
+    "src/modules/data_catalog/presentation/dto/catalog-response.dto.ts": {
+      "lineas": 636
+    },
+    "src/modules/accounting/services/accounting-scope.service.ts": {
+      "lineas": 634
+    },
+    "src/modules/workflow/repositories/state-machines.repository.ts": {
+      "lineas": 632
+    },
+    "src/modules/insurance/application/services/insurance-read.service.ts": {
+      "lineas": 631
+    },
+    "src/modules/terminology/services/concept-file-import.service.ts": {
+      "lineas": 631
+    },
+    "src/modules/reporting/repositories/reporting-definitions.repository.ts": {
+      "lineas": 629
+    },
+    "src/modules/insurance/presentation/dto/backbone.dto.ts": {
+      "lineas": 628
+    },
+    "src/modules/promotions/repositories/promotions-discounts.repository.ts": {
+      "lineas": 625
+    },
+    "src/modules/iam/application/services/iam-patient-self-registration.service.ts": {
+      "lineas": 620
+    },
+    "src/modules/marketing/repositories/marketing-campaigns.repository.ts": {
+      "lineas": 618
+    },
+    "src/modules/read_models/services/frontend-views.service.ts": {
+      "lineas": 618
+    },
+    "src/modules/object_storage/services/object-governance.service.ts": {
+      "lineas": 617
+    },
+    "src/modules/health_data/repositories/canonical-resources.repository.ts": {
+      "lineas": 616
+    },
+    "src/modules/read_models/services/read-model-definitions.service.ts": {
+      "lineas": 616
+    },
+    "src/modules/clinical/dto/clinical-read.dto.ts": {
+      "lineas": 615
+    },
+    "src/modules/community/controllers/community-public.controller.ts": {
+      "lineas": 612
+    },
+    "src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts": {
+      "lineas": 610
+    },
+    "src/modules/practice/dto/care-space-ops.dto.ts": {
+      "lineas": 607
+    },
+    "src/modules/crm/services/crm-service.service.ts": {
+      "lineas": 606
+    },
+    "src/modules/graph_intelligence/repositories/graph-analytics.repository.ts": {
+      "lineas": 606
+    },
+    "src/modules/diagnostic_units/services/diagnostic-units-search.service.ts": {
+      "lineas": 604
+    },
+    "src/modules/integrations/services/integrations-messaging.service.ts": {
+      "lineas": 603
+    },
+    "src/modules/bulk_import/schema/clinical-kinds.ts": {
+      "lineas": 601
+    },
+    "src/modules/profiles/presentation/controllers/profiles-patients.controller.ts": {
+      "lineas": 600
+    },
+    "src/modules/scheduling/presentation/dto/scheduling-read.dto.ts": {
+      "lineas": 599
+    },
+    "src/modules/erp/services/erp-operations.service.ts": {
+      "lineas": 597
+    },
+    "src/modules/insurance/application/services/practitioner-settlement-batches.service.ts": {
+      "lineas": 595
+    },
+    "src/modules/system_ops/repositories/governance.repository.ts": {
+      "lineas": 595
+    },
+    "src/modules/iam/presentation/controllers/iam-users.controller.ts": {
+      "lineas": 594
+    },
+    "src/modules/system_ops/repositories/assessment.repository.ts": {
+      "lineas": 594
+    },
+    "src/modules/iam/application/services/iam-users.service.ts": {
+      "lineas": 591
+    },
+    "src/modules/pharma_lab/services/visit-agenda.service.ts": {
+      "lineas": 587
+    },
+    "src/modules/identity_assurance/services/identity-cases.service.ts": {
+      "lineas": 586
+    },
+    "src/modules/platform_ops/repositories/ops-incidents.repository.ts": {
+      "lineas": 586
+    },
+    "src/modules/education/repositories/education-learning.repository.ts": {
+      "lineas": 585
+    },
+    "src/modules/polyglot_storage/services/dataset-governance.service.ts": {
+      "lineas": 585
+    },
+    "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts": {
+      "lineas": 585
+    },
+    "src/modules/vector_rag/services/vector-governance.service.ts": {
+      "lineas": 585
+    },
+    "src/modules/crm/repositories/crm-service.repository.ts": {
+      "lineas": 584
+    },
+    "src/modules/delegated_access/services/prescription-shares.service.ts": {
+      "lineas": 583
+    },
+    "src/modules/payments/services/payments-gateway-webhook.service.ts": {
+      "lineas": 583
+    },
+    "src/modules/pharmacy/controllers/pharmacy.controller.ts": {
+      "lineas": 583
+    },
+    "src/modules/insurance/application/services/claim-coverage-policy.ts": {
+      "lineas": 582
+    },
+    "src/modules/common/dto/files.dto.ts": {
+      "lineas": 581
+    },
+    "src/modules/community/dto/read-social.dto.ts": {
+      "lineas": 581
+    },
+    "src/modules/cross_store_consistency/repositories/deletion.repository.ts": {
+      "lineas": 580
+    },
+    "src/modules/graph_intelligence/services/graph-analytics.service.ts": {
+      "lineas": 580
+    },
+    "src/modules/chart/services/chart-templates.service.ts": {
+      "lineas": 579
+    },
+    "src/modules/community/repositories/conversations.repository.ts": {
+      "lineas": 579
+    },
+    "src/modules/crm/services/crm-sales.service.ts": {
+      "lineas": 578
+    },
+    "src/modules/insurance/application/services/insurance-backbone.service.ts": {
+      "lineas": 578
+    },
+    "src/modules/practice/services/practice-sites.service.ts": {
+      "lineas": 578
+    },
+    "src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository.ts": {
+      "lineas": 577
+    },
+    "src/modules/diagnostic_units/services/diagnostic-units.service.ts": {
+      "lineas": 575
+    },
+    "src/modules/community/controllers/community-social.controller.ts": {
+      "lineas": 574
+    },
+    "src/modules/telemetry/application/services/telemetry-analytics.service.ts": {
+      "lineas": 574
+    },
+    "src/modules/graph_intelligence/repositories/graph-projection.repository.ts": {
+      "lineas": 573
+    },
+    "src/modules/payments/dto/payment-operations.dto.ts": {
+      "lineas": 573
+    },
+    "src/modules/health_data/services/health-ingestion.service.ts": {
+      "lineas": 570
+    },
+    "src/modules/pharma_lab/services/pharma-catalog.service.ts": {
+      "lineas": 568
+    },
+    "src/modules/automation/repositories/automation-governance.repository.ts": {
+      "lineas": 567
+    },
+    "src/modules/crm/repositories/crm-sales.repository.ts": {
+      "lineas": 567
+    },
+    "src/modules/billing/services/billing-service-catalog.service.ts": {
+      "lineas": 565
+    },
+    "src/modules/cross_store_consistency/services/projection-delivery.service.ts": {
+      "lineas": 564
+    },
+    "src/modules/data_catalog/application/catalog-read.service.ts": {
+      "lineas": 564
+    },
+    "src/modules/workflow/services/state-machine-definition.service.ts": {
+      "lineas": 562
+    },
+    "src/modules/diagnostics/repositories/specimens.repository.ts": {
+      "lineas": 560
+    },
+    "src/modules/insurance/infrastructure/repositories/claim-read.repository.ts": {
+      "lineas": 560
+    },
+    "src/modules/erp/services/erp-contracts.service.ts": {
+      "lineas": 559
+    },
+    "src/modules/clinical_ext/services/cds.service.ts": {
+      "lineas": 556
+    },
+    "src/modules/iam/presentation/controllers/iam-auth.controller.ts": {
+      "lineas": 556
+    },
+    "src/modules/payments/repositories/payment-flow.repository.ts": {
+      "lineas": 554
+    },
+    "src/modules/practice/services/bed-board-read.service.ts": {
+      "lineas": 553
+    },
+    "src/modules/vector_rag/repositories/vector-catalog.repository.ts": {
+      "lineas": 553
+    },
+    "src/modules/automation/repositories/agents.repository.ts": {
+      "lineas": 550
+    },
+    "src/modules/ops_console/application/ops-tools.service.ts": {
+      "lineas": 549
+    },
+    "src/modules/vector_rag/services/embedding-pipeline.service.ts": {
+      "lineas": 547
+    },
+    "src/modules/authz/repositories/authz-governance-read.repository.ts": {
+      "lineas": 545
+    },
+    "src/modules/community/dto/public-search.dto.ts": {
+      "lineas": 545
+    },
+    "src/modules/chart/repositories/clinical-notes.repository.ts": {
+      "lineas": 543
+    },
+    "src/modules/education/services/education-catalog.service.ts": {
+      "lineas": 541
+    },
+    "src/modules/read_models/repositories/frontend-view-children.repository.ts": {
+      "lineas": 540
+    },
+    "src/modules/bulk_import/services/bulk-import.service.ts": {
+      "lineas": 539
+    },
+    "src/modules/consent/dto/responses.dto.ts": {
+      "lineas": 538
+    },
+    "src/modules/data_catalog/presentation/dto/portal-response.dto.ts": {
+      "lineas": 538
+    },
+    "src/modules/pharmacy/services/pharmacy-opening-hours.service.ts": {
+      "lineas": 538
+    },
+    "src/modules/reporting/services/reporting-definitions.service.ts": {
+      "lineas": 538
+    },
+    "src/modules/directory/services/directory-memberships.service.ts": {
+      "lineas": 537
+    },
+    "src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts": {
+      "lineas": 536
+    },
+    "src/modules/diagnostics/diagnostics.concepts.ts": {
+      "lineas": 535
+    },
+    "src/modules/pharma_lab/services/visit-records.service.ts": {
+      "lineas": 533
+    },
+    "src/modules/accounting/repositories/asset.repository.ts": {
+      "lineas": 532
+    },
+    "src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts": {
+      "lineas": 532
+    },
+    "src/modules/chart/services/encounter-pdf.service.ts": {
+      "lineas": 531
+    },
+    "src/modules/cross_store_consistency/services/deletion.service.ts": {
+      "lineas": 531
+    },
+    "src/modules/vector_rag/repositories/vector-corpus.repository.ts": {
+      "lineas": 531
+    },
+    "src/modules/forms/services/forms-fields.service.ts": {
+      "lineas": 530
+    },
+    "src/modules/marketing/dto/insights-workspace.dto.ts": {
+      "lineas": 529
+    },
+    "src/modules/chart/dto/templates.dto.ts": {
+      "lineas": 528
+    },
+    "src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts": {
+      "lineas": 528
+    },
+    "src/modules/diagnostic_units/services/diagnostic-units-admin-read.service.ts": {
+      "lineas": 525
+    },
+    "src/modules/integration_contracts/services/integration-exchanges.service.ts": {
+      "lineas": 525
+    },
+    "src/modules/payments/services/payments-intents.service.ts": {
+      "lineas": 525
+    },
+    "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts": {
+      "lineas": 523
+    },
+    "src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts": {
+      "lineas": 522
+    },
+    "src/modules/data_catalog/application/portal-inventory.service.ts": {
+      "lineas": 521
+    },
+    "src/modules/pharmacy_inventory/application/inventory-sync/sync-external-pharmacy-catalog.use-case.ts": {
+      "lineas": 521
+    },
+    "src/modules/cross_store_consistency/repositories/projection.repository.ts": {
+      "lineas": 519
+    },
+    "src/modules/billing/services/procedure-import.service.ts": {
+      "lineas": 516
+    },
+    "src/modules/platform_ops/services/ops-practices.service.ts": {
+      "lineas": 514
+    },
+    "src/modules/read_models/dto/publish-view-contract.dto.ts": {
+      "lineas": 514
+    },
+    "src/modules/polyglot_storage/services/storage-governance.service.ts": {
+      "lineas": 513
+    },
+    "src/modules/clinical/services/service-request-detail.service.ts": {
+      "lineas": 511
+    },
+    "src/modules/polyglot_storage/repositories/storage-policies.repository.ts": {
+      "lineas": 511
+    },
+    "src/modules/terminology/dto/search-concepts.dto.ts": {
+      "lineas": 511
+    },
+    "src/modules/community/repositories/groups.repository.ts": {
+      "lineas": 510
+    },
+    "src/modules/polyglot_storage/repositories/datasets.repository.ts": {
+      "lineas": 508
+    },
+    "src/modules/profiles/application/services/practitioner-admission-evidence.service.ts": {
+      "lineas": 506
+    },
+    "src/modules/qa_lab/infrastructure/repositories/qa-catalog.repository.ts": {
+      "lineas": 506
+    },
+    "src/modules/billing/dto/invoice.dto.ts": {
+      "lineas": 504
+    },
+    "src/modules/insurance/presentation/dto/claims-read.dto.ts": {
+      "lineas": 502
+    },
+    "src/modules/time_series/repositories/timescale.repository.ts": {
+      "lineas": 502
+    },
+    "src/modules/pharma_lab/pharma_lab.concepts.ts": {
+      "lineas": 500
+    },
+    "src/modules/scheduling/domain/notices/agenda-notices.ts": {
+      "lineas": 500
+    },
+    "src/modules/quotations/services/quotations.service.ts": {
+      "lineas": 498
+    },
+    "src/modules/diagnostics/repositories/reports.repository.ts": {
+      "lineas": 497
+    },
+    "src/modules/practice/domain/structure/structure-catalog.ts": {
+      "lineas": 497
+    },
+    "src/modules/authz/services/authz-pdp.service.ts": {
+      "lineas": 496
+    },
+    "src/modules/insurance/presentation/dto/read.dto.ts": {
+      "lineas": 496
+    },
+    "src/modules/marketing/services/marketing-campaigns.service.ts": {
+      "lineas": 495
+    },
+    "src/modules/read_models/services/projection-executor.service.ts": {
+      "lineas": 495
+    },
+    "src/modules/forms/repositories/field-definitions.repository.ts": {
+      "lineas": 494
+    },
+    "src/modules/clinical/services/encounters.service.ts": {
+      "lineas": 493
+    },
+    "src/modules/data_catalog/infrastructure/repositories/catalog-insights.repository.ts": {
+      "lineas": 493
+    },
+    "src/modules/practice/repositories/care-space-ops.repository.ts": {
+      "lineas": 493
+    },
+    "src/modules/reporting/repositories/reporting-runs.repository.ts": {
+      "lineas": 493
+    },
+    "src/modules/workflow/repositories/workflow-runtime.repository.ts": {
+      "lineas": 493
+    },
+    "src/modules/clinical/services/duplicate-study-detector.ts": {
+      "lineas": 492
+    },
+    "src/modules/platform_ops/services/ops-reliability.service.ts": {
+      "lineas": 492
+    },
+    "src/modules/automation/repositories/automation-runs.repository.ts": {
+      "lineas": 491
+    },
+    "src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts": {
+      "lineas": 490
+    },
+    "src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts": {
+      "lineas": 489
+    },
+    "src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository.ts": {
+      "lineas": 489
+    },
+    "src/modules/practice/services/practice-organization-read.service.ts": {
+      "lineas": 488
+    },
+    "src/modules/diagnostics/repositories/lab-work.repository.ts": {
+      "lineas": 486
+    },
+    "src/modules/insurance/presentation/dto/insurance-portability.dto.ts": {
+      "lineas": 486
+    },
+    "src/modules/practice/services/ops/use-cases/cleaning-order.use-cases.ts": {
+      "lineas": 486
+    },
+    "src/modules/iam/presentation/dto/iam-user-read.dto.ts": {
+      "lineas": 485
+    },
+    "src/modules/clinical_ext/entities/referrals.entity.ts": {
+      "lineas": 484
+    },
+    "src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts": {
+      "lineas": 483
+    },
+    "src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts": {
+      "lineas": 483
+    },
+    "src/modules/scheduling/application/confirmation/scheduling-confirmation.service.ts": {
+      "lineas": 478
+    },
+    "src/modules/clinical/services/inpatient/adt-support.ts": {
+      "lineas": 477
+    },
+    "src/modules/accounting/dto/ledger-read.dto.ts": {
+      "lineas": 476
+    },
+    "src/modules/terminology/controllers/terminology-concepts.controller.ts": {
+      "lineas": 476
+    },
+    "src/modules/authz/services/authz-governance.service.ts": {
+      "lineas": 475
+    },
+    "src/modules/insurance/application/services/insurer-patients.service.ts": {
+      "lineas": 474
+    },
+    "src/modules/lakehouse/services/lakehouse-catalog.service.ts": {
+      "lineas": 472
+    },
+    "src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts": {
+      "lineas": 471
+    },
+    "src/modules/diagnostics/dto/specimens.dto.ts": {
+      "lineas": 467
+    },
+    "src/modules/diagnostics/repositories/imaging.repository.ts": {
+      "lineas": 467
+    },
+    "src/modules/ads/controllers/ads.controller.ts": {
+      "lineas": 465
+    },
+    "src/modules/clinical/repositories/observations.repository.ts": {
+      "lineas": 465
+    },
+    "src/modules/practice/controllers/care-space-ops.controller.ts": {
+      "lineas": 462
+    },
+    "src/modules/qa_lab/domain/flow-catalog.ts": {
+      "lineas": 462
+    },
+    "src/modules/community/services/community-visibility.service.ts": {
+      "lineas": 460
+    },
+    "src/modules/insurance/presentation/dto/claims.dto.ts": {
+      "lineas": 460
+    },
+    "src/modules/pharma_lab/services/pharma-lab-organization.service.ts": {
+      "lineas": 460
+    },
+    "src/modules/clinical/controllers/clinical-records.controller.ts": {
+      "lineas": 459
+    },
+    "src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts": {
+      "lineas": 459
+    },
+    "src/modules/object_storage/repositories/dicom.repository.ts": {
+      "lineas": 459
+    },
+    "src/modules/ops_console/domain/readiness.ts": {
+      "lineas": 458
+    },
+    "src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts": {
+      "lineas": 458
+    },
+    "src/modules/authz/services/authz-modules-catalog.service.ts": {
+      "lineas": 457
+    },
+    "src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts": {
+      "lineas": 457
+    },
+    "src/modules/object_storage/services/dicom-catalog.service.ts": {
+      "lineas": 457
+    },
+    "src/modules/telemetry/domain/event-property-policy.ts": {
+      "lineas": 457
+    },
+    "src/common/constants/legal-entity-types.ts": {
+      "lineas": 454
+    },
+    "src/modules/directory/controllers/tenants.controller.ts": {
+      "lineas": 454
+    },
+    "src/modules/health_data/repositories/patient-identity.repository.ts": {
+      "lineas": 454
+    },
+    "src/modules/practice/dto/infrastructure-responses.dto.ts": {
+      "lineas": 454
+    },
+    "src/modules/diagnostics/services/diagnostics-scope.service.ts": {
+      "lineas": 451
+    },
+    "src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts": {
+      "lineas": 450
+    },
+    "src/modules/time_series/services/timescale-admin.service.ts": {
+      "lineas": 450
+    },
+    "src/modules/community/dto/read-moderation.dto.ts": {
+      "lineas": 449
+    },
+    "src/modules/insurance/application/services/prior-auth.service.ts": {
+      "lineas": 449
+    },
+    "src/modules/practice/controllers/practices.controller.ts": {
+      "lineas": 449
+    },
+    "src/modules/scheduling/infrastructure/adapters/messaging-agenda-notice.adapter.ts": {
+      "lineas": 448
+    },
+    "src/modules/diagnostics/services/diagnostics-specimens.service.ts": {
+      "lineas": 447
+    },
+    "src/modules/insurance/application/services/claim-patient-invoice.service.ts": {
+      "lineas": 446
+    },
+    "src/modules/pharmacy/services/pharmacy-staff-read.service.ts": {
+      "lineas": 444
+    },
+    "src/modules/telemetry/application/services/telemetry-parts-analytics.service.ts": {
+      "lineas": 444
+    },
+    "src/modules/telemetry/infrastructure/adapters/google-analytics/google-analytics.mapper.ts": {
+      "lineas": 444
+    },
+    "src/modules/insurance/application/services/practitioner-insurer-requests.service.ts": {
+      "lineas": 443
+    },
+    "src/modules/pharma_lab/services/regulatory-documents.service.ts": {
+      "lineas": 443
+    },
+    "src/modules/bulk_import/services/bulk-import.processor.ts": {
+      "lineas": 441
+    },
+    "src/modules/observability/infrastructure/observability-write.repository.ts": {
+      "lineas": 441
+    },
+    "src/modules/ops_console/domain/instance-liveness.ts": {
+      "lineas": 441
+    },
+    "src/modules/consent/services/consents.service.ts": {
+      "lineas": 440
+    },
+    "src/modules/messaging/services/queues.service.ts": {
+      "lineas": 440
+    },
+    "src/modules/clinical/dto/service-request.dto.ts": {
+      "lineas": 439
+    },
+    "src/modules/practice/dto/infrastructure.dto.ts": {
+      "lineas": 439
+    },
+    "src/modules/community/services/community-verification.service.ts": {
+      "lineas": 438
+    },
+    "src/modules/iam/application/services/iam-onboarding-drafts.service.ts": {
+      "lineas": 438
+    },
+    "src/modules/surveys/dto/responses.dto.ts": {
+      "lineas": 438
+    },
+    "src/modules/system_ops/services/assessment.service.ts": {
+      "lineas": 438
+    },
+    "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts": {
+      "lineas": 438
+    },
+    "src/modules/workflow/services/workflow-instances.service.ts": {
+      "lineas": 438
+    },
+    "src/modules/pharmacy/repositories/pharmacy-read.repository.ts": {
+      "lineas": 436
+    },
+    "src/modules/ads/services/ads-accounts.service.ts": {
+      "lineas": 435
+    },
+    "src/modules/consent/dto/create-treatment-informed-consent.dto.ts": {
+      "lineas": 434
+    },
+    "src/modules/data_catalog/application/catalogacion/explanation-quality.ts": {
+      "lineas": 434
+    },
+    "src/modules/terminology/services/admin-glossary.service.ts": {
+      "lineas": 434
+    },
+    "src/modules/common/services/residence-address.ts": {
+      "lineas": 433
+    },
+    "src/modules/polyglot_storage/services/storage-operations.service.ts": {
+      "lineas": 432
+    },
+    "src/modules/accounting/dto/journal.dto.ts": {
+      "lineas": 431
+    },
+    "src/modules/pharmacy_inventory/infrastructure/repositories/prescription-balance.repository.ts": {
+      "lineas": 431
+    },
+    "src/modules/clinical/controllers/clinical-adt.controller.ts": {
+      "lineas": 430
+    },
+    "src/modules/telemetry/application/services/telemetry-errors-analytics.service.ts": {
+      "lineas": 430
+    },
+    "src/modules/bulk_import/schema/user-kinds.ts": {
+      "lineas": 429
+    },
+    "src/modules/community/services/community-reviews.service.ts": {
+      "lineas": 429
+    },
+    "src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts": {
+      "lineas": 428
+    },
+    "src/modules/practice/dto/responses.dto.ts": {
+      "lineas": 428
+    },
+    "src/modules/health_data/services/canonical-resources.service.ts": {
+      "lineas": 426
+    },
+    "src/modules/community/repositories/posts.repository.ts": {
+      "lineas": 425
+    },
+    "src/modules/study_catalog/repositories/study-catalog.repository.ts": {
+      "lineas": 425
+    },
+    "src/modules/community/services/community-moderation-read.service.ts": {
+      "lineas": 424
+    },
+    "src/modules/bulk_import/schema/field-schema.ts": {
+      "lineas": 423
+    },
+    "src/modules/lakehouse/repositories/research.repository.ts": {
+      "lineas": 423
+    },
+    "src/observability/capture/error-sink.ts": {
+      "lineas": 423
+    },
+    "src/modules/consent/services/practitioner-access-requests.service.ts": {
+      "lineas": 421
+    },
+    "src/modules/pharmacy/services/pharmacy-integration.service.ts": {
+      "lineas": 421
+    },
+    "src/modules/clinical/dto/observation.dto.ts": {
+      "lineas": 420
+    },
+    "src/modules/data_catalog/application/catalog-scan.service.ts": {
+      "lineas": 420
+    },
+    "src/modules/ops_console/domain/tool-catalog.ts": {
+      "lineas": 420
+    },
+    "src/modules/payments/services/payments-operations.service.ts": {
+      "lineas": 420
+    },
+    "src/modules/polyglot_storage/repositories/placements.repository.ts": {
+      "lineas": 418
+    },
+    "src/modules/clinical_ext/services/referral-transfer.ts": {
+      "lineas": 417
+    },
+    "src/modules/system_ops/dto/governance-read.dto.ts": {
+      "lineas": 417
+    },
+    "src/modules/identity_assurance/repositories/identity-checks.repository.ts": {
+      "lineas": 416
+    },
+    "src/modules/marketing/repositories/insights-workspace.repository.ts": {
+      "lineas": 416
+    },
+    "src/modules/payments/repositories/payment-transactions.repository.ts": {
+      "lineas": 416
+    },
+    "src/modules/community/repositories/public-profiles.repository.ts": {
+      "lineas": 415
+    },
+    "src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository.ts": {
+      "lineas": 415
+    },
+    "src/modules/integration_contracts/services/integration-contracts.service.ts": {
+      "lineas": 413
+    },
+    "src/modules/surveys/repositories/insights.repository.ts": {
+      "lineas": 411
+    },
+    "src/modules/pharmacy/dto/responses.dto.ts": {
+      "lineas": 410
+    },
+    "src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts": {
+      "lineas": 410
+    },
+    "src/modules/profiles/presentation/controllers/admissions.controller.ts": {
+      "lineas": 410
+    },
+    "src/modules/payments/dto/payment-flow.dto.ts": {
+      "lineas": 409
+    },
+    "src/modules/practice/services/clinical-units-admin.service.ts": {
+      "lineas": 408
+    },
+    "src/modules/qa_lab/application/services/qa-flows.service.ts": {
+      "lineas": 407
+    },
+    "src/modules/directory/dto/my-organizations.dto.ts": {
+      "lineas": 406
+    },
+    "src/modules/automation/services/record-automation.service.ts": {
+      "lineas": 404
+    },
+    "src/modules/health_data/repositories/data-release.repository.ts": {
+      "lineas": 404
+    },
+    "src/modules/system_ops/repositories/governance-read.repository.ts": {
+      "lineas": 404
+    },
+    "src/modules/community/services/community-search-index.service.ts": {
+      "lineas": 403
+    },
+    "src/modules/health_data/repositories/health-ingestion.repository.ts": {
+      "lineas": 403
+    },
+    "src/modules/clinical/repositories/encounters.repository.ts": {
+      "lineas": 402
+    },
+    "src/modules/pharma_lab/services/visit-surveys.service.ts": {
+      "lineas": 402
+    },
+    "src/modules/scheduling/presentation/dto/scheduling-agenda.dto.ts": {
+      "lineas": 401
+    },
+    "src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts": {
+      "lineas": 400
+    },
+    "src/modules/pharmacy_inventory/infrastructure/adapters/external-system-clients.ts": {
+      "lineas": 400
+    },
+    "src/modules/platform_ops/controllers/platform-ops.controller.ts": {
+      "lineas": 400
+    },
+    "src/modules/community/services/party-ratings.service.ts": {
+      "lineas": 399
+    },
+    "src/modules/pharma_lab/dto/visits.dto.ts": {
+      "lineas": 399
+    },
+    "src/modules/read_models/dto/read-model-responses.dto.ts": {
+      "lineas": 398
+    },
+    "src/modules/clinical/services/observations.service.ts": {
+      "lineas": 397
+    },
+    "src/modules/system_context/controllers/system-context.controller.ts": {
+      "lineas": 397
+    },
+    "src/modules/audit/repositories/history.repository.ts": {
+      "lineas": 396
+    },
+    "src/modules/geo/reverse-geocoding/reverse-geocoding.service.ts": {
+      "lineas": 396
+    },
+    "src/modules/billing/siat-simulated/siat-simulated.engine.ts": {
+      "lineas": 393
+    },
+    "src/modules/diagnostics/dto/lab.dto.ts": {
+      "lineas": 393
+    },
+    "src/modules/forms/services/forms-values.service.ts": {
+      "lineas": 393
+    },
+    "src/modules/audit/interceptors/audit-trail.interceptor.ts": {
+      "lineas": 392
+    },
+    "src/modules/audit/services/audit-events.service.ts": {
+      "lineas": 392
+    },
+    "src/modules/system_ops/dto/assessment.dto.ts": {
+      "lineas": 391
+    },
+    "src/modules/clinical_ext/dto/cds.dto.ts": {
+      "lineas": 390
+    },
+    "src/modules/terminology/repositories/catalog-concepts.repository.ts": {
+      "lineas": 389
+    },
+    "src/modules/community/dto/read-messaging.dto.ts": {
+      "lineas": 388
+    },
+    "src/modules/erp/controllers/erp.controller.ts": {
+      "lineas": 387
+    },
+    "src/modules/system_ops/services/retention-execution.service.ts": {
+      "lineas": 387
+    },
+    "src/modules/profiles/application/services/patient-address-book.service.ts": {
+      "lineas": 386
+    },
+    "src/modules/consent/entities/treatment_informed_consents.entity.ts": {
+      "lineas": 385
+    },
+    "src/modules/payments/dto/payment-transaction.dto.ts": {
+      "lineas": 385
+    },
+    "src/modules/payments/gateway/payments-gateway.double.testing.ts": {
+      "lineas": 385
+    },
+    "src/modules/health_data/controllers/health-data.controller.ts": {
+      "lineas": 383
+    },
+    "src/modules/insurance/application/services/practitioner-settlement-batch.ts": {
+      "lineas": 383
+    },
+    "src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts": {
+      "lineas": 383
+    },
+    "src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts": {
+      "lineas": 383
+    },
+    "src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts": {
+      "lineas": 383
+    },
+    "src/modules/clinical_ext/dto/referral-transfer.dto.ts": {
+      "lineas": 382
+    },
+    "src/modules/erp/services/erp-scope.service.ts": {
+      "lineas": 382
+    },
+    "src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts": {
+      "lineas": 382
+    },
+    "src/modules/community/repositories/reviews.repository.ts": {
+      "lineas": 381
+    },
+    "src/modules/insurance/infrastructure/repositories/coverage.repository.ts": {
+      "lineas": 381
+    },
+    "src/modules/organization_extensions/services/orgext-hospitals.service.ts": {
+      "lineas": 381
+    },
+    "src/modules/scheduling/application/service-offerings/scheduling-service-agenda.service.ts": {
+      "lineas": 381
+    },
+    "src/modules/medical_groups/dto/medical-groups.dto.ts": {
+      "lineas": 380
+    },
+    "src/modules/billing/services/admin-service-catalog.service.ts": {
+      "lineas": 379
+    },
+    "src/modules/pharmacy_inventory/application/scope/pharmacy-inventory-scope.policy.ts": {
+      "lineas": 379
+    },
+    "src/modules/pharma_lab/dto/catalog.dto.ts": {
+      "lineas": 377
+    },
+    "src/modules/pharmacy/services/pharmacy-bulk.service.ts": {
+      "lineas": 376
+    },
+    "src/modules/iam/application/services/iam-assisted-registration.service.ts": {
+      "lineas": 375
+    },
+    "src/modules/iam/infrastructure/repositories/credentials.repository.ts": {
+      "lineas": 375
+    },
+    "src/modules/practice/services/ops/use-cases/change-availability.use-case.ts": {
+      "lineas": 375
+    },
+    "src/modules/community/services/community-moderation.service.ts": {
+      "lineas": 374
+    },
+    "src/modules/pharma_lab/repositories/visits.repository.ts": {
+      "lineas": 374
+    },
+    "src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts": {
+      "lineas": 374
+    },
+    "src/modules/accounting/dto/practitioner-assets-liabilities.dto.ts": {
+      "lineas": 373
+    },
+    "src/modules/surveys/repositories/templates.repository.ts": {
+      "lineas": 372
+    },
+    "src/modules/system_ops/services/governance-catalog.service.ts": {
+      "lineas": 372
+    },
+    "src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts": {
+      "lineas": 370
+    },
+    "src/modules/marketing/services/insights-workspace.service.ts": {
+      "lineas": 370
+    },
+    "src/modules/pharmacy_inventory/domain/pharmacy_inventory.concepts.ts": {
+      "lineas": 368
+    },
+    "src/modules/vector_rag/services/vector-maintenance.service.ts": {
+      "lineas": 368
+    },
+    "src/modules/audit/services/audit-query.service.ts": {
+      "lineas": 367
+    },
+    "src/modules/directory/services/tenant-document-completion.service.ts": {
+      "lineas": 367
+    },
+    "src/modules/education/services/education-scope.service.ts": {
+      "lineas": 367
+    },
+    "src/modules/clinical/clinical.module.ts": {
+      "lineas": 366
+    },
+    "src/modules/insurance/domain/insurance.concepts.ts": {
+      "lineas": 366
+    },
+    "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts": {
+      "lineas": 366
+    },
+    "src/modules/practice/services/ops/ops-cell-builder.ts": {
+      "lineas": 366
+    },
+    "src/modules/delegated_access/dto/support-staff.dto.ts": {
+      "lineas": 364
+    },
+    "src/modules/procedures_perioperative/controllers/periop-or.controller.ts": {
+      "lineas": 364
+    },
+    "src/modules/promotions/controllers/loyalty.controller.ts": {
+      "lineas": 364
+    },
+    "src/modules/diagnostic_units/dto/administration-read.dto.ts": {
+      "lineas": 363
+    },
+    "src/modules/practice/dto/organization-console.dto.ts": {
+      "lineas": 363
+    },
+    "src/modules/insurance/presentation/dto/prior-auth.dto.ts": {
+      "lineas": 362
+    },
+    "src/modules/pharmacy/services/pharmacy-marketplace.service.ts": {
+      "lineas": 362
+    },
+    "src/modules/time_series/repositories/series-ingest.repository.ts": {
+      "lineas": 362
+    },
+    "src/modules/crm/controllers/crm.controller.ts": {
+      "lineas": 361
+    },
+    "src/modules/data_catalog/domain/catalog/import-plan.ts": {
+      "lineas": 361
+    },
+    "src/modules/insurance/application/services/coverage.service.ts": {
+      "lineas": 361
+    },
+    "src/modules/object_storage/controllers/object-storage.controller.ts": {
+      "lineas": 360
+    },
+    "src/common/storage/s3-file-storage.adapter.ts": {
+      "lineas": 359
+    },
+    "src/modules/accounting/controllers/accounting-ledger.controller.ts": {
+      "lineas": 359
+    },
+    "src/modules/platform_ops/tools/tool-catalog.ts": {
+      "lineas": 359
+    },
+    "src/modules/study_catalog/services/study-catalog.service.ts": {
+      "lineas": 359
+    },
+    "src/modules/automation/services/automation-definition.service.ts": {
+      "lineas": 358
+    },
+    "src/modules/forms/repositories/field-values.repository.ts": {
+      "lineas": 358
+    },
+    "src/modules/iam/application/services/iam-password-reset.service.ts": {
+      "lineas": 358
+    },
+    "src/modules/data_catalog/application/catalog-insights.service.ts": {
+      "lineas": 357
+    },
+    "src/modules/integrations/dto/responses.dto.ts": {
+      "lineas": 357
+    },
+    "src/modules/pharmacy_inventory/presentation/dto/read-responses.dto.ts": {
+      "lineas": 357
+    },
+    "src/modules/telemetry/application/services/telemetry-web-analytics.service.ts": {
+      "lineas": 357
+    },
+    "src/modules/education/controllers/education.controller.ts": {
+      "lineas": 356
+    },
+    "src/modules/diagnostic_units/services/diagnostic-unit-provisioning.service.ts": {
+      "lineas": 352
+    },
+    "src/modules/diagnostic_units/dto/catalog.dto.ts": {
+      "lineas": 351
+    },
+    "src/modules/clinical/entities/observations.entity.ts": {
+      "lineas": 350
+    },
+    "src/modules/diagnostics/dto/imaging.dto.ts": {
+      "lineas": 350
+    },
+    "src/modules/accounting/services/space-accounting.service.ts": {
+      "lineas": 349
+    },
+    "src/modules/community/controllers/community-messaging.controller.ts": {
+      "lineas": 349
+    },
+    "src/modules/object_storage/repositories/object-governance.repository.ts": {
+      "lineas": 349
+    },
+    "src/modules/polyglot_storage/repositories/storage-backends.repository.ts": {
+      "lineas": 349
+    },
+    "src/modules/health_data/repositories/health-validation.repository.ts": {
+      "lineas": 348
+    },
+    "src/modules/ui_visibility/dto/ui-visibility.dto.ts": {
+      "lineas": 348
+    },
+    "src/worker/worker.env.ts": {
+      "lineas": 348
+    },
+    "src/common/dto/tenant-type-profile.dto.ts": {
+      "lineas": 347
+    },
+    "src/modules/clinical/dto/inpatient.dto.ts": {
+      "lineas": 347
+    },
+    "src/modules/insurance/insurance.module.ts": {
+      "lineas": 347
+    },
+    "src/worker/worker-health.registry.ts": {
+      "lineas": 347
+    },
+    "src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts": {
+      "lineas": 346
+    },
+    "src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts": {
+      "lineas": 345
+    },
+    "src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts": {
+      "lineas": 344
+    },
+    "src/modules/directory/dto/directory-read.dto.ts": {
+      "lineas": 343
+    },
+    "src/modules/health_context/controllers/health-context.controller.ts": {
+      "lineas": 343
+    },
+    "src/modules/health_data/services/health-validation.service.ts": {
+      "lineas": 343
+    },
+    "src/modules/authz/services/authz-clinical.service.ts": {
+      "lineas": 342
+    },
+    "src/modules/data_catalog/presentation/dto/catalog-request.dto.ts": {
+      "lineas": 342
+    },
+    "src/modules/diagnostics/dto/patient-results.dto.ts": {
+      "lineas": 342
+    },
+    "src/modules/marketing/controllers/marketing.controller.ts": {
+      "lineas": 342
+    },
+    "src/modules/accounting/repositories/subledger.repository.ts": {
+      "lineas": 341
+    },
+    "src/modules/chart/dto/chart-read.dto.ts": {
+      "lineas": 341
+    },
+    "src/modules/diagnostics/services/diagnostics-reception.service.ts": {
+      "lineas": 341
+    },
+    "src/modules/platform_ops/repositories/ops-reliability.repository.ts": {
+      "lineas": 341
+    },
+    "src/modules/practice/entities/care_spaces.entity.ts": {
+      "lineas": 341
+    },
+    "src/modules/payments/gateway/payments-gateway.client.ts": {
+      "lineas": 340
+    },
+    "src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts": {
+      "lineas": 340
+    },
+    "src/modules/billing/repositories/invoices.repository.ts": {
+      "lineas": 339
+    },
+    "src/modules/pharmacy_inventory/application/prescription-shares/open-prescription-share.use-case.ts": {
+      "lineas": 339
+    },
+    "src/modules/scheduling/application/bookings/support/booking-item-assembler.ts": {
+      "lineas": 338
+    },
+    "src/modules/messaging/repositories/outbox.repository.ts": {
+      "lineas": 337
+    },
+    "src/modules/profiles/application/services/practitioner-admission-checklist.service.ts": {
+      "lineas": 337
+    },
+    "src/modules/search_platform/constants/search-platform.constants.ts": {
+      "lineas": 337
+    },
+    "src/modules/clinical/dto/condition.dto.ts": {
+      "lineas": 336
+    },
+    "src/modules/forms/services/forms-assignments.service.ts": {
+      "lineas": 336
+    },
+    "src/modules/telemetry/application/services/telemetry-consent.service.ts": {
+      "lineas": 336
+    },
+    "src/modules/cross_store_consistency/repositories/reconciliation.repository.ts": {
+      "lineas": 335
+    },
+    "src/modules/billing/controllers/billing-service-catalog.controller.ts": {
+      "lineas": 334
+    },
+    "src/modules/billing/dto/service-catalog.dto.ts": {
+      "lineas": 334
+    },
+    "src/modules/directory/services/pharmacy-operating-requirements.service.ts": {
+      "lineas": 334
+    },
+    "src/modules/practice/repositories/practitioner-role-assignments.repository.ts": {
+      "lineas": 334
+    },
+    "src/modules/telemetry/application/services/telemetry-governance.service.ts": {
+      "lineas": 334
+    },
+    "src/modules/community/services/community-groups-read.service.ts": {
+      "lineas": 333
+    },
+    "src/modules/vector_rag/repositories/retrieval.repository.ts": {
+      "lineas": 333
+    },
+    "src/modules/procedures_perioperative/procedures_perioperative.concepts.ts": {
+      "lineas": 332
+    },
+    "src/modules/diagnostic_units/services/diagnostic-units-read.service.ts": {
+      "lineas": 331
+    },
+    "src/modules/iam/application/services/iam-support-staff-self-registration.service.ts": {
+      "lineas": 331
+    },
+    "src/modules/practice/services/space-assets-read.service.ts": {
+      "lineas": 331
+    },
+    "src/modules/system_ops/dto/governance-catalog.dto.ts": {
+      "lineas": 331
+    },
+    "src/common/dto/medical-facility.dto.ts": {
+      "lineas": 330
+    },
+    "src/modules/accounting/repositories/liability.repository.ts": {
+      "lineas": 329
+    },
+    "src/modules/common/services/attachable-file.service.ts": {
+      "lineas": 329
+    },
+    "src/modules/consent/services/consent-me.service.ts": {
+      "lineas": 329
+    },
+    "src/modules/directory/services/tenant-affiliation-documents.service.ts": {
+      "lineas": 329
+    },
+    "src/modules/pharma_lab/services/pharmacovigilance.service.ts": {
+      "lineas": 329
+    },
+    "src/modules/scheduling/presentation/dto/scheduling-service-offerings.dto.ts": {
+      "lineas": 329
+    },
+    "src/observability/capture/sql-sink.ts": {
+      "lineas": 329
+    },
+    "src/modules/clinical_ext/services/referral-notifier.service.ts": {
+      "lineas": 328
+    },
+    "src/modules/insurance/application/services/prior-auth-read.service.ts": {
+      "lineas": 328
+    },
+    "src/modules/pharmacy/controllers/pharmacy-read.controller.ts": {
+      "lineas": 328
+    },
+    "src/modules/terminology/repositories/concept-relationships.repository.ts": {
+      "lineas": 328
+    },
+    "src/persistence/config/data-sources.env.ts": {
+      "lineas": 328
+    },
+    "src/modules/delegated_access/services/org-user-assignments.service.ts": {
+      "lineas": 327
+    },
+    "src/modules/scheduling/scheduling.module.ts": {
+      "lineas": 327
+    },
+    "src/modules/diagnostics/services/diagnostics-lab.service.ts": {
+      "lineas": 326
+    },
+    "src/modules/ui_visibility/testing/in-memory-ui-visibility.store.ts": {
+      "lineas": 326
+    },
+    "src/modules/iam/application/services/iam-users-read.service.ts": {
+      "lineas": 325
+    },
+    "src/modules/pharmacy/services/pharmacy-pricing.service.ts": {
+      "lineas": 325
+    },
+    "src/modules/data_catalog/domain/catalog/scan-diff.ts": {
+      "lineas": 321
+    },
+    "src/modules/diagnostics/repositories/media-quality.repository.ts": {
+      "lineas": 321
+    },
+    "src/modules/auth_providers/controllers/auth-providers.controller.ts": {
+      "lineas": 320
+    },
+    "src/modules/insurance/application/services/linked-claim-order.service.ts": {
+      "lineas": 320
+    },
+    "src/modules/public/domain/public-pharmacy-branches.domain.ts": {
+      "lineas": 320
+    },
+    "src/modules/telemetry/infrastructure/repositories/telemetry-client-errors-read.repository.ts": {
+      "lineas": 320
+    },
+    "src/modules/insurance/application/services/insurance-analytics.service.ts": {
+      "lineas": 319
+    },
+    "src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts": {
+      "lineas": 319
+    },
+    "src/orm/subscribers/history-mirror.subscriber.ts": {
+      "lineas": 319
+    },
+    "src/modules/authz/dto/authz-governance.dto.ts": {
+      "lineas": 317
+    },
+    "src/modules/scheduling/infrastructure/adapters/postgres-waitlist.adapter.ts": {
+      "lineas": 317
+    },
+    "src/modules/pharmacy/dto/create-product.dto.ts": {
+      "lineas": 316
+    },
+    "src/modules/pharmacy_inventory/application/pharmacy-orders/pending-order-lines.ts": {
+      "lineas": 316
+    },
+    "src/modules/community/services/community-group-access.service.ts": {
+      "lineas": 315
+    },
+    "src/modules/authz/services/authz-clinical-scope.service.ts": {
+      "lineas": 314
+    },
+    "src/modules/clinical_ext/services/care-gaps.service.ts": {
+      "lineas": 314
+    },
+    "src/modules/diagnostic_units/services/equipment-f5a.service.ts": {
+      "lineas": 314
+    },
+    "src/modules/diagnostics/services/diagnostics-reports.service.ts": {
+      "lineas": 314
+    },
+    "src/modules/bulk_import/ports/bulk-import.ports.ts": {
+      "lineas": 313
+    },
+    "src/modules/identity_assurance/services/identity-verification-effects.service.ts": {
+      "lineas": 313
+    },
+    "src/modules/profiles/presentation/dto/create-practitioner.dto.ts": {
+      "lineas": 313
+    },
+    "src/modules/data_catalog/application/catalog-governance.service.ts": {
+      "lineas": 312
+    },
+    "src/modules/insurance/infrastructure/repositories/catalog.repository.ts": {
+      "lineas": 312
+    },
+    "src/modules/marketing/services/insights-workflow.service.ts": {
+      "lineas": 312
+    },
+    "src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts": {
+      "lineas": 312
+    },
+    "src/modules/audio_assets/application/resolve-audio-asset.use-case.ts": {
+      "lineas": 311
+    },
+    "src/modules/billing/services/dunning.service.ts": {
+      "lineas": 311
+    },
+    "src/modules/cross_store_consistency/services/reconciliation.service.ts": {
+      "lineas": 311
+    },
+    "src/modules/procedures_perioperative/dto/dental.dto.ts": {
+      "lineas": 311
+    },
+    "src/modules/procedures_perioperative/services/periop-dental.service.ts": {
+      "lineas": 311
+    },
+    "src/modules/tracking/controllers/tracking.controller.ts": {
+      "lineas": 311
+    },
+    "src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts": {
+      "lineas": 310
+    },
+    "src/modules/authz/services/authz-grants.service.ts": {
+      "lineas": 310
+    },
+    "src/modules/authz/services/authz-roles.service.ts": {
+      "lineas": 310
+    },
+    "src/modules/billing/dto/admin-service-catalog.dto.ts": {
+      "lineas": 310
+    },
+    "src/modules/scheduling/application/bookings/support/booking-materializer.ts": {
+      "lineas": 310
+    },
+    "src/app.module.ts": {
+      "lineas": 309
+    },
+    "src/modules/platform_ops/runtime_pieces/scanner/scan-schedules.ts": {
+      "lineas": 309
+    },
+    "src/modules/profiles/profiles.module.ts": {
+      "lineas": 309
+    },
+    "src/modules/reporting/controllers/reporting.controller.ts": {
+      "lineas": 309
+    },
+    "src/modules/data_catalog/presentation/dto/insights.dto.ts": {
+      "lineas": 308
+    },
+    "src/modules/accounting/services/asset.service.ts": {
+      "lineas": 307
+    },
+    "src/modules/cross_store_consistency/services/storage-maintenance.service.ts": {
+      "lineas": 307
+    },
+    "src/modules/observability/application/observability-flush.service.ts": {
+      "lineas": 307
+    },
+    "src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts": {
+      "lineas": 307
+    },
+    "src/modules/scheduling/application/bookings/support/booking-billing-bridge.ts": {
+      "lineas": 307
+    },
+    "src/modules/procedures_perioperative/services/or/case-or-view.ts": {
+      "lineas": 305
+    },
+    "src/modules/scheduling/application/delay/scheduling-delay.service.ts": {
+      "lineas": 305
+    },
+    "src/common/http/ssrf-guard.ts": {
+      "lineas": 303
+    },
+    "src/modules/pharmacy_inventory/application/site-availability/site-stock-writer.ts": {
+      "lineas": 303
+    },
+    "src/modules/practice/services/clinical-structure.service.ts": {
+      "lineas": 303
+    },
+    "src/modules/insurance/application/services/insurance-portability-pdf.service.ts": {
+      "lineas": 302
+    },
+    "src/modules/platform_ops/repositories/ops-practices.repository.ts": {
+      "lineas": 302
+    },
+    "src/modules/surveys/surveys.base-definitions.ts": {
+      "lineas": 302
+    },
+    "src/main.ts": {
+      "lineas": 301
+    },
+    "src/modules/forms/repositories/assignments.repository.ts": {
+      "lineas": 301
+    },
+    "src/modules/system_ops/services/governance-read.service.ts": {
+      "lineas": 301
+    }
+  }
+}

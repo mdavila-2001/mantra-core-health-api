@@ -85,6 +85,22 @@ Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepci
 - **Prohibido abrir PR hacia `test`.** Está dada de baja desde el 30/10/2026: no despliega nada y
   `test.alovidasalud.com` redirige a `dev`.
 
+### 1.7 Reforma estructural: arquitectura hexagonal, DTOs atómicos y código ≤ 300 líneas
+
+- **Regla durísima de código Lean:** Escribir única y exclusivamente las líneas de código necesarias.
+  Prohibido el boilerplate superfluo y la sobre-ingeniería.
+- **Tope estricto:** Ningún archivo de código nuevo (`.ts`, `.sql`, etc.) puede superar **300 líneas**.
+- **Ratchet anti-crecimiento:** Los archivos heredados que superan 300 líneas quedan congelados en
+  `scripts/baselines/max-lines.json` y tienen **terminantemente prohibido crecer**.
+- **Arquitectura Hexagonal (Ports & Adapters):**
+  - Casos de uso aislados e independientes en `application/use-cases/` (≤ 150 líneas).
+  - Puertos de entrada y salida desacoplados en `domain/ports/`.
+  - Controladores y adaptadores de infraestructura delgados (≤ 150 líneas).
+  - DTOs atómicos: prohibidos los archivos macro-DTOs de miles de líneas; cada operación lleva su archivo
+    DTO específico en `dto/` (≤ 80 líneas).
+- **Orquestación con KMAN:** Se utiliza la skill y CLI de `kman` para orquestar agentes en carriles paralelos disjuntos.
+
+
 ---
 
 ## 2. Formato obligatorio de trabajo
