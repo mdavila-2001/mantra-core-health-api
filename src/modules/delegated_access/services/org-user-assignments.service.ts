@@ -97,6 +97,18 @@ export class OrgUserAssignmentsService {
           dto.validTo,
         );
       }
+      // `tenant_id` es NOT NULL (modelo v4.2.79) y el disparador
+      // `support_tenant_consistency` lo exige igual al de la membresía: se
+      // deriva de la membresía, nunca de la petición.
+      const tenantId = await this.assignmentsRepo.findMembershipTenantId(
+        tx,
+        tenantMembershipId,
+      );
+      if (!tenantId) {
+        throw new ResourceNotFoundException('Membresía no encontrada', {
+          tenantMembershipId,
+        });
+      }
       const overlap = await this.assignmentsRepo.findActiveOverlap(
         tx,
         tenantMembershipId,
@@ -121,6 +133,7 @@ export class OrgUserAssignmentsService {
       }
 
       const assignment = this.assignmentsRepo.create(tx, {
+        tenantId,
         tenantMembershipId,
         practiceId: dto.practiceId,
         practiceSiteId: dto.practiceSiteId,
