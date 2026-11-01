@@ -1,0 +1,35 @@
+﻿
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90mc:/Alovida/alovida-backend[39m
+
+ [32mÔ£ô[39m src/app.controller.spec.ts [2m([22m[2m1 test[22m[2m)[22m[33m 315[2mms[22m[39m
+       [33m[2mÔ£ô[22m[39m should return "Hello World!" [33m 312[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/billing/services/billing/billing.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 333[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 313[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/pharmacy/services/pharmacy/pharmacy.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 348[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 316[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/terminology/controllers/terminology/terminology.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 291[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/appointments/services/appointments/appointments.service.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 314[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/diagnostics/controllers/diagnostics/diagnostics.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 302[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/clinical/services/clinical/clinical.service.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 320[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/clinical/controllers/clinical/clinical.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 296[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/diagnostics/services/diagnostics/diagnostics.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 330[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 311[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/practitioners/controllers/practitioners/practitioners.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 305[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/appointments/controllers/appointments/appointments.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 338[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m debe estar definido [33m 307[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/terminology/services/terminology/terminology.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/patients/services/patients/patients.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/core/filters/http-exception/http-exception.filter.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/practitioners/services/practitioners/practitioners.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/core/guards/roles/roles.guard.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/core/guards/jwt-auth/jwt-auth.guard.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/patients/controllers/patients/patients.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 151[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/pharmacy/controllers/pharmacy/pharmacy.controller.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 143[2mms[22m[39m
+ [32mÔ£ô[39m src/modules/billing/controllers/billing/billing.controller.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 143[2mms[22m[39m
+ [32mÔ£ô[39m src/mikro-orm.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m      Tests [22m [1m[32m75 passed[39m[22m[90m (75)[39m
+[2m   Start at [22m 21:57:12
+[2m   Duration [22m 4.52s[2m (transform 1.36s, setup 0ms, import 29.20s, tests 4.03s, environment 7ms)[22m
+
