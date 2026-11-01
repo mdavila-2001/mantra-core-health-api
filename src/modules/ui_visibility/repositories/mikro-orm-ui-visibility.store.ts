@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
+// `EntityManager` va como valor, no como `type`: Nest lee el tipo del parámetro del
+// constructor en tiempo de ejecución, y un import de tipo se borra al compilar.
 import {
+  EntityManager,
   UniqueConstraintViolationException,
-  type EntityManager,
 } from '@mikro-orm/postgresql';
 import { OptimisticLockError, type FilterQuery } from '@mikro-orm/core';
 import { CONCEPTS } from '../../../common';
