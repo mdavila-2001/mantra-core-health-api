@@ -8,3 +8,4 @@ export * from './backup.controller';
 export * from './restore-test.controller';
 export * from './assessment.controller';
 export * from './draft.controller';
+export * from './governance-read.controller';

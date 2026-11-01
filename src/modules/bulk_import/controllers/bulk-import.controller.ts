@@ -27,6 +27,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import {
+  AccessLogged,
   Audited,
   CurrentUser,
   PreconditionFailedException,
@@ -188,6 +189,13 @@ export class BulkImportController {
   }
 
   @Get(':id')
+  // Leer un lote es leer lo que se cargó: queda en `audit.data_access_log`, además
+  // del sello `BULK_IMPORT_BATCH_READ` que escribe el servicio.
+  @AccessLogged({
+    resourceType: 'BULK_IMPORT_BATCH',
+    resourceId: 'param:id',
+    purpose: 'DATA_ADMINISTRATION',
+  })
   @ApiOperation({ summary: 'Estado, vista previa y avance de un lote' })
   get(
     @Param('id', ParseUUIDPipe) id: string,
@@ -198,6 +206,11 @@ export class BulkImportController {
   }
 
   @Get(':id/report')
+  @AccessLogged({
+    resourceType: 'BULK_IMPORT_REPORT',
+    resourceId: 'param:id',
+    purpose: 'DATA_ADMINISTRATION',
+  })
   @ApiOperation({
     summary: 'Informe de un lote: creados, omitidos y rechazados con su motivo',
   })

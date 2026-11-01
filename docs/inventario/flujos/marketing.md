@@ -3,19 +3,19 @@
 # Flujos del módulo `marketing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 15 (15 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 31 (24 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [marketing](../endpoints/marketing.md)
 
 ## Proceso: Módulo 50 — Marketing Automation, Journeys y Atribución
 
-- **Código:** `marketing` · **Agrupación:** MIXTO · **Operaciones:** 15
-- **Actores:** CONTENT_EDITOR · MARKETING_MANAGER · Público (sin sesión) · SYSTEM
+- **Código:** `marketing` · **Agrupación:** MIXTO · **Operaciones:** 31
+- **Actores:** ...INSIGHTS_WRITE_ROLES · CONTENT_EDITOR · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · PLATFORM_ADMIN · Público (sin sesión) · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/marketing/README.md`
 
 ### Para qué sirve
 
-Segmentación de audiencia, campañas multicanal, plantillas de contenido versionadas, journeys con inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-touch.
+Segmentación de audiencia, campañas multicanal, plantillas de contenido versionadas, journeys con inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-touch. Además sirve el dataset de **plataforma** de AloVida Insights (`/marketing/insights/*`, tablas `insights_*` sin `tenant_id`): sus dos lecturas de campañas (`catalog`, `campaign-facts`) y el flujo de trabajo de las personas (alertas, reglas, preferencias, vistas guardadas e informes).
 
 _Fuente: `src/modules/marketing/README.md:3`_
 
@@ -40,7 +40,7 @@ enlace (active) ── GET /r/{code}?t=<token> ──> click_count++ [+ touchpoi
 touchpoints del miembro en ventana ── attribution/compute ──> reparto con SUM(weight) = 1
 ```
 
-_Fuente: `src/modules/marketing/README.md:67`_
+_Fuente: `src/modules/marketing/README.md:85`_
 
 ### Etapas y operaciones
 
@@ -60,9 +60,25 @@ _Fuente: `src/modules/marketing/README.md:67`_
 |  |  | GET /r/{code} | Público (sin sesión) | ALTO | 3 |
 | `UC-50-11` | Registrar touchpoint (append-only) | POST /marketing/touchpoints | SYSTEM · MARKETING_MANAGER | MEDIO | 7 |
 | `UC-50-12` | Atribución multi-touch | POST /marketing/attribution/compute | SYSTEM · MARKETING_MANAGER | ALTO | 6 |
+| `UC-50-13` | Catálogo de Insights: campañas (con canales derivados de sus creativos) e hitos | GET /marketing/insights/catalog | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 6 |
+| `UC-50-14` | Hechos diarios por campaña y canal en una ventana de hasta 92 días, con meta (dataset, asOf, notMeasured) | GET /marketing/insights/campaign-facts | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 3 |
+| `UC-50-15` | Estado, responsable e historial de una alerta detectada por la pantalla: el PUT la crea con su snapshot la primera vez y escribe una fila de insights_alert_transitions solo si cambia el estado o el responsable | GET /marketing/insights/alert-workflow | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 5 |
+|  |  | PUT /marketing/insights/alert-workflow/{fingerprint} | ...INSIGHTS_WRITE_ROLES | BAJO | 2 |
+| `UC-50-16` | Encender, apagar o cambiar el umbral (1 a 500) de una de las siete reglas; If-Match obligatorio | GET /marketing/insights/alert-rules | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 4 |
+|  |  | PATCH /marketing/insights/alert-rules/{code} | PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 2 |
+| `UC-50-17` | Preferencias de aviso (no se envía nada) y de interfaz del usuario autenticado | PUT /marketing/insights/notification-preferences | ...INSIGHTS_WRITE_ROLES | BAJO | 2 |
+| `ctrl:InsightsWorkspaceController` | Operaciones de InsightsWorkspaceController que el README no asigna a un caso de uso | GET /marketing/insights/notification-preferences | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 3 |
+|  |  | GET /marketing/insights/reports | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 3 |
+|  |  | DELETE /marketing/insights/reports/{id} | ...INSIGHTS_WRITE_ROLES | ALTO | 1 |
+|  |  | PUT /marketing/insights/reports/{id} | ...INSIGHTS_WRITE_ROLES | BAJO | 2 |
+|  |  | GET /marketing/insights/saved-views | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 3 |
+|  |  | DELETE /marketing/insights/saved-views/{id} | ...INSIGHTS_WRITE_ROLES | ALTO | 1 |
+|  |  | PUT /marketing/insights/saved-views/{id} | ...INSIGHTS_WRITE_ROLES | BAJO | 2 |
+|  |  | GET /marketing/insights/user-preferences | MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN | BAJO | 3 |
+|  |  | PUT /marketing/insights/user-preferences | ...INSIGHTS_WRITE_ROLES | BAJO | 2 |
 | `ctrl:MarketingController` | Operaciones de MarketingController que el README no asigna a un caso de uso | POST /marketing/tracked-links/{id}/recipient-tokens | SYSTEM · MARKETING_MANAGER | BAJO | 3 |
 
-### Diagrama — etapas `UC-50-01`, `UC-50-02`, `UC-50-03`…
+### Diagrama 1 de 2 — etapas `UC-50-01`, `UC-50-02`, `UC-50-03`…
 
 ```mermaid
 flowchart LR
@@ -71,6 +87,8 @@ flowchart LR
   a12(["CONTENT_EDITOR · MARKETING_MANAGER"]):::actor
   a21(["SYSTEM · MARKETING_MANAGER"]):::actor
   a27(["Público (sin sesión)"]):::actor
+  a33(["MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN"]):::actor
+  a45(["...INSIGHTS_WRITE_ROLES"]):::actor
   t3[("marketing.segments")]:::tabla
   t6[("marketing.segment_members")]:::tabla
   t8[("marketing.marketing_campaigns")]:::tabla
@@ -82,6 +100,14 @@ flowchart LR
   t22[("marketing.marketing_touchpoints")]:::tabla
   t25[("marketing.tracked_links")]:::tabla
   t31[("marketing.attribution_touches")]:::tabla
+  t34[("marketing.insights_campaign_daily_facts")]:::tabla
+  t35[("marketing.insights_campaigns")]:::tabla
+  t36[("marketing.insights_creatives")]:::tabla
+  t37[("marketing.insights_data_sources")]:::tabla
+  t38[("marketing.insights_milestones")]:::tabla
+  t39[("terminology.catalog_concepts")]:::tabla
+  t42[("marketing.insights_alert_transitions")]:::tabla
+  t43[("marketing.insights_alerts")]:::tabla
   subgraph s0["UC-50-01 · Crear segmento y ligarlo a su read model"]
     o1["POST /marketing/segments"]:::op
   end
@@ -121,8 +147,15 @@ flowchart LR
   subgraph s11["UC-50-12 · Atribución multi-touch"]
     o30["POST /marketing/attribution/compute"]:::op
   end
-  subgraph s12["ctrl:MarketingController · Operaciones de MarketingController que el README no…"]
-    o32["POST /marketing/tracked-links/{id}/recipient-tokens"]:::op
+  subgraph s12["UC-50-13 · Catálogo de Insights: campañas (con canales derivados de sus creativ…"]
+    o32["GET /marketing/insights/catalog"]:::op
+  end
+  subgraph s13["UC-50-14 · Hechos diarios por campaña y canal en una ventana de hasta 92 días,…"]
+    o40["GET /marketing/insights/campaign-facts"]:::op
+  end
+  subgraph s14["UC-50-15 · Estado, responsable e historial de una alerta detectada por la panta…"]
+    o41["GET /marketing/insights/alert-workflow"]:::op
+    o44["PUT /marketing/insights/alert-workflow/{fingerprint}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -193,10 +226,116 @@ flowchart LR
   o30 -->|"LEE"| t15
   o30 -->|"LEE"| t8
   o30 -->|"LEE"| t22
-  a21 --> o32
-  o32 -->|"LEE"| t10
-  o32 -->|"LEE"| t8
-  o32 -->|"LEE"| t25
+  a33 --> o32
+  o32 -->|"LEE"| t34
+  o32 -->|"LEE"| t35
+  o32 -->|"LEE"| t36
+  o32 -->|"LEE"| t37
+  o32 -->|"LEE"| t38
+  o32 -->|"LEE"| t39
+  a33 --> o40
+  o40 -->|"LEE"| t34
+  o40 -->|"LEE"| t35
+  o40 -->|"LEE"| t37
+  a33 --> o41
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t43
+  o41 -->|"LEE"| t34
+  o41 -->|"LEE"| t37
+  o41 -->|"LEE"| t39
+  a45 --> o44
+  o44 -->|"LEE"| t34
+  o44 -->|"LEE"| t37
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 2 de 2 — etapas `UC-50-16`, `UC-50-17`, `ctrl:InsightsWorkspaceController`…
+
+```mermaid
+flowchart LR
+  a2(["MARKETING_MANAGER · PLATFORM_ADMIN · DATA_PLATFORM_ADMIN"]):::actor
+  a8(["PLATFORM_ADMIN · DATA_PLATFORM_ADMIN"]):::actor
+  a10(["...INSIGHTS_WRITE_ROLES"]):::actor
+  a25(["SYSTEM · MARKETING_MANAGER"]):::actor
+  t3[("marketing.insights_alert_rules")]:::tabla
+  t4[("marketing.insights_campaign_daily_facts")]:::tabla
+  t5[("marketing.insights_data_sources")]:::tabla
+  t6[("terminology.catalog_concepts")]:::tabla
+  t12[("marketing.insights_notification_preferences")]:::tabla
+  t14[("marketing.insights_reports")]:::tabla
+  t18[("marketing.insights_saved_views")]:::tabla
+  t22[("marketing.insights_user_preferences")]:::tabla
+  t26[("marketing.campaign_members")]:::tabla
+  t27[("marketing.marketing_campaigns")]:::tabla
+  t28[("marketing.tracked_links")]:::tabla
+  subgraph s0["UC-50-16 · Encender, apagar o cambiar el umbral (1 a 500) de una de las siete r…"]
+    o1["GET /marketing/insights/alert-rules"]:::op
+    o7["PATCH /marketing/insights/alert-rules/{code}"]:::op
+  end
+  subgraph s1["UC-50-17 · Preferencias de aviso (no se envía nada) y de interfaz del usuario a…"]
+    o9["PUT /marketing/insights/notification-preferences"]:::op
+  end
+  subgraph s2["ctrl:InsightsWorkspaceController · Operaciones de InsightsWorkspaceController q…"]
+    o11["GET /marketing/insights/notification-preferences"]:::op
+    o13["GET /marketing/insights/reports"]:::op
+    o15["DELETE /marketing/insights/reports/{id}"]:::op
+    o16["PUT /marketing/insights/reports/{id}"]:::op
+    o17["GET /marketing/insights/saved-views"]:::op
+    o19["DELETE /marketing/insights/saved-views/{id}"]:::op
+    o20["PUT /marketing/insights/saved-views/{id}"]:::op
+    o21["GET /marketing/insights/user-preferences"]:::op
+    o23["PUT /marketing/insights/user-preferences"]:::op
+  end
+  subgraph s3["ctrl:MarketingController · Operaciones de MarketingController que el README no…"]
+    o24["POST /marketing/tracked-links/{id}/recipient-tokens"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  a8 --> o7
+  o7 -->|"LEE"| t4
+  o7 -->|"LEE"| t5
+  a10 --> o9
+  o9 -->|"LEE"| t4
+  o9 -->|"LEE"| t5
+  a2 --> o11
+  o11 -->|"LEE"| t4
+  o11 -->|"LEE"| t5
+  o11 -->|"LEE"| t12
+  a2 --> o13
+  o13 -->|"LEE"| t4
+  o13 -->|"LEE"| t5
+  o13 -->|"LEE"| t14
+  a10 --> o15
+  o15 -->|"BORRA"| t14
+  a10 --> o16
+  o16 -->|"LEE"| t4
+  o16 -->|"LEE"| t5
+  a2 --> o17
+  o17 -->|"LEE"| t4
+  o17 -->|"LEE"| t5
+  o17 -->|"LEE"| t18
+  a10 --> o19
+  o19 -->|"BORRA"| t18
+  a10 --> o20
+  o20 -->|"LEE"| t4
+  o20 -->|"LEE"| t5
+  a2 --> o21
+  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t22
+  a10 --> o23
+  o23 -->|"LEE"| t4
+  o23 -->|"LEE"| t5
+  a25 --> o24
+  o24 -->|"LEE"| t26
+  o24 -->|"LEE"| t27
+  o24 -->|"LEE"| t28
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -591,7 +730,527 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /marketing/journeys
+#### 7. GET /marketing/insights/alert-rules
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Regla de alerta desconocida: {row.code}/{row.severity} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkflowService.listRules"]:::llamada
+  n2 --> n3
+  n4["Llama a InsightsWorkflowRepository.rules"]:::llamada
+  n3 --> n4
+  n5[("LEE marketing.insights_alert_rules · LEE terminology.catalog_concepts")]:::efecto
+  n4 --> n5
+  n6["Llama a InsightsWorkflowService.toRule"]:::llamada
+  n5 --> n6
+  n7{"!severity || !code"}:::decision
+  n6 --> n7
+  n8(["500 INTERNAL Regla de alerta desconocida: {row.code}/{row.severity}"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a InsightsWorkflowService.envelope"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a InsightsFactsService.meta"]:::llamada
+  n9 --> n10
+  n11["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n10 --> n11
+  n12[("LEE marketing.insights_data_sources")]:::efecto
+  n11 --> n12
+  n13["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n12 --> n13
+  n14[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. PATCH /marketing/insights/alert-rules/{code}
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La regla de alerta no existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY}; Error: Regla de alerta desconocida: {row.code}/{row.severity}; Error: La regla guardada no se encuentra |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkflowService.patchRule"]:::llamada
+  n2 --> n3
+  n4{"expected === null"}:::decision
+  n3 --> n4
+  n5(["↩ (relanza el error capturado)"]):::error
+  n4 -->|"sí"| n5
+  n6{"dto.enabled === undefined && dto.threshold === undefined"}:::decision
+  n4 -->|"no"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8{"dto.threshold !== undefined && !( Number.isFinite(dto.threshold) && dto.threshold ›= INSIGHTS_RULE_THRESHOLD_…"}:::decision
+  n6 -->|"no"| n8
+  n9(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: transaction(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11{"!row"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND La regla de alerta no existe"]):::error
+  n11 -->|"sí"| n12
+  n13{"enabled === row.enabled && threshold === Number(row.threshold)"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a InsightsWorkflowService.toRule"]:::llamada
+  n13 -->|"sí"| n14
+  n15{"!severity || !code"}:::decision
+  n14 --> n15
+  n16(["500 INTERNAL Regla de alerta desconocida: {row.code}/{row.severity}"]):::error
+  n15 -->|"sí"| n16
+  n17{"!updated"}:::decision
+  n15 -->|"no"| n17
+  n13 -->|"no"| n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19{"!fresh"}:::decision
+  n17 -->|"no"| n19
+  n20(["500 INTERNAL La regla guardada no se encuentra"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a InsightsWorkflowService.toRule"]:::llamada
+  n19 -->|"no"| n21
+  n22{"!severity || !code"}:::decision
+  n21 --> n22
+  n23(["500 INTERNAL Regla de alerta desconocida: {row.code}/{row.severity}"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a InsightsWorkflowService.envelope"]:::llamada
+  n22 -->|"no"| n24
+  n25["Llama a InsightsFactsService.meta"]:::llamada
+  n24 --> n25
+  n26["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n25 --> n26
+  n27[("LEE marketing.insights_data_sources")]:::efecto
+  n26 --> n27
+  n28["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n27 --> n28
+  n29[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n28 --> n29
+  n30(("200 Responde con éxito")):::ok
+  n29 --> n30
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. PUT /marketing/insights/alert-workflow/{fingerprint}
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY}; Error: El value set {ALERT_SEVERITY_VALUE_SET} no tiene el concepto «{dto.snapshot.severity}»; Error: La alerta recién insertada no se encuentra; Error: La alerta guardada no se encuentra |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkflowService.putWorkflow"]:::llamada
+  n2 --> n3
+  n4["Llama a InsightsWorkflowService.assertFingerprint"]:::llamada
+  n3 --> n4
+  n5{"fingerprint.length ‹ 1 || fingerprint.length › 200 || // eslint-disable-next-line no-control-regex /[\u0000-\…"}:::decision
+  n4 --> n5
+  n6(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transaction(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8{"!row"}:::decision
+  n7 --> n8
+  n9{"!severityId"}:::decision
+  n8 -->|"sí"| n9
+  n10(["500 INTERNAL El value set {ALERT_SEVERITY_VALUE_SET} no tiene el concepto «{dto.snapshot.severity}»"]):::error
+  n9 -->|"sí"| n10
+  n11{"!row"}:::decision
+  n9 -->|"no"| n11
+  n12(["500 INTERNAL La alerta recién insertada no se encuentra"]):::error
+  n11 -->|"sí"| n12
+  n13{"changed"}:::decision
+  n11 -->|"no"| n13
+  n8 -->|"no"| n13
+  n14{"!created"}:::decision
+  n13 -->|"sí"| n14
+  n15{"!updated"}:::decision
+  n14 -->|"sí"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17{"!fresh"}:::decision
+  n15 -->|"no"| n17
+  n14 -->|"no"| n17
+  n13 -->|"no"| n17
+  n18(["500 INTERNAL La alerta guardada no se encuentra"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a InsightsWorkflowService.envelope"]:::llamada
+  n17 -->|"no"| n19
+  n20["Llama a InsightsFactsService.meta"]:::llamada
+  n19 --> n20
+  n21["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n20 --> n21
+  n22[("LEE marketing.insights_data_sources")]:::efecto
+  n21 --> n22
+  n23["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n22 --> n23
+  n24[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. GET /marketing/insights/campaign-facts
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsFactsService.campaignFacts"]:::llamada
+  n2 --> n3
+  n4["Llama a InsightsFactsRepository.facts"]:::llamada
+  n3 --> n4
+  n5[("LEE marketing.insights_campaign_daily_facts · LEE marketing.insights_campaigns")]:::efecto
+  n4 --> n5
+  n6{"rows.length › INSIGHTS_MAX_FACT_ROWS"}:::decision
+  n5 --> n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a InsightsFactsService.meta"]:::llamada
+  n6 -->|"no"| n8
+  n9["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n8 --> n9
+  n10[("LEE marketing.insights_data_sources")]:::efecto
+  n9 --> n10
+  n11["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n10 --> n11
+  n12[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. GET /marketing/insights/catalog
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Estado de campaña desconocido para {row.code}: {row.status_code ?? 'sin conce…} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsFactsService.catalog"]:::llamada
+  n2 --> n3
+  n4["Llama a InsightsFactsRepository.campaigns"]:::llamada
+  n3 --> n4
+  n5[("LEE marketing.insights_campaigns · LEE terminology.catalog_concepts")]:::efecto
+  n4 --> n5
+  n6["Llama a InsightsFactsRepository.campaignChannels"]:::llamada
+  n5 --> n6
+  n7[("LEE marketing.insights_creatives · LEE marketing.insights_campaigns")]:::efecto
+  n6 --> n7
+  n8["Llama a InsightsFactsRepository.milestones"]:::llamada
+  n7 --> n8
+  n9[("LEE marketing.insights_milestones · LEE marketing.insights_campaigns")]:::efecto
+  n8 --> n9
+  n10["Repite: map(…)"]:::bucle
+  n9 --> n10
+  n11{"!status"}:::decision
+  n10 -->|"cada elemento"| n11
+  n12(["500 INTERNAL Estado de campaña desconocido para {row.code}: {row.status_code ?? 'sin conce…}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a InsightsFactsService.meta"]:::llamada
+  n11 -->|"no"| n13
+  n10 -->|"al terminar"| n13
+  n14["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n13 --> n14
+  n15[("LEE marketing.insights_data_sources")]:::efecto
+  n14 --> n15
+  n16["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n15 --> n16
+  n17[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. PUT /marketing/insights/notification-preferences
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Las preferencias guardadas no se encuentran |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkspaceService.putNotificationPreferences"]:::llamada
+  n2 --> n3
+  n4["Transacción: transaction(…)"]:::transaccion
+  n3 --> n4
+  n5{"!fresh"}:::decision
+  n4 --> n5
+  n6(["500 INTERNAL Las preferencias guardadas no se encuentran"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a InsightsWorkspaceService.envelope"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a InsightsFactsService.meta"]:::llamada
+  n7 --> n8
+  n9["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n8 --> n9
+  n10[("LEE marketing.insights_data_sources")]:::efecto
+  n9 --> n10
+  n11["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n10 --> n11
+  n12[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. PUT /marketing/insights/reports/{id}
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY}; Error: El informe guardado no se encuentra |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkspaceService.putReport"]:::llamada
+  n2 --> n3
+  n4{"dto.periodTo ‹ dto.periodFrom"}:::decision
+  n3 --> n4
+  n5(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transaction(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7{"owner !== null && owner !== actor.id"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9{"!row"}:::decision
+  n7 -->|"no"| n9
+  n10(["500 INTERNAL El informe guardado no se encuentra"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a InsightsWorkspaceService.envelope"]:::llamada
+  n9 -->|"no"| n11
+  n12["Llama a InsightsFactsService.meta"]:::llamada
+  n11 --> n12
+  n13["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n12 --> n13
+  n14[("LEE marketing.insights_data_sources")]:::efecto
+  n13 --> n14
+  n15["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n14 --> n15
+  n16[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. PUT /marketing/insights/saved-views/{id}
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya tienes una vista guardada con ese nombre |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La vista guardada no se encuentra |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkspaceService.putSavedView"]:::llamada
+  n2 --> n3
+  n4["Transacción: transaction(…)"]:::transaccion
+  n3 --> n4
+  n5{"owner !== null && owner !== actor.id"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7{"await tx.savedViewNamed(actor.id, dto.name, id)"}:::decision
+  n5 -->|"no"| n7
+  n8(["409 CONFLICT Ya tienes una vista guardada con ese nombre"]):::error
+  n7 -->|"sí"| n8
+  n9{"!row"}:::decision
+  n7 -->|"no"| n9
+  n10(["500 INTERNAL La vista guardada no se encuentra"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a InsightsWorkspaceService.envelope"]:::llamada
+  n9 -->|"no"| n11
+  n12["Llama a InsightsFactsService.meta"]:::llamada
+  n11 --> n12
+  n13["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n12 --> n13
+  n14[("LEE marketing.insights_data_sources")]:::efecto
+  n13 --> n14
+  n15["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n14 --> n15
+  n16[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. PUT /marketing/insights/user-preferences
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Las preferencias guardadas no se encuentran |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsightsWorkspaceService.putUserPreferences"]:::llamada
+  n2 --> n3
+  n4["Transacción: transaction(…)"]:::transaccion
+  n3 --> n4
+  n5{"!fresh"}:::decision
+  n4 --> n5
+  n6(["500 INTERNAL Las preferencias guardadas no se encuentran"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a InsightsWorkspaceService.envelope"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a InsightsFactsService.meta"]:::llamada
+  n7 --> n8
+  n9["Llama a InsightsFactsRepository.dataSources"]:::llamada
+  n8 --> n9
+  n10[("LEE marketing.insights_data_sources")]:::efecto
+  n9 --> n10
+  n11["Llama a InsightsFactsRepository.lastFactDate"]:::llamada
+  n10 --> n11
+  n12[("LEE marketing.insights_campaign_daily_facts")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. POST /marketing/journeys
 
 Crear un journey en borrador
 
@@ -649,7 +1308,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /marketing/journeys/{id}/activate
+#### 17. POST /marketing/journeys/{id}/activate
 
 Activar el journey e inscribir la cohorte inicial
 
@@ -709,7 +1368,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /marketing/journeys/{id}/steps
+#### 18. POST /marketing/journeys/{id}/steps
 
 Añadir pasos al journey
 
@@ -791,7 +1450,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /marketing/segments
+#### 19. POST /marketing/segments
 
 Crear un segmento y ligarlo a su read model
 
@@ -837,7 +1496,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /marketing/segments/{id}/refresh
+#### 20. POST /marketing/segments/{id}/refresh
 
 Recomputar la membresía del segmento
 
@@ -888,7 +1547,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /marketing/touchpoints
+#### 21. POST /marketing/touchpoints
 
 Registrar un touchpoint de marketing
 
@@ -979,7 +1638,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /marketing/tracked-links
+#### 22. POST /marketing/tracked-links
 
 Crear un enlace rastreable con parámetros UTM
 
@@ -1030,7 +1689,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /marketing/tracked-links/{id}/recipient-tokens
+#### 23. POST /marketing/tracked-links/{id}/recipient-tokens
 
 Emitir el token de destinatario de un enlace rastreable
 
@@ -1080,7 +1739,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /r/{code}
+#### 24. GET /r/{code}
 
 Resolver un enlace rastreable y registrar el click
 
@@ -1136,3 +1795,16 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /marketing/insights/alert-workflow | 200, 401, 403, 429 | 5 |
+| GET /marketing/insights/notification-preferences | 200, 401, 403, 429 | 3 |
+| GET /marketing/insights/reports | 200, 401, 403, 429 | 3 |
+| DELETE /marketing/insights/reports/{id} | 204, 400, 401, 403, 429 | 1 |
+| GET /marketing/insights/saved-views | 200, 401, 403, 429 | 3 |
+| DELETE /marketing/insights/saved-views/{id} | 204, 400, 401, 403, 429 | 1 |
+| GET /marketing/insights/user-preferences | 200, 401, 403, 429 | 3 |

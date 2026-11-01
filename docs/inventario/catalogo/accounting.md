@@ -2,7 +2,7 @@
 
 # Catálogo del schema `accounting`
 
-- **Tablas:** 42 · **Columnas:** 613 (157 con descripción: 25.6 %) · **Índices:** 356
+- **Tablas:** 45 · **Columnas:** 648 (182 con descripción: 28.1 %) · **Índices:** 369
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -29,14 +29,14 @@
 | [company_bank_accounts](#company_bank_accounts) | Registra cuentas bancarias institucionales usadas para cobros y pagos de la organización sanitaria. | 18 | 10 | 1 | COINCIDE |
 | [controlling_areas](#controlling_areas) | Define ámbitos de control de gestión para consolidar información financiera de una o más unidades. | 13 | 7 | 0 | COINCIDE |
 | [cost_center_maps](#cost_center_maps) | Relaciona centros de costo con estructuras contables o institucionales para integrar reportes financieros. | 11 | 5 | 0 | COINCIDE |
-| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 14 | COINCIDE |
+| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 19 | DIVERGE |
 | [depreciation_areas](#depreciation_areas) | Define áreas de valoración donde se calculan depreciaciones con criterios contables o fiscales distintos. | 13 | 8 | 2 | COINCIDE |
 | [employee_payments](#employee_payments) | Registra pagos al personal para sostener contabilidad de remuneraciones institucionales. | 14 | 6 | 0 | COINCIDE |
 | [exchange_rates](#exchange_rates) | Conserva tasas de cambio utilizadas para registrar y comparar operaciones financieras en distintas monedas. | 11 | 4 | 3 | COINCIDE |
 | [fiscal_periods](#fiscal_periods) | Desglosa ejercicios en períodos contables para registrar y reportar movimientos financieros por fecha. | 11 | 4 | 21 | COINCIDE |
 | [fiscal_years](#fiscal_years) | Define ejercicios fiscales de la organización para ordenar períodos contables y cierres financieros. | 11 | 4 | 19 | COINCIDE |
 | [functional_areas](#functional_areas) | Define áreas funcionales para clasificar gastos y resultados según actividad institucional. | 11 | 7 | 0 | COINCIDE |
-| [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 0 | COINCIDE |
+| [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 5 | DIVERGE |
 | [internal_orders](#internal_orders) | Agrupa costos y compromisos de iniciativas internas para facilitar seguimiento presupuestario. | 20 | 14 | 0 | COINCIDE |
 | [journal_entry_assignments](#journal_entry_assignments) | Asocia asientos con dimensiones contables para clasificar movimientos por unidad y propósito. | 30 | 32 | 16 | COINCIDE |
 | [journal_transactions](#journal_transactions) | Agrupa asientos contables de una operación para conservar su registro financiero balanceado. | 22 | 9 | 38 | COINCIDE |
@@ -46,6 +46,9 @@
 | [liability_postings](#liability_postings) | Registra movimientos contables asociados a obligaciones y sus pagos. | 10 | 9 | 2 | COINCIDE |
 | [liability_schedules](#liability_schedules) | Define calendarios de vencimientos de obligaciones para planificar pagos y previsiones financieras. | 15 | 7 | 4 | COINCIDE |
 | [open_items](#open_items) | Conserva partidas pendientes de compensación para seguir cobros y pagos aún no aplicados. | 20 | 13 | 3 | COINCIDE |
+| [practitioner_simple_accounts](#practitioner_simple_accounts) | sin propósito | 11 | 4 | 12 | COINCIDE |
+| [practitioner_simple_records](#practitioner_simple_records) | sin propósito | 12 | 4 | 8 | COINCIDE |
+| [practitioner_simple_transactions](#practitioner_simple_transactions) | sin propósito | 12 | 5 | 8 | COINCIDE |
 | [profit_centers](#profit_centers) | Representa unidades responsables de resultados para analizar ingresos y costos por operación. | 16 | 10 | 14 | COINCIDE |
 | [purchases](#purchases) | Registra adquisiciones institucionales para relacionar compras con pagos, activos y gastos. | 15 | 7 | 0 | COINCIDE |
 | [sales](#sales) | Conserva operaciones de venta de servicios o productos de salud para reflejar ingresos institucionales. | 16 | 7 | 0 | COINCIDE |
@@ -57,7 +60,7 @@
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 2 — 40 tablas
+### Familia 1 de 3 — 40 tablas
 
 ```mermaid
 erDiagram
@@ -507,7 +510,7 @@ erDiagram
   accounting_transaction_files }o--|| accounting_journal_transactions : "transaction_id"
 ```
 
-### Familia 2 de 2 — 1 tablas
+### Familia 2 de 3 — 1 tablas
 
 ```mermaid
 erDiagram
@@ -518,6 +521,36 @@ erDiagram
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
+```
+
+### Familia 3 de 3 — 3 tablas
+
+```mermaid
+erDiagram
+  accounting_practitioner_simple_accounts["accounting.practitioner_simple_accounts"] {
+    uuid id PK
+    uuid practice_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  accounting_practitioner_simple_records["accounting.practitioner_simple_records"] {
+    uuid id PK
+    uuid practice_id FK
+    uuid account_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  accounting_practitioner_simple_transactions["accounting.practitioner_simple_transactions"] {
+    uuid id PK
+    uuid practice_id FK
+    uuid debit_account_id FK
+    uuid credit_account_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  accounting_practitioner_simple_records }o--|| accounting_practitioner_simple_accounts : "account_id"
+  accounting_practitioner_simple_transactions }o--|| accounting_practitioner_simple_accounts : "debit_account_id"
+  accounting_practitioner_simple_transactions }o--|| accounting_practitioner_simple_accounts : "credit_account_id"
 ```
 
 ### Tablas sin relaciones dentro del schema
@@ -2171,7 +2204,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: cost_centers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `CostCenters` — `src/modules/accounting/entities/cost_centers.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 14 operaciones
+- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -2228,7 +2261,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | `ix_cost_centers_practice_id` | no | practice_id | Soporta la clave foránea fk_cost_centers_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_cost_centers_parent_cost_center_id` | no | parent_cost_center_id | Soporta la clave foránea fk_cost_centers_parent_cost_center_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_cost_centers_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_cost_centers_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_cost_centers_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_cost_centers_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cost_centers_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_cost_centers_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_cost_centers_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_cost_centers_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_cost_centers_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_cost_centers_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -2240,6 +2273,9 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | POST /accounting/accruals/run | LEE | DIRECTA |
 | POST /accounting/assets/capitalize | LEE | DIRECTA |
 | POST /accounting/clearing-documents | LEE | DIRECTA |
+| GET /accounting/cost-centers | LEE | POR_SQL |
+| POST /accounting/cost-centers/{id}/unit-link | ACTUALIZA | POR_TIPO |
+| POST /accounting/cost-centers/{id}/unit-link | LEE | DIRECTA |
 | POST /accounting/depreciation/run | LEE | DIRECTA |
 | GET /accounting/dimensions | LEE | DIRECTA |
 | POST /accounting/journal-transactions | LEE | DIRECTA |
@@ -2250,6 +2286,8 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
 | POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | POR_SQL |
+| POST /internal/billing/bed-day-charges/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -2743,7 +2781,7 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: infrastructure_items`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `InfrastructureItems` — `src/modules/accounting/entities/infrastructure_items.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2790,7 +2828,13 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /accounting/infrastructure-items | LEE | POR_SQL |
+| PATCH /accounting/infrastructure-items/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /accounting/infrastructure-items/{id} | LEE | DIRECTA |
+| POST /care-spaces/{id}/lifecycle | LEE | POR_SQL |
+| GET /care-spaces/{id}/retire-check | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -3135,7 +3179,7 @@ Agrupa asientos contables de una operación para conservar su registro financier
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_journal_transactions_transaction_number` | sí | transaction_number | Garantiza que no se repita la combinación (transaction_number) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «transaction_number», la primera columna del índice _(CONSULTA)_ |
+| `uq_journal_transactions_practice_id_transaction_number` | sí | practice_id, transaction_number | Garantiza que no se repita la combinación (practice_id, transaction_number) _(DOCUMENTO)_; Soporta la clave foránea fk_journal_transactions_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_journal_transactions_practice_id` | no | practice_id | Soporta la clave foránea fk_journal_transactions_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_journal_transactions_transaction_type_concept_id` | no | transaction_type_concept_id | Soporta la clave foránea fk_journal_transactions_transaction_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_journal_transactions_fiscal_period_id` | no | fiscal_period_id | Soporta la clave foránea fk_journal_transactions_fiscal_period_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3149,7 +3193,7 @@ Agrupa asientos contables de una operación para conservar su registro financier
 
 | Restricción | Tipo | Definición |
 |---|---|---|
-| `uq_journal_transactions_transaction_number` | UNIQUE INDEX | UNIQUE INDEX ("transaction_number") |
+| `uq_journal_transactions_practice_id_transaction_number` | UNIQUE INDEX | UNIQUE INDEX ("practice_id", "transaction_number") |
 
 #### Operaciones que la tocan
 
@@ -3712,6 +3756,253 @@ Conserva partidas pendientes de compensación para seguir cobros y pagos aún no
 | POST /accounting/clearing-documents | LEE | DIRECTA |
 | GET /accounting/open-items | LEE | DIRECTA |
 | POST /accounting/open-items | CREA | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### practitioner_simple_accounts
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
+- **Entidad del ORM:** `PractitionerSimpleAccounts` — `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts`
+- **Resumen:** 11 columnas · 4 índices · 3 FK salientes · 3 entrantes · 12 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:16`)_ | coincide |
+| 2 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `code` | `varchar` | Obligatoria | Código corto de la cuenta (`5.3`); lo asigna el servidor. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:28`)_ | coincide |
+| 4 | `name` | `varchar` | Obligatoria | Nombre de la cuenta. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:34`)_ | coincide |
+| 5 | `account_class` | `varchar` | Obligatoria | Clase de la cuenta: ASSET, LIABILITY, EQUITY, INCOME o EXPENSE. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:40`)_ | coincide |
+| 6 | `seeded` | `boolean = false` | Obligatoria | Viene sembrada con la práctica: se renombra, no se borra. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:46`)_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:52`)_ | coincide |
+| 8 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:58`)_ | coincide |
+| 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_accounts.entity.ts:76`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | practice_id | practice.practices (id) | fk_practitioner_simple_accounts_practice_id |
+| hacia | created_by_user_id | iam.users (id) | fk_practitioner_simple_accounts_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_practitioner_simple_accounts_updated_by_user_id |
+| desde | id | accounting.practitioner_simple_records (account_id) | fk_practitioner_simple_records_account_id |
+| desde | id | accounting.practitioner_simple_transactions (debit_account_id) | fk_practitioner_simple_transactions_debit_account_id |
+| desde | id | accounting.practitioner_simple_transactions (credit_account_id) | fk_practitioner_simple_transactions_credit_account_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_practitioner_simple_accounts_practice_code` | sí | practice_id, code | Garantiza que no se repita la combinación (practice_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_practitioner_simple_accounts_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_simple_accounts_practice_id` | no | practice_id | Soporta la clave foránea fk_practitioner_simple_accounts_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_simple_accounts_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_simple_accounts_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_simple_accounts_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_simple_accounts_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_practitioner_simple_accounts_practice_code` | UNIQUE INDEX | UNIQUE INDEX ("practice_id", "code") |
+| `ck_practitioner_simple_accounts_class` | CHECK | CHECK ("account_class" IN ('ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE')) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /accounting/practitioner/simple/accounts | CREA | POR_SQL |
+| GET /accounting/practitioner/simple/accounts | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/accounts | CREA | DIRECTA |
+| POST /accounting/practitioner/simple/accounts | LEE | DIRECTA |
+| DELETE /accounting/practitioner/simple/accounts/{id} | BORRA | POR_TIPO |
+| DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/accounts/{id} | ACTUALIZA | POR_TIPO |
+| PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/records | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/transactions | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### practitioner_simple_records
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
+- **Entidad del ORM:** `PractitionerSimpleRecords` — `src/modules/accounting/entities/practitioner_simple_records.entity.ts`
+- **Resumen:** 12 columnas · 4 índices · 4 FK salientes · 0 entrantes · 8 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:15`)_ | coincide |
+| 2 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `kind` | `varchar` | Obligatoria | Qué es: EXPENSE (gasto), ASSET (activo) o DEBT (deuda). _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:27`)_ | coincide |
+| 4 | `record_date` | `date` | Obligatoria | Fecha del registro. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:33`)_ | coincide |
+| 5 | `account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `description` | `varchar` | Obligatoria | Descripción libre del registro. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:45`)_ | coincide |
+| 7 | `amount` | `numeric` | Obligatoria | Importe, siempre positivo. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:51`)_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:57`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:63`)_ | coincide |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_records.entity.ts:81`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | account_id | accounting.practitioner_simple_accounts (id) | fk_practitioner_simple_records_account_id |
+| hacia | practice_id | practice.practices (id) | fk_practitioner_simple_records_practice_id |
+| hacia | created_by_user_id | iam.users (id) | fk_practitioner_simple_records_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_practitioner_simple_records_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_practitioner_simple_records_practice_id` | no | practice_id | Soporta la clave foránea fk_practitioner_simple_records_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_simple_records_account_id` | no | account_id | Soporta la clave foránea fk_practitioner_simple_records_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «account_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_simple_records_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_simple_records_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_simple_records_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_simple_records_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ck_practitioner_simple_records_kind` | CHECK | CHECK ("kind" IN ('EXPENSE', 'ASSET', 'DEBT')) |
+| `ck_practitioner_simple_records_amount` | CHECK | CHECK ("amount" > 0) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/records | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/records | CREA | DIRECTA |
+| DELETE /accounting/practitioner/simple/records/{id} | BORRA | POR_TIPO |
+| DELETE /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/records/{id} | ACTUALIZA | POR_TIPO |
+| PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### practitioner_simple_transactions
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
+- **Entidad del ORM:** `PractitionerSimpleTransactions` — `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts`
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 8 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:18`)_ | coincide |
+| 2 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `transaction_date` | `date` | Obligatoria | Fecha de la transacción. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:30`)_ | coincide |
+| 4 | `description` | `varchar` | Obligatoria | Descripción libre de la transacción. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:36`)_ | coincide |
+| 5 | `debit_account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | Cuenta del debe. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:42`)_ | coincide |
+| 6 | `credit_account_id` | `uuid` | Clave foránea → accounting.practitioner_simple_accounts.id; Obligatoria | Cuenta del haber; distinta de la del debe. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:48`)_ | coincide |
+| 7 | `amount` | `numeric` | Obligatoria | Importe, siempre positivo. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:54`)_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:60`)_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:66`)_ | coincide |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/practitioner_simple_transactions.entity.ts:84`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | debit_account_id | accounting.practitioner_simple_accounts (id) | fk_practitioner_simple_transactions_debit_account_id |
+| hacia | credit_account_id | accounting.practitioner_simple_accounts (id) | fk_practitioner_simple_transactions_credit_account_id |
+| hacia | practice_id | practice.practices (id) | fk_practitioner_simple_transactions_practice_id |
+| hacia | created_by_user_id | iam.users (id) | fk_practitioner_simple_transactions_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_practitioner_simple_transactions_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_practitioner_simple_transactions_practice_id` | no | practice_id | Soporta la clave foránea fk_practitioner_simple_transactions_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_simple_transactions_debit_account_id` | no | debit_account_id | Soporta la clave foránea fk_practitioner_simple_transactions_debit_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_simple_transactions_credit_account_id` | no | credit_account_id | Soporta la clave foránea fk_practitioner_simple_transactions_credit_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_simple_transactions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_simple_transactions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_simple_transactions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_simple_transactions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ck_practitioner_simple_transactions_distinct` | CHECK | CHECK ("debit_account_id" <> "credit_account_id") |
+| `ck_practitioner_simple_transactions_amount` | CHECK | CHECK ("amount" > 0) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/transactions | LEE | DIRECTA |
+| POST /accounting/practitioner/simple/transactions | CREA | DIRECTA |
+| DELETE /accounting/practitioner/simple/transactions/{id} | BORRA | POR_TIPO |
+| DELETE /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
+| PUT /accounting/practitioner/simple/transactions/{id} | ACTUALIZA | POR_TIPO |
+| PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
 
 #### Gobierno
 

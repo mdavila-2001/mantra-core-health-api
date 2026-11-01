@@ -49,10 +49,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -178,9 +178,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:59` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -254,10 +254,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -369,18 +369,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.files` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → OrgextReferencesRepository.fileInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:97` |
-| `organization_extensions.facility_licenses` | ESCRIBE | CREA | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.create | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:105` |
-| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.findByNumber | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:84` |
+| `organization_extensions.facility_licenses` | ESCRIBE | CREA | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.create | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:125` |
+| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.findByNumber | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:88` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → OrgextReferencesRepository.practiceSiteInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:44` |
 | `practice.practices` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → OrgextReferencesRepository.practiceSiteInTenants → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
 
@@ -489,17 +489,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:60` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.verify → OrgextFacilityLicensesService.verify → FacilityLicensesRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:74` |
+| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.verify → OrgextFacilityLicensesService.verify → FacilityLicensesRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:78` |
 
 ### Parámetros
 
@@ -587,10 +587,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -701,18 +701,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:61` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `community.public_profiles` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → OrgextReferencesRepository.publicProfileInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:83` |
-| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → FacilityLicensesRepository.countVerifiedForTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:97` |
+| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → FacilityLicensesRepository.countVerifiedForTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:101` |
 | `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → HospitalsRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/hospitals.repository.ts:68` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → OrgextReferencesRepository.practiceSiteInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:44` |
 | `practice.practices` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → OrgextReferencesRepository.practiceSiteInTenants → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
@@ -807,11 +807,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:79` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -921,9 +921,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, lineId | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:97` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

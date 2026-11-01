@@ -2,7 +2,7 @@
 
 # Catálogo del schema `billing`
 
-- **Tablas:** 22 · **Columnas:** 317 (90 con descripción: 28.4 %) · **Índices:** 167
+- **Tablas:** 24 · **Columnas:** 353 (90 con descripción: 25.5 %) · **Índices:** 174
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -18,7 +18,7 @@
 | [dunning_items](#dunning_items) | Detalla cuentas o documentos tratados en una ejecución de cobranza para seguir acciones por saldo. | 12 | 9 | 2 | COINCIDE |
 | [dunning_runs](#dunning_runs) | Registra ejecuciones de gestión de cobranza para seguir procesos de notificación de saldos vencidos. | 9 | 7 | 6 | COINCIDE |
 | [financial_kpi_snapshots](#financial_kpi_snapshots) | Preserva snapshots de indicadores financieros para analizar evolución económica de servicios y organizaciones de salud. | 9 | 4 | 2 | COINCIDE |
-| [invoice_lines](#invoice_lines) | Detalla servicios, cantidades y montos que componen una factura para explicar su total y vínculo con la prestación. | 19 | 9 | 19 | DIVERGE |
+| [invoice_lines](#invoice_lines) | Detalla servicios, cantidades y montos que componen una factura para explicar su total y vínculo con la prestación. | 20 | 11 | 19 | COINCIDE |
 | [invoices](#invoices) | Representa facturas emitidas por servicios de salud para administrar cuentas por cobrar y comprobantes del paciente o pagador. | 25 | 14 | 39 | COINCIDE |
 | [patient_statements](#patient_statements) | Consolida movimientos y saldos comunicables al paciente para informarle cargos, pagos y obligaciones pendientes. | 15 | 5 | 3 | COINCIDE |
 | [payable_payment_allocations](#payable_payment_allocations) | Distribuye pagos efectuados entre facturas de proveedores para mantener conciliación de cuentas por pagar. | 11 | 7 | 1 | COINCIDE |
@@ -28,7 +28,9 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 12 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 51 | DIVERGE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 8 | 66 | COINCIDE |
+| [siat_simulated_invoices](#siat_simulated_invoices) | sin propósito | 26 | 4 | 15 | COINCIDE |
+| [siat_simulated_outbox](#siat_simulated_outbox) | sin propósito | 8 | 1 | 2 | COINCIDE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
 | [tax_periods](#tax_periods) | Define períodos tributarios para agrupar obligaciones y reportes fiscales de la organización sanitaria. | 13 | 4 | 0 | COINCIDE |
 | [vendors](#vendors) | Cataloga proveedores a quienes la organización sanitaria compra bienes o servicios. | 14 | 6 | 2 | COINCIDE |
@@ -37,7 +39,7 @@
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 2 — 16 tablas
+### Familia 1 de 2 — 18 tablas
 
 ```mermaid
 erDiagram
@@ -69,7 +71,7 @@ erDiagram
     uuid contract_id FK
     uuid sales_order_id FK
     uuid purchase_order_id FK
-    uuid encounter_id FK
+    uuid claim_id FK
   }
   billing_payable_payment_allocations["billing.payable_payment_allocations"] {
     uuid id PK
@@ -122,12 +124,12 @@ erDiagram
   billing_invoice_lines["billing.invoice_lines"] {
     uuid id PK
     uuid invoice_id FK
+    uuid insurance_claim_line_id FK
     uuid tax_code_id FK
     uuid income_account_id FK
     uuid cost_center_id FK
     uuid contract_line_item_id FK
     uuid sales_order_item_id FK
-    uuid created_by_user_id FK
   }
   billing_payments_received["billing.payments_received"] {
     uuid id PK
@@ -148,6 +150,11 @@ erDiagram
     uuid currency_concept_id FK
     uuid created_by_user_id FK
   }
+  billing_siat_simulated_invoices["billing.siat_simulated_invoices"] {
+    uuid id PK
+    uuid invoice_id FK
+    uuid practice_id FK
+  }
   billing_dunning_runs["billing.dunning_runs"] {
     uuid id PK
     uuid tenant_id FK
@@ -164,6 +171,10 @@ erDiagram
     uuid account_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+  }
+  billing_siat_simulated_outbox["billing.siat_simulated_outbox"] {
+    uuid id PK
+    uuid siat_invoice_id FK
   }
   billing_service_catalog["billing.service_catalog"] {
     uuid id PK
@@ -204,6 +215,8 @@ erDiagram
   billing_payments_received }o--o| billing_invoices : "invoice_id"
   billing_receivable_payment_allocations }o--|| billing_payments_received : "payment_received_id"
   billing_receivable_payment_allocations }o--|| billing_invoices : "invoice_id"
+  billing_siat_simulated_invoices }o--|| billing_invoices : "invoice_id"
+  billing_siat_simulated_outbox }o--|| billing_siat_simulated_invoices : "siat_invoice_id"
   billing_service_catalog }o--o| billing_tax_codes : "tax_code_id"
   billing_quotations }o--|| billing_service_catalog : "service_catalog_id"
   billing_quotation_installments }o--|| billing_quotations : "quotation_id"
@@ -331,7 +344,7 @@ Relaciona documentos de facturación con fuentes clínicas, pagos u otros docume
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: billing_document_links`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `BillingDocumentLinks` — `src/modules/billing/entities/billing_document_links.entity.ts`
-- **Resumen:** 12 columnas · 12 índices · 9 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 12 columnas · 12 índices · 10 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -344,7 +357,7 @@ Relaciona documentos de facturación con fuentes clínicas, pagos u otros docume
 | 5 | `contract_id` | `uuid` | Clave foránea → erp.contracts.id; Opcional | _sin dato_ | coincide |
 | 6 | `sales_order_id` | `uuid` | Clave foránea → erp.sales_orders.id; Opcional | _sin dato_ | coincide |
 | 7 | `purchase_order_id` | `uuid` | Clave foránea → erp.purchase_orders.id; Opcional | _sin dato_ | coincide |
-| 8 | `claim_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 8 | `claim_id` | `uuid` | Clave foránea → insurance.insurance_claims.id; Opcional | _sin dato_ | coincide |
 | 9 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Opcional | _sin dato_ | coincide |
 | 10 | `relation_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/billing_document_links.entity.ts:72`)_ | coincide |
@@ -360,6 +373,7 @@ Relaciona documentos de facturación con fuentes clínicas, pagos u otros docume
 | hacia | contract_id | erp.contracts (id) | fk_billing_document_links_contract_id |
 | hacia | sales_order_id | erp.sales_orders (id) | fk_billing_document_links_sales_order_id |
 | hacia | purchase_order_id | erp.purchase_orders (id) | fk_billing_document_links_purchase_order_id |
+| hacia | claim_id | insurance.insurance_claims (id) | fk_billing_document_links_claim_id |
 | hacia | encounter_id | clinical.encounters (id) | fk_billing_document_links_encounter_id |
 | hacia | relation_type_concept_id | terminology.catalog_concepts (id) | fk_billing_document_links_relation_type_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_billing_document_links_created_by_user_id |
@@ -374,7 +388,7 @@ Relaciona documentos de facturación con fuentes clínicas, pagos u otros docume
 | `ix_billing_document_links_contract_id` | no | contract_id | Soporta la clave foránea fk_billing_document_links_contract_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_billing_document_links_sales_order_id` | no | sales_order_id | Soporta la clave foránea fk_billing_document_links_sales_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_billing_document_links_purchase_order_id` | no | purchase_order_id | Soporta la clave foránea fk_billing_document_links_purchase_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_billing_document_links_claim_id` | no | claim_id | _sin uso detectado estáticamente_ |
+| `ix_billing_document_links_claim_id` | no | claim_id | Soporta la clave foránea fk_billing_document_links_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_billing_document_links_encounter_id` | no | encounter_id | Soporta la clave foránea fk_billing_document_links_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_billing_document_links_relation_type_concept_id` | no | relation_type_concept_id | Soporta la clave foránea fk_billing_document_links_relation_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_billing_document_links_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_billing_document_links_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -877,7 +891,7 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoice_lines`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `InvoiceLines` — `src/modules/billing/entities/invoice_lines.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 19 operaciones
+- **Resumen:** 20 columnas · 11 índices · 9 FK salientes · 2 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -886,22 +900,23 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/billing/entities/invoice_lines.entity.ts:12`)_ | coincide |
 | 2 | `invoice_id` | `uuid` | Clave foránea → billing.invoices.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `service_id` | `uuid` | Opcional | _sin dato_ | coincide |
-| 4 | `description` | `varchar` | Opcional | _sin dato_ | coincide |
-| 5 | `quantity` | `numeric` | Obligatoria | _sin dato_ | coincide |
-| 6 | `unit_price` | `numeric` | Obligatoria | _sin dato_ | coincide |
-| 7 | `discount` | `numeric` | Opcional | _sin dato_ | coincide |
-| 8 | `tax_code_id` | `uuid` | Clave foránea → billing.tax_codes.id; Opcional | _sin dato_ | coincide |
-| 9 | `tax_amount` | `numeric` | Opcional | _sin dato_ | coincide |
-| 10 | `line_total` | `numeric` | Opcional | _sin dato_ | coincide |
-| 11 | `income_account_id` | `uuid` | Clave foránea → accounting.accounts.id; Opcional | _sin dato_ | coincide |
-| 12 | `cost_center_id` | `uuid` | Clave foránea → accounting.cost_centers.id; Opcional | _sin dato_ | coincide |
-| 13 | `contract_line_item_id` | `uuid` | Clave foránea → erp.contract_line_items.id; Opcional | _sin dato_ | coincide |
-| 14 | `sales_order_item_id` | `uuid` | Clave foránea → erp.sales_order_items.id; Opcional | _sin dato_ | coincide |
-| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/invoice_lines.entity.ts:110`)_ | coincide |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/invoice_lines.entity.ts:116`)_ | coincide |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/invoice_lines.entity.ts:134`)_ | coincide |
+| 4 | `insurance_claim_line_id` | `uuid` | Clave foránea → insurance.insurance_claim_lines.id; Opcional | _sin dato_ | coincide |
+| 5 | `description` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `quantity` | `numeric` | Obligatoria | _sin dato_ | coincide |
+| 7 | `unit_price` | `numeric` | Obligatoria | _sin dato_ | coincide |
+| 8 | `discount` | `numeric` | Opcional | _sin dato_ | coincide |
+| 9 | `tax_code_id` | `uuid` | Clave foránea → billing.tax_codes.id; Opcional | _sin dato_ | coincide |
+| 10 | `tax_amount` | `numeric` | Opcional | _sin dato_ | coincide |
+| 11 | `line_total` | `numeric` | Opcional | _sin dato_ | coincide |
+| 12 | `income_account_id` | `uuid` | Clave foránea → accounting.accounts.id; Opcional | _sin dato_ | coincide |
+| 13 | `cost_center_id` | `uuid` | Clave foránea → accounting.cost_centers.id; Opcional | _sin dato_ | coincide |
+| 14 | `contract_line_item_id` | `uuid` | Clave foránea → erp.contract_line_items.id; Opcional | _sin dato_ | coincide |
+| 15 | `sales_order_item_id` | `uuid` | Clave foránea → erp.sales_order_items.id; Opcional | _sin dato_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/invoice_lines.entity.ts:110`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/invoice_lines.entity.ts:116`)_ | coincide |
+| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/invoice_lines.entity.ts:134`)_ | coincide |
 
 #### Relaciones
 
@@ -909,12 +924,14 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 |---|---|---|---|
 | hacia | invoice_id | billing.invoices (id) | fk_invoice_lines_invoice_id |
 | hacia | tax_code_id | billing.tax_codes (id) | fk_invoice_lines_tax_code_id |
+| hacia | insurance_claim_line_id | insurance.insurance_claim_lines (id) | fk_invoice_lines_insurance_claim_line_id |
 | hacia | income_account_id | accounting.accounts (id) | fk_invoice_lines_income_account_id |
 | hacia | cost_center_id | accounting.cost_centers (id) | fk_invoice_lines_cost_center_id |
 | hacia | contract_line_item_id | erp.contract_line_items (id) | fk_invoice_lines_contract_line_item_id |
 | hacia | sales_order_item_id | erp.sales_order_items (id) | fk_invoice_lines_sales_order_item_id |
 | hacia | created_by_user_id | iam.users (id) | fk_invoice_lines_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_invoice_lines_updated_by_user_id |
+| desde | id | clinical.received_services (invoice_line_id) | fk_received_services_invoice_line_id |
 | desde | id | procedures_perioperative.procedure_charge_items (invoice_line_id) | fk_procedure_charge_items_invoice_line_id |
 
 #### Índices
@@ -923,6 +940,8 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 |---|---|---|---|
 | `ix_invoice_lines_invoice_id` | no | invoice_id | Soporta la clave foránea fk_invoice_lines_invoice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «invoice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_invoice_lines_service_id` | no | service_id | _sin uso detectado estáticamente_ |
+| `ix_invoice_lines_insurance_claim_line_id` | no | insurance_claim_line_id | Soporta la clave foránea fk_invoice_lines_insurance_claim_line_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «insurance_claim_line_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_invoice_lines_insurance_claim_line_id` | sí | insurance_claim_line_id donde WHERE insurance_claim_line_id IS NOT NULL | Garantiza que no se repita la combinación (insurance_claim_line_id) _(DOCUMENTO)_; Soporta la clave foránea fk_invoice_lines_insurance_claim_line_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE insurance_claim_line_id IS NOT NULL _(ESTRUCTURAL)_; 2 consulta(s) de repositorio filtran u ordenan por «insurance_claim_line_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_invoice_lines_tax_code_id` | no | tax_code_id | Soporta la clave foránea fk_invoice_lines_tax_code_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_invoice_lines_income_account_id` | no | income_account_id | Soporta la clave foránea fk_invoice_lines_income_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_invoice_lines_cost_center_id` | no | cost_center_id | Soporta la clave foránea fk_invoice_lines_cost_center_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -930,6 +949,12 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 | `ix_invoice_lines_sales_order_item_id` | no | sales_order_item_id | Soporta la clave foránea fk_invoice_lines_sales_order_item_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_invoice_lines_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_invoice_lines_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_invoice_lines_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_invoice_lines_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_invoice_lines_insurance_claim_line_id` | UNIQUE INDEX | UNIQUE INDEX ("insurance_claim_line_id") WHERE insurance_claim_line_id IS NOT NULL |
 
 #### Operaciones que la tocan
 
@@ -978,7 +1003,7 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoices`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `Invoices` — `src/modules/billing/entities/invoices.entity.ts`
-- **Resumen:** 25 columnas · 14 índices · 12 FK salientes · 13 entrantes · 39 operaciones
+- **Resumen:** 25 columnas · 14 índices · 12 FK salientes · 15 entrantes · 39 operaciones
 
 #### Columnas
 
@@ -1028,6 +1053,7 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 | hacia | updated_by_user_id | iam.users (id) | fk_invoices_updated_by_user_id |
 | desde | id | billing.invoice_lines (invoice_id) | fk_invoice_lines_invoice_id |
 | desde | id | billing.payments_received (invoice_id) | fk_payments_received_invoice_id |
+| desde | id | billing.siat_simulated_invoices (invoice_id) | fk_siat_simulated_invoices_invoice_id |
 | desde | id | billing.receivable_payment_allocations (invoice_id) | fk_receivable_payment_allocations_invoice_id |
 | desde | id | billing.billing_document_links (invoice_id) | fk_billing_document_links_invoice_id |
 | desde | id | billing.dunning_items (invoice_id) | fk_dunning_items_invoice_id |
@@ -1036,6 +1062,7 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 | desde | id | accounting.journal_entry_assignments (invoice_id) | fk_journal_entry_assignments_invoice_id |
 | desde | id | accounting.open_items (invoice_id) | fk_open_items_invoice_id |
 | desde | id | erp.contract_payment_schedules (invoice_id) | fk_contract_payment_schedules_invoice_id |
+| desde | id | scheduling.appointment_payment_states (invoice_id) | fk_appointment_payment_states_invoice_id |
 | desde | id | payments.payment_intents (invoice_id) | fk_payment_intents_invoice_id |
 | desde | id | payments.payment_debts (invoice_id) | fk_payment_debts_invoice_id |
 | desde | id | crm.crm_cases (invoice_id) | fk_crm_cases_invoice_id |
@@ -1716,14 +1743,14 @@ Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servi
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: reimbursements`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `Reimbursements` — `src/modules/billing/entities/reimbursements.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
 | 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/billing/entities/reimbursements.entity.ts:12`)_ | coincide |
-| 2 | `claim_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 2 | `claim_id` | `uuid` | Clave foránea → insurance.insurance_claims.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `amount` | `numeric` | Obligatoria | _sin dato_ | coincide |
 | 4 | `received_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 5 | `transaction_id` | `uuid` | Clave foránea → accounting.journal_transactions.id; Opcional | _sin dato_ | coincide |
@@ -1738,6 +1765,7 @@ Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servi
 
 | Sentido | Columnas | Tabla | Restricción |
 |---|---|---|---|
+| hacia | claim_id | insurance.insurance_claims (id) | fk_reimbursements_claim_id |
 | hacia | transaction_id | accounting.journal_transactions (id) | fk_reimbursements_transaction_id |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_reimbursements_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_reimbursements_created_by_user_id |
@@ -1747,7 +1775,7 @@ Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servi
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_reimbursements_claim_id` | no | claim_id | 1 consulta(s) de repositorio filtran u ordenan por «claim_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_reimbursements_claim_id` | no | claim_id | Soporta la clave foránea fk_reimbursements_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «claim_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_reimbursements_transaction_id` | no | transaction_id | Soporta la clave foránea fk_reimbursements_transaction_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_reimbursements_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_reimbursements_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_reimbursements_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_reimbursements_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1783,7 +1811,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 51 operaciones
+- **Resumen:** 18 columnas · 8 índices · 8 FK salientes · 7 entrantes · 66 operaciones
 
 #### Columnas
 
@@ -1794,18 +1822,19 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | 3 | `code` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `description_text` | `text` | Opcional | _sin dato_ | coincide |
-| 6 | `image_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | _sin dato_ | coincide |
-| 7 | `service_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 8 | `default_price` | `numeric` | Obligatoria | _sin dato_ | coincide |
-| 9 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 10 | `tax_code_id` | `uuid` | Clave foránea → billing.tax_codes.id; Opcional | _sin dato_ | coincide |
-| 11 | `income_account_id` | `uuid` | Clave foránea → accounting.accounts.id; Opcional | _sin dato_ | coincide |
-| 12 | `is_active` | `boolean` | Obligatoria | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:91`)_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:97`)_ | coincide |
-| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/service_catalog.entity.ts:115`)_ | coincide |
+| 6 | `terms_text` | `text` | Opcional | _sin dato_ | coincide |
+| 7 | `image_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | _sin dato_ | coincide |
+| 8 | `service_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 9 | `default_price` | `numeric` | Obligatoria | _sin dato_ | coincide |
+| 10 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 11 | `tax_code_id` | `uuid` | Clave foránea → billing.tax_codes.id; Opcional | _sin dato_ | coincide |
+| 12 | `income_account_id` | `uuid` | Clave foránea → accounting.accounts.id; Opcional | _sin dato_ | coincide |
+| 13 | `is_active` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:91`)_ | coincide |
+| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:97`)_ | coincide |
+| 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/service_catalog.entity.ts:115`)_ | coincide |
 
 #### Relaciones
 
@@ -1820,6 +1849,9 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | hacia | created_by_user_id | iam.users (id) | fk_service_catalog_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_service_catalog_updated_by_user_id |
 | desde | id | billing.quotations (service_catalog_id) | fk_quotations_service_catalog_id |
+| desde | id | clinical.received_services (service_catalog_id) | fk_received_services_service_catalog_id |
+| desde | id | practice.healthcare_services (service_catalog_id) | fk_healthcare_services_service_catalog_id |
+| desde | id | clinical_ext.referrals (target_service_catalog_id) | fk_referrals_target_service_catalog_id |
 | desde | id | scheduling.practitioner_service_offerings (service_catalog_id) | fk_practitioner_service_offerings_service_catalog_id |
 | desde | id | procedures_perioperative.procedure_charge_items (billable_item_id) | fk_procedure_charge_items_billable_item_id |
 | desde | id | medical_groups.groups (service_catalog_id) | fk_groups_service_catalog_id |
@@ -1841,6 +1873,13 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/catalogs/services | LEE | DIRECTA |
+| POST /admin/catalogs/services | CREA | DIRECTA |
+| POST /admin/catalogs/services | LEE | DIRECTA |
+| GET /admin/catalogs/services/{id} | LEE | DIRECTA |
+| PATCH /admin/catalogs/services/{id} | LEE | DIRECTA |
+| POST /admin/catalogs/services/{id}/deactivate | LEE | DIRECTA |
+| POST /admin/catalogs/services/{id}/reactivate | LEE | DIRECTA |
 | GET /billing/service-catalog | LEE | DIRECTA |
 | POST /billing/service-catalog | CREA | DIRECTA |
 | POST /billing/service-catalog | LEE | DIRECTA |
@@ -1857,6 +1896,10 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs/{id}/close | LEE | POR_SQL |
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | GET /referrals | LEE | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
@@ -1867,7 +1910,11 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | GET /medical-groups | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/{id} | LEE | DIRECTA |
+| PATCH /medical-groups/{id} | LEE | DIRECTA |
 | PATCH /medical-groups/{id}/exercise-notes | LEE | DIRECTA |
+| POST /medical-groups/{id}/members | LEE | DIRECTA |
+| DELETE /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
+| PATCH /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
 | POST /medical-groups/{id}/members/{memberId}/respond | LEE | DIRECTA |
 | POST /medical-groups/{id}/reschedule-requests | LEE | DIRECTA |
 | POST /medical-groups/{id}/reschedule-requests/respond | LEE | DIRECTA |
@@ -1892,6 +1939,172 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | POR_SQL |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### siat_simulated_invoices
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
+- **Entidad del ORM:** `SiatSimulatedInvoices` — `src/modules/billing/entities/siat_simulated_invoices.entity.ts`
+- **Resumen:** 26 columnas · 4 índices · 2 FK salientes · 1 entrantes · 15 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `invoice_id` | `uuid` | Clave foránea → billing.invoices.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `encounter_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 4 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `patient_profile_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 6 | `issuer_nit` | `varchar(20)` | Obligatoria | _sin dato_ | coincide |
+| 7 | `invoice_number` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 8 | `cuf` | `varchar(200)` | Obligatoria | _sin dato_ | coincide |
+| 9 | `cufd` | `varchar(200)` | Obligatoria | _sin dato_ | coincide |
+| 10 | `issued_at_text` | `varchar(23)` | Obligatoria | _sin dato_ | coincide |
+| 11 | `cabecera` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 12 | `detalle` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 13 | `xml` | `text` | Obligatoria | _sin dato_ | coincide |
+| 14 | `hash_archivo` | `varchar(64)` | Obligatoria | _sin dato_ | coincide |
+| 15 | `compressed_bytes` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 16 | `status` | `varchar(12)` | Obligatoria | _sin dato_ | coincide |
+| 17 | `status_at_reception` | `varchar(12)` | Obligatoria | _sin dato_ | coincide |
+| 18 | `siat_response` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 19 | `events` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 20 | `simulated` | `boolean = true` | Obligatoria | _sin dato_ | coincide |
+| 21 | `siat_mode` | `varchar(12) = 'simulated'` | Obligatoria | _sin dato_ | coincide |
+| 22 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 23 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 24 | `created_by_user_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 25 | `updated_by_user_id` | `uuid` | Opcional | _sin dato_ | coincide |
+| 26 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | invoice_id | billing.invoices (id) | fk_siat_simulated_invoices_invoice_id |
+| hacia | practice_id | practice.practices (id) | fk_siat_simulated_invoices_practice_id |
+| desde | id | billing.siat_simulated_outbox (siat_invoice_id) | fk_siat_simulated_outbox_siat_invoice_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_siat_simulated_invoices_invoice_id` | no | invoice_id | Soporta la clave foránea fk_siat_simulated_invoices_invoice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_siat_simulated_invoices_encounter_id` | no | encounter_id | _sin uso detectado estáticamente_ |
+| `ix_siat_simulated_invoices_patient_profile_id` | no | patient_profile_id | _sin uso detectado estáticamente_ |
+| `uk_siat_simulated_invoices_practice_number` | sí | practice_id, invoice_number donde WHERE "status" <> 'REJECTED' | Garantiza que no se repita la combinación (practice_id, invoice_number) _(DOCUMENTO)_; Soporta la clave foránea fk_siat_simulated_invoices_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE "status" <> 'REJECTED' _(ESTRUCTURAL)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uk_siat_simulated_invoices_practice_number` | UNIQUE INDEX | UNIQUE INDEX ("practice_id", "invoice_number") WHERE "status" <> 'REJECTED' |
+| `ck_siat_simulated_invoices_simulated` | CHECK | CHECK ("simulated" = true) |
+| `ck_siat_simulated_invoices_status` | CHECK | CHECK ("status" IN ('VALIDATED','OBSERVED','REJECTED','ANNULLED')) |
+| `ck_siat_simulated_invoices_siat_mode` | CHECK | CHECK ("siat_mode" IN ('simulated','real')) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /billing/simulated/charges | LEE | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/invoices | CREA | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/payment | LEE | POR_SQL |
+| GET /billing/simulated/invoices/{invoiceId} | LEE | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/annulment | ACTUALIZA | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | ACTUALIZA | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/email | ACTUALIZA | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /billing/simulated/my-invoices | LEE | POR_SQL |
+| GET /billing/simulated/my-invoices/{invoiceId} | LEE | POR_SQL |
+| GET /billing/simulated/outbox | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### siat_simulated_outbox
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
+- **Entidad del ORM:** `SiatSimulatedOutbox` — `src/modules/billing/entities/siat_simulated_outbox.entity.ts`
+- **Resumen:** 8 columnas · 1 índices · 1 FK salientes · 0 entrantes · 2 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `siat_invoice_id` | `uuid` | Clave foránea → billing.siat_simulated_invoices.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `to_email` | `varchar(320)` | Obligatoria | _sin dato_ | coincide |
+| 4 | `attachments` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 5 | `status` | `varchar(24)` | Obligatoria | _sin dato_ | coincide |
+| 6 | `siat_mode` | `varchar(12) = 'simulated'` | Obligatoria | _sin dato_ | coincide |
+| 7 | `queued_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_by_user_id` | `uuid` | Opcional | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | siat_invoice_id | billing.siat_simulated_invoices (id) | fk_siat_simulated_outbox_siat_invoice_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_siat_simulated_outbox_siat_invoice_id` | no | siat_invoice_id | Soporta la clave foránea fk_siat_simulated_outbox_siat_invoice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ck_siat_simulated_outbox_status` | CHECK | CHECK ("status" = 'NOT_SENT_SIMULATED') |
+| `ck_siat_simulated_outbox_siat_mode` | CHECK | CHECK ("siat_mode" IN ('simulated','real')) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /billing/simulated/invoices/{invoiceId}/email | CREA | POR_SQL |
+| GET /billing/simulated/outbox | LEE | POR_SQL |
 
 #### Gobierno
 

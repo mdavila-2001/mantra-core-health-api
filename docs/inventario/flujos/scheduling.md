@@ -25,8 +25,8 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |---|---|---|---|---|---|
 | `ctrl:SchedulingAgendaController` | Operaciones de SchedulingAgendaController que el README no asigna a un caso de uso | GET /scheduling/resources | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 6 |
 |  |  | GET /scheduling/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 3 |
-| `ctrl:SchedulingBookingsController` | Operaciones de SchedulingBookingsController que el README no asigna a un caso de uso | GET /scheduling/bookings | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 19 |
-|  |  | GET /scheduling/bookings/{id} | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 10 |
+| `ctrl:SchedulingBookingsController` | Operaciones de SchedulingBookingsController que el README no asigna a un caso de uso | GET /scheduling/bookings | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 20 |
+|  |  | GET /scheduling/bookings/{id} | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 11 |
 |  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 57 |
 |  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 49 |
 |  |  | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
@@ -51,15 +51,15 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | POST /scheduling/confirmation-rules/{id}/deactivate | SCHEDULING_ADMIN | MEDIO | 2 |
 |  |  | POST /scheduling/confirmation-rules/evaluate | SCHEDULING_ADMIN | BAJO | 1 |
 | `ctrl:SchedulingController` | Operaciones de SchedulingController que el README no asigna a un caso de uso | GET /scheduling/activity-types | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 0 |
-|  |  | POST /scheduling/appointments/direct | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 49 |
-|  |  | POST /scheduling/appointments/walk-in | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 26 |
+|  |  | POST /scheduling/appointments/direct | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 50 |
+|  |  | POST /scheduling/appointments/walk-in | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 27 |
 |  |  | POST /scheduling/booking-policies | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 2 |
 |  |  | GET /scheduling/exception-types | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 0 |
 |  |  | DELETE /scheduling/exceptions/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 3 |
 |  |  | PATCH /scheduling/exceptions/{id} | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
-|  |  | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 18 |
-|  |  | POST /scheduling/holds/{holdToken}/request | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 46 |
-|  |  | POST /scheduling/resources | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 4 |
+|  |  | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 21 |
+|  |  | POST /scheduling/holds/{holdToken}/request | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 49 |
+|  |  | POST /scheduling/resources | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 9 |
 |  |  | POST /scheduling/resources/{id}/close-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 |  |  | POST /scheduling/resources/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 35 |
 |  |  | GET /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER · PATIENT | BAJO | 3 |
@@ -95,9 +95,9 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
-  a26(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
-  a34(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a41(["PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a25(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
+  a33(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a40(["PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
   a46(["PATIENT"]):::actor
   a49(["PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
   a76(["SCHEDULING_ADMIN"]):::actor
@@ -117,13 +117,13 @@ flowchart LR
   t18[("insurance.insurance_claims")]:::tabla
   t21[("profiles.patient_portal_proxies")]:::tabla
   t22[("profiles.patient_profiles")]:::tabla
-  t23[("profiles.person_account_links")]:::tabla
-  t27[("common.file_versions")]:::tabla
-  t30[("community.conversation_participants")]:::tabla
-  t31[("community.conversations")]:::tabla
-  t35[("scheduling.appointment_bookings")]:::tabla
-  t42[("common.files")]:::tabla
-  t43[("iam.users")]:::tabla
+  t26[("common.file_versions")]:::tabla
+  t29[("community.conversation_participants")]:::tabla
+  t30[("community.conversations")]:::tabla
+  t34[("scheduling.appointment_bookings")]:::tabla
+  t41[("common.files")]:::tabla
+  t42[("iam.users")]:::tabla
+  t43[("profiles.person_account_links")]:::tabla
   t50[("billing.invoice_lines")]:::tabla
   t51[("billing.payments_received")]:::tabla
   t52[("billing.receivable_payment_allocations")]:::tabla
@@ -136,12 +136,12 @@ flowchart LR
     o1["GET /scheduling/resources"]:::op
     o9["GET /scheduling/slots"]:::op
   end
-  t19[("+13 tablas más")]
-  t24[("+4 tablas más")]
-  t28[("+51 tablas más")]
-  t32[("+43 tablas más")]
-  t37[("+20 tablas más")]
-  t39[("+30 tablas más")]
+  t19[("+14 tablas más")]
+  t23[("+5 tablas más")]
+  t27[("+51 tablas más")]
+  t31[("+43 tablas más")]
+  t36[("+20 tablas más")]
+  t38[("+30 tablas más")]
   t44[("+3 tablas más")]
   t47[("+34 tablas más")]
   t53[("+41 tablas más")]
@@ -155,12 +155,12 @@ flowchart LR
   subgraph s1["ctrl:SchedulingBookingsController · Operaciones de SchedulingBookingsController…"]
     o12["GET /scheduling/bookings"]:::op
     o20["GET /scheduling/bookings/{id}"]:::op
-    o25["POST /scheduling/bookings/{id}/accept"]:::op
-    o29["POST /scheduling/bookings/{id}/cancel"]:::op
-    o33["POST /scheduling/bookings/{id}/check-in"]:::op
-    o36["POST /scheduling/bookings/{id}/complete"]:::op
-    o38["POST /scheduling/bookings/{id}/delay"]:::op
-    o40["GET /scheduling/bookings/{id}/payment-receipts"]:::op
+    o24["POST /scheduling/bookings/{id}/accept"]:::op
+    o28["POST /scheduling/bookings/{id}/cancel"]:::op
+    o32["POST /scheduling/bookings/{id}/check-in"]:::op
+    o35["POST /scheduling/bookings/{id}/complete"]:::op
+    o37["POST /scheduling/bookings/{id}/delay"]:::op
+    o39["GET /scheduling/bookings/{id}/payment-receipts"]:::op
     o45["POST /scheduling/bookings/{id}/payment-receipts"]:::op
     o48["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm"]:::op
     o54["GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content"]:::op
@@ -204,63 +204,63 @@ flowchart LR
   o20 -->|"LEE"| t13
   o20 -->|"LEE"| t15
   o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t4
   o20 -->|"LEE"| t21
   o20 -->|"LEE"| t22
-  o20 -->|"LEE"| t23
-  o20 -.-> t24
-  a26 --> o25
-  o25 -->|"ACTUALIZA"| t13
-  o25 -->|"CREA"| t13
-  o25 -->|"LEE"| t13
-  o25 -->|"ACTUALIZA"| t15
-  o25 -->|"LEE"| t15
-  o25 -->|"LEE"| t27
-  o25 -.-> t28
-  a2 --> o29
-  o29 -->|"ACTUALIZA"| t13
-  o29 -->|"CREA"| t13
-  o29 -->|"LEE"| t13
-  o29 -->|"CREA"| t30
-  o29 -->|"LEE"| t30
-  o29 -->|"CREA"| t31
-  o29 -.-> t32
-  a34 --> o33
-  o33 -->|"ACTUALIZA"| t13
-  o33 -->|"CREA"| t13
-  o33 -->|"LEE"| t13
-  o33 -->|"ACTUALIZA"| t35
-  o33 -->|"LEE"| t35
-  a26 --> o36
-  o36 -->|"ACTUALIZA"| t13
-  o36 -->|"CREA"| t13
-  o36 -->|"LEE"| t13
-  o36 -->|"ACTUALIZA"| t15
-  o36 -->|"LEE"| t15
-  o36 -->|"ACTUALIZA"| t35
-  o36 -.-> t37
-  a26 --> o38
-  o38 -->|"ACTUALIZA"| t13
-  o38 -->|"CREA"| t13
-  o38 -->|"LEE"| t13
-  o38 -->|"CREA"| t30
-  o38 -->|"LEE"| t30
-  o38 -->|"CREA"| t31
-  o38 -.-> t39
-  a41 --> o40
-  o40 -->|"LEE"| t27
-  o40 -->|"LEE"| t42
-  o40 -->|"LEE"| t43
-  o40 -->|"LEE"| t21
-  o40 -->|"LEE"| t22
-  o40 -->|"LEE"| t23
-  o40 -.-> t44
+  o20 -.-> t23
+  a25 --> o24
+  o24 -->|"ACTUALIZA"| t13
+  o24 -->|"CREA"| t13
+  o24 -->|"LEE"| t13
+  o24 -->|"ACTUALIZA"| t15
+  o24 -->|"LEE"| t15
+  o24 -->|"LEE"| t26
+  o24 -.-> t27
+  a2 --> o28
+  o28 -->|"ACTUALIZA"| t13
+  o28 -->|"CREA"| t13
+  o28 -->|"LEE"| t13
+  o28 -->|"CREA"| t29
+  o28 -->|"LEE"| t29
+  o28 -->|"CREA"| t30
+  o28 -.-> t31
+  a33 --> o32
+  o32 -->|"ACTUALIZA"| t13
+  o32 -->|"CREA"| t13
+  o32 -->|"LEE"| t13
+  o32 -->|"ACTUALIZA"| t34
+  o32 -->|"LEE"| t34
+  a25 --> o35
+  o35 -->|"ACTUALIZA"| t13
+  o35 -->|"CREA"| t13
+  o35 -->|"LEE"| t13
+  o35 -->|"ACTUALIZA"| t15
+  o35 -->|"LEE"| t15
+  o35 -->|"ACTUALIZA"| t34
+  o35 -.-> t36
+  a25 --> o37
+  o37 -->|"ACTUALIZA"| t13
+  o37 -->|"CREA"| t13
+  o37 -->|"LEE"| t13
+  o37 -->|"CREA"| t29
+  o37 -->|"LEE"| t29
+  o37 -->|"CREA"| t30
+  o37 -.-> t38
+  a40 --> o39
+  o39 -->|"LEE"| t26
+  o39 -->|"LEE"| t41
+  o39 -->|"LEE"| t42
+  o39 -->|"LEE"| t21
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t43
+  o39 -.-> t44
   a46 --> o45
-  o45 -->|"LEE"| t27
-  o45 -->|"LEE"| t42
+  o45 -->|"LEE"| t26
+  o45 -->|"LEE"| t41
+  o45 -->|"CREA"| t29
+  o45 -->|"LEE"| t29
   o45 -->|"CREA"| t30
   o45 -->|"LEE"| t30
-  o45 -->|"CREA"| t31
-  o45 -->|"LEE"| t31
   o45 -.-> t47
   a49 --> o48
   o48 -->|"CREA"| t50
@@ -270,28 +270,28 @@ flowchart LR
   o48 -->|"CREA"| t51
   o48 -->|"CREA"| t52
   o48 -.-> t53
-  a41 --> o54
-  o54 -->|"LEE"| t27
-  o54 -->|"LEE"| t42
+  a40 --> o54
+  o54 -->|"LEE"| t26
+  o54 -->|"LEE"| t41
   o54 -->|"LEE"| t21
   o54 -->|"LEE"| t22
-  o54 -->|"LEE"| t23
-  o54 -->|"LEE"| t35
+  o54 -->|"LEE"| t43
+  o54 -->|"LEE"| t34
   o54 -.-> t55
   a49 --> o56
-  o56 -->|"LEE"| t27
-  o56 -->|"LEE"| t42
+  o56 -->|"LEE"| t26
+  o56 -->|"LEE"| t41
+  o56 -->|"CREA"| t29
+  o56 -->|"LEE"| t29
   o56 -->|"CREA"| t30
   o56 -->|"LEE"| t30
-  o56 -->|"CREA"| t31
-  o56 -->|"LEE"| t31
   o56 -.-> t57
-  a26 --> o58
+  a25 --> o58
   o58 -->|"LEE"| t14
-  o58 -->|"LEE"| t35
+  o58 -->|"LEE"| t34
   o58 -->|"LEE"| t59
   o58 -->|"LEE"| t8
-  a26 --> o60
+  a25 --> o60
   o60 -->|"CREA"| t50
   o60 -->|"CREA"| t14
   o60 -->|"ACTUALIZA"| t14
@@ -299,15 +299,15 @@ flowchart LR
   o60 -->|"CREA"| t51
   o60 -->|"CREA"| t52
   o60 -.-> t61
-  a26 --> o62
+  a25 --> o62
   o62 -->|"ACTUALIZA"| t13
   o62 -->|"CREA"| t13
   o62 -->|"LEE"| t13
-  o62 -->|"ACTUALIZA"| t35
-  o62 -->|"LEE"| t35
+  o62 -->|"ACTUALIZA"| t34
+  o62 -->|"LEE"| t34
   o62 -->|"ACTUALIZA"| t11
   o62 -.-> t63
-  a26 --> o64
+  a25 --> o64
   o64 -->|"ACTUALIZA"| t13
   o64 -->|"CREA"| t13
   o64 -->|"LEE"| t13
@@ -315,32 +315,32 @@ flowchart LR
   o64 -->|"ACTUALIZA"| t66
   o64 -->|"LEE"| t66
   o64 -.-> t67
-  a34 --> o68
-  o68 -->|"LEE"| t35
+  a33 --> o68
+  o68 -->|"LEE"| t34
   o68 -->|"CREA"| t69
   o68 -->|"LEE"| t11
-  a26 --> o70
+  a25 --> o70
   o70 -->|"ACTUALIZA"| t13
   o70 -->|"CREA"| t13
   o70 -->|"LEE"| t13
-  o70 -->|"ACTUALIZA"| t35
-  o70 -->|"LEE"| t35
+  o70 -->|"ACTUALIZA"| t34
+  o70 -->|"LEE"| t34
   o70 -->|"LEE"| t8
   a2 --> o71
   o71 -->|"ACTUALIZA"| t13
   o71 -->|"CREA"| t13
   o71 -->|"LEE"| t13
+  o71 -->|"CREA"| t29
+  o71 -->|"LEE"| t29
   o71 -->|"CREA"| t30
-  o71 -->|"LEE"| t30
-  o71 -->|"CREA"| t31
   o71 -.-> t72
-  a26 --> o73
+  a25 --> o73
   o73 -->|"ACTUALIZA"| t13
   o73 -->|"CREA"| t13
   o73 -->|"LEE"| t13
   o73 -->|"ACTUALIZA"| t15
   o73 -->|"LEE"| t15
-  o73 -->|"ACTUALIZA"| t35
+  o73 -->|"ACTUALIZA"| t34
   o73 -.-> t74
   a76 --> o75
   o75 -->|"LEE"| t77
@@ -367,8 +367,8 @@ flowchart LR
   a2(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
   a12(["SCHEDULING_ADMIN · PRACTITIONER"]):::actor
   a21(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT"]):::actor
-  a42(["SCHEDULING_ADMIN · PRACTITIONER · PATIENT"]):::actor
-  a50(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
+  a44(["SCHEDULING_ADMIN · PRACTITIONER · PATIENT"]):::actor
+  a52(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
   t4[("audit.appointment_bookings_history")]:::tabla
   t5[("clinical.appointments")]:::tabla
   t6[("clinical.encounters")]:::tabla
@@ -378,34 +378,38 @@ flowchart LR
   t17[("scheduling.schedulable_resources")]:::tabla
   t19[("scheduling.bookable_slots")]:::tabla
   t22[("billing.service_catalog")]:::tabla
-  t23[("profiles.patient_portal_proxies")]:::tabla
-  t24[("profiles.patient_profiles")]:::tabla
-  t25[("profiles.person_account_links")]:::tabla
-  t26[("profiles.persons")]:::tabla
+  t23[("practice.care_spaces")]:::tabla
+  t24[("practice.practice_sites")]:::tabla
+  t25[("profiles.patient_portal_proxies")]:::tabla
+  t26[("profiles.patient_profiles")]:::tabla
   t29[("community.conversations")]:::tabla
-  t32[("practice.practice_sites")]:::tabla
-  t33[("practice.practices")]:::tabla
-  t34[("profiles.practitioner_affiliations")]:::tabla
-  t36[("iam.devices")]:::tabla
-  t37[("messaging.in_app_notifications")]:::tabla
-  t43[("scheduling.appointment_bookings")]:::tabla
-  t47[("community.public_profiles")]:::tabla
-  t52[("scheduling.schedule_rules")]:::tabla
-  t53[("scheduling.schedule_templates")]:::tabla
-  t56[("profiles.person_profiles")]:::tabla
-  t57[("scheduling.waitlist_entries")]:::tabla
-  t8[("+43 tablas más")]
-  t10[("+20 tablas más")]
-  t27[("+12 tablas más")]
-  t30[("+40 tablas más")]
-  t38[("+26 tablas más")]
-  t40[("+29 tablas más")]
-  t45[("+26 tablas más")]
-  t48[("+28 tablas más")]
-  t59[("+3 tablas más")]
-  t61[("+29 tablas más")]
-  t64[("+1 tablas más")]
+  t32[("messaging.domain_events")]:::tabla
+  t33[("messaging.outbox_messages")]:::tabla
+  t34[("practice.practices")]:::tabla
+  e36>"scheduling.resource.linked_to_space"]:::evento
+  t38[("iam.devices")]:::tabla
+  t39[("messaging.in_app_notifications")]:::tabla
+  t45[("scheduling.appointment_bookings")]:::tabla
+  t49[("community.public_profiles")]:::tabla
+  t54[("scheduling.schedule_rules")]:::tabla
+  t55[("scheduling.schedule_templates")]:::tabla
+  t58[("profiles.person_profiles")]:::tabla
+  t59[("profiles.persons")]:::tabla
+  t60[("scheduling.waitlist_entries")]:::tabla
+  t62[("profiles.person_account_links")]:::tabla
+  t8[("+44 tablas más")]
+  t10[("+21 tablas más")]
+  t27[("+15 tablas más")]
+  t30[("+43 tablas más")]
+  t35[("+3 tablas más")]
+  t40[("+26 tablas más")]
+  t42[("+29 tablas más")]
+  t47[("+26 tablas más")]
+  t50[("+28 tablas más")]
+  t63[("+3 tablas más")]
+  t65[("+29 tablas más")]
   t68[("+1 tablas más")]
+  t72[("+1 tablas más")]
   subgraph s0["ctrl:SchedulingController · Operaciones de SchedulingController que el README n…"]
     o1["GET /scheduling/activity-types"]:::op
     o3["POST /scheduling/appointments/direct"]:::op
@@ -417,23 +421,23 @@ flowchart LR
     o20["POST /scheduling/holds/{holdToken}/confirm"]:::op
     o28["POST /scheduling/holds/{holdToken}/request"]:::op
     o31["POST /scheduling/resources"]:::op
-    o35["POST /scheduling/resources/{id}/close-slots"]:::op
-    o39["POST /scheduling/resources/{id}/delay"]:::op
-    o41["GET /scheduling/resources/{id}/exceptions"]:::op
-    o44["POST /scheduling/resources/{id}/exceptions"]:::op
-    o46["POST /scheduling/resources/{id}/shift-slots"]:::op
-    o49["GET /scheduling/resources/{id}/slots"]:::op
-    o51["GET /scheduling/resources/{id}/templates"]:::op
-    o54["POST /scheduling/resources/{id}/templates"]:::op
-    o55["GET /scheduling/resources/{resourceId}/waitlist"]:::op
-    o58["POST /scheduling/slots/{id}/holds"]:::op
-    o60["DELETE /scheduling/templates/{id}"]:::op
-    o62["PATCH /scheduling/templates/{id}"]:::op
-    o63["POST /scheduling/templates/{id}/generate-slots"]:::op
-    o65["GET /scheduling/templates/{id}/live-bookings"]:::op
-    o66["POST /scheduling/templates/{id}/reactivate"]:::op
-    o67["GET /scheduling/waitlist"]:::op
-    o69["POST /scheduling/waitlist"]:::op
+    o37["POST /scheduling/resources/{id}/close-slots"]:::op
+    o41["POST /scheduling/resources/{id}/delay"]:::op
+    o43["GET /scheduling/resources/{id}/exceptions"]:::op
+    o46["POST /scheduling/resources/{id}/exceptions"]:::op
+    o48["POST /scheduling/resources/{id}/shift-slots"]:::op
+    o51["GET /scheduling/resources/{id}/slots"]:::op
+    o53["GET /scheduling/resources/{id}/templates"]:::op
+    o56["POST /scheduling/resources/{id}/templates"]:::op
+    o57["GET /scheduling/resources/{resourceId}/waitlist"]:::op
+    o61["POST /scheduling/slots/{id}/holds"]:::op
+    o64["DELETE /scheduling/templates/{id}"]:::op
+    o66["PATCH /scheduling/templates/{id}"]:::op
+    o67["POST /scheduling/templates/{id}/generate-slots"]:::op
+    o69["GET /scheduling/templates/{id}/live-bookings"]:::op
+    o70["POST /scheduling/templates/{id}/reactivate"]:::op
+    o71["GET /scheduling/waitlist"]:::op
+    o73["POST /scheduling/waitlist"]:::op
   end
   a2 --> o1
   a2 --> o3
@@ -483,119 +487,123 @@ flowchart LR
   o28 -->|"LEE"| t29
   o28 -.-> t30
   a12 --> o31
-  o31 -->|"LEE"| t32
+  o31 -->|"CREA"| t32
+  o31 -->|"CREA"| t33
   o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t23
+  o31 -->|"LEE"| t24
   o31 -->|"LEE"| t34
-  o31 -->|"CREA"| t17
-  a12 --> o35
-  o35 -->|"ACTUALIZA"| t4
-  o35 -->|"CREA"| t4
-  o35 -->|"LEE"| t4
-  o35 -->|"ACTUALIZA"| t36
-  o35 -->|"LEE"| t36
-  o35 -->|"CREA"| t37
-  o35 -.-> t38
-  a2 --> o39
-  o39 -->|"ACTUALIZA"| t4
-  o39 -->|"CREA"| t4
-  o39 -->|"LEE"| t4
-  o39 -->|"CREA"| t7
-  o39 -->|"LEE"| t7
-  o39 -->|"CREA"| t29
-  o39 -.-> t40
-  a42 --> o41
-  o41 -->|"LEE"| t43
-  o41 -->|"LEE"| t16
-  o41 -->|"LEE"| t17
-  a12 --> o44
-  o44 -->|"ACTUALIZA"| t4
-  o44 -->|"CREA"| t4
-  o44 -->|"LEE"| t4
-  o44 -->|"ACTUALIZA"| t36
-  o44 -->|"LEE"| t36
-  o44 -->|"CREA"| t37
-  o44 -.-> t45
+  o31 -.-> t35
+  o31 -->|"evento"| e36
+  a12 --> o37
+  o37 -->|"ACTUALIZA"| t4
+  o37 -->|"CREA"| t4
+  o37 -->|"LEE"| t4
+  o37 -->|"ACTUALIZA"| t38
+  o37 -->|"LEE"| t38
+  o37 -->|"CREA"| t39
+  o37 -.-> t40
+  a2 --> o41
+  o41 -->|"ACTUALIZA"| t4
+  o41 -->|"CREA"| t4
+  o41 -->|"LEE"| t4
+  o41 -->|"CREA"| t7
+  o41 -->|"LEE"| t7
+  o41 -->|"CREA"| t29
+  o41 -.-> t42
+  a44 --> o43
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t16
+  o43 -->|"LEE"| t17
   a12 --> o46
-  o46 -->|"CREA"| t7
-  o46 -->|"LEE"| t7
-  o46 -->|"CREA"| t29
-  o46 -->|"LEE"| t29
-  o46 -->|"ACTUALIZA"| t47
-  o46 -->|"CREA"| t47
-  o46 -.-> t48
-  a50 --> o49
-  o49 -->|"LEE"| t19
-  o49 -->|"LEE"| t17
-  a12 --> o51
+  o46 -->|"ACTUALIZA"| t4
+  o46 -->|"CREA"| t4
+  o46 -->|"LEE"| t4
+  o46 -->|"ACTUALIZA"| t38
+  o46 -->|"LEE"| t38
+  o46 -->|"CREA"| t39
+  o46 -.-> t47
+  a12 --> o48
+  o48 -->|"CREA"| t7
+  o48 -->|"LEE"| t7
+  o48 -->|"CREA"| t29
+  o48 -->|"LEE"| t29
+  o48 -->|"ACTUALIZA"| t49
+  o48 -->|"CREA"| t49
+  o48 -.-> t50
+  a52 --> o51
+  o51 -->|"LEE"| t19
   o51 -->|"LEE"| t17
-  o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t53
-  a12 --> o54
-  o54 -->|"LEE"| t17
-  o54 -->|"CREA"| t52
-  o54 -->|"LEE"| t52
-  o54 -->|"CREA"| t53
-  o54 -->|"LEE"| t53
-  a2 --> o55
-  o55 -->|"LEE"| t56
-  o55 -->|"LEE"| t26
-  o55 -->|"LEE"| t17
-  o55 -->|"LEE"| t57
-  a21 --> o58
-  o58 -->|"LEE"| t23
-  o58 -->|"LEE"| t24
-  o58 -->|"LEE"| t25
-  o58 -->|"LEE"| t43
-  o58 -->|"ACTUALIZA"| t19
-  o58 -->|"LEE"| t19
-  o58 -.-> t59
-  a12 --> o60
-  o60 -->|"ACTUALIZA"| t4
-  o60 -->|"CREA"| t4
-  o60 -->|"LEE"| t4
-  o60 -->|"ACTUALIZA"| t36
-  o60 -->|"LEE"| t36
-  o60 -->|"CREA"| t37
-  o60 -.-> t61
-  a12 --> o62
-  o62 -->|"LEE"| t17
-  o62 -->|"BORRA"| t52
-  o62 -->|"CREA"| t52
-  o62 -->|"LEE"| t52
-  o62 -->|"ACTUALIZA"| t53
-  o62 -->|"LEE"| t53
-  a12 --> o63
-  o63 -->|"LEE"| t43
-  o63 -->|"LEE"| t16
-  o63 -->|"CREA"| t19
-  o63 -->|"LEE"| t19
-  o63 -->|"LEE"| t17
-  o63 -->|"LEE"| t52
-  o63 -.-> t64
-  a12 --> o65
-  o65 -->|"LEE"| t56
-  o65 -->|"LEE"| t26
-  o65 -->|"LEE"| t43
-  o65 -->|"LEE"| t19
-  o65 -->|"LEE"| t17
-  o65 -->|"LEE"| t53
+  a12 --> o53
+  o53 -->|"LEE"| t17
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t55
+  a12 --> o56
+  o56 -->|"LEE"| t17
+  o56 -->|"CREA"| t54
+  o56 -->|"LEE"| t54
+  o56 -->|"CREA"| t55
+  o56 -->|"LEE"| t55
+  a2 --> o57
+  o57 -->|"LEE"| t58
+  o57 -->|"LEE"| t59
+  o57 -->|"LEE"| t17
+  o57 -->|"LEE"| t60
+  a21 --> o61
+  o61 -->|"LEE"| t25
+  o61 -->|"LEE"| t26
+  o61 -->|"LEE"| t62
+  o61 -->|"LEE"| t45
+  o61 -->|"ACTUALIZA"| t19
+  o61 -->|"LEE"| t19
+  o61 -.-> t63
+  a12 --> o64
+  o64 -->|"ACTUALIZA"| t4
+  o64 -->|"CREA"| t4
+  o64 -->|"LEE"| t4
+  o64 -->|"ACTUALIZA"| t38
+  o64 -->|"LEE"| t38
+  o64 -->|"CREA"| t39
+  o64 -.-> t65
   a12 --> o66
   o66 -->|"LEE"| t17
-  o66 -->|"ACTUALIZA"| t53
-  o66 -->|"LEE"| t53
-  a50 --> o67
-  o67 -->|"LEE"| t23
-  o67 -->|"LEE"| t24
-  o67 -->|"LEE"| t25
-  o67 -->|"LEE"| t56
-  o67 -->|"LEE"| t26
+  o66 -->|"BORRA"| t54
+  o66 -->|"CREA"| t54
+  o66 -->|"LEE"| t54
+  o66 -->|"ACTUALIZA"| t55
+  o66 -->|"LEE"| t55
+  a12 --> o67
+  o67 -->|"LEE"| t45
+  o67 -->|"LEE"| t16
+  o67 -->|"CREA"| t19
+  o67 -->|"LEE"| t19
   o67 -->|"LEE"| t17
+  o67 -->|"LEE"| t54
   o67 -.-> t68
-  a21 --> o69
-  o69 -->|"LEE"| t23
-  o69 -->|"LEE"| t24
-  o69 -->|"LEE"| t25
-  o69 -->|"CREA"| t57
+  a12 --> o69
+  o69 -->|"LEE"| t58
+  o69 -->|"LEE"| t59
+  o69 -->|"LEE"| t45
+  o69 -->|"LEE"| t19
+  o69 -->|"LEE"| t17
+  o69 -->|"LEE"| t55
+  a12 --> o70
+  o70 -->|"LEE"| t17
+  o70 -->|"ACTUALIZA"| t55
+  o70 -->|"LEE"| t55
+  a52 --> o71
+  o71 -->|"LEE"| t25
+  o71 -->|"LEE"| t26
+  o71 -->|"LEE"| t62
+  o71 -->|"LEE"| t58
+  o71 -->|"LEE"| t59
+  o71 -->|"LEE"| t17
+  o71 -.-> t72
+  a21 --> o73
+  o73 -->|"LEE"| t25
+  o73 -->|"LEE"| t26
+  o73 -->|"LEE"| t62
+  o73 -->|"CREA"| t60
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -777,7 +785,7 @@ _Fuente: `docs/business/critical-workflows.md:51`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `P1` | `POST /scheduling/slots/:id/holds` — toma un slot con `SELECT ... FOR UPDATE`, decrementa `remaining_capacity` (nunca baja de cero). | POST /scheduling/slots/{id}/holds | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 9 |
-| `P2` | `POST /scheduling/holds/:holdToken/confirm` — dentro del TTL del hold (`hold_ttl_seconds`, 300s por defecto), confirma → `appointment_bookings` en estado `confirmed` + se programan recordatorios. | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 18 |
+| `P2` | `POST /scheduling/holds/:holdToken/confirm` — dentro del TTL del hold (`hold_ttl_seconds`, 300s por defecto), confirma → `appointment_bookings` en estado `confirmed` + se programan recordatorios. | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 21 |
 | `P3` | `POST /scheduling/bookings/:id/check-in` — el día de la cita, pasa a `checked_in`. | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
 | `A1` | **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cupo de origen, toma el de destino. | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 44 |
 | `A2` | **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cobra cargo por inasistencia solo si la política define `no_show_fee_amount` **y** se marca como no-show — una cancelación avisada nunca se cobra. | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 49 |
@@ -790,10 +798,10 @@ _Fuente: `docs/business/critical-workflows.md:51`_
 ```mermaid
 flowchart LR
   a2(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT"]):::actor
-  a15(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a18(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
-  a25(["SYSTEM · SYSTEM_WORKER"]):::actor
-  a31(["SCHEDULING_ADMIN · PRACTITIONER"]):::actor
+  a16(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a19(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
+  a26(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a32(["SCHEDULING_ADMIN · PRACTITIONER"]):::actor
   t3[("profiles.patient_portal_proxies")]:::tabla
   t4[("profiles.patient_profiles")]:::tabla
   t5[("profiles.person_account_links")]:::tabla
@@ -801,45 +809,46 @@ flowchart LR
   t7[("scheduling.bookable_slots")]:::tabla
   t10[("billing.service_catalog")]:::tabla
   t11[("clinical.appointments")]:::tabla
-  t12[("profiles.persons")]:::tabla
-  t16[("audit.appointment_bookings_history")]:::tabla
-  t19[("community.conversation_participants")]:::tabla
-  t20[("community.conversations")]:::tabla
-  t26[("scheduling.availability_exceptions")]:::tabla
-  t27[("scheduling.practitioner_service_offerings")]:::tabla
-  t28[("scheduling.schedulable_resources")]:::tabla
-  t32[("iam.devices")]:::tabla
-  t33[("messaging.in_app_notifications")]:::tabla
-  t36[("scheduling.waitlist_entries")]:::tabla
+  t12[("practice.care_spaces")]:::tabla
+  t13[("practice.practice_sites")]:::tabla
+  t17[("audit.appointment_bookings_history")]:::tabla
+  t20[("community.conversation_participants")]:::tabla
+  t21[("community.conversations")]:::tabla
+  t27[("scheduling.availability_exceptions")]:::tabla
+  t28[("scheduling.practitioner_service_offerings")]:::tabla
+  t29[("scheduling.schedulable_resources")]:::tabla
+  t33[("iam.devices")]:::tabla
+  t34[("messaging.in_app_notifications")]:::tabla
+  t37[("scheduling.waitlist_entries")]:::tabla
   t8[("+3 tablas más")]
   subgraph s0["P1 · `POST /scheduling/slots/:id/holds` — toma un slot con `SELECT ... FOR UPDA…"]
     o1["POST /scheduling/slots/{id}/holds"]:::op
   end
-  t13[("+12 tablas más")]
+  t14[("+15 tablas más")]
   subgraph s1["P2 · `POST /scheduling/holds/:holdToken/confirm` — dentro del TTL del hold (`ho…"]
     o9["POST /scheduling/holds/{holdToken}/confirm"]:::op
   end
   subgraph s2["P3 · `POST /scheduling/bookings/:id/check-in` — el día de la cita, pasa a `chec…"]
-    o14["POST /scheduling/bookings/{id}/check-in"]:::op
+    o15["POST /scheduling/bookings/{id}/check-in"]:::op
   end
-  t21[("+38 tablas más")]
+  t22[("+38 tablas más")]
   subgraph s3["A1 · **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cu…"]
-    o17["POST /scheduling/bookings/{id}/reschedule"]:::op
+    o18["POST /scheduling/bookings/{id}/reschedule"]:::op
   end
-  t23[("+43 tablas más")]
+  t24[("+43 tablas más")]
   subgraph s4["A2 · **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cob…"]
-    o22["POST /scheduling/bookings/{id}/cancel"]:::op
+    o23["POST /scheduling/bookings/{id}/cancel"]:::op
   end
-  t29[("+4 tablas más")]
+  t30[("+4 tablas más")]
   subgraph s5["A3 · **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicl…"]
-    o24["POST /scheduling/internal/expire-holds"]:::op
+    o25["POST /scheduling/internal/expire-holds"]:::op
   end
-  t34[("+26 tablas más")]
+  t35[("+26 tablas más")]
   subgraph s6["A4 · **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exception…"]
-    o30["POST /scheduling/resources/{id}/exceptions"]:::op
+    o31["POST /scheduling/resources/{id}/exceptions"]:::op
   end
   subgraph s7["A5 · **Lista de espera**: `POST /scheduling/waitlist` inscribe; el worker (`pro…"]
-    o35["POST /scheduling/waitlist"]:::op
+    o36["POST /scheduling/waitlist"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -852,56 +861,56 @@ flowchart LR
   a2 --> o9
   o9 -->|"LEE"| t10
   o9 -->|"CREA"| t11
+  o9 -->|"LEE"| t12
+  o9 -->|"LEE"| t13
   o9 -->|"LEE"| t3
   o9 -->|"LEE"| t4
-  o9 -->|"LEE"| t5
-  o9 -->|"LEE"| t12
-  o9 -.-> t13
+  o9 -.-> t14
   o1 ==>|"luego"| o9
-  a15 --> o14
-  o14 -->|"ACTUALIZA"| t16
-  o14 -->|"CREA"| t16
-  o14 -->|"LEE"| t16
-  o14 -->|"ACTUALIZA"| t6
-  o14 -->|"LEE"| t6
-  o9 ==>|"luego"| o14
-  a18 --> o17
-  o17 -->|"ACTUALIZA"| t16
-  o17 -->|"CREA"| t16
-  o17 -->|"LEE"| t16
-  o17 -->|"CREA"| t19
-  o17 -->|"LEE"| t19
-  o17 -->|"CREA"| t20
-  o17 -.-> t21
-  a18 --> o22
-  o22 -->|"ACTUALIZA"| t16
-  o22 -->|"CREA"| t16
-  o22 -->|"LEE"| t16
-  o22 -->|"CREA"| t19
-  o22 -->|"LEE"| t19
-  o22 -->|"CREA"| t20
-  o22 -.-> t23
-  a25 --> o24
-  o24 -->|"LEE"| t6
-  o24 -->|"LEE"| t26
-  o24 -->|"ACTUALIZA"| t7
-  o24 -->|"LEE"| t7
-  o24 -->|"LEE"| t27
-  o24 -->|"LEE"| t28
-  o24 -.-> t29
-  a31 --> o30
-  o30 -->|"ACTUALIZA"| t16
-  o30 -->|"CREA"| t16
-  o30 -->|"LEE"| t16
-  o30 -->|"ACTUALIZA"| t32
-  o30 -->|"LEE"| t32
-  o30 -->|"CREA"| t33
-  o30 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t4
-  o35 -->|"LEE"| t5
-  o35 -->|"CREA"| t36
+  a16 --> o15
+  o15 -->|"ACTUALIZA"| t17
+  o15 -->|"CREA"| t17
+  o15 -->|"LEE"| t17
+  o15 -->|"ACTUALIZA"| t6
+  o15 -->|"LEE"| t6
+  o9 ==>|"luego"| o15
+  a19 --> o18
+  o18 -->|"ACTUALIZA"| t17
+  o18 -->|"CREA"| t17
+  o18 -->|"LEE"| t17
+  o18 -->|"CREA"| t20
+  o18 -->|"LEE"| t20
+  o18 -->|"CREA"| t21
+  o18 -.-> t22
+  a19 --> o23
+  o23 -->|"ACTUALIZA"| t17
+  o23 -->|"CREA"| t17
+  o23 -->|"LEE"| t17
+  o23 -->|"CREA"| t20
+  o23 -->|"LEE"| t20
+  o23 -->|"CREA"| t21
+  o23 -.-> t24
+  a26 --> o25
+  o25 -->|"LEE"| t6
+  o25 -->|"LEE"| t27
+  o25 -->|"ACTUALIZA"| t7
+  o25 -->|"LEE"| t7
+  o25 -->|"LEE"| t28
+  o25 -->|"LEE"| t29
+  o25 -.-> t30
+  a32 --> o31
+  o31 -->|"ACTUALIZA"| t17
+  o31 -->|"CREA"| t17
+  o31 -->|"LEE"| t17
+  o31 -->|"ACTUALIZA"| t33
+  o31 -->|"LEE"| t33
+  o31 -->|"CREA"| t34
+  o31 -.-> t35
+  a2 --> o36
+  o36 -->|"LEE"| t3
+  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t5
+  o36 -->|"CREA"| t37
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1074,29 +1083,33 @@ flowchart TD
   n43 -->|"no"| n48
   n49[("CREA scheduling.bookable_slots")]:::efecto
   n48 --> n49
-  n50["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
+  n50["Llama a ClinicalAppointmentSync.careSpaceFor"]:::llamada
   n49 --> n50
-  n51[("CREA scheduling.appointment_bookings")]:::efecto
+  n51[("LEE scheduling.schedule_templates")]:::efecto
   n50 --> n51
-  n52["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
+  n52["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
   n51 --> n52
-  n53["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
-  n52 -->|"cada elemento"| n53
-  n54[("CREA scheduling.appointment_reminders")]:::efecto
+  n53[("CREA scheduling.appointment_bookings")]:::efecto
+  n52 --> n53
+  n54["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
   n53 --> n54
-  n55["Llama a BookingChangeNotifier.notifyChange"]:::llamada
-  n54 --> n55
-  n52 -->|"al terminar"| n55
-  n56["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n55["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
+  n54 -->|"cada elemento"| n55
+  n56[("CREA scheduling.appointment_reminders")]:::efecto
   n55 --> n56
-  n57[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n57["Llama a BookingChangeNotifier.notifyChange"]:::llamada
   n56 --> n57
-  n58["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
+  n54 -->|"al terminar"| n57
+  n58["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
   n57 --> n58
-  n59[("LEE scheduling.schedulable_resources")]:::efecto
+  n59[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
   n58 --> n59
-  n60(("201 Responde con éxito")):::ok
+  n60["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
   n59 --> n60
+  n61[("LEE scheduling.schedulable_resources")]:::efecto
+  n60 --> n61
+  n62(("201 Responde con éxito")):::ok
+  n61 --> n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1223,46 +1236,50 @@ flowchart TD
   n44 -->|"no"| n49
   n50[("CREA scheduling.bookable_slots")]:::efecto
   n49 --> n50
-  n51["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
+  n51["Llama a ClinicalAppointmentSync.careSpaceFor"]:::llamada
   n50 --> n51
-  n52[("CREA scheduling.appointment_bookings")]:::efecto
+  n52[("LEE scheduling.schedule_templates")]:::efecto
   n51 --> n52
-  n53["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
+  n53["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
   n52 --> n53
-  n54["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
-  n53 -->|"cada elemento"| n54
-  n55[("CREA scheduling.appointment_reminders")]:::efecto
+  n54[("CREA scheduling.appointment_bookings")]:::efecto
+  n53 --> n54
+  n55["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
   n54 --> n55
-  n56["Llama a ClinicalEncountersAdapter.open"]:::llamada
-  n55 --> n56
-  n53 -->|"al terminar"| n56
-  n57["Llama a EncountersRepository.create"]:::llamada
+  n56["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
+  n55 -->|"cada elemento"| n56
+  n57[("CREA scheduling.appointment_reminders")]:::efecto
   n56 --> n57
-  n58[("CREA clinical.encounters")]:::efecto
+  n58["Llama a ClinicalEncountersAdapter.open"]:::llamada
   n57 --> n58
-  n59{"appointment.practitionerProfileId"}:::decision
+  n55 -->|"al terminar"| n58
+  n59["Llama a EncountersRepository.create"]:::llamada
   n58 --> n59
-  n60["Llama a ClinicalEncountersAdapter.addParticipant"]:::llamada
-  n59 -->|"sí"| n60
-  n61["Llama a EncountersRepository.createParticipant"]:::llamada
+  n60[("CREA clinical.encounters")]:::efecto
+  n59 --> n60
+  n61{"appointment.practitionerProfileId"}:::decision
   n60 --> n61
-  n62[("CREA clinical.encounter_participants")]:::efecto
-  n61 --> n62
-  n63["Llama a SchedulingBookingsService.startInTransaction"]:::llamada
+  n62["Llama a ClinicalEncountersAdapter.addParticipant"]:::llamada
+  n61 -->|"sí"| n62
+  n63["Llama a EncountersRepository.createParticipant"]:::llamada
   n62 --> n63
-  n59 -->|"no"| n63
-  n64["Llama a StartAppointmentUseCase.executeInTransaction"]:::llamada
+  n64[("CREA clinical.encounter_participants")]:::efecto
   n63 --> n64
-  n65["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
+  n65["Llama a SchedulingBookingsService.startInTransaction"]:::llamada
   n64 --> n65
-  n66{"!isValidBookingTransition(from, to)"}:::decision
+  n61 -->|"no"| n65
+  n66["Llama a StartAppointmentUseCase.executeInTransaction"]:::llamada
   n65 --> n66
-  n67(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
-  n66 -->|"sí"| n67
-  n68[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
-  n66 -->|"no"| n68
-  n69(("201 Responde con éxito")):::ok
-  n68 --> n69
+  n67["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
+  n66 --> n67
+  n68{"!isValidBookingTransition(from, to)"}:::decision
+  n67 --> n68
+  n69(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
+  n68 -->|"sí"| n69
+  n70[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1438,8 +1455,14 @@ flowchart TD
   n46 --> n47
   n48[("LEE scheduling.appointment_bookings")]:::efecto
   n47 --> n48
-  n49(("200 Responde con éxito")):::ok
+  n49["Llama a ClinicalAppointmentsAdapter.findCareSpaces"]:::llamada
   n48 --> n49
+  n50["Llama a AppointmentsRepository.findCareSpaces"]:::llamada
+  n49 --> n50
+  n51[("LEE clinical.appointments · LEE practice.care_spaces")]:::efecto
+  n50 --> n51
+  n52(("200 Responde con éxito")):::ok
+  n51 --> n52
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1520,18 +1543,24 @@ flowchart TD
   n26 --> n27
   n28[("LEE clinical.encounters")]:::efecto
   n27 --> n28
-  n29["Llama a BookingItemAssembler.followUpLinks"]:::llamada
+  n29["Llama a ClinicalAppointmentsAdapter.findCareSpaces"]:::llamada
   n28 --> n29
-  n30["Llama a SchedulingBookingsRepository.findBookingsWithSlotsByIds"]:::llamada
+  n30["Llama a AppointmentsRepository.findCareSpaces"]:::llamada
   n29 --> n30
-  n31[("LEE scheduling.appointment_bookings")]:::efecto
+  n31[("LEE clinical.appointments · LEE practice.care_spaces")]:::efecto
   n30 --> n31
-  n32["Llama a SchedulingBookingsRepository.findFollowUpsOf"]:::llamada
+  n32["Llama a BookingItemAssembler.followUpLinks"]:::llamada
   n31 --> n32
-  n33[("LEE scheduling.appointment_bookings")]:::efecto
+  n33["Llama a SchedulingBookingsRepository.findBookingsWithSlotsByIds"]:::llamada
   n32 --> n33
-  n34(("200 Responde con éxito")):::ok
+  n34[("LEE scheduling.appointment_bookings")]:::efecto
   n33 --> n34
+  n35["Llama a SchedulingBookingsRepository.findFollowUpsOf"]:::llamada
+  n34 --> n35
+  n36[("LEE scheduling.appointment_bookings")]:::efecto
+  n35 --> n36
+  n37(("200 Responde con éxito")):::ok
+  n36 --> n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3607,26 +3636,30 @@ flowchart TD
   n27 -->|"sí"| n28
   n29(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
   n28 --> n29
-  n30["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
+  n30["Llama a ClinicalAppointmentSync.careSpaceFor"]:::llamada
   n27 -->|"no"| n30
-  n31[("CREA scheduling.appointment_bookings")]:::efecto
+  n31[("LEE scheduling.schedule_templates")]:::efecto
   n30 --> n31
-  n32[("ACTUALIZA scheduling.slot_holds")]:::efecto
+  n32["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
   n31 --> n32
-  n33{"slot.remainingCapacity === 0"}:::decision
+  n33[("CREA scheduling.appointment_bookings")]:::efecto
   n32 --> n33
-  n34[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n33 -->|"sí"| n34
-  n35["Repite: por cada const offset de offsets"]:::bucle
+  n34[("ACTUALIZA scheduling.slot_holds")]:::efecto
+  n33 --> n34
+  n35{"slot.remainingCapacity === 0"}:::decision
   n34 --> n35
-  n33 -->|"no"| n35
-  n36["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
-  n35 -->|"cada elemento"| n36
-  n37[("CREA scheduling.appointment_reminders")]:::efecto
+  n36[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n35 -->|"sí"| n36
+  n37["Repite: por cada const offset de offsets"]:::bucle
   n36 --> n37
-  n38(("201 Responde con éxito")):::ok
-  n37 --> n38
-  n35 -->|"al terminar"| n38
+  n35 -->|"no"| n37
+  n38["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
+  n37 -->|"cada elemento"| n38
+  n39[("CREA scheduling.appointment_reminders")]:::efecto
+  n38 --> n39
+  n40(("201 Responde con éxito")):::ok
+  n39 --> n40
+  n37 -->|"al terminar"| n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3709,43 +3742,47 @@ flowchart TD
   n27 -->|"sí"| n28
   n29(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
   n28 --> n29
-  n30["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
+  n30["Llama a ClinicalAppointmentSync.careSpaceFor"]:::llamada
   n27 -->|"no"| n30
-  n31[("CREA scheduling.appointment_bookings")]:::efecto
+  n31[("LEE scheduling.schedule_templates")]:::efecto
   n30 --> n31
-  n32[("ACTUALIZA scheduling.slot_holds")]:::efecto
+  n32["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
   n31 --> n32
-  n33{"slot.remainingCapacity === 0"}:::decision
+  n33[("CREA scheduling.appointment_bookings")]:::efecto
   n32 --> n33
-  n34[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n33 -->|"sí"| n34
-  n35["Repite: por cada const offset de offsets"]:::bucle
+  n34[("ACTUALIZA scheduling.slot_holds")]:::efecto
+  n33 --> n34
+  n35{"slot.remainingCapacity === 0"}:::decision
   n34 --> n35
-  n33 -->|"no"| n35
-  n36["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
-  n35 -->|"cada elemento"| n36
-  n37[("CREA scheduling.appointment_reminders")]:::efecto
+  n36[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n35 -->|"sí"| n36
+  n37["Repite: por cada const offset de offsets"]:::bucle
   n36 --> n37
-  n38["Llama a BookingChangeNotifier.notifyRequest"]:::llamada
-  n37 --> n38
-  n35 -->|"al terminar"| n38
-  n39["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n35 -->|"no"| n37
+  n38["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
+  n37 -->|"cada elemento"| n38
+  n39[("CREA scheduling.appointment_reminders")]:::efecto
   n38 --> n39
-  n40[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n40["Llama a BookingChangeNotifier.notifyRequest"]:::llamada
   n39 --> n40
-  n41["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
+  n37 -->|"al terminar"| n40
+  n41["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
   n40 --> n41
-  n42[("LEE scheduling.schedulable_resources")]:::efecto
+  n42[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
   n41 --> n42
-  n43{"practitioner === null"}:::decision
+  n43["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
   n42 --> n43
-  n44["Llama a SchedulingNoticeRepository.findDisplayNameForProfile"]:::llamada
-  n43 -->|"no"| n44
-  n45[("LEE profiles.persons")]:::efecto
+  n44[("LEE scheduling.schedulable_resources")]:::efecto
+  n43 --> n44
+  n45{"practitioner === null"}:::decision
   n44 --> n45
-  n46(("201 Responde con éxito")):::ok
-  n43 -->|"sí"| n46
-  n45 --> n46
+  n46["Llama a SchedulingNoticeRepository.findDisplayNameForProfile"]:::llamada
+  n45 -->|"no"| n46
+  n47[("LEE profiles.persons")]:::efecto
+  n46 --> n47
+  n48(("201 Responde con éxito")):::ok
+  n45 -->|"sí"| n48
+  n47 --> n48
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4046,7 +4083,9 @@ Dar de alta un recurso agendable
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Un profesional solo puede publicar su propia agenda: el recurso debe apuntar a su perfil profesional.; ForbiddenException: El tenant indicado no es uno de los del actor. |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación. Cuando la acepten va a poder publicar su agenda acá. / Su vínculo con esta organización… |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado |
+| 409 | `CONFLICT` | ConflictException: El espacio ya tiene un recurso agendable activo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación. Cuando la acepten va a poder publicar su agenda acá. / Su vínculo con esta organización…; PreconditionFailedException: El espacio no es agendable; PreconditionFailedException: El espacio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4075,12 +4114,46 @@ flowchart TD
   n12(["422 PRECONDITION_FAILED Su vínculo con esta organización todavía está pendiente de aprobación. Cuando la acep…"]):::error
   n11 --> n12
   n13["Transacción: transactional(…)"]:::transaccion
-  n14["Llama a SchedulingCatalogRepository.createResource"]:::llamada
+  n14{"refType === 'care_spaces'"}:::decision
   n13 --> n14
-  n15[("CREA scheduling.schedulable_resources")]:::efecto
-  n14 --> n15
-  n16(("201 Responde con éxito")):::ok
+  n15["Llama a PracticeCareSpaceDirectoryAdapter.describe"]:::llamada
+  n14 -->|"sí"| n15
+  n16[("LEE practice.care_spaces · LEE practice.practice_sites")]:::efecto
   n15 --> n16
+  n17{"!space || space.tenantId !== dto.tenantId"}:::decision
+  n16 --> n17
+  n18(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19{"!space.schedulable"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED El espacio no es agendable"]):::error
+  n19 -->|"sí"| n20
+  n21{"!space.active"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El espacio no está activo"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a PracticeCareSpaceDirectoryAdapter.hasActiveResource"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE scheduling.schedulable_resources")]:::efecto
+  n23 --> n24
+  n25{"await this.spaces.hasActiveResource(tx, dto.resourceRefId)"}:::decision
+  n24 --> n25
+  n26(["409 CONFLICT El espacio ya tiene un recurso agendable activo"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a SchedulingCatalogRepository.createResource"]:::llamada
+  n25 -->|"no"| n27
+  n14 -->|"no"| n27
+  n28[("CREA scheduling.schedulable_resources")]:::efecto
+  n27 --> n28
+  n29{"careSpaceId"}:::decision
+  n28 --> n29
+  n30["Llama a PracticeCareSpaceDirectoryAdapter.announceLinked"]:::llamada
+  n29 -->|"sí"| n30
+  n31>"Evento scheduling.resource.linked_to_space"]:::evento
+  n30 --> n31
+  n32(("201 Responde con éxito")):::ok
+  n31 --> n32
+  n29 -->|"no"| n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5898,34 +5971,46 @@ flowchart TD
   n26 --> n27
   n28[("ACTUALIZA scheduling.schedule_templates")]:::efecto
   n27 -->|"sí"| n28
-  n29["Llama a SchedulingCatalogRepository.findRulesByTemplate"]:::llamada
+  n29{"effectiveSpace && (careSpaceChanged || dto.rules !== undefined)"}:::decision
   n28 --> n29
   n27 -->|"no"| n29
-  n30[("LEE scheduling.schedule_rules")]:::efecto
-  n29 --> n30
-  n31{"dto.rules !== undefined"}:::decision
+  n30["Llama a SchedulingCatalogRepository.findRulesByTemplate"]:::llamada
+  n29 -->|"sí"| n30
+  n31[("LEE scheduling.schedule_rules")]:::efecto
   n30 --> n31
-  n32["Repite: por cada const rule de dto.rules"]:::bucle
-  n31 -->|"sí"| n32
-  n33{"rule.startTime ›= rule.endTime"}:::decision
-  n32 -->|"cada elemento"| n33
-  n34(["422 PRECONDITION_FAILED La franja debe empezar antes de terminar"]):::error
-  n33 -->|"sí"| n34
-  n35["Llama a SchedulingCatalogRepository.deleteRulesByTemplate"]:::llamada
-  n33 -->|"no"| n35
-  n32 -->|"al terminar"| n35
-  n36[("BORRA scheduling.schedule_rules")]:::efecto
+  n32{"dto.careSpaceId !== undefined"}:::decision
+  n31 --> n32
+  n29 -->|"no"| n32
+  n33[("ACTUALIZA scheduling.schedule_templates")]:::efecto
+  n32 -->|"sí"| n33
+  n34["Llama a SchedulingCatalogRepository.findRulesByTemplate"]:::llamada
+  n33 --> n34
+  n32 -->|"no"| n34
+  n35[("LEE scheduling.schedule_rules")]:::efecto
+  n34 --> n35
+  n36{"dto.rules !== undefined"}:::decision
   n35 --> n36
   n37["Repite: por cada const rule de dto.rules"]:::bucle
-  n36 --> n37
-  n38["Llama a SchedulingCatalogRepository.createRule"]:::llamada
+  n36 -->|"sí"| n37
+  n38{"rule.startTime ›= rule.endTime"}:::decision
   n37 -->|"cada elemento"| n38
-  n39[("CREA scheduling.schedule_rules")]:::efecto
-  n38 --> n39
-  n40(("200 Responde con éxito")):::ok
-  n39 --> n40
+  n39(["422 PRECONDITION_FAILED La franja debe empezar antes de terminar"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a SchedulingCatalogRepository.deleteRulesByTemplate"]:::llamada
+  n38 -->|"no"| n40
   n37 -->|"al terminar"| n40
-  n31 -->|"no"| n40
+  n41[("BORRA scheduling.schedule_rules")]:::efecto
+  n40 --> n41
+  n42["Repite: por cada const rule de dto.rules"]:::bucle
+  n41 --> n42
+  n43["Llama a SchedulingCatalogRepository.createRule"]:::llamada
+  n42 -->|"cada elemento"| n43
+  n44[("CREA scheduling.schedule_rules")]:::efecto
+  n43 --> n44
+  n45(("200 Responde con éxito")):::ok
+  n44 --> n45
+  n42 -->|"al terminar"| n45
+  n36 -->|"no"| n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

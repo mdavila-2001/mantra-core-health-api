@@ -24,6 +24,7 @@ import {
   AdminListServicesQueryDto,
   AdminServiceItemDto,
   AdminServicePageDto,
+  AdminServiceScopesDto,
   AdminServiceStateChangeDto,
   AdminUpdateServiceDto,
 } from '../dto/admin-service-catalog.dto';
@@ -41,6 +42,7 @@ import { AdminServiceCatalogService } from '../services/admin-service-catalog.se
  *
  * | Método y ruta | Cuerpo / query | Éxito | Errores |
  * | --- | --- | --- | --- |
+ * | `GET /admin/catalogs/services/scopes` | — | 200 `{types[], practices[], currencies[]}`: tipos de organización, prácticas activas y monedas del editor, sólo de la organización del token | 401/403 |
  * | `GET /admin/catalogs/services` | query `practiceTypeConceptId?`, `practiceId?`, `isActive?`, `q?`, `cursor?`, `limit?` (1..200, def. 50) | 200 `{items[], count, limit, nextCursor}` (orden `(code,id)`) | 400 query inválida o cursor; 404 `practiceId` ajena |
  * | `GET /admin/catalogs/services/:id` | — | 200 `AdminServiceItem` | 404 |
  * | `POST /admin/catalogs/services` | `{practiceId, code, name, defaultPrice, descriptionText?, serviceConceptId?, currencyConceptId?, isActive?}` | 201 creado · 200 si es repetición idéntica (idempotente por `(practiceId, code)`) | 400; 404 práctica ajena; 409 `SERVICE_CATALOG_CODE_ALREADY_EXISTS` (código ocupado con datos distintos); 422 precio 0 |
@@ -60,6 +62,17 @@ import { AdminServiceCatalogService } from '../services/admin-service-catalog.se
 @Controller('admin/catalogs/services')
 export class AdminServiceCatalogController {
   constructor(private readonly service: AdminServiceCatalogService) {}
+
+  // `scopes` se declara antes de `:id` para que no se lea como un identificador.
+  @Get('scopes')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Tipos de organización, prácticas y monedas del editor de servicios',
+  })
+  scopes(): Promise<AdminServiceScopesDto> {
+    return this.service.scopes();
+  }
 
   @Get()
   @HttpCode(HttpStatus.OK)

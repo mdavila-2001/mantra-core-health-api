@@ -3,13 +3,13 @@
 # Flujos del módulo `audit`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 14 (12 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 18 (15 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [audit](../endpoints/audit.md)
 
 ## Proceso: Módulo 10 — Audit, Provenance and Version Histories
 
-- **Código:** `audit` · **Agrupación:** MIXTO · **Operaciones:** 14
-- **Actores:** AUDITOR · DPO · PATIENT · SECURITY_ADMIN
+- **Código:** `audit` · **Agrupación:** MIXTO · **Operaciones:** 18
+- **Actores:** ...AUDIT_SUMMARY_ROLES · AUDITOR · DPO · PATIENT · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/audit/README.md`
 
@@ -36,7 +36,11 @@ _Fuente: `src/modules/audit/README.md:3`_
 | `UC-10-12` | Registrar acceso delegado / de tercero gobernado | POST /audit/third-party-access | SECURITY_ADMIN | MEDIO | 7 |
 | `ctrl:AuditMeController` | Operaciones de AuditMeController que el README no asigna a un caso de uso | GET /audit/me/data-access | PATIENT | BAJO | 5 |
 | `ctrl:AuditQueryController` | Operaciones de AuditQueryController que el README no asigna a un caso de uso | GET /audit/data-access | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 1 |
+|  |  | GET /audit/data-access/summary | ...AUDIT_SUMMARY_ROLES | BAJO | 2 |
 |  |  | GET /audit/log | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 1 |
+|  |  | GET /audit/log/filter-catalog | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 0 |
+| `ctrl:PrivacyController` | Operaciones de PrivacyController que el README no asigna a un caso de uso | GET /privacy/dsar | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 2 |
+|  |  | GET /privacy/dsar/{id} | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 2 |
 
 ### Diagrama — etapas `UC-10-01`, `UC-10-04`, `UC-10-05`…
 
@@ -45,6 +49,7 @@ flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a27(["PATIENT"]):::actor
   a33(["AUDITOR · DPO · SECURITY_ADMIN"]):::actor
+  a35(["...AUDIT_SUMMARY_ROLES"]):::actor
   t3[("audit.audit_log")]:::tabla
   t4[("audit.data_access_log")]:::tabla
   t5[("audit.patient_content_access_log")]:::tabla
@@ -61,6 +66,7 @@ flowchart LR
   t29[("profiles.patient_profiles")]:::tabla
   t30[("profiles.person_account_links")]:::tabla
   t31[("profiles.persons")]:::tabla
+  t36[("terminology.catalog_concepts")]:::tabla
   subgraph s0["UC-10-01 · Registrar acceso/lectura clínica (accounting WORM) + provenance"]
     o1["POST /audit/data-access"]:::op
   end
@@ -98,7 +104,13 @@ flowchart LR
   end
   subgraph s11["ctrl:AuditQueryController · Operaciones de AuditQueryController que el README n…"]
     o32["GET /audit/data-access"]:::op
-    o34["GET /audit/log"]:::op
+    o34["GET /audit/data-access/summary"]:::op
+    o37["GET /audit/log"]:::op
+    o38["GET /audit/log/filter-catalog"]:::op
+  end
+  subgraph s12["ctrl:PrivacyController · Operaciones de PrivacyController que el README no asig…"]
+    o39["GET /privacy/dsar"]:::op
+    o40["GET /privacy/dsar/{id}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -170,8 +182,18 @@ flowchart LR
   o26 -->|"LEE"| t31
   a33 --> o32
   o32 -->|"LEE"| t4
-  a33 --> o34
-  o34 -->|"LEE"| t3
+  a35 --> o34
+  o34 -->|"LEE"| t4
+  o34 -->|"LEE"| t36
+  a33 --> o37
+  o37 -->|"LEE"| t3
+  a33 --> o38
+  a33 --> o39
+  o39 -->|"LEE"| t13
+  o39 -->|"LEE"| t36
+  a33 --> o40
+  o40 -->|"LEE"| t13
+  o40 -->|"LEE"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -295,7 +317,58 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /audit/events
+#### 3. GET /audit/data-access/summary
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuditOversightReadService.dataAccessSummary"]:::llamada
+  n2 --> n3
+  n4["Llama a AuditOversightReadService.rango"]:::llamada
+  n3 --> n4
+  n5{"to ‹= from"}:::decision
+  n4 --> n5
+  n6(["400 VALIDATION_FAILED «to» debe ser posterior a «from»"]):::error
+  n5 -->|"sí"| n6
+  n7{"to.getTime() - from.getTime() ‹ SUMMARY_MIN_WINDOW_MS"}:::decision
+  n5 -->|"no"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a AuditOversightReadRepository.accessTotals"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE audit.data_access_log")]:::efecto
+  n9 --> n10
+  n11["Llama a AuditOversightReadRepository.accessDaily"]:::llamada
+  n10 --> n11
+  n12[("LEE audit.data_access_log")]:::efecto
+  n11 --> n12
+  n13["Llama a AuditOversightReadRepository.accessBuckets"]:::llamada
+  n12 --> n13
+  n14[("LEE audit.data_access_log · LEE terminology.catalog_concepts")]:::efecto
+  n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /audit/events
 
 Registrar provenance de un cambio y sellar la cadena hash
 
@@ -343,7 +416,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. GET /audit/history/{entity}/{id}
+#### 5. GET /audit/history/{entity}/{id}
 
 Consultar historial / línea de tiempo de un registro
 
@@ -400,7 +473,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /audit/integrity/verify
+#### 6. POST /audit/integrity/verify
 
 Verificar integridad tamper-evidence de la cadena
 
@@ -457,7 +530,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /audit/me/data-access
+#### 7. GET /audit/me/data-access
 
 Quién accedió a mi historia y con qué finalidad
 
@@ -504,7 +577,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /audit/retention/apply
+#### 8. POST /audit/retention/apply
 
 Aplicar retención / archivado / litigation-hold
 
@@ -559,7 +632,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /audit/third-party-access
+#### 9. POST /audit/third-party-access
 
 Registrar acceso delegado / de tercero gobernado
 
@@ -659,7 +732,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /compliance/audit-export
+#### 10. POST /compliance/audit-export
 
 Exportar evidencia de auditoría para cumplimiento
 
@@ -723,7 +796,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /moderation/decisions
+#### 11. POST /moderation/decisions
 
 Registrar decisión de moderación / gobernanza analítica
 
@@ -789,7 +862,46 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /privacy/dsar
+#### 12. GET /privacy/dsar
+
+Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares).
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuditOversightReadService.dsarList"]:::llamada
+  n2 --> n3
+  n4{"from && to && to ‹= from"}:::decision
+  n3 --> n4
+  n5(["400 VALIDATION_FAILED «to» debe ser posterior a «from»"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a AuditOversightReadRepository.dsarList"]:::llamada
+  n4 -->|"no"| n6
+  n7["Llama a AuditOversightReadRepository.dsarSelect"]:::llamada
+  n6 --> n7
+  n8[("LEE audit.dsar_requests · LEE terminology.catalog_concepts")]:::efecto
+  n7 --> n8
+  n9(("200 Responde con éxito")):::ok
+  n8 --> n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. POST /privacy/dsar
 
 Tramitar DSAR (solicitud del titular)
 
@@ -845,7 +957,47 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. PATCH /privacy/dsar/{id}
+#### 14. GET /privacy/dsar/{id}
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud DSAR no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuditOversightReadService.dsar"]:::llamada
+  n2 --> n3
+  n4["Llama a AuditOversightReadRepository.dsarById"]:::llamada
+  n3 --> n4
+  n5["Llama a AuditOversightReadRepository.dsarSelect"]:::llamada
+  n4 --> n5
+  n6[("LEE audit.dsar_requests · LEE terminology.catalog_concepts")]:::efecto
+  n5 --> n6
+  n7{"!fila"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Solicitud DSAR no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9(("200 Responde con éxito")):::ok
+  n7 -->|"no"| n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. PATCH /privacy/dsar/{id}
 
 Avanzar la máquina de estados de una solicitud DSAR
 
@@ -922,3 +1074,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 |---|---|---|
 | GET /audit/data-access | 200, 401, 403, 429 | 1 |
 | GET /audit/log | 200, 401, 403, 429 | 1 |
+| GET /audit/log/filter-catalog | 200, 401, 403, 429 | 0 |

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `ads`
 
-- **Tablas:** 73 · **Columnas:** 1000 (235 con descripción: 23.5 %) · **Índices:** 497
+- **Tablas:** 73 · **Columnas:** 1003 (238 con descripción: 23.7 %) · **Índices:** 497
 - **Dominio:** Marketing y Crecimiento
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -38,7 +38,7 @@
 | [brand_lift_studies](#brand_lift_studies) | Agrupa estudios de recordación o percepción para evaluar efectos agregados de campañas. | 16 | 7 | 0 | COINCIDE |
 | [budget_schedules](#budget_schedules) | Programa presupuestos publicitarios por período para controlar ritmo y límites de inversión. | 14 | 7 | 2 | COINCIDE |
 | [business_managers](#business_managers) | Representa organizaciones que administran cuentas y campañas publicitarias vinculadas al ecosistema médico. | 13 | 10 | 4 | COINCIDE |
-| [campaigns](#campaigns) | Representa campañas publicitarias que agrupan objetivos, presupuesto y períodos de difusión. | 20 | 9 | 7 | COINCIDE |
+| [campaigns](#campaigns) | Representa campañas publicitarias que agrupan objetivos, presupuesto y períodos de difusión. | 21 | 9 | 7 | DIVERGE |
 | [catalog_feeds](#catalog_feeds) | Registra feeds de productos sincronizados con plataformas publicitarias para publicar inventario comercial. | 17 | 8 | 2 | COINCIDE |
 | [catalog_products](#catalog_products) | Cataloga productos incluidos en feeds para asociarlos con creatividades y campañas. | 25 | 9 | 3 | COINCIDE |
 | [collection_ads](#collection_ads) | Representa anuncios que muestran colecciones de productos dentro de formatos compatibles. | 13 | 8 | 0 | COINCIDE |
@@ -49,7 +49,7 @@
 | [conversion_event_delivery_attempts](#conversion_event_delivery_attempts) | Registra intentos de entrega de eventos de conversión para observar aceptación y reintentos de plataforma. | 12 | 6 | 1 | COINCIDE |
 | [conversion_event_user_data](#conversion_event_user_data) | Almacena atributos de usuario permitidos para emparejar eventos con plataformas según controles de consentimiento. | 14 | 4 | 1 | COINCIDE |
 | [creative_assets](#creative_assets) | Vincula imágenes, videos u otros recursos con creatividades publicitarias. | 15 | 5 | 1 | COINCIDE |
-| [custom_audiences](#custom_audiences) | Define audiencias publicitarias permitidas bajo políticas de consentimiento y uso de datos. | 18 | 10 | 1 | COINCIDE |
+| [custom_audiences](#custom_audiences) | Define audiencias publicitarias permitidas bajo políticas de consentimiento y uso de datos. | 19 | 10 | 1 | DIVERGE |
 | [custom_conversions](#custom_conversions) | Cataloga definiciones de conversión personalizadas usadas para medir resultados de campañas. | 14 | 8 | 0 | COINCIDE |
 | [dataset_connections](#dataset_connections) | Vincula datasets con plataformas o destinos de conversión autorizados. | 13 | 10 | 0 | COINCIDE |
 | [dataset_quality_snapshots](#dataset_quality_snapshots) | Preserva métricas de calidad de datasets publicitarios antes de su uso o intercambio. | 10 | 3 | 0 | COINCIDE |
@@ -79,7 +79,7 @@
 | [product_set_members](#product_set_members) | Relaciona productos con conjuntos para definir el contenido de colecciones de catálogo. | 9 | 4 | 2 | COINCIDE |
 | [product_sets](#product_sets) | Agrupa productos para crear colecciones promocionales reutilizables. | 13 | 5 | 2 | COINCIDE |
 | [rule_executions](#rule_executions) | Registra ejecuciones de reglas publicitarias para auditar acciones automáticas y resultados. | 10 | 4 | 1 | COINCIDE |
-| [saved_audiences](#saved_audiences) | Guarda definiciones reutilizables de audiencias para campañas que cumplen políticas de segmentación. | 11 | 5 | 0 | COINCIDE |
+| [saved_audiences](#saved_audiences) | Guarda definiciones reutilizables de audiencias para campañas que cumplen políticas de segmentación. | 12 | 5 | 0 | DIVERGE |
 | [server_conversion_events](#server_conversion_events) | Conserva eventos de conversión enviados desde servicios internos para medir campañas sin depender solo de navegador. | 18 | 15 | 1 | COINCIDE |
 | [targeting_specs](#targeting_specs) | Conserva criterios de segmentación de anuncios sin autorizar el uso de datos clínicos protegidos. | 20 | 4 | 2 | COINCIDE |
 | [tracking_pixels](#tracking_pixels) | Registra píxeles de seguimiento asociados a campañas para medir eventos permitidos de navegación o conversión. | 12 | 7 | 0 | COINCIDE |
@@ -2988,7 +2988,7 @@ Representa campañas publicitarias que agrupan objetivos, presupuesto y período
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_43_ads.puml: campaigns`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_43_ads.puml` · **DDL:** `SQL/43_ads/02_tables.sql`
 - **Entidad del ORM:** `Campaigns` — `src/modules/ads/entities/campaigns.entity.ts`
-- **Resumen:** 20 columnas · 9 índices · 8 FK salientes · 10 entrantes · 7 operaciones
+- **Resumen:** 21 columnas · 9 índices · 8 FK salientes · 10 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -3014,6 +3014,7 @@ Representa campañas publicitarias que agrupan objetivos, presupuesto y período
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/ads/entities/campaigns.entity.ts:155`)_ | coincide |
+| 21 | `version_number` | `integer` | Opcional | + v4.2.49 (CAN-VERSION-001, issue #57): numero de version. Nullable: lo existente no lo tiene. Sus revisiones viven en audit.campaigns_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_43_ads.puml:127`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -3842,7 +3843,7 @@ Define audiencias publicitarias permitidas bajo políticas de consentimiento y u
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_43_ads.puml: custom_audiences`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_43_ads.puml` · **DDL:** `SQL/43_ads/02_tables.sql`
 - **Entidad del ORM:** `CustomAudiences` — `src/modules/ads/entities/custom_audiences.entity.ts`
-- **Resumen:** 18 columnas · 10 índices · 9 FK salientes · 4 entrantes · 1 operaciones
+- **Resumen:** 19 columnas · 10 índices · 9 FK salientes · 4 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -3866,6 +3867,7 @@ Define audiencias publicitarias permitidas bajo políticas de consentimiento y u
 | 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/ads/entities/custom_audiences.entity.ts:132`)_ | coincide |
+| 19 | `version_number` | `integer` | Opcional | + v4.2.49 (CAN-VERSION-001, issue #57): numero de version. Nullable: lo existente no lo tiene. Sus revisiones viven en audit.custom_audiences_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_43_ads.puml:272`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -6028,7 +6030,7 @@ Guarda definiciones reutilizables de audiencias para campañas que cumplen polí
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_43_ads.puml: saved_audiences`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_43_ads.puml` · **DDL:** `SQL/43_ads/02_tables.sql`
 - **Entidad del ORM:** `SavedAudiences` — `src/modules/ads/entities/saved_audiences.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 12 columnas · 5 índices · 4 FK salientes · 0 entrantes · 0 operaciones
 
 #### Columnas
 
@@ -6045,6 +6047,7 @@ Guarda definiciones reutilizables de audiencias para campañas que cumplen polí
 | 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/ads/entities/saved_audiences.entity.ts:77`)_ | coincide |
+| 12 | `version_number` | `integer` | Opcional | + v4.2.49 (CAN-VERSION-001, issue #57): numero de version del segmento guardado. Nullable. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_43_ads.puml:807`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 

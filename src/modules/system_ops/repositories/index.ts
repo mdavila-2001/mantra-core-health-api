@@ -8,3 +8,4 @@ export * from './backup.repository';
 export * from './assessment.repository';
 export * from './draft.repository';
 export * from './system-ops-security.repository';
+export * from './governance-read.repository';

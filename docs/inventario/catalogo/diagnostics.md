@@ -20,32 +20,32 @@
 | [diagnostic_release_events](#diagnostic_release_events) | Mantiene evidencia de los eventos que liberan resultados diagnósticos para consulta dentro del flujo asistencial. | 9 | 7 | 6 | COINCIDE |
 | [diagnostic_report_files](#diagnostic_report_files) | Vincula archivos complementarios con informes diagnósticos manteniendo separada la metadata del contenido binario. | 8 | 5 | 6 | COINCIDE |
 | [diagnostic_report_results](#diagnostic_report_results) | Asocia resultados estructurados a informes diagnósticos para que un informe pueda contener varias observaciones. | 6 | 3 | 6 | COINCIDE |
-| [diagnostic_report_versions](#diagnostic_report_versions) | Preserva versiones inmutables de informes diagnósticos para conservar conclusiones y estados clínicos emitidos a lo largo del tiempo. | 18 | 12 | 13 | COINCIDE |
+| [diagnostic_report_versions](#diagnostic_report_versions) | Preserva versiones inmutables de informes diagnósticos para conservar conclusiones y estados clínicos emitidos a lo largo del tiempo. | 18 | 12 | 14 | COINCIDE |
 | [dicom_object_locations](#dicom_object_locations) | Resuelve las ubicaciones de objetos DICOM en repositorios o sistemas externos sin almacenar necesariamente el objeto pesado en la base relacional. | 18 | 10 | 1 | COINCIDE |
 | [dicom_structured_reports](#dicom_structured_reports) | Cataloga informes estructurados DICOM para conservar referencias y metadata de resultados de imagenología interoperables. | 16 | 10 | 0 | COINCIDE |
 | [imaging_endpoints](#imaging_endpoints) | Registra puntos de conexión con sistemas de imagenología para intercambiar estudios con PACS, VNA u otros servicios autorizados. | 13 | 8 | 2 | COINCIDE |
 | [imaging_instances](#imaging_instances) | Registra instancias individuales de imagen dentro de una serie para referenciar cada objeto diagnóstico. | 9 | 3 | 1 | COINCIDE |
-| [imaging_procedure_steps](#imaging_procedure_steps) | Registra etapas de procedimientos de imagenología para representar el flujo técnico de adquisición de un estudio. | 17 | 10 | 0 | COINCIDE |
+| [imaging_procedure_steps](#imaging_procedure_steps) | Registra etapas de procedimientos de imagenología para representar el flujo técnico de adquisición de un estudio. | 17 | 10 | 0 | DIVERGE |
 | [imaging_selection_items](#imaging_selection_items) | Relaciona instancias de imagen con una selección para especificar qué imágenes forman parte de un conjunto revisable. | 8 | 4 | 0 | COINCIDE |
 | [imaging_selections](#imaging_selections) | Define selecciones o conjuntos de imágenes organizados para revisión diagnóstica o tareas clínicas específicas. | 13 | 7 | 0 | COINCIDE |
 | [imaging_series](#imaging_series) | Agrupa series de imágenes pertenecientes a un estudio para organizar sus instancias diagnósticas. | 11 | 5 | 2 | COINCIDE |
 | [imaging_studies](#imaging_studies) | Representa estudios de imágenes de un paciente y mantiene su asociación clínica y su contexto de adquisición. | 22 | 15 | 6 | COINCIDE |
-| [laboratory_accessions](#laboratory_accessions) | Representa accesiones de laboratorio que agrupan y asignan identidad operativa a muestras y solicitudes recibidas. | 17 | 13 | 5 | COINCIDE |
+| [laboratory_accessions](#laboratory_accessions) | Representa accesiones de laboratorio que agrupan y asignan identidad operativa a muestras y solicitudes recibidas. | 17 | 13 | 6 | COINCIDE |
 | [laboratory_work_order_tests](#laboratory_work_order_tests) | Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trabajo diagnóstico requerido. | 17 | 12 | 5 | COINCIDE |
 | [laboratory_work_orders](#laboratory_work_orders) | Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamiento diagnóstico. | 16 | 9 | 3 | COINCIDE |
 | [media_annotations](#media_annotations) | Guarda anotaciones vinculadas a medios clínicos para conservar marcas o descripciones interpretativas asociadas al contenido. | 16 | 8 | 1 | COINCIDE |
 | [observation_specimens](#observation_specimens) | Vincula observaciones clínicas o de laboratorio con las muestras que les dieron origen. | 5 | 3 | 0 | COINCIDE |
 | [radiation_dose_events](#radiation_dose_events) | Registra eventos y datos de dosis de radiación asociados a estudios para dar seguimiento a la exposición durante imagenología. | 14 | 8 | 1 | COINCIDE |
 | [result_verifications](#result_verifications) | Registra verificaciones de resultados diagnósticos para documentar su revisión antes de liberar o utilizar resultados. | 12 | 10 | 1 | COINCIDE |
-| [specimen_chain_of_custody_events](#specimen_chain_of_custody_events) | Preserva los traspasos y controles de custodia de muestras para reconstruir su recorrido y responsables. | 14 | 10 | 5 | COINCIDE |
-| [specimen_collection_events](#specimen_collection_events) | Registra eventos de recolección de muestras para documentar cuándo, dónde y bajo qué contexto se obtuvieron. | 12 | 8 | 0 | COINCIDE |
+| [specimen_chain_of_custody_events](#specimen_chain_of_custody_events) | Preserva los traspasos y controles de custodia de muestras para reconstruir su recorrido y responsables. | 14 | 10 | 7 | COINCIDE |
+| [specimen_collection_events](#specimen_collection_events) | Registra eventos de recolección de muestras para documentar cuándo, dónde y bajo qué contexto se obtuvieron. | 12 | 8 | 2 | DIVERGE |
 | [specimen_container_events](#specimen_container_events) | Traza cambios y eventos relacionados con recipientes de muestras durante su preparación, traslado o recepción. | 11 | 6 | 1 | COINCIDE |
-| [specimen_containers](#specimen_containers) | Representa recipientes que contienen muestras para identificar el soporte físico usado en su manejo diagnóstico. | 16 | 10 | 7 | COINCIDE |
+| [specimen_containers](#specimen_containers) | Representa recipientes que contienen muestras para identificar el soporte físico usado en su manejo diagnóstico. | 16 | 10 | 9 | COINCIDE |
 | [specimen_identifiers](#specimen_identifiers) | Conserva identificadores alternativos de muestras para reconciliar etiquetas internas y referencias de laboratorio externo. | 14 | 6 | 0 | COINCIDE |
 | [specimen_parent_links](#specimen_parent_links) | Expresa relaciones entre muestras derivadas y muestras de origen para mantener trazabilidad de la cadena de procesamiento. | 7 | 6 | 0 | COINCIDE |
 | [specimen_processing_steps](#specimen_processing_steps) | Traza los pasos de procesamiento aplicados a cada muestra para conservar cómo se preparó antes de producir resultados. | 9 | 5 | 0 | COINCIDE |
 | [specimen_rejection_events](#specimen_rejection_events) | Documenta rechazos de muestras y sus motivos para explicar por qué un análisis no pudo continuar o requirió nueva toma. | 9 | 5 | 1 | COINCIDE |
-| [specimens](#specimens) | Registra muestras biológicas asociadas a pacientes y solicitudes para mantener su identidad, recolección y estado durante el proceso diagnóstico. | 21 | 14 | 12 | COINCIDE |
+| [specimens](#specimens) | Registra muestras biológicas asociadas a pacientes y solicitudes para mantener su identidad, recolección y estado durante el proceso diagnóstico. | 21 | 14 | 15 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1160,7 +1160,7 @@ Preserva versiones inmutables de informes diagnósticos para conservar conclusio
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: diagnostic_report_versions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticReportVersions` — `src/modules/diagnostics/entities/diagnostic_report_versions.entity.ts`
-- **Resumen:** 18 columnas · 12 índices · 11 FK salientes · 6 entrantes · 13 operaciones
+- **Resumen:** 18 columnas · 12 índices · 11 FK salientes · 6 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -1234,6 +1234,7 @@ Preserva versiones inmutables de informes diagnósticos para conservar conclusio
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
 | GET /diagnostic-results/me | LEE | DIRECTA |
@@ -2004,7 +2005,7 @@ Representa accesiones de laboratorio que agrupan y asignan identidad operativa a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: laboratory_accessions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `LaboratoryAccessions` — `src/modules/diagnostics/entities/laboratory_accessions.entity.ts`
-- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 2 entrantes · 5 operaciones
+- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 2 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -2077,6 +2078,7 @@ Representa accesiones de laboratorio que agrupan y asignan identidad operativa a
 | POST /diagnostics/accessions | CREA | DIRECTA |
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| GET /diagnostics/work-orders | LEE | POR_SQL |
 | POST /diagnostics/work-orders | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/work-orders | LEE | DIRECTA |
 
@@ -2571,7 +2573,7 @@ Preserva los traspasos y controles de custodia de muestras para reconstruir su r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_chain_of_custody_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenChainOfCustodyEvents` — `src/modules/diagnostics/entities/specimen_chain_of_custody_events.entity.ts`
-- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -2626,7 +2628,9 @@ Preserva los traspasos y controles de custodia de muestras para reconstruir su r
 | POST /diagnostics/accessions | CREA | DIRECTA |
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
 | POST /diagnostics/containers/{id}/custody-events | CREA | DIRECTA |
+| GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
 | GET /diagnostics/specimens/{id} | LEE | DIRECTA |
 
 #### Gobierno
@@ -2652,7 +2656,7 @@ Registra eventos de recolección de muestras para documentar cuándo, dónde y b
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_collection_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenCollectionEvents` — `src/modules/diagnostics/entities/specimen_collection_events.entity.ts`
-- **Resumen:** 12 columnas · 8 índices · 7 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 12 columnas · 8 índices · 7 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -2698,7 +2702,10 @@ Registra eventos de recolección de muestras para documentar cuándo, dónde y b
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /diagnostics/specimens | CREA | POR_SQL |
+| GET /diagnostics/work-orders | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -2791,7 +2798,7 @@ Representa recipientes que contienen muestras para identificar el soporte físic
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_containers`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenContainers` — `src/modules/diagnostics/entities/specimen_containers.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 3 entrantes · 7 operaciones
+- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 3 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -2859,7 +2866,9 @@ Representa recipientes que contienen muestras para identificar el soporte físic
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
 | POST /diagnostics/containers/{id}/custody-events | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/containers/{id}/custody-events | LEE | DIRECTA |
+| GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
 | GET /diagnostics/specimens/{id} | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/containers | CREA | DIRECTA |
 | POST /diagnostics/specimens/{id}/containers | LEE | DIRECTA |
@@ -3155,7 +3164,7 @@ Registra muestras biológicas asociadas a pacientes y solicitudes para mantener 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimens`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `Specimens` — `src/modules/diagnostics/entities/specimens.entity.ts`
-- **Resumen:** 21 columnas · 14 índices · 13 FK salientes · 13 entrantes · 12 operaciones
+- **Resumen:** 21 columnas · 14 índices · 13 FK salientes · 13 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -3242,12 +3251,15 @@ Registra muestras biológicas asociadas a pacientes y solicitudes para mantener 
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
 | POST /diagnostics/containers/{id}/custody-events | LEE | DIRECTA |
 | POST /diagnostics/data-quality-events | LEE | DIRECTA |
+| GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
 | POST /diagnostics/specimens | CREA | DIRECTA |
 | GET /diagnostics/specimens/{id} | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/containers | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/rejection | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/specimens/{id}/rejection | LEE | DIRECTA |
+| GET /diagnostics/work-orders | LEE | POR_SQL |
 | POST /diagnostics/work-orders | LEE | DIRECTA |
 
 #### Gobierno
