@@ -1,0 +1,196 @@
+openapi: 3.0.3
+info:
+  title: Estándar ALOVIDA — sistema de una farmacia
+  version: 1.0.0
+  description: >-
+    Lo que tiene que exponer el sistema de una farmacia para conectarse con
+    ALOVIDA solo con el formulario de la pestaña Integración (FAR-C9, D-9).
+    La plataforma llama a estos endpoints con la dirección, el código de
+    farmacia, el código de cada sucursal y la clave que la farmacia carga.
+
+
+    - **Autenticación:** la clave de la farmacia en `X-Api-Key`. Una clave
+      equivocada o de otra farmacia responde **401** (o 403).
+    - **Tiempo:** la plataforma espera como máximo 3 segundos y no reintenta.
+      Si el sistema no responde, el pedido del paciente entra «por confirmar»
+      y la conexión queda «con error».
+    - **Stock:** unidades enteras disponibles para vender en la sucursal en
+      este momento. Un producto que no aparece cuenta como 0.
+    - **Códigos:** los propios de la farmacia. La farmacia vincula cada
+      producto de la plataforma con su código en la pestaña Integración.
+
+
+    El simulador de `mock-provider-server/` implementa este contrato bajo
+    `/alovida-standard` (ver su README).
+servers:
+  - url: '{baseUrl}'
+    description: La dirección que la farmacia carga en la plataforma
+    variables:
+      baseUrl:
+        default: https://api.mi-farmacia.bo/alovida-standard
+security:
+  - apiKey: []
+paths:
+  /v1/pharmacies/{pharmacyCode}/health:
+    get:
+      operationId: health
+      summary: La farmacia responde y la clave es válida («Probar conexión»)
+      parameters:
+        - $ref: '#/components/parameters/pharmacyCode'
+      responses:
+        '200':
+          description: Responde y acepta la clave
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [OK]
+                  pharmacyCode:
+                    type: string
+                  asOf:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/pharmacies/{pharmacyCode}/products:
+    get:
+      operationId: listProducts
+      summary: Catálogo de la farmacia, con sus propios códigos
+      parameters:
+        - $ref: '#/components/parameters/pharmacyCode'
+      responses:
+        '200':
+          description: Catálogo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/pharmacies/{pharmacyCode}/sites/{siteCode}/stock:
+    get:
+      operationId: siteStock
+      summary: Stock de una sucursal, en este momento
+      parameters:
+        - $ref: '#/components/parameters/pharmacyCode'
+        - name: siteCode
+          in: path
+          required: true
+          description: Código de la sucursal en el sistema de la farmacia
+          schema:
+            type: string
+        - name: codes
+          in: query
+          required: false
+          description: Códigos separados por coma; sin él, todo el catálogo
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stock por producto
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  siteCode:
+                    type: string
+                  asOf:
+                    type: string
+                    format: date-time
+                  validUntil:
+                    type: string
+                    format: date-time
+                    description: Hasta cuándo este dato no cambia (opcional)
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StockLine'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/pharmacies/{pharmacyCode}/prices:
+    get:
+      operationId: listPrices
+      summary: Precio unitario de cada producto
+      parameters:
+        - $ref: '#/components/parameters/pharmacyCode'
+      responses:
+        '200':
+          description: Precios
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currency, items]
+                properties:
+                  currency:
+                    type: string
+                    example: BOB
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Price'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+  parameters:
+    pharmacyCode:
+      name: pharmacyCode
+      in: path
+      required: true
+      description: El código con que el sistema conoce a la farmacia
+      schema:
+        type: string
+  responses:
+    Unauthorized:
+      description: Clave ausente, equivocada o de otra farmacia
+  schemas:
+    Product:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          example: ERP-0003
+        name:
+          type: string
+          example: Amoxicilina 500 mg
+        presentation:
+          type: string
+        unitCode:
+          type: string
+          example: BOX
+    StockLine:
+      type: object
+      required: [code, quantity]
+      properties:
+        code:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+    Price:
+      type: object
+      required: [code, unitPrice]
+      properties:
+        code:
+          type: string
+        unitPrice:
+          type: number
+          minimum: 0

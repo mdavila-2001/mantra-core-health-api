@@ -25,6 +25,10 @@ export const pharmacyErpEnvSchema = Joi.object({
     .min(200)
     .max(60_000)
     .default(5_000),
+  // FAR-C9: llave para cifrar la clave de la conexión de cada farmacia. Sin
+  // ella la API arranca igual, y guardar o probar una conexión responde que
+  // falta configurar el cifrado.
+  PHARMACY_CONNECTION_SECRET_KEY: Joi.string().allow('').default(''),
 }).unknown(true);
 
 /** Configuración ya leída del entorno. */

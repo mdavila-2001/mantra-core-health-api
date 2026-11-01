@@ -152,6 +152,29 @@ export const { seeds: PHARMACY_INVENTORY_CONCEPT_SEEDS, ids: PINV } =
       display: 'Reservation line pending pharmacy confirmation',
     },
 
+    // --- Conexión de la farmacia con su propio sistema (FAR-C9) ---
+    // Estado de la última llamada o prueba, guardado en el `config_json` de su
+    // `integrations.provider_connections`. «Manual» no es un estado: es la
+    // ausencia de una conexión activa (`domain/erp-connection/pharmacy-stock-mode.ts`).
+    ERP_CONNECTION_ACTIVE: {
+      code: 'PINV_ERP_CONNECTION_ACTIVE',
+      display: 'Pharmacy system connection working',
+    },
+    ERP_CONNECTION_ERROR: {
+      code: 'PINV_ERP_CONNECTION_ERROR',
+      display: 'Pharmacy system connection failing',
+    },
+    // Motivo del error: el sistema no respondió (también por tiempo agotado)…
+    ERP_REASON_UNREACHABLE: {
+      code: 'PINV_ERP_REASON_UNREACHABLE',
+      display: 'Pharmacy system did not respond',
+    },
+    // …o rechazó la clave (401 o 403).
+    ERP_REASON_AUTH_REJECTED: {
+      code: 'PINV_ERP_REASON_AUTH_REJECTED',
+      display: 'Pharmacy system rejected the key',
+    },
+
     // --- Pedidos de paciente (FAR-E1) ---
     // El pedido se materializa sobre `inventory_reservations`; lo que lo
     // distingue de una reserva de mostrador es su `reservation_status_concept_id`:
