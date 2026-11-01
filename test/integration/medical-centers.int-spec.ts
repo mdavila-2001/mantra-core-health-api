@@ -248,6 +248,8 @@ describe('Centros médicos · recorrido completo (integración)', () => {
     const site = em.create(
       PracticeSites,
       {
+        // La sede es del tenant de su práctica (FK compuesta, infraestructura_f1b).
+        tenantId: duenoA.orgTenantId!,
         practiceId: practiceA,
         code: `${code}-${marca}`,
         name: nombre,
