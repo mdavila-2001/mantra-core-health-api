@@ -100,9 +100,21 @@ export class TenantMemberships {
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 
+  /**
+   * Identificador asociado a workday concept.
+   */
   @Property({ fieldName: 'workday_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   workdayConceptId?: string;
 
+  /**
+   * Identificador asociado a responsible user.
+   */
   @Property({ fieldName: 'responsible_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   responsibleUserId?: string;
+
+  /**
+   * Identificador asociado a origin concept.
+   */
+  @Property({ fieldName: 'origin_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  originConceptId?: string;
 }

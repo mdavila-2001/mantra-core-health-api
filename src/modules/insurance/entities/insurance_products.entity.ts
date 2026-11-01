@@ -91,4 +91,45 @@ export class InsuranceProducts {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
+  @Property({ fieldName: 'version_number', columnType: 'int', nullable: true })
+  versionNumber?: number;
+
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
+  @Property({ fieldName: 'effective_from', columnType: 'date', nullable: true })
+  effectiveFrom?: Date;
+
+  /**
+   * Valor de effective to mantenido por la instancia.
+   */
+  @Property({ fieldName: 'effective_to', columnType: 'date', nullable: true })
+  effectiveTo?: Date;
+
+  /**
+   * Valor de min age years mantenido por la instancia.
+   */
+  @Property({ fieldName: 'min_age_years', columnType: 'int', nullable: true })
+  minAgeYears?: number;
+
+  /**
+   * Valor de max age years mantenido por la instancia.
+   */
+  @Property({ fieldName: 'max_age_years', columnType: 'int', nullable: true })
+  maxAgeYears?: number;
+
+  /**
+   * Valor de eligibility requirements mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'eligibility_requirements',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  eligibilityRequirements?: unknown;
 }
