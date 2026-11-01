@@ -194,5 +194,29 @@ describe('AuthzClinicalScopeService', () => {
         ),
       ).toThrow(PreconditionFailedException);
     });
+
+    it('un SUPERADMIN acotado (al tenant de la fila o a otro) no revoca sin tenant en el contexto (#1241)', () => {
+      const { scope } = buildClinicalScope();
+      for (const tenantId of [ACTIVE_TENANT, 'tenant-otra']) {
+        expect(() =>
+          scope.scopeRevocation(
+            row,
+            {
+              id: 'sa',
+              roles: ['SUPERADMIN'],
+              scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+            } as any,
+            failure,
+          ),
+        ).toThrow(PreconditionFailedException);
+      }
+      expect(
+        scope.scopeRevocation(
+          row,
+          { id: 'sa-g', roles: ['SUPERADMIN'] } as any,
+          failure,
+        ),
+      ).toBe(row);
+    });
   });
 });
