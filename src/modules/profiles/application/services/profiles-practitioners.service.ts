@@ -92,6 +92,12 @@ import {
   type PersonAddressSummary,
   type PersonRecordsPort,
 } from '../ports/person-records.port';
+import {
+  ManagePractitionerPhotoUseCase,
+  ManagePractitionerSpecialtiesUseCase,
+  ManagePractitionerLicensesUseCase,
+  ManagePractitionerCredentialsUseCase,
+} from '../use-cases/practitioners';
 
 interface PersonContactRecord {
   readonly value: string;
@@ -190,25 +196,6 @@ const PUBLISHABLE_STATES = [
   PROF.AFFILIATION_APPROVED,
 ] as const;
 
-/**
- * Corta si el concepto no es una profesión de la COB-2023 (`VS_BO_PROFESSION`).
- *
- * La FK acepta cualquier concepto del catálogo; quién decide qué es una
- * profesión es la clasificación, igual que `TIPOS_DE_CREDENCIAL` para el tipo.
- */
-function assertClassificationProfession(
-  professionConceptId: string | undefined,
-): void {
-  if (
-    professionConceptId !== undefined &&
-    !BO_PROFESSION_CONCEPT_IDS.has(professionConceptId)
-  ) {
-    throw new PreconditionFailedException(
-      'Esa profesión no está en la Clasificación de Ocupaciones de Bolivia',
-      { professionConceptId },
-    );
-  }
-}
 
 @Injectable()
 export class ProfilesPractitionersService {
@@ -263,7 +250,41 @@ export class ProfilesPractitionersService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
+    this.photoUseCase = new ManagePractitionerPhotoUseCase(
+      this.em,
+      this.logger,
+      this.ownership,
+      this.practitionersRepo,
+      this.attachableFiles,
+    );
+    this.specialtiesUseCase = new ManagePractitionerSpecialtiesUseCase(
+      this.em,
+      this.logger,
+      this.ownership,
+      this.specialtiesRepo,
+      this.specialtyCatalog,
+    );
+    this.licensesUseCase = new ManagePractitionerLicensesUseCase(
+      this.em,
+      this.logger,
+      this.ownership,
+      this.authorizationsRepo,
+      this.attachableFiles,
+      this.practitionerContext,
+    );
+    this.credentialsUseCase = new ManagePractitionerCredentialsUseCase(
+      this.em,
+      this.logger,
+      this.ownership,
+      this.credentialsRepo,
+      this.attachableFiles,
+    );
   }
+
+  private readonly photoUseCase: ManagePractitionerPhotoUseCase;
+  private readonly specialtiesUseCase: ManagePractitionerSpecialtiesUseCase;
+  private readonly licensesUseCase: ManagePractitionerLicensesUseCase;
+  private readonly credentialsUseCase: ManagePractitionerCredentialsUseCase;
 
   /**
    * El perfil profesional propio — la lectura que le faltaba al módulo.
@@ -1815,95 +1836,18 @@ export class ProfilesPractitionersService {
     dto: SetPractitionerPhotoDto,
     actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
-    this.logger.info(
-      {
-        operation: 'profiles.practitioner.setPhoto',
-        profileId,
-        actorId: actor.id,
-      },
-      'Setting practitioner profile photo',
-    );
-
-    await this.em.transactional(async (tx) => {
-      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
-      const practitioner = await this.practitionersRepo.findById(tx, profileId);
-      if (!practitioner) {
-        throw new ResourceNotFoundException(
-          'Profesional no encontrado',
-          {
-            profileId,
-          },
-          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
-        );
-      }
-      // Dentro de la misma transacción que la escritura: comprobar contra un
-      // estado y escribir sobre otro no comprueba nada.
-      await this.attachableFiles.assertUsableBy(
-        tx,
-        dto.fileId,
-        actor,
-        {
-          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
-          operation: 'profiles.practitioner.setPhoto',
-        },
-        {
-          subject: 'El archivo de la foto',
-          notFound: 'El archivo de la foto no existe',
-        },
-      );
-      practitioner.photoFileId = dto.fileId;
-      touch(practitioner, actor.id);
-      await tx.flush();
-    });
-
+    await this.photoUseCase.setPhoto(profileId, dto, actor);
     return this.getPractitionerSummary(profileId);
   }
 
   /**
    * Quita la foto del perfil profesional.
-   *
-   * Deja `photo_file_id` en nulo y no toca el archivo: quitar la foto de la
-   * ficha es una decisión de presentación, borrar un archivo del almacenamiento
-   * es otra cosa y tiene su propio camino. Es idempotente —quitar la foto de un
-   * perfil que no tiene se responde igual—, porque el resultado que el cliente
-   * pidió es el que queda.
-   *
-   * @param profileId - Perfil profesional cuya foto se quita.
-   * @param actor - Quien pide la operación.
-   * @returns El perfil releído, ya sin foto.
-   * @throws ForbiddenException si no es el titular ni plataforma.
-   * @throws ResourceNotFoundException si el perfil no existe.
    */
   async removePractitionerPhoto(
     profileId: string,
     actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
-    this.logger.info(
-      {
-        operation: 'profiles.practitioner.removePhoto',
-        profileId,
-        actorId: actor.id,
-      },
-      'Removing practitioner profile photo',
-    );
-
-    await this.em.transactional(async (tx) => {
-      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
-      const practitioner = await this.practitionersRepo.findById(tx, profileId);
-      if (!practitioner) {
-        throw new ResourceNotFoundException(
-          'Profesional no encontrado',
-          {
-            profileId,
-          },
-          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
-        );
-      }
-      practitioner.photoFileId = undefined;
-      touch(practitioner, actor.id);
-      await tx.flush();
-    });
-
+    await this.photoUseCase.removePhoto(profileId, actor);
     return this.getPractitionerSummary(profileId);
   }
 
@@ -2565,323 +2509,37 @@ export class ProfilesPractitionersService {
     specialtyId: string,
     actor: AuthenticatedUser,
   ): Promise<SpecialtyResponseDto> {
-    this.logger.info(
-      {
-        operation: 'profiles.specialty.setPrimary',
-        specialtyId,
-        actorId: actor.id,
-      },
-      'Setting primary specialty',
-    );
-    return this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
-      const specialty = await this.specialtiesRepo.findById(tx, specialtyId);
-      // La ajena y la inexistente responden lo mismo: decir «existe pero no es
-      // tuya» ya es contar algo del perfil de otro.
-      if (!specialty || specialty.practitionerProfileId !== profileId) {
-        throw new ResourceNotFoundException('Especialidad no encontrada', {
-          specialtyId,
-        });
-      }
-
-      // Una que ya no se ejerce no puede ser con la que uno se presenta. El
-      // modelo lo deja pasar —`is_primary` no mira `valid_to`— así que la regla
-      // vive acá, que es donde se decide.
-      if (specialty.validTo) {
-        throw new PreconditionFailedException(
-          'Una especialidad que ya no ejerce no puede ser la principal',
-          { specialtyId, validTo: specialty.validTo },
-        );
-      }
-
-      if (specialty.isPrimary !== true) {
-        const now = new Date();
-        // Primero se baja la anterior: hay una sola vigente, y dejar dos
-        // marcadas aunque sea por un instante rompe la lectura del perfil.
-        await this.specialtiesRepo.demotePrimary(tx, profileId, now);
-        specialty.isPrimary = true;
-        touch(specialty, actor.id);
-        await tx.flush();
-      }
-
-      return {
-        id: specialty.id,
-        specialtyConceptId: specialty.specialtyConceptId,
-        isPrimary: specialty.isPrimary ?? false,
-        verificationStatus: specialty.verificationStatusConceptId,
-        createdAt: specialty.createdAt,
-      };
-    });
+    return this.specialtiesUseCase.setOwnPrimarySpecialty(specialtyId, actor);
   }
 
-  /**
-   * Corrige una especialidad propia que sigue pendiente de verificación
-   * (ID-07). `isPrimary` no viaja: tiene su ruta (`setOwnPrimarySpecialty`).
-   *
-   * Cambiar `specialtyConceptId` respeta las reglas del alta: pertenece al
-   * catálogo y no duplica una vigente.
-   *
-   * @throws ResourceNotFoundException si no existe o es de otro profesional.
-   * @throws PreconditionFailedException si ya no está pendiente o ya no se ejerce.
-   */
   async updateOwnSpecialty(
     specialtyId: string,
     dto: UpdateOwnSpecialtyDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
-      const specialty = await this.specialtiesRepo.findByIdForUpdate(
-        tx,
-        specialtyId,
-      );
-      if (!specialty || specialty.practitionerProfileId !== profileId) {
-        throw new ResourceNotFoundException('Especialidad no encontrada', {
-          specialtyId,
-        });
-      }
-      this.assertSpecialtyEditable(specialty, 'corregir');
-
-      if (
-        dto.specialtyConceptId !== undefined &&
-        dto.specialtyConceptId !== specialty.specialtyConceptId
-      ) {
-        await this.specialtyCatalog.assertIsMedicalSpecialty(
-          tx,
-          dto.specialtyConceptId,
-        );
-        const duplicate = await this.specialtiesRepo.findActive(
-          tx,
-          profileId,
-          dto.specialtyConceptId,
-        );
-        if (duplicate) {
-          throw new ConflictException(
-            'El profesional ya tiene esa especialidad activa',
-            { specialtyConceptId: dto.specialtyConceptId },
-          );
-        }
-        specialty.specialtyConceptId = dto.specialtyConceptId;
-      }
-      if (dto.boardCertified !== undefined) {
-        specialty.boardCertified = dto.boardCertified;
-      }
-      touch(specialty, actor.id);
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'profiles.specialty.updateOwn',
-          specialtyId,
-          actorId: actor.id,
-        },
-        'Own specialty updated',
-      );
-    });
+    return this.specialtiesUseCase.updateOwnSpecialty(specialtyId, dto, actor);
   }
 
-  /**
-   * Retira una especialidad propia pendiente (ID-07).
-   *
-   * Si era la principal el perfil queda sin principal: no se promueve otra en
-   * silencio, porque elegir con cuál se presenta es decisión del titular.
-   */
   async removeOwnSpecialty(
     specialtyId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
-      const specialty = await this.specialtiesRepo.findByIdForUpdate(
-        tx,
-        specialtyId,
-      );
-      if (!specialty || specialty.practitionerProfileId !== profileId) {
-        throw new ResourceNotFoundException('Especialidad no encontrada', {
-          specialtyId,
-        });
-      }
-      this.assertSpecialtyEditable(specialty, 'retirar');
-
-      this.specialtiesRepo.remove(tx, specialty);
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'profiles.specialty.removeOwn',
-          specialtyId,
-          actorId: actor.id,
-        },
-        'Own specialty removed',
-      );
-    });
+    return this.specialtiesUseCase.removeOwnSpecialty(specialtyId, actor);
   }
 
-  /** Una especialidad verificada, rechazada o dada de baja es un hecho, no un borrador. */
-  private assertSpecialtyEditable(
-    specialty: {
-      id: string;
-      verificationStatusConceptId: string;
-      validTo?: Date | null;
-    },
-    verb: 'corregir' | 'retirar',
-  ): void {
-    if (
-      specialty.verificationStatusConceptId !== PROF.SPEC_VERIF_PENDING ||
-      specialty.validTo
-    ) {
-      throw new PreconditionFailedException(
-        `Esa especialidad ya no está pendiente de verificación; no se puede ${verb}`,
-        {
-          specialtyId: specialty.id,
-          verificationStatusConceptId: specialty.verificationStatusConceptId,
-        },
-      );
-    }
-  }
-
-  /**
-   * Corrige una matrícula propia pendiente (ID-08). Sólo en `AUTH_PENDING` y
-   * sin un caso de verificación de identidad abierto: mientras la autoridad la
-   * está revisando, cambiarla por debajo invalidaría lo que revisa.
-   */
   async updateOwnLicense(
     licenseId: string,
     dto: UpdateOwnLicenseDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.em.transactional(async (tx) => {
-      const license = await this.lockOwnEditableLicense(
-        tx,
-        licenseId,
-        actor,
-        'corregir',
-      );
-
-      if (dto.fileId !== undefined) {
-        await this.attachableFiles.assertUsableBy(
-          tx,
-          dto.fileId,
-          actor,
-          {
-            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
-            operation: 'profiles.authorization.updateOwn',
-          },
-          {
-            subject: 'El archivo de la matrícula',
-            notFound: 'El archivo de la matrícula no existe',
-          },
-        );
-        license.fileId = dto.fileId;
-      }
-      if (dto.licenseNumber !== undefined) {
-        license.licenseNumber = dto.licenseNumber.trim();
-      }
-      if (dto.regulatoryAuthority !== undefined) {
-        license.regulatoryAuthority = dto.regulatoryAuthority.trim();
-      }
-      if (dto.validFrom !== undefined) {
-        license.validFrom = new Date(dto.validFrom);
-      }
-      touch(license, actor.id);
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'profiles.authorization.updateOwn',
-          licenseId,
-          actorId: actor.id,
-        },
-        'Own license updated',
-      );
-    });
+    return this.licensesUseCase.updateOwnLicense(licenseId, dto, actor);
   }
 
-  /**
-   * Retira una matrícula propia pendiente (ID-08).
-   *
-   * Además de las reglas de la corrección: si la auditoría ya tiene historia de
-   * esa matrícula **no se borra** (la FK de `audit` la referencia sin
-   * `ON DELETE`) y responde 422 con el motivo. Se mira antes en vez de capturar
-   * un `23503` a ciegas.
-   */
   async removeOwnLicense(
     licenseId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.em.transactional(async (tx) => {
-      const license = await this.lockOwnEditableLicense(
-        tx,
-        licenseId,
-        actor,
-        'retirar',
-      );
-
-      if (
-        await this.practitionerContext.hasAuthorizationHistory(tx, licenseId)
-      ) {
-        throw new PreconditionFailedException(
-          'Esa matrícula ya tiene historial de auditoría; no se puede borrar',
-          { licenseId },
-        );
-      }
-
-      this.authorizationsRepo.remove(tx, license);
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'profiles.authorization.removeOwn',
-          licenseId,
-          actorId: actor.id,
-        },
-        'Own license removed',
-      );
-    });
-  }
-
-  /** Dueño por sesión, bloqueo de fila, pendiente y sin caso de verificación abierto. */
-  private async lockOwnEditableLicense(
-    tx: EntityManager,
-    licenseId: string,
-    actor: AuthenticatedUser,
-    verb: 'corregir' | 'retirar',
-  ) {
-    const profileId = await this.ownership.requireOwnPractitionerProfileId(
-      tx,
-      actor,
-    );
-    const license = await this.authorizationsRepo.findByIdForUpdate(
-      tx,
-      licenseId,
-    );
-    if (!license || license.practitionerProfileId !== profileId) {
-      throw new ResourceNotFoundException('Matrícula no encontrada', {
-        licenseId,
-      });
-    }
-    if (license.stateConceptId !== PROF.AUTH_PENDING) {
-      throw new PreconditionFailedException(
-        `Esa matrícula ya no está pendiente; no se puede ${verb}`,
-        { licenseId, stateConceptId: license.stateConceptId },
-      );
-    }
-    if (await this.practitionerContext.hasOpenIdentityCase(tx, licenseId)) {
-      throw new PreconditionFailedException(
-        `Esa matrícula tiene una verificación en curso; no se puede ${verb}`,
-        { licenseId },
-      );
-    }
-    return license;
+    return this.licensesUseCase.removeOwnLicense(licenseId, actor);
   }
 
   /* -- UC-05-16: historial laboral del profesional -------------------------- */
@@ -3324,260 +2982,28 @@ export class ProfilesPractitionersService {
    * estado de cita. Quién decide cuáles son tipos de credencial es la
    * enumeración `professional-credential-type`, la misma que siembra la app.
    */
-  private static readonly CREDENTIAL_TYPES: readonly string[] = [
-    PROF.CREDENTIAL_TYPE_DEGREE,
-    PROF.CREDENTIAL_TYPE_DIPLOMA,
-    PROF.CREDENTIAL_TYPE_MASTER,
-    PROF.CREDENTIAL_TYPE_DOCTORATE,
-    PROF.CREDENTIAL_TYPE_SPECIALTY,
-  ];
+  public static readonly CREDENTIAL_TYPES = ManagePractitionerCredentialsUseCase.CREDENTIAL_TYPES;
 
-  /**
-   * Agrega un título propio a la formación, con su diploma adjunto.
-   *
-   * El registro de procesos pide «espacio para poder subir varios diplomados»
-   * —y lo mismo para maestrías, doctorados y especialidades—, pero tanto el
-   * alta administrativa como la de autorregistro creaban **una** credencial y
-   * ahí terminaba: no había forma de agregar la segunda. Cada llamada agrega
-   * una fila.
-   *
-   * Nace PENDIENTE a propósito: declarar un título no es haberlo acreditado, y
-   * quien lo verifica es `POST /profiles/credentials/{id}/verify`, que exige
-   * `SECURITY_ADMIN`. Si el alta lo diera por verificado, el sello del perfil
-   * dejaría de significar algo.
-   */
   async addOwnCredential(
     dto: AddOwnCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<OwnCredentialResponseDto> {
-    if (
-      !ProfilesPractitionersService.CREDENTIAL_TYPES.includes(
-        dto.credentialTypeConceptId,
-      )
-    ) {
-      throw new PreconditionFailedException(
-        'Ese concepto no es un tipo de credencial profesional',
-        { credentialTypeConceptId: dto.credentialTypeConceptId },
-        ProfilesErrorReason.CREDENTIAL_TYPE_INVALID,
-      );
-    }
-    assertClassificationProfession(dto.professionConceptId);
-
-    this.logger.info(
-      { operation: 'profiles.credential.addOwn', actorId: actor.id },
-      'Adding own professional credential',
-    );
-
-    const created = await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
-
-      // Dentro de la MISMA transacción que la escritura: comprobar el archivo
-      // contra un estado y escribir sobre otro no comprueba nada. `assertUsableBy`
-      // es también lo que impide colgarse del archivo de otro.
-      if (dto.fileId !== undefined) {
-        await this.attachableFiles.assertUsableBy(
-          tx,
-          dto.fileId,
-          actor,
-          {
-            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
-            operation: 'profiles.credential.addOwn',
-          },
-          {
-            subject: 'El archivo del título',
-            notFound: 'El archivo del título no existe',
-          },
-        );
-      }
-
-      const credential = this.credentialsRepo.create(tx, {
-        practitionerProfileId: profileId,
-        credentialTypeConceptId: dto.credentialTypeConceptId,
-        number: dto.number.trim(),
-        issuingInstitutionText: dto.issuingInstitutionText?.trim(),
-        issuingCityText: dto.issuingCityText?.trim() || undefined,
-        issuingCountryText: dto.issuingCountryText?.trim() || undefined,
-        professionConceptId: dto.professionConceptId,
-        titleText: dto.titleText?.trim() || undefined,
-        issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
-        fileId: dto.fileId,
-        stateConceptId: PROF.CRED_PENDING,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
-      return credential;
-    });
-
-    return {
-      id: created.id,
-      credentialTypeConceptId: created.credentialTypeConceptId,
-      number: created.number,
-      issuingInstitutionText: created.issuingInstitutionText,
-      issuingCityText: created.issuingCityText,
-      issuingCountryText: created.issuingCountryText,
-      professionConceptId: created.professionConceptId,
-      titleText: created.titleText,
-      issueDate: created.issueDate,
-      stateConceptId: created.stateConceptId,
-      fileId: created.fileId,
-      createdAt: created.createdAt,
-    };
+    return this.credentialsUseCase.addOwnCredential(dto, actor);
   }
 
-  /**
-   * Corrige una credencial propia mientras siga pendiente de revisión.
-   * Reutiliza el propietario resuelto desde la sesión y el control existente
-   * del ciclo de vida/propiedad de archivos.
-   */
   async updateOwnCredential(
     credentialId: string,
     dto: UpdateOwnCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (
-      dto.credentialTypeConceptId !== undefined &&
-      !ProfilesPractitionersService.CREDENTIAL_TYPES.includes(
-        dto.credentialTypeConceptId,
-      )
-    ) {
-      throw new PreconditionFailedException(
-        'Ese concepto no es un tipo de credencial profesional',
-        { credentialTypeConceptId: dto.credentialTypeConceptId },
-      );
-    }
-    assertClassificationProfession(dto.professionConceptId);
-
-    await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
-      const credential = await this.credentialsRepo.findByIdForUpdate(
-        tx,
-        credentialId,
-      );
-      if (!credential || credential.practitionerProfileId !== profileId) {
-        throw new ResourceNotFoundException('Título no encontrado', {
-          credentialId,
-        });
-      }
-      if (credential.stateConceptId !== PROF.CRED_PENDING) {
-        throw new PreconditionFailedException(
-          'Ese título ya fue verificado o rechazado; no se puede editar',
-          { credentialId, stateConceptId: credential.stateConceptId },
-        );
-      }
-
-      if (dto.fileId !== undefined) {
-        await this.attachableFiles.assertUsableBy(
-          tx,
-          dto.fileId,
-          actor,
-          {
-            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
-            operation: 'profiles.credential.updateOwn',
-          },
-          {
-            subject: 'El archivo del título',
-            notFound: 'El archivo del título no existe',
-          },
-        );
-      }
-
-      if (dto.credentialTypeConceptId !== undefined) {
-        credential.credentialTypeConceptId = dto.credentialTypeConceptId;
-      }
-      if (dto.number !== undefined) credential.number = dto.number.trim();
-      if (dto.issuingInstitutionText !== undefined) {
-        credential.issuingInstitutionText = dto.issuingInstitutionText.trim();
-      }
-      if (dto.issuingCityText !== undefined) {
-        credential.issuingCityText = dto.issuingCityText.trim() || undefined;
-      }
-      if (dto.issuingCountryText !== undefined) {
-        credential.issuingCountryText =
-          dto.issuingCountryText.trim() || undefined;
-      }
-      if (dto.professionConceptId !== undefined) {
-        credential.professionConceptId = dto.professionConceptId;
-      }
-      if (dto.titleText !== undefined) {
-        credential.titleText = dto.titleText.trim() || undefined;
-      }
-      if (dto.issueDate !== undefined) {
-        credential.issueDate = new Date(dto.issueDate);
-      }
-      if (dto.fileId !== undefined) credential.fileId = dto.fileId;
-      touch(credential, actor.id);
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'profiles.credential.updateOwn',
-          credentialId,
-          actorId: actor.id,
-        },
-        'Own professional credential updated',
-      );
-    });
+    return this.credentialsUseCase.updateOwnCredential(credentialId, dto, actor);
   }
 
-  /**
-   * Retira un título propio cargado por error (ALV-009/formación).
-   *
-   * Sólo mientras está PENDIENTE: uno ya verificado o rechazado es un hecho
-   * de la autoridad que lo revisó —`POST /profiles/credentials/{id}/verify`,
-   * `SECURITY_ADMIN`—, no algo que el titular deshace borrándolo. Un id ajeno
-   * y uno inexistente responden igual (`404`), mismo criterio que
-   * `propiaONada` para las afiliaciones: no hay tabla `state=WITHDRAWN`, así
-   * que es borrado físico, como el resto de las altas «solo se agrega» de
-   * este perfil (matrícula, especialidad).
-   *
-   * @param credentialId - El título a retirar.
-   * @param actor - El profesional titular.
-   * @throws ResourceNotFoundException si no existe o es de otro profesional.
-   * @throws PreconditionFailedException si ya no está pendiente.
-   */
   async removeOwnCredential(
     credentialId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.em.transactional(async (tx) => {
-      const profileId = await this.ownership.requireOwnPractitionerProfileId(
-        tx,
-        actor,
-      );
-      const credential = await this.credentialsRepo.findByIdForUpdate(
-        tx,
-        credentialId,
-      );
-      if (!credential || credential.practitionerProfileId !== profileId) {
-        throw new ResourceNotFoundException('Título no encontrado', {
-          credentialId,
-        });
-      }
-      if (credential.stateConceptId !== PROF.CRED_PENDING) {
-        throw new PreconditionFailedException(
-          'Ese título ya fue verificado o rechazado; no se puede retirar',
-          { credentialId, stateConceptId: credential.stateConceptId },
-        );
-      }
-
-      this.credentialsRepo.remove(tx, credential);
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'profiles.credential.removeOwn',
-          credentialId,
-          actorId: actor.id,
-        },
-        'Own professional credential removed',
-      );
-    });
+    return this.credentialsUseCase.removeOwnCredential(credentialId, actor);
   }
 }
 

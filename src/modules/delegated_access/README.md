@@ -15,7 +15,7 @@ delegante y delegado quedan siempre auditados en `delegation_events`.
   find src/modules/delegated_access -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **7 controllers, 31 rutas HTTP, 7 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **7 controllers, 31 rutas HTTP, 7 entidades y 6 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -23,39 +23,39 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `delegated_access_approval_requests`, `delegated_access_grants`, `delegated_permission_set_items`, `delegated_permission_sets`, `delegation_events`, `organization_user_assignments`, `practitioner_delegate_assignments`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /access-requests/:id/decision` | SECURITY_ADMIN | `access-requests` |
-| `POST /delegated-access/expiry-sweep` | SYSTEM, SECURITY_ADMIN | `delegated-access-authz` |
-| `POST /authz/effective-actor/evaluate` | SECURITY_ADMIN | `delegated-access-authz` |
-| `GET /delegated-permission-sets` | SECURITY_ADMIN | `delegated-permission-sets` |
-| `POST /delegated-permission-sets` | SECURITY_ADMIN | `delegated-permission-sets` |
-| `POST /delegated-permission-sets/:id/versions` | SECURITY_ADMIN | `delegated-permission-sets` |
-| `POST /org/:tenantMembershipId/user-assignments` | SECURITY_ADMIN | `org-user-assignments` |
-| `PATCH /org/user-assignments/:id` | SECURITY_ADMIN | `org-user-assignments` |
-| `POST /practitioner-delegates` | SECURITY_ADMIN | `practitioner-delegates` |
-| `POST /practitioner-delegates/:id/access-requests` | SECURITY_ADMIN | `practitioner-delegates` |
-| `POST /practitioner-delegates/:id/grants` | SECURITY_ADMIN | `practitioner-delegates` |
-| `POST /practitioner-delegates/:id/revoke` | SECURITY_ADMIN | `practitioner-delegates` |
-| `GET /me/support-engagements` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `GET /me/support-access` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `GET /me/support-catalog` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `POST /support-engagement-requests` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `POST /me/support-engagements/:id/confirm` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `POST /me/support-engagements/:id/decline` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `POST /me/support-engagements/:id/leave` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `GET /me/support-agenda` | SUPPORT_STAFF (sin tenant) | `support-staff` |
-| `GET /org/support-catalog` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
-| `GET /org/support-engagement-requests` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
-| `POST /org/support-engagement-requests/:id/decision` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
-| `GET /org/support-engagements` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
-| `POST /org/support-engagements/:id/end` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
-| `POST /org/team/invitations` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
-| `GET /me/practitioner/support-team` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
-| `POST /practitioner-delegates/:id/accept` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
-| `POST /practitioner-delegates/:id/reject` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
-| `POST /me/practitioner/support-team/:id/end` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
-| `POST /me/practitioner/support-invitations` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
+| Método y ruta                                        | Acceso                                          | Controller                  |
+| ---------------------------------------------------- | ----------------------------------------------- | --------------------------- |
+| `POST /access-requests/:id/decision`                 | SECURITY_ADMIN                                  | `access-requests`           |
+| `POST /delegated-access/expiry-sweep`                | SYSTEM, SECURITY_ADMIN                          | `delegated-access-authz`    |
+| `POST /authz/effective-actor/evaluate`               | SECURITY_ADMIN                                  | `delegated-access-authz`    |
+| `GET /delegated-permission-sets`                     | SECURITY_ADMIN                                  | `delegated-permission-sets` |
+| `POST /delegated-permission-sets`                    | SECURITY_ADMIN                                  | `delegated-permission-sets` |
+| `POST /delegated-permission-sets/:id/versions`       | SECURITY_ADMIN                                  | `delegated-permission-sets` |
+| `POST /org/:tenantMembershipId/user-assignments`     | SECURITY_ADMIN                                  | `org-user-assignments`      |
+| `PATCH /org/user-assignments/:id`                    | SECURITY_ADMIN                                  | `org-user-assignments`      |
+| `POST /practitioner-delegates`                       | SECURITY_ADMIN                                  | `practitioner-delegates`    |
+| `POST /practitioner-delegates/:id/access-requests`   | SECURITY_ADMIN                                  | `practitioner-delegates`    |
+| `POST /practitioner-delegates/:id/grants`            | SECURITY_ADMIN                                  | `practitioner-delegates`    |
+| `POST /practitioner-delegates/:id/revoke`            | SECURITY_ADMIN                                  | `practitioner-delegates`    |
+| `GET /me/support-engagements`                        | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `GET /me/support-access`                             | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `GET /me/support-catalog`                            | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `POST /support-engagement-requests`                  | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `POST /me/support-engagements/:id/confirm`           | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `POST /me/support-engagements/:id/decline`           | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `POST /me/support-engagements/:id/leave`             | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `GET /me/support-agenda`                             | SUPPORT_STAFF (sin tenant)                      | `support-staff`             |
+| `GET /org/support-catalog`                           | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff`             |
+| `GET /org/support-engagement-requests`               | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff`             |
+| `POST /org/support-engagement-requests/:id/decision` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff`             |
+| `GET /org/support-engagements`                       | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff`             |
+| `POST /org/support-engagements/:id/end`              | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff`             |
+| `POST /org/team/invitations`                         | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff`             |
+| `GET /me/practitioner/support-team`                  | PRACTITIONER, CLINICIAN (sin tenant)            | `practitioner-support`      |
+| `POST /practitioner-delegates/:id/accept`            | PRACTITIONER, CLINICIAN (sin tenant)            | `practitioner-support`      |
+| `POST /practitioner-delegates/:id/reject`            | PRACTITIONER, CLINICIAN (sin tenant)            | `practitioner-support`      |
+| `POST /me/practitioner/support-team/:id/end`         | PRACTITIONER, CLINICIAN (sin tenant)            | `practitioner-support`      |
+| `POST /me/practitioner/support-invitations`          | PRACTITIONER, CLINICIAN (sin tenant)            | `practitioner-support`      |
 
 ## Secretarias (personal de apoyo hospitalario)
 
@@ -89,19 +89,19 @@ cuerpos no se guardan: las tablas no tienen columna para ellos.
 
 ## Endpoints (UC → ruta)
 
-| UC | Método y ruta | Descripción | Permiso |
-|----|---------------|-------------|---------|
+| UC       | Método y ruta                                       | Descripción                                       | Permiso          |
+| -------- | --------------------------------------------------- | ------------------------------------------------- | ---------------- |
 | UC-29-01 | `POST /org/{tenant_membership_id}/user-assignments` | Asignar usuario de organización (scoped, vigente) | `SECURITY_ADMIN` |
-| UC-29-02 | `POST /delegated-permission-sets` | Publicar set de permisos delegados (v1) | `SECURITY_ADMIN` |
-| UC-29-02 | `POST /delegated-permission-sets/{id}/versions` | Versionar set (reemplazo all-or-nothing) | `SECURITY_ADMIN` |
-| UC-29-03 | `POST /practitioner-delegates` | Crear delegación de practitioner | `SECURITY_ADMIN` |
-| UC-29-04 | `POST /practitioner-delegates/{id}/access-requests` | Solicitar acceso delegado (aprobación previa) | `SECURITY_ADMIN` |
-| UC-29-05 | `POST /access-requests/{id}/decision` | Aprobar/Denegar y emitir grant scoped | `SECURITY_ADMIN` |
-| UC-29-06 | `POST /practitioner-delegates/{id}/grants` | Grant pre-autorizado por-propósito y temporal | `SECURITY_ADMIN` |
-| UC-29-07 | `POST /practitioner-delegates/{id}/revoke` | Revocar delegación inmediata (cascada) | `SECURITY_ADMIN` |
-| UC-29-08 | `POST /delegated-access/expiry-sweep` | Expirar delegaciones y grants vencidos | `SECURITY_ADMIN` |
-| UC-29-09 | `POST /authz/effective-actor/evaluate` | Evaluar actor efectivo por propósito (step-up) | `SECURITY_ADMIN` |
-| UC-29-10 | `PATCH /org/user-assignments/{id}` | Reasignar supervisor / suspender (cascada) | `SECURITY_ADMIN` |
+| UC-29-02 | `POST /delegated-permission-sets`                   | Publicar set de permisos delegados (v1)           | `SECURITY_ADMIN` |
+| UC-29-02 | `POST /delegated-permission-sets/{id}/versions`     | Versionar set (reemplazo all-or-nothing)          | `SECURITY_ADMIN` |
+| UC-29-03 | `POST /practitioner-delegates`                      | Crear delegación de practitioner                  | `SECURITY_ADMIN` |
+| UC-29-04 | `POST /practitioner-delegates/{id}/access-requests` | Solicitar acceso delegado (aprobación previa)     | `SECURITY_ADMIN` |
+| UC-29-05 | `POST /access-requests/{id}/decision`               | Aprobar/Denegar y emitir grant scoped             | `SECURITY_ADMIN` |
+| UC-29-06 | `POST /practitioner-delegates/{id}/grants`          | Grant pre-autorizado por-propósito y temporal     | `SECURITY_ADMIN` |
+| UC-29-07 | `POST /practitioner-delegates/{id}/revoke`          | Revocar delegación inmediata (cascada)            | `SECURITY_ADMIN` |
+| UC-29-08 | `POST /delegated-access/expiry-sweep`               | Expirar delegaciones y grants vencidos            | `SECURITY_ADMIN` |
+| UC-29-09 | `POST /authz/effective-actor/evaluate`              | Evaluar actor efectivo por propósito (step-up)    | `SECURITY_ADMIN` |
+| UC-29-10 | `PATCH /org/user-assignments/{id}`                  | Reasignar supervisor / suspender (cascada)        | `SECURITY_ADMIN` |
 
 ## Entidades (esquema `delegated_access`)
 

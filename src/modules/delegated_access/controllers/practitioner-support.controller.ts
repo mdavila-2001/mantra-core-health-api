@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Ip,
   Param,
   ParseUUIDPipe,
   Post,
@@ -18,13 +19,16 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import {
+  CreatePractitionerSupportStaffDto,
+  CreatedSupportStaffViewDto,
   PractitionerInviteSupportDto,
   SupportLinkListDto,
   SupportLinkReasonDto,
   SupportLinksCreatedDto,
   SupportLinkViewDto,
-} from '../dto/support-staff.dto';
+} from '../dto';
 import { SupportStaffService } from '../services/support-staff.service';
+import { SupportStaffProvisioningService } from '../services/support-staff-provisioning.service';
 
 /**
  * El doctor y sus secretarias: ve su equipo, acepta o rechaza a quien pidió
@@ -45,8 +49,12 @@ export class PractitionerSupportController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param support - Casos de uso de los vínculos de la secretaria.
+   * @param provisioning - Provisión y alta directa de secretarias.
    */
-  constructor(private readonly support: SupportStaffService) {}
+  constructor(
+    private readonly support: SupportStaffService,
+    private readonly provisioning: SupportStaffProvisioningService,
+  ) {}
 
   /** Sus secretarias, activas y pendientes. */
   @Get('me/practitioner/support-team')
@@ -130,5 +138,27 @@ export class PractitionerSupportController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SupportLinksCreatedDto> {
     return this.support.inviteForPractitioner(dto, actor);
+  }
+
+  /** Crea la cuenta de una secretaria y la vincula de inmediato con estado ACTIVE. */
+  @Audited({
+    action: 'SUPPORT_STAFF_PROVISIONED_BY_PRACTITIONER',
+    entity: 'practitioner_support_assignment',
+    entityId: 'result.linkId',
+  })
+  @Post('me/practitioner/support-staff')
+  @TenantAgnostic()
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear cuenta de secretaria y vincularla de inmediato',
+  })
+  createSecretary(
+    @Body() dto: CreatePractitionerSupportStaffDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Ip() ip: string,
+  ): Promise<CreatedSupportStaffViewDto> {
+    return this.provisioning.provisionForPractitioner(dto, actor, ip);
   }
 }
