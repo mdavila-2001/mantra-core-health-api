@@ -238,7 +238,9 @@ x-app-env: &app-env
   # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
   AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
-  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  # Encendido por defecto (C-3). Con NODE_ENV=production cualquier otro valor
+  # aborta el arranque (SYSTEM_RLS_ENFORCE_DISABLED).
+  RLS_ENFORCE: ${RLS_ENFORCE:-true}
   # El bypass de verificación aborta el arranque si llega en `true` con
   # NODE_ENV=production; se deja escrito para que nadie lo herede de un `.env`.
   DEV_VERIFICATION_BYPASS: "false"
@@ -731,6 +733,12 @@ services:
       # que hereda del ancla para que `buildOrmConfig` caiga a DB_USER (HZ-05).
       DB_APP_USER: ""
       DB_APP_PASSWORD: ""
+      # El vacío de arriba no alcanza en Coolify: lo trata como «sin valor» y lo
+      # rellena con la variable de la app (`mantra_app`). El propósito es lo que
+      # decide: `resolveRuntimeCredentials` usa el rol dueño con `migration`. Va
+      # en el entorno y no sólo en `seed-cli` porque la configuración del ORM se
+      # arma al importar `OrmModule`, antes de que corra su `main()`.
+      DB_ROLE_PURPOSE: "migration"
     deploy:
       resources: *api-resources
     depends_on:

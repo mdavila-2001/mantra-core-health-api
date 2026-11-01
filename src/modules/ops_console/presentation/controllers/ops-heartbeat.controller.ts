@@ -5,7 +5,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '../../../../common';
+import { NotAudited, Roles } from '../../../../common';
 import { InstanceLivenessService } from '../../application/instance-liveness.service';
 import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
 
@@ -23,6 +23,9 @@ export class OpsHeartbeatController {
   constructor(private readonly liveness: InstanceLivenessService) {}
 
   @Post('heartbeats')
+  @NotAudited(
+    'Latido de 27 workers × 4/min: sobrescribe el estado de la instancia; auditarlo serían ~108 filas/min sin valor.',
+  )
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 06 · schema authz
+-- SALUD v4.2.82 · módulo 06 · schema authz
 -- Generado de diagram_06_authz.puml — NO editar a mano.
 
 
@@ -35,6 +35,14 @@ CREATE TABLE IF NOT EXISTS "authz"."permissions" (
     "is_role_restricted" boolean NOT NULL,
     "required_role_code" varchar,
     "allow_direct_user_grant" boolean NOT NULL,
+    "sensitivity_concept_id" uuid,
+    "requires_reason" boolean NOT NULL DEFAULT false,
+    "requires_step_up" boolean NOT NULL DEFAULT false,
+    "approval_mode_concept_id" uuid,
+    "purpose_of_use_concept_id" uuid,
+    "legal_basis_concept_id" uuid,
+    "touches_clinical_data" boolean NOT NULL DEFAULT false,
+    "support_assignable" boolean NOT NULL DEFAULT false,
     CONSTRAINT "pk_permissions" PRIMARY KEY ("id")
 );
 
@@ -274,4 +282,43 @@ CREATE TABLE IF NOT EXISTS "authz"."patient_legal_representations" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_patient_legal_representations" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "authz"."ui_visibility_elements" (
+    "id" uuid NOT NULL,
+    "key" varchar(160) NOT NULL,
+    "kind" varchar(20) NOT NULL,
+    "module_code" varchar(80) NOT NULL,
+    "parent_element_id" uuid,
+    "label" varchar(200) NOT NULL,
+    "description" varchar(500),
+    "default_visible" boolean NOT NULL DEFAULT true,
+    "source" varchar(10) NOT NULL,
+    "status" varchar(10) NOT NULL,
+    "retired_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_ui_visibility_elements" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "authz"."ui_visibility_rules" (
+    "id" uuid NOT NULL,
+    "element_id" uuid NOT NULL,
+    "effect" varchar(4) NOT NULL,
+    "subject_type" varchar(10) NOT NULL,
+    "subject_id" varchar(160),
+    "scope_tenant_id" uuid,
+    "valid_from" timestamptz,
+    "valid_to" timestamptz,
+    "ended_at" timestamptz,
+    "reason" varchar(500) NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_ui_visibility_rules" PRIMARY KEY ("id")
 );

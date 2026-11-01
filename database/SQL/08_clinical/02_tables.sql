@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 08 · schema clinical
+-- SALUD v4.2.82 · módulo 08 · schema clinical
 -- Generado de diagram_08_clinical.puml — NO editar a mano.
 
 
@@ -246,6 +246,12 @@ CREATE TABLE IF NOT EXISTS "clinical"."service_requests" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     "suggested_care_space_id" uuid,
+    "requisition_id" uuid,
+    "specimen_type_concept_id" uuid,
+    "modality_concept_id" uuid,
+    "body_site_concept_id" uuid,
+    "laterality_concept_id" uuid,
+    "contrast_concept_id" uuid,
     CONSTRAINT "pk_service_requests" PRIMARY KEY ("id")
 );
 
@@ -277,6 +283,17 @@ CREATE TABLE IF NOT EXISTS "clinical"."service_request_notes" (
     "created_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     CONSTRAINT "pk_service_request_notes" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "clinical"."service_request_components" (
+    "id" uuid NOT NULL,
+    "service_request_id" uuid NOT NULL,
+    "custodian_tenant_id" uuid NOT NULL,
+    "component_concept_id" uuid NOT NULL,
+    "ordinal" integer NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_service_request_components" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical"."medication_requests" (
@@ -547,6 +564,23 @@ CREATE TABLE IF NOT EXISTS "clinical"."inpatient_census_days" (
     CONSTRAINT "pk_inpatient_census_days" PRIMARY KEY ("id")
 );
 
+CREATE TABLE IF NOT EXISTS "clinical"."patient_admission_footprints" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "encounter_id" uuid NOT NULL,
+    "practice_site_id" uuid NOT NULL,
+    "admission_origin_concept_id" uuid NOT NULL,
+    "identity_verification_method_concept_id" uuid NOT NULL,
+    "identity_document_type" varchar(32) NOT NULL,
+    "identity_document_last4" varchar(4) NOT NULL,
+    "identity_document_hmac" varchar(64) NOT NULL,
+    "referral_id" uuid,
+    "recorded_by_user_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    CONSTRAINT "pk_patient_admission_footprints" PRIMARY KEY ("id")
+);
+
 CREATE TABLE IF NOT EXISTS "clinical"."inpatient_census_entries" (
     "id" uuid NOT NULL,
     "tenant_id" uuid NOT NULL,
@@ -612,22 +646,4 @@ CREATE TABLE IF NOT EXISTS "clinical"."observation_notes" (
     "note_text" text NOT NULL,
     "recorded_at" timestamptz NOT NULL,
     CONSTRAINT "pk_observation_notes" PRIMARY KEY ("id")
-);
-
--- + patient_admission_footprints (Admisión crea el vínculo, 2026-10-31)
-CREATE TABLE IF NOT EXISTS "clinical"."patient_admission_footprints" (
-    "id" uuid NOT NULL,
-    "tenant_id" uuid NOT NULL,
-    "patient_profile_id" uuid NOT NULL,
-    "encounter_id" uuid NOT NULL,
-    "practice_site_id" uuid NOT NULL,
-    "admission_origin_concept_id" uuid NOT NULL,
-    "identity_verification_method_concept_id" uuid NOT NULL,
-    "identity_document_type" varchar(32) NOT NULL,
-    "identity_document_last4" varchar(4) NOT NULL,
-    "identity_document_hmac" varchar(64) NOT NULL,
-    "referral_id" uuid,
-    "recorded_by_user_id" uuid NOT NULL,
-    "created_at" timestamptz NOT NULL,
-    CONSTRAINT "pk_patient_admission_footprints" PRIMARY KEY ("id")
 );

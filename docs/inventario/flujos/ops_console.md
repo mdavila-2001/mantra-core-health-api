@@ -3,19 +3,19 @@
 # Flujos del módulo `ops_console`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 9 (3 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 11 (4 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [ops_console](../endpoints/ops_console.md)
 
 ## Proceso: Operations console module
 
-- **Código:** `ops_console` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 9
-- **Actores:** GOVERNANCE_ADMIN · PLATFORM_ADMIN · RELEASE_MANAGER · SECURITY_ADMIN · SRE
+- **Código:** `ops_console` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 11
+- **Actores:** GOVERNANCE_ADMIN · PLATFORM_ADMIN · RELEASE_MANAGER · SECURITY_ADMIN · SRE · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/ops_console/README.md`
 
 ### Para qué sirve
 
-Esta carpeta contiene las consultas de la consola global de operaciones: readiness, incidentes, despliegues, cambios, SLO y respaldos. Sus rutas son de sólo lectura y están reservadas a roles operativos de plataforma.
+Esta carpeta contiene las consultas de la consola global de operaciones: readiness, incidentes, despliegues, cambios, SLO, respaldos, tráfico HTTP, el catálogo de herramientas e integraciones con su estado y la sonda de vida de instancias. Sus rutas de lectura están reservadas a roles operativos de plataforma; la única escritura es la ingesta de latidos de los workers, sólo para el rol `SYSTEM`.
 
 _Fuente: `src/modules/ops_console/README.md:3`_
 
@@ -32,12 +32,15 @@ _Fuente: `src/modules/ops_console/README.md:3`_
 |  |  | GET /admin/ops/slos | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 3 |
 |  |  | GET /admin/ops/traffic | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 2 |
 |  |  | GET /admin/ops/traffic/endpoints | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 1 |
+| `ctrl:OpsHeartbeatController` | Operaciones de OpsHeartbeatController que el README no asigna a un caso de uso | POST /internal/ops/heartbeats | SYSTEM | BAJO | 0 |
+| `ctrl:OpsLivenessController` | Operaciones de OpsLivenessController que el README no asigna a un caso de uso | GET /admin/ops/instances/liveness | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 1 |
 
-### Diagrama — etapas `ctrl:OpsConsoleController`
+### Diagrama — etapas `ctrl:OpsConsoleController`, `ctrl:OpsHeartbeatController`, `ctrl:OpsLivenessController`
 
 ```mermaid
 flowchart LR
   a2(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · G…"]):::actor
+  a28(["SYSTEM"]):::actor
   t3[("system_ops.backup_policies")]:::tabla
   t4[("system_ops.restore_test_runs")]:::tabla
   t6[("platform_ops.change_requests")]:::tabla
@@ -53,6 +56,7 @@ flowchart LR
   t22[("platform_ops.slo_measurements")]:::tabla
   t24[("iam.sessions")]:::tabla
   t25[("time_series.service_sli_series")]:::tabla
+  t30[("terminology.catalog_concepts")]:::tabla
   t18[("+8 tablas más")]
   subgraph s0["ctrl:OpsConsoleController · Operaciones de OpsConsoleController que el README n…"]
     o1["GET /admin/ops/backups"]:::op
@@ -64,6 +68,12 @@ flowchart LR
     o19["GET /admin/ops/slos"]:::op
     o23["GET /admin/ops/traffic"]:::op
     o26["GET /admin/ops/traffic/endpoints"]:::op
+  end
+  subgraph s1["ctrl:OpsHeartbeatController · Operaciones de OpsHeartbeatController que el READ…"]
+    o27["POST /internal/ops/heartbeats"]:::op
+  end
+  subgraph s2["ctrl:OpsLivenessController · Operaciones de OpsLivenessController que el README…"]
+    o29["GET /admin/ops/instances/liveness"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -97,6 +107,9 @@ flowchart LR
   o23 -->|"LEE"| t25
   a2 --> o26
   o26 -->|"LEE"| t25
+  a28 --> o27
+  a2 --> o29
+  o29 -->|"LEE"| t30
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -241,6 +254,40 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 4. POST /internal/ops/heartbeats
+
+Latido de un worker hacia la sonda de vida de instancias
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InstanceLivenessService.recordHeartbeat"]:::llamada
+  n2 --> n3
+  n4{"!KNOWN_WORKER_IDS.has(input.instanceId)"}:::decision
+  n3 --> n4
+  n5(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n4 -->|"sí"| n5
+  n6(("201 Responde con éxito")):::ok
+  n4 -->|"no"| n6
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 ### Operaciones sin decisiones propias
 
 Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
@@ -251,5 +298,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /admin/ops/change-requests | 200, 401, 403, 429 | 1 |
 | GET /admin/ops/deployments | 200, 401, 403, 429 | 2 |
 | GET /admin/ops/incidents | 200, 401, 403, 429 | 2 |
+| GET /admin/ops/instances/liveness | 200, 401, 403, 429 | 1 |
 | GET /admin/ops/readiness | 200, 401, 403, 429 | 14 |
 | GET /admin/ops/slos | 200, 401, 403, 429 | 3 |

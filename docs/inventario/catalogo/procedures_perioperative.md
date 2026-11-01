@@ -2,7 +2,7 @@
 
 # Catálogo del schema `procedures_perioperative`
 
-- **Tablas:** 35 · **Columnas:** 446 (92 con descripción: 20.6 %) · **Índices:** 262
+- **Tablas:** 35 · **Columnas:** 450 (94 con descripción: 20.9 %) · **Índices:** 262
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -14,7 +14,7 @@
 | [anesthesia_events](#anesthesia_events) | Registra eventos de anestesia ocurridos durante la atención perioperatoria para documentar su cronología y contexto. | 12 | 10 | 1 | COINCIDE |
 | [anesthesia_plans](#anesthesia_plans) | Representa el plan de anestesia asociado a un caso para documentar la estrategia anestésica prevista. | 18 | 8 | 6 | COINCIDE |
 | [implant_identifiers](#implant_identifiers) | Conserva identificadores de implantes para apoyar seguimiento y trazabilidad de dispositivos colocados en pacientes. | 9 | 3 | 2 | COINCIDE |
-| [operating_room_utilization_events](#operating_room_utilization_events) | Registra eventos de uso de quirófanos para relacionar capacidad y ocupación con la actividad perioperatoria. | 11 | 8 | 4 | COINCIDE |
+| [operating_room_utilization_events](#operating_room_utilization_events) | Registra eventos de uso de quirófanos para relacionar capacidad y ocupación con la actividad perioperatoria. | 11 | 8 | 9 | DIVERGE |
 | [operative_findings](#operative_findings) | Documenta hallazgos observados durante la intervención para incorporarlos a la historia del procedimiento. | 12 | 9 | 2 | COINCIDE |
 | [operative_reports](#operative_reports) | Conserva informes operatorios que describen la intervención y sus resultados en el registro perioperatorio. | 19 | 9 | 5 | COINCIDE |
 | [operative_steps](#operative_steps) | Desglosa la intervención en pasos operatorios para conservar la secuencia técnica realizada. | 18 | 11 | 6 | COINCIDE |
@@ -29,10 +29,10 @@
 | [procedure_cancellations](#procedure_cancellations) | Documenta cancelaciones de procedimientos y sus motivos para explicar por qué una intervención planificada no se realizó. | 11 | 7 | 1 | COINCIDE |
 | [procedure_case_diagnoses](#procedure_case_diagnoses) | Asocia diagnósticos con casos de procedimiento para documentar las condiciones que motivan o contextualizan la intervención. | 7 | 4 | 4 | COINCIDE |
 | [procedure_case_locations](#procedure_case_locations) | Vincula casos con salas o espacios donde se planifica o realiza la intervención. | 8 | 6 | 3 | COINCIDE |
-| [procedure_case_milestones](#procedure_case_milestones) | Registra hitos de los casos para seguir etapas relevantes de preparación, intervención y recuperación. | 9 | 6 | 7 | COINCIDE |
+| [procedure_case_milestones](#procedure_case_milestones) | Registra hitos de los casos para seguir etapas relevantes de preparación, intervención y recuperación. | 9 | 6 | 8 | COINCIDE |
 | [procedure_case_status_history](#procedure_case_status_history) | Preserva cambios de estado de los casos para reconstruir su evolución operativa y perioperatoria. | 10 | 7 | 9 | COINCIDE |
-| [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 14 | 7 | 13 | COINCIDE |
-| [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 27 | 20 | 15 | COINCIDE |
+| [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 15 | 7 | 13 | COINCIDE |
+| [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 30 | 20 | 26 | DIVERGE |
 | [procedure_charge_items](#procedure_charge_items) | Asocia conceptos facturables con procedimientos para trasladar cargos del acto médico al ciclo administrativo correspondiente. | 16 | 9 | 4 | COINCIDE |
 | [procedure_complications](#procedure_complications) | Documenta complicaciones asociadas a procedimientos para dar seguimiento a eventos clínicos adversos o no previstos. | 13 | 9 | 1 | COINCIDE |
 | [procedure_devices](#procedure_devices) | Registra dispositivos utilizados en procedimientos para conservar trazabilidad del equipamiento clínico relevante. | 11 | 5 | 1 | COINCIDE |
@@ -42,9 +42,9 @@
 | [procedure_performers](#procedure_performers) | Identifica profesionales y roles que realizaron un procedimiento para atribuir la ejecución clínica. | 9 | 5 | 0 | COINCIDE |
 | [procedure_specimens](#procedure_specimens) | Relaciona muestras con procedimientos para mantener trazabilidad de material obtenido durante una intervención. | 10 | 7 | 1 | COINCIDE |
 | [sterility_verification_checks](#sterility_verification_checks) | Conserva verificaciones de esterilidad vinculadas al proceso operatorio para documentar controles previos o durante la intervención. | 12 | 7 | 0 | COINCIDE |
-| [surgical_safety_checklists](#surgical_safety_checklists) | Define listas de verificación de seguridad quirúrgica aplicables a la preparación y ejecución de procedimientos. | 12 | 5 | 2 | COINCIDE |
-| [surgical_safety_items](#surgical_safety_items) | Detalla puntos de control incluidos en una lista de seguridad quirúrgica para hacer verificables los pasos requeridos. | 15 | 7 | 1 | COINCIDE |
-| [surgical_safety_responses](#surgical_safety_responses) | Registra respuestas del equipo a los puntos de control de seguridad para conservar evidencia de su cumplimiento. | 11 | 7 | 2 | COINCIDE |
+| [surgical_safety_checklists](#surgical_safety_checklists) | Define listas de verificación de seguridad quirúrgica aplicables a la preparación y ejecución de procedimientos. | 12 | 5 | 6 | COINCIDE |
+| [surgical_safety_items](#surgical_safety_items) | Detalla puntos de control incluidos en una lista de seguridad quirúrgica para hacer verificables los pasos requeridos. | 15 | 7 | 4 | COINCIDE |
+| [surgical_safety_responses](#surgical_safety_responses) | Registra respuestas del equipo a los puntos de control de seguridad para conservar evidencia de su cumplimiento. | 11 | 7 | 4 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -681,7 +681,7 @@ Registra eventos de uso de quirófanos para relacionar capacidad y ocupación co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: operating_room_utilization_events`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `OperatingRoomUtilizationEvents` — `src/modules/procedures_perioperative/entities/operating_room_utilization_events.entity.ts`
-- **Resumen:** 11 columnas · 8 índices · 6 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 8 índices · 6 FK salientes · 0 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -714,23 +714,28 @@ Registra eventos de uso de quirófanos para relacionar capacidad y ocupación co
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_operating_room_utilization_events_operating_room_id` | no | operating_room_id | Soporta la clave foránea fk_operating_room_utilization_events_operating_room_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_operating_room_utilization_events_procedure_case_id` | no | procedure_case_id | Soporta la clave foránea fk_operating_room_utilization_events_procedure_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_operating_room_utilization_events_event_type_concept_id` | no | event_type_concept_id | Soporta la clave foránea fk_operating_room_utilization_events_event_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_utilization_events_operating_room_id` | no | operating_room_id | Soporta la clave foránea fk_operating_room_utilization_events_operating_room_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «operating_room_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_operating_room_utilization_events_procedure_case_id` | no | procedure_case_id | Soporta la clave foránea fk_operating_room_utilization_events_procedure_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «procedure_case_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_operating_room_utilization_events_event_type_concept_id` | no | event_type_concept_id | Soporta la clave foránea fk_operating_room_utilization_events_event_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «event_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_operating_room_utilization_events_delay_reason_concept_id` | no | delay_reason_concept_id | Soporta la clave foránea fk_operating_room_utilization_events_delay_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_operating_room_utilization_events_turnover_category_21fa0c9f` | no | turnover_category_concept_id | Soporta la clave foránea fk_operating_room_utilization_events_turnover_category_c499a812: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_operating_room_utilization_events_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_operating_room_utilization_events_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_or_utilization_room_time` | no | operating_room_id, ("occurred_at" DESC) | _sin uso detectado estáticamente_ |
-| `brin_operating_room_utilization_events_occurred_at` | no | occurred_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+| `brin_operating_room_utilization_events_occurred_at` | no | occurred_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «occurred_at», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/billing/bed-day-charges/run | LEE | POR_SQL |
 | POST /procedure-cases | CREA | DIRECTA |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
 | POST /procedure-cases/{id}/anesthesia-events | CREA | DIRECTA |
 | POST /procedure-cases/{id}/cancel | CREA | DIRECTA |
 | POST /procedure-cases/{id}/charge-items/post | CREA | DIRECTA |
+| POST /procedure-cases/{id}/room-events | CREA | DIRECTA |
+| POST /procedure-cases/{id}/room-events | LEE | DIRECTA |
+| GET /sites/{siteId}/or-utilization | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1851,7 +1856,7 @@ Registra hitos de los casos para seguir etapas relevantes de preparación, inter
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_case_milestones`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCaseMilestones` — `src/modules/procedures_perioperative/entities/procedure_case_milestones.entity.ts`
-- **Resumen:** 9 columnas · 6 índices · 4 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 9 columnas · 6 índices · 4 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -1903,6 +1908,7 @@ Registra hitos de los casos para seguir etapas relevantes de preparación, inter
 | POST /procedure-cases/{id}/anesthesia-events | LEE | DIRECTA |
 | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | CREA | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-assessments | CREA | DIRECTA |
+| POST /procedure-cases/{id}/room-events | CREA | DIRECTA |
 | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | CREA | DIRECTA |
 
 #### Gobierno
@@ -2005,7 +2011,7 @@ Identifica integrantes del equipo asignado a un caso de procedimiento para conse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_case_team_members`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCaseTeamMembers` — `src/modules/procedures_perioperative/entities/procedure_case_team_members.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 13 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2025,6 +2031,7 @@ Identifica integrantes del equipo asignado a un caso de procedimiento para conse
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/procedures_perioperative/entities/procedure_case_team_members.entity.ts:109`)_ | coincide |
+| 15 | `accepted_version_number` | `integer` | Opcional | + v4.2.49 (DOC-MOD-002, issue #57): version del caso (procedure_cases.version_number) que acepto el integrante. NULL = acepto antes de que el caso tuviera version. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:108`)_ | coincide |
 
 #### Relaciones
 
@@ -2096,7 +2103,7 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_cases`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCases` — `src/modules/procedures_perioperative/entities/procedure_cases.entity.ts`
-- **Resumen:** 27 columnas · 20 índices · 17 FK salientes · 26 entrantes · 15 operaciones
+- **Resumen:** 30 columnas · 20 índices · 17 FK salientes · 28 entrantes · 26 operaciones
 
 #### Columnas
 
@@ -2129,6 +2136,9 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | 25 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 26 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 27 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/procedures_perioperative/entities/procedure_cases.entity.ts:208`)_ | coincide |
+| 28 | `prep_minutes` | `integer` | Opcional | + v4.2.49 (ORG-QUI-002 / DOC-MOD-002, issues #58 y #57): preparacion y limpieza del quirofano para este caso (NULL = las del espacio, practice.care_spaces) y numero de version del caso. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:74`)_ | coincide |
+| 29 | `cleanup_minutes` | `integer` | Opcional | _sin dato_ | coincide |
+| 30 | `version_number` | `integer` | Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2177,6 +2187,8 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | desde | id | procedures_perioperative.procedure_charge_items (procedure_case_id) | fk_procedure_charge_items_procedure_case_id |
 | desde | id | procedures_perioperative.operating_room_utilization_events (procedure_case_id) | fk_operating_room_utilization_events_procedure_case_id |
 | desde | id | procedures_perioperative.sterility_verification_checks (procedure_case_id) | fk_sterility_verification_checks_procedure_case_id |
+| desde | id | clinical.received_services (procedure_case_id) | fk_received_services_procedure_case_id |
+| desde | id | audit.procedure_cases_history (procedure_case_id) | fk_procedure_cases_history_procedure_case_id |
 
 #### Índices
 
@@ -2189,18 +2201,18 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | `ix_procedure_cases_primary_procedure_id` | no | primary_procedure_id | Soporta la clave foránea fk_procedure_cases_primary_procedure_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «primary_procedure_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_case_type_concept_id` | no | case_type_concept_id | Soporta la clave foránea fk_procedure_cases_case_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_priority_concept_id` | no | priority_concept_id | Soporta la clave foránea fk_procedure_cases_priority_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_procedure_cases_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_procedure_cases_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_procedure_cases_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_procedure_cases_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_surgical_specialty_concept_id` | no | surgical_specialty_concept_id | Soporta la clave foránea fk_procedure_cases_surgical_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_requested_by_profile_id` | no | requested_by_profile_id | Soporta la clave foránea fk_procedure_cases_requested_by_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_primary_surgeon_profile_id` | no | primary_surgeon_profile_id | Soporta la clave foránea fk_procedure_cases_primary_surgeon_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «primary_surgeon_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_anesthesiologist_profile_id` | no | anesthesiologist_profile_id | Soporta la clave foránea fk_procedure_cases_anesthesiologist_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_procedure_cases_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_procedure_cases_operating_room_id` | no | operating_room_id | Soporta la clave foránea fk_procedure_cases_operating_room_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «operating_room_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_procedure_cases_operating_room_id` | no | operating_room_id | Soporta la clave foránea fk_procedure_cases_operating_room_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «operating_room_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_cancellation_reason_concept_id` | no | cancellation_reason_concept_id | Soporta la clave foránea fk_procedure_cases_cancellation_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_procedure_cases_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_procedure_cases_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_procedure_cases_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `uk_procedure_cases_tenant_number` | sí | custodian_tenant_id, case_number | Garantiza que no se repita la combinación (custodian_tenant_id, case_number) _(DOCUMENTO)_; Soporta la clave foránea fk_procedure_cases_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_procedure_cases_room_schedule` | no | operating_room_id, scheduled_start_at, scheduled_end_at | Soporta la clave foránea fk_procedure_cases_operating_room_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «operating_room_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_procedure_cases_room_schedule` | no | operating_room_id, scheduled_start_at, scheduled_end_at | Soporta la clave foránea fk_procedure_cases_operating_room_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «operating_room_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_procedure_cases_patient_time` | no | custodian_tenant_id, patient_profile_id, ("scheduled_start_at" DESC) | _sin uso detectado estáticamente_ |
 
 #### Restricciones
@@ -2208,26 +2220,39 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | Restricción | Tipo | Definición |
 |---|---|---|
 | `uk_procedure_cases_tenant_number` | UNIQUE INDEX | UNIQUE INDEX ("custodian_tenant_id", "case_number") |
+| `ex_procedure_cases_operating_room_time` | EXCLUDE | EXCLUDE USING gist ("operating_room_id" WITH =, tstzrange("scheduled_start_at", "scheduled_end_at", '[)') WITH &&) WHERE ("operating_room_id" IS NOT NULL AND "scheduled_start_at" IS NOT NULL AND "scheduled_end_at" IS NOT NULL AND "status_concept_id" IN ('6fe38139-ad1d-5214-84c1-8c184e4e58fb', 'f6985cd5-f867-5d76-b70c-1138667fd2ab', 'fdc78cc9-eda6-5625-9a26-1bdcec4dc203')) |
+| `ck_procedure_cases_buffers` | CHECK | CHECK ((COALESCE("prep_minutes", 0) >= 0 AND COALESCE("cleanup_minutes", 0) >= 0)) |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/billing/bed-day-charges/run | LEE | POR_SQL |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /clinical/procedures | LEE | DIRECTA |
 | POST /visit-requests | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| POST /care-spaces/{id}/availability | LEE | POR_SQL |
+| POST /care-spaces/{id}/lifecycle | LEE | POR_SQL |
+| GET /care-spaces/{id}/retire-check | LEE | POR_SQL |
 | POST /dental-procedures | LEE | DIRECTA |
+| POST /internal/periop/or-blocks-release-tick | LEE | DIRECTA |
+| POST /or-blocks/{id}/cancel | LEE | DIRECTA |
+| POST /or-blocks/{id}/release | LEE | DIRECTA |
 | GET /procedure-cases | LEE | DIRECTA |
+| POST /procedure-cases | ACTUALIZA | POR_TIPO |
 | POST /procedure-cases | CREA | DIRECTA |
 | POST /procedure-cases | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | PATCH /procedure-cases/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /procedure-cases/{id} | LEE | POR_SQL |
 | POST /procedure-cases/{id}/operative-reports | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-assessments | ACTUALIZA | POR_TIPO |
 | GET /procedure-cases/{id}/team-members | LEE | DIRECTA |
 | POST /procedure-cases/{id}/team-members | ACTUALIZA | POR_TIPO |
+| GET /sites/{siteId}/operating-rooms | LEE | DIRECTA |
+| GET /sites/{siteId}/or-blocks | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2907,7 +2932,7 @@ Define listas de verificación de seguridad quirúrgica aplicables a la preparac
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: surgical_safety_checklists`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `SurgicalSafetyChecklists` — `src/modules/procedures_perioperative/entities/surgical_safety_checklists.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 4 FK salientes · 1 entrantes · 2 operaciones
+- **Resumen:** 12 columnas · 5 índices · 4 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -2940,11 +2965,11 @@ Define listas de verificación de seguridad quirúrgica aplicables a la preparac
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_surgical_safety_checklists_procedure_case_id` | no | procedure_case_id | Soporta la clave foránea fk_surgical_safety_checklists_procedure_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «procedure_case_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_surgical_safety_checklists_checklist_type_concept_id` | no | checklist_type_concept_id | Soporta la clave foránea fk_surgical_safety_checklists_checklist_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_surgical_safety_checklists_procedure_case_id` | no | procedure_case_id | Soporta la clave foránea fk_surgical_safety_checklists_procedure_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «procedure_case_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_surgical_safety_checklists_checklist_type_concept_id` | no | checklist_type_concept_id | Soporta la clave foránea fk_surgical_safety_checklists_checklist_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «checklist_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_surgical_safety_checklists_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_surgical_safety_checklists_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_surgical_safety_checklists_coordinator_profile_id` | no | coordinator_profile_id | Soporta la clave foránea fk_surgical_safety_checklists_coordinator_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_surgical_safety_checklists_case_type_version` | sí | procedure_case_id, checklist_type_concept_id, checklist_version | Garantiza que no se repita la combinación (procedure_case_id, checklist_type_concept_id, checklist_version) _(DOCUMENTO)_; Soporta la clave foránea fk_surgical_safety_checklists_procedure_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «procedure_case_id», la primera columna del índice _(CONSULTA)_ |
+| `uk_surgical_safety_checklists_case_type_version` | sí | procedure_case_id, checklist_type_concept_id, checklist_version | Garantiza que no se repita la combinación (procedure_case_id, checklist_type_concept_id, checklist_version) _(DOCUMENTO)_; Soporta la clave foránea fk_surgical_safety_checklists_procedure_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «procedure_case_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -2956,6 +2981,10 @@ Define listas de verificación de seguridad quirúrgica aplicables a la preparac
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /procedure-cases/{id} | LEE | POR_SQL |
+| POST /procedure-cases/{id}/safety-checklists | CREA | DIRECTA |
+| POST /procedure-cases/{id}/safety-checklists | LEE | DIRECTA |
+| GET /procedure-cases/{id}/safety-checklists/{checklistId} | LEE | DIRECTA |
 | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | ACTUALIZA | POR_TIPO |
 | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | LEE | DIRECTA |
 
@@ -2982,7 +3011,7 @@ Detalla puntos de control incluidos en una lista de seguridad quirúrgica para h
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: surgical_safety_items`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `SurgicalSafetyItems` — `src/modules/procedures_perioperative/entities/surgical_safety_items.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 1 entrantes · 1 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -3020,13 +3049,13 @@ Detalla puntos de control incluidos en una lista de seguridad quirúrgica para h
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_surgical_safety_items_checklist_type_concept_id` | no | checklist_type_concept_id | Soporta la clave foránea fk_surgical_safety_items_checklist_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «checklist_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_surgical_safety_items_checklist_type_concept_id` | no | checklist_type_concept_id | Soporta la clave foránea fk_surgical_safety_items_checklist_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «checklist_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_surgical_safety_items_phase_concept_id` | no | phase_concept_id | Soporta la clave foránea fk_surgical_safety_items_phase_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «phase_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_surgical_safety_items_response_type_concept_id` | no | response_type_concept_id | Soporta la clave foránea fk_surgical_safety_items_response_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_surgical_safety_items_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_surgical_safety_items_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_surgical_safety_items_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_surgical_safety_items_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_surgical_safety_items_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_surgical_safety_items_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_surgical_safety_items_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_surgical_safety_items_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_surgical_safety_items_version_code` | sí | checklist_type_concept_id, checklist_version, item_code | Garantiza que no se repita la combinación (checklist_type_concept_id, checklist_version, item_code) _(DOCUMENTO)_; Soporta la clave foránea fk_surgical_safety_items_checklist_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «checklist_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `uk_surgical_safety_items_version_code` | sí | checklist_type_concept_id, checklist_version, item_code | Garantiza que no se repita la combinación (checklist_type_concept_id, checklist_version, item_code) _(DOCUMENTO)_; Soporta la clave foránea fk_surgical_safety_items_checklist_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «checklist_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -3038,6 +3067,9 @@ Detalla puntos de control incluidos en una lista de seguridad quirúrgica para h
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /procedure-cases/{id}/safety-checklists | CREA | DIRECTA |
+| POST /procedure-cases/{id}/safety-checklists | LEE | DIRECTA |
+| GET /procedure-cases/{id}/safety-checklists/{checklistId} | LEE | DIRECTA |
 | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | LEE | DIRECTA |
 
 #### Gobierno
@@ -3063,7 +3095,7 @@ Registra respuestas del equipo a los puntos de control de seguridad para conserv
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: surgical_safety_responses`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `SurgicalSafetyResponses` — `src/modules/procedures_perioperative/entities/surgical_safety_responses.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 5 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 11 columnas · 7 índices · 5 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -3095,12 +3127,12 @@ Registra respuestas del equipo a los puntos de control de seguridad para conserv
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_surgical_safety_responses_surgical_safety_checklist_id` | no | surgical_safety_checklist_id | Soporta la clave foránea fk_surgical_safety_responses_surgical_safety_checklist_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «surgical_safety_checklist_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_surgical_safety_responses_surgical_safety_checklist_id` | no | surgical_safety_checklist_id | Soporta la clave foránea fk_surgical_safety_responses_surgical_safety_checklist_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «surgical_safety_checklist_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_surgical_safety_responses_surgical_safety_item_id` | no | surgical_safety_item_id | Soporta la clave foránea fk_surgical_safety_responses_surgical_safety_item_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_surgical_safety_responses_response_status_concept_id` | no | response_status_concept_id | Soporta la clave foránea fk_surgical_safety_responses_response_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_surgical_safety_responses_response_concept_id` | no | response_concept_id | Soporta la clave foránea fk_surgical_safety_responses_response_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_surgical_safety_responses_responded_by_profile_id` | no | responded_by_profile_id | Soporta la clave foránea fk_surgical_safety_responses_responded_by_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_surgical_safety_responses_checklist_item` | sí | surgical_safety_checklist_id, surgical_safety_item_id | Garantiza que no se repita la combinación (surgical_safety_checklist_id, surgical_safety_item_id) _(DOCUMENTO)_; Soporta la clave foránea fk_surgical_safety_responses_surgical_safety_checklist_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «surgical_safety_checklist_id», la primera columna del índice _(CONSULTA)_ |
+| `uk_surgical_safety_responses_checklist_item` | sí | surgical_safety_checklist_id, surgical_safety_item_id | Garantiza que no se repita la combinación (surgical_safety_checklist_id, surgical_safety_item_id) _(DOCUMENTO)_; Soporta la clave foránea fk_surgical_safety_responses_surgical_safety_checklist_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «surgical_safety_checklist_id», la primera columna del índice _(CONSULTA)_ |
 | `brin_surgical_safety_responses_created_at` | no | created_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Restricciones
@@ -3113,6 +3145,8 @@ Registra respuestas del equipo a los puntos de control de seguridad para conserv
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /procedure-cases/{id}/safety-checklists | LEE | DIRECTA |
+| GET /procedure-cases/{id}/safety-checklists/{checklistId} | LEE | DIRECTA |
 | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | CREA | DIRECTA |
 | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | LEE | DIRECTA |
 

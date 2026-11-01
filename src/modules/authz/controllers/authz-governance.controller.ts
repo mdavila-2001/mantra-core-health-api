@@ -69,7 +69,7 @@ import { AuthzGovernanceService } from '../services/authz-governance.service';
  * | `POST /authz/simulations` | igual que `POST /authz/decisions/evaluate` | `{ simulated: true, decision }` |
  *
  * Errores: 401 sin token · 403 `ROLE_INSUFFICIENT` · 404 `GOVERNANCE_USER_NOT_FOUND` /
- * `GOVERNANCE_PERMISSION_NOT_FOUND` · 412 `ACCESS_REVIEW_SELF_REVIEW_FORBIDDEN` · 400 validación.
+ * `GOVERNANCE_PERMISSION_NOT_FOUND` · 422 `ACCESS_REVIEW_SELF_REVIEW_FORBIDDEN` (PreconditionFailedException responde 422) · 400 validación.
  * Contrato completo: `docs/trabajo/2026-10-30-perfil-admin-medicion-gobierno/contratos/H5-permisos-y-usuarios.md`.
  *
  * Las vistas «quién puede qué» son **orientativas**: no reproducen toda la evaluación del PDP

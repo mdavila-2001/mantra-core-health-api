@@ -25,6 +25,18 @@ import { PermissionDriftService } from './application/permission-drift.service';
 import { PortalInventoryService } from './application/portal-inventory.service';
 import { PLATFORM_ROLE_CODES_PORT } from './application/ports/platform-role-codes.port';
 import { IamPlatformRoleCodesAdapter } from './infrastructure/adapters/iam-platform-role-codes.adapter';
+import { CatalogFitService } from './application/fit/catalog-fit.service';
+import { FitCheckRegistry } from './application/fit/fit-check.registry';
+import { FitInputsCollector } from './application/fit/fit-inputs.collector';
+import { FitLiveRepository } from './application/fit/fit-live.repository';
+import { FitResultsStore } from './application/fit/fit-results.store';
+import { FIT_MUTABILITY_SOURCE } from './application/fit/fit.types';
+import { MutabilityFitSource } from './application/fit/mutability-source.adapter';
+import { MutabilityModule } from '../system_ops/mutability/mutability.module';
+import {
+  AdminCatalogFitController,
+  InternalCatalogFitController,
+} from './presentation/controllers/catalog-fit.controller';
 
 /**
  * Módulo 67 — catálogo de datos y portal administrativo de datos.
@@ -40,6 +52,7 @@ import { IamPlatformRoleCodesAdapter } from './infrastructure/adapters/iam-platf
  */
 @Module({
   imports: [
+    MutabilityModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     RouteIndexModule,
   ],
@@ -49,6 +62,8 @@ import { IamPlatformRoleCodesAdapter } from './infrastructure/adapters/iam-platf
     GovernanceQueueController,
     InternalCatalogScansController,
     InternalCatalogInventoryController,
+    AdminCatalogFitController,
+    InternalCatalogFitController,
   ],
   providers: [
     InventoryRepository,
@@ -65,12 +80,19 @@ import { IamPlatformRoleCodesAdapter } from './infrastructure/adapters/iam-platf
     CatalogScanService,
     InventoryImportService,
     PermissionDriftService,
+    // sonda de ajuste de la catalogación (application/fit)
+    FitLiveRepository,
+    FitInputsCollector,
+    FitCheckRegistry,
+    FitResultsStore,
+    CatalogFitService,
+    { provide: FIT_MUTABILITY_SOURCE, useClass: MutabilityFitSource },
     IamPlatformRoleCodesAdapter,
     {
       provide: PLATFORM_ROLE_CODES_PORT,
       useExisting: IamPlatformRoleCodesAdapter,
     },
   ],
-  exports: [InventoryRepository],
+  exports: [InventoryRepository, FitCheckRegistry],
 })
 export class DataCatalogModule {}

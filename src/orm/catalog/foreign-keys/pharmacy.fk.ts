@@ -22,7 +22,7 @@ export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacy_external_product_mappings', 'pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
   ['pharmacy_external_product_mappings', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_external_product_mappings', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['pharmacy_integration_connections', 'connection_id', 'pharmacy', 'pharmacy_integration_connections', 'id'],
+  ['pharmacy_integration_connections', 'connection_id', 'integrations', 'provider_connections', 'id'],
   ['pharmacy_integration_connections', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_integration_connections', 'integration_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_integration_connections', 'inventory_authority_concept_id', 'terminology', 'catalog_concepts', 'id'],

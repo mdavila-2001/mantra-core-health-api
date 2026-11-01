@@ -42,8 +42,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -110,10 +110,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -149,9 +149,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `forms.field_definition_sets` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedExtensionPolicy | `src/common/seed/clinical-forms-seed.service.ts:466` |
 | `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CredentialsRepository.createPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:315` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount | `src/common/seed/provider-accounts-seed.service.ts:146` |
-| `iam.security_events` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:42` |
+| `iam.security_events` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
-| `iam.users` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → UsersRepository.create | `src/modules/iam/infrastructure/repositories/users.repository.ts:49` |
+| `iam.users` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → UsersRepository.create | `src/modules/iam/infrastructure/repositories/users.repository.ts:104` |
 | `insurance.insurance_carriers` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedCarriers | `src/common/seed/bolivia-insurance-seed.service.ts:328` |
 | `insurance.insurance_plans` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedPlans | `src/common/seed/bolivia-insurance-seed.service.ts:417` |
 | `insurance.insurance_products` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedProducts | `src/common/seed/bolivia-insurance-seed.service.ts:372` |

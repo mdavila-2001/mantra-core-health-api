@@ -21,6 +21,9 @@ import { MikroORM } from '@mikro-orm/postgresql';
  *     el único que legítimamente usa el rol dueño: queda exento.
  *   - `DB_ALLOW_PRIVILEGED_RUNTIME_ROLE=true` es una válvula transitoria
  *     explícita; cada arranque con ella deja un `error` en el log.
+ *   - En producción `RLS_ENFORCE` tiene que valer exactamente `"true"`: sin
+ *     definir, `false` o cualquier otro valor aborta el arranque con
+ *     `SYSTEM_RLS_ENFORCE_DISABLED` (C-3). No hay válvula para esto.
  */
 
 /** Hechos del rol de conexión que alimentan la política. */
@@ -124,6 +127,23 @@ export function evaluateRuntimeRole(
   };
 }
 
+/**
+ * C-3 · ¿Este entorno arranca en producción con el aislamiento por tenant
+ * apagado?
+ *
+ * Con `RLS_ENFORCE` distinto de `"true"` el interceptor no fija
+ * `app.current_tenant_id`: con un rol sin privilegios las políticas ocultan
+ * todas las filas, y con uno privilegiado el aislamiento queda librado a cada
+ * servicio. Ninguna de las dos es un despliegue válido. El proceso de
+ * migración/seed queda exento, igual que en `shouldVerifyRuntimeRole`.
+ */
+export function isRlsEnforcementMissingInProduction(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (isMigrationProcess(env)) return false;
+  return env.NODE_ENV === 'production' && env.RLS_ENFORCE !== 'true';
+}
+
 /** Ejecuta la política al arrancar y aborta si corresponde. */
 @Injectable()
 export class RuntimeRoleGuardService implements OnApplicationBootstrap {
@@ -141,20 +161,6 @@ export class RuntimeRoleGuardService implements OnApplicationBootstrap {
     const verdict = evaluateRuntimeRole(facts);
     const roleIsSafe = verdict.violations.length === 0;
 
-    if (roleIsSafe) {
-      // El inverso también es un error de despliegue: un rol que SÍ respeta RLS
-      // sin `RLS_ENFORCE=true` no recibe `app.current_tenant_id`, y las
-      // políticas (fail-closed) le ocultan todas las filas.
-      if (process.env.RLS_ENFORCE !== 'true') {
-        this.logger.error(
-          'El rol de conexión respeta RLS pero RLS_ENFORCE no es "true": el ' +
-            'interceptor no fija el tenant y las políticas ocultarán las filas. ' +
-            'Definí RLS_ENFORCE=true junto con DB_APP_USER.',
-        );
-      }
-      return;
-    }
-
     const reason = verdict.violations.join('; ');
     if (verdict.fatal) {
       throw new Error(
@@ -165,6 +171,22 @@ export class RuntimeRoleGuardService implements OnApplicationBootstrap {
           'DB_ALLOW_PRIVILEGED_RUNTIME_ROLE=true.',
       );
     }
+
+    // C-3: en producción el interruptor tiene que estar encendido, sea cual sea
+    // el rol. Un rol que respeta RLS sin `RLS_ENFORCE=true` no recibe
+    // `app.current_tenant_id` y las políticas (fail-closed) le ocultan todas
+    // las filas; uno privilegiado (con la válvula) no aísla nada.
+    if (isRlsEnforcementMissingInProduction()) {
+      throw new Error(
+        'SYSTEM_RLS_ENFORCE_DISABLED: NODE_ENV=production exige ' +
+          'RLS_ENFORCE=true. Sin él el interceptor no fija el tenant y el ' +
+          'aislamiento entre organizaciones no rige. Definí RLS_ENFORCE=true ' +
+          'junto con DB_APP_USER/DB_APP_PASSWORD (rol mantra_app).',
+      );
+    }
+
+    if (roleIsSafe) return;
+
     this.logger.error(
       `El rol de conexión ${reason}: las políticas RLS no aíslan por tenant.` +
         (process.env.NODE_ENV === 'production'

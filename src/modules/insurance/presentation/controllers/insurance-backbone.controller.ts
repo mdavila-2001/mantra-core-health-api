@@ -46,6 +46,10 @@ import {
  * Backbone del aseguramiento (catálogo de aseguradoras/productos/planes/redes/
  * brokers) y UC-26-01 (alta de membresía de prestador en red). Capa fina: valida
  * parámetros y delega en el servicio. Operaciones administrativas → SECURITY_ADMIN.
+ *
+ * Las rutas con `@Roles()` vacío (O3-3) son las de la aseguradora sobre su
+ * propio catálogo: `administrableCarrier` exige ser OWNER/ADMIN del tenant
+ * activo (o plataforma) y acota el plan o producto a esa aseguradora.
  */
 @ApiTags('insurance-backbone')
 @ApiBearerAuth()
@@ -85,7 +89,7 @@ export class InsuranceBackboneController {
    * Configura los canales de contacto directo de la aseguradora del tenant
    * activo (subtarea 2.3 — registro de procesos, Aseguradora 6.2 · ítem 5).
    *
-   * Sin `@Roles`, igual que `createPlan`/`updateBenefit`: los roles
+   * `@Roles()` vacío (sin rol global), igual que `createPlan`/`updateBenefit`: los roles
    * "ADMINISTRATOR"/"OWNER" que pediría un pedido literal no existen en
    * `role-mapping.ts`. La barrera es la membresía OWNER/ADMIN del tenant de
    * la aseguradora (o ser plataforma), que resuelve el servicio.
@@ -101,6 +105,7 @@ export class InsuranceBackboneController {
     entityId: 'param:id',
   })
   @Put('insurance-carriers/:id/contact-channels')
+  @Roles()
   @ApiOperation({
     summary:
       'Configurar los canales de contacto de la aseguradora del tenant activo',
@@ -153,6 +158,7 @@ export class InsuranceBackboneController {
     entityId: 'result.id',
   })
   @Post('insurance-products/:productId/plans')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un plan del carrier del tenant activo' })
   createPlan(
@@ -177,6 +183,7 @@ export class InsuranceBackboneController {
     entityId: 'result.id',
   })
   @Post('insurance-plans/:planId/benefits')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una cobertura de un plan administrable' })
   createBenefit(
@@ -194,6 +201,7 @@ export class InsuranceBackboneController {
     entityId: 'param:benefitId',
   })
   @Put('insurance-plans/:planId/benefits/:benefitId')
+  @Roles()
   @ApiOperation({ summary: 'Editar importes de una cobertura' })
   updateBenefit(
     @Param('planId', ParseUUIDPipe) planId: string,
@@ -211,6 +219,7 @@ export class InsuranceBackboneController {
     entityId: 'param:benefitId',
   })
   @Put('insurance-plans/:planId/benefits/:benefitId/rules')
+  @Roles()
   @ApiOperation({ summary: 'Editar reglas de aprobación de una cobertura' })
   updateBenefitRules(
     @Param('planId', ParseUUIDPipe) planId: string,
@@ -224,7 +233,7 @@ export class InsuranceBackboneController {
   /**
    * Subtarea 3.1 (v4.2.14) — la aseguradora declara la prima de lista mensual
    * de un plan que ya existe. Reemplazo completo de un solo valor; `null` la
-   * quita. Sin `@Roles`, como `createPlan`: la barrera es la membresía
+   * quita. `@Roles()` vacío, como `createPlan`: la barrera es la membresía
    * OWNER/ADMIN del tenant de la aseguradora (`administrableCarrier`).
    */
   @Audited({
@@ -233,6 +242,7 @@ export class InsuranceBackboneController {
     entityId: 'param:planId',
   })
   @Put('insurance-plans/:planId/premium')
+  @Roles()
   @ApiOperation({
     summary: 'Declarar la prima de lista mensual de un plan administrable',
   })

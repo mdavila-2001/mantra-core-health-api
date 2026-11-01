@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 06 · schema authz
+-- SALUD v4.2.82 · módulo 06 · schema authz
 -- Generado de diagram_06_authz.puml — NO editar a mano.
 
 
@@ -50,6 +50,34 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_permissions_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "authz"."permissions"
+        ADD CONSTRAINT "fk_permissions_sensitivity_concept_id" FOREIGN KEY ("sensitivity_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "authz"."permissions"
+        ADD CONSTRAINT "fk_permissions_approval_mode_concept_id" FOREIGN KEY ("approval_mode_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "authz"."permissions"
+        ADD CONSTRAINT "fk_permissions_purpose_of_use_concept_id" FOREIGN KEY ("purpose_of_use_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "authz"."permissions"
+        ADD CONSTRAINT "fk_permissions_legal_basis_concept_id" FOREIGN KEY ("legal_basis_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 -- destino: directory.tenants (requiere schema directory)
 DO $$ BEGIN
@@ -636,5 +664,33 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención
 DO $$ BEGIN
     ALTER TABLE "authz"."patient_legal_representations"
         ADD CONSTRAINT "fk_patient_legal_representations_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "authz"."ui_visibility_elements"
+        ADD CONSTRAINT "fk_ui_visibility_elements_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "authz"."ui_visibility_elements"
+        ADD CONSTRAINT "fk_ui_visibility_elements_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "authz"."ui_visibility_rules"
+        ADD CONSTRAINT "fk_ui_visibility_rules_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "authz"."ui_visibility_rules"
+        ADD CONSTRAINT "fk_ui_visibility_rules_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)

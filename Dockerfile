@@ -34,6 +34,12 @@ COPY . .
 # de Node (~2 GB) y `nest build` muere con «heap out of memory»: sin esto la
 # imagen no se construye y el servidor se queda con el código anterior.
 RUN NODE_OPTIONS=--max-old-space-size=4096 yarn build
+# Manifiesto de la sonda de piezas en ejecución (`/admin/ops/runtime-pieces`):
+# el escáner lee `src/`, que la imagen final no trae. Se genera aquí, con el
+# código fuente delante, y viaja dentro de `dist/`. Sin él la sonda responde
+# «escaneo no disponible». El CLI sale con 1 si no encuentra el código fuente: así un
+# manifiesto vacío rompe la construcción en vez de llegar a producción.
+RUN node dist/src/modules/platform_ops/runtime_pieces/runtime-pieces-manifest.cli.js dist/runtime-pieces.manifest.json
 
 # ---- deps de producción only (para la imagen final, sin devDependencies) ----
 FROM node:24-bookworm-slim AS prod-deps

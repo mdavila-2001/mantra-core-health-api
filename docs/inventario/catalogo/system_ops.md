@@ -10,22 +10,22 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [anonymization_rules](#anonymization_rules) | Define reglas de anonimización para preparar información para usos que no requieren identificar personas. | 10 | 4 | 5 | COINCIDE |
+| [anonymization_rules](#anonymization_rules) | Define reglas de anonimización para preparar información para usos que no requieren identificar personas. | 10 | 4 | 8 | COINCIDE |
 | [assessment_control_results](#assessment_control_results) | Conserva resultados por control de una evaluación para localizar cumplimiento y brechas específicas. | 16 | 9 | 3 | COINCIDE |
 | [assessment_findings](#assessment_findings) | Registra hallazgos de evaluaciones para priorizar riesgos y acciones correctivas. | 17 | 7 | 7 | COINCIDE |
 | [backup_policies](#backup_policies) | Define políticas de respaldo para proteger disponibilidad y recuperabilidad de información del sistema médico. | 16 | 7 | 4 | COINCIDE |
 | [breach_notifications](#breach_notifications) | Conserva notificaciones de brechas para documentar comunicaciones y obligaciones posteriores a un incidente. | 17 | 4 | 0 | COINCIDE |
 | [cross_border_transfer_events](#cross_border_transfer_events) | Registra transferencias internacionales de datos para mantener trazabilidad de movimientos entre jurisdicciones. | 10 | 9 | 2 | COINCIDE |
-| [data_classifications](#data_classifications) | Define niveles de clasificación de datos para gobernar su protección y uso en la plataforma médica. | 13 | 4 | 2 | COINCIDE |
-| [data_domains](#data_domains) | Cataloga dominios de datos para asignar ownership y organizar gobierno por área del sistema. | 10 | 3 | 2 | COINCIDE |
-| [data_residency_policies](#data_residency_policies) | Define requisitos de residencia geográfica de datos para controlar dónde pueden almacenarse datos de salud. | 17 | 9 | 2 | COINCIDE |
+| [data_classifications](#data_classifications) | Define niveles de clasificación de datos para gobernar su protección y uso en la plataforma médica. | 13 | 4 | 5 | COINCIDE |
+| [data_domains](#data_domains) | Cataloga dominios de datos para asignar ownership y organizar gobierno por área del sistema. | 10 | 3 | 4 | COINCIDE |
+| [data_residency_policies](#data_residency_policies) | Define requisitos de residencia geográfica de datos para controlar dónde pueden almacenarse datos de salud. | 17 | 9 | 4 | COINCIDE |
 | [draft_records](#draft_records) | Almacena registros en estado de borrador para separar preparación de datos de su publicación o uso operativo. | 17 | 6 | 3 | COINCIDE |
 | [encryption_keys](#encryption_keys) | Cataloga claves de cifrado gobernadas que protegen datos y secretos almacenados por la plataforma. | 18 | 4 | 0 | COINCIDE |
-| [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 9 | COINCIDE |
-| [field_registry](#field_registry) | Cataloga campos de entidades para mantener metadata de sensibilidad, clasificación y uso. | 14 | 6 | 6 | COINCIDE |
-| [governance_change_log](#governance_change_log) | Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasificación, acceso y ciclo de vida. | 10 | 4 | 10 | COINCIDE |
+| [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 20 | COINCIDE |
+| [field_registry](#field_registry) | Cataloga campos de entidades para mantener metadata de sensibilidad, clasificación y uso. | 14 | 6 | 12 | COINCIDE |
+| [governance_change_log](#governance_change_log) | Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasificación, acceso y ciclo de vida. | 10 | 4 | 11 | COINCIDE |
 | [key_rotation_events](#key_rotation_events) | Preserva eventos de rotación de claves para demostrar y operar el ciclo de vida criptográfico. | 9 | 2 | 0 | COINCIDE |
-| [legal_holds](#legal_holds) | Registra retenciones legales que suspenden disposición de información requerida para procesos o investigaciones. | 14 | 7 | 7 | COINCIDE |
+| [legal_holds](#legal_holds) | Registra retenciones legales que suspenden disposición de información requerida para procesos o investigaciones. | 14 | 7 | 8 | COINCIDE |
 | [operational_framework_controls](#operational_framework_controls) | Define controles que componen marcos operativos para evaluar cumplimiento y preparación organizacional. | 15 | 7 | 1 | COINCIDE |
 | [operational_frameworks](#operational_frameworks) | Cataloga marcos operativos usados para evaluar controles y prácticas institucionales. | 13 | 5 | 3 | COINCIDE |
 | [partition_specs](#partition_specs) | Registra especificaciones de particionado para organizar almacenamiento y retención de tablas de gran volumen. | 22 | 5 | 0 | COINCIDE |
@@ -33,12 +33,12 @@
 | [remediation_actions](#remediation_actions) | Detalla acciones de remediación y su estado para seguir la resolución de hallazgos. | 18 | 8 | 3 | COINCIDE |
 | [remediation_plans](#remediation_plans) | Agrupa acciones planificadas para corregir hallazgos de gobierno, privacidad o seguridad. | 16 | 9 | 4 | COINCIDE |
 | [restore_test_runs](#restore_test_runs) | Documenta pruebas de restauración para verificar que copias de respaldo permiten recuperar datos. | 12 | 5 | 3 | COINCIDE |
-| [retention_executions](#retention_executions) | Registra ejecuciones de políticas de retención para documentar qué datos fueron evaluados o procesados. | 13 | 5 | 2 | COINCIDE |
-| [retention_policies](#retention_policies) | Establece políticas de conservación y disposición de datos según necesidad operativa y normativa aplicable. | 13 | 7 | 6 | COINCIDE |
+| [retention_executions](#retention_executions) | Registra ejecuciones de políticas de retención para documentar qué datos fueron evaluados o procesados. | 13 | 5 | 4 | COINCIDE |
+| [retention_policies](#retention_policies) | Establece políticas de conservación y disposición de datos según necesidad operativa y normativa aplicable. | 13 | 7 | 10 | COINCIDE |
 | [security_incidents](#security_incidents) | Registra incidentes de seguridad para coordinar investigación, contención y recuperación. | 20 | 4 | 0 | COINCIDE |
 | [tenant_residency_bindings](#tenant_residency_bindings) | Asocia tenants con políticas o regiones de residencia para aplicar requisitos territoriales a cada organización. | 13 | 8 | 1 | COINCIDE |
 | [workload_assessments](#workload_assessments) | Registra evaluaciones de cargas de trabajo para analizar capacidad y condiciones operativas de los servicios. | 19 | 11 | 4 | COINCIDE |
-| [write_policies](#write_policies) | Define reglas sobre escrituras permitidas en entidades para proteger consistencia y gobierno de datos. | 16 | 7 | 3 | COINCIDE |
+| [write_policies](#write_policies) | Define reglas sobre escrituras permitidas en entidades para proteger consistencia y gobierno de datos. | 16 | 7 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -302,7 +302,7 @@ Define reglas de anonimización para preparar información para usos que no requ
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: anonymization_rules`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `AnonymizationRules` — `src/modules/system_ops/entities/anonymization_rules.entity.ts`
-- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 1 entrantes · 5 operaciones
+- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -351,6 +351,9 @@ Define reglas de anonimización para preparar información para usos que no requ
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
 | POST /admin/governance/anonymization-rules | CREA | DIRECTA |
 | POST /admin/governance/anonymization-rules | LEE | DIRECTA |
+| GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
+| GET /admin/governance/policies | LEE | POR_SQL |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno
@@ -777,7 +780,7 @@ Define niveles de clasificación de datos para gobernar su protección y uso en 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: data_classifications`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `SystemOpsDataClassifications` — `src/modules/system_ops/entities/data_classifications.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 4 entrantes · 2 operaciones
+- **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 4 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -828,8 +831,11 @@ Define niveles de clasificación de datos para gobernar su protección y uso en 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/entity-registry | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
 | POST /admin/governance/entity-registry | LEE | DIRECTA |
+| GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -854,7 +860,7 @@ Cataloga dominios de datos para asignar ownership y organizar gobierno por área
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: data_domains`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `DataDomains` — `src/modules/system_ops/entities/data_domains.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 2 FK salientes · 1 entrantes · 2 operaciones
+- **Resumen:** 10 columnas · 3 índices · 2 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -897,6 +903,8 @@ Cataloga dominios de datos para asignar ownership y organizar gobierno por área
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/domains | LEE | POR_SQL |
+| GET /admin/governance/entity-registry | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
 | POST /admin/governance/entity-registry | LEE | DIRECTA |
 
@@ -923,7 +931,7 @@ Define requisitos de residencia geográfica de datos para controlar dónde puede
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: data_residency_policies`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `DataResidencyPolicies` — `src/modules/system_ops/entities/data_residency_policies.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 8 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 17 columnas · 9 índices · 8 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -984,6 +992,8 @@ Define requisitos de residencia geográfica de datos para controlar dónde puede
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/policies | LEE | POR_SQL |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
 | POST /admin/governance/residency-policies | CREA | DIRECTA |
 | POST /admin/governance/residency-policies | LEE | DIRECTA |
 
@@ -1170,7 +1180,7 @@ Registra entidades del modelo para aplicar políticas de gobierno, retención y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: entity_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `EntityRegistry` — `src/modules/system_ops/entities/entity_registry.entity.ts`
-- **Resumen:** 21 columnas · 7 índices · 8 FK salientes · 3 entrantes · 9 operaciones
+- **Resumen:** 21 columnas · 7 índices · 8 FK salientes · 3 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -1231,13 +1241,24 @@ Registra entidades del modelo para aplicar políticas de gobierno, retención y 
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /admin/catalog/objects/{id} | LEE | POR_SQL |
+| GET /admin/catalog/pii/columns | LEE | POR_SQL |
+| GET /admin/catalog/pii/reconciliation | LEE | POR_SQL |
+| GET /admin/catalog/pii/summary | LEE | POR_SQL |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
+| GET /admin/governance/domains | LEE | POR_SQL |
+| GET /admin/governance/entity-registry | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
+| GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
 | PATCH /admin/governance/entity-registry/{id}/retention | ACTUALIZA | POR_TIPO |
 | PATCH /admin/governance/entity-registry/{id}/retention | LEE | DIRECTA |
 | PATCH /admin/governance/entity-registry/{id}/write-policy | ACTUALIZA | POR_TIPO |
 | PATCH /admin/governance/entity-registry/{id}/write-policy | LEE | DIRECTA |
+| GET /admin/governance/mutability | LEE | DIRECTA |
+| GET /admin/governance/mutability/{schema}/{table} | LEE | DIRECTA |
+| GET /admin/governance/mutability/summary | LEE | DIRECTA |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
+| GET /admin/governance/retention-executions | LEE | POR_SQL |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno
@@ -1263,7 +1284,7 @@ Cataloga campos de entidades para mantener metadata de sensibilidad, clasificaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: field_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `FieldRegistry` — `src/modules/system_ops/entities/field_registry.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 0 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -1310,11 +1331,17 @@ Cataloga campos de entidades para mantener metadata de sensibilidad, clasificaci
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/catalog/pii/columns | LEE | POR_SQL |
+| GET /admin/catalog/pii/reconciliation | LEE | POR_SQL |
+| GET /admin/catalog/pii/summary | LEE | POR_SQL |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
+| GET /admin/governance/entity-registry | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
+| GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
 | PATCH /admin/governance/field-registry/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /admin/governance/field-registry/{id} | LEE | DIRECTA |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno
@@ -1340,7 +1367,7 @@ Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasific
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: governance_change_log`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `GovernanceChangeLog` — `src/modules/system_ops/entities/governance_change_log.entity.ts`
-- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 0 entrantes · 10 operaciones
+- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 0 entrantes · 11 operaciones
 
 #### Columnas
 
@@ -1379,6 +1406,7 @@ Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasific
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /admin/governance/anonymization-rules | CREA | DIRECTA |
+| GET /admin/governance/change-log | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
 | PATCH /admin/governance/entity-registry/{id}/retention | CREA | DIRECTA |
 | PATCH /admin/governance/entity-registry/{id}/write-policy | CREA | DIRECTA |
@@ -1470,7 +1498,7 @@ Registra retenciones legales que suspenden disposición de información requerid
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: legal_holds`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `LegalHolds` — `src/modules/system_ops/entities/legal_holds.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 1 entrantes · 7 operaciones
+- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -1521,6 +1549,7 @@ Registra retenciones legales que suspenden disposición de información requerid
 |---|---|---|
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
+| GET /admin/governance/legal-holds | LEE | POR_SQL |
 | POST /admin/governance/legal-holds | CREA | DIRECTA |
 | POST /admin/governance/legal-holds | LEE | DIRECTA |
 | POST /admin/governance/legal-holds/{id}/release | ACTUALIZA | POR_TIPO |
@@ -1850,7 +1879,7 @@ Conserva revisiones de registros para proporcionar historial y control de cambio
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/system_ops/README.md:108` |
+| Append-only | sí (declarado) | `src/modules/system_ops/README.md:113` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2119,7 +2148,7 @@ Registra ejecuciones de políticas de retención para documentar qué datos fuer
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: retention_executions`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `RetentionExecutions` — `src/modules/system_ops/entities/retention_executions.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -2162,6 +2191,8 @@ Registra ejecuciones de políticas de retención para documentar qué datos fuer
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/jobs | LEE | POR_SQL |
+| GET /admin/governance/retention-executions | LEE | POR_SQL |
 | POST /internal/governance/retention-executions/run | ACTUALIZA | POR_TIPO |
 | POST /internal/governance/retention-executions/run | CREA | DIRECTA |
 
@@ -2188,7 +2219,7 @@ Establece políticas de conservación y disposición de datos según necesidad o
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: retention_policies`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `SystemOpsRetentionPolicies` — `src/modules/system_ops/entities/retention_policies.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 6 FK salientes · 7 entrantes · 6 operaciones
+- **Resumen:** 13 columnas · 7 índices · 6 FK salientes · 7 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -2230,7 +2261,7 @@ Establece políticas de conservación y disposición de datos según necesidad o
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_retention_policies_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_retention_policies_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_retention_policies_legal_basis_concept_id` | no | legal_basis_concept_id | Soporta la clave foránea fk_retention_policies_legal_basis_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_retention_policies_disposition_concept_id` | no | disposition_concept_id | Soporta la clave foránea fk_retention_policies_disposition_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_retention_policies_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_retention_policies_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2250,7 +2281,11 @@ Establece políticas de conservación y disposición de datos según necesidad o
 |---|---|---|
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
+| GET /admin/governance/entity-registry | LEE | POR_SQL |
 | PATCH /admin/governance/entity-registry/{id}/retention | LEE | DIRECTA |
+| GET /admin/governance/policies | LEE | POR_SQL |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
+| GET /admin/governance/retention-executions | LEE | POR_SQL |
 | POST /admin/governance/retention-policies | CREA | DIRECTA |
 | POST /admin/governance/retention-policies | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
@@ -2527,7 +2562,7 @@ Define reglas sobre escrituras permitidas en entidades para proteger consistenci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: write_policies`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `WritePolicies` — `src/modules/system_ops/entities/write_policies.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 1 entrantes · 3 operaciones
+- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -2566,7 +2601,7 @@ Define reglas sobre escrituras permitidas en entidades para proteger consistenci
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_write_policies_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_write_policies_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_write_policies_insert_mode_concept_id` | no | insert_mode_concept_id | Soporta la clave foránea fk_write_policies_insert_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_write_policies_update_mode_concept_id` | no | update_mode_concept_id | Soporta la clave foránea fk_write_policies_update_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_write_policies_delete_mode_concept_id` | no | delete_mode_concept_id | Soporta la clave foránea fk_write_policies_delete_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2584,7 +2619,10 @@ Define reglas sobre escrituras permitidas en entidades para proteger consistenci
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/governance/entity-registry | LEE | POR_SQL |
 | PATCH /admin/governance/entity-registry/{id}/write-policy | LEE | DIRECTA |
+| GET /admin/governance/policies | LEE | POR_SQL |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
 | POST /admin/governance/write-policies | CREA | DIRECTA |
 | POST /admin/governance/write-policies | LEE | DIRECTA |
 

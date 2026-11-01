@@ -3,13 +3,13 @@
 # Flujos del módulo `billing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 38 (35 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 53 (49 con decisiones propias, 4 sin ellas)
 - Inventario de endpoints del módulo: [billing](../endpoints/billing.md)
 
 ## Proceso: Módulo Billing (17)
 
-- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 38
-- **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM
+- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 53
+- **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM · SYSTEM_WORKER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/billing/README.md`
 
@@ -23,7 +23,7 @@ _Fuente: `src/modules/billing/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-17-01` | InvoicesService.issueFromEncounter | POST /billing/invoices:issue-from-encounter | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-17-01` | InvoicesService.issueFromEncounter | POST /billing/invoices:issue-from-encounter | SECURITY_ADMIN | MEDIO | 9 |
 | `UC-17-02` | PaymentsReceivedService.apply | POST /billing/payments-received:apply | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-17-03` | InvoicesService.creditNote | POST /billing/invoices/{id}:credit-note | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-17-04` | BillsService.register | POST /billing/bills | SECURITY_ADMIN | MEDIO | 7 |
@@ -35,6 +35,13 @@ _Fuente: `src/modules/billing/README.md:3`_
 | `UC-17-10` | DunningService.execute | POST /billing/dunning-runs:execute | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-17-11` | InvoicesService.createPaymentPlan | POST /billing/payment-plans | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-17-12` | KpiSnapshotsService.compute | POST /billing/kpi-snapshots:compute | SECURITY_ADMIN | MEDIO | 2 |
+| `ctrl:AdminServiceCatalogController` | Operaciones de AdminServiceCatalogController que el README no asigna a un caso de uso | GET /admin/catalogs/services | SECURITY_ADMIN | BAJO | 2 |
+|  |  | POST /admin/catalogs/services | SECURITY_ADMIN | MEDIO | 3 |
+|  |  | GET /admin/catalogs/services/{id} | SECURITY_ADMIN | BAJO | 2 |
+|  |  | PATCH /admin/catalogs/services/{id} | SECURITY_ADMIN | BAJO | 2 |
+|  |  | POST /admin/catalogs/services/{id}/deactivate | SECURITY_ADMIN | BAJO | 2 |
+|  |  | POST /admin/catalogs/services/{id}/reactivate | SECURITY_ADMIN | BAJO | 2 |
+|  |  | GET /admin/catalogs/services/scopes | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:BillingOperationsController` | Operaciones de BillingOperationsController que el README no asigna a un caso de uso | POST /billing/internal/dunning-runs/run-due | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
 | `ctrl:BillingReceivablesController` | Operaciones de BillingReceivablesController que el README no asigna a un caso de uso | GET /billing/invoices | SECURITY_ADMIN | BAJO | 2 |
 |  |  | GET /billing/invoices/{id} | SECURITY_ADMIN | BAJO | 3 |
@@ -51,7 +58,7 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/simulated/charges | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/charges/{chargeId}/invoices | Cualquier sesión válida | ALTO | 12 |
-|  |  | POST /billing/simulated/charges/{chargeId}/payment | Cualquier sesión válida | ALTO | 18 |
+|  |  | POST /billing/simulated/charges/{chargeId}/payment | Cualquier sesión válida | ALTO | 22 |
 |  |  | GET /billing/simulated/invoices/{invoiceId} | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/invoices/{invoiceId}/annulment | Cualquier sesión válida | ALTO | 12 |
 |  |  | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | Cualquier sesión válida | ALTO | 12 |
@@ -60,355 +67,520 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/simulated/my-invoices/{invoiceId} | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /billing/simulated/outbox | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/simulated/status | Cualquier sesión válida | BAJO | 2 |
+| `ctrl:BillingSpaceChargesController` | Operaciones de BillingSpaceChargesController que el README no asigna a un caso de uso | GET /billing/bed-day/stays | Cualquier sesión válida | BAJO | 12 |
+|  |  | POST /billing/charge-captures/{id}/void | Cualquier sesión válida | ALTO | 13 |
+|  |  | POST /billing/encounters/{encounterId}/bed-day-charges/run | Cualquier sesión válida | ALTO | 17 |
+|  |  | GET /billing/encounters/{encounterId}/pending-charges | Cualquier sesión válida | BAJO | 11 |
+|  |  | GET /billing/space-tariffs | Cualquier sesión válida | BAJO | 9 |
+|  |  | POST /billing/space-tariffs | Cualquier sesión válida | ALTO | 13 |
+|  |  | POST /billing/space-tariffs/{id}/close | Cualquier sesión válida | ALTO | 13 |
+|  |  | POST /internal/billing/bed-day-charges/run | SYSTEM · SYSTEM_WORKER | MEDIO | 19 |
 | `ctrl:PatientSpendingController` | Operaciones de PatientSpendingController que el README no asigna a un caso de uso | GET /patient-spending/me | PATIENT | BAJO | 11 |
 
-### Diagrama 1 de 2 — etapas `UC-17-01`, `UC-17-02`, `UC-17-03`…
+### Diagrama 1 de 3 — etapas `UC-17-01`, `UC-17-02`, `UC-17-03`…
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a35(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a48(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("billing.billing_document_links")]:::tabla
-  t4[("billing.invoice_lines")]:::tabla
-  t5[("billing.invoices")]:::tabla
-  t6[("clinical.encounters")]:::tabla
-  t8[("billing.payments_received")]:::tabla
-  t9[("billing.receivable_payment_allocations")]:::tabla
-  t10[("insurance.claim_disputes")]:::tabla
-  t11[("insurance.insurance_claim_lines")]:::tabla
-  t14[("billing.bill_lines")]:::tabla
-  t15[("billing.bills")]:::tabla
-  t16[("billing.vendors")]:::tabla
-  t17[("erp.contracts")]:::tabla
-  t20[("billing.payable_payment_allocations")]:::tabla
-  t21[("billing.payments_made")]:::tabla
-  t25[("billing.reimbursements")]:::tabla
-  t27[("billing.patient_statements")]:::tabla
-  t29[("billing.dunning_items")]:::tabla
-  t30[("billing.dunning_runs")]:::tabla
-  t33[("billing.financial_kpi_snapshots")]:::tabla
-  t38[("practice.practices")]:::tabla
+  t4[("billing.charge_captures")]:::tabla
+  t5[("billing.invoice_lines")]:::tabla
+  t6[("billing.invoices")]:::tabla
+  t7[("clinical.encounters")]:::tabla
+  e9>"billing.charge_capture.invoiced"]:::evento
+  t11[("billing.payments_received")]:::tabla
+  t12[("billing.receivable_payment_allocations")]:::tabla
+  t13[("insurance.claim_disputes")]:::tabla
+  t14[("insurance.insurance_claim_lines")]:::tabla
+  t17[("billing.bill_lines")]:::tabla
+  t18[("billing.bills")]:::tabla
+  t19[("billing.vendors")]:::tabla
+  t20[("erp.contracts")]:::tabla
+  t23[("billing.payable_payment_allocations")]:::tabla
+  t24[("billing.payments_made")]:::tabla
+  t28[("billing.reimbursements")]:::tabla
+  t30[("billing.patient_statements")]:::tabla
+  t32[("billing.dunning_items")]:::tabla
+  t33[("billing.dunning_runs")]:::tabla
+  t36[("billing.financial_kpi_snapshots")]:::tabla
+  t38[("billing.service_catalog")]:::tabla
+  t39[("practice.practices")]:::tabla
+  t46[("terminology.catalog_concepts")]:::tabla
+  t8[("+3 tablas más")]
   subgraph s0["UC-17-01 · InvoicesService.issueFromEncounter"]
     o1["POST /billing/invoices:issue-from-encounter"]:::op
   end
   subgraph s1["UC-17-02 · PaymentsReceivedService.apply"]
-    o7["POST /billing/payments-received:apply"]:::op
+    o10["POST /billing/payments-received:apply"]:::op
   end
   subgraph s2["UC-17-03 · InvoicesService.creditNote"]
-    o12["POST /billing/invoices/{id}:credit-note"]:::op
+    o15["POST /billing/invoices/{id}:credit-note"]:::op
   end
-  t18[("+1 tablas más")]
+  t21[("+1 tablas más")]
   subgraph s3["UC-17-04 · BillsService.register"]
-    o13["POST /billing/bills"]:::op
+    o16["POST /billing/bills"]:::op
   end
   subgraph s4["UC-17-05 · PaymentsMadeService.execute"]
-    o19["POST /billing/payments-made:execute"]:::op
+    o22["POST /billing/payments-made:execute"]:::op
   end
   subgraph s5["UC-17-06 · LedgerService.postToLedger"]
-    o22["POST /billing/documents/{id}:post-to-ledger"]:::op
+    o25["POST /billing/documents/{id}:post-to-ledger"]:::op
   end
   subgraph s6["UC-17-07 · ReconciliationService.clear"]
-    o23["POST /billing/reconciliation:clear"]:::op
+    o26["POST /billing/reconciliation:clear"]:::op
   end
   subgraph s7["UC-17-08 · ReimbursementsService.link"]
-    o24["POST /billing/reimbursements:link"]:::op
+    o27["POST /billing/reimbursements:link"]:::op
   end
   subgraph s8["UC-17-09 · PatientStatementsService.generate"]
-    o26["POST /billing/patient-statements:generate"]:::op
+    o29["POST /billing/patient-statements:generate"]:::op
   end
   subgraph s9["UC-17-10 · DunningService.execute"]
-    o28["POST /billing/dunning-runs:execute"]:::op
+    o31["POST /billing/dunning-runs:execute"]:::op
   end
   subgraph s10["UC-17-11 · InvoicesService.createPaymentPlan"]
-    o31["POST /billing/payment-plans"]:::op
+    o34["POST /billing/payment-plans"]:::op
   end
   subgraph s11["UC-17-12 · KpiSnapshotsService.compute"]
-    o32["POST /billing/kpi-snapshots:compute"]:::op
+    o35["POST /billing/kpi-snapshots:compute"]:::op
   end
-  t36[("+1 tablas más")]
-  subgraph s12["ctrl:BillingOperationsController · Operaciones de BillingOperationsController q…"]
-    o34["POST /billing/internal/dunning-runs/run-due"]:::op
+  subgraph s12["ctrl:AdminServiceCatalogController · Operaciones de AdminServiceCatalogControll…"]
+    o37["GET /admin/catalogs/services"]:::op
+    o40["POST /admin/catalogs/services"]:::op
+    o41["GET /admin/catalogs/services/{id}"]:::op
+    o42["PATCH /admin/catalogs/services/{id}"]:::op
+    o43["POST /admin/catalogs/services/{id}/deactivate"]:::op
+    o44["POST /admin/catalogs/services/{id}/reactivate"]:::op
+    o45["GET /admin/catalogs/services/scopes"]:::op
   end
-  subgraph s13["ctrl:BillingReceivablesController · Operaciones de BillingReceivablesController…"]
-    o37["GET /billing/invoices"]:::op
-    o39["GET /billing/invoices/{id}"]:::op
-    o40["GET /billing/patient-statements"]:::op
+  t49[("+1 tablas más")]
+  subgraph s13["ctrl:BillingOperationsController · Operaciones de BillingOperationsController q…"]
+    o47["POST /billing/internal/dunning-runs/run-due"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
-  o1 -->|"CREA"| t4
+  o1 -->|"LEE"| t4
   o1 -->|"CREA"| t5
-  o1 -->|"LEE"| t5
+  o1 -->|"CREA"| t6
   o1 -->|"LEE"| t6
-  a2 --> o7
-  o7 -->|"LEE"| t4
-  o7 -->|"LEE"| t5
-  o7 -->|"CREA"| t8
-  o7 -->|"CREA"| t9
-  o7 -->|"LEE"| t10
-  o7 -->|"LEE"| t11
-  a2 --> o12
-  o12 -->|"CREA"| t3
-  o12 -->|"CREA"| t4
-  o12 -->|"CREA"| t5
-  o12 -->|"LEE"| t5
-  a2 --> o13
-  o13 -->|"CREA"| t14
-  o13 -->|"CREA"| t3
-  o13 -->|"CREA"| t15
-  o13 -->|"LEE"| t15
-  o13 -->|"LEE"| t16
-  o13 -->|"LEE"| t17
-  o13 -.-> t18
-  a2 --> o19
-  o19 -->|"LEE"| t15
-  o19 -->|"CREA"| t20
-  o19 -->|"CREA"| t21
-  o19 -->|"LEE"| t16
+  o1 -->|"LEE"| t7
+  o1 -.-> t8
+  o1 -->|"evento"| e9
+  a2 --> o10
+  o10 -->|"LEE"| t5
+  o10 -->|"LEE"| t6
+  o10 -->|"CREA"| t11
+  o10 -->|"CREA"| t12
+  o10 -->|"LEE"| t13
+  o10 -->|"LEE"| t14
+  a2 --> o15
+  o15 -->|"CREA"| t3
+  o15 -->|"CREA"| t5
+  o15 -->|"CREA"| t6
+  o15 -->|"LEE"| t6
+  a2 --> o16
+  o16 -->|"CREA"| t17
+  o16 -->|"CREA"| t3
+  o16 -->|"CREA"| t18
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t19
+  o16 -->|"LEE"| t20
+  o16 -.-> t21
   a2 --> o22
-  o22 -->|"LEE"| t15
-  o22 -->|"LEE"| t5
-  o22 -->|"LEE"| t21
-  o22 -->|"LEE"| t8
-  a2 --> o23
-  o23 -->|"LEE"| t21
-  o23 -->|"LEE"| t8
-  a2 --> o24
-  o24 -->|"CREA"| t3
-  o24 -->|"LEE"| t5
-  o24 -->|"CREA"| t25
-  o24 -->|"LEE"| t25
+  o22 -->|"LEE"| t18
+  o22 -->|"CREA"| t23
+  o22 -->|"CREA"| t24
+  o22 -->|"LEE"| t19
+  a2 --> o25
+  o25 -->|"LEE"| t18
+  o25 -->|"LEE"| t6
+  o25 -->|"LEE"| t24
+  o25 -->|"LEE"| t11
   a2 --> o26
-  o26 -->|"CREA"| t3
-  o26 -->|"LEE"| t5
-  o26 -->|"CREA"| t27
-  o26 -->|"LEE"| t27
-  a2 --> o28
-  o28 -->|"CREA"| t29
-  o28 -->|"ACTUALIZA"| t30
-  o28 -->|"CREA"| t30
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t5
+  o26 -->|"LEE"| t24
+  o26 -->|"LEE"| t11
+  a2 --> o27
+  o27 -->|"CREA"| t3
+  o27 -->|"LEE"| t6
+  o27 -->|"CREA"| t28
+  o27 -->|"LEE"| t28
+  a2 --> o29
+  o29 -->|"CREA"| t3
+  o29 -->|"LEE"| t6
+  o29 -->|"CREA"| t30
+  o29 -->|"LEE"| t30
   a2 --> o31
-  o31 -->|"CREA"| t3
-  o31 -->|"CREA"| t5
-  o31 -->|"LEE"| t5
-  a2 --> o32
-  o32 -->|"CREA"| t33
-  o32 -->|"LEE"| t33
-  a35 --> o34
-  o34 -->|"CREA"| t29
-  o34 -->|"ACTUALIZA"| t30
-  o34 -->|"CREA"| t30
-  o34 -->|"LEE"| t30
-  o34 -->|"ACTUALIZA"| t5
-  o34 -->|"LEE"| t5
-  o34 -.-> t36
+  o31 -->|"CREA"| t32
+  o31 -->|"ACTUALIZA"| t33
+  o31 -->|"CREA"| t33
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t6
+  a2 --> o34
+  o34 -->|"CREA"| t3
+  o34 -->|"CREA"| t6
+  o34 -->|"LEE"| t6
+  a2 --> o35
+  o35 -->|"CREA"| t36
+  o35 -->|"LEE"| t36
   a2 --> o37
-  o37 -->|"LEE"| t5
   o37 -->|"LEE"| t38
-  a2 --> o39
-  o39 -->|"LEE"| t4
-  o39 -->|"LEE"| t5
-  o39 -->|"LEE"| t38
+  o37 -->|"LEE"| t39
   a2 --> o40
-  o40 -->|"LEE"| t27
+  o40 -->|"CREA"| t38
   o40 -->|"LEE"| t38
+  o40 -->|"LEE"| t39
+  a2 --> o41
+  o41 -->|"LEE"| t38
+  o41 -->|"LEE"| t39
+  a2 --> o42
+  o42 -->|"LEE"| t38
+  o42 -->|"LEE"| t39
+  a2 --> o43
+  o43 -->|"LEE"| t38
+  o43 -->|"LEE"| t39
+  a2 --> o44
+  o44 -->|"LEE"| t38
+  o44 -->|"LEE"| t39
+  a2 --> o45
+  o45 -->|"LEE"| t39
+  o45 -->|"LEE"| t46
+  a48 --> o47
+  o47 -->|"CREA"| t32
+  o47 -->|"ACTUALIZA"| t33
+  o47 -->|"CREA"| t33
+  o47 -->|"LEE"| t33
+  o47 -->|"ACTUALIZA"| t6
+  o47 -->|"LEE"| t6
+  o47 -.-> t49
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:BillingServiceCatalogController`, `ctrl:BillingSimulatedController`, `ctrl:PatientSpendingController`
+### Diagrama 2 de 3 — etapas `ctrl:BillingReceivablesController`, `ctrl:BillingServiceCatalogController`, `ctrl:BillingSimulatedController`
+
+```mermaid
+flowchart LR
+  a2(["SECURITY_ADMIN"]):::actor
+  a10(["Cualquier sesión válida"]):::actor
+  a13(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
+  a17(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
+  t3[("billing.invoices")]:::tabla
+  t4[("practice.practices")]:::tabla
+  t6[("billing.invoice_lines")]:::tabla
+  t8[("billing.patient_statements")]:::tabla
+  t11[("billing.service_catalog")]:::tabla
+  t14[("common.file_versions")]:::tabla
+  t15[("common.files")]:::tabla
+  t18[("practice.practitioner_role_assignments")]:::tabla
+  t21[("terminology.catalog_concepts")]:::tabla
+  t22[("terminology.concept_properties")]:::tabla
+  t25[("profiles.practitioner_specialties")]:::tabla
+  t29[("billing.payments_received")]:::tabla
+  t30[("billing.receivable_payment_allocations")]:::tabla
+  t31[("billing.siat_simulated_invoices")]:::tabla
+  t38[("billing.billing_document_links")]:::tabla
+  t39[("billing.charge_captures")]:::tabla
+  e41>"billing.charge_capture.invoiced"]:::evento
+  t51[("clinical.encounters")]:::tabla
+  t52[("profiles.persons")]:::tabla
+  t55[("billing.siat_simulated_outbox")]:::tabla
+  subgraph s0["ctrl:BillingReceivablesController · Operaciones de BillingReceivablesController…"]
+    o1["GET /billing/invoices"]:::op
+    o5["GET /billing/invoices/{id}"]:::op
+    o7["GET /billing/patient-statements"]:::op
+  end
+  subgraph s1["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
+    o9["GET /billing/service-catalog"]:::op
+    o12["POST /billing/service-catalog"]:::op
+    o16["PATCH /billing/service-catalog/{id}"]:::op
+    o19["GET /billing/service-catalog/{id}/image"]:::op
+    o20["POST /billing/service-catalog/import-procedures"]:::op
+    o23["GET /billing/service-catalog/procedure-specialties"]:::op
+    o24["GET /billing/service-catalog/procedure-specialties/mine"]:::op
+    o26["GET /billing/service-catalog/procedures"]:::op
+  end
+  t32[("+5 tablas más")]
+  t34[("+5 tablas más")]
+  t36[("+6 tablas más")]
+  t40[("+16 tablas más")]
+  t43[("+5 tablas más")]
+  t45[("+6 tablas más")]
+  t47[("+6 tablas más")]
+  t49[("+7 tablas más")]
+  subgraph s2["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
+    o27["GET /billing/simulated/catalogs"]:::op
+    o28["GET /billing/simulated/charges"]:::op
+    o33["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
+    o35["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
+    o37["POST /billing/simulated/charges/{chargeId}/payment"]:::op
+    o42["GET /billing/simulated/invoices/{invoiceId}"]:::op
+    o44["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
+    o46["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
+    o48["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
+    o50["GET /billing/simulated/my-invoices"]:::op
+    o53["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
+    o54["GET /billing/simulated/outbox"]:::op
+    o56["GET /billing/simulated/status"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  o1 -->|"LEE"| t4
+  a2 --> o5
+  o5 -->|"LEE"| t6
+  o5 -->|"LEE"| t3
+  o5 -->|"LEE"| t4
+  a2 --> o7
+  o7 -->|"LEE"| t8
+  o7 -->|"LEE"| t4
+  a10 --> o9
+  o9 -->|"LEE"| t11
+  a13 --> o12
+  o12 -->|"CREA"| t11
+  o12 -->|"LEE"| t11
+  o12 -->|"LEE"| t14
+  o12 -->|"LEE"| t15
+  o12 -->|"LEE"| t4
+  a17 --> o16
+  o16 -->|"ACTUALIZA"| t11
+  o16 -->|"LEE"| t11
+  o16 -->|"LEE"| t4
+  o16 -->|"LEE"| t18
+  a10 --> o19
+  o19 -->|"LEE"| t11
+  o19 -->|"LEE"| t14
+  o19 -->|"LEE"| t15
+  o19 -->|"LEE"| t4
+  a13 --> o20
+  o20 -->|"CREA"| t11
+  o20 -->|"LEE"| t11
+  o20 -->|"LEE"| t4
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t22
+  a10 --> o23
+  o23 -->|"LEE"| t22
+  a10 --> o24
+  o24 -->|"LEE"| t25
+  o24 -->|"LEE"| t21
+  o24 -->|"LEE"| t22
+  a10 --> o26
+  o26 -->|"LEE"| t21
+  o26 -->|"LEE"| t22
+  a10 --> o27
+  a10 --> o28
+  o28 -->|"LEE"| t6
+  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t29
+  o28 -->|"LEE"| t30
+  o28 -->|"LEE"| t11
+  o28 -->|"LEE"| t31
+  o28 -.-> t32
+  a10 --> o33
+  o33 -->|"LEE"| t6
+  o33 -->|"LEE"| t3
+  o33 -->|"LEE"| t29
+  o33 -->|"LEE"| t30
+  o33 -->|"LEE"| t11
+  o33 -->|"LEE"| t31
+  o33 -.-> t34
+  a10 --> o35
+  o35 -->|"LEE"| t6
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t29
+  o35 -->|"LEE"| t30
+  o35 -->|"LEE"| t11
+  o35 -->|"CREA"| t31
+  o35 -.-> t36
+  a10 --> o37
+  o37 -->|"CREA"| t38
+  o37 -->|"LEE"| t39
+  o37 -->|"CREA"| t6
+  o37 -->|"LEE"| t6
+  o37 -->|"CREA"| t3
+  o37 -->|"LEE"| t3
+  o37 -.-> t40
+  o37 -->|"evento"| e41
+  a10 --> o42
+  o42 -->|"LEE"| t6
+  o42 -->|"LEE"| t3
+  o42 -->|"LEE"| t29
+  o42 -->|"LEE"| t30
+  o42 -->|"LEE"| t11
+  o42 -->|"LEE"| t31
+  o42 -.-> t43
+  a10 --> o44
+  o44 -->|"LEE"| t6
+  o44 -->|"LEE"| t3
+  o44 -->|"LEE"| t29
+  o44 -->|"LEE"| t30
+  o44 -->|"LEE"| t11
+  o44 -->|"ACTUALIZA"| t31
+  o44 -.-> t45
+  a10 --> o46
+  o46 -->|"LEE"| t6
+  o46 -->|"LEE"| t3
+  o46 -->|"LEE"| t29
+  o46 -->|"LEE"| t30
+  o46 -->|"LEE"| t11
+  o46 -->|"ACTUALIZA"| t31
+  o46 -.-> t47
+  a10 --> o48
+  o48 -->|"LEE"| t6
+  o48 -->|"LEE"| t3
+  o48 -->|"LEE"| t29
+  o48 -->|"LEE"| t30
+  o48 -->|"LEE"| t11
+  o48 -->|"ACTUALIZA"| t31
+  o48 -.-> t49
+  a10 --> o50
+  o50 -->|"LEE"| t31
+  o50 -->|"LEE"| t51
+  o50 -->|"LEE"| t4
+  o50 -->|"LEE"| t52
+  a10 --> o53
+  o53 -->|"LEE"| t31
+  o53 -->|"LEE"| t51
+  o53 -->|"LEE"| t4
+  o53 -->|"LEE"| t52
+  a10 --> o54
+  o54 -->|"LEE"| t31
+  o54 -->|"LEE"| t55
+  o54 -->|"LEE"| t51
+  a10 --> o56
+  o56 -->|"LEE"| t51
+  o56 -->|"LEE"| t4
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 3 de 3 — etapas `ctrl:BillingSpaceChargesController`, `ctrl:PatientSpendingController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a5(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
-  a10(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
-  a51(["PATIENT"]):::actor
-  t3[("billing.service_catalog")]:::tabla
-  t6[("common.file_versions")]:::tabla
-  t7[("common.files")]:::tabla
-  t8[("practice.practices")]:::tabla
-  t11[("practice.practitioner_role_assignments")]:::tabla
-  t14[("terminology.catalog_concepts")]:::tabla
-  t15[("terminology.concept_properties")]:::tabla
-  t18[("profiles.practitioner_specialties")]:::tabla
-  t22[("billing.invoice_lines")]:::tabla
-  t23[("billing.invoices")]:::tabla
-  t24[("billing.payments_received")]:::tabla
-  t25[("billing.receivable_payment_allocations")]:::tabla
-  t26[("billing.siat_simulated_invoices")]:::tabla
-  t33[("billing.billing_document_links")]:::tabla
-  t44[("clinical.encounters")]:::tabla
-  t45[("profiles.persons")]:::tabla
-  t48[("billing.siat_simulated_outbox")]:::tabla
-  t52[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t53[("directory.tenants")]:::tabla
-  t54[("insurance.insurance_claim_lines")]:::tabla
-  t55[("insurance.insurance_claims")]:::tabla
-  subgraph s0["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
-    o1["GET /billing/service-catalog"]:::op
-    o4["POST /billing/service-catalog"]:::op
-    o9["PATCH /billing/service-catalog/{id}"]:::op
-    o12["GET /billing/service-catalog/{id}/image"]:::op
-    o13["POST /billing/service-catalog/import-procedures"]:::op
-    o16["GET /billing/service-catalog/procedure-specialties"]:::op
-    o17["GET /billing/service-catalog/procedure-specialties/mine"]:::op
-    o19["GET /billing/service-catalog/procedures"]:::op
+  a29(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a32(["PATIENT"]):::actor
+  t3[("billing.charge_captures")]:::tabla
+  t4[("clinical.encounter_locations")]:::tabla
+  t5[("clinical.encounters")]:::tabla
+  t6[("delegated_access.organization_user_assignments")]:::tabla
+  t7[("directory.branch_memberships")]:::tabla
+  t8[("directory.tenant_memberships")]:::tabla
+  t11[("messaging.domain_events")]:::tabla
+  e13>"~eventType"]:::evento
+  t15[("accounting.cost_centers")]:::tabla
+  t16[("billing.space_tariffs")]:::tabla
+  t21[("billing.service_catalog")]:::tabla
+  t22[("practice.care_spaces")]:::tabla
+  t33[("billing.invoice_lines")]:::tabla
+  t34[("billing.invoices")]:::tabla
+  t35[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t36[("directory.tenants")]:::tabla
+  t37[("insurance.insurance_claim_lines")]:::tabla
+  t38[("insurance.insurance_claims")]:::tabla
+  t9[("+6 tablas más")]
+  t12[("+7 tablas más")]
+  t17[("+11 tablas más")]
+  t19[("+5 tablas más")]
+  t23[("+3 tablas más")]
+  t25[("+7 tablas más")]
+  t27[("+7 tablas más")]
+  t30[("+13 tablas más")]
+  subgraph s0["ctrl:BillingSpaceChargesController · Operaciones de BillingSpaceChargesControll…"]
+    o1["GET /billing/bed-day/stays"]:::op
+    o10["POST /billing/charge-captures/{id}/void"]:::op
+    o14["POST /billing/encounters/{encounterId}/bed-day-charges/run"]:::op
+    o18["GET /billing/encounters/{encounterId}/pending-charges"]:::op
+    o20["GET /billing/space-tariffs"]:::op
+    o24["POST /billing/space-tariffs"]:::op
+    o26["POST /billing/space-tariffs/{id}/close"]:::op
+    o28["POST /internal/billing/bed-day-charges/run"]:::op
   end
-  t27[("+5 tablas más")]
-  t29[("+5 tablas más")]
-  t31[("+6 tablas más")]
-  t34[("+12 tablas más")]
-  t36[("+5 tablas más")]
-  t38[("+6 tablas más")]
-  t40[("+6 tablas más")]
-  t42[("+7 tablas más")]
-  subgraph s1["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
-    o20["GET /billing/simulated/catalogs"]:::op
-    o21["GET /billing/simulated/charges"]:::op
-    o28["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
-    o30["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
-    o32["POST /billing/simulated/charges/{chargeId}/payment"]:::op
-    o35["GET /billing/simulated/invoices/{invoiceId}"]:::op
-    o37["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
-    o39["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
-    o41["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
-    o43["GET /billing/simulated/my-invoices"]:::op
-    o46["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
-    o47["GET /billing/simulated/outbox"]:::op
-    o49["GET /billing/simulated/status"]:::op
-  end
-  t56[("+5 tablas más")]
-  subgraph s2["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
-    o50["GET /patient-spending/me"]:::op
+  t39[("+5 tablas más")]
+  subgraph s1["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
+    o31["GET /patient-spending/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
-  a5 --> o4
-  o4 -->|"CREA"| t3
-  o4 -->|"LEE"| t3
-  o4 -->|"LEE"| t6
-  o4 -->|"LEE"| t7
-  o4 -->|"LEE"| t8
-  a10 --> o9
-  o9 -->|"ACTUALIZA"| t3
-  o9 -->|"LEE"| t3
-  o9 -->|"LEE"| t8
-  o9 -->|"LEE"| t11
-  a2 --> o12
-  o12 -->|"LEE"| t3
-  o12 -->|"LEE"| t6
-  o12 -->|"LEE"| t7
-  o12 -->|"LEE"| t8
-  a5 --> o13
-  o13 -->|"CREA"| t3
-  o13 -->|"LEE"| t3
-  o13 -->|"LEE"| t8
-  o13 -->|"LEE"| t14
-  o13 -->|"LEE"| t15
-  a2 --> o16
-  o16 -->|"LEE"| t15
-  a2 --> o17
-  o17 -->|"LEE"| t18
-  o17 -->|"LEE"| t14
-  o17 -->|"LEE"| t15
-  a2 --> o19
-  o19 -->|"LEE"| t14
-  o19 -->|"LEE"| t15
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -->|"LEE"| t7
+  o1 -->|"LEE"| t8
+  o1 -.-> t9
+  a2 --> o10
+  o10 -->|"ACTUALIZA"| t3
+  o10 -->|"LEE"| t3
+  o10 -->|"LEE"| t6
+  o10 -->|"LEE"| t7
+  o10 -->|"LEE"| t8
+  o10 -->|"CREA"| t11
+  o10 -.-> t12
+  o10 -->|"evento"| e13
+  a2 --> o14
+  o14 -->|"LEE"| t15
+  o14 -->|"CREA"| t3
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t16
+  o14 -->|"LEE"| t4
+  o14 -->|"LEE"| t5
+  o14 -.-> t17
+  o14 -->|"evento"| e13
+  a2 --> o18
+  o18 -->|"LEE"| t3
+  o18 -->|"LEE"| t4
+  o18 -->|"LEE"| t5
+  o18 -->|"LEE"| t6
+  o18 -->|"LEE"| t7
+  o18 -->|"LEE"| t8
+  o18 -.-> t19
   a2 --> o20
-  a2 --> o21
-  o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t23
-  o21 -->|"LEE"| t24
-  o21 -->|"LEE"| t25
-  o21 -->|"LEE"| t3
-  o21 -->|"LEE"| t26
-  o21 -.-> t27
-  a2 --> o28
-  o28 -->|"LEE"| t22
-  o28 -->|"LEE"| t23
-  o28 -->|"LEE"| t24
-  o28 -->|"LEE"| t25
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t6
+  o20 -->|"LEE"| t7
+  o20 -->|"LEE"| t8
+  o20 -->|"LEE"| t22
+  o20 -.-> t23
+  a2 --> o24
+  o24 -->|"LEE"| t21
+  o24 -->|"CREA"| t16
+  o24 -->|"LEE"| t6
+  o24 -->|"LEE"| t7
+  o24 -->|"LEE"| t8
+  o24 -->|"CREA"| t11
+  o24 -.-> t25
+  o24 -->|"evento"| e13
+  a2 --> o26
+  o26 -->|"LEE"| t21
+  o26 -->|"ACTUALIZA"| t16
+  o26 -->|"LEE"| t16
+  o26 -->|"LEE"| t6
+  o26 -->|"LEE"| t7
+  o26 -->|"LEE"| t8
+  o26 -.-> t27
+  o26 -->|"evento"| e13
+  a29 --> o28
+  o28 -->|"LEE"| t15
+  o28 -->|"CREA"| t3
   o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t26
-  o28 -.-> t29
-  a2 --> o30
-  o30 -->|"LEE"| t22
-  o30 -->|"LEE"| t23
-  o30 -->|"LEE"| t24
-  o30 -->|"LEE"| t25
-  o30 -->|"LEE"| t3
-  o30 -->|"CREA"| t26
-  o30 -.-> t31
-  a2 --> o32
-  o32 -->|"CREA"| t33
-  o32 -->|"CREA"| t22
-  o32 -->|"LEE"| t22
-  o32 -->|"CREA"| t23
-  o32 -->|"LEE"| t23
-  o32 -->|"CREA"| t24
-  o32 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t22
-  o35 -->|"LEE"| t23
-  o35 -->|"LEE"| t24
-  o35 -->|"LEE"| t25
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t26
-  o35 -.-> t36
-  a2 --> o37
-  o37 -->|"LEE"| t22
-  o37 -->|"LEE"| t23
-  o37 -->|"LEE"| t24
-  o37 -->|"LEE"| t25
-  o37 -->|"LEE"| t3
-  o37 -->|"ACTUALIZA"| t26
-  o37 -.-> t38
-  a2 --> o39
-  o39 -->|"LEE"| t22
-  o39 -->|"LEE"| t23
-  o39 -->|"LEE"| t24
-  o39 -->|"LEE"| t25
-  o39 -->|"LEE"| t3
-  o39 -->|"ACTUALIZA"| t26
-  o39 -.-> t40
-  a2 --> o41
-  o41 -->|"LEE"| t22
-  o41 -->|"LEE"| t23
-  o41 -->|"LEE"| t24
-  o41 -->|"LEE"| t25
-  o41 -->|"LEE"| t3
-  o41 -->|"ACTUALIZA"| t26
-  o41 -.-> t42
-  a2 --> o43
-  o43 -->|"LEE"| t26
-  o43 -->|"LEE"| t44
-  o43 -->|"LEE"| t8
-  o43 -->|"LEE"| t45
-  a2 --> o46
-  o46 -->|"LEE"| t26
-  o46 -->|"LEE"| t44
-  o46 -->|"LEE"| t8
-  o46 -->|"LEE"| t45
-  a2 --> o47
-  o47 -->|"LEE"| t26
-  o47 -->|"LEE"| t48
-  o47 -->|"LEE"| t44
-  a2 --> o49
-  o49 -->|"LEE"| t44
-  o49 -->|"LEE"| t8
-  a51 --> o50
-  o50 -->|"LEE"| t22
-  o50 -->|"LEE"| t23
-  o50 -->|"LEE"| t52
-  o50 -->|"LEE"| t53
-  o50 -->|"LEE"| t54
-  o50 -->|"LEE"| t55
-  o50 -.-> t56
+  o28 -->|"LEE"| t16
+  o28 -->|"LEE"| t4
+  o28 -->|"LEE"| t5
+  o28 -.-> t30
+  o28 -->|"evento"| e13
+  a32 --> o31
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t35
+  o31 -->|"LEE"| t36
+  o31 -->|"LEE"| t37
+  o31 -->|"LEE"| t38
+  o31 -.-> t39
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -421,7 +593,350 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /billing/bills
+#### 1. GET /admin/catalogs/services
+
+Listar servicios de la organización, filtrable por tipo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AdminServiceCatalogService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a PracticesRepository.findByTenant"]:::llamada
+  n3 --> n4
+  n5[("LEE practice.practices")]:::efecto
+  n4 --> n5
+  n6{"query.practiceId !== undefined && !tenantPractices.some((p) =› p.id === query.practiceId)"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a ServiceCatalogRepository.searchAdminPage"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE billing.service_catalog")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /admin/catalogs/services
+
+Crear un servicio (idempotente por práctica y código)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AdminServiceCatalogService.create"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PracticesRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE practice.practices")]:::efecto
+  n5 --> n6
+  n7{"!practice || practice.tenantId !== tenantId"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a ServiceCatalogRepository.findByCode"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE billing.service_catalog")]:::efecto
+  n9 --> n10
+  n11{"clash"}:::decision
+  n10 --> n11
+  n12(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a ServiceCatalogRepository.create"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA billing.service_catalog")]:::efecto
+  n13 --> n14
+  n15(("201 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. GET /admin/catalogs/services/{id}
+
+Ver un servicio con su versión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AdminServiceCatalogService.get"]:::llamada
+  n2 --> n3
+  n4["Llama a AdminServiceCatalogService.loadInTenant"]:::llamada
+  n3 --> n4
+  n5["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE billing.service_catalog")]:::efecto
+  n5 --> n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!item || !practice || practice.tenantId !== tenantId"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Servicio no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11(("200 Responde con éxito")):::ok
+  n9 -->|"no"| n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. PATCH /admin/catalogs/services/{id}
+
+Editar un servicio con precondición de versión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a AdminServiceCatalogService.update"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a AdminServiceCatalogService.loadInTenant"]:::llamada
+  n4 --> n5
+  n6["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE billing.service_catalog")]:::efecto
+  n6 --> n7
+  n8["Llama a PracticesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practices")]:::efecto
+  n8 --> n9
+  n10{"!item || !practice || practice.tenantId !== tenantId"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Servicio no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12(("200 Responde con éxito")):::ok
+  n10 -->|"no"| n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /admin/catalogs/services/{id}/deactivate
+
+Desactivar un servicio (no se borra)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a AdminServiceCatalogService.setActive"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a AdminServiceCatalogService.loadInTenant"]:::llamada
+  n4 --> n5
+  n6["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE billing.service_catalog")]:::efecto
+  n6 --> n7
+  n8["Llama a PracticesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practices")]:::efecto
+  n8 --> n9
+  n10{"!item || !practice || practice.tenantId !== tenantId"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Servicio no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12(("200 Responde con éxito")):::ok
+  n10 -->|"no"| n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. POST /admin/catalogs/services/{id}/reactivate
+
+Reactivar un servicio desactivado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a AdminServiceCatalogService.setActive"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a AdminServiceCatalogService.loadInTenant"]:::llamada
+  n4 --> n5
+  n6["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE billing.service_catalog")]:::efecto
+  n6 --> n7
+  n8["Llama a PracticesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practices")]:::efecto
+  n8 --> n9
+  n10{"!item || !practice || practice.tenantId !== tenantId"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Servicio no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12(("200 Responde con éxito")):::ok
+  n10 -->|"no"| n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. GET /billing/bed-day/stays
+
+Estancias de internación de una sede (F5e)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Rango inválido (máximo 366 días) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.stays"]:::llamada
+  n2 --> n3
+  n4["Llama a SpaceChargesService.assertSites"]:::llamada
+  n3 --> n4
+  n5["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n5 --> n6
+  n7{"!req.tenantId || siteIds.length === 0"}:::decision
+  n8["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n7 -->|"sí"| n8
+  n9(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n8 --> n9
+  n10["Repite: por cada const siteId de siteIds"]:::bucle
+  n7 -->|"no"| n10
+  n11["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n10 -->|"cada elemento"| n11
+  n12["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n11 --> n12
+  n13[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n12 --> n13
+  n14{"!filter.allSite"}:::decision
+  n13 --> n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n14 -->|"sí"| n15
+  n16["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n15 --> n16
+  n17{"!rule"}:::decision
+  n16 --> n17
+  n18(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n17 -->|"sí"| n18
+  n19(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n17 -->|"no"| n19
+  n20{"from › to || (Date.parse(to) - Date.parse(from)) / 86_400_000 › 366"}:::decision
+  n14 -->|"no"| n20
+  n10 -->|"al terminar"| n20
+  n21(["422 PRECONDITION_FAILED Rango inválido (máximo 366 días)"]):::error
+  n20 -->|"sí"| n21
+  n22[("LEE billing.charge_captures · LEE clinical.encounters · LEE profiles.person_profiles · LEE profiles.persons ·…")]:::efecto
+  n20 -->|"no"| n22
+  n23(("200 Responde con éxito")):::ok
+  n22 --> n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. POST /billing/bills
 
 Registrar factura de proveedor con three-way match
 
@@ -509,7 +1024,141 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /billing/documents/{id}:post-to-ledger
+#### 9. POST /billing/charge-captures/{id}/void
+
+Anular un cargo devengado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cargo no encontrado; ResourceNotFoundException: Práctica no encontrada |
+| 409 | `CONFLICT` | ConflictException: El cargo ya está facturado; ConflictException: El cargo no está pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.voidCharge"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5[("LEE billing.charge_captures")]:::efecto
+  n4 --> n5
+  n6{"!c || c.tenantId !== tenantId"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Cargo no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8[("LEE practice.care_spaces")]:::efecto
+  n6 -->|"no"| n8
+  n9{"s"}:::decision
+  n8 --> n9
+  n10["Llama a SpaceChargesService.assertSites"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n10 --> n11
+  n12(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n11 --> n12
+  n13{"!req.tenantId || siteIds.length === 0"}:::decision
+  n14["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n14 --> n15
+  n16["Repite: por cada const siteId de siteIds"]:::bucle
+  n13 -->|"no"| n16
+  n17["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n16 -->|"cada elemento"| n17
+  n18["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n18 --> n19
+  n20{"!filter.allSite"}:::decision
+  n19 --> n20
+  n21["Llama a InfrastructureAccessService.decide"]:::llamada
+  n20 -->|"sí"| n21
+  n22["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n21 --> n22
+  n23{"!rule"}:::decision
+  n22 --> n23
+  n24(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n23 -->|"sí"| n24
+  n25(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n23 -->|"no"| n25
+  n26["Llama a SpaceChargesService.assertPractice"]:::llamada
+  n9 -->|"no"| n26
+  n27[("LEE practice.practices")]:::efecto
+  n26 --> n27
+  n28{"!p || p.tenant_id !== tenantId"}:::decision
+  n27 --> n28
+  n29(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a InfrastructureAccessService.actorScope"]:::llamada
+  n28 -->|"no"| n30
+  n31["Llama a CareSpaceOpsRepository.grants"]:::llamada
+  n30 --> n31
+  n32[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE practice.care_spa…")]:::efecto
+  n31 --> n32
+  n33["Llama a InfrastructureAccessService.decide"]:::llamada
+  n32 --> n33
+  n34["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n33 --> n34
+  n35{"!rule"}:::decision
+  n34 --> n35
+  n36(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n35 -->|"sí"| n36
+  n37(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n35 -->|"no"| n37
+  n38{"c.statusConceptId === BILL.CHG_INVOICED"}:::decision
+  n20 -->|"no"| n38
+  n16 -->|"al terminar"| n38
+  n39(["409 CONFLICT El cargo ya está facturado"]):::error
+  n38 -->|"sí"| n39
+  n40{"c.statusConceptId !== BILL.CHG_PENDING"}:::decision
+  n38 -->|"no"| n40
+  n41(["409 CONFLICT El cargo no está pendiente"]):::error
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA billing.charge_captures · ACTUALIZA billing.charge_captures · ACTUALIZA billing.charge_captures · A…")]:::efecto
+  n40 -->|"no"| n42
+  n43["Llama a SpaceChargesService.flush"]:::llamada
+  n42 --> n43
+  n44["Intenta"]:::intento
+  n43 --> n44
+  n45(["↩ (relanza el error capturado)"]):::error
+  n44 -->|"si falla"| n45
+  n46["Llama a SpaceChargesService.publish"]:::llamada
+  n44 --> n46
+  n47["Intenta"]:::intento
+  n46 --> n47
+  n48["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n47 --> n48
+  n49["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n48 --> n49
+  n50["Transacción: startActiveSpan(…)"]:::transaccion
+  n49 --> n50
+  n51["Intenta"]:::intento
+  n50 --> n51
+  n52(["↩ (relanza el error capturado)"]):::error
+  n51 -->|"si falla"| n52
+  n53>"Evento ~eventType"]:::evento
+  n51 --> n53
+  n54(["↩ (relanza el error capturado)"]):::error
+  n47 -->|"si falla"| n54
+  n55(("200 Responde con éxito")):::ok
+  n53 --> n55
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. POST /billing/documents/{id}:post-to-ledger
 
 Contabilizar documento (posting CxC/CxP)
 
@@ -569,7 +1218,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /billing/dunning-runs:execute
+#### 11. POST /billing/dunning-runs:execute
 
 Ejecutar ciclo de morosidad (dunning)
 
@@ -629,7 +1278,229 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /billing/internal/dunning-runs/run-due
+#### 12. POST /billing/encounters/{encounterId}/bed-day-charges/run
+
+Devengar los días-cama de un encuentro
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.runBedDays"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SpaceChargesService.encounter"]:::llamada
+  n4 --> n5
+  n6[("LEE clinical.encounters")]:::efecto
+  n5 --> n6
+  n7{"!enc || (req.tenantId && enc.tenant_id !== req.tenantId)"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9[("LEE clinical.encounter_locations")]:::efecto
+  n7 -->|"no"| n9
+  n10{"req.actor"}:::decision
+  n9 --> n10
+  n11["Llama a SpaceChargesService.assertSites"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n11 --> n12
+  n13(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n12 --> n13
+  n14{"!req.tenantId || siteIds.length === 0"}:::decision
+  n15["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n14 -->|"sí"| n15
+  n16(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n15 --> n16
+  n17["Repite: por cada const siteId de siteIds"]:::bucle
+  n14 -->|"no"| n17
+  n18["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n17 -->|"cada elemento"| n18
+  n19["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n18 --> n19
+  n20[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n19 --> n20
+  n21{"!filter.allSite"}:::decision
+  n20 --> n21
+  n22["Llama a InfrastructureAccessService.decide"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n22 --> n23
+  n24{"!rule"}:::decision
+  n23 --> n24
+  n25(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n24 -->|"sí"| n25
+  n26(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n24 -->|"no"| n26
+  n27[("LEE practice.practice_sites")]:::efecto
+  n21 -->|"no"| n27
+  n17 -->|"al terminar"| n27
+  n10 -->|"no"| n27
+  n28["Repite: por cada const day de days"]:::bucle
+  n27 --> n28
+  n29[("LEE billing.charge_captures · LEE practice.care_space_category_periods · LEE practice.care_spaces")]:::efecto
+  n28 -->|"cada elemento"| n29
+  n30["Llama a SpaceChargesService.tariffFor"]:::llamada
+  n29 --> n30
+  n31[("LEE billing.space_tariffs")]:::efecto
+  n30 --> n31
+  n32["Llama a SpaceChargesService.capture"]:::llamada
+  n31 --> n32
+  n33[("LEE accounting.cost_centers · CREA billing.charge_captures")]:::efecto
+  n32 --> n33
+  n34["Llama a SpaceChargesService.flush"]:::llamada
+  n33 --> n34
+  n35["Intenta"]:::intento
+  n34 --> n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"si falla"| n36
+  n37["Llama a SpaceChargesService.publish"]:::llamada
+  n35 --> n37
+  n38["Intenta"]:::intento
+  n37 --> n38
+  n39>"Evento ~eventType"]:::evento
+  n38 --> n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"si falla"| n40
+  n41(("200 Responde con éxito")):::ok
+  n39 --> n41
+  n28 -->|"al terminar"| n41
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. GET /billing/encounters/{encounterId}/pending-charges
+
+Cargos devengados pendientes
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.pending"]:::llamada
+  n2 --> n3
+  n4["Llama a SpaceChargesService.encounter"]:::llamada
+  n3 --> n4
+  n5[("LEE clinical.encounters")]:::efecto
+  n4 --> n5
+  n6{"!enc || (req.tenantId && enc.tenant_id !== req.tenantId)"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8[("LEE clinical.encounter_locations · LEE billing.charge_captures · LEE practice.care_spaces")]:::efecto
+  n6 -->|"no"| n8
+  n9{"sites.length › 0"}:::decision
+  n8 --> n9
+  n10["Llama a SpaceChargesService.assertSites"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n10 --> n11
+  n12(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n11 --> n12
+  n13{"!req.tenantId || siteIds.length === 0"}:::decision
+  n14["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n14 --> n15
+  n16["Repite: por cada const siteId de siteIds"]:::bucle
+  n13 -->|"no"| n16
+  n17["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n16 -->|"cada elemento"| n17
+  n18["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n18 --> n19
+  n20{"!filter.allSite"}:::decision
+  n19 --> n20
+  n21["Llama a InfrastructureAccessService.decide"]:::llamada
+  n20 -->|"sí"| n21
+  n22["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n21 --> n22
+  n23{"!rule"}:::decision
+  n22 --> n23
+  n24(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n23 -->|"sí"| n24
+  n25(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n23 -->|"no"| n25
+  n26[("LEE billing.charge_captures")]:::efecto
+  n9 -->|"no"| n26
+  n27["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n26 --> n27
+  n28(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n27 --> n28
+  n29{"practices.length === 0"}:::decision
+  n30["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n29 -->|"sí"| n30
+  n31(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n30 --> n31
+  n32["Repite: por cada const p de practices"]:::bucle
+  n29 -->|"no"| n32
+  n33["Llama a SpaceChargesService.assertPractice"]:::llamada
+  n32 -->|"cada elemento"| n33
+  n34[("LEE practice.practices")]:::efecto
+  n33 --> n34
+  n35{"!p || p.tenant_id !== tenantId"}:::decision
+  n34 --> n35
+  n36(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a InfrastructureAccessService.actorScope"]:::llamada
+  n35 -->|"no"| n37
+  n38["Llama a CareSpaceOpsRepository.grants"]:::llamada
+  n37 --> n38
+  n39[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE practice.care_spa…")]:::efecto
+  n38 --> n39
+  n40["Llama a InfrastructureAccessService.decide"]:::llamada
+  n39 --> n40
+  n41["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n40 --> n41
+  n42{"!rule"}:::decision
+  n41 --> n42
+  n43(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n42 -->|"sí"| n43
+  n44(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n42 -->|"no"| n44
+  n45[("LEE billing.charge_captures")]:::efecto
+  n20 -->|"no"| n45
+  n16 -->|"al terminar"| n45
+  n32 -->|"al terminar"| n45
+  n46(("200 Responde con éxito")):::ok
+  n45 --> n46
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. POST /billing/internal/dunning-runs/run-due
 
 Evaluar y disparar morosidad automática por tenant
 
@@ -694,7 +1565,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /billing/invoices
+#### 15. GET /billing/invoices
 
 Listar las facturas de la práctica
 
@@ -740,7 +1611,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /billing/invoices:issue-from-encounter
+#### 16. POST /billing/invoices:issue-from-encounter
 
 Emitir factura desde los cargos del encuentro
 
@@ -750,9 +1621,9 @@ Emitir factura desde los cargos del encuentro
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message} |
-| 409 | `CONFLICT` | ConflictException: El número de factura ya existe en la práctica |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message}; ResourceNotFoundException: Cargo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El número de factura ya existe en la práctica; ConflictException: El cargo ya está facturado; ConflictException: El cargo no está pendiente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada; PreconditionFailedException: El cargo no tiene precio (sin tarifa vigente) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -787,26 +1658,78 @@ flowchart TD
   n13 --> n14
   n15(["409 CONFLICT El número de factura ya existe en la práctica"]):::error
   n14 -->|"sí"| n15
-  n16["Llama a InvoicesRepository.create"]:::llamada
+  n16["Llama a InvoicesService.loadCharges"]:::llamada
   n14 -->|"no"| n16
-  n17[("CREA billing.invoices")]:::efecto
+  n17[("LEE billing.charge_captures")]:::efecto
   n16 --> n17
-  n18["Repite: forEach(…)"]:::bucle
+  n18["Repite: por cada const id de ids"]:::bucle
   n17 --> n18
-  n19["Llama a InvoicesRepository.createLine"]:::llamada
+  n19{"!c || c.tenantId !== tenantId || c.practiceId !== dto.practiceId || c.patientProfileId !== dto.patientProfile…"}:::decision
   n18 -->|"cada elemento"| n19
-  n20[("CREA billing.invoice_lines")]:::efecto
-  n19 --> n20
-  n21{"dto.encounterId || dto.claimId"}:::decision
-  n20 --> n21
-  n18 -->|"al terminar"| n21
-  n22["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n20(["404 NOT_FOUND Cargo no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"c.statusConceptId === BILL.CHG_INVOICED"}:::decision
+  n19 -->|"no"| n21
+  n22(["409 CONFLICT El cargo ya está facturado"]):::error
   n21 -->|"sí"| n22
-  n23[("CREA billing.billing_document_links")]:::efecto
-  n22 --> n23
-  n24(("201 Responde con éxito")):::ok
-  n23 --> n24
-  n21 -->|"no"| n24
+  n23{"c.statusConceptId !== BILL.CHG_PENDING"}:::decision
+  n21 -->|"no"| n23
+  n24(["409 CONFLICT El cargo no está pendiente"]):::error
+  n23 -->|"sí"| n24
+  n25{"c.unitPrice === undefined || c.unitPrice === null"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED El cargo no tiene precio (sin tarifa vigente)"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a InvoicesRepository.create"]:::llamada
+  n25 -->|"no"| n27
+  n18 -->|"al terminar"| n27
+  n28[("CREA billing.invoices")]:::efecto
+  n27 --> n28
+  n29["Llama a InvoicesRepository.createLine"]:::llamada
+  n28 --> n29
+  n30[("CREA billing.invoice_lines")]:::efecto
+  n29 --> n30
+  n31{"charges.length › 0"}:::decision
+  n30 --> n31
+  n32["Repite: por cada const c de charges"]:::bucle
+  n31 -->|"sí"| n32
+  n33["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n32 -->|"cada elemento"| n33
+  n34["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n33 --> n34
+  n35["Transacción: startActiveSpan(…)"]:::transaccion
+  n34 --> n35
+  n36["Intenta"]:::intento
+  n35 --> n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"si falla"| n37
+  n38["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n36 --> n38
+  n39["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n38 --> n39
+  n40[("LEE messaging.outbox_messages")]:::efecto
+  n39 --> n40
+  n41["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n40 --> n41
+  n42[("CREA messaging.domain_events")]:::efecto
+  n41 --> n42
+  n43["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n42 --> n43
+  n44[("CREA messaging.outbox_messages")]:::efecto
+  n43 --> n44
+  n45>"Evento billing.charge_capture.invoiced"]:::evento
+  n44 --> n45
+  n46{"dto.encounterId || dto.claimId"}:::decision
+  n45 --> n46
+  n32 -->|"al terminar"| n46
+  n31 -->|"no"| n46
+  n47["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n46 -->|"sí"| n47
+  n48[("CREA billing.billing_document_links")]:::efecto
+  n47 --> n48
+  n49(("201 Responde con éxito")):::ok
+  n48 --> n49
+  n46 -->|"no"| n49
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -815,7 +1738,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /billing/invoices/{id}
+#### 17. GET /billing/invoices/{id}
 
 Detalle de una factura, con sus líneas
 
@@ -869,7 +1792,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /billing/invoices/{id}:credit-note
+#### 18. POST /billing/invoices/{id}:credit-note
 
 Emitir nota de crédito / castigo sobre una factura
 
@@ -928,7 +1851,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /billing/kpi-snapshots:compute
+#### 19. POST /billing/kpi-snapshots:compute
 
 Calcular snapshot de KPI financiero y aging
 
@@ -972,7 +1895,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /billing/patient-statements
+#### 20. GET /billing/patient-statements
 
 Listar los estados de cuenta de la práctica
 
@@ -1016,7 +1939,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /billing/patient-statements:generate
+#### 21. POST /billing/patient-statements:generate
 
 Generar el estado de cuenta del paciente
 
@@ -1071,7 +1994,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /billing/payment-plans
+#### 22. POST /billing/payment-plans
 
 Configurar un plan de pagos del paciente
 
@@ -1133,7 +2056,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /billing/payments-made:execute
+#### 23. POST /billing/payments-made:execute
 
 Ejecutar pago a proveedor con asignación
 
@@ -1221,7 +2144,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /billing/payments-received:apply
+#### 24. POST /billing/payments-received:apply
 
 Aplicar un pago recibido con asignación multi-factura
 
@@ -1306,7 +2229,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /billing/reconciliation:clear
+#### 25. POST /billing/reconciliation:clear
 
 Conciliar pagos vía documento de compensación
 
@@ -1370,7 +2293,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /billing/reimbursements:link
+#### 26. POST /billing/reimbursements:link
 
 Vincular reembolso de reclamo de seguro a la factura
 
@@ -1427,7 +2350,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /billing/service-catalog
+#### 27. POST /billing/service-catalog
 
 Dar de alta un servicio en el catálogo maestro
 
@@ -1534,7 +2457,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. PATCH /billing/service-catalog/{id}
+#### 28. PATCH /billing/service-catalog/{id}
 
 Corregir un servicio del catálogo de mi práctica
 
@@ -1619,7 +2542,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /billing/service-catalog/{id}/image
+#### 29. GET /billing/service-catalog/{id}/image
 
 Descargar la imagen de un servicio que el actor puede ver
 
@@ -1749,7 +2672,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /billing/service-catalog/import-procedures
+#### 30. POST /billing/service-catalog/import-procedures
 
 Importar en lote procedimientos del arancel al catálogo
 
@@ -1820,7 +2743,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /billing/service-catalog/procedures
+#### 31. GET /billing/service-catalog/procedures
 
 Listar el nomenclador de procedimientos (arancel de referencia)
 
@@ -1864,7 +2787,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /billing/simulated/catalogs
+#### 32. GET /billing/simulated/catalogs
 
 Catálogos paramétricos del SIAT simulado
 
@@ -1899,7 +2822,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /billing/simulated/charges
+#### 33. GET /billing/simulated/charges
 
 Cobros de consultas (opcionalmente de una persona)
 
@@ -1945,7 +2868,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+#### 34. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
 
@@ -2003,7 +2926,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /billing/simulated/charges/{chargeId}/invoices
+#### 35. POST /billing/simulated/charges/{chargeId}/invoices
 
 Emitir la factura SIAT simulada de un cobro pagado
 
@@ -2091,7 +3014,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /billing/simulated/charges/{chargeId}/payment
+#### 36. POST /billing/simulated/charges/{chargeId}/payment
 
 Registrar el pago real de un cobro
 
@@ -2101,9 +3024,9 @@ Registrar el pago real de un cobro
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Su rol no permite operar la facturación |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false); ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message} |
-| 409 | `CONFLICT` | ConflictException: El cobro ya está pagado; ConflictException: El número de factura ya existe en la práctica |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La consulta no tiene precio: defina el precio del servicio «{cobro.catalogName}» en el catálogo de servicios de la práctica; PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada; PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: El cobro está en pausa mientras el paciente tenga una objeción abierta; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false); ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message}; ResourceNotFoundException: Cargo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El cobro ya está pagado; ConflictException: El número de factura ya existe en la práctica; ConflictException: El cargo ya está facturado; ConflictException: El cargo no está pendiente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La consulta no tiene precio: defina el precio del servicio «{cobro.catalogName}» en el catálogo de servicios de la práctica; PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada; PreconditionFailedException: El cargo no tiene precio (sin tarifa vigente); PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: El cobro está en pausa mientras el paciente tenga una objeción abierta; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2180,81 +3103,81 @@ flowchart TD
   n34 --> n35
   n36(["409 CONFLICT El número de factura ya existe en la práctica"]):::error
   n35 -->|"sí"| n36
-  n37["Llama a InvoicesRepository.create"]:::llamada
+  n37["Llama a InvoicesService.loadCharges"]:::llamada
   n35 -->|"no"| n37
-  n38[("CREA billing.invoices")]:::efecto
+  n38[("LEE billing.charge_captures")]:::efecto
   n37 --> n38
-  n39["Repite: forEach(…)"]:::bucle
+  n39["Repite: por cada const id de ids"]:::bucle
   n38 --> n39
-  n40["Llama a InvoicesRepository.createLine"]:::llamada
+  n40{"!c || c.tenantId !== tenantId || c.practiceId !== dto.practiceId || c.patientProfileId !== dto.patientProfile…"}:::decision
   n39 -->|"cada elemento"| n40
-  n41[("CREA billing.invoice_lines")]:::efecto
-  n40 --> n41
-  n42{"dto.encounterId || dto.claimId"}:::decision
-  n41 --> n42
-  n39 -->|"al terminar"| n42
-  n43["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n41(["404 NOT_FOUND Cargo no encontrado"]):::error
+  n40 -->|"sí"| n41
+  n42{"c.statusConceptId === BILL.CHG_INVOICED"}:::decision
+  n40 -->|"no"| n42
+  n43(["409 CONFLICT El cargo ya está facturado"]):::error
   n42 -->|"sí"| n43
-  n44[("CREA billing.billing_document_links")]:::efecto
-  n43 --> n44
-  n45["Llama a PaymentsReceivedService.apply"]:::llamada
-  n44 --> n45
-  n42 -->|"no"| n45
-  n23 -->|"no"| n45
-  n46["Transacción: transactional(…)"]:::transaccion
-  n45 --> n46
-  n47{"amountCents === null || amountCents ‹= 0"}:::decision
-  n46 --> n47
-  n48(["422 PRECONDITION_FAILED El monto del pago debe ser positivo"]):::error
-  n47 -->|"sí"| n48
-  n49["Repite: por cada const alloc de dto.allocations"]:::bucle
-  n47 -->|"no"| n49
-  n50{"allocCents === null || allocCents ‹= 0"}:::decision
-  n49 -->|"cada elemento"| n50
-  n51(["422 PRECONDITION_FAILED La asignación debe ser un importe positivo"]):::error
-  n50 -->|"sí"| n51
-  n52{"discountCents === null"}:::decision
-  n50 -->|"no"| n52
-  n53(["422 PRECONDITION_FAILED El descuento debe ser un importe no negativo"]):::error
+  n44{"c.statusConceptId !== BILL.CHG_PENDING"}:::decision
+  n42 -->|"no"| n44
+  n45(["409 CONFLICT El cargo no está pendiente"]):::error
+  n44 -->|"sí"| n45
+  n46{"c.unitPrice === undefined || c.unitPrice === null"}:::decision
+  n44 -->|"no"| n46
+  n47(["422 PRECONDITION_FAILED El cargo no tiene precio (sin tarifa vigente)"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a InvoicesRepository.create"]:::llamada
+  n46 -->|"no"| n48
+  n39 -->|"al terminar"| n48
+  n49[("CREA billing.invoices")]:::efecto
+  n48 --> n49
+  n50["Llama a InvoicesRepository.createLine"]:::llamada
+  n49 --> n50
+  n51[("CREA billing.invoice_lines")]:::efecto
+  n50 --> n51
+  n52{"charges.length › 0"}:::decision
+  n51 --> n52
+  n53["Repite: por cada const c de charges"]:::bucle
   n52 -->|"sí"| n53
-  n54{"effectCents › amountCents"}:::decision
-  n52 -->|"no"| n54
-  n49 -->|"al terminar"| n54
-  n55(["422 PRECONDITION_FAILED La suma asignada excede el monto del pago"]):::error
-  n54 -->|"sí"| n55
-  n56["Repite: por cada const alloc de dto.allocations"]:::bucle
-  n54 -->|"no"| n56
-  n57["Llama a InvoicesRepository.findById"]:::llamada
-  n56 -->|"cada elemento"| n57
-  n58[("LEE billing.invoices")]:::efecto
-  n57 --> n58
-  n59["Llama a PaymentsReceivedRepository.create"]:::llamada
-  n58 --> n59
-  n56 -->|"al terminar"| n59
-  n60[("CREA billing.payments_received")]:::efecto
+  n54["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n53 -->|"cada elemento"| n54
+  n55["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n54 --> n55
+  n56["Transacción: startActiveSpan(…)"]:::transaccion
+  n55 --> n56
+  n57["Intenta"]:::intento
+  n56 --> n57
+  n58(["↩ (relanza el error capturado)"]):::error
+  n57 -->|"si falla"| n58
+  n59>"Evento billing.charge_capture.invoiced"]:::evento
+  n57 --> n59
+  n60{"dto.encounterId || dto.claimId"}:::decision
   n59 --> n60
-  n61["Repite: por cada const [index, alloc] de dto.allocations.entries()"]:::bucle
-  n60 --> n61
-  n62["Llama a InvoicesRepository.hasOpenPatientObjection"]:::llamada
-  n61 -->|"cada elemento"| n62
-  n63[("LEE billing.invoice_lines · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
+  n53 -->|"al terminar"| n60
+  n52 -->|"no"| n60
+  n61["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n60 -->|"sí"| n61
+  n62[("CREA billing.billing_document_links")]:::efecto
+  n61 --> n62
+  n63["Llama a PaymentsReceivedService.apply"]:::llamada
   n62 --> n63
-  n64{"await this.invoicesRepo.hasOpenPatientObjection(tx, invoice.id)"}:::decision
+  n60 -->|"no"| n63
+  n23 -->|"no"| n63
+  n64["Transacción: transactional(…)"]:::transaccion
   n63 --> n64
-  n65(["422 PRECONDITION_FAILED El cobro está en pausa mientras el paciente tenga una objeción abierta"]):::error
-  n64 -->|"sí"| n65
-  n66{"balanceCents ‹= 0"}:::decision
-  n64 -->|"no"| n66
-  n67(["422 PRECONDITION_FAILED La factura no tiene saldo pendiente"]):::error
-  n66 -->|"sí"| n67
-  n68{"allocCents + discountCents › balanceCents"}:::decision
-  n66 -->|"no"| n68
-  n69(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura"]):::error
+  n65{"amountCents === null || amountCents ‹= 0"}:::decision
+  n64 --> n65
+  n66(["422 PRECONDITION_FAILED El monto del pago debe ser positivo"]):::error
+  n65 -->|"sí"| n66
+  n67["Repite: por cada const alloc de dto.allocations"]:::bucle
+  n65 -->|"no"| n67
+  n68{"allocCents === null || allocCents ‹= 0"}:::decision
+  n67 -->|"cada elemento"| n68
+  n69(["422 PRECONDITION_FAILED La asignación debe ser un importe positivo"]):::error
   n68 -->|"sí"| n69
-  n70["Llama a PaymentsReceivedRepository.createAllocation"]:::llamada
+  n70{"discountCents === null"}:::decision
   n68 -->|"no"| n70
   n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2263,7 +3186,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /billing/simulated/invoices/{invoiceId}
+#### 37. GET /billing/simulated/invoices/{invoiceId}
 
 Una factura simulada, dentro del alcance de quien la pide
 
@@ -2348,7 +3271,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /billing/simulated/invoices/{invoiceId}/annulment
+#### 38. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 Anular la factura (sólo administración)
 
@@ -2434,7 +3357,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+#### 39. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 Revertir la anulación (sólo administración)
 
@@ -2535,7 +3458,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /billing/simulated/invoices/{invoiceId}/email
+#### 40. POST /billing/simulated/invoices/{invoiceId}/email
 
 Encolar el envío (simulado, no se envía) de la factura
 
@@ -2631,7 +3554,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /billing/simulated/my-invoices
+#### 41. GET /billing/simulated/my-invoices
 
 Mis facturas: recibidas (paciente) o emitidas (quien factura)
 
@@ -2670,7 +3593,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /billing/simulated/my-invoices/{invoiceId}
+#### 42. GET /billing/simulated/my-invoices/{invoiceId}
 
 Una de mis facturas
 
@@ -2717,7 +3640,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /billing/simulated/outbox
+#### 43. GET /billing/simulated/outbox
 
 Bandeja de correo simulada (sólo administración)
 
@@ -2766,7 +3689,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. GET /billing/simulated/status
+#### 44. GET /billing/simulated/status
 
 Estado fiscal simulado: emisores y credenciales sintéticas
 
@@ -2816,7 +3739,412 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. GET /patient-spending/me
+#### 45. GET /billing/space-tariffs
+
+Tarifas de espacios
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.listTariffs"]:::llamada
+  n2 --> n3
+  n4["Llama a SpaceChargesService.assertPractice"]:::llamada
+  n3 --> n4
+  n5[("LEE practice.practices")]:::efecto
+  n4 --> n5
+  n6{"!p || p.tenant_id !== tenantId"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a InfrastructureAccessService.actorScope"]:::llamada
+  n6 -->|"no"| n8
+  n9["Llama a CareSpaceOpsRepository.grants"]:::llamada
+  n8 --> n9
+  n10[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE practice.care_spa…")]:::efecto
+  n9 --> n10
+  n11["Llama a InfrastructureAccessService.decide"]:::llamada
+  n10 --> n11
+  n12["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n11 --> n12
+  n13{"!rule"}:::decision
+  n12 --> n13
+  n14(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n13 -->|"sí"| n14
+  n15(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n13 -->|"no"| n15
+  n16[("LEE billing.space_tariffs")]:::efecto
+  n17["Llama a SpaceChargesService.tariffViews"]:::llamada
+  n16 --> n17
+  n18[("LEE terminology.catalog_concepts · LEE practice.care_spaces · LEE billing.service_catalog")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 46. POST /billing/space-tariffs
+
+Crear una tarifa de espacio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: Espacio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Vigencia inválida; PreconditionFailedException: La tarifa de quirófano necesita minutos por unidad; PreconditionFailedException: El servicio no es de la práctica; PreconditionFailedException: Categoría de cama desconocida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.createTariff"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SpaceChargesService.assertPractice"]:::llamada
+  n4 --> n5
+  n6[("LEE practice.practices")]:::efecto
+  n5 --> n6
+  n7{"!p || p.tenant_id !== tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a InfrastructureAccessService.actorScope"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a CareSpaceOpsRepository.grants"]:::llamada
+  n9 --> n10
+  n11[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE practice.care_spa…")]:::efecto
+  n10 --> n11
+  n12["Llama a InfrastructureAccessService.decide"]:::llamada
+  n11 --> n12
+  n13["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n12 --> n13
+  n14{"!rule"}:::decision
+  n13 --> n14
+  n15(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n14 -->|"sí"| n15
+  n16(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n14 -->|"no"| n16
+  n17{"!DATE_RE.test(input.validFrom) || (input.validTo && !DATE_RE.test(input.validTo))"}:::decision
+  n18(["422 PRECONDITION_FAILED Vigencia inválida"]):::error
+  n17 -->|"sí"| n18
+  n19{"input.tariffKind === 'OR_TIME' && !(Number(input.unitMinutes) › 0)"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED La tarifa de quirófano necesita minutos por unidad"]):::error
+  n19 -->|"sí"| n20
+  n21[("LEE billing.service_catalog")]:::efecto
+  n19 -->|"no"| n21
+  n22{"!svc"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED El servicio no es de la práctica"]):::error
+  n22 -->|"sí"| n23
+  n24{"input.careSpaceId"}:::decision
+  n22 -->|"no"| n24
+  n25[("LEE practice.care_spaces · LEE practice.practice_sites")]:::efecto
+  n24 -->|"sí"| n25
+  n26{"!space"}:::decision
+  n25 --> n26
+  n27(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"input.bedCategoryCode && (!input.bedCategoryCode.startsWith('BED_CAT_') || !bedCategory)"}:::decision
+  n26 -->|"no"| n28
+  n24 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED Categoría de cama desconocida"]):::error
+  n28 -->|"sí"| n29
+  n30[("CREA billing.space_tariffs")]:::efecto
+  n28 -->|"no"| n30
+  n31["Llama a SpaceChargesService.flush"]:::llamada
+  n30 --> n31
+  n32["Intenta"]:::intento
+  n31 --> n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"si falla"| n33
+  n34["Llama a SpaceChargesService.publish"]:::llamada
+  n32 --> n34
+  n35["Intenta"]:::intento
+  n34 --> n35
+  n36["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n35 --> n36
+  n37["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n36 --> n37
+  n38["Transacción: startActiveSpan(…)"]:::transaccion
+  n37 --> n38
+  n39["Intenta"]:::intento
+  n38 --> n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"si falla"| n40
+  n41>"Evento ~eventType"]:::evento
+  n39 --> n41
+  n42(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"si falla"| n42
+  n43["Llama a SpaceChargesService.tariffViews"]:::llamada
+  n41 --> n43
+  n44[("LEE terminology.catalog_concepts · LEE practice.care_spaces · LEE billing.service_catalog")]:::efecto
+  n43 --> n44
+  n45(("201 Responde con éxito")):::ok
+  n44 --> n45
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 47. POST /billing/space-tariffs/{id}/close
+
+Cerrar la vigencia de una tarifa
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tarifa no encontrada; ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El fin debe ser posterior al inicio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.closeTariff"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5[("LEE billing.space_tariffs")]:::efecto
+  n4 --> n5
+  n6{"!tariff || tariff.tenantId !== tenantId"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Tarifa no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a SpaceChargesService.assertPractice"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE practice.practices")]:::efecto
+  n8 --> n9
+  n10{"!p || p.tenant_id !== tenantId"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a InfrastructureAccessService.actorScope"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a CareSpaceOpsRepository.grants"]:::llamada
+  n12 --> n13
+  n14[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE practice.care_spa…")]:::efecto
+  n13 --> n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n14 --> n15
+  n16["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n15 --> n16
+  n17{"!rule"}:::decision
+  n16 --> n17
+  n18(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n17 -->|"sí"| n18
+  n19(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n17 -->|"no"| n19
+  n20{"!DATE_RE.test(validTo) || validTo ‹= String(tariff.validFrom).slice(0, 10)"}:::decision
+  n21(["422 PRECONDITION_FAILED El fin debe ser posterior al inicio"]):::error
+  n20 -->|"sí"| n21
+  n22[("ACTUALIZA billing.space_tariffs · ACTUALIZA billing.space_tariffs")]:::efecto
+  n20 -->|"no"| n22
+  n23["Llama a SpaceChargesService.flush"]:::llamada
+  n22 --> n23
+  n24["Intenta"]:::intento
+  n23 --> n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 -->|"si falla"| n25
+  n26["Llama a SpaceChargesService.publish"]:::llamada
+  n24 --> n26
+  n27["Intenta"]:::intento
+  n26 --> n27
+  n28["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n27 --> n28
+  n29["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n28 --> n29
+  n30["Transacción: startActiveSpan(…)"]:::transaccion
+  n29 --> n30
+  n31["Intenta"]:::intento
+  n30 --> n31
+  n32(["↩ (relanza el error capturado)"]):::error
+  n31 -->|"si falla"| n32
+  n33>"Evento ~eventType"]:::evento
+  n31 --> n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"si falla"| n34
+  n35["Llama a SpaceChargesService.tariffViews"]:::llamada
+  n33 --> n35
+  n36[("LEE terminology.catalog_concepts · LEE practice.care_spaces · LEE billing.service_catalog")]:::efecto
+  n35 --> n36
+  n37(("200 Responde con éxito")):::ok
+  n36 --> n37
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 48. POST /internal/billing/bed-day-charges/run
+
+Devengar día-cama y quirófano (worker)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No hay un objetivo sobre el que autorizar esta acción; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SpaceChargesService.runInternal"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5[("LEE clinical.encounter_locations")]:::efecto
+  n4 --> n5
+  n6["Repite: por cada const e de encounters"]:::bucle
+  n5 --> n6
+  n7["Llama a SpaceChargesService.runBedDays"]:::llamada
+  n6 -->|"cada elemento"| n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n7 --> n8
+  n9["Llama a SpaceChargesService.encounter"]:::llamada
+  n8 --> n9
+  n10[("LEE clinical.encounters")]:::efecto
+  n9 --> n10
+  n11{"!enc || (req.tenantId && enc.tenant_id !== req.tenantId)"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13[("LEE clinical.encounter_locations")]:::efecto
+  n11 -->|"no"| n13
+  n14{"req.actor"}:::decision
+  n13 --> n14
+  n15["Llama a SpaceChargesService.assertSites"]:::llamada
+  n14 -->|"sí"| n15
+  n16["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n15 --> n16
+  n17(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n16 --> n17
+  n18{"!req.tenantId || siteIds.length === 0"}:::decision
+  n19["Llama a SpaceChargesService.denyWithoutTarget"]:::llamada
+  n18 -->|"sí"| n19
+  n20(["403 FORBIDDEN No hay un objetivo sobre el que autorizar esta acción"]):::error
+  n19 --> n20
+  n21["Repite: por cada const siteId de siteIds"]:::bucle
+  n18 -->|"no"| n21
+  n22{"!filter.allSite"}:::decision
+  n21 -->|"cada elemento"| n22
+  n23["Llama a InfrastructureAccessService.decide"]:::llamada
+  n22 -->|"sí"| n23
+  n24(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n23 --> n24
+  n25[("LEE practice.practice_sites")]:::efecto
+  n22 -->|"no"| n25
+  n21 -->|"al terminar"| n25
+  n14 -->|"no"| n25
+  n26["Repite: por cada const day de days"]:::bucle
+  n25 --> n26
+  n27[("LEE billing.charge_captures · LEE practice.care_space_category_periods · LEE practice.care_spaces")]:::efecto
+  n26 -->|"cada elemento"| n27
+  n28["Llama a SpaceChargesService.tariffFor"]:::llamada
+  n27 --> n28
+  n29[("LEE billing.space_tariffs")]:::efecto
+  n28 --> n29
+  n30["Llama a SpaceChargesService.capture"]:::llamada
+  n29 --> n30
+  n31[("LEE accounting.cost_centers · CREA billing.charge_captures")]:::efecto
+  n30 --> n31
+  n32["Llama a SpaceChargesService.flush"]:::llamada
+  n31 --> n32
+  n33["Intenta"]:::intento
+  n32 --> n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 -->|"si falla"| n34
+  n35["Llama a SpaceChargesService.publish"]:::llamada
+  n33 --> n35
+  n36["Intenta"]:::intento
+  n35 --> n36
+  n37>"Evento ~eventType"]:::evento
+  n36 --> n37
+  n38(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"si falla"| n38
+  n39["Llama a SpaceChargesService.runOrTime"]:::llamada
+  n37 --> n39
+  n26 -->|"al terminar"| n39
+  n6 -->|"al terminar"| n39
+  n40["Transacción: transactional(…)"]:::transaccion
+  n39 --> n40
+  n41[("LEE procedures_perioperative.operating_room_utilization_events · LEE procedures_perioperative.procedure_cases…")]:::efecto
+  n40 --> n41
+  n42["Repite: por cada const c de cases"]:::bucle
+  n41 --> n42
+  n43["Llama a SpaceChargesService.tariffFor"]:::llamada
+  n42 -->|"cada elemento"| n43
+  n44[("LEE billing.space_tariffs")]:::efecto
+  n43 --> n44
+  n45["Llama a SpaceChargesService.capture"]:::llamada
+  n44 --> n45
+  n46[("LEE accounting.cost_centers · CREA billing.charge_captures")]:::efecto
+  n45 --> n46
+  n47["Llama a SpaceChargesService.flush"]:::llamada
+  n46 --> n47
+  n48["Intenta"]:::intento
+  n47 --> n48
+  n49(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"si falla"| n49
+  n50["Llama a SpaceChargesService.publish"]:::llamada
+  n48 --> n50
+  n51["Intenta"]:::intento
+  n50 --> n51
+  n52>"Evento ~eventType"]:::evento
+  n51 --> n52
+  n53(["↩ (relanza el error capturado)"]):::error
+  n51 -->|"si falla"| n53
+  n54(("200 Responde con éxito")):::ok
+  n52 --> n54
+  n42 -->|"al terminar"| n54
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 49. GET /patient-spending/me
 
 Mis gastos de salud
 
@@ -2860,6 +4188,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
+| GET /admin/catalogs/services/scopes | 200, 401, 403, 429 | 2 |
 | GET /billing/service-catalog | 200, 400, 401, 403, 429 | 1 |
 | GET /billing/service-catalog/procedure-specialties | 200, 401, 403, 429 | 1 |
 | GET /billing/service-catalog/procedure-specialties/mine | 200, 401, 403, 429 | 3 |
