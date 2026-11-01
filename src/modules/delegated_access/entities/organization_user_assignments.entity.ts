@@ -16,6 +16,12 @@ export class OrganizationUserAssignments {
   id: string = randomUUID();
 
   /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  tenantId!: string;
+
+  /**
    * Identificador asociado a tenant membership.
    */
   @Property({ fieldName: 'tenant_membership_id', type: 'uuid' }) // FK → directory.tenant_memberships

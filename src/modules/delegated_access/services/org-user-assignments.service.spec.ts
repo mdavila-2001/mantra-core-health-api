@@ -30,6 +30,7 @@ function build() {
   };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const assignmentsRepo = {
+    findMembershipTenantId: mockFn().mockResolvedValue('t1'),
     findActiveOverlap: mockFn().mockResolvedValue(null),
     create: mockFn(),
     findById: mockFn(),
@@ -69,6 +70,50 @@ describe('OrgUserAssignmentsService', () => {
         createdAt: created.createdAt,
       });
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
+    });
+
+    it('writes the tenant of the membership (tenant_id NOT NULL, v4.2.79)', async () => {
+      const d = build();
+      d.assignmentsRepo.create.mockReturnValue({
+        id: 'a1',
+        statusConceptId: STATUS.ACTIVE,
+        createdAt: new Date(),
+      });
+      await d.service.createAssignment('m1', { role: 'SECRETARY' } as any, {
+        ...actor,
+        tenantId: 'header-tenant',
+      });
+      expect(d.assignmentsRepo.findMembershipTenantId).toHaveBeenCalledWith(
+        d.tx,
+        'm1',
+      );
+      expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: 't1', tenantMembershipId: 'm1' }),
+      );
+    });
+
+    it('rejects a membership that does not exist (404) without writing', async () => {
+      const d = build();
+      d.tx.execute.mockResolvedValue([]);
+      d.assignmentsRepo.findMembershipTenantId.mockResolvedValue(null);
+      await expect(
+        d.service.createAssignment('missing', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the membership tenant cannot be resolved (404)', async () => {
+      const d = build();
+      d.assignmentsRepo.findMembershipTenantId.mockResolvedValue(null);
+      await expect(
+        d.service.createAssignment('m1', {} as any, actor),
+      ).rejects.toMatchObject({
+        constructor: ResourceNotFoundException,
+        message: 'Membresía no encontrada',
+      });
+      expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
     });
 
     it('rejects an overlapping active role+scope (conflict)', async () => {
