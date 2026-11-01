@@ -6,6 +6,9 @@ import {
   runWithTenant,
 } from '../../../../common/tenant/tenant-context';
 import { INTEG } from '../../../integrations/integrations.concepts';
+import { PHARM } from '../../../pharmacy/pharmacy.concepts';
+import { IntegrationReadService } from '../inventory-sync/integration-read.service';
+import { SyncExternalPharmacyCatalogUseCase } from '../inventory-sync/sync-external-pharmacy-catalog.use-case';
 import { ErpConnectionUseCases } from './erp-connection.use-cases';
 import { OrderStockSourceResolver } from './order-stock-source.resolver';
 
@@ -129,6 +132,8 @@ function fixture(checkReads = true, tenantId = 'synthetic-tenant-a') {
     }),
   };
   const adapter = {
+    isConfigured: () => true,
+    listProducts: jest.fn(async () => []),
     checkHealth: jest.fn(async () => undefined),
     stockForSite: jest.fn(async () => [{ code: 'E1', quantity: 7 }]),
   };
@@ -140,9 +145,10 @@ function fixture(checkReads = true, tenantId = 'synthetic-tenant-a') {
   };
   const logger = { setContext: jest.fn(), warn: jest.fn(), info: jest.fn() };
   const scope = {
-    requireManagedPharmacy: jest.fn(async (manager: EntityManager) =>
-      observe(manager, 'scope'),
-    ),
+    requireManagedPharmacy: jest.fn(async (manager: EntityManager) => {
+      observe(manager, 'scope');
+      return { pharmacyId: 'pharmacy', tenantId };
+    }),
   };
   const useCases = new ErpConnectionUseCases(
     root,
@@ -173,6 +179,9 @@ function fixture(checkReads = true, tenantId = 'synthetic-tenant-a') {
     resolver,
     connections,
     adapter,
+    scope,
+    observe,
+    logger,
   };
 }
 
@@ -275,4 +284,93 @@ describe('A03: ERP keeps the actual request transaction context', () => {
       expect(d.statements).toEqual([]);
     },
   );
+});
+
+describe('A03: direct C9 integration readers and sync caller', () => {
+  function dependencyFixture() {
+    const d = fixture();
+    const read = <T>(operation: string, value: T) =>
+      jest.fn(async (manager: EntityManager) => {
+        d.observe(manager, operation);
+        return value;
+      });
+    const link = {
+      id: 'link',
+      pharmacyId: 'pharmacy',
+      statusConceptId: PHARM.CONNECTION_ACTIVE,
+      supportsStockQuery: true,
+    };
+    const reads = {
+      findConnections: read('integration-connections', []),
+      findSites: read('integration-sites', []),
+      findConnection: read('integration-link', link),
+      findMappings: read('integration-mappings', []),
+      findProducts: read('integration-products', []),
+      findBatches: read('integration-batches', []),
+      countDiscrepancies: read('integration-discrepancies', new Map()),
+      findPharmacyCode: read('integration-code', 'FARM'),
+      findActiveSites: read('integration-active-sites', []),
+      findMatchedItems: read('integration-matched', []),
+    };
+    const external = { isConfigured: () => false };
+    const service = new IntegrationReadService(
+      d.root,
+      d.scope as never,
+      reads as never,
+      external as never,
+      d.useCases,
+    );
+    const sync = new SyncExternalPharmacyCatalogUseCase(
+      d.root,
+      d.scope as never,
+      {} as never,
+      reads as never,
+      {} as never,
+      { execute: jest.fn(async () => ({ id: 'synthetic-batch' })) } as never,
+      { execute: jest.fn(async () => undefined) } as never,
+      {} as never,
+      external as never,
+      d.logger as never,
+      d.useCases,
+    );
+    return { ...d, service, sync };
+  }
+  const ref = { pharmacyId: 'pharmacy', connectionId: 'link' };
+
+  it('lists integration connections without losing the request transaction', async () => {
+    const d = dependencyFixture();
+    await expect(
+      d.run(() => d.service.connections('pharmacy', ACTOR)),
+    ).resolves.toHaveProperty('items');
+    expect(d.observations.every((o) => o.sameTransaction)).toBe(true);
+  });
+  it('reads mappings without losing the request transaction', async () => {
+    const d = dependencyFixture();
+    await expect(d.run(() => d.service.mappings(ref, ACTOR))).resolves.toEqual({
+      items: [],
+    });
+    expect(d.observations.every((o) => o.sameTransaction)).toBe(true);
+  });
+  it('reads the ERP catalog with its request transaction', async () => {
+    const d = dependencyFixture();
+    await expect(
+      d.run(() => d.service.externalProducts(ref, ACTOR)),
+    ).resolves.toEqual({ items: [] });
+    expect(d.observations.every((o) => o.sameTransaction)).toBe(true);
+  });
+  it('reads sync batches without losing the request transaction', async () => {
+    const d = dependencyFixture();
+    await expect(
+      d.run(() => d.service.syncBatches(ref, 5, ACTOR)),
+    ).resolves.toEqual({ items: [] });
+    expect(d.observations.every((o) => o.sameTransaction)).toBe(true);
+  });
+  it('passes the inherited context from sync to catalogForConnection', async () => {
+    const d = dependencyFixture();
+    await expect(
+      d.run(() => d.sync.execute(ref, ACTOR)),
+    ).resolves.toHaveProperty('batchId', 'synthetic-batch');
+    expect(d.observations.every((o) => o.sameTransaction)).toBe(true);
+    expect(d.statements).toEqual([]);
+  });
 });

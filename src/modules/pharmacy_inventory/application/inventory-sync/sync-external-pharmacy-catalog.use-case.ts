@@ -151,7 +151,7 @@ export class SyncExternalPharmacyCatalogUseCase {
     );
     const plan = await this.plan(ref, actor);
     const source = await this.erp.catalogForConnection(
-      this.em.fork(),
+      this.em.fork({ keepTransactionContext: true }),
       ref.pharmacyId,
       ref.connectionId,
       this.external,

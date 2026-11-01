@@ -56,7 +56,7 @@ export class IntegrationReadService {
     pharmacyId: string,
     actor: AuthenticatedUser,
   ): Promise<IntegrationConnectionListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacy = await this.scope.requireManagedPharmacy(
       em,
       pharmacyId,
@@ -110,7 +110,7 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<IntegrationMappingListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
     const products = await this.reads.findProducts(
@@ -141,7 +141,7 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<ExternalCatalogListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
     const { catalog: external } = await this.erp.catalogForConnection(
@@ -191,7 +191,7 @@ export class IntegrationReadService {
     limit: number | undefined,
     actor: AuthenticatedUser,
   ): Promise<IntegrationSyncBatchListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const batches = await this.reads.findBatches(
       em,
