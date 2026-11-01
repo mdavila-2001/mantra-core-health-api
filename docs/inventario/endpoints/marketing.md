@@ -3,7 +3,7 @@
 # Endpoints del módulo `marketing`
 
 - **Bloque:** Marketing y Crecimiento (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
-- **Operaciones:** 31 (15 en el contrato, 16 sólo en el código)
+- **Operaciones:** 31 (31 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 4 · MEDIO 12 · BAJO 15
 - **Tablas distintas que tocan:** 24
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/marketing.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -18,22 +18,22 @@
 | 4 | POST | `/marketing/content-templates/{code}/versions` | Publicar una versión de plantilla de contenido | MEDIO | 3 | CONTENT_EDITOR, MARKETING_MANAGER |
 | 5 | POST | `/marketing/enrollments/{id}/advance` | Avanzar la inscripción al siguiente paso | MEDIO | 4 | SYSTEM, MARKETING_MANAGER |
 | 6 | POST | `/marketing/enrollments/{id}/exit` | Cerrar la inscripción por meta, baja o rebote | MEDIO | 5 | SYSTEM, MARKETING_MANAGER |
-| 7 | GET | `/marketing/insights/alert-rules` | — | BAJO | 4 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 8 | PATCH | `/marketing/insights/alert-rules/{code}` | — | BAJO | 2 | PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 9 | GET | `/marketing/insights/alert-workflow` | — | BAJO | 5 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 10 | PUT | `/marketing/insights/alert-workflow/{fingerprint}` | — | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
-| 11 | GET | `/marketing/insights/campaign-facts` | — | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 12 | GET | `/marketing/insights/catalog` | — | BAJO | 6 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 13 | GET | `/marketing/insights/notification-preferences` | — | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 14 | PUT | `/marketing/insights/notification-preferences` | — | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
-| 15 | GET | `/marketing/insights/reports` | — | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 16 | DELETE | `/marketing/insights/reports/{id}` | — | ALTO | 1 | ...INSIGHTS_WRITE_ROLES |
-| 17 | PUT | `/marketing/insights/reports/{id}` | — | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
-| 18 | GET | `/marketing/insights/saved-views` | — | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 19 | DELETE | `/marketing/insights/saved-views/{id}` | — | ALTO | 1 | ...INSIGHTS_WRITE_ROLES |
-| 20 | PUT | `/marketing/insights/saved-views/{id}` | — | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
-| 21 | GET | `/marketing/insights/user-preferences` | — | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
-| 22 | PUT | `/marketing/insights/user-preferences` | — | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
+| 7 | GET | `/marketing/insights/alert-rules` | Las siete reglas de alerta con su umbral y estado | BAJO | 4 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 8 | PATCH | `/marketing/insights/alert-rules/{code}` | Enciende, apaga o cambia el umbral (1 a 500) de una regla | BAJO | 2 | PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 9 | GET | `/marketing/insights/alert-workflow` | Estado, responsable e historial de las alertas que existen | BAJO | 5 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 10 | PUT | `/marketing/insights/alert-workflow/{fingerprint}` | Cambia estado y/o responsable de una alerta (la crea la primera vez) | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
+| 11 | GET | `/marketing/insights/campaign-facts` | Hechos diarios por campaña y canal; lo que la fuente no reporta se declara en meta.notMeasured | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 12 | GET | `/marketing/insights/catalog` | Campañas (con sus canales y objetivos) e hitos de Insights | BAJO | 6 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 13 | GET | `/marketing/insights/notification-preferences` | Preferencias de aviso del usuario (rowVersion 0 si no guardó nada) | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 14 | PUT | `/marketing/insights/notification-preferences` | Guarda las preferencias de aviso del usuario (no se envía nada) | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
+| 15 | GET | `/marketing/insights/reports` | Historial de informes del usuario (máximo 12, el más nuevo primero) | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 16 | DELETE | `/marketing/insights/reports/{id}` | Borra un informe del usuario (idempotente) | ALTO | 1 | ...INSIGHTS_WRITE_ROLES |
+| 17 | PUT | `/marketing/insights/reports/{id}` | Guarda un informe en el historial (idempotente por id) | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
+| 18 | GET | `/marketing/insights/saved-views` | Vistas guardadas del usuario | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 19 | DELETE | `/marketing/insights/saved-views/{id}` | Borra una vista del usuario (idempotente) | ALTO | 1 | ...INSIGHTS_WRITE_ROLES |
+| 20 | PUT | `/marketing/insights/saved-views/{id}` | Guarda una vista con el id que manda el cliente (idempotente) | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
+| 21 | GET | `/marketing/insights/user-preferences` | Preferencias de interfaz del usuario (rowVersion 0 si no guardó nada) | BAJO | 3 | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN |
+| 22 | PUT | `/marketing/insights/user-preferences` | Guarda las preferencias de interfaz del usuario | BAJO | 2 | ...INSIGHTS_WRITE_ROLES |
 | 23 | POST | `/marketing/journeys` | Crear un journey en borrador | MEDIO | 3 | MARKETING_MANAGER |
 | 24 | POST | `/marketing/journeys/{id}/activate` | Activar el journey e inscribir la cohorte inicial | MEDIO | 4 | MARKETING_MANAGER |
 | 25 | POST | `/marketing/journeys/{id}/steps` | Añadir pasos al journey | MEDIO | 5 | MARKETING_MANAGER |
@@ -727,8 +727,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 7. GET /marketing/insights/alert-rules
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Las siete reglas de alerta con su umbral y estado
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -736,9 +736,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-16: Encender, apagar o cambiar el umbral (1 a 500) de una de las siete reglas; If-Match obligatorio. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Las siete reglas de alerta con su umbral y estado. Caso de uso UC-50-16: Encender, apagar o cambiar el umbral (1 a 500) de una de las siete reglas; If-Match obligatorio. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -794,8 +794,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 8. PATCH /marketing/insights/alert-rules/{code}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Enciende, apaga o cambia el umbral (1 a 500) de una regla
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -803,13 +803,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-16: Encender, apagar o cambiar el umbral (1 a 500) de una de las siete reglas; If-Match obligatorio. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Enciende, apaga o cambia el umbral (1 a 500) de una regla. Caso de uso UC-50-16: Encender, apagar o cambiar el umbral (1 a 500) de una de las siete reglas; If-Match obligatorio. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /marketing/insights/alert-rules/{code}` la atiende `InsightsWorkflowController.patchRule` (src/modules/marketing/controllers/insights-workflow.controller.ts:100). Exige sesión con alguno de los roles PLATFORM_ADMIN, DATA_PLATFORM_ADMIN. Valida el cuerpo como `PatchAlertRuleDto` (0 campos, 0 obligatorios). Delega en `InsightsWorkflowService.patchRule`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
+`PATCH /marketing/insights/alert-rules/{code}` la atiende `InsightsWorkflowController.patchRule` (src/modules/marketing/controllers/insights-workflow.controller.ts:100). Exige sesión con alguno de los roles PLATFORM_ADMIN, DATA_PLATFORM_ADMIN. Valida el cuerpo como `MarketingInsightsPatchAlertRuleDto` (2 campos, 0 obligatorios). Delega en `InsightsWorkflowService.patchRule`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
 
 ### Requerimientos
 
@@ -818,6 +818,9 @@ _Fuentes:_ README (`src/modules/marketing/README.md:72`) · MODELO (`Mantra Core
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, DATA_PLATFORM_ADMIN | `src/modules/marketing/controllers/insights-workflow.controller.ts:100` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | If-Match (obligatoria) | `contrato (parameters)` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -832,11 +835,31 @@ _Fuentes:_ README (`src/modules/marketing/README.md:72`) · MODELO (`Mantra Core
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `code` | path | Sí | `string` | — |
-| `if-match` | header | sin dato | `string \| undefined` | — |
+| `If-Match` | header | Sí | `string` | rowVersion leído |
 
-### Cuerpo — DTO `PatchAlertRuleDto`
+### Cuerpo — DTO `MarketingInsightsPatchAlertRuleDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `enabled` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:160` |
+| `threshold` | `number` | No | mínimo 1; máximo 500 | `@IsOptional()` `@IsNumber({ allowNaN: false, allowInfinity: false })` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:170` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "enabled": true,
+  "threshold": 1
+}
+```
+
+</details>
 
 ### Respuesta — `no declarado`
 
@@ -847,6 +870,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La regla de alerta no existe |
@@ -869,8 +893,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 9. GET /marketing/insights/alert-workflow
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Estado, responsable e historial de las alertas que existen
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -878,9 +902,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-15: Estado, responsable e historial de una alerta detectada por la pantalla: el PUT la crea con su snapshot la primera vez y escribe una fila de insights_alert_transitions solo si cambia el estado o el responsable. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Estado, responsable e historial de las alertas que existen. Caso de uso UC-50-15: Estado, responsable e historial de una alerta detectada por la pantalla: el PUT la crea con su snapshot la primera vez y escribe una fila de insights_alert_transitions solo si cambia el estado o el responsable. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -936,8 +960,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 10. PUT /marketing/insights/alert-workflow/{fingerprint}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Cambia estado y/o responsable de una alerta (la crea la primera vez)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -945,13 +969,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-15: Estado, responsable e historial de una alerta detectada por la pantalla: el PUT la crea con su snapshot la primera vez y escribe una fila de insights_alert_transitions solo si cambia el estado o el responsable. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Cambia estado y/o responsable de una alerta (la crea la primera vez). Caso de uso UC-50-15: Estado, responsable e historial de una alerta detectada por la pantalla: el PUT la crea con su snapshot la primera vez y escribe una fila de insights_alert_transitions solo si cambia el estado o el responsable. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /marketing/insights/alert-workflow/{fingerprint}` la atiende `InsightsWorkflowController.putWorkflow` (src/modules/marketing/controllers/insights-workflow.controller.ts:62). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `PutAlertWorkflowDto` (0 campos, 0 obligatorios). Delega en `InsightsWorkflowService.putWorkflow`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
+`PUT /marketing/insights/alert-workflow/{fingerprint}` la atiende `InsightsWorkflowController.putWorkflow` (src/modules/marketing/controllers/insights-workflow.controller.ts:62). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `MarketingInsightsPutAlertWorkflowDto` (10 campos, 9 obligatorios). Delega en `InsightsWorkflowService.putWorkflow`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
 
 ### Requerimientos
 
@@ -960,6 +984,9 @@ _Fuentes:_ README (`src/modules/marketing/README.md:71`) · MODELO (`Mantra Core
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...INSIGHTS_WRITE_ROLES | `src/modules/marketing/controllers/insights-workflow.controller.ts:62` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | If-Match (opcional) | `contrato (parameters)` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -974,11 +1001,59 @@ _Fuentes:_ README (`src/modules/marketing/README.md:71`) · MODELO (`Mantra Core
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `fingerprint` | path | Sí | `string` | — |
-| `if-match` | header | sin dato | `string \| undefined` | — |
+| `If-Match` | header | No | `string` | rowVersion leído |
 
-### Cuerpo — DTO `PutAlertWorkflowDto`
+### Cuerpo — DTO `MarketingInsightsPutAlertWorkflowDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `status` | `string` | Sí | valores: new, in_progress, resolved, dismissed | `@IsIn(INSIGHTS_ALERT_STATUSES)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:133` |
+| `ownerTeam` | `string` | Sí | valores: marketing, innovation, product, communication, content, systems, direction; admite null | `@ValidateIf((_, value) => value !== null)` `@IsIn(INSIGHTS_OWNER_TEAMS)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:138` |
+| `note` | `string` | No | longitud máxima 500 | `@IsOptional()` `@Transform(trim)` `@IsString()` `@MaxLength(500)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:145` |
+| `snapshot` | `MarketingInsightsAlertSnapshotDto` | Sí | — | `@IsDefined()` `@ValidateNested()` `@Type(() => InsightsAlertSnapshotDto)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:151` |
+| `snapshot.severity` | `string` | Sí | valores: critical, risk, anomaly, opportunity | `@IsIn(INSIGHTS_ALERT_SEVERITIES)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:94` |
+| `snapshot.title` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:101` |
+| `snapshot.whatText` | `string` | Sí | longitud mínima 1; longitud máxima 2000 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(2000)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:108` |
+| `snapshot.detectedOn` | `string` | Sí | patrón runtime DAY | `@Matches(DAY)` | Día de detección | `src/modules/marketing/dto/insights-workspace.dto.ts:112` |
+| `snapshot.moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima 40; patrón runtime CODE | `@IsString()` `@MinLength(1)` `@MaxLength(40)` `@Matches(CODE)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:119` |
+| `snapshot.priority` | `number` | Sí | mínimo 1; máximo 5 | `@IsInt()` `@Min(1)` `@Max(5)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:125` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "status": "new",
+  "ownerTeam": "marketing",
+  "snapshot": {
+    "severity": "critical",
+    "title": "valor-ejemplo",
+    "whatText": "valor-ejemplo",
+    "detectedOn": "2026-10-29",
+    "moduleCode": "campaigns",
+    "priority": 1
+  }
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "status": "new",
+  "ownerTeam": "marketing",
+  "note": "valor-ejemplo",
+  "snapshot": {
+    "severity": "critical",
+    "title": "valor-ejemplo",
+    "whatText": "valor-ejemplo",
+    "detectedOn": "2026-10-29",
+    "moduleCode": "campaigns",
+    "priority": 1
+  }
+}
+```
+
+</details>
 
 ### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
 
@@ -989,6 +1064,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1010,8 +1086,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 11. GET /marketing/insights/campaign-facts
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Hechos diarios por campaña y canal; lo que la fuente no reporta se declara en meta.notMeasured
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1019,9 +1095,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-14: Hechos diarios por campaña y canal en una ventana de hasta 92 días, con meta (dataset, asOf, notMeasured). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Hechos diarios por campaña y canal; lo que la fuente no reporta se declara en meta.notMeasured. Caso de uso UC-50-14: Hechos diarios por campaña y canal en una ventana de hasta 92 días, con meta (dataset, asOf, notMeasured). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1034,6 +1110,8 @@ _Fuentes:_ README (`src/modules/marketing/README.md:70`) · MODELO (`Mantra Core
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN | `src/modules/marketing/controllers/insights-facts.controller.ts:45` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1048,7 +1126,10 @@ _Fuentes:_ README (`src/modules/marketing/README.md:70`) · MODELO (`Mantra Core
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `InsightsFactsQueryDto` | — |
+| `from` | query | Sí | `string` | Primer día (inclusive) |
+| `to` | query | Sí | `string` | Último día (inclusive) |
+| `campaignIds` | query | No | `array<string>` | Códigos de campaña (lista separada por comas) |
+| `channels` | query | No | `array<string>` | Canales (lista separada por comas) |
 
 ### Cuerpo
 
@@ -1063,6 +1144,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1084,8 +1166,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 12. GET /marketing/insights/catalog
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Campañas (con sus canales y objetivos) e hitos de Insights
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1093,9 +1175,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-13: Catálogo de Insights: campañas (con canales derivados de sus creativos) e hitos. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Campañas (con sus canales y objetivos) e hitos de Insights. Caso de uso UC-50-13: Catálogo de Insights: campañas (con canales derivados de sus creativos) e hitos. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1155,8 +1237,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 13. GET /marketing/insights/notification-preferences
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Preferencias de aviso del usuario (rowVersion 0 si no guardó nada)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1164,9 +1246,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Preferencias de aviso del usuario (rowVersion 0 si no guardó nada). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1220,8 +1302,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 14. PUT /marketing/insights/notification-preferences
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Guarda las preferencias de aviso del usuario (no se envía nada)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1229,13 +1311,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Caso de uso UC-50-17: Preferencias de aviso (no se envía nada) y de interfaz del usuario autenticado. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Guarda las preferencias de aviso del usuario (no se envía nada). Caso de uso UC-50-17: Preferencias de aviso (no se envía nada) y de interfaz del usuario autenticado. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ README (`src/modules/marketing/README.md:73`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:73`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /marketing/insights/notification-preferences` la atiende `InsightsWorkspaceController.putNotificationPreferences` (src/modules/marketing/controllers/insights-workspace.controller.ts:69). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `PutNotificationPreferencesDto` (0 campos, 0 obligatorios). Delega en `InsightsWorkspaceService.putNotificationPreferences`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
+`PUT /marketing/insights/notification-preferences` la atiende `InsightsWorkspaceController.putNotificationPreferences` (src/modules/marketing/controllers/insights-workspace.controller.ts:69). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `MarketingInsightsPutNotificationPreferencesDto` (10 campos, 10 obligatorios). Delega en `InsightsWorkspaceService.putNotificationPreferences`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
 
 ### Requerimientos
 
@@ -1244,6 +1326,9 @@ _Fuentes:_ README (`src/modules/marketing/README.md:73`) · MODELO (`Mantra Core
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...INSIGHTS_WRITE_ROLES | `src/modules/marketing/controllers/insights-workspace.controller.ts:69` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | If-Match (opcional) | `contrato (parameters)` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1257,11 +1342,76 @@ _Fuentes:_ README (`src/modules/marketing/README.md:73`) · MODELO (`Mantra Core
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `if-match` | header | sin dato | `string \| undefined` | — |
+| `If-Match` | header | No | `string` | rowVersion leído; obligatorio si ya hay fila |
 
-### Cuerpo — DTO `PutNotificationPreferencesDto`
+### Cuerpo — DTO `MarketingInsightsPutNotificationPreferencesDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `matrix` | `MarketingInsightsNotificationMatrixDto` | Sí | — | `@IsDefined()` `@ValidateNested()` `@Type(() => InsightsNotificationMatrixDto)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:215` |
+| `matrix.critical` | `array<string>` | Sí | — | `@applyAll(channelList())` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:193` |
+| `matrix.risk` | `array<string>` | Sí | — | `@applyAll(channelList())` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:197` |
+| `matrix.anomaly` | `array<string>` | Sí | — | `@applyAll(channelList())` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:201` |
+| `matrix.opportunity` | `array<string>` | Sí | — | `@applyAll(channelList())` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:205` |
+| `frequency` | `string` | Sí | valores: immediate, daily_digest | `@IsIn(INSIGHTS_NOTIFICATION_FREQUENCIES)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:219` |
+| `digestHour` | `number` | Sí | mínimo 0; máximo 23 | `@IsInt()` `@Min(0)` `@Max(23)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:225` |
+| `quietFrom` | `object` | Sí | patrón runtime HOUR_MINUTE; admite null | `@ValidateIf((_, value) => value !== null)` `@Matches(HOUR_MINUTE)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:230` |
+| `quietTo` | `object` | Sí | patrón runtime HOUR_MINUTE; admite null | `@ValidateIf((_, value) => value !== null)` `@Matches(HOUR_MINUTE)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:235` |
+| `quietExemptCritical` | `boolean` | Sí | — | `@IsBoolean()` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:239` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "matrix": {
+    "critical": [
+      "app"
+    ],
+    "risk": [
+      "app"
+    ],
+    "anomaly": [
+      "app"
+    ],
+    "opportunity": [
+      "app"
+    ]
+  },
+  "frequency": "immediate",
+  "digestHour": 1,
+  "quietFrom": "22:00",
+  "quietTo": "07:00",
+  "quietExemptCritical": true
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "matrix": {
+    "critical": [
+      "app"
+    ],
+    "risk": [
+      "app"
+    ],
+    "anomaly": [
+      "app"
+    ],
+    "opportunity": [
+      "app"
+    ]
+  },
+  "frequency": "immediate",
+  "digestHour": 1,
+  "quietFrom": "22:00",
+  "quietTo": "07:00",
+  "quietExemptCritical": true
+}
+```
+
+</details>
 
 ### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
 
@@ -1272,6 +1422,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1291,8 +1442,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 15. GET /marketing/insights/reports
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Historial de informes del usuario (máximo 12, el más nuevo primero)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1300,9 +1451,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Historial de informes del usuario (máximo 12, el más nuevo primero). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1358,8 +1509,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 16. DELETE /marketing/insights/reports/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Borra un informe del usuario (idempotente)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1367,9 +1518,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Borra un informe del usuario (idempotente). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1429,8 +1580,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 17. PUT /marketing/insights/reports/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Guarda un informe en el historial (idempotente por id)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1438,13 +1589,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Guarda un informe en el historial (idempotente por id). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /marketing/insights/reports/{id}` la atiende `InsightsWorkspaceController.putReport` (src/modules/marketing/controllers/insights-workspace.controller.ts:184). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `PutReportDto` (0 campos, 0 obligatorios). Delega en `InsightsWorkspaceService.putReport`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
+`PUT /marketing/insights/reports/{id}` la atiende `InsightsWorkspaceController.putReport` (src/modules/marketing/controllers/insights-workspace.controller.ts:184). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `MarketingInsightsPutReportDto` (8 campos, 8 obligatorios). Delega en `InsightsWorkspaceService.putReport`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
 
 ### Requerimientos
 
@@ -1454,6 +1605,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml
 | ROL | Alguno de: ...INSIGHTS_WRITE_ROLES | `src/modules/marketing/controllers/insights-workspace.controller.ts:184` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/insights-workspace.controller.ts:184` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1469,9 +1622,62 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `PutReportDto`
+### Cuerpo — DTO `MarketingInsightsPutReportDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `title` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(120)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:298` |
+| `type` | `string` | Sí | longitud mínima 1; longitud máxima 40; patrón runtime CODE | `@IsString()` `@MinLength(1)` `@MaxLength(40)` `@Matches(CODE)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:305` |
+| `audience` | `string` | Sí | longitud mínima 1; longitud máxima 40; patrón runtime CODE | `@IsString()` `@MinLength(1)` `@MaxLength(40)` `@Matches(CODE)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:312` |
+| `periodFrom` | `string` | Sí | patrón runtime DAY | `@Matches(DAY)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:316` |
+| `periodTo` | `string` | Sí | patrón runtime DAY | `@Matches(DAY)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:320` |
+| `campaignIds` | `array<string>` | Sí | — | `@applyAll(codeItems(20, 40))` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:324` |
+| `channels` | `array<string>` | Sí | máximo INSIGHTS_CHANNELS.length elemento(s) | `@IsArray()` `@ArrayUnique()` `@ArrayMaxSize(INSIGHTS_CHANNELS.length)` `@IsIn(INSIGHTS_CHANNELS, { each: true })` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:331` |
+| `sections` | `array<string>` | Sí | — | `@applyAll(codeItems(32, 40))` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:335` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "title": "valor-ejemplo",
+  "type": "valor-ejemplo",
+  "audience": "valor-ejemplo",
+  "periodFrom": "2026-10-01",
+  "periodTo": "2026-10-29",
+  "campaignIds": [
+    "valor-ejemplo"
+  ],
+  "channels": [
+    "instagram"
+  ],
+  "sections": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "title": "valor-ejemplo",
+  "type": "valor-ejemplo",
+  "audience": "valor-ejemplo",
+  "periodFrom": "2026-10-01",
+  "periodTo": "2026-10-29",
+  "campaignIds": [
+    "valor-ejemplo"
+  ],
+  "channels": [
+    "instagram"
+  ],
+  "sections": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+</details>
 
 ### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
 
@@ -1482,7 +1688,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1504,8 +1710,8 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ## 18. GET /marketing/insights/saved-views
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Vistas guardadas del usuario
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1513,9 +1719,9 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Vistas guardadas del usuario. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1569,8 +1775,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 19. DELETE /marketing/insights/saved-views/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Borra una vista del usuario (idempotente)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1578,9 +1784,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Borra una vista del usuario (idempotente). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1640,8 +1846,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 20. PUT /marketing/insights/saved-views/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Guarda una vista con el id que manda el cliente (idempotente)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1649,13 +1855,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Guarda una vista con el id que manda el cliente (idempotente). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /marketing/insights/saved-views/{id}` la atiende `InsightsWorkspaceController.putSavedView` (src/modules/marketing/controllers/insights-workspace.controller.ts:134). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `PutSavedViewDto` (0 campos, 0 obligatorios). Delega en `InsightsWorkspaceService.putSavedView`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
+`PUT /marketing/insights/saved-views/{id}` la atiende `InsightsWorkspaceController.putSavedView` (src/modules/marketing/controllers/insights-workspace.controller.ts:134). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `MarketingInsightsPutSavedViewDto` (2 campos, 2 obligatorios). Delega en `InsightsWorkspaceService.putSavedView`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
 
 ### Requerimientos
 
@@ -1665,6 +1871,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml
 | ROL | Alguno de: ...INSIGHTS_WRITE_ROLES | `src/modules/marketing/controllers/insights-workspace.controller.ts:134` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/insights-workspace.controller.ts:134` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1680,9 +1888,32 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `PutSavedViewDto`
+### Cuerpo — DTO `MarketingInsightsPutSavedViewDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@Transform(trim)` `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:273` |
+| `url` | `string` | Sí | longitud máxima 500; patrón runtime /^\/insights(?:\/[a-z0-9-]+)*(?:\?[^\s#]*)?$/ | `@IsString()` `@MaxLength(500)` `@Matches(/^\/insights(?:\/[a-z0-9-]+)*(?:\?[^\s#]*)?$/)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:279` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "url": "/insights/campaigns?c=c1&p=30d"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "url": "/insights/campaigns?c=c1&p=30d"
+}
+```
+
+</details>
 
 ### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
 
@@ -1693,7 +1924,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya tienes una vista guardada con ese nombre |
@@ -1714,8 +1945,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 21. GET /marketing/insights/user-preferences
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Preferencias de interfaz del usuario (rowVersion 0 si no guardó nada)
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1723,9 +1954,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Preferencias de interfaz del usuario (rowVersion 0 si no guardó nada). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1779,8 +2010,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 22. PUT /marketing/insights/user-preferences
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Guarda las preferencias de interfaz del usuario
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1788,13 +2019,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
+Guarda las preferencias de interfaz del usuario. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /marketing/insights/user-preferences` la atiende `InsightsWorkspaceController.putUserPreferences` (src/modules/marketing/controllers/insights-workspace.controller.ts:104). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `PutUserPreferencesDto` (0 campos, 0 obligatorios). Delega en `InsightsWorkspaceService.putUserPreferences`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
+`PUT /marketing/insights/user-preferences` la atiende `InsightsWorkspaceController.putUserPreferences` (src/modules/marketing/controllers/insights-workspace.controller.ts:104). Exige sesión con alguno de los roles ...INSIGHTS_WRITE_ROLES. Valida el cuerpo como `MarketingInsightsPutUserPreferencesDto` (4 campos, 4 obligatorios). Delega en `InsightsWorkspaceService.putUserPreferences`. Lee marketing.insights_campaign_daily_facts, marketing.insights_data_sources.
 
 ### Requerimientos
 
@@ -1803,6 +2034,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ...INSIGHTS_WRITE_ROLES | `src/modules/marketing/controllers/insights-workspace.controller.ts:104` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | If-Match (opcional) | `contrato (parameters)` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1816,11 +2050,40 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `if-match` | header | sin dato | `string \| undefined` | — |
+| `If-Match` | header | No | `string` | rowVersion leído; obligatorio si ya hay fila |
 
-### Cuerpo — DTO `PutUserPreferencesDto`
+### Cuerpo — DTO `MarketingInsightsPutUserPreferencesDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `density` | `string` | Sí | valores: comfortable, compact | `@IsIn(INSIGHTS_DENSITIES)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:247` |
+| `theme` | `string` | Sí | valores: system, light, dark | `@IsIn(INSIGHTS_THEMES)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:251` |
+| `navCollapsed` | `boolean` | Sí | — | `@IsBoolean()` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:255` |
+| `timezone` | `object` | Sí | longitud máxima 64; patrón runtime /^[A-Za-z0-9_+\-/]+$/; admite null | `@ValidateIf((_, value) => value !== null)` `@IsString()` `@MaxLength(64)` `@Matches(/^[A-Za-z0-9_+\-/]+$/)` | — | `src/modules/marketing/dto/insights-workspace.dto.ts:262` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "density": "comfortable",
+  "theme": "system",
+  "navCollapsed": true,
+  "timezone": "America/La_Paz"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "density": "comfortable",
+  "theme": "system",
+  "navCollapsed": true,
+  "timezone": "America/La_Paz"
+}
+```
+
+</details>
 
 ### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
 
@@ -1831,6 +2094,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |

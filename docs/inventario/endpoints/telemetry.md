@@ -3,7 +3,7 @@
 # Endpoints del módulo `telemetry`
 
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
-- **Operaciones:** 35 (27 en el contrato, 8 sólo en el código)
+- **Operaciones:** 35 (35 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 10 · MEDIO 5 · BAJO 20
 - **Tablas distintas que tocan:** 20
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/telemetry.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -13,18 +13,18 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/admin/analytics/devices` | Desglose de dispositivos (tipo, SO, navegador, versión de app); bots aparte; lo no medido se declara | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 2 | GET | `/admin/analytics/errors` | — | BAJO | 4 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 3 | GET | `/admin/analytics/errors/fingerprints` | — | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 4 | GET | `/admin/analytics/errors/fingerprints/{fingerprint}` | — | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 5 | GET | `/admin/analytics/errors/routes-not-found` | — | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 2 | GET | `/admin/analytics/errors` | Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API | BAJO | 4 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 3 | GET | `/admin/analytics/errors/fingerprints` | Top de huellas de error con tendencia | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 4 | GET | `/admin/analytics/errors/fingerprints/{fingerprint}` | Detalle agregado de una huella; request_id recientes sólo a roles RAW | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 5 | GET | `/admin/analytics/errors/routes-not-found` | Rutas que cayeron en «no encontrada» o sin parte registrada | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 6 | GET | `/admin/analytics/funnels` | Embudos definidos con sus pasos | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 7 | GET | `/admin/analytics/funnels/{funnelId}/report` | Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor | BAJO | 6 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 8 | GET | `/admin/analytics/heatmap` | Mapa de calor de clics de una pantalla: celdas normalizadas, elementos y tamaño; lo no medido se declara | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 9 | GET | `/admin/analytics/onboarding/funnel` | Reporte de embudo y deserción paso a paso para formularios de alta | BAJO | 0 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 10 | GET | `/admin/analytics/onboarding/heatmap` | Mapa de calor por campo y nivel de fricción para formularios de alta | BAJO | 0 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 11 | GET | `/admin/analytics/overview` | Totales, rutas y eventos principales de la ventana | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 12 | GET | `/admin/analytics/parts` | — | BAJO | 5 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 13 | GET | `/admin/analytics/parts/{routeCode}` | — | BAJO | 5 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 12 | GET | `/admin/analytics/parts` | Árbol de partes con su uso, errores y vitales; lo que no casa va a unmapped | BAJO | 5 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 13 | GET | `/admin/analytics/parts/{routeCode}` | Detalle de una parte: serie, acciones clave, vitales y errores | BAJO | 5 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 14 | GET | `/admin/analytics/pipeline-health` | Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 15 | GET | `/admin/analytics/sessions` | Sesiones de la ventana (sin identificadores de sesión ni sujeto) | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
 | 16 | GET | `/admin/analytics/sessions/{id}` | Timeline de una sesión: eventos y nombres de propiedad, sin valores | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
@@ -33,14 +33,14 @@
 | 19 | POST | `/telemetry/activity-events` | Capturar evento(s) de actividad consent-aware (batch) | ALTO | 10 | sesión (sin roles) |
 | 20 | POST | `/telemetry/analytics-subjects` | Provisionar sujeto de analítica pseudónimo | MEDIO | 2 | SECURITY_ADMIN |
 | 21 | POST | `/telemetry/client-contexts` | Registrar contexto de cliente/dispositivo + journey | ALTO | 5 | sesión (sin roles) |
-| 22 | POST | `/telemetry/client-errors` | — | ALTO | 3 | pública |
+| 22 | POST | `/telemetry/client-errors` | Registra un lote de errores del cliente (saneados en el servidor) | ALTO | 3 | pública |
 | 23 | POST | `/telemetry/conversion-events` | Registrar evento de conversión con atribución | ALTO | 7 | sesión (sin roles) |
 | 24 | POST | `/telemetry/disclosure-acceptances` | Registrar aceptación de disclosure por usuario/sesión | ALTO | 3 | sesión (sin roles) |
 | 25 | POST | `/telemetry/disclosure-versions` | Publicar versión de disclosure de tracking | MEDIO | 3 | SECURITY_ADMIN |
 | 26 | POST | `/telemetry/event-schemas` | Registrar esquema de evento de actividad (versionado) | MEDIO | 3 | SECURITY_ADMIN |
 | 27 | POST | `/telemetry/funnels` | Definir funnel y sus pasos | MEDIO | 5 | SECURITY_ADMIN |
 | 28 | POST | `/telemetry/onboarding-events` | Captura eventos de telemetría de alta y avance en formularios de registro | BAJO | 0 | pública |
-| 29 | POST | `/telemetry/retention/purge` | — | ALTO | 10 | SYSTEM |
+| 29 | POST | `/telemetry/retention/purge` | Purga por retención del propósito: eventos de uso, propiedades y errores del cliente | ALTO | 10 | SYSTEM |
 | 30 | POST | `/telemetry/session-journeys/{id}/close` | Cerrar journey de sesión y consolidar métricas | ALTO | 4 | sesión (sin roles) |
 | 31 | POST | `/telemetry/tracking-consents` | Otorgar consentimiento de tracking por propósito | ALTO | 2 | sesión (sin roles) |
 | 32 | POST | `/telemetry/tracking-consents/{id}/withdraw` | Retirar consentimiento y desactivar sujeto (cascada) | ALTO | 4 | sesión (sin roles) |
@@ -93,6 +93,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `from` | query | No | `string` | Por defecto: to − 7 días |
 | `to` | query | No | `string` | Por defecto: ahora |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 
 ### Cuerpo
 
@@ -126,8 +127,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 2. GET /admin/analytics/errors
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -135,9 +136,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -165,7 +166,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ErrorsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días. |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `interval` | query | No | `string` | — |
+| `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma: sube el umbral de sujetos (nunca baja del piso del servidor). |
+| `routeCode` | query | No | `string` | route_code de la parte (ver GET /admin/analytics/parts) |
+| `class` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -198,8 +206,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 3. GET /admin/analytics/errors/fingerprints
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Top de huellas de error con tendencia
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -207,9 +215,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Top de huellas de error con tendencia. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -236,7 +244,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ErrorsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días. |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `interval` | query | No | `string` | — |
+| `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma: sube el umbral de sujetos (nunca baja del piso del servidor). |
+| `routeCode` | query | No | `string` | route_code de la parte (ver GET /admin/analytics/parts) |
+| `class` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -269,8 +284,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 4. GET /admin/analytics/errors/fingerprints/{fingerprint}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Detalle agregado de una huella; request_id recientes sólo a roles RAW
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -278,9 +293,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Detalle agregado de una huella; request_id recientes sólo a roles RAW. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -308,7 +323,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `fingerprint` | path | Sí | `string` | — |
-| `—` | query | sin dato | `ErrorsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días. |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `interval` | query | No | `string` | — |
+| `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma: sube el umbral de sujetos (nunca baja del piso del servidor). |
+| `routeCode` | query | No | `string` | route_code de la parte (ver GET /admin/analytics/parts) |
+| `class` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -341,8 +363,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 5. GET /admin/analytics/errors/routes-not-found
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Rutas que cayeron en «no encontrada» o sin parte registrada
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -350,9 +372,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Rutas que cayeron en «no encontrada» o sin parte registrada. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -379,7 +401,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ErrorsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días. |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `interval` | query | No | `string` | — |
+| `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma: sube el umbral de sujetos (nunca baja del piso del servidor). |
+| `routeCode` | query | No | `string` | route_code de la parte (ver GET /admin/analytics/parts) |
+| `class` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -524,6 +553,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `interval` | query | No | `string` | — |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 
 ### Cuerpo
 
@@ -604,6 +634,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `portal` | query | No | `string` | — |
 | `screenSize` | query | No | `string` | Segmenta las celdas y los elementos por tamaño de pantalla; `byScreenSize` no se filtra. |
+| `metric` | query | No | `string` | clicks: todos los clics posicionados; rage: clics repetidos; dead: clics sobre algo interactivo sin efecto; scroll: profundidad de lectura (sin celdas). |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de personas por celda/elemento; nunca baja del piso del servidor. |
 
 ### Cuerpo
 
@@ -812,6 +844,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `interval` | query | No | `string` | — |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 
 ### Cuerpo
 
@@ -847,8 +880,8 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ## 12. GET /admin/analytics/parts
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Árbol de partes con su uso, errores y vitales; lo que no casa va a unmapped
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -856,9 +889,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Árbol de partes con su uso, errores y vitales; lo que no casa va a unmapped. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -887,7 +920,12 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `PartsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días. |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `interval` | query | No | `string` | — |
+| `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma: sube el umbral de sujetos (nunca baja del piso del servidor). |
+| `compare` | query | No | `string` | Añade el periodo anterior de la misma duración. |
 
 ### Cuerpo
 
@@ -920,8 +958,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 13. GET /admin/analytics/parts/{routeCode}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Detalle de una parte: serie, acciones clave, vitales y errores
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -929,9 +967,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Detalle de una parte: serie, acciones clave, vitales y errores. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -961,7 +999,12 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `routeCode` | path | Sí | `string` | — |
-| `—` | query | sin dato | `PartsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: to − 7 días. Máximo 92 días. |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `interval` | query | No | `string` | — |
+| `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma: sube el umbral de sujetos (nunca baja del piso del servidor). |
+| `compare` | query | No | `string` | Añade el periodo anterior de la misma duración. |
 
 ### Cuerpo
 
@@ -1036,6 +1079,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `interval` | query | No | `string` | — |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 
 ### Cuerpo
 
@@ -1112,6 +1156,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `interval` | query | No | `string` | — |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 | `cursor` | query | No | `string` | — |
 | `limit` | query | No | `number` | — |
 
@@ -1265,6 +1310,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `interval` | query | No | `string` | — |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 
 ### Cuerpo
 
@@ -1342,6 +1388,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `to` | query | No | `string` | Por defecto: ahora |
 | `interval` | query | No | `string` | — |
 | `portal` | query | No | `string` | — |
+| `minSample` | query | No | `number` | Sólo alcance plataforma (sin X-Tenant-Id): sube el umbral de sujetos por grupo; nunca baja del piso del servidor. |
 | `route` | query | No | `string` | Plantilla de ruta, p. ej. /patients/:id |
 | `metric` | query | No | `string` | Desglose p75 por ruta de esta métrica |
 
@@ -1751,8 +1798,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 22. POST /telemetry/client-errors
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Registra un lote de errores del cliente (saneados en el servidor)
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Ruta pública que escribe en la base
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1760,9 +1807,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Registra un lote de errores del cliente (saneados en el servidor). Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1773,6 +1820,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle(CLIENT_ERRORS_RATE_LIMIT) | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27` |
 
 ### Tablas que afecta
@@ -1783,14 +1832,14 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | `iam.users` | LEE | LEE | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsService.optionalActor → SessionValidator.assertActive | `src/common/auth/session-validator.ts:51` |
 | `telemetry.client_error_events` | ESCRIBE | CREA | POR_SQL | TelemetryClientErrorsController.capture → TelemetryClientErrorsService.ingest → TelemetryClientErrorsRepository.insertMany | `src/modules/telemetry/infrastructure/repositories/telemetry-client-errors.repository.ts:63` |
 
-### Cuerpo — DTO `CaptureClientErrorsDto`
+### Cuerpo — DTO `CaptureClientErrorsDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `errors` | `array<ClientErrorItemDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => ClientErrorItemDto)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:138` |
-| `errors[].errorClass` | `object` | Sí | — | `@IsIn(CLIENT_ERROR_CLASSES)` | Tipo TypeScript no expandido: (typeof CLIENT_ERROR_CLASSES)[number] | `src/modules/telemetry/presentation/dto/client-error.dto.ts:27` |
+| `errors[].errorClass` | `string` | Sí | valores: JS, PROMISE, HTTP, ROUTE, CHUNK, HYDRATION, TEMPLATE, NATIVE | `@IsIn(CLIENT_ERROR_CLASSES)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:27` |
 | `errors[].errorType` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@IsString()` `@MinLength(1)` `@MaxLength(120)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:33` |
-| `errors[].message` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Sin stack ni cuerpo; se redacta de nuevo en el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:39` |
+| `errors[].message` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | Sin stack ni cuerpo; se redacta de nuevo en el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:39` |
 | `errors[].routeTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Plantilla de ruta sin ids (misma lista cerrada que la ruta anónima). | `src/modules/telemetry/presentation/dto/client-error.dto.ts:45` |
 | `errors[].occurredAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:50` |
 | `errors[].portal` | `string` | No | valores: WEB, MOBILE | `@IsOptional()` `@IsIn(['WEB', 'MOBILE'])` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:55` |
@@ -1802,7 +1851,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | `errors[].supportCode` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | Código dictable E-… que ve la persona. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:92` |
 | `errors[].appVersion` | `string` | Sí | longitud mínima 1; longitud máxima 40 | `@IsString()` `@MinLength(1)` `@MaxLength(40)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:98` |
 | `errors[].buildId` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:104` |
-| `errors[].screenSize` | `object` | No | — | `@IsOptional()` `@IsIn(SCREEN_SIZES)` | Tipo TypeScript no expandido: (typeof SCREEN_SIZES)[number] | `src/modules/telemetry/presentation/dto/client-error.dto.ts:109` |
+| `errors[].screenSize` | `string` | No | valores: movil, tableta, escritorio | `@IsOptional()` `@IsIn(SCREEN_SIZES)` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:109` |
 | `errors[].isOnline` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/telemetry/presentation/dto/client-error.dto.ts:114` |
 | `errors[].suppressedCount` | `number` | No | mínimo 0; máximo 100000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100000)` | Repeticiones suprimidas en el cliente. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:121` |
 | `errors[].fingerprint` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Se ignora: la huella la calcula el servidor. | `src/modules/telemetry/presentation/dto/client-error.dto.ts:127` |
@@ -1813,7 +1862,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 {
   "errors": [
     {
-      "errorClass": {},
+      "errorClass": "JS",
       "errorType": "TypeError",
       "appVersion": "valor-ejemplo"
     }
@@ -1827,7 +1876,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 {
   "errors": [
     {
-      "errorClass": {},
+      "errorClass": "JS",
       "errorType": "TypeError",
       "message": "valor-ejemplo",
       "routeTemplate": "valor-ejemplo",
@@ -1841,7 +1890,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
       "supportCode": "CODIGO_EJEMPLO",
       "appVersion": "valor-ejemplo",
       "buildId": "00000000-0000-4000-8000-000000000001",
-      "screenSize": {},
+      "screenSize": "movil",
       "isOnline": true,
       "suppressedCount": 1,
       "fingerprint": "valor-ejemplo"
@@ -1861,6 +1910,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2549,8 +2599,8 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ## 29. POST /telemetry/retention/purge
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Purga por retención del propósito: eventos de uso, propiedades y errores del cliente
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2558,9 +2608,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+Purga por retención del propósito: eventos de uso, propiedades y errores del cliente. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2573,6 +2623,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2590,12 +2642,12 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 | `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:133` |
 | `telemetry.web_vitals` | ESCRIBE | ACTUALIZA | POR_SQL | TelemetryRetentionController.purge → TelemetryRetentionService.purge → TelemetryRetentionService.purgePurpose | `src/modules/telemetry/application/services/telemetry-retention.service.ts:145` |
 
-### Cuerpo — DTO `RetentionPurgeDto`
+### Cuerpo — DTO `RetentionPurgeDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `batchSize` | `number` | No | mínimo 1; máximo RETENTION_MAX_BATCH | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCH)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:19` |
-| `maxBatches` | `number` | No | mínimo 1; máximo RETENTION_MAX_BATCHES | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCHES)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:27` |
+| `batchSize` | `number` | No | mínimo 1; máximo 5000 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCH)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:19` |
+| `maxBatches` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(RETENTION_MAX_BATCHES)` | — | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:27` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2607,8 +2659,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml
 
 ```json
 {
-  "batchSize": 1,
-  "maxBatches": 1
+  "batchSize": 1000,
+  "maxBatches": 10
 }
 ```
 
@@ -2623,6 +2675,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |

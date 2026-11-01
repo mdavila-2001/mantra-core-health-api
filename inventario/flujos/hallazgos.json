@@ -1845,7 +1845,7 @@
         "ruta": "/accounting/practitioner/simple/accounts/{id}",
         "modulo": "accounting",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:132"
+        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:133"
       },
       {
         "operacion": "AccountingPractitionerSimpleController_deleteRecord",
@@ -1853,7 +1853,7 @@
         "ruta": "/accounting/practitioner/simple/records/{id}",
         "modulo": "accounting",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:204"
+        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:208"
       },
       {
         "operacion": "AccountingPractitionerSimpleController_deleteTransaction",
@@ -1861,7 +1861,7 @@
         "ruta": "/accounting/practitioner/simple/transactions/{id}",
         "modulo": "accounting",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:271"
+        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:278"
       },
       {
         "operacion": "AudioAssetsController_contentById",
@@ -2174,6 +2174,22 @@
         "modulo": "content_packs",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/content_packs/content-packs.controller.ts:69"
+      },
+      {
+        "operacion": "AdminCatalogFitController_run",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/fit/run",
+        "modulo": "data_catalog",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60"
+      },
+      {
+        "operacion": "InternalCatalogFitController_run",
+        "metodo": "POST",
+        "ruta": "/internal/catalog/fit/run",
+        "modulo": "data_catalog",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109"
       },
       {
         "operacion": "DelegatedPermissionSetsController_publishVersion",
@@ -3045,7 +3061,7 @@
         "ruta": "/scheduling/exceptions/{id}",
         "modulo": "scheduling",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:603"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:605"
       },
       {
         "operacion": "SchedulingController_updateTemplate",
@@ -3053,7 +3069,7 @@
         "ruta": "/scheduling/templates/{id}",
         "modulo": "scheduling",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:291"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:292"
       },
       {
         "operacion": "SurveysPatientController_submitResponse",
@@ -3192,7 +3208,7 @@
         "fuente": "src/modules/vector_rag/controllers/vector-runtime.controller.ts:189"
       }
     ],
-    "cuenta": 171
+    "cuenta": 173
   },
   {
     "id": "FLU-05",
@@ -14770,70 +14786,6 @@
     "queHacer": "Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.",
     "items": [
       {
-        "operacion": "AuditQueryController_dataAccessSummary",
-        "metodo": "GET",
-        "ruta": "/audit/data-access/summary",
-        "modulo": "audit",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/audit/controllers/audit-query.controller.ts:102"
-      },
-      {
-        "operacion": "PrivacyController_listDsar",
-        "metodo": "GET",
-        "ruta": "/privacy/dsar",
-        "modulo": "audit",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/audit/controllers/privacy.controller.ts:49"
-      },
-      {
-        "operacion": "PrivacyController_getDsar",
-        "metodo": "GET",
-        "ruta": "/privacy/dsar/{id}",
-        "modulo": "audit",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/audit/controllers/privacy.controller.ts:59"
-      },
-      {
-        "operacion": "AuthzModulesCatalogController_modules",
-        "metodo": "GET",
-        "ruta": "/authz/catalog/modules",
-        "modulo": "authz",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/authz/controllers/authz-modules-catalog.controller.ts:28"
-      },
-      {
-        "operacion": "AuthzGovernanceExtController_scopeGrants",
-        "metodo": "GET",
-        "ruta": "/authz/resource-scope-grants",
-        "modulo": "authz",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/authz/controllers/authz-governance-ext.controller.ts:72"
-      },
-      {
-        "operacion": "AuthzGovernanceExtController_endScopeGrant",
-        "metodo": "DELETE",
-        "ruta": "/authz/resource-scope-grants/{grantId}",
-        "modulo": "authz",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/authz/controllers/authz-governance-ext.controller.ts:83"
-      },
-      {
-        "operacion": "AuthzGovernanceExtController_fieldPermissions",
-        "metodo": "GET",
-        "ruta": "/authz/roles/{roleId}/field-permissions",
-        "modulo": "authz",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/authz/controllers/authz-governance-ext.controller.ts:57"
-      },
-      {
-        "operacion": "AdminServiceCatalogController_scopes",
-        "metodo": "GET",
-        "ruta": "/admin/catalogs/services/scopes",
-        "modulo": "billing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/billing/controllers/admin-service-catalog.controller.ts:67"
-      },
-      {
         "operacion": "CommunityPublicController_toInt",
         "metodo": "DESCONOCIDO",
         "ruta": "/",
@@ -14866,228 +14818,12 @@
         "fuente": "src/modules/community/controllers/community-public.controller.ts:607"
       },
       {
-        "operacion": "AdminCatalogFitController_latest",
-        "metodo": "GET",
-        "ruta": "/admin/catalog/fit",
-        "modulo": "data_catalog",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48"
-      },
-      {
-        "operacion": "AdminCatalogFitController_run",
-        "metodo": "POST",
-        "ruta": "/admin/catalog/fit/run",
-        "modulo": "data_catalog",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60"
-      },
-      {
-        "operacion": "AdminCatalogController_piiReconciliation",
-        "metodo": "GET",
-        "ruta": "/admin/catalog/pii/reconciliation",
-        "modulo": "data_catalog",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:421"
-      },
-      {
-        "operacion": "GovernanceQueueController_jobs",
-        "metodo": "GET",
-        "ruta": "/admin/governance/jobs",
-        "modulo": "data_catalog",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/data_catalog/presentation/controllers/governance-queue.controller.ts:47"
-      },
-      {
-        "operacion": "GovernanceQueueController_reviewQueue",
-        "metodo": "GET",
-        "ruta": "/admin/governance/review-queue",
-        "modulo": "data_catalog",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/data_catalog/presentation/controllers/governance-queue.controller.ts:32"
-      },
-      {
-        "operacion": "InternalCatalogFitController_run",
-        "metodo": "POST",
-        "ruta": "/internal/catalog/fit/run",
-        "modulo": "data_catalog",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109"
-      },
-      {
-        "operacion": "AdminDataQualityController_issues",
-        "metodo": "GET",
-        "ruta": "/admin/governance/data-quality/issues",
-        "modulo": "governance_admin",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/governance_admin/controllers/admin-data-quality.controller.ts:52"
-      },
-      {
-        "operacion": "AdminDataQualityController_issue",
-        "metodo": "GET",
-        "ruta": "/admin/governance/data-quality/issues/{id}",
-        "modulo": "governance_admin",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/governance_admin/controllers/admin-data-quality.controller.ts:65"
-      },
-      {
-        "operacion": "AdminDataQualityController_resolve",
-        "metodo": "POST",
-        "ruta": "/admin/governance/data-quality/issues/{id}/resolution",
-        "modulo": "governance_admin",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78"
-      },
-      {
-        "operacion": "AdminDataQualityController_rules",
-        "metodo": "GET",
-        "ruta": "/admin/governance/data-quality/rules",
-        "modulo": "governance_admin",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/governance_admin/controllers/admin-data-quality.controller.ts:99"
-      },
-      {
-        "operacion": "AdminDataQualityController_rule",
-        "metodo": "GET",
-        "ruta": "/admin/governance/data-quality/rules/{id}",
-        "modulo": "governance_admin",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/governance_admin/controllers/admin-data-quality.controller.ts:108"
-      },
-      {
         "operacion": "IamAuthController_deliverTokens",
         "metodo": "DESCONOCIDO",
         "ruta": "/iam/auth",
         "modulo": "iam",
         "detalle": "handler sin operación en openapi.json",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:486"
-      },
-      {
-        "operacion": "InsightsWorkflowController_listRules",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/alert-rules",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workflow.controller.ts:90"
-      },
-      {
-        "operacion": "InsightsWorkflowController_patchRule",
-        "metodo": "PATCH",
-        "ruta": "/marketing/insights/alert-rules/{code}",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workflow.controller.ts:100"
-      },
-      {
-        "operacion": "InsightsWorkflowController_listWorkflow",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/alert-workflow",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workflow.controller.ts:52"
-      },
-      {
-        "operacion": "InsightsWorkflowController_putWorkflow",
-        "metodo": "PUT",
-        "ruta": "/marketing/insights/alert-workflow/{fingerprint}",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workflow.controller.ts:62"
-      },
-      {
-        "operacion": "InsightsFactsController_campaignFacts",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/campaign-facts",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-facts.controller.ts:45"
-      },
-      {
-        "operacion": "InsightsFactsController_catalog",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/catalog",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-facts.controller.ts:35"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_getNotificationPreferences",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/notification-preferences",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:58"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_putNotificationPreferences",
-        "metodo": "PUT",
-        "ruta": "/marketing/insights/notification-preferences",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:69"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_listReports",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/reports",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:173"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_deleteReport",
-        "metodo": "DELETE",
-        "ruta": "/marketing/insights/reports/{id}",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:205"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_putReport",
-        "metodo": "PUT",
-        "ruta": "/marketing/insights/reports/{id}",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:184"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_listSavedViews",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/saved-views",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:126"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_deleteSavedView",
-        "metodo": "DELETE",
-        "ruta": "/marketing/insights/saved-views/{id}",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:156"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_putSavedView",
-        "metodo": "PUT",
-        "ruta": "/marketing/insights/saved-views/{id}",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:134"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_getUserPreferences",
-        "metodo": "GET",
-        "ruta": "/marketing/insights/user-preferences",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:93"
-      },
-      {
-        "operacion": "InsightsWorkspaceController_putUserPreferences",
-        "metodo": "PUT",
-        "ruta": "/marketing/insights/user-preferences",
-        "modulo": "marketing",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/marketing/controllers/insights-workspace.controller.ts:104"
       },
       {
         "operacion": "WebPushController_assertKnownPushService",
@@ -15098,140 +14834,12 @@
         "fuente": "src/modules/messaging/controllers/web-push.controller.ts:78"
       },
       {
-        "operacion": "ObservabilityController_coverage",
-        "metodo": "GET",
-        "ruta": "/admin/observability/coverage",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:85"
-      },
-      {
-        "operacion": "ObservabilityController_endpoints",
-        "metodo": "GET",
-        "ruta": "/admin/observability/endpoints",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:69"
-      },
-      {
-        "operacion": "ObservabilityController_errorEvents",
-        "metodo": "GET",
-        "ruta": "/admin/observability/errors/events",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:116"
-      },
-      {
-        "operacion": "ObservabilityController_errorGroups",
-        "metodo": "GET",
-        "ruta": "/admin/observability/errors/groups",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:95"
-      },
-      {
-        "operacion": "ObservabilityController_errorGroup",
-        "metodo": "GET",
-        "ruta": "/admin/observability/errors/groups/{id}",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:105"
-      },
-      {
-        "operacion": "ObservabilityController_changeErrorGroupState",
-        "metodo": "PATCH",
-        "ruta": "/admin/observability/errors/groups/{id}",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:140"
-      },
-      {
-        "operacion": "ObservabilityController_modules",
-        "metodo": "GET",
-        "ruta": "/admin/observability/modules",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:77"
-      },
-      {
-        "operacion": "ObservabilityController_request",
-        "metodo": "GET",
-        "ruta": "/admin/observability/requests/{requestId}",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:124"
-      },
-      {
-        "operacion": "ObservabilityController_sqlSlow",
-        "metodo": "GET",
-        "ruta": "/admin/observability/sql/slow",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:181"
-      },
-      {
-        "operacion": "ObservabilityController_sqlStatements",
-        "metodo": "GET",
-        "ruta": "/admin/observability/sql/statements",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:160"
-      },
-      {
-        "operacion": "ObservabilityController_sqlStatement",
-        "metodo": "GET",
-        "ruta": "/admin/observability/sql/statements/{hash}",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:170"
-      },
-      {
-        "operacion": "ObservabilityController_summary",
-        "metodo": "GET",
-        "ruta": "/admin/observability/summary",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:49"
-      },
-      {
-        "operacion": "ObservabilityController_timeseries",
-        "metodo": "GET",
-        "ruta": "/admin/observability/timeseries",
-        "modulo": "observability",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/observability/presentation/controllers/observability.controller.ts:59"
-      },
-      {
         "operacion": "ObservabilitySelftestController_fail",
         "metodo": "GET",
         "ruta": "/internal/observability/selftest/fail",
         "modulo": "observability",
         "detalle": "handler sin operación en openapi.json",
         "fuente": "src/modules/observability/presentation/controllers/observability-selftest.controller.ts:32"
-      },
-      {
-        "operacion": "RuntimePiecesController_list",
-        "metodo": "GET",
-        "ruta": "/admin/ops/runtime-pieces",
-        "modulo": "platform_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:49"
-      },
-      {
-        "operacion": "RuntimePiecesController_detail",
-        "metodo": "GET",
-        "ruta": "/admin/ops/runtime-pieces/{id}",
-        "modulo": "platform_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:62"
-      },
-      {
-        "operacion": "RuntimePiecesController_discover",
-        "metodo": "POST",
-        "ruta": "/admin/ops/runtime-pieces/discover",
-        "modulo": "platform_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:73"
       },
       {
         "operacion": "OpsToolsController_list",
@@ -15272,193 +14880,9 @@
         "modulo": "search_platform",
         "detalle": "handler sin operación en openapi.json",
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
-      },
-      {
-        "operacion": "GovernanceOperationsReadController_domains",
-        "metodo": "GET",
-        "ruta": "/admin/governance/domains",
-        "modulo": "system_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/system_ops/controllers/governance-operations-read.controller.ts:48"
-      },
-      {
-        "operacion": "GovernanceOperationsReadController_legalHolds",
-        "metodo": "GET",
-        "ruta": "/admin/governance/legal-holds",
-        "modulo": "system_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/system_ops/controllers/governance-operations-read.controller.ts:60"
-      },
-      {
-        "operacion": "MutabilityController_list",
-        "metodo": "GET",
-        "ruta": "/admin/governance/mutability",
-        "modulo": "system_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/system_ops/mutability/controllers/mutability.controller.ts:34"
-      },
-      {
-        "operacion": "MutabilityController_detail",
-        "metodo": "GET",
-        "ruta": "/admin/governance/mutability/{schema}/{table}",
-        "modulo": "system_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/system_ops/mutability/controllers/mutability.controller.ts:57"
-      },
-      {
-        "operacion": "MutabilityController_summary",
-        "metodo": "GET",
-        "ruta": "/admin/governance/mutability/summary",
-        "modulo": "system_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/system_ops/mutability/controllers/mutability.controller.ts:46"
-      },
-      {
-        "operacion": "GovernanceOperationsReadController_retentionExecutions",
-        "metodo": "GET",
-        "ruta": "/admin/governance/retention-executions",
-        "modulo": "system_ops",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/system_ops/controllers/governance-operations-read.controller.ts:73"
-      },
-      {
-        "operacion": "TelemetryErrorsAnalyticsController_summary",
-        "metodo": "GET",
-        "ruta": "/admin/analytics/errors",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:28"
-      },
-      {
-        "operacion": "TelemetryErrorsAnalyticsController_fingerprints",
-        "metodo": "GET",
-        "ruta": "/admin/analytics/errors/fingerprints",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:36"
-      },
-      {
-        "operacion": "TelemetryErrorsAnalyticsController_fingerprint",
-        "metodo": "GET",
-        "ruta": "/admin/analytics/errors/fingerprints/{fingerprint}",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:52"
-      },
-      {
-        "operacion": "TelemetryErrorsAnalyticsController_routesNotFound",
-        "metodo": "GET",
-        "ruta": "/admin/analytics/errors/routes-not-found",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:44"
-      },
-      {
-        "operacion": "TelemetryPartsAnalyticsController_list",
-        "metodo": "GET",
-        "ruta": "/admin/analytics/parts",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:17"
-      },
-      {
-        "operacion": "TelemetryPartsAnalyticsController_detail",
-        "metodo": "GET",
-        "ruta": "/admin/analytics/parts/{routeCode}",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:25"
-      },
-      {
-        "operacion": "TelemetryClientErrorsController_capture",
-        "metodo": "POST",
-        "ruta": "/telemetry/client-errors",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27"
-      },
-      {
-        "operacion": "TelemetryRetentionController_purge",
-        "metodo": "POST",
-        "ruta": "/telemetry/retention/purge",
-        "modulo": "telemetry",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_elements",
-        "metodo": "GET",
-        "ruta": "/admin/ui-visibility/elements",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:53"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_createElement",
-        "metodo": "POST",
-        "ruta": "/admin/ui-visibility/elements",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_syncElements",
-        "metodo": "POST",
-        "ruta": "/admin/ui-visibility/elements/sync",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_preview",
-        "metodo": "GET",
-        "ruta": "/admin/ui-visibility/preview",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:153"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_rules",
-        "metodo": "GET",
-        "ruta": "/admin/ui-visibility/rules",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:90"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_createRule",
-        "metodo": "POST",
-        "ruta": "/admin/ui-visibility/rules",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_updateRule",
-        "metodo": "PATCH",
-        "ruta": "/admin/ui-visibility/rules/{id}",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110"
-      },
-      {
-        "operacion": "AdminUiVisibilityController_endRule",
-        "metodo": "POST",
-        "ruta": "/admin/ui-visibility/rules/{id}/end",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:139"
-      },
-      {
-        "operacion": "MeUiVisibilityController_mine",
-        "metodo": "GET",
-        "ruta": "/me/ui-visibility",
-        "modulo": "ui_visibility",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23"
       }
     ],
-    "cuenta": 86
+    "cuenta": 12
   },
   {
     "id": "FLU-09",
@@ -15625,7 +15049,7 @@
         "ruta": "/authz/patients/{patientProfileId}/break-the-glass",
         "modulo": "authz",
         "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72)",
-        "fuente": "src/modules/authz/controllers/authz-clinical.controller.ts:61"
+        "fuente": "src/modules/authz/controllers/authz-clinical.controller.ts:62"
       },
       {
         "operacion": "AuthzClinicalController_grantClinicalAccess",
@@ -15633,7 +15057,7 @@
         "ruta": "/authz/patients/{patientProfileId}/clinical-access-grants",
         "modulo": "authz",
         "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72)",
-        "fuente": "src/modules/authz/controllers/authz-clinical.controller.ts:40"
+        "fuente": "src/modules/authz/controllers/authz-clinical.controller.ts:41"
       },
       {
         "operacion": "AutomationOrchestrationController_executeRecordAutomation",
@@ -16449,7 +15873,7 @@
         "ruta": "/internal/ops/heartbeats",
         "modulo": "ops_console",
         "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/instance-liveness.service.ts:97)",
-        "fuente": "src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:25"
+        "fuente": "src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:26"
       },
       {
         "operacion": "PaymentsGatewayDispatchesController_close",
@@ -16737,7 +16161,7 @@
         "ruta": "/scheduling/bookings/{id}/delay",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:551"
       },
       {
         "operacion": "SchedulingBookingsController_confirmPaymentReceipt",
@@ -16745,7 +16169,7 @@
         "ruta": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm",
         "modulo": "scheduling",
         "detalle": "Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:387"
       },
       {
         "operacion": "SchedulingBookingsController_setPaymentState",
@@ -16753,7 +16177,7 @@
         "ruta": "/scheduling/bookings/{id}/payment-state",
         "modulo": "scheduling",
         "detalle": "Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:269"
       },
       {
         "operacion": "SchedulingBookingsController_reschedule",
@@ -16761,7 +16185,7 @@
         "ruta": "/scheduling/bookings/{id}/reschedule",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:485"
       },
       {
         "operacion": "SchedulingController_delayResource",
@@ -16769,7 +16193,7 @@
         "ruta": "/scheduling/resources/{id}/delay",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:844"
       },
       {
         "operacion": "SurveysAssignmentsController_issueInvitations",

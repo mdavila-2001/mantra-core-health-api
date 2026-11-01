@@ -312,7 +312,7 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. GET /admin/ops/runtime-pieces/{id}
 
-
+Una pieza con su evidencia, su registro y sus hallazgos
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -351,11 +351,12 @@ flowchart TD
 
 #### 2. POST /admin/ops/runtime-pieces/discover
 
-
+Descubrir y registrar las piezas del código (idempotente)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: {scan.reason ?? 'No hay código fuente para escanear'} |
@@ -365,7 +366,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a RuntimePiecesService.discover"]:::llamada
   n2 --> n3

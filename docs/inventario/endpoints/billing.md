@@ -3,7 +3,7 @@
 # Endpoints del módulo `billing`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 53 (52 en el contrato, 1 sólo en el código)
+- **Operaciones:** 53 (53 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 9 · MEDIO 16 · BAJO 28
 - **Tablas distintas que tocan:** 55
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -18,7 +18,7 @@
 | 4 | PATCH | `/admin/catalogs/services/{id}` | Editar un servicio con precondición de versión | BAJO | 2 | SECURITY_ADMIN |
 | 5 | POST | `/admin/catalogs/services/{id}/deactivate` | Desactivar un servicio (no se borra) | BAJO | 2 | SECURITY_ADMIN |
 | 6 | POST | `/admin/catalogs/services/{id}/reactivate` | Reactivar un servicio desactivado | BAJO | 2 | SECURITY_ADMIN |
-| 7 | GET | `/admin/catalogs/services/scopes` | — | BAJO | 2 | SECURITY_ADMIN |
+| 7 | GET | `/admin/catalogs/services/scopes` | Tipos de organización, prácticas y monedas del editor de servicios | BAJO | 2 | SECURITY_ADMIN |
 | 8 | GET | `/billing/bed-day/stays` | Estancias de internación de una sede (F5e) | BAJO | 12 | sesión (sin roles) |
 | 9 | POST | `/billing/bills` | Registrar factura de proveedor con three-way match | MEDIO | 7 | SECURITY_ADMIN |
 | 10 | POST | `/billing/charge-captures/{id}/void` | Anular un cargo devengado | ALTO | 13 | sesión (sin roles) |
@@ -721,8 +721,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 7. GET /admin/catalogs/services/scopes
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Tipos de organización, prácticas y monedas del editor de servicios
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -730,9 +730,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dominio: Financiero y ERP.
+Tipos de organización, prácticas y monedas del editor de servicios. Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 

@@ -570,7 +570,7 @@ flowchart TD
 
 #### 5. GET /admin/analytics/parts/{routeCode}
 
-
+Detalle de una parte: serie, acciones clave, vitales y errores
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1118,18 +1118,19 @@ flowchart TD
 
 #### 13. POST /telemetry/client-errors
 
-
+Registra un lote de errores del cliente (saneados en el servidor)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a TelemetryClientErrorsService.ingest"]:::llamada
   n2 --> n3
@@ -1485,11 +1486,12 @@ flowchart TD
 
 #### 19. POST /telemetry/retention/purge
 
-
+Purga por retención del propósito: eventos de uso, propiedades y errores del cliente
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1497,7 +1499,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a TelemetryRetentionService.purge"]:::llamada
   n2 --> n3

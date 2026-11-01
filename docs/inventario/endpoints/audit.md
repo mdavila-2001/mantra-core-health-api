@@ -3,7 +3,7 @@
 # Endpoints del módulo `audit`
 
 - **Bloque:** Auditoría y Reporting (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
-- **Operaciones:** 18 (15 en el contrato, 3 sólo en el código)
+- **Operaciones:** 18 (18 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 10 · BAJO 7
 - **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/audit.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -15,7 +15,7 @@
 | 1 | POST | `/audit/anomaly/scan` | Detectar acceso anómalo | MEDIO | 4 | SECURITY_ADMIN |
 | 2 | GET | `/audit/data-access` | Lecturas de datos sensibles (`audit.data_access_log`), con filtros | BAJO | 1 | AUDITOR, DPO, SECURITY_ADMIN |
 | 3 | POST | `/audit/data-access` | Registrar acceso/lectura clínica (accounting WORM) | MEDIO | 5 | SECURITY_ADMIN |
-| 4 | GET | `/audit/data-access/summary` | — | BAJO | 2 | ...AUDIT_SUMMARY_ROLES |
+| 4 | GET | `/audit/data-access/summary` | Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación | BAJO | 2 | ...AUDIT_SUMMARY_ROLES |
 | 5 | POST | `/audit/events` | Registrar provenance de un cambio y sellar la cadena hash | MEDIO | 3 | SECURITY_ADMIN |
 | 6 | GET | `/audit/history/{entity}/{id}` | Consultar historial / línea de tiempo de un registro | MEDIO | 4 | SECURITY_ADMIN |
 | 7 | POST | `/audit/integrity/verify` | Verificar integridad tamper-evidence de la cadena | MEDIO | 3 | SECURITY_ADMIN |
@@ -26,9 +26,9 @@
 | 12 | POST | `/audit/third-party-access` | Registrar acceso delegado / de tercero gobernado | MEDIO | 7 | SECURITY_ADMIN |
 | 13 | POST | `/compliance/audit-export` | Exportar evidencia de auditoría para cumplimiento | MEDIO | 5 | SECURITY_ADMIN |
 | 14 | POST | `/moderation/decisions` | Registrar decisión de moderación / gobernanza analítica | MEDIO | 6 | SECURITY_ADMIN |
-| 15 | GET | `/privacy/dsar` | Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares). | BAJO | 2 | AUDITOR, DPO, SECURITY_ADMIN |
+| 15 | GET | `/privacy/dsar` | Solicitudes DSAR, la más reciente primero | BAJO | 2 | AUDITOR, DPO, SECURITY_ADMIN |
 | 16 | POST | `/privacy/dsar` | Tramitar DSAR (solicitud del titular) | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | GET | `/privacy/dsar/{id}` | — | BAJO | 2 | AUDITOR, DPO, SECURITY_ADMIN |
+| 17 | GET | `/privacy/dsar/{id}` | Una solicitud DSAR (sin el archivo resultante) | BAJO | 2 | AUDITOR, DPO, SECURITY_ADMIN |
 | 18 | PATCH | `/privacy/dsar/{id}` | Avanzar la máquina de estados de una solicitud DSAR | MEDIO | 5 | SECURITY_ADMIN |
 
 ---
@@ -322,8 +322,8 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ## 4. GET /audit/data-access/summary
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -331,9 +331,9 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -359,7 +359,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `DataAccessSummaryQueryDto` | — |
+| `from` | query | No | `string` | Desde (ISO 8601, incluido). Sin rango, los últimos 30 días |
+| `to` | query | No | `string` | Hasta (ISO 8601, excluido) |
+| `minSample` | query | No | `number` | Un grupo con menos eventos que esto no se muestra: se suma a `suppressed`. El mínimo es 5 (piso del servidor) |
 
 ### Cuerpo
 
@@ -1373,8 +1375,8 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ## 15. GET /privacy/dsar
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares).
+- **Origen:** CONTRATO
+- **Nombre:** Solicitudes DSAR, la más reciente primero
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1382,7 +1384,7 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+Solicitudes DSAR, la más reciente primero. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
@@ -1410,7 +1412,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `DsarListQueryDto` | — |
+| `status` | query | No | `string` | — |
+| `type` | query | No | `string` | — |
+| `from` | query | No | `string` | Solicitada desde (ISO 8601, incluido) |
+| `to` | query | No | `string` | Solicitada hasta (ISO 8601, excluido) |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -1548,8 +1555,8 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ## 17. GET /privacy/dsar/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Una solicitud DSAR (sin el archivo resultante)
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1557,9 +1564,9 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
+Una solicitud DSAR (sin el archivo resultante). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:192`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 

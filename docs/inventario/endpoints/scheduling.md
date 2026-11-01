@@ -88,24 +88,24 @@
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listActivityTypes` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:509`
+- **Implementación:** `SchedulingController.listActivityTypes` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:511`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar las tipologías de actividad de la agenda. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/activity-types` la atiende `SchedulingController.listActivityTypes` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:509). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingCatalogService.listActivityTypes`. No toca tablas relacionales: Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos..
+`GET /scheduling/activity-types` la atiende `SchedulingController.listActivityTypes` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:511). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingCatalogService.listActivityTypes`. No toca tablas relacionales: Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:509` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:511` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -157,24 +157,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.createDirectAppointment` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:633`
+- **Implementación:** `SchedulingController.createDirectAppointment` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:636`
 
 ### Qué es y para qué sirve (negocio)
 
 Asignar una cita puntual a un paciente (nace confirmada). Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/appointments/direct` la atiende `SchedulingController.createDirectAppointment` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:633). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `CreateDirectAppointmentDto` (10 campos, 4 obligatorios). Delega en `SchedulingBookingsService.createDirectAppointment`. Crea filas en audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests y 3 más. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.encounters, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 26 más.
+`POST /scheduling/appointments/direct` la atiende `SchedulingController.createDirectAppointment` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:636). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `CreateDirectAppointmentDto` (10 campos, 4 obligatorios). Delega en `SchedulingBookingsService.createDirectAppointment`. Crea filas en audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests y 3 más. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.encounters, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 26 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:633` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:636` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -327,24 +327,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.createWalkInAppointment` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:667`
+- **Implementación:** `SchedulingController.createWalkInAppointment` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:670`
 
 ### Qué es y para qué sirve (negocio)
 
 Turno de mostrador atómico (walk-in). Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/appointments/walk-in` la atiende `SchedulingController.createWalkInAppointment` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:667). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `WalkInAppointmentDto` (20 campos, 8 obligatorios). Delega en `SchedulingWalkInService.createWalkInAppointment`. Crea filas en audit.appointment_bookings_history, clinical.appointments, clinical.encounter_participants, clinical.encounters, scheduling.appointment_bookings, scheduling.appointment_reminders, scheduling.bookable_slots. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.appointments, clinical.encounters, forms.form_instances, practice.care_spaces, practice.practice_sites, practice.practices, profiles.patient_profiles y 8 más.
+`POST /scheduling/appointments/walk-in` la atiende `SchedulingController.createWalkInAppointment` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:670). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `WalkInAppointmentDto` (20 campos, 8 obligatorios). Delega en `SchedulingWalkInService.createWalkInAppointment`. Crea filas en audit.appointment_bookings_history, clinical.appointments, clinical.encounter_participants, clinical.encounters, scheduling.appointment_bookings, scheduling.appointment_reminders, scheduling.bookable_slots. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, clinical.appointments, clinical.encounters, forms.form_instances, practice.care_spaces, practice.practice_sites, practice.practices, profiles.patient_profiles y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:667` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:670` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -505,24 +505,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.createPolicy` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:189`
+- **Implementación:** `SchedulingController.createPolicy` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:190`
 
 ### Qué es y para qué sirve (negocio)
 
 Definir una política de reserva. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/booking-policies` la atiende `SchedulingController.createPolicy` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:189). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateBookingPolicyDto` (10 campos, 3 obligatorios). Delega en `SchedulingCatalogService.createPolicy`. Crea filas en scheduling.booking_policies. Lee scheduling.booking_policies.
+`POST /scheduling/booking-policies` la atiende `SchedulingController.createPolicy` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:190). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateBookingPolicyDto` (10 campos, 3 obligatorios). Delega en `SchedulingCatalogService.createPolicy`. Crea filas en scheduling.booking_policies. Lee scheduling.booking_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:189` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:190` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -619,24 +619,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.searchBookings` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:98`
+- **Implementación:** `SchedulingBookingsController.searchBookings` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:99`
 
 ### Qué es y para qué sirve (negocio)
 
 UC-41-15: lista citas por paciente, recurso y/o ventana. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/bookings` la atiende `SchedulingBookingsController.searchBookings` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:98). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingBookingsService.searchBookings`. Lee audit.appointment_bookings_history, billing.invoices, clinical.appointments, clinical.encounters, insurance.insurance_carriers, insurance.insurance_claims, insurance.insurance_plans, insurance.insurance_products y 12 más.
+`GET /scheduling/bookings` la atiende `SchedulingBookingsController.searchBookings` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:99). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingBookingsService.searchBookings`. Lee audit.appointment_bookings_history, billing.invoices, clinical.appointments, clinical.encounters, insurance.insurance_carriers, insurance.insurance_claims, insurance.insurance_plans, insurance.insurance_products y 12 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:98` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:99` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -785,26 +785,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.getBooking` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:141`
+- **Implementación:** `SchedulingBookingsController.getBooking` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:142`
 
 ### Qué es y para qué sirve (negocio)
 
 UC-41-15: consulta una cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/bookings/{id}` la atiende `SchedulingBookingsController.getBooking` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:141). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingBookingsService.getBookingById`. Lee audit.appointment_bookings_history, clinical.appointments, clinical.encounters, practice.care_spaces, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings y 3 más.
+`GET /scheduling/bookings/{id}` la atiende `SchedulingBookingsController.getBooking` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:142). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingBookingsService.getBookingById`. Lee audit.appointment_bookings_history, clinical.appointments, clinical.encounters, practice.care_spaces, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings y 3 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:141` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:142` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:141` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:142` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -935,26 +935,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.accept` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:157`
+- **Implementación:** `SchedulingBookingsController.accept` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:158`
 
 ### Qué es y para qué sirve (negocio)
 
 Aceptar la solicitud de cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/accept` la atiende `SchedulingBookingsController.accept` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:157). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `AcceptBookingDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.accept`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.direct_messages, community.message_receipts, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries y 3 más. Actualiza audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings y 1 más. Lee audit.appointment_bookings_history, clinical.appointments, common.file_versions, common.files, community.chat_auto_replies, community.conversation_participants, community.conversations, community.direct_messages y 29 más.
+`POST /scheduling/bookings/{id}/accept` la atiende `SchedulingBookingsController.accept` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:158). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `AcceptBookingDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.accept`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.direct_messages, community.message_receipts, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries y 3 más. Actualiza audit.appointment_bookings_history, clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings y 1 más. Lee audit.appointment_bookings_history, clinical.appointments, common.file_versions, common.files, community.chat_auto_replies, community.conversation_participants, community.conversations, community.direct_messages y 29 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:157` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:158` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:157` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:158` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -1097,26 +1097,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.cancel` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:501`
+- **Implementación:** `SchedulingBookingsController.cancel` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:506`
 
 ### Qué es y para qué sirve (negocio)
 
 Cancelar la cita y liberar el cupo. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/cancel` la atiende `SchedulingBookingsController.cancel` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:501). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `CancelBookingDto` (3 campos, 2 obligatorios). Delega en `SchedulingBookingsService.cancel`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 26 más.
+`POST /scheduling/bookings/{id}/cancel` la atiende `SchedulingBookingsController.cancel` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:506). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `CancelBookingDto` (3 campos, 2 obligatorios). Delega en `SchedulingBookingsService.cancel`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 26 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:501` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:506` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:501` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:506` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -1258,26 +1258,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.checkIn` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:523`
+- **Implementación:** `SchedulingBookingsController.checkIn` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:528`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar la llegada del paciente. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/check-in` la atiende `SchedulingBookingsController.checkIn` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:523). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingBookingsService.checkIn`. Crea filas en audit.appointment_bookings_history. Actualiza audit.appointment_bookings_history, scheduling.appointment_bookings. Lee audit.appointment_bookings_history, scheduling.appointment_bookings.
+`POST /scheduling/bookings/{id}/check-in` la atiende `SchedulingBookingsController.checkIn` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:528). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingBookingsService.checkIn`. Crea filas en audit.appointment_bookings_history. Actualiza audit.appointment_bookings_history, scheduling.appointment_bookings. Lee audit.appointment_bookings_history, scheduling.appointment_bookings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:523` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:528` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:523` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:528` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1341,26 +1341,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.complete` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:459`
+- **Implementación:** `SchedulingBookingsController.complete` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:464`
 
 ### Qué es y para qué sirve (negocio)
 
 Completar la atención. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/complete` la atiende `SchedulingBookingsController.complete` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:459). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.complete`. Crea filas en audit.appointment_bookings_history, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_templates, surveys.survey_versions. Lee audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, scheduling.schedule_templates y 6 más.
+`POST /scheduling/bookings/{id}/complete` la atiende `SchedulingBookingsController.complete` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:464). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.complete`. Crea filas en audit.appointment_bookings_history, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_templates, surveys.survey_versions. Lee audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, scheduling.schedule_templates y 6 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:459` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:464` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:459` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:464` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1444,26 +1444,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.delay` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546`
+- **Implementación:** `SchedulingBookingsController.delay` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:551`
 
 ### Qué es y para qué sirve (negocio)
 
 Informar una demora sobre una cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/delay` la atiende `SchedulingBookingsController.delay` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayBookingDto` (2 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayBooking`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 17 más.
+`POST /scheduling/bookings/{id}/delay` la atiende `SchedulingBookingsController.delay` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:551). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayBookingDto` (2 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayBooking`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 17 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:551` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:551` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -1584,26 +1584,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.listPaymentReceipts` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:336`
+- **Implementación:** `SchedulingBookingsController.listPaymentReceipts` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:338`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar los comprobantes de pago de una cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/bookings/{id}/payment-receipts` la atiende `SchedulingBookingsController.listPaymentReceipts` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:336). Exige sesión con alguno de los roles PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.list`. Lee common.file_versions, common.files, iam.users, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings, scheduling.appointment_payment_receipts y 1 más.
+`GET /scheduling/bookings/{id}/payment-receipts` la atiende `SchedulingBookingsController.listPaymentReceipts` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:338). Exige sesión con alguno de los roles PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.list`. Lee common.file_versions, common.files, iam.users, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings, scheduling.appointment_payment_receipts y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:336` |
+| ROL | Alguno de: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:338` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:336` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:338` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -1682,26 +1682,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.uploadPaymentReceipt` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:314`
+- **Implementación:** `SchedulingBookingsController.uploadPaymentReceipt` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:316`
 
 ### Qué es y para qué sirve (negocio)
 
 Subir el comprobante de pago de una cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/payment-receipts` la atiende `SchedulingBookingsController.uploadPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:314). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `UploadPaymentReceiptDto` (4 campos, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.upload`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_payment_receipts. Actualiza community.public_profiles, iam.devices, messaging.notification_requests. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 21 más.
+`POST /scheduling/bookings/{id}/payment-receipts` la atiende `SchedulingBookingsController.uploadPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:316). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `UploadPaymentReceiptDto` (4 campos, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.upload`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_payment_receipts. Actualiza community.public_profiles, iam.devices, messaging.notification_requests. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 21 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:314` |
+| ROL | Alguno de: PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:316` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:314` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:316` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -1842,26 +1842,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.confirmPaymentReceipt` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385`
+- **Implementación:** `SchedulingBookingsController.confirmPaymentReceipt` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:387`
 
 ### Qué es y para qué sirve (negocio)
 
 Confirmar un comprobante de pago. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` la atiende `SchedulingBookingsController.confirmPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.confirm`. Crea filas en billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications y 2 más. Actualiza billing.invoices, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_payment_receipts, scheduling.appointment_payment_states. Lee billing.invoices, billing.service_catalog, clinical.encounters, common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles y 23 más.
+`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` la atiende `SchedulingBookingsController.confirmPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:387). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.confirm`. Crea filas en billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications y 2 más. Actualiza billing.invoices, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_payment_receipts, scheduling.appointment_payment_states. Lee billing.invoices, billing.service_catalog, clinical.encounters, common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles y 23 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385` |
+| ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:387` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:387` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2000,26 +2000,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.paymentReceiptContent` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:357`
+- **Implementación:** `SchedulingBookingsController.paymentReceiptContent` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:359`
 
 ### Qué es y para qué sirve (negocio)
 
 Descargar el archivo de un comprobante de pago. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content` la atiende `SchedulingBookingsController.paymentReceiptContent` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:357). Exige sesión con alguno de los roles PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.content`. Lee common.file_versions, common.files, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings, scheduling.appointment_payment_receipts, scheduling.schedulable_resources.
+`GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content` la atiende `SchedulingBookingsController.paymentReceiptContent` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:359). Exige sesión con alguno de los roles PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Delega en `SchedulingPaymentReceiptsService.content`. Lee common.file_versions, common.files, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings, scheduling.appointment_payment_receipts, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:357` |
+| ROL | Alguno de: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:359` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:357` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:359` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2081,26 +2081,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.rejectPaymentReceipt` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:407`
+- **Implementación:** `SchedulingBookingsController.rejectPaymentReceipt` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:409`
 
 ### Qué es y para qué sirve (negocio)
 
 Rechazar un comprobante de pago. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` la atiende `SchedulingBookingsController.rejectPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:407). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Valida el cuerpo como `RejectPaymentReceiptDto` (1 campo, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.reject`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_payment_receipts. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 19 más.
+`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` la atiende `SchedulingBookingsController.rejectPaymentReceipt` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:409). Exige sesión con alguno de los roles PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. Valida el cuerpo como `RejectPaymentReceiptDto` (1 campo, 1 obligatorio). Delega en `SchedulingPaymentReceiptsService.reject`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_payment_receipts. Lee common.file_versions, common.files, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants y 19 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:407` |
+| ROL | Alguno de: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:409` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:407` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, receiptId | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:409` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -2232,26 +2232,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.getPaymentState` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:294`
+- **Implementación:** `SchedulingBookingsController.getPaymentState` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:296`
 
 ### Qué es y para qué sirve (negocio)
 
 Leer el estado de pago de una cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/bookings/{id}/payment-state` la atiende `SchedulingBookingsController.getPaymentState` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:294). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.getPaymentState`. Lee billing.invoices, scheduling.appointment_bookings, scheduling.appointment_payment_states, scheduling.schedulable_resources.
+`GET /scheduling/bookings/{id}/payment-state` la atiende `SchedulingBookingsController.getPaymentState` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:296). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.getPaymentState`. Lee billing.invoices, scheduling.appointment_bookings, scheduling.appointment_payment_states, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:294` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:296` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:294` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -2316,26 +2316,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.setPaymentState` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267`
+- **Implementación:** `SchedulingBookingsController.setPaymentState` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:269`
 
 ### Qué es y para qué sirve (negocio)
 
 Marcar el estado de pago de una cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /scheduling/bookings/{id}/payment-state` la atiende `SchedulingBookingsController.setPaymentState` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `SetPaymentStateDto` (3 campos, 1 obligatorio). Delega en `SchedulingBookingsService.setPaymentState`. Crea filas en billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations. Actualiza billing.invoices, scheduling.appointment_payment_states. Lee billing.invoices, billing.service_catalog, clinical.encounters, scheduling.appointment_bookings, scheduling.schedulable_resources.
+`PUT /scheduling/bookings/{id}/payment-state` la atiende `SchedulingBookingsController.setPaymentState` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:269). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `SetPaymentStateDto` (3 campos, 1 obligatorio). Delega en `SchedulingBookingsService.setPaymentState`. Crea filas en billing.invoice_lines, billing.invoices, billing.payments_received, billing.receivable_payment_allocations. Actualiza billing.invoices, scheduling.appointment_payment_states. Lee billing.invoices, billing.service_catalog, clinical.encounters, scheduling.appointment_bookings, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:269` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:269` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -2434,26 +2434,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.proposeSchedule` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:213`
+- **Implementación:** `SchedulingBookingsController.proposeSchedule` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:214`
 
 ### Qué es y para qué sirve (negocio)
 
 Proponer otro horario para la solicitud. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/propose-schedule` la atiende `SchedulingBookingsController.proposeSchedule` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:213). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `ProposeScheduleDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.proposeSchedule`. Crea filas en audit.appointment_bookings_history, scheduling.booking_reschedules. Actualiza audit.appointment_bookings_history, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
+`POST /scheduling/bookings/{id}/propose-schedule` la atiende `SchedulingBookingsController.proposeSchedule` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:214). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `ProposeScheduleDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.proposeSchedule`. Crea filas en audit.appointment_bookings_history, scheduling.booking_reschedules. Actualiza audit.appointment_bookings_history, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:213` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:214` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:213` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:214` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -2548,26 +2548,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.reject` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:234`
+- **Implementación:** `SchedulingBookingsController.reject` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:235`
 
 ### Qué es y para qué sirve (negocio)
 
 Rechazar la solicitud de cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/reject` la atiende `SchedulingBookingsController.reject` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:234). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `RejectBookingDto` (1 campo, 1 obligatorio). Delega en `SchedulingBookingsService.reject`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 16 más.
+`POST /scheduling/bookings/{id}/reject` la atiende `SchedulingBookingsController.reject` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:235). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `RejectBookingDto` (1 campo, 1 obligatorio). Delega en `SchedulingBookingsService.reject`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.waitlist_entries. Lee audit.appointment_bookings_history, iam.authentication_credentials, iam.devices, iam.email_verifications, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 16 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:234` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:235` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:234` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:235` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -2682,26 +2682,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.scheduleReminders` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:568`
+- **Implementación:** `SchedulingBookingsController.scheduleReminders` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:573`
 
 ### Qué es y para qué sirve (negocio)
 
 Programar recordatorios para la cita. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/reminders` la atiende `SchedulingBookingsController.scheduleReminders` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:568). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT. Valida el cuerpo como `ScheduleRemindersDto` (2 campos, 1 obligatorio). Delega en `SchedulingWaitlistService.scheduleReminders`. Crea filas en scheduling.appointment_reminders. Lee scheduling.appointment_bookings, scheduling.bookable_slots.
+`POST /scheduling/bookings/{id}/reminders` la atiende `SchedulingBookingsController.scheduleReminders` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:573). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT. Valida el cuerpo como `ScheduleRemindersDto` (2 campos, 1 obligatorio). Delega en `SchedulingWaitlistService.scheduleReminders`. Crea filas en scheduling.appointment_reminders. Lee scheduling.appointment_bookings, scheduling.bookable_slots.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:568` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:573` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:568` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:573` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -2791,26 +2791,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.requestInfo` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:185`
+- **Implementación:** `SchedulingBookingsController.requestInfo` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:186`
 
 ### Qué es y para qué sirve (negocio)
 
 Pedir documentación u orden médica antes de aceptar. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/request-info` la atiende `SchedulingBookingsController.requestInfo` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:185). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `RequestBookingInfoDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.requestInfo`. Crea filas en audit.appointment_bookings_history. Actualiza audit.appointment_bookings_history, scheduling.appointment_bookings. Lee audit.appointment_bookings_history, scheduling.appointment_bookings, scheduling.schedulable_resources.
+`POST /scheduling/bookings/{id}/request-info` la atiende `SchedulingBookingsController.requestInfo` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:186). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `RequestBookingInfoDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.requestInfo`. Crea filas en audit.appointment_bookings_history. Actualiza audit.appointment_bookings_history, scheduling.appointment_bookings. Lee audit.appointment_bookings_history, scheduling.appointment_bookings, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:185` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:186` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:185` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:186` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -2899,26 +2899,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.reschedule` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480`
+- **Implementación:** `SchedulingBookingsController.reschedule` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:485`
 
 ### Qué es y para qué sirve (negocio)
 
 Reprogramar la cita a otro slot. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/reschedule` la atiende `SchedulingBookingsController.reschedule` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `RescheduleBookingDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.reschedule`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_reschedules. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 22 más.
+`POST /scheduling/bookings/{id}/reschedule` la atiende `SchedulingBookingsController.reschedule` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:485). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Valida el cuerpo como `RescheduleBookingDto` (2 campos, 2 obligatorios). Delega en `SchedulingBookingsService.reschedule`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_reschedules. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 22 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:485` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:485` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -3050,26 +3050,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingBookingsController.start` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:435`
+- **Implementación:** `SchedulingBookingsController.start` — `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:440`
 
 ### Qué es y para qué sirve (negocio)
 
 Iniciar la atención. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/bookings/{id}/start` la atiende `SchedulingBookingsController.start` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:435). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.start`. Crea filas en audit.appointment_bookings_history. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings. Lee audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.schedulable_resources.
+`POST /scheduling/bookings/{id}/start` la atiende `SchedulingBookingsController.start` (src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:440). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingBookingsService.start`. Crea filas en audit.appointment_bookings_history. Actualiza audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings. Lee audit.appointment_bookings_history, clinical.appointments, scheduling.appointment_bookings, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:435` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:440` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:435` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:440` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3141,7 +3141,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Listar las reglas de un tenant. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -3221,7 +3221,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear una regla de confirmación. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -3333,7 +3333,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reactivar una regla desactivada. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -3414,7 +3414,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Desactivar una regla (sin borrado duro). Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -3495,7 +3495,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Evaluar una solicitud de reserva contra las reglas vigentes. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -3593,24 +3593,24 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listExceptionTypes` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:531`
+- **Implementación:** `SchedulingController.listExceptionTypes` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:533`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar los motivos de bloqueo de agenda. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/exception-types` la atiende `SchedulingController.listExceptionTypes` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:531). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingCatalogService.listExceptionTypes`. No toca tablas relacionales: Devuelve el catálogo de motivos de bloqueo, que vive en constantes del código (EXCEPTION_TYPES y sus etiquetas); no accede a datos..
+`GET /scheduling/exception-types` la atiende `SchedulingController.listExceptionTypes` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:533). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingCatalogService.listExceptionTypes`. No toca tablas relacionales: Devuelve el catálogo de motivos de bloqueo, que vive en constantes del código (EXCEPTION_TYPES y sus etiquetas); no accede a datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:531` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:533` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
@@ -3663,26 +3663,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.removeException` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:603`
+- **Implementación:** `SchedulingController.removeException` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:605`
 
 ### Qué es y para qué sirve (negocio)
 
 Eliminar una excepción de disponibilidad. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /scheduling/exceptions/{id}` la atiende `SchedulingController.removeException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:603). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.removeException`. Borra de scheduling.availability_exceptions. Lee scheduling.availability_exceptions, scheduling.schedulable_resources.
+`DELETE /scheduling/exceptions/{id}` la atiende `SchedulingController.removeException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:605). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.removeException`. Borra de scheduling.availability_exceptions. Lee scheduling.availability_exceptions, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:603` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:605` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:603` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:605` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -3737,26 +3737,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.updateException` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:575`
+- **Implementación:** `SchedulingController.updateException` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:577`
 
 ### Qué es y para qué sirve (negocio)
 
 Editar una excepción de disponibilidad. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /scheduling/exceptions/{id}` la atiende `SchedulingController.updateException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:575). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `UpdateExceptionDto` (4 campos, 0 obligatorios). Delega en `SchedulingCatalogService.updateException`. Actualiza scheduling.availability_exceptions, scheduling.bookable_slots. Lee scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.schedulable_resources.
+`PATCH /scheduling/exceptions/{id}` la atiende `SchedulingController.updateException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:577). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `UpdateExceptionDto` (4 campos, 0 obligatorios). Delega en `SchedulingCatalogService.updateException`. Actualiza scheduling.availability_exceptions, scheduling.bookable_slots. Lee scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:575` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:577` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:575` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:577` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -3847,26 +3847,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.confirmBooking` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:710`
+- **Implementación:** `SchedulingController.confirmBooking` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:713`
 
 ### Qué es y para qué sirve (negocio)
 
 Confirmar la cita a partir de la reserva temporal. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/holds/{holdToken}/confirm` la atiende `SchedulingController.confirmBooking` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:710). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `ConfirmBookingDto` (5 campos, 3 obligatorios). Delega en `SchedulingBookingsService.confirmBooking`. Crea filas en clinical.appointments, scheduling.appointment_bookings, scheduling.appointment_reminders. Actualiza scheduling.bookable_slots, scheduling.slot_holds. Lee billing.service_catalog, practice.care_spaces, practice.practice_sites, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, profiles.persons, scheduling.appointment_bookings y 8 más.
+`POST /scheduling/holds/{holdToken}/confirm` la atiende `SchedulingController.confirmBooking` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:713). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `ConfirmBookingDto` (5 campos, 3 obligatorios). Delega en `SchedulingBookingsService.confirmBooking`. Crea filas en clinical.appointments, scheduling.appointment_bookings, scheduling.appointment_reminders. Actualiza scheduling.bookable_slots, scheduling.slot_holds. Lee billing.service_catalog, practice.care_spaces, practice.practice_sites, profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, profiles.persons, scheduling.appointment_bookings y 8 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:710` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:713` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: holdToken | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:710` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: holdToken | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:713` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -3989,26 +3989,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.requestBooking` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:739`
+- **Implementación:** `SchedulingController.requestBooking` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:742`
 
 ### Qué es y para qué sirve (negocio)
 
 Solicitar la cita a partir de la reserva temporal. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/holds/{holdToken}/request` la atiende `SchedulingController.requestBooking` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:739). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `RequestBookingDto` (4 campos, 3 obligatorios). Delega en `SchedulingBookingsService.requestBooking`. Crea filas en clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_bookings y 1 más. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots, scheduling.slot_holds. Lee billing.service_catalog, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 27 más.
+`POST /scheduling/holds/{holdToken}/request` la atiende `SchedulingController.requestBooking` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:742). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `RequestBookingDto` (4 campos, 3 obligatorios). Delega en `SchedulingBookingsService.requestBooking`. Crea filas en clinical.appointments, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.appointment_bookings y 1 más. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots, scheduling.slot_holds. Lee billing.service_catalog, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 27 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:739` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:742` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: holdToken | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:739` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: holdToken | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:742` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -4159,7 +4159,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Despachar los recordatorios cuya hora ya llegó. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -4282,7 +4282,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Liberar las reservas temporales vencidas. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -4381,7 +4381,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Promover candidatos de la lista de espera a un slot con cupo. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -4510,7 +4510,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Listar slots con cupo libre y candidatos activos en espera. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -4585,7 +4585,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Listar los recursos agendables de un tenant. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -4679,24 +4679,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.createResource` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:167`
+- **Implementación:** `SchedulingController.createResource` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:168`
 
 ### Qué es y para qué sirve (negocio)
 
 Dar de alta un recurso agendable. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources` la atiende `SchedulingController.createResource` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:167). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateResourceDto` (8 campos, 5 obligatorios). Delega en `SchedulingCatalogService.createResource`. Crea filas en messaging.domain_events, messaging.outbox_messages, scheduling.schedulable_resources. Lee messaging.outbox_messages, practice.care_spaces, practice.practice_sites, practice.practices, profiles.practitioner_affiliations, scheduling.schedulable_resources. Publica scheduling.resource.linked_to_space.
+`POST /scheduling/resources` la atiende `SchedulingController.createResource` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:168). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateResourceDto` (8 campos, 5 obligatorios). Delega en `SchedulingCatalogService.createResource`. Crea filas en messaging.domain_events, messaging.outbox_messages, scheduling.schedulable_resources. Lee messaging.outbox_messages, practice.care_spaces, practice.practice_sites, practice.practices, profiles.practitioner_affiliations, scheduling.schedulable_resources. Publica scheduling.resource.linked_to_space.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:167` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:168` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -4829,26 +4829,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.closeSlots` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:445`
+- **Implementación:** `SchedulingController.closeSlots` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:447`
 
 ### Qué es y para qué sirve (negocio)
 
 Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/close-slots` la atiende `SchedulingController.closeSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:445). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CloseSlotsDto` (4 campos, 2 obligatorios). Delega en `SchedulingCatalogService.closeSlots`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 13 más.
+`POST /scheduling/resources/{id}/close-slots` la atiende `SchedulingController.closeSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:447). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CloseSlotsDto` (4 campos, 2 obligatorios). Delega en `SchedulingCatalogService.closeSlots`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 13 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:445` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:447` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:445` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:447` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -4975,26 +4975,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.delayResource` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841`
+- **Implementación:** `SchedulingController.delayResource` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:844`
 
 ### Qué es y para qué sirve (negocio)
 
 Informar una demora que alcanza a toda la agenda del recurso. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/delay` la atiende `SchedulingController.delayResource` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayResourceDto` (4 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayResource`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 16 más.
+`POST /scheduling/resources/{id}/delay` la atiende `SchedulingController.delayResource` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:844). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Valida el cuerpo como `DelayResourceDto` (4 campos, 1 obligatorio). Delega en `SchedulingDelayService.delayResource`. Crea filas en audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.appointment_bookings_history, community.public_profiles, iam.devices, messaging.notification_requests. Lee audit.appointment_bookings_history, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials y 16 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:844` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:844` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -5118,28 +5118,28 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listExceptions` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:400`
+- **Implementación:** `SchedulingController.listExceptions` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:402`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar las excepciones de disponibilidad de un recurso. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/resources/{id}/exceptions` la atiende `SchedulingController.listExceptions` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:400). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER, PATIENT. Delega en `SchedulingCatalogService.listExceptions`. Lee scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.schedulable_resources.
+`GET /scheduling/resources/{id}/exceptions` la atiende `SchedulingController.listExceptions` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:402). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER, PATIENT. Delega en `SchedulingCatalogService.listExceptions`. Lee scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:400` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:402` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:400` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:402` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5210,26 +5210,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.createException` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:543`
+- **Implementación:** `SchedulingController.createException` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:545`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar una excepción de disponibilidad. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/exceptions` la atiende `SchedulingController.createException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:543). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateExceptionDto` (6 campos, 3 obligatorios). Delega en `SchedulingCatalogService.createException`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 13 más.
+`POST /scheduling/resources/{id}/exceptions` la atiende `SchedulingController.createException` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:545). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `CreateExceptionDto` (6 campos, 3 obligatorios). Delega en `SchedulingCatalogService.createException`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.availability_exceptions, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 13 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:543` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:545` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:543` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:545` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -5365,7 +5365,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Horas que se pueden pedir en un horario flexible. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -5459,7 +5459,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Retener una hora de un horario flexible. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -5576,26 +5576,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.shiftSlots` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:477`
+- **Implementación:** `SchedulingController.shiftSlots` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:479`
 
 ### Qué es y para qué sirve (negocio)
 
 Correr los cupos de una agenda N minutos. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/shift-slots` la atiende `SchedulingController.shiftSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:477). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `ShiftSlotsDto` (4 campos, 3 obligatorios). Delega en `SchedulingCatalogService.shiftSlots`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.devices y 16 más.
+`POST /scheduling/resources/{id}/shift-slots` la atiende `SchedulingController.shiftSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:479). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `ShiftSlotsDto` (4 campos, 3 obligatorios). Delega en `SchedulingCatalogService.shiftSlots`. Crea filas en community.conversation_participants, community.conversations, community.public_profiles, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.public_profiles, iam.devices, messaging.notification_requests, scheduling.bookable_slots. Lee community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.authentication_credentials, iam.devices y 16 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:477` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:479` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:477` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:479` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -5721,28 +5721,28 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.getResourceAgenda` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:120`
+- **Implementación:** `SchedulingController.getResourceAgenda` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:121`
 
 ### Qué es y para qué sirve (negocio)
 
 UC-41-14: agenda publicada del recurso en una ventana. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/resources/{id}/slots` la atiende `SchedulingController.getResourceAgenda` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:120). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingCatalogService.getResourceAgenda`. Lee scheduling.bookable_slots, scheduling.schedulable_resources.
+`GET /scheduling/resources/{id}/slots` la atiende `SchedulingController.getResourceAgenda` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:121). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingCatalogService.getResourceAgenda`. Lee scheduling.bookable_slots, scheduling.schedulable_resources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:120` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:121` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:120` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:121` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5825,26 +5825,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listTemplates` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:244`
+- **Implementación:** `SchedulingController.listTemplates` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:245`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar las plantillas de agenda de un recurso. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/resources/{id}/templates` la atiende `SchedulingController.listTemplates` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:244). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.listTemplates`. Lee scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
+`GET /scheduling/resources/{id}/templates` la atiende `SchedulingController.listTemplates` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:245). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.listTemplates`. Lee scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:244` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:245` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:244` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:245` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -5925,26 +5925,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.createTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:211`
+- **Implementación:** `SchedulingController.createTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:212`
 
 ### Qué es y para qué sirve (negocio)
 
 Publicar una plantilla de agenda con sus franjas. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/resources/{id}/templates` la atiende `SchedulingController.createTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:211). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `SchedulingCreateTemplateDto` (17 campos, 5 obligatorios). Delega en `SchedulingCatalogService.createTemplate`. Crea filas en scheduling.schedule_rules, scheduling.schedule_templates. Lee scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
+`POST /scheduling/resources/{id}/templates` la atiende `SchedulingController.createTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:212). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `SchedulingCreateTemplateDto` (17 campos, 5 obligatorios). Delega en `SchedulingCatalogService.createTemplate`. Crea filas en scheduling.schedule_rules, scheduling.schedule_templates. Lee scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:211` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:212` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:211` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:212` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -6088,26 +6088,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listResourceWaitlist` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:814`
+- **Implementación:** `SchedulingController.listResourceWaitlist` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:817`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar quiénes esperan turno en una agenda. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/resources/{resourceId}/waitlist` la atiende `SchedulingController.listResourceWaitlist` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:814). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingWaitlistService.listForResource`. Lee profiles.person_profiles, profiles.persons, scheduling.schedulable_resources, scheduling.waitlist_entries.
+`GET /scheduling/resources/{resourceId}/waitlist` la atiende `SchedulingController.listResourceWaitlist` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:817). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. Delega en `SchedulingWaitlistService.listForResource`. Lee profiles.person_profiles, profiles.persons, scheduling.schedulable_resources, scheduling.waitlist_entries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:814` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:817` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: resourceId | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:814` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: resourceId | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:817` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -6184,7 +6184,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 Horarios donde cabe un servicio. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -6279,7 +6279,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Los servicios que ofrece un profesional. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -6367,7 +6367,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Declarar cómo ofrezco un servicio. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -6492,7 +6492,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Editar o apagar la oferta de un servicio. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -6616,7 +6616,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Retener el turno de un servicio. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -6743,7 +6743,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Consultar los cupos de una ventana. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -6837,26 +6837,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.placeHold` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:688`
+- **Implementación:** `SchedulingController.placeHold` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:691`
 
 ### Qué es y para qué sirve (negocio)
 
 Reservar temporalmente un cupo del slot. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/slots/{id}/holds` la atiende `SchedulingController.placeHold` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:688). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `CreateHoldDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.placeHold`. Crea filas en scheduling.slot_holds. Actualiza scheduling.bookable_slots. Lee profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.booking_policies, scheduling.schedule_templates.
+`POST /scheduling/slots/{id}/holds` la atiende `SchedulingController.placeHold` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:691). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `CreateHoldDto` (1 campo, 0 obligatorios). Delega en `SchedulingBookingsService.placeHold`. Crea filas en scheduling.slot_holds. Actualiza scheduling.bookable_slots. Lee profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.booking_policies, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:688` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:691` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:688` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:691` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -6957,26 +6957,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.retireTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:322`
+- **Implementación:** `SchedulingController.retireTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:323`
 
 ### Qué es y para qué sirve (negocio)
 
 Retirar una plantilla de agenda y soltar sus cupos libres. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /scheduling/templates/{id}` la atiende `SchedulingController.retireTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:322). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.retireTemplate`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedule_templates. Borra de scheduling.bookable_slots, scheduling.slot_holds. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 14 más.
+`DELETE /scheduling/templates/{id}` la atiende `SchedulingController.retireTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:323). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.retireTemplate`. Crea filas en audit.appointment_bookings_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, scheduling.booking_cancellations. Actualiza audit.appointment_bookings_history, iam.devices, messaging.notification_requests, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedule_templates. Borra de scheduling.bookable_slots, scheduling.slot_holds. Lee audit.appointment_bookings_history, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs y 14 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:322` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:323` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:322` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:323` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7080,26 +7080,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.updateTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:291`
+- **Implementación:** `SchedulingController.updateTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:292`
 
 ### Qué es y para qué sirve (negocio)
 
 Editar una plantilla de agenda ya publicada. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /scheduling/templates/{id}` la atiende `SchedulingController.updateTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:291). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `SchedulingUpdateTemplateDto` (16 campos, 0 obligatorios). Delega en `SchedulingCatalogService.updateTemplate`. Crea filas en scheduling.schedule_rules. Actualiza scheduling.schedule_templates. Borra de scheduling.schedule_rules. Lee scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
+`PATCH /scheduling/templates/{id}` la atiende `SchedulingController.updateTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:292). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `SchedulingUpdateTemplateDto` (16 campos, 0 obligatorios). Delega en `SchedulingCatalogService.updateTemplate`. Crea filas en scheduling.schedule_rules. Actualiza scheduling.schedule_templates. Borra de scheduling.schedule_rules. Lee scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:291` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:292` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:291` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:292` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -7219,26 +7219,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.generateSlots` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:366`
+- **Implementación:** `SchedulingController.generateSlots` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:368`
 
 ### Qué es y para qué sirve (negocio)
 
 Materializar los slots de la plantilla en una ventana. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/templates/{id}/generate-slots` la atiende `SchedulingController.generateSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:366). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `GenerateSlotsDto` (2 campos, 2 obligatorios). Delega en `SchedulingCatalogService.generateSlots`. Crea filas en scheduling.bookable_slots. Lee scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
+`POST /scheduling/templates/{id}/generate-slots` la atiende `SchedulingController.generateSlots` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:368). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Valida el cuerpo como `GenerateSlotsDto` (2 campos, 2 obligatorios). Delega en `SchedulingCatalogService.generateSlots`. Crea filas en scheduling.bookable_slots. Lee scheduling.appointment_bookings, scheduling.availability_exceptions, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_rules, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:366` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:368` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:366` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:368` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -7343,26 +7343,26 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listTemplateLiveBookings` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:351`
+- **Implementación:** `SchedulingController.listTemplateLiveBookings` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:353`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar las citas vivas de una plantilla antes de retirarla. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/templates/{id}/live-bookings` la atiende `SchedulingController.listTemplateLiveBookings` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:351). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.listTemplateLiveBookings`. Lee profiles.person_profiles, profiles.persons, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_templates.
+`GET /scheduling/templates/{id}/live-bookings` la atiende `SchedulingController.listTemplateLiveBookings` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:353). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.listTemplateLiveBookings`. Lee profiles.person_profiles, profiles.persons, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.schedulable_resources, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:351` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:353` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:351` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:353` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7435,26 +7435,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.reactivateTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:263`
+- **Implementación:** `SchedulingController.reactivateTemplate` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:264`
 
 ### Qué es y para qué sirve (negocio)
 
 Reactivar un horario retirado. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/templates/{id}/reactivate` la atiende `SchedulingController.reactivateTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:263). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.reactivateTemplate`. Actualiza scheduling.schedule_templates. Lee scheduling.schedulable_resources, scheduling.schedule_templates.
+`POST /scheduling/templates/{id}/reactivate` la atiende `SchedulingController.reactivateTemplate` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:264). Exige sesión con alguno de los roles SCHEDULING_ADMIN, PRACTITIONER. Delega en `SchedulingCatalogService.reactivateTemplate`. Actualiza scheduling.schedule_templates. Lee scheduling.schedulable_resources, scheduling.schedule_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:263` |
+| ROL | Alguno de: SCHEDULING_ADMIN, PRACTITIONER | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:264` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:263` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:264` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -7515,24 +7515,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.listWaitlist` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:783`
+- **Implementación:** `SchedulingController.listWaitlist` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:786`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar las entradas de lista de espera de un paciente. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`GET /scheduling/waitlist` la atiende `SchedulingController.listWaitlist` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:783). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingWaitlistService.listForPatient`. Lee profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, profiles.person_profiles, profiles.persons, scheduling.schedulable_resources, scheduling.waitlist_entries.
+`GET /scheduling/waitlist` la atiende `SchedulingController.listWaitlist` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:786). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. Delega en `SchedulingWaitlistService.listForPatient`. Lee profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links, profiles.person_profiles, profiles.persons, scheduling.schedulable_resources, scheduling.waitlist_entries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:783` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:786` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
@@ -7609,24 +7609,24 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SchedulingController.enrollWaitlist` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:761`
+- **Implementación:** `SchedulingController.enrollWaitlist` — `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:764`
 
 ### Qué es y para qué sirve (negocio)
 
 Inscribir a un paciente en la lista de espera. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /scheduling/waitlist` la atiende `SchedulingController.enrollWaitlist` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:761). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `CreateWaitlistEntryDto` (6 campos, 2 obligatorios). Delega en `SchedulingWaitlistService.enroll`. Crea filas en scheduling.waitlist_entries. Lee profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links.
+`POST /scheduling/waitlist` la atiende `SchedulingController.enrollWaitlist` (src/modules/scheduling/presentation/controllers/scheduling.controller.ts:764). Exige sesión con alguno de los roles SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. Valida el cuerpo como `CreateWaitlistEntryDto` (6 campos, 2 obligatorios). Delega en `SchedulingWaitlistService.enroll`. Crea filas en scheduling.waitlist_entries. Lee profiles.patient_portal_proxies, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:761` |
+| ROL | Alguno de: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:764` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -7724,7 +7724,7 @@ El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
 
 La agenda de la organización. Dentro del módulo (descripción del modelo, en inglés): «The full booking (agenda) layer on top of the clinical appointment record.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:54`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_41_scheduling.puml:57`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 

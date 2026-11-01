@@ -743,7 +743,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: files`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Files` — `src/modules/common/entities/files.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 89 entrantes · 107 operaciones
+- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 90 entrantes · 107 operaciones
 
 #### Columnas
 
@@ -787,6 +787,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | desde | id | profiles.health_practitioner_profiles (seal_file_id) | fk_health_practitioner_profiles_seal_file_id |
 | desde | id | profiles.professional_credentials (file_id) | fk_professional_credentials_file_id |
 | desde | id | profiles.jurisdiction_authorizations (file_id) | fk_jurisdiction_authorizations_file_id |
+| desde | id | profiles.practitioner_admission_reviews (file_id) | fk_practitioner_admission_reviews_file_id |
 | desde | id | consent.consent_evidence (document_file_id) | fk_consent_evidence_document_file_id |
 | desde | id | clinical.observations (value_file_id) | fk_observations_value_file_id |
 | desde | id | clinical.procedures (operative_report_file_id) | fk_procedures_operative_report_file_id |

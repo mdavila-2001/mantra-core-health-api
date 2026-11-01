@@ -220,7 +220,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2656 entrantes · 228 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2745 entrantes · 228 operaciones
 
 #### Columnas
 
@@ -418,6 +418,21 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | profiles.related_persons (relationship_concept_id) | fk_related_persons_relationship_concept_id |
 | desde | id | profiles.related_persons (status_concept_id) | fk_related_persons_status_concept_id |
 | desde | id | profiles.patient_portal_proxies (status_concept_id) | fk_patient_portal_proxies_status_concept_id |
+| desde | id | profiles.admission_requirements (admission_type_concept_id) | fk_admission_requirements_admission_type_concept_id |
+| desde | id | profiles.admission_requirements (item_type_concept_id) | fk_admission_requirements_item_type_concept_id |
+| desde | id | profiles.admission_requirements (evidence_kind_concept_id) | fk_admission_requirements_evidence_kind_concept_id |
+| desde | id | profiles.admission_requirements (verification_method_concept_id) | fk_admission_requirements_verification_method_concept_id |
+| desde | id | profiles.practitioner_admissions (admission_type_concept_id) | fk_practitioner_admissions_admission_type_concept_id |
+| desde | id | profiles.practitioner_admissions (status_concept_id) | fk_practitioner_admissions_status_concept_id |
+| desde | id | profiles.practitioner_admissions (decision_reason_code_concept_id) | fk_practitioner_admissions_decision_reason_code_concept_id |
+| desde | id | profiles.practitioner_admission_reviews (status_concept_id) | fk_practitioner_admission_reviews_status_concept_id |
+| desde | id | profiles.practitioner_admission_reviews (source_type_concept_id) | fk_practitioner_admission_reviews_source_type_concept_id |
+| desde | id | profiles.practitioner_admission_reviews (reason_code_concept_id) | fk_practitioner_admission_reviews_reason_code_concept_id |
+| desde | id | profiles.practitioner_admission_events (event_type_concept_id) | fk_practitioner_admission_events_event_type_concept_id |
+| desde | id | profiles.practitioner_admission_events (from_status_concept_id) | fk_practitioner_admission_events_from_status_concept_id |
+| desde | id | profiles.practitioner_admission_events (to_status_concept_id) | fk_practitioner_admission_events_to_status_concept_id |
+| desde | id | profiles.practitioner_admission_events (item_type_concept_id) | fk_practitioner_admission_events_item_type_concept_id |
+| desde | id | profiles.practitioner_admission_events (reason_code_concept_id) | fk_practitioner_admission_events_reason_code_concept_id |
 | desde | id | profiles.insurance_representative_profiles (representative_type_concept_id) | fk_insurance_representative_profiles_representative_ty_fcc1b52f |
 | desde | id | profiles.insurance_representative_profiles (role_concept_id) | fk_insurance_representative_profiles_role_concept_id |
 | desde | id | profiles.provider_operator_profiles (operator_type_concept_id) | fk_provider_operator_profiles_operator_type_concept_id |
@@ -514,6 +529,10 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical.encounters (class_concept_id) | fk_encounters_class_concept_id |
 | desde | id | clinical.encounters (type_concept_id) | fk_encounters_type_concept_id |
 | desde | id | clinical.encounters (status_concept_id) | fk_encounters_status_concept_id |
+| desde | id | clinical.encounters (level_of_care_concept_id) | fk_encounters_level_of_care_concept_id |
+| desde | id | clinical.encounters (admission_source_concept_id) | fk_encounters_admission_source_concept_id |
+| desde | id | clinical.encounters (discharge_disposition_concept_id) | fk_encounters_discharge_disposition_concept_id |
+| desde | id | clinical.encounters (isolation_precaution_concept_id) | fk_encounters_isolation_precaution_concept_id |
 | desde | id | clinical.observations (category_concept_id) | fk_observations_category_concept_id |
 | desde | id | clinical.observations (code_concept_id) | fk_observations_code_concept_id |
 | desde | id | clinical.observations (status_concept_id) | fk_observations_status_concept_id |
@@ -556,10 +575,16 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical.service_requests (priority_concept_id) | fk_service_requests_priority_concept_id |
 | desde | id | clinical.service_requests (status_concept_id) | fk_service_requests_status_concept_id |
 | desde | id | clinical.service_requests (performer_selection_concept_id) | fk_service_requests_performer_selection_concept_id |
+| desde | id | clinical.service_requests (specimen_type_concept_id) | fk_service_requests_specimen_type_concept_id |
+| desde | id | clinical.service_requests (modality_concept_id) | fk_service_requests_modality_concept_id |
+| desde | id | clinical.service_requests (body_site_concept_id) | fk_service_requests_body_site_concept_id |
+| desde | id | clinical.service_requests (laterality_concept_id) | fk_service_requests_laterality_concept_id |
+| desde | id | clinical.service_requests (contrast_concept_id) | fk_service_requests_contrast_concept_id |
 | desde | id | clinical.diagnostic_reports (code_concept_id) | fk_diagnostic_reports_code_concept_id |
 | desde | id | clinical.diagnostic_reports (category_concept_id) | fk_diagnostic_reports_category_concept_id |
 | desde | id | clinical.diagnostic_reports (lifecycle_status_concept_id) | fk_diagnostic_reports_lifecycle_status_concept_id |
 | desde | id | clinical.diagnostic_reports (result_release_status_concept_id) | fk_diagnostic_reports_result_release_status_concept_id |
+| desde | id | clinical.service_request_components (component_concept_id) | fk_service_request_components_component_concept_id |
 | desde | id | clinical.medication_requests (medication_concept_id) | fk_medication_requests_medication_concept_id |
 | desde | id | clinical.medication_requests (substance_atc_concept_id) | fk_medication_requests_substance_atc_concept_id |
 | desde | id | clinical.medication_requests (intent_concept_id) | fk_medication_requests_intent_concept_id |
@@ -591,6 +616,15 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical.encounter_participants (participant_role_concept_id) | fk_encounter_participants_participant_role_concept_id |
 | desde | id | clinical.encounter_participants (status_concept_id) | fk_encounter_participants_status_concept_id |
 | desde | id | clinical.encounter_locations (location_status_concept_id) | fk_encounter_locations_location_status_concept_id |
+| desde | id | clinical.encounter_locations (movement_type_concept_id) | fk_encounter_locations_movement_type_concept_id |
+| desde | id | clinical.encounter_locations (end_reason_concept_id) | fk_encounter_locations_end_reason_concept_id |
+| desde | id | clinical.encounter_locations (bed_category_concept_id) | fk_encounter_locations_bed_category_concept_id |
+| desde | id | clinical.placement_incidents (status_concept_id) | fk_placement_incidents_status_concept_id |
+| desde | id | clinical.inpatient_census_days (status_concept_id) | fk_inpatient_census_days_status_concept_id |
+| desde | id | clinical.patient_admission_footprints (admission_origin_concept_id) | fk_patient_admission_footprints_admission_origin_concept_id |
+| desde | id | clinical.patient_admission_footprints (identity_verification_method_concept_id) | fk_patient_admission_footprints_identity_verification__4ddbb04f |
+| desde | id | clinical.inpatient_census_entries (bed_category_concept_id) | fk_inpatient_census_entries_bed_category_concept_id |
+| desde | id | clinical.inpatient_census_entries (movement_concept_id) | fk_inpatient_census_entries_movement_concept_id |
 | desde | id | clinical.observation_performers (performer_type_concept_id) | fk_observation_performers_performer_type_concept_id |
 | desde | id | clinical.observation_performers (performer_role_concept_id) | fk_observation_performers_performer_role_concept_id |
 | desde | id | clinical.observation_reference_ranges (unit_concept_id) | fk_observation_reference_ranges_unit_concept_id |
@@ -662,6 +696,24 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | audit.clinical_units_history (change_reason_concept_id) | fk_clinical_units_history_change_reason_concept_id |
 | desde | id | audit.care_spaces_history (operation_concept_id) | fk_care_spaces_history_operation_concept_id |
 | desde | id | audit.care_spaces_history (change_reason_concept_id) | fk_care_spaces_history_change_reason_concept_id |
+| desde | id | audit.operating_room_block_series_history (operation_concept_id) | fk_operating_room_block_series_history_operation_concept_id |
+| desde | id | audit.operating_room_block_series_history (change_reason_concept_id) | fk_operating_room_block_series_history_change_reason_concept_id |
+| desde | id | audit.operating_room_blocks_history (operation_concept_id) | fk_operating_room_blocks_history_operation_concept_id |
+| desde | id | audit.operating_room_blocks_history (change_reason_concept_id) | fk_operating_room_blocks_history_change_reason_concept_id |
+| desde | id | audit.encounter_locations_history (operation_concept_id) | fk_encounter_locations_history_operation_concept_id |
+| desde | id | audit.encounter_locations_history (change_reason_concept_id) | fk_encounter_locations_history_change_reason_concept_id |
+| desde | id | audit.placement_incidents_history (operation_concept_id) | fk_placement_incidents_history_operation_concept_id |
+| desde | id | audit.placement_incidents_history (change_reason_concept_id) | fk_placement_incidents_history_change_reason_concept_id |
+| desde | id | audit.care_space_blocks_history (operation_concept_id) | fk_care_space_blocks_history_operation_concept_id |
+| desde | id | audit.care_space_blocks_history (change_reason_concept_id) | fk_care_space_blocks_history_change_reason_concept_id |
+| desde | id | audit.cleaning_orders_history (operation_concept_id) | fk_cleaning_orders_history_operation_concept_id |
+| desde | id | audit.cleaning_orders_history (change_reason_concept_id) | fk_cleaning_orders_history_change_reason_concept_id |
+| desde | id | audit.care_space_category_periods_history (operation_concept_id) | fk_care_space_category_periods_history_operation_concept_id |
+| desde | id | audit.care_space_category_periods_history (change_reason_concept_id) | fk_care_space_category_periods_history_change_reason_concept_id |
+| desde | id | audit.space_tariffs_history (operation_concept_id) | fk_space_tariffs_history_operation_concept_id |
+| desde | id | audit.space_tariffs_history (change_reason_concept_id) | fk_space_tariffs_history_change_reason_concept_id |
+| desde | id | audit.charge_captures_history (operation_concept_id) | fk_charge_captures_history_operation_concept_id |
+| desde | id | audit.charge_captures_history (change_reason_concept_id) | fk_charge_captures_history_change_reason_concept_id |
 | desde | id | audit.diagnostic_reports_history (operation_concept_id) | fk_diagnostic_reports_history_operation_concept_id |
 | desde | id | audit.diagnostic_reports_history (change_reason_concept_id) | fk_diagnostic_reports_history_change_reason_concept_id |
 | desde | id | audit.imaging_studies_history (operation_concept_id) | fk_imaging_studies_history_operation_concept_id |
@@ -1022,6 +1074,22 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | practice.care_spaces (sex_restriction_concept_id) | fk_care_spaces_sex_restriction_concept_id |
 | desde | id | practice.care_spaces (age_group_concept_id) | fk_care_spaces_age_group_concept_id |
 | desde | id | practice.care_spaces (bed_category_concept_id) | fk_care_spaces_bed_category_concept_id |
+| desde | id | practice.care_spaces (availability_reason_concept_id) | fk_care_spaces_availability_reason_concept_id |
+| desde | id | practice.care_spaces (hygiene_status_concept_id) | fk_care_spaces_hygiene_status_concept_id |
+| desde | id | practice.care_spaces (isolation_concept_id) | fk_care_spaces_isolation_concept_id |
+| desde | id | practice.care_space_status_events (axis_concept_id) | fk_care_space_status_events_axis_concept_id |
+| desde | id | practice.care_space_status_events (from_concept_id) | fk_care_space_status_events_from_concept_id |
+| desde | id | practice.care_space_status_events (to_concept_id) | fk_care_space_status_events_to_concept_id |
+| desde | id | practice.care_space_status_events (reason_concept_id) | fk_care_space_status_events_reason_concept_id |
+| desde | id | practice.care_space_status_events (source_concept_id) | fk_care_space_status_events_source_concept_id |
+| desde | id | practice.care_space_blocks (kind_concept_id) | fk_care_space_blocks_kind_concept_id |
+| desde | id | practice.care_space_blocks (reason_concept_id) | fk_care_space_blocks_reason_concept_id |
+| desde | id | practice.cleaning_orders (cleaning_type_concept_id) | fk_cleaning_orders_cleaning_type_concept_id |
+| desde | id | practice.cleaning_orders (trigger_concept_id) | fk_cleaning_orders_trigger_concept_id |
+| desde | id | practice.cleaning_orders (priority_concept_id) | fk_cleaning_orders_priority_concept_id |
+| desde | id | practice.cleaning_orders (status_concept_id) | fk_cleaning_orders_status_concept_id |
+| desde | id | practice.cleaning_orders (inspection_result_concept_id) | fk_cleaning_orders_inspection_result_concept_id |
+| desde | id | practice.care_space_category_periods (bed_category_concept_id) | fk_care_space_category_periods_bed_category_concept_id |
 | desde | id | practice.space_unit_assignments (role_concept_id) | fk_space_unit_assignments_role_concept_id |
 | desde | id | practice.site_declared_capacities (capacity_kind_concept_id) | fk_site_declared_capacities_capacity_kind_concept_id |
 | desde | id | practice.space_form_parent_rules (parent_form_concept_id) | fk_space_form_parent_rules_parent_form_concept_id |
@@ -1038,6 +1106,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | practice.practitioner_support_assignments (support_role_concept_id) | fk_practitioner_support_assignments_support_role_concept_id |
 | desde | id | practice.practitioner_support_assignments (scope_concept_id) | fk_practitioner_support_assignments_scope_concept_id |
 | desde | id | practice.practitioner_support_assignments (status_concept_id) | fk_practitioner_support_assignments_status_concept_id |
+| desde | id | practice.practitioner_support_assignments (initiated_by_party_concept_id) | fk_practitioner_support_assignments_initiated_by_party_7e268d24 |
 | desde | id | practice.practice_accreditations (accreditation_type_concept_id) | fk_practice_accreditations_accreditation_type_concept_id |
 | desde | id | practice.practice_accreditations (verification_status_concept_id) | fk_practice_accreditations_verification_status_concept_id |
 | desde | id | practice.practice_settings (category_concept_id) | fk_practice_settings_category_concept_id |
@@ -1146,6 +1215,14 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | accounting.accrual_postings (currency_concept_id) | fk_accrual_postings_currency_concept_id |
 | desde | id | billing.service_catalog (service_concept_id) | fk_service_catalog_service_concept_id |
 | desde | id | billing.service_catalog (currency_concept_id) | fk_service_catalog_currency_concept_id |
+| desde | id | billing.space_tariffs (tariff_kind_concept_id) | fk_space_tariffs_tariff_kind_concept_id |
+| desde | id | billing.space_tariffs (bed_category_concept_id) | fk_space_tariffs_bed_category_concept_id |
+| desde | id | billing.space_tariffs (currency_concept_id) | fk_space_tariffs_currency_concept_id |
+| desde | id | billing.space_tariffs (status_concept_id) | fk_space_tariffs_status_concept_id |
+| desde | id | billing.charge_captures (source_kind_concept_id) | fk_charge_captures_source_kind_concept_id |
+| desde | id | billing.charge_captures (bed_category_concept_id) | fk_charge_captures_bed_category_concept_id |
+| desde | id | billing.charge_captures (currency_concept_id) | fk_charge_captures_currency_concept_id |
+| desde | id | billing.charge_captures (status_concept_id) | fk_charge_captures_status_concept_id |
 | desde | id | billing.invoices (status_concept_id) | fk_invoices_status_concept_id |
 | desde | id | billing.invoices (currency_concept_id) | fk_invoices_currency_concept_id |
 | desde | id | billing.payments_received (method_concept_id) | fk_payments_received_method_concept_id |
@@ -1177,8 +1254,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical_ext.referrals (reason_concept_id) | fk_referrals_reason_concept_id |
 | desde | id | clinical_ext.referrals (priority_concept_id) | fk_referrals_priority_concept_id |
 | desde | id | clinical_ext.referrals (status_concept_id) | fk_referrals_status_concept_id |
-| desde | id | clinical_ext.referrals (requested_service_concept_id) | fk_referrals_requested_service_concept_id |
 | desde | id | clinical_ext.referrals (referral_type_concept_id) | fk_referrals_referral_type_concept_id |
+| desde | id | clinical_ext.referrals (requested_service_concept_id) | fk_referrals_requested_service_concept_id |
 | desde | id | clinical_ext.clinical_alerts (alert_type_concept_id) | fk_clinical_alerts_alert_type_concept_id |
 | desde | id | clinical_ext.clinical_alerts (severity_concept_id) | fk_clinical_alerts_severity_concept_id |
 | desde | id | clinical_ext.clinical_alerts (trigger_concept_id) | fk_clinical_alerts_trigger_concept_id |
@@ -1658,11 +1735,14 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | telemetry.web_vitals (metric_concept_id) | fk_web_vitals_metric_concept_id |
 | desde | id | telemetry.web_vitals (rating_concept_id) | fk_web_vitals_rating_concept_id |
 | desde | id | telemetry.web_vitals (navigation_type_concept_id) | fk_web_vitals_navigation_type_concept_id |
+| desde | id | telemetry.client_error_events (portal_type_concept_id) | fk_client_error_events_portal_type_concept_id |
+| desde | id | telemetry.client_error_events (error_class_concept_id) | fk_client_error_events_error_class_concept_id |
 | desde | id | delegated_access.organization_user_assignments (assignment_role_concept_id) | fk_organization_user_assignments_assignment_role_concept_id |
 | desde | id | delegated_access.organization_user_assignments (access_scope_concept_id) | fk_organization_user_assignments_access_scope_concept_id |
 | desde | id | delegated_access.organization_user_assignments (status_concept_id) | fk_organization_user_assignments_status_concept_id |
 | desde | id | delegated_access.organization_user_assignments (origin_concept_id) | fk_organization_user_assignments_origin_concept_id |
 | desde | id | delegated_access.organization_user_assignments (owner_kind_concept_id) | fk_organization_user_assignments_owner_kind_concept_id |
+| desde | id | delegated_access.organization_user_assignments (initiated_by_party_concept_id) | fk_organization_user_assignments_initiated_by_party_concept_id |
 | desde | id | delegated_access.organization_user_assignments (identity_method_concept_id) | fk_organization_user_assignments_identity_method_concept_id |
 | desde | id | delegated_access.organization_user_assignments (suspension_reason_concept_id) | fk_organization_user_assignments_suspension_reason_concept_id |
 | desde | id | delegated_access.delegated_permission_sets (delegate_type_concept_id) | fk_delegated_permission_sets_delegate_type_concept_id |
@@ -2053,6 +2133,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | scheduling.schedule_templates (status_concept_id) | fk_schedule_templates_status_concept_id |
 | desde | id | scheduling.schedule_rules (booking_mode_concept_id) | fk_schedule_rules_booking_mode_concept_id |
 | desde | id | scheduling.availability_exceptions (exception_type_concept_id) | fk_availability_exceptions_exception_type_concept_id |
+| desde | id | scheduling.availability_exceptions (source_kind_concept_id) | fk_availability_exceptions_source_kind_concept_id |
 | desde | id | scheduling.bookable_slots (service_concept_id) | fk_bookable_slots_service_concept_id |
 | desde | id | scheduling.bookable_slots (status_concept_id) | fk_bookable_slots_status_concept_id |
 | desde | id | scheduling.slot_holds (status_concept_id) | fk_slot_holds_status_concept_id |
@@ -2846,6 +2927,12 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | procedures_perioperative.operating_room_utilization_events (event_type_concept_id) | fk_operating_room_utilization_events_event_type_concept_id |
 | desde | id | procedures_perioperative.operating_room_utilization_events (delay_reason_concept_id) | fk_operating_room_utilization_events_delay_reason_concept_id |
 | desde | id | procedures_perioperative.operating_room_utilization_events (turnover_category_concept_id) | fk_operating_room_utilization_events_turnover_category_c499a812 |
+| desde | id | procedures_perioperative.operating_room_block_series (owner_kind_concept_id) | fk_operating_room_block_series_owner_kind_concept_id |
+| desde | id | procedures_perioperative.operating_room_block_series (surgical_specialty_concept_id) | fk_operating_room_block_series_surgical_specialty_concept_id |
+| desde | id | procedures_perioperative.operating_room_block_series (status_concept_id) | fk_operating_room_block_series_status_concept_id |
+| desde | id | procedures_perioperative.operating_room_blocks (owner_kind_concept_id) | fk_operating_room_blocks_owner_kind_concept_id |
+| desde | id | procedures_perioperative.operating_room_blocks (surgical_specialty_concept_id) | fk_operating_room_blocks_surgical_specialty_concept_id |
+| desde | id | procedures_perioperative.operating_room_blocks (status_concept_id) | fk_operating_room_blocks_status_concept_id |
 | desde | id | procedures_perioperative.sterility_verification_checks (check_type_concept_id) | fk_sterility_verification_checks_check_type_concept_id |
 | desde | id | procedures_perioperative.sterility_verification_checks (result_concept_id) | fk_sterility_verification_checks_result_concept_id |
 | desde | id | surveys.survey_templates (owner_type_concept_id) | fk_survey_templates_owner_type_concept_id |
@@ -2908,6 +2995,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | pharma_lab.visit_surveys (specialty_concept_id) | fk_visit_surveys_specialty_concept_id |
 | desde | id | pharma_lab.visit_surveys (status_concept_id) | fk_visit_surveys_status_concept_id |
 | desde | id | pharma_lab.visitor_post_submissions (status_concept_id) | fk_visitor_post_submissions_status_concept_id |
+| desde | id | observability.error_groups (state_concept_id) | fk_error_groups_state_concept_id |
+| desde | id | observability.alert_rules (severity_concept_id) | fk_alert_rules_severity_concept_id |
 
 #### Índices
 

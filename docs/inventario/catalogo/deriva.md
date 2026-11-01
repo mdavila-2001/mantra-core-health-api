@@ -6,68 +6,27 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 
 | Concepto | Cantidad |
 |---|---|
-| Tablas en el DDL del modelo | 1313 |
+| Tablas en el DDL del modelo | 1370 |
 | Entidades del ORM | 1353 |
-| Tablas del DDL con entidad | 1277 |
-| Tablas del DDL **sin** entidad | 36 |
-| Entidades del ORM **sin** tabla en el DDL | 76 |
-| Columnas del DDL ausentes en su entidad | 66 |
+| Tablas del DDL con entidad | 1318 |
+| Tablas del DDL **sin** entidad | 52 |
+| Entidades del ORM **sin** tabla en el DDL | 35 |
+| Columnas del DDL ausentes en su entidad | 69 |
 | Columnas con nulabilidad divergente | 7 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 56 |
+| Columnas de la entidad que el DDL no tiene | 0 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
-| `audit.care_space_blocks_history` | CareSpaceBlocksHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.care_space_category_periods_history` | CareSpaceCategoryPeriodsHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.charge_captures_history` | ChargeCapturesHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.cleaning_orders_history` | CleaningOrdersHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.encounter_locations_history` | EncounterLocationsHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.operating_room_block_series_history` | OperatingRoomBlockSeriesHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.operating_room_blocks_history` | OperatingRoomBlocksHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.placement_incidents_history` | PlacementIncidentsHistory | **en ninguna fuente de DDL del modelo** |
-| `audit.space_tariffs_history` | SpaceTariffsHistory | **en ninguna fuente de DDL del modelo** |
-| `billing.charge_captures` | ChargeCaptures | **en ninguna fuente de DDL del modelo** |
-| `billing.space_tariffs` | SpaceTariffs | **en ninguna fuente de DDL del modelo** |
-| `clinical.inpatient_census_adjustments` | InpatientCensusAdjustments | **en ninguna fuente de DDL del modelo** |
-| `clinical.inpatient_census_days` | InpatientCensusDays | **en ninguna fuente de DDL del modelo** |
-| `clinical.inpatient_census_entries` | InpatientCensusEntries | **en ninguna fuente de DDL del modelo** |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
-| `clinical.placement_incidents` | PlacementIncidents | **en ninguna fuente de DDL del modelo** |
-| `clinical.service_request_components` | ServiceRequestComponents | **en ninguna fuente de DDL del modelo** |
-| `directory.tenant_medical_facilities` | TenantMedicalFacilities | **en ninguna fuente de DDL del modelo** |
-| `directory.tenant_medical_facility_sites` | TenantMedicalFacilitySites | **en ninguna fuente de DDL del modelo** |
-| `observability.alert_evaluations` | AlertEvaluations | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.alert_rules` | AlertRules | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.dependency_probe_runs` | DependencyProbeRuns | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.error_events` | ErrorEvents | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.error_groups` | ErrorGroups | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.http_request_minute_series` | HttpRequestMinuteSeries | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.instances` | Instances | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.rollup_watermarks` | RollupWatermarks | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.slow_request_samples` | SlowRequestSamples | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.sql_statement_minute_series` | SqlStatementMinuteSeries | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.sql_statements` | SqlStatements | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
-| `observability.worker_tick_minute_series` | WorkerTickMinuteSeries | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
-| `practice.care_space_blocks` | CareSpaceBlocks | **en ninguna fuente de DDL del modelo** |
-| `practice.care_space_category_periods` | CareSpaceCategoryPeriods | **en ninguna fuente de DDL del modelo** |
-| `practice.care_space_status_events` | CareSpaceStatusEvents | **en ninguna fuente de DDL del modelo** |
-| `practice.cleaning_orders` | CleaningOrders | **en ninguna fuente de DDL del modelo** |
 | `procedures_perioperative.instrument_sets` | InstrumentSets | **en ninguna fuente de DDL del modelo** |
-| `procedures_perioperative.operating_room_block_series` | OperatingRoomBlockSeries | **en ninguna fuente de DDL del modelo** |
-| `procedures_perioperative.operating_room_blocks` | OperatingRoomBlocks | **en ninguna fuente de DDL del modelo** |
 | `procedures_perioperative.sterilization_loads` | SterilizationLoads | **en ninguna fuente de DDL del modelo** |
-| `profiles.admission_requirements` | AdmissionRequirements | **en ninguna fuente de DDL del modelo** |
-| `profiles.practitioner_admission_events` | PractitionerAdmissionEvents | **en ninguna fuente de DDL del modelo** |
-| `profiles.practitioner_admission_reviews` | PractitionerAdmissionReviews | **en ninguna fuente de DDL del modelo** |
-| `profiles.practitioner_admissions` | PractitionerAdmissions | **en ninguna fuente de DDL del modelo** |
 | `system_ops.accepted_risks` | AcceptedRisks | **en ninguna fuente de DDL del modelo** |
-| `telemetry.client_error_events` | ClientErrorEvents | sólo en un parche: `SQL/patches/2026-10-31_v4280_observabilidad_sistema.sql` |
 | `time_series.ads_delivery_event_series` | AdsDeliveryEventSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
 | `time_series.ai_runtime_metric_series` | AiRuntimeMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
 | `time_series.application_tracking_series` | ApplicationTrackingSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
@@ -104,10 +63,23 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | `audit.insurance_products_history` | `Mantra Core Health Context/modules/diagram_10_audit.puml` |
 | `audit.procedure_cases_history` | `Mantra Core Health Context/modules/diagram_10_audit.puml` |
 | `clinical_ext.cds_rule_versions` | `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` |
+| `clinical.patient_admission_footprints` | `Mantra Core Health Context/modules/diagram_08_clinical.puml` |
 | `community.conversation_assignments` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
 | `community.conversation_internal_notes` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
 | `community.reply_templates` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
 | `crm.crm_case_owner_history` | `Mantra Core Health Context/modules/diagram_49_crm.puml` |
+| `data_catalog.catalog_certifications` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.catalog_change_acknowledgements` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.catalog_glossary_term_links` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.catalog_glossary_term_revisions` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.catalog_glossary_terms` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.catalog_lineage_edges` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.catalog_stewardships` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.quality_issue_events` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.quality_issues` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.quality_rule_runs` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.quality_rules` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
+| `data_catalog.quality_score_snapshots` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
 | `delegated_access.access_anomalies` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.access_decision_log` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
 | `delegated_access.access_review_campaigns` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
@@ -137,6 +109,9 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | `insurance.insurance_terms_conditions` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
 | `practice.practitioner_location_assignments` | `Mantra Core Health Context/modules/diagram_14_practice.puml` |
 | `surveys.survey_invitation_reminders` | `Mantra Core Health Context/modules/diagram_65_surveys.puml` |
+| `system_ops.bulk_import_batch_rows` | `Mantra Core Health Context/modules/diagram_11_system_ops.puml` |
+| `system_ops.bulk_import_batches` | `Mantra Core Health Context/modules/diagram_11_system_ops.puml` |
+| `system_ops.governance_policy_revisions` | `Mantra Core Health Context/modules/diagram_11_system_ops.puml` |
 
 ## Columnas del DDL ausentes en la entidad
 
@@ -163,6 +138,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | community.direct_messages.disclosure_shown | boolean | obligatoria |
 | community.service_reviews.verified_crm_case_id | uuid | opcional |
 | crm.crm_cases.insurance_claim_id | uuid | opcional |
+| data_catalog.catalog_objects.domain_id | uuid | opcional |
 | delegated_access.organization_user_assignments.tenant_id | uuid | obligatoria |
 | delegated_access.organization_user_assignments.origin_concept_id | uuid | opcional |
 | delegated_access.organization_user_assignments.owner_kind_concept_id | uuid | opcional |
@@ -170,6 +146,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | delegated_access.organization_user_assignments.recertify_every_months | integer | opcional |
 | delegated_access.organization_user_assignments.next_recertification_at | timestamptz | opcional |
 | delegated_access.organization_user_assignments.ended_reason_text | text | opcional |
+| delegated_access.organization_user_assignments.initiated_by_party_concept_id | uuid | opcional |
 | delegated_access.organization_user_assignments.identity_verified_at | timestamptz | opcional |
 | delegated_access.organization_user_assignments.identity_verified_by_user_id | uuid | opcional |
 | delegated_access.organization_user_assignments.identity_method_concept_id | uuid | opcional |
@@ -199,6 +176,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | insurance.insurance_products.eligibility_requirements | jsonb | opcional |
 | marketing.segments.version_number | integer | opcional |
 | practice.care_spaces.location_path | varchar | opcional |
+| practice.practitioner_support_assignments.initiated_by_party_concept_id | uuid | opcional |
 | scheduling.appointment_bookings.pre_visit_instructions_snapshot | text | opcional |
 | scheduling.appointment_bookings.care_space_id | uuid | opcional |
 | scheduling.appointment_bookings.healthcare_service_id | uuid | opcional |
@@ -248,5 +226,5 @@ _Ninguno._
 
 No figuran en la tabla de dominios de `semantic-data-analysis.md`; sus tablas quedan con dominio «sin dato».
 
-`audio_assets` · `data_catalog` · `medical_groups` · `pharma_lab` · `qa_execution` · `surveys`
+`audio_assets` · `data_catalog` · `medical_groups` · `observability` · `pharma_lab` · `qa_execution` · `surveys`
 

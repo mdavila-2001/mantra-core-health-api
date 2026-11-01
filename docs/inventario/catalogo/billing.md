@@ -2,7 +2,7 @@
 
 # Catálogo del schema `billing`
 
-- **Tablas:** 24 · **Columnas:** 353 (90 con descripción: 25.5 %) · **Índices:** 174
+- **Tablas:** 26 · **Columnas:** 397 (98 con descripción: 24.7 %) · **Índices:** 204
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -15,6 +15,7 @@
 | [bills](#bills) | Representa facturas recibidas de proveedores para administrar cuentas por pagar institucionales. | 23 | 11 | 6 | COINCIDE |
 | [budget_lines](#budget_lines) | Desglosa presupuestos por conceptos o unidades para comparar asignaciones con ejecución financiera. | 11 | 6 | 0 | COINCIDE |
 | [budgets](#budgets) | Registra presupuestos institucionales para planificar gastos y recursos del prestador. | 10 | 5 | 0 | COINCIDE |
+| [charge_captures](#charge_captures) | Registra cada cargo devengado por uso de infraestructura (día-cama por medianoche, quirófano por tiempo) con su tarifa, espacio y encuentro, de forma idempotente, antes de facturarlo. | 25 | 18 | 10 | COINCIDE |
 | [dunning_items](#dunning_items) | Detalla cuentas o documentos tratados en una ejecución de cobranza para seguir acciones por saldo. | 12 | 9 | 2 | COINCIDE |
 | [dunning_runs](#dunning_runs) | Registra ejecuciones de gestión de cobranza para seguir procesos de notificación de saldos vencidos. | 9 | 7 | 6 | COINCIDE |
 | [financial_kpi_snapshots](#financial_kpi_snapshots) | Preserva snapshots de indicadores financieros para analizar evolución económica de servicios y organizaciones de salud. | 9 | 4 | 2 | COINCIDE |
@@ -28,9 +29,10 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 12 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 8 | 66 | COINCIDE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 18 | 9 | 66 | COINCIDE |
 | [siat_simulated_invoices](#siat_simulated_invoices) | sin propósito | 26 | 4 | 15 | COINCIDE |
 | [siat_simulated_outbox](#siat_simulated_outbox) | sin propósito | 8 | 1 | 2 | COINCIDE |
+| [space_tariffs](#space_tariffs) | Define la tarifa vigente por uso de un espacio o categoría de cama (día-cama, quirófano por tiempo) por práctica, sin vigencias solapadas, para valorizar los cargos devengados. | 19 | 11 | 6 | COINCIDE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
 | [tax_periods](#tax_periods) | Define períodos tributarios para agrupar obligaciones y reportes fiscales de la organización sanitaria. | 13 | 4 | 0 | COINCIDE |
 | [vendors](#vendors) | Cataloga proveedores a quienes la organización sanitaria compra bienes o servicios. | 14 | 6 | 2 | COINCIDE |
@@ -39,7 +41,7 @@
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 2 — 18 tablas
+### Familia 1 de 2 — 20 tablas
 
 ```mermaid
 erDiagram
@@ -163,6 +165,16 @@ erDiagram
     uuid status_concept_id FK
     uuid created_by_user_id FK
   }
+  billing_charge_captures["billing.charge_captures"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid practice_id FK
+    uuid patient_profile_id FK
+    uuid encounter_id FK
+    uuid source_kind_concept_id FK
+    uuid care_space_id FK
+    uuid bed_category_concept_id FK
+  }
   billing_tax_codes["billing.tax_codes"] {
     uuid id PK
     uuid practice_id FK
@@ -185,6 +197,16 @@ erDiagram
     uuid tax_code_id FK
     uuid income_account_id FK
     uuid created_by_user_id FK
+  }
+  billing_space_tariffs["billing.space_tariffs"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid practice_id FK
+    uuid tariff_kind_concept_id FK
+    uuid bed_category_concept_id FK
+    uuid care_space_id FK
+    uuid service_catalog_id FK
+    uuid currency_concept_id FK
   }
   billing_quotations["billing.quotations"] {
     uuid id PK
@@ -216,8 +238,12 @@ erDiagram
   billing_receivable_payment_allocations }o--|| billing_payments_received : "payment_received_id"
   billing_receivable_payment_allocations }o--|| billing_invoices : "invoice_id"
   billing_siat_simulated_invoices }o--|| billing_invoices : "invoice_id"
+  billing_charge_captures }o--o| billing_space_tariffs : "space_tariff_id"
+  billing_charge_captures }o--o| billing_invoice_lines : "invoice_line_id"
+  billing_charge_captures }o--|| billing_service_catalog : "practice_id+"
   billing_siat_simulated_outbox }o--|| billing_siat_simulated_invoices : "siat_invoice_id"
   billing_service_catalog }o--o| billing_tax_codes : "tax_code_id"
+  billing_space_tariffs }o--|| billing_service_catalog : "practice_id+"
   billing_quotations }o--|| billing_service_catalog : "service_catalog_id"
   billing_quotation_installments }o--|| billing_quotations : "quotation_id"
 ```
@@ -659,6 +685,127 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 ---
 
+### charge_captures
+
+#### Vista general
+
+Registra cada cargo devengado por uso de infraestructura (día-cama por medianoche, quirófano por tiempo) con su tarifa, espacio y encuentro, de forma idempotente, antes de facturarlo.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: charge_captures`
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
+- **Entidad del ORM:** `ChargeCaptures` — `src/modules/billing/entities/charge_captures.entity.ts`
+- **Resumen:** 25 columnas · 18 índices · 15 FK salientes · 1 entrantes · 10 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/billing/entities/charge_captures.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Clave foránea → billing.service_catalog.practice_id; Obligatoria | _sin dato_ | coincide |
+| 4 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
+| 5 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Opcional | _sin dato_ | coincide |
+| 6 | `source_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 7 | `source_ref_id` | `uuid` | Obligatoria | _sin dato_ | coincide |
+| 8 | `service_date` | `date` | Obligatoria | _sin dato_ | coincide |
+| 9 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
+| 10 | `bed_category_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 11 | `space_tariff_id` | `uuid` | Clave foránea → billing.space_tariffs.id; Opcional | _sin dato_ | coincide |
+| 12 | `service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Opcional | _sin dato_ | coincide |
+| 13 | `quantity` | `numeric` | Obligatoria | _sin dato_ | coincide |
+| 14 | `unit_price` | `numeric(20,6)` | Opcional | _sin dato_ | coincide |
+| 15 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 16 | `cost_center_id` | `uuid` | Clave foránea → accounting.cost_centers.id; Opcional | _sin dato_ | coincide |
+| 17 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 18 | `invoice_line_id` | `uuid` | Clave foránea → billing.invoice_lines.id; Opcional | _sin dato_ | coincide |
+| 19 | `void_reason` | `varchar` | Opcional | _sin dato_ | coincide |
+| 20 | `idempotency_key` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 21 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/charge_captures.entity.ts:140`)_ | coincide |
+| 22 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/charge_captures.entity.ts:146`)_ | coincide |
+| 23 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 24 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 25 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/charge_captures.entity.ts:164`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | space_tariff_id | billing.space_tariffs (id) | fk_charge_captures_space_tariff_id |
+| hacia | invoice_line_id | billing.invoice_lines (id) | fk_charge_captures_invoice_line_id |
+| hacia | tenant_id | directory.tenants (id) | fk_charge_captures_tenant_id |
+| hacia | practice_id | practice.practices (id) | fk_charge_captures_practice_id |
+| hacia | patient_profile_id | profiles.patient_profiles (profile_id) | fk_charge_captures_patient_profile_id |
+| hacia | encounter_id | clinical.encounters (id) | fk_charge_captures_encounter_id |
+| hacia | source_kind_concept_id | terminology.catalog_concepts (id) | fk_charge_captures_source_kind_concept_id |
+| hacia | care_space_id | practice.care_spaces (id) | fk_charge_captures_care_space_id |
+| hacia | bed_category_concept_id | terminology.catalog_concepts (id) | fk_charge_captures_bed_category_concept_id |
+| hacia | practice_id, service_catalog_id | billing.service_catalog (practice_id, id) | fk_charge_captures_service_catalog_id |
+| hacia | currency_concept_id | terminology.catalog_concepts (id) | fk_charge_captures_currency_concept_id |
+| hacia | cost_center_id | accounting.cost_centers (id) | fk_charge_captures_cost_center_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_charge_captures_status_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_charge_captures_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_charge_captures_updated_by_user_id |
+| desde | id | audit.charge_captures_history (charge_capture_id) | fk_charge_captures_history_charge_capture_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_charge_captures_idempotency_key` | sí | idempotency_key | Garantiza que no se repita la combinación (idempotency_key) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «idempotency_key», la primera columna del índice _(CONSULTA)_ |
+| `ix_charge_captures_tenant_id` | no | tenant_id | Soporta la clave foránea fk_charge_captures_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_practice_id` | no | practice_id | Soporta la clave foránea fk_charge_captures_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_charge_captures_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_encounter_id` | no | encounter_id | Soporta la clave foránea fk_charge_captures_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_charge_captures_source_kind_concept_id` | no | source_kind_concept_id | Soporta la clave foránea fk_charge_captures_source_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_care_space_id` | no | care_space_id | Soporta la clave foránea fk_charge_captures_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_bed_category_concept_id` | no | bed_category_concept_id | Soporta la clave foránea fk_charge_captures_bed_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_space_tariff_id` | no | space_tariff_id | Soporta la clave foránea fk_charge_captures_space_tariff_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_service_catalog_id` | no | service_catalog_id | _sin uso detectado estáticamente_ |
+| `ix_charge_captures_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_charge_captures_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_cost_center_id` | no | cost_center_id | Soporta la clave foránea fk_charge_captures_cost_center_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_charge_captures_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_charge_captures_invoice_line_id` | no | invoice_line_id | Soporta la clave foránea fk_charge_captures_invoice_line_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_charge_captures_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_charge_captures_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_encounter_status` | no | encounter_id, status_concept_id | Soporta la clave foránea fk_charge_captures_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `ux_charge_captures_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_charge_captures_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_charge_captures_idempotency_key` | UNIQUE INDEX | UNIQUE INDEX ("idempotency_key") |
+| `ux_charge_captures_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /billing/bed-day/stays | LEE | POR_SQL |
+| POST /billing/charge-captures/{id}/void | ACTUALIZA | POR_TIPO |
+| POST /billing/charge-captures/{id}/void | LEE | DIRECTA |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | CREA | DIRECTA |
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | DIRECTA |
+| GET /billing/encounters/{encounterId}/pending-charges | LEE | DIRECTA |
+| POST /billing/invoices:issue-from-encounter | LEE | DIRECTA |
+| POST /billing/simulated/charges/{chargeId}/payment | LEE | DIRECTA |
+| POST /internal/billing/bed-day-charges/run | CREA | DIRECTA |
+| POST /internal/billing/bed-day-charges/run | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### dunning_items
 
 #### Vista general
@@ -891,7 +1038,7 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoice_lines`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `InvoiceLines` — `src/modules/billing/entities/invoice_lines.entity.ts`
-- **Resumen:** 20 columnas · 11 índices · 9 FK salientes · 2 entrantes · 19 operaciones
+- **Resumen:** 20 columnas · 11 índices · 9 FK salientes · 3 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -931,6 +1078,7 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 | hacia | sales_order_item_id | erp.sales_order_items (id) | fk_invoice_lines_sales_order_item_id |
 | hacia | created_by_user_id | iam.users (id) | fk_invoice_lines_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_invoice_lines_updated_by_user_id |
+| desde | id | billing.charge_captures (invoice_line_id) | fk_charge_captures_invoice_line_id |
 | desde | id | clinical.received_services (invoice_line_id) | fk_received_services_invoice_line_id |
 | desde | id | procedures_perioperative.procedure_charge_items (invoice_line_id) | fk_procedure_charge_items_invoice_line_id |
 
@@ -1573,13 +1721,13 @@ Representa cotizaciones de prestaciones ligadas a una práctica y a una persona 
 | 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 4 | `created_by_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | Identificador del profesional que arma la cotización. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:33`)_ | coincide |
 | 5 | `attention_date` | `date` | Obligatoria | Fecha de atención sobre la que se cotiza. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:39`)_ | coincide |
-| 6 | `appointment_id` | `uuid` | Opcional | Sin <<FK>> a propósito: no tiene destino canónico en lo mergeado (evita un anillo scheduling↔billing). Ver la nota FK homónima en gen_ddl.py — queda sin forzar, temperatura-0. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:544`)_ | coincide |
+| 6 | `appointment_id` | `uuid` | Opcional | Sin <<FK>> a propósito: no tiene destino canónico en lo mergeado (evita un anillo scheduling↔billing). Ver la nota FK homónima en gen_ddl.py — queda sin forzar, temperatura-0. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:625`)_ | coincide |
 | 7 | `service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Obligatoria | Servicio del catálogo cotizado. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:53`)_ | coincide |
 | 8 | `service_name_snapshot` | `varchar` | Obligatoria | Nombre del servicio, copiado del catálogo al momento de crear la cotización (snapshot para trazabilidad). _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:60`)_ | coincide |
 | 9 | `offered_price` | `numeric` | Obligatoria | Precio ofrecido al paciente; editable respecto del precio de catálogo. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:66`)_ | coincide |
 | 10 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 11 | `payment_plan_installment_count` | `integer` | Obligatoria | Cantidad de cuotas del plan de pagos ofrecido. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:78`)_ | coincide |
-| 12 | `down_payment_amount` | `numeric` | Obligatoria | v4.2.18 — plan de pagos flexible, SIN interés: la tasa y el método de amortización (FLAT/FRENCH) salen del modelo; entra lo que se paga el día de la atención y la frecuencia con que se armó el cronograma (sólo punto de partida: cada cuota guarda su propia fecha y monto). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:553`)_ | coincide |
+| 12 | `down_payment_amount` | `numeric` | Obligatoria | v4.2.18 — plan de pagos flexible, SIN interés: la tasa y el método de amortización (FLAT/FRENCH) salen del modelo; entra lo que se paga el día de la atención y la frecuencia con que se armó el cronograma (sólo punto de partida: cada cuota guarda su propia fecha y monto). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:634`)_ | coincide |
 | 13 | `payment_frequency` | `varchar` | Obligatoria | Frecuencia con que se armó el cronograma: `WEEKLY`, `BIWEEKLY` o `MONTHLY`. Sólo el punto de partida: cada cuota guarda su propia fecha. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:90`)_ | coincide |
 | 14 | `valid_until` | `date` | Obligatoria | Fecha hasta la que la oferta es válida. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:96`)_ | coincide |
 | 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Estado de la cotización (reusa los conceptos `STATE_*` de terminology). _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:102`)_ | coincide |
@@ -1811,7 +1959,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 18 columnas · 8 índices · 8 FK salientes · 7 entrantes · 66 operaciones
+- **Resumen:** 18 columnas · 9 índices · 8 FK salientes · 9 entrantes · 66 operaciones
 
 #### Columnas
 
@@ -1851,6 +1999,8 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | desde | id | billing.quotations (service_catalog_id) | fk_quotations_service_catalog_id |
 | desde | id | clinical.received_services (service_catalog_id) | fk_received_services_service_catalog_id |
 | desde | id | practice.healthcare_services (service_catalog_id) | fk_healthcare_services_service_catalog_id |
+| desde | practice_id, id | billing.space_tariffs (practice_id, service_catalog_id) | fk_space_tariffs_service_catalog_id |
+| desde | practice_id, id | billing.charge_captures (practice_id, service_catalog_id) | fk_charge_captures_service_catalog_id |
 | desde | id | clinical_ext.referrals (target_service_catalog_id) | fk_referrals_target_service_catalog_id |
 | desde | id | scheduling.practitioner_service_offerings (service_catalog_id) | fk_practitioner_service_offerings_service_catalog_id |
 | desde | id | procedures_perioperative.procedure_charge_items (billable_item_id) | fk_procedure_charge_items_billable_item_id |
@@ -1868,6 +2018,13 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | `ix_service_catalog_income_account_id` | no | income_account_id | Soporta la clave foránea fk_service_catalog_income_account_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_service_catalog_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_service_catalog_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_service_catalog_practice_id_id` | sí | practice_id, id | Garantiza que no se repita la combinación (practice_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_service_catalog_practice_id_id` | UNIQUE INDEX | UNIQUE INDEX ("practice_id", "id") |
 
 #### Operaciones que la tocan
 
@@ -2105,6 +2262,108 @@ _Sin propósito registrado._
 |---|---|---|
 | POST /billing/simulated/invoices/{invoiceId}/email | CREA | POR_SQL |
 | GET /billing/simulated/outbox | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### space_tariffs
+
+#### Vista general
+
+Define la tarifa vigente por uso de un espacio o categoría de cama (día-cama, quirófano por tiempo) por práctica, sin vigencias solapadas, para valorizar los cargos devengados.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: space_tariffs`
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
+- **Entidad del ORM:** `SpaceTariffs` — `src/modules/billing/entities/space_tariffs.entity.ts`
+- **Resumen:** 19 columnas · 11 índices · 10 FK salientes · 2 entrantes · 6 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/billing/entities/space_tariffs.entity.ts:12`)_ | coincide |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `practice_id` | `uuid` | Clave foránea → practice.practices.id; Clave foránea → billing.service_catalog.practice_id; Obligatoria | _sin dato_ | coincide |
+| 4 | `tariff_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `bed_category_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 6 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
+| 7 | `service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Obligatoria | _sin dato_ | coincide |
+| 8 | `unit_minutes` | `integer` | Opcional | _sin dato_ | coincide |
+| 9 | `minimum_units` | `integer` | Opcional | _sin dato_ | coincide |
+| 10 | `unit_price` | `numeric(20,6)` | Opcional | _sin dato_ | coincide |
+| 11 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 12 | `valid_from` | `date` | Obligatoria | _sin dato_ | coincide |
+| 13 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/space_tariffs.entity.ts:104`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/space_tariffs.entity.ts:110`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/space_tariffs.entity.ts:128`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | tenant_id | directory.tenants (id) | fk_space_tariffs_tenant_id |
+| hacia | practice_id | practice.practices (id) | fk_space_tariffs_practice_id |
+| hacia | tariff_kind_concept_id | terminology.catalog_concepts (id) | fk_space_tariffs_tariff_kind_concept_id |
+| hacia | bed_category_concept_id | terminology.catalog_concepts (id) | fk_space_tariffs_bed_category_concept_id |
+| hacia | care_space_id | practice.care_spaces (id) | fk_space_tariffs_care_space_id |
+| hacia | practice_id, service_catalog_id | billing.service_catalog (practice_id, id) | fk_space_tariffs_service_catalog_id |
+| hacia | currency_concept_id | terminology.catalog_concepts (id) | fk_space_tariffs_currency_concept_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_space_tariffs_status_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_space_tariffs_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_space_tariffs_updated_by_user_id |
+| desde | id | billing.charge_captures (space_tariff_id) | fk_charge_captures_space_tariff_id |
+| desde | id | audit.space_tariffs_history (space_tariff_id) | fk_space_tariffs_history_space_tariff_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_space_tariffs_tenant_id` | no | tenant_id | Soporta la clave foránea fk_space_tariffs_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_practice_id` | no | practice_id | Soporta la clave foránea fk_space_tariffs_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_space_tariffs_tariff_kind_concept_id` | no | tariff_kind_concept_id | Soporta la clave foránea fk_space_tariffs_tariff_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_bed_category_concept_id` | no | bed_category_concept_id | Soporta la clave foránea fk_space_tariffs_bed_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_care_space_id` | no | care_space_id | Soporta la clave foránea fk_space_tariffs_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_service_catalog_id` | no | service_catalog_id | _sin uso detectado estáticamente_ |
+| `ix_space_tariffs_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_space_tariffs_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_space_tariffs_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_space_tariffs_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_space_tariffs_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_space_tariffs_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_space_tariffs_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_space_tariffs_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
+| `ex_space_tariffs_validity` | EXCLUDE | EXCLUDE USING gist ("practice_id" WITH =, "tariff_kind_concept_id" WITH =, coalesce("bed_category_concept_id", '00000000-0000-0000-0000-000000000000'::uuid) WITH =, coalesce("care_space_id", '00000000-0000-0000-0000-000000000000'::uuid) WITH =, daterange("valid_from", "valid_to", '[)') WITH &&) |
+| `ck_space_tariffs_or_time_unit_minutes` | CHECK | CHECK (("tariff_kind_concept_id" <> '25eb53f6-8006-5959-bee9-65b16117bc9b' OR ("unit_minutes" IS NOT NULL AND "unit_minutes" > 0))) |
+| `ck_space_tariffs_valid_period` | CHECK | CHECK (("valid_to" IS NULL OR "valid_to" > "valid_from")) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /billing/encounters/{encounterId}/bed-day-charges/run | LEE | POR_SQL |
+| GET /billing/space-tariffs | LEE | DIRECTA |
+| POST /billing/space-tariffs | CREA | DIRECTA |
+| POST /billing/space-tariffs/{id}/close | ACTUALIZA | POR_TIPO |
+| POST /billing/space-tariffs/{id}/close | LEE | DIRECTA |
+| POST /internal/billing/bed-day-charges/run | LEE | POR_SQL |
 
 #### Gobierno
 

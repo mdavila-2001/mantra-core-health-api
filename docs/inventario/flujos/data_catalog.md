@@ -3,7 +3,7 @@
 # Flujos del módulo `data_catalog`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 50 (42 con decisiones propias, 8 sin ellas)
+- **Operaciones:** 50 (43 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [data_catalog](../endpoints/data_catalog.md)
 
 ## Proceso: Módulo 67 — Catálogo de datos y portal administrativo
@@ -97,13 +97,13 @@ _Fuente: `src/modules/data_catalog/README.md:99`_
 |  |  | GET /admin/catalog/pii/summary | ...PORTAL_VIEW_ROLES | BAJO | 5 |
 |  |  | GET /admin/catalog/quality/issues | ...PORTAL_VIEW_ROLES | BAJO | 3 |
 |  |  | GET /admin/catalog/quality/rules | ...PORTAL_VIEW_ROLES | BAJO | 3 |
-| `ctrl:AdminCatalogFitController` | Operaciones de AdminCatalogFitController que el README no asigna a un caso de uso | GET /admin/catalog/fit | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 0 |
-|  |  | POST /admin/catalog/fit/run | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | BAJO | 5 |
+| `ctrl:AdminCatalogFitController` | Operaciones de AdminCatalogFitController que el README no asigna a un caso de uso | GET /admin/catalog/fit | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 1 |
+|  |  | POST /admin/catalog/fit/run | GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD | ALTO | 7 |
 | `ctrl:AdminPortalController` | Operaciones de AdminPortalController que el README no asigna a un caso de uso | GET /admin/portal/linaje/aristas | ...PORTAL_VIEW_ROLES | BAJO | 0 |
 |  |  | GET /admin/portal/linaje/nodos | ...PORTAL_VIEW_ROLES | BAJO | 0 |
 | `ctrl:GovernanceQueueController` | Operaciones de GovernanceQueueController que el README no asigna a un caso de uso | GET /admin/governance/jobs | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 4 |
 |  |  | GET /admin/governance/review-queue | SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DPO · AUDITOR · DATA_STEWARD | BAJO | 4 |
-| `ctrl:InternalCatalogFitController` | Operaciones de InternalCatalogFitController que el README no asigna a un caso de uso | POST /internal/catalog/fit/run | SYSTEM | BAJO | 5 |
+| `ctrl:InternalCatalogFitController` | Operaciones de InternalCatalogFitController que el README no asigna a un caso de uso | POST /internal/catalog/fit/run | SYSTEM | ALTO | 7 |
 | `ctrl:InternalCatalogInventoryController` | Operaciones de InternalCatalogInventoryController que el README no asigna a un caso de uso | POST /internal/catalog/inventory/import | SYSTEM | ALTO | 15 |
 | `ctrl:InternalCatalogScansController` | Operaciones de InternalCatalogScansController que el README no asigna a un caso de uso | POST /internal/catalog/scans/run-next | SYSTEM | MEDIO | 15 |
 
@@ -330,8 +330,8 @@ flowchart LR
   a2(["GOVERNANCE_ADMIN · DATA_PLATFORM_ADMIN · DATA_STEWARD"]):::actor
   a10(["...PORTAL_VIEW_ROLES"]):::actor
   a24(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_P…"]):::actor
-  a31(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_G…"]):::actor
-  a37(["SYSTEM"]):::actor
+  a32(["SECURITY_ADMIN · PLATFORM_ADMIN · GOVERNANCE_ADMIN · DATA_G…"]):::actor
+  a39(["SYSTEM"]):::actor
   t3[("data_catalog.catalog_annotation_revisions")]:::tabla
   t4[("data_catalog.catalog_annotations")]:::tabla
   t5[("data_catalog.catalog_change_events")]:::tabla
@@ -341,12 +341,13 @@ flowchart LR
   t16[("data_catalog.catalog_objects")]:::tabla
   t17[("system_ops.entity_registry")]:::tabla
   t18[("system_ops.field_registry")]:::tabla
-  t26[("data_catalog.catalog_operations")]:::tabla
-  t27[("data_catalog.catalog_scan_runs")]:::tabla
-  t32[("audit.audit_log")]:::tabla
-  t33[("system_ops.retention_executions")]:::tabla
-  t34[("terminology.catalog_concepts")]:::tabla
-  t39[("data_catalog.catalog_operation_impacts")]:::tabla
+  t25[("data_catalog.catalog_fit_runs")]:::tabla
+  t27[("data_catalog.catalog_operations")]:::tabla
+  t33[("audit.audit_log")]:::tabla
+  t34[("data_catalog.catalog_scan_runs")]:::tabla
+  t35[("system_ops.retention_executions")]:::tabla
+  t36[("terminology.catalog_concepts")]:::tabla
+  t42[("data_catalog.catalog_operation_impacts")]:::tabla
   t7[("+1 tablas más")]
   subgraph s0["ctrl:AdminCatalogController · Operaciones de AdminCatalogController que el READ…"]
     o1["POST /admin/catalog/classification/run"]:::op
@@ -360,28 +361,30 @@ flowchart LR
     o21["GET /admin/catalog/quality/issues"]:::op
     o22["GET /admin/catalog/quality/rules"]:::op
   end
+  t28[("+1 tablas más")]
   subgraph s1["ctrl:AdminCatalogFitController · Operaciones de AdminCatalogFitController que e…"]
     o23["GET /admin/catalog/fit"]:::op
-    o25["POST /admin/catalog/fit/run"]:::op
+    o26["POST /admin/catalog/fit/run"]:::op
   end
   subgraph s2["ctrl:AdminPortalController · Operaciones de AdminPortalController que el README…"]
-    o28["GET /admin/portal/linaje/aristas"]:::op
-    o29["GET /admin/portal/linaje/nodos"]:::op
+    o29["GET /admin/portal/linaje/aristas"]:::op
+    o30["GET /admin/portal/linaje/nodos"]:::op
   end
   subgraph s3["ctrl:GovernanceQueueController · Operaciones de GovernanceQueueController que e…"]
-    o30["GET /admin/governance/jobs"]:::op
-    o35["GET /admin/governance/review-queue"]:::op
+    o31["GET /admin/governance/jobs"]:::op
+    o37["GET /admin/governance/review-queue"]:::op
   end
+  t40[("+1 tablas más")]
   subgraph s4["ctrl:InternalCatalogFitController · Operaciones de InternalCatalogFitController…"]
-    o36["POST /internal/catalog/fit/run"]:::op
+    o38["POST /internal/catalog/fit/run"]:::op
   end
-  t40[("+9 tablas más")]
+  t43[("+9 tablas más")]
   subgraph s5["ctrl:InternalCatalogInventoryController · Operaciones de InternalCatalogInvento…"]
-    o38["POST /internal/catalog/inventory/import"]:::op
+    o41["POST /internal/catalog/inventory/import"]:::op
   end
-  t42[("+9 tablas más")]
+  t45[("+9 tablas más")]
   subgraph s6["ctrl:InternalCatalogScansController · Operaciones de InternalCatalogScansContro…"]
-    o41["POST /internal/catalog/scans/run-next"]:::op
+    o44["POST /internal/catalog/scans/run-next"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -432,46 +435,51 @@ flowchart LR
   o22 -->|"LEE"| t6
   o22 -->|"LEE"| t16
   a24 --> o23
-  a2 --> o25
-  o25 -->|"LEE"| t4
-  o25 -->|"LEE"| t6
-  o25 -->|"LEE"| t16
-  o25 -->|"LEE"| t26
-  o25 -->|"LEE"| t27
-  a10 --> o28
+  o23 -->|"LEE"| t25
+  a2 --> o26
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t6
+  o26 -->|"BORRA"| t25
+  o26 -->|"CREA"| t25
+  o26 -->|"LEE"| t16
+  o26 -->|"LEE"| t27
+  o26 -.-> t28
   a10 --> o29
-  a31 --> o30
-  o30 -->|"LEE"| t32
-  o30 -->|"LEE"| t27
-  o30 -->|"LEE"| t33
-  o30 -->|"LEE"| t34
-  a31 --> o35
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t4
-  o35 -->|"LEE"| t6
-  o35 -->|"LEE"| t16
-  a37 --> o36
-  o36 -->|"LEE"| t4
-  o36 -->|"LEE"| t6
-  o36 -->|"LEE"| t16
-  o36 -->|"LEE"| t26
-  o36 -->|"LEE"| t27
-  a37 --> o38
+  a10 --> o30
+  a32 --> o31
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t35
+  o31 -->|"LEE"| t36
+  a32 --> o37
+  o37 -->|"LEE"| t3
+  o37 -->|"LEE"| t4
+  o37 -->|"LEE"| t6
+  o37 -->|"LEE"| t16
+  a39 --> o38
+  o38 -->|"LEE"| t4
+  o38 -->|"LEE"| t6
+  o38 -->|"BORRA"| t25
+  o38 -->|"CREA"| t25
   o38 -->|"LEE"| t16
-  o38 -->|"BORRA"| t39
-  o38 -->|"CREA"| t39
-  o38 -->|"CREA"| t26
-  o38 -->|"ACTUALIZA"| t26
-  o38 -->|"LEE"| t26
+  o38 -->|"LEE"| t27
   o38 -.-> t40
-  a37 --> o41
-  o41 -->|"CREA"| t3
-  o41 -->|"CREA"| t4
-  o41 -->|"ACTUALIZA"| t4
-  o41 -->|"LEE"| t4
-  o41 -->|"CREA"| t5
-  o41 -->|"LEE"| t5
-  o41 -.-> t42
+  a39 --> o41
+  o41 -->|"LEE"| t16
+  o41 -->|"BORRA"| t42
+  o41 -->|"CREA"| t42
+  o41 -->|"CREA"| t27
+  o41 -->|"ACTUALIZA"| t27
+  o41 -->|"LEE"| t27
+  o41 -.-> t43
+  a39 --> o44
+  o44 -->|"CREA"| t3
+  o44 -->|"CREA"| t4
+  o44 -->|"ACTUALIZA"| t4
+  o44 -->|"LEE"| t4
+  o44 -->|"CREA"| t5
+  o44 -->|"LEE"| t5
+  o44 -.-> t45
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -807,9 +815,54 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /admin/catalog/fit/run
+#### 6. GET /admin/catalog/fit
 
+Último resultado de la sonda de ajuste de la catalogación
 
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CatalogFitService.latest"]:::llamada
+  n2 --> n3
+  n4{"this.runs"}:::decision
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 -->|"sí"| n5
+  n6["Llama a FitRunsRepository.latestCompleted"]:::llamada
+  n5 --> n6
+  n7[("LEE data_catalog.catalog_fit_runs")]:::efecto
+  n6 --> n7
+  n8["Llama a FitRunsRepository.latestFailed"]:::llamada
+  n7 --> n8
+  n9[("LEE data_catalog.catalog_fit_runs")]:::efecto
+  n8 --> n9
+  n10["Llama a FitRunsRepository.history"]:::llamada
+  n9 --> n10
+  n11[("LEE data_catalog.catalog_fit_runs")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
+  n4 -->|"no"| n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /admin/catalog/fit/run
+
+Pide una corrida de la sonda de ajuste (se ejecuta fuera de la petición)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -837,7 +890,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /admin/catalog/objects
+#### 8. GET /admin/catalog/objects
 
 Objetos del catálogo, paginados por cursor
 
@@ -878,7 +931,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /admin/catalog/objects/{id}
+#### 9. GET /admin/catalog/objects/{id}
 
 Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto
 
@@ -931,7 +984,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PUT /admin/catalog/objects/{id}/annotation
+#### 10. PUT /admin/catalog/objects/{id}/annotation
 
 Crea o edita la ficha de un objeto (con versión esperada)
 
@@ -1029,7 +1082,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /admin/catalog/objects/{id}/changes
+#### 11. GET /admin/catalog/objects/{id}/changes
 
 Cambios que los escaneos detectaron en un objeto
 
@@ -1072,7 +1125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /admin/catalog/objects/{id}/columns
+#### 12. GET /admin/catalog/objects/{id}/columns
 
 Columnas observadas de un objeto, con su ficha si la tienen
 
@@ -1119,7 +1172,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. GET /admin/catalog/objects/{id}/evidence
+#### 13. GET /admin/catalog/objects/{id}/evidence
 
 Evidencia enlazada a un objeto
 
@@ -1162,7 +1215,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /admin/catalog/objects/{id}/evidence
+#### 14. POST /admin/catalog/objects/{id}/evidence
 
 Enlaza evidencia a un objeto
 
@@ -1208,7 +1261,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /admin/catalog/objects/{id}/history
+#### 15. GET /admin/catalog/objects/{id}/history
 
 Revisiones y decisiones de la ficha de un objeto
 
@@ -1261,7 +1314,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /admin/catalog/objects/{id}/impact
+#### 16. GET /admin/catalog/objects/{id}/impact
 
 Quién referencia a un objeto y a quién referencia, por claves foráneas observadas
 
@@ -1312,7 +1365,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /admin/catalog/pii/columns
+#### 17. GET /admin/catalog/pii/columns
 
 Columnas clasificadas como datos personales, con su sensibilidad y estado de revisión
 
@@ -1351,9 +1404,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /admin/catalog/pii/reconciliation
+#### 18. GET /admin/catalog/pii/reconciliation
 
-
+Conciliación de las columnas personales del catálogo con el registro declarado de gobierno
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1403,7 +1456,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /admin/catalog/quality/issues
+#### 19. GET /admin/catalog/quality/issues
 
 Incidencias de calidad del catálogo (derivadas al leer), paginadas
 
@@ -1450,7 +1503,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /admin/catalog/scans
+#### 20. POST /admin/catalog/scans
 
 Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
 
@@ -1552,7 +1605,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /admin/catalog/scans/{id}
+#### 21. GET /admin/catalog/scans/{id}
 
 Un escaneo
 
@@ -1589,9 +1642,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /admin/governance/jobs
+#### 22. GET /admin/governance/jobs
 
-
+Trabajos de gobierno: escaneos del catálogo, clasificaciones y ejecuciones de retención
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1626,7 +1679,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /admin/portal/catalogo/deriva
+#### 23. GET /admin/portal/catalogo/deriva
 
 Deriva entre el DDL del modelo y las entidades del ORM
 
@@ -1673,7 +1726,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /admin/portal/catalogo/tablas
+#### 24. GET /admin/portal/catalogo/tablas
 
 Listar las tablas del catálogo de datos
 
@@ -1720,7 +1773,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
+#### 25. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
 
 Ver la ficha de una tabla
 
@@ -1794,7 +1847,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /admin/portal/flujos
+#### 26. GET /admin/portal/flujos
 
 Listar los procesos de negocio
 
@@ -1841,7 +1894,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /admin/portal/flujos/{codigo}
+#### 27. GET /admin/portal/flujos/{codigo}
 
 Ver un proceso con sus etapas y máquinas de estado
 
@@ -1907,7 +1960,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /admin/portal/flujos/{codigo}/grafo
+#### 28. GET /admin/portal/flujos/{codigo}/grafo
 
 Ver el grafo de un proceso
 
@@ -1973,7 +2026,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /admin/portal/flujos/hallazgos
+#### 29. GET /admin/portal/flujos/hallazgos
 
 Resumen de hallazgos del mapa
 
@@ -2020,7 +2073,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /admin/portal/flujos/hallazgos/{id}
+#### 30. GET /admin/portal/flujos/hallazgos/{id}
 
 Ver los casos de un hallazgo
 
@@ -2072,7 +2125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /admin/portal/flujos/mapa
+#### 31. GET /admin/portal/flujos/mapa
 
 Mapa de operaciones con sus señales
 
@@ -2119,7 +2172,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /admin/portal/glosario
+#### 32. GET /admin/portal/glosario
 
 Buscar en el glosario
 
@@ -2166,7 +2219,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /admin/portal/linaje
+#### 33. GET /admin/portal/linaje
 
 Métricas del linaje de datos
 
@@ -2213,7 +2266,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /admin/portal/linaje/aristas
+#### 34. GET /admin/portal/linaje/aristas
 
 Aristas del linaje (lee, escribe, borra, referencia, pertenece)
 
@@ -2260,7 +2313,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. GET /admin/portal/linaje/nodos
+#### 35. GET /admin/portal/linaje/nodos
 
 Nodos del linaje (operaciones, tablas, dominios)
 
@@ -2307,7 +2360,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. GET /admin/portal/linaje/tablas/{schema}/{tabla}
+#### 36. GET /admin/portal/linaje/tablas/{schema}/{tabla}
 
 Linaje de una tabla
 
@@ -2359,7 +2412,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. GET /admin/portal/operaciones
+#### 37. GET /admin/portal/operaciones
 
 Listar las operaciones HTTP del sistema
 
@@ -2420,7 +2473,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /admin/portal/operaciones/{id}
+#### 38. GET /admin/portal/operaciones/{id}
 
 Ver la ficha de una operación
 
@@ -2478,7 +2531,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. GET /admin/portal/operaciones/{id}/arbol
+#### 39. GET /admin/portal/operaciones/{id}/arbol
 
 Ver el árbol de decisión de una operación
 
@@ -2547,7 +2600,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. GET /admin/portal/version
+#### 40. GET /admin/portal/version
 
 Versión y tamaño del inventario publicado
 
@@ -2627,9 +2680,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. POST /internal/catalog/fit/run
+#### 41. POST /internal/catalog/fit/run
 
-
+Corre la sonda de ajuste y espera su desenlace (worker)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -2657,7 +2710,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /internal/catalog/inventory/import
+#### 42. POST /internal/catalog/inventory/import
 
 Importa el inventario de la API a las tablas de operaciones y procesos (worker)
 
@@ -2828,7 +2881,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. POST /internal/catalog/scans/run-next
+#### 43. POST /internal/catalog/scans/run-next
 
 Sonda: reclama y ejecuta el siguiente escaneo (worker)
 
@@ -3011,7 +3064,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | GET /admin/catalog/coverage | 200, 401, 403, 429 | 3 |
-| GET /admin/catalog/fit | 200, 401, 403, 429 | 0 |
 | GET /admin/catalog/permission-drift | 200, 401, 403, 429 | 1 |
 | GET /admin/catalog/pii/summary | 200, 401, 403, 429 | 5 |
 | GET /admin/catalog/quality/rules | 200, 401, 403, 429 | 3 |

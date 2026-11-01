@@ -3,7 +3,7 @@
 # Endpoints del módulo `observability`
 
 - **Bloque:** —
-- **Operaciones:** 14 (0 en el contrato, 14 sólo en el código)
+- **Operaciones:** 14 (13 en el contrato, 1 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 1 · BAJO 13
 - **Tablas distintas que tocan:** 7
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/observability.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -12,27 +12,27 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/admin/observability/coverage` | — | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 2 | GET | `/admin/observability/endpoints` | — | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 3 | GET | `/admin/observability/errors/events` | — | BAJO | 2 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 4 | GET | `/admin/observability/errors/groups` | — | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 5 | GET | `/admin/observability/errors/groups/{id}` | — | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 6 | PATCH | `/admin/observability/errors/groups/{id}` | Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que exige una organización elegida (o un rol global con resolución propia, como `SUPERADMIN`). Es la decisión conservadora; ver el README del módulo. | MEDIO | 2 | PLATFORM_ADMIN, SRE |
-| 7 | GET | `/admin/observability/modules` | — | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 8 | GET | `/admin/observability/requests/{requestId}` | — | BAJO | 2 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 9 | GET | `/admin/observability/sql/slow` | — | BAJO | 2 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 10 | GET | `/admin/observability/sql/statements` | — | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 11 | GET | `/admin/observability/sql/statements/{hash}` | — | BAJO | 4 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 12 | GET | `/admin/observability/summary` | — | BAJO | 4 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
-| 13 | GET | `/admin/observability/timeseries` | — | BAJO | 4 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 1 | GET | `/admin/observability/coverage` | Qué se mide, qué no, y si la propia medición está sana | BAJO | 1 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 2 | GET | `/admin/observability/endpoints` | Operaciones por tráfico, fallos y latencia | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 3 | GET | `/admin/observability/errors/events` | Eventos de error (sin mensajes), paginados | BAJO | 2 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 4 | GET | `/admin/observability/errors/groups` | Grupos de errores (huella estable) con su actividad | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 5 | GET | `/admin/observability/errors/groups/{id}` | Un grupo de errores con sus eventos recientes | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 6 | PATCH | `/admin/observability/errors/groups/{id}` | Marcar un grupo como visto, resuelto o ignorado (con motivo y versión) | MEDIO | 2 | PLATFORM_ADMIN, SRE |
+| 7 | GET | `/admin/observability/modules` | Errores y latencia por módulo | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 8 | GET | `/admin/observability/requests/{requestId}` | Qué se guardó de una petición (errores y muestra lenta) por su requestId | BAJO | 2 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 9 | GET | `/admin/observability/sql/slow` | Peticiones lentas o con error muestreadas, con su SQL | BAJO | 2 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 10 | GET | `/admin/observability/sql/statements` | Consultas SQL por coste (huella, nunca parámetros) | BAJO | 3 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 11 | GET | `/admin/observability/sql/statements/{hash}` | Una consulta normalizada y quién la dispara | BAJO | 4 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 12 | GET | `/admin/observability/summary` | Estado del sistema en la ventana: KPIs con null+reason | BAJO | 4 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
+| 13 | GET | `/admin/observability/timeseries` | Serie temporal de una métrica (un cubo sin fila es «sin dato») | BAJO | 4 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN |
 | 14 | GET | `/internal/observability/selftest/fail` | — | BAJO | 0 | SYSTEM |
 
 ---
 
 ## 1. GET /admin/observability/coverage
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Qué se mide, qué no, y si la propia medición está sana
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -40,9 +40,9 @@
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Qué se mide, qué no, y si la propia medición está sana.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -67,7 +67,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `WindowQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
 
 ### Cuerpo
 
@@ -100,8 +102,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 2. GET /admin/observability/endpoints
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Operaciones por tráfico, fallos y latencia
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -109,9 +111,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Operaciones por tráfico, fallos y latencia.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -138,7 +140,13 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `EndpointsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior |
+| `limit` | query | No | `number` | — |
+| `module` | query | No | `string` | Filtra por `module_code` |
+| `sort` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -171,8 +179,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 3. GET /admin/observability/errors/events
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Eventos de error (sin mensajes), paginados
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -180,9 +188,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Eventos de error (sin mensajes), paginados.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -208,7 +216,13 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ErrorEventsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior |
+| `limit` | query | No | `number` | — |
+| `groupId` | query | No | `string` | — |
+| `requestId` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -241,8 +255,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 4. GET /admin/observability/errors/groups
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Grupos de errores (huella estable) con su actividad
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -250,9 +264,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Grupos de errores (huella estable) con su actividad.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -279,7 +293,16 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ErrorGroupsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior |
+| `limit` | query | No | `number` | — |
+| `state` | query | No | `string` | — |
+| `module` | query | No | `string` | — |
+| `code` | query | No | `string` | — |
+| `source` | query | No | `string` | — |
+| `sort` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -312,8 +335,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 5. GET /admin/observability/errors/groups/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Un grupo de errores con sus eventos recientes
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -321,9 +344,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Un grupo de errores con sus eventos recientes.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -352,7 +375,10 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
-| `—` | query | sin dato | `IntervalWindowQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `interval` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -386,8 +412,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 6. PATCH /admin/observability/errors/groups/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que exige una organización elegida (o un rol global con resolución propia, como `SUPERADMIN`). Es la decisión conservadora; ver el README del módulo.
+- **Origen:** CONTRATO
+- **Nombre:** Marcar un grupo como visto, resuelto o ignorado (con motivo y versión)
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -395,9 +421,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que exige una organización elegida (o un rol global con resolución propia, como `SUPERADMIN`). Es la decisión conservadora; ver el README del módulo. Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Marcar un grupo como visto, resuelto o ignorado (con motivo y versión).
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -411,6 +437,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PLATFORM_ADMIN, SRE | `src/modules/observability/presentation/controllers/observability.controller.ts:140` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/observability/presentation/controllers/observability.controller.ts:140` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -426,7 +454,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `ChangeErrorGroupStateDto`
+### Cuerpo — DTO `ChangeErrorGroupStateDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -464,7 +492,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -484,8 +512,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 7. GET /admin/observability/modules
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Errores y latencia por módulo
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -493,9 +521,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Errores y latencia por módulo.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -522,7 +550,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `WindowQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
 
 ### Cuerpo
 
@@ -555,8 +585,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 8. GET /admin/observability/requests/{requestId}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Qué se guardó de una petición (errores y muestra lenta) por su requestId
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -564,9 +594,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Qué se guardó de una petición (errores y muestra lenta) por su requestId.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -625,8 +655,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 9. GET /admin/observability/sql/slow
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Peticiones lentas o con error muestreadas, con su SQL
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -634,9 +664,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Peticiones lentas o con error muestreadas, con su SQL.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -662,7 +692,11 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `PageQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -695,8 +729,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 10. GET /admin/observability/sql/statements
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Consultas SQL por coste (huella, nunca parámetros)
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -704,9 +738,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Consultas SQL por coste (huella, nunca parámetros).
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -733,7 +767,13 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `SqlStatementsQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior |
+| `limit` | query | No | `number` | — |
+| `sort` | query | No | `string` | — |
+| `module` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -766,8 +806,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 11. GET /admin/observability/sql/statements/{hash}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Una consulta normalizada y quién la dispara
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -775,9 +815,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Una consulta normalizada y quién la dispara.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -806,7 +846,10 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `hash` | path | Sí | `string` | — |
-| `—` | query | sin dato | `IntervalWindowQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `interval` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -840,8 +883,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 12. GET /admin/observability/summary
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Estado del sistema en la ventana: KPIs con null+reason
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -849,9 +892,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Estado del sistema en la ventana: KPIs con null+reason.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -879,7 +922,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `WindowQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
 
 ### Cuerpo
 
@@ -912,8 +957,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 13. GET /admin/observability/timeseries
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Serie temporal de una métrica (un cubo sin fila es «sin dato»)
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -921,9 +966,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+Serie temporal de una métrica (un cubo sin fila es «sin dato»).
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -936,6 +981,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/observability/presentation/controllers/observability.controller.ts:59` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| PARAMETRO_QUERY | metric (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -951,7 +997,12 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `TimeseriesQueryDto` | — |
+| `from` | query | No | `string` | Por defecto: 00:00 de `to` en la zona `tz` |
+| `to` | query | No | `string` | Por defecto: ahora |
+| `tz` | query | No | `string` | Zona IANA de los cubos; la respuesta la devuelve en `window.timezone` |
+| `interval` | query | No | `string` | — |
+| `metric` | query | Sí | `string` | — |
+| `groupBy` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -966,6 +1017,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -994,9 +1046,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Answers "is the system healthy, what is failing, how often, since when and where does the time go" for platform operators: grouped errors with a fingerprint and a request id to jump to the trace…»
+_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_70_observability.puml:67`)
+
 
 ### Cómo se atiende (sistema)
 

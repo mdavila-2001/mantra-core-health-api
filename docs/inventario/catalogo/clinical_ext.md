@@ -2,7 +2,7 @@
 
 # Catálogo del schema `clinical_ext`
 
-- **Tablas:** 14 · **Columnas:** 249 (86 con descripción: 34.5 %) · **Índices:** 112
+- **Tablas:** 14 · **Columnas:** 249 (86 con descripción: 34.5 %) · **Índices:** 113
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -22,7 +22,7 @@
 | [order_sets](#order_sets) | Define conjuntos reutilizables de órdenes clínicas para apoyar flujos frecuentes de atención con componentes coordinados. | 14 | 7 | 3 | COINCIDE |
 | [prescription_favorites](#prescription_favorites) | Guarda selecciones frecuentes de prescripción para facilitar la captura de órdenes recurrentes por profesionales autorizados. | 16 | 8 | 5 | COINCIDE |
 | [reference_ranges](#reference_ranges) | Conserva rangos de referencia clínicos para contextualizar la interpretación de mediciones y resultados. | 18 | 6 | 0 | COINCIDE |
-| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 57 | 19 | 19 | COINCIDE |
+| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 57 | 20 | 19 | COINCIDE |
 | [virtual_encounters](#virtual_encounters) | Representa encuentros clínicos realizados por canales virtuales y conserva su contexto dentro de la atención del paciente. | 14 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -1081,7 +1081,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: referrals`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `Referrals` — `src/modules/clinical_ext/entities/referrals.entity.ts`
-- **Resumen:** 57 columnas · 19 índices · 17 FK salientes · 1 entrantes · 19 operaciones
+- **Resumen:** 57 columnas · 20 índices · 17 FK salientes · 2 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -1159,19 +1159,21 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | hacia | reason_concept_id | terminology.catalog_concepts (id) | fk_referrals_reason_concept_id |
 | hacia | priority_concept_id | terminology.catalog_concepts (id) | fk_referrals_priority_concept_id |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_referrals_status_concept_id |
+| hacia | referral_type_concept_id | terminology.catalog_concepts (id) | fk_referrals_referral_type_concept_id |
+| hacia | target_service_catalog_id | billing.service_catalog (id) | fk_referrals_target_service_catalog_id |
 | hacia | target_branch_id | directory.branches (id) | fk_referrals_target_branch_id |
 | hacia | requested_service_concept_id | terminology.catalog_concepts (id) | fk_referrals_requested_service_concept_id |
 | hacia | informed_consent_id | consent.treatment_informed_consents (id) | fk_referrals_informed_consent_id |
-| hacia | referral_type_concept_id | terminology.catalog_concepts (id) | fk_referrals_referral_type_concept_id |
-| hacia | target_service_catalog_id | billing.service_catalog (id) | fk_referrals_target_service_catalog_id |
 | hacia | created_by_user_id | iam.users (id) | fk_referrals_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_referrals_updated_by_user_id |
+| desde | id | clinical.patient_admission_footprints (referral_id) | fk_patient_admission_footprints_referral_id |
 | desde | id | audit.referrals_history (referral_id) | fk_referrals_history_referral_id |
 
 #### Índices
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
+| `ux_referrals_id_patient_target` | sí | id, patient_profile_id, target_tenant_id | Garantiza que no se repita la combinación (id, patient_profile_id, target_tenant_id) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «id», la primera columna del índice _(CONSULTA)_ |
 | `ix_referrals_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_referrals_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_referrals_source_encounter_id` | no | source_encounter_id | Soporta la clave foránea fk_referrals_source_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_referring_profile_id` | no | referring_profile_id | Soporta la clave foránea fk_referrals_referring_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1196,6 +1198,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 
 | Restricción | Tipo | Definición |
 |---|---|---|
+| `ux_referrals_id_patient_target` | UNIQUE INDEX | UNIQUE INDEX ("id", "patient_profile_id", "target_tenant_id") |
 | `uq_referrals_source_encounter_target_specialty` | UNIQUE INDEX | UNIQUE INDEX ("source_encounter_id", "target_profile_id", "specialty_concept_id") WHERE source_encounter_id IS NOT NULL AND target_profile_id IS NOT NULL AND specialty_concept_id IS NOT NULL |
 | `ck_referrals_transport_mode` | CHECK | CHECK ("transport_mode" IN ('AMBULANCE_BASIC','AMBULANCE_ADVANCED','AIR_AMBULANCE','RIVER','PRIVATE_VEHICLE','PUBLIC_TRANSPORT','ON_FOOT','OTHER')) |
 | `ck_referrals_departure_condition` | CHECK | CHECK ("departure_condition" IN ('STABLE','UNSTABLE','CRITICAL')) |

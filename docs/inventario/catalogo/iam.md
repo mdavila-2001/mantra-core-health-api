@@ -20,7 +20,7 @@
 | [mfa_factors](#mfa_factors) | Registra factores de autenticación adicional para reforzar la protección de cuentas que acceden a datos médicos. | 12 | 5 | 5 | COINCIDE |
 | [password_resets](#password_resets) | Gestiona solicitudes de restablecimiento de credenciales para recuperar acceso de forma controlada. | 13 | 2 | 4 | COINCIDE |
 | [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 18 | COINCIDE |
-| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 33 | COINCIDE |
+| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 34 | COINCIDE |
 | [session_policies](#session_policies) | Fija por organización la duración de la sesión inactiva, la alerta de dispositivo nuevo, el horario permitido y el uso de reglas de IP y MFA, para todas las cuentas, su personal o un rol. | 15 | 7 | 0 | SIN_ENTIDAD |
 | [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 143 | COINCIDE |
 | [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 25 | COINCIDE |
@@ -1201,7 +1201,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: security_events`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `SecurityEvents` — `src/modules/iam/entities/security_events.entity.ts`
-- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 33 operaciones
+- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 34 operaciones
 
 #### Columnas
 
@@ -1240,6 +1240,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| DELETE /authz/resource-scope-grants/{grantId} | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /iam/auth/activate | CREA | DIRECTA |
 | POST /iam/auth/change-password | CREA | DIRECTA |
@@ -1378,7 +1379,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: sessions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Sessions` — `src/modules/iam/entities/sessions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 6 entrantes · 143 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 7 entrantes · 143 operaciones
 
 #### Columnas
 
@@ -1413,6 +1414,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | desde | id | telemetry.user_activity_events (session_id) | fk_user_activity_events_session_id |
 | desde | id | telemetry.session_journeys (session_id) | fk_session_journeys_session_id |
 | desde | id | telemetry.client_contexts (session_id) | fk_client_contexts_session_id |
+| desde | id | telemetry.client_error_events (session_id) | fk_client_error_events_session_id |
 
 #### Índices
 
@@ -1692,7 +1694,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: users`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Users` — `src/modules/iam/entities/users.entity.ts`
-- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2097 entrantes · 112 operaciones
+- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2186 entrantes · 112 operaciones
 
 #### Columnas
 
@@ -1836,7 +1838,11 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | directory.tenant_web_configs (updated_by_user_id) | fk_tenant_web_configs_updated_by_user_id |
 | desde | id | directory.affiliation_invitations (created_by_user_id) | fk_affiliation_invitations_created_by_user_id |
 | desde | id | directory.affiliation_invitations (updated_by_user_id) | fk_affiliation_invitations_updated_by_user_id |
+| desde | id | directory.tenant_medical_facilities (created_by_user_id) | fk_tenant_medical_facilities_created_by_user_id |
+| desde | id | directory.tenant_medical_facilities (updated_by_user_id) | fk_tenant_medical_facilities_updated_by_user_id |
 | desde | id | directory.affiliation_invitation_uses (used_by_user_id) | fk_affiliation_invitation_uses_used_by_user_id |
+| desde | id | directory.tenant_medical_facility_sites (created_by_user_id) | fk_tenant_medical_facility_sites_created_by_user_id |
+| desde | id | directory.tenant_medical_facility_sites (updated_by_user_id) | fk_tenant_medical_facility_sites_updated_by_user_id |
 | desde | id | profiles.persons (created_by_user_id) | fk_persons_created_by_user_id |
 | desde | id | profiles.persons (updated_by_user_id) | fk_persons_updated_by_user_id |
 | desde | id | profiles.person_account_links (user_id) | fk_person_account_links_user_id |
@@ -1860,6 +1866,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | profiles.practitioner_specialties (updated_by_user_id) | fk_practitioner_specialties_updated_by_user_id |
 | desde | id | profiles.practitioner_languages (created_by_user_id) | fk_practitioner_languages_created_by_user_id |
 | desde | id | profiles.practitioner_languages (updated_by_user_id) | fk_practitioner_languages_updated_by_user_id |
+| desde | id | profiles.jurisdiction_authorizations (verified_by_user_id) | fk_jurisdiction_authorizations_verified_by_user_id |
 | desde | id | profiles.jurisdiction_authorizations (created_by_user_id) | fk_jurisdiction_authorizations_created_by_user_id |
 | desde | id | profiles.jurisdiction_authorizations (updated_by_user_id) | fk_jurisdiction_authorizations_updated_by_user_id |
 | desde | id | profiles.practitioner_affiliations (created_by_user_id) | fk_practitioner_affiliations_created_by_user_id |
@@ -1871,6 +1878,16 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | profiles.patient_portal_proxies (updated_by_user_id) | fk_patient_portal_proxies_updated_by_user_id |
 | desde | id | profiles.patient_primary_practitioners (created_by_user_id) | fk_patient_primary_practitioners_created_by_user_id |
 | desde | id | profiles.patient_primary_practitioners (updated_by_user_id) | fk_patient_primary_practitioners_updated_by_user_id |
+| desde | id | profiles.admission_requirements (created_by_user_id) | fk_admission_requirements_created_by_user_id |
+| desde | id | profiles.admission_requirements (updated_by_user_id) | fk_admission_requirements_updated_by_user_id |
+| desde | id | profiles.practitioner_admissions (assigned_to_user_id) | fk_practitioner_admissions_assigned_to_user_id |
+| desde | id | profiles.practitioner_admissions (decided_by_user_id) | fk_practitioner_admissions_decided_by_user_id |
+| desde | id | profiles.practitioner_admissions (created_by_user_id) | fk_practitioner_admissions_created_by_user_id |
+| desde | id | profiles.practitioner_admissions (updated_by_user_id) | fk_practitioner_admissions_updated_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (reviewed_by_user_id) | fk_practitioner_admission_reviews_reviewed_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (created_by_user_id) | fk_practitioner_admission_reviews_created_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (updated_by_user_id) | fk_practitioner_admission_reviews_updated_by_user_id |
+| desde | id | profiles.practitioner_admission_events (actor_user_id) | fk_practitioner_admission_events_actor_user_id |
 | desde | id | profiles.insurance_representative_profiles (created_by_user_id) | fk_insurance_representative_profiles_created_by_user_id |
 | desde | id | profiles.insurance_representative_profiles (updated_by_user_id) | fk_insurance_representative_profiles_updated_by_user_id |
 | desde | id | profiles.provider_operator_profiles (created_by_user_id) | fk_provider_operator_profiles_created_by_user_id |
@@ -1967,6 +1984,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | clinical.diagnostic_reports (created_by_user_id) | fk_diagnostic_reports_created_by_user_id |
 | desde | id | clinical.diagnostic_reports (updated_by_user_id) | fk_diagnostic_reports_updated_by_user_id |
 | desde | id | clinical.service_request_notes (created_by_user_id) | fk_service_request_notes_created_by_user_id |
+| desde | id | clinical.service_request_components (created_by_user_id) | fk_service_request_components_created_by_user_id |
 | desde | id | clinical.medication_requests (created_by_user_id) | fk_medication_requests_created_by_user_id |
 | desde | id | clinical.medication_requests (updated_by_user_id) | fk_medication_requests_updated_by_user_id |
 | desde | id | clinical.medication_requests (signed_by_user_id) | fk_medication_requests_signed_by_user_id |
@@ -1987,6 +2005,15 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | clinical.encounter_participants (updated_by_user_id) | fk_encounter_participants_updated_by_user_id |
 | desde | id | clinical.encounter_locations (created_by_user_id) | fk_encounter_locations_created_by_user_id |
 | desde | id | clinical.encounter_locations (updated_by_user_id) | fk_encounter_locations_updated_by_user_id |
+| desde | id | clinical.placement_incidents (authorized_by_user_id) | fk_placement_incidents_authorized_by_user_id |
+| desde | id | clinical.placement_incidents (reviewed_by_user_id) | fk_placement_incidents_reviewed_by_user_id |
+| desde | id | clinical.placement_incidents (created_by_user_id) | fk_placement_incidents_created_by_user_id |
+| desde | id | clinical.placement_incidents (updated_by_user_id) | fk_placement_incidents_updated_by_user_id |
+| desde | id | clinical.inpatient_census_days (closed_by_user_id) | fk_inpatient_census_days_closed_by_user_id |
+| desde | id | clinical.inpatient_census_days (created_by_user_id) | fk_inpatient_census_days_created_by_user_id |
+| desde | id | clinical.inpatient_census_days (updated_by_user_id) | fk_inpatient_census_days_updated_by_user_id |
+| desde | id | clinical.patient_admission_footprints (recorded_by_user_id) | fk_patient_admission_footprints_recorded_by_user_id |
+| desde | id | clinical.inpatient_census_adjustments (adjusted_by_user_id) | fk_inpatient_census_adjustments_adjusted_by_user_id |
 | desde | id | clinical.observation_performers (created_by_user_id) | fk_observation_performers_created_by_user_id |
 | desde | id | clinical.observation_reference_ranges (created_by_user_id) | fk_observation_reference_ranges_created_by_user_id |
 | desde | id | clinical.observation_notes (author_user_id) | fk_observation_notes_author_user_id |
@@ -2040,6 +2067,15 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | audit.practice_sites_history (changed_by_user_id) | fk_practice_sites_history_changed_by_user_id |
 | desde | id | audit.clinical_units_history (changed_by_user_id) | fk_clinical_units_history_changed_by_user_id |
 | desde | id | audit.care_spaces_history (changed_by_user_id) | fk_care_spaces_history_changed_by_user_id |
+| desde | id | audit.operating_room_block_series_history (changed_by_user_id) | fk_operating_room_block_series_history_changed_by_user_id |
+| desde | id | audit.operating_room_blocks_history (changed_by_user_id) | fk_operating_room_blocks_history_changed_by_user_id |
+| desde | id | audit.encounter_locations_history (changed_by_user_id) | fk_encounter_locations_history_changed_by_user_id |
+| desde | id | audit.placement_incidents_history (changed_by_user_id) | fk_placement_incidents_history_changed_by_user_id |
+| desde | id | audit.care_space_blocks_history (changed_by_user_id) | fk_care_space_blocks_history_changed_by_user_id |
+| desde | id | audit.cleaning_orders_history (changed_by_user_id) | fk_cleaning_orders_history_changed_by_user_id |
+| desde | id | audit.care_space_category_periods_history (changed_by_user_id) | fk_care_space_category_periods_history_changed_by_user_id |
+| desde | id | audit.space_tariffs_history (changed_by_user_id) | fk_space_tariffs_history_changed_by_user_id |
+| desde | id | audit.charge_captures_history (changed_by_user_id) | fk_charge_captures_history_changed_by_user_id |
 | desde | id | audit.diagnostic_reports_history (changed_by_user_id) | fk_diagnostic_reports_history_changed_by_user_id |
 | desde | id | audit.imaging_studies_history (changed_by_user_id) | fk_imaging_studies_history_changed_by_user_id |
 | desde | id | audit.public_profiles_history (changed_by_user_id) | fk_public_profiles_history_changed_by_user_id |
@@ -2221,6 +2257,11 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | system_ops.security_incidents (updated_by_user_id) | fk_security_incidents_updated_by_user_id |
 | desde | id | system_ops.breach_notifications (created_by_user_id) | fk_breach_notifications_created_by_user_id |
 | desde | id | system_ops.breach_notifications (updated_by_user_id) | fk_breach_notifications_updated_by_user_id |
+| desde | id | system_ops.governance_policy_revisions (submitted_by_user_id) | fk_governance_policy_revisions_submitted_by_user_id |
+| desde | id | system_ops.governance_policy_revisions (decided_by_user_id) | fk_governance_policy_revisions_decided_by_user_id |
+| desde | id | system_ops.bulk_import_batches (confirmed_by_user_id) | fk_bulk_import_batches_confirmed_by_user_id |
+| desde | id | system_ops.bulk_import_batches (created_by_user_id) | fk_bulk_import_batches_created_by_user_id |
+| desde | id | system_ops.bulk_import_batches (updated_by_user_id) | fk_bulk_import_batches_updated_by_user_id |
 | desde | id | integrations.external_providers (created_by_user_id) | fk_external_providers_created_by_user_id |
 | desde | id | integrations.external_providers (updated_by_user_id) | fk_external_providers_updated_by_user_id |
 | desde | id | integrations.provider_connections (created_by_user_id) | fk_provider_connections_created_by_user_id |
@@ -2265,6 +2306,18 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | practice.clinical_units (responsible_user_id) | fk_clinical_units_responsible_user_id |
 | desde | id | practice.care_spaces (created_by_user_id) | fk_care_spaces_created_by_user_id |
 | desde | id | practice.care_spaces (updated_by_user_id) | fk_care_spaces_updated_by_user_id |
+| desde | id | practice.care_space_status_events (recorded_by_user_id) | fk_care_space_status_events_recorded_by_user_id |
+| desde | id | practice.care_space_blocks (ended_by_user_id) | fk_care_space_blocks_ended_by_user_id |
+| desde | id | practice.care_space_blocks (created_by_user_id) | fk_care_space_blocks_created_by_user_id |
+| desde | id | practice.care_space_blocks (updated_by_user_id) | fk_care_space_blocks_updated_by_user_id |
+| desde | id | practice.cleaning_orders (assigned_user_id) | fk_cleaning_orders_assigned_user_id |
+| desde | id | practice.cleaning_orders (started_by_user_id) | fk_cleaning_orders_started_by_user_id |
+| desde | id | practice.cleaning_orders (finished_by_user_id) | fk_cleaning_orders_finished_by_user_id |
+| desde | id | practice.cleaning_orders (inspected_by_user_id) | fk_cleaning_orders_inspected_by_user_id |
+| desde | id | practice.cleaning_orders (created_by_user_id) | fk_cleaning_orders_created_by_user_id |
+| desde | id | practice.cleaning_orders (updated_by_user_id) | fk_cleaning_orders_updated_by_user_id |
+| desde | id | practice.care_space_category_periods (created_by_user_id) | fk_care_space_category_periods_created_by_user_id |
+| desde | id | practice.care_space_category_periods (updated_by_user_id) | fk_care_space_category_periods_updated_by_user_id |
 | desde | id | practice.space_unit_assignments (created_by_user_id) | fk_space_unit_assignments_created_by_user_id |
 | desde | id | practice.space_unit_assignments (updated_by_user_id) | fk_space_unit_assignments_updated_by_user_id |
 | desde | id | practice.site_declared_capacities (created_by_user_id) | fk_site_declared_capacities_created_by_user_id |
@@ -2388,6 +2441,10 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | accounting.practitioner_simple_transactions (updated_by_user_id) | fk_practitioner_simple_transactions_updated_by_user_id |
 | desde | id | billing.service_catalog (created_by_user_id) | fk_service_catalog_created_by_user_id |
 | desde | id | billing.service_catalog (updated_by_user_id) | fk_service_catalog_updated_by_user_id |
+| desde | id | billing.space_tariffs (created_by_user_id) | fk_space_tariffs_created_by_user_id |
+| desde | id | billing.space_tariffs (updated_by_user_id) | fk_space_tariffs_updated_by_user_id |
+| desde | id | billing.charge_captures (created_by_user_id) | fk_charge_captures_created_by_user_id |
+| desde | id | billing.charge_captures (updated_by_user_id) | fk_charge_captures_updated_by_user_id |
 | desde | id | billing.invoices (created_by_user_id) | fk_invoices_created_by_user_id |
 | desde | id | billing.invoices (updated_by_user_id) | fk_invoices_updated_by_user_id |
 | desde | id | billing.invoice_lines (created_by_user_id) | fk_invoice_lines_created_by_user_id |
@@ -2751,6 +2808,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | telemetry.user_activity_events (user_id) | fk_user_activity_events_user_id |
 | desde | id | telemetry.funnel_definitions (created_by_user_id) | fk_funnel_definitions_created_by_user_id |
 | desde | id | telemetry.funnel_definitions (updated_by_user_id) | fk_funnel_definitions_updated_by_user_id |
+| desde | id | telemetry.client_error_events (user_id) | fk_client_error_events_user_id |
 | desde | id | delegated_access.organization_user_assignments (supervisor_user_id) | fk_organization_user_assignments_supervisor_user_id |
 | desde | id | delegated_access.organization_user_assignments (created_by_user_id) | fk_organization_user_assignments_created_by_user_id |
 | desde | id | delegated_access.organization_user_assignments (updated_by_user_id) | fk_organization_user_assignments_updated_by_user_id |
@@ -3717,6 +3775,11 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | procedures_perioperative.procedure_charge_items (created_by_user_id) | fk_procedure_charge_items_created_by_user_id |
 | desde | id | procedures_perioperative.procedure_charge_items (updated_by_user_id) | fk_procedure_charge_items_updated_by_user_id |
 | desde | id | procedures_perioperative.operating_room_utilization_events (recorded_by_user_id) | fk_operating_room_utilization_events_recorded_by_user_id |
+| desde | id | procedures_perioperative.operating_room_block_series (created_by_user_id) | fk_operating_room_block_series_created_by_user_id |
+| desde | id | procedures_perioperative.operating_room_block_series (updated_by_user_id) | fk_operating_room_block_series_updated_by_user_id |
+| desde | id | procedures_perioperative.operating_room_blocks (released_by_user_id) | fk_operating_room_blocks_released_by_user_id |
+| desde | id | procedures_perioperative.operating_room_blocks (created_by_user_id) | fk_operating_room_blocks_created_by_user_id |
+| desde | id | procedures_perioperative.operating_room_blocks (updated_by_user_id) | fk_operating_room_blocks_updated_by_user_id |
 | desde | id | surveys.survey_templates (created_by_user_id) | fk_survey_templates_created_by_user_id |
 | desde | id | surveys.survey_templates (updated_by_user_id) | fk_survey_templates_updated_by_user_id |
 | desde | id | surveys.survey_versions (created_by_user_id) | fk_survey_versions_created_by_user_id |
@@ -3759,6 +3822,28 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | data_catalog.catalog_process_steps (updated_by_user_id) | fk_catalog_process_steps_updated_by_user_id |
 | desde | id | data_catalog.catalog_process_step_operations (created_by_user_id) | fk_catalog_process_step_operations_created_by_user_id |
 | desde | id | data_catalog.catalog_process_step_operations (updated_by_user_id) | fk_catalog_process_step_operations_updated_by_user_id |
+| desde | id | data_catalog.catalog_stewardships (user_id) | fk_catalog_stewardships_user_id |
+| desde | id | data_catalog.catalog_stewardships (created_by_user_id) | fk_catalog_stewardships_created_by_user_id |
+| desde | id | data_catalog.catalog_stewardships (updated_by_user_id) | fk_catalog_stewardships_updated_by_user_id |
+| desde | id | data_catalog.catalog_glossary_terms (approved_by_user_id) | fk_catalog_glossary_terms_approved_by_user_id |
+| desde | id | data_catalog.catalog_glossary_terms (created_by_user_id) | fk_catalog_glossary_terms_created_by_user_id |
+| desde | id | data_catalog.catalog_glossary_terms (updated_by_user_id) | fk_catalog_glossary_terms_updated_by_user_id |
+| desde | id | data_catalog.catalog_glossary_term_revisions (author_user_id) | fk_catalog_glossary_term_revisions_author_user_id |
+| desde | id | data_catalog.catalog_glossary_term_links (created_by_user_id) | fk_catalog_glossary_term_links_created_by_user_id |
+| desde | id | data_catalog.quality_rules (owner_user_id) | fk_quality_rules_owner_user_id |
+| desde | id | data_catalog.quality_rules (created_by_user_id) | fk_quality_rules_created_by_user_id |
+| desde | id | data_catalog.quality_rules (updated_by_user_id) | fk_quality_rules_updated_by_user_id |
+| desde | id | data_catalog.quality_rule_runs (requested_by_user_id) | fk_quality_rule_runs_requested_by_user_id |
+| desde | id | data_catalog.quality_issues (acknowledged_by_user_id) | fk_quality_issues_acknowledged_by_user_id |
+| desde | id | data_catalog.quality_issues (resolved_by_user_id) | fk_quality_issues_resolved_by_user_id |
+| desde | id | data_catalog.quality_issue_events (actor_user_id) | fk_quality_issue_events_actor_user_id |
+| desde | id | data_catalog.catalog_lineage_edges (approved_by_user_id) | fk_catalog_lineage_edges_approved_by_user_id |
+| desde | id | data_catalog.catalog_lineage_edges (created_by_user_id) | fk_catalog_lineage_edges_created_by_user_id |
+| desde | id | data_catalog.catalog_lineage_edges (updated_by_user_id) | fk_catalog_lineage_edges_updated_by_user_id |
+| desde | id | data_catalog.catalog_certifications (requested_by_user_id) | fk_catalog_certifications_requested_by_user_id |
+| desde | id | data_catalog.catalog_certifications (certified_by_user_id) | fk_catalog_certifications_certified_by_user_id |
+| desde | id | data_catalog.catalog_certifications (revoked_by_user_id) | fk_catalog_certifications_revoked_by_user_id |
+| desde | id | data_catalog.catalog_change_acknowledgements (user_id) | fk_catalog_change_acknowledgements_user_id |
 | desde | id | qa_execution.execution_targets (created_by_user_id) | fk_execution_targets_created_by_user_id |
 | desde | id | qa_execution.execution_targets (updated_by_user_id) | fk_execution_targets_updated_by_user_id |
 | desde | id | qa_execution.execution_plans (requested_by_user_id) | fk_execution_plans_requested_by_user_id |
@@ -3829,6 +3914,12 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | desde | id | pharma_lab.visitor_post_submissions (decided_by_user_id) | fk_visitor_post_submissions_decided_by_user_id |
 | desde | id | pharma_lab.visitor_post_submissions (created_by_user_id) | fk_visitor_post_submissions_created_by_user_id |
 | desde | id | pharma_lab.visitor_post_submissions (updated_by_user_id) | fk_visitor_post_submissions_updated_by_user_id |
+| desde | id | observability.error_groups (assigned_to_user_id) | fk_error_groups_assigned_to_user_id |
+| desde | id | observability.error_groups (resolved_by_user_id) | fk_error_groups_resolved_by_user_id |
+| desde | id | observability.error_groups (created_by_user_id) | fk_error_groups_created_by_user_id |
+| desde | id | observability.error_groups (updated_by_user_id) | fk_error_groups_updated_by_user_id |
+| desde | id | observability.alert_rules (created_by_user_id) | fk_alert_rules_created_by_user_id |
+| desde | id | observability.alert_rules (updated_by_user_id) | fk_alert_rules_updated_by_user_id |
 
 #### Índices
 

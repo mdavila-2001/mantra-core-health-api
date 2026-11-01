@@ -9,11 +9,11 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
 | [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 202 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 22 |
-| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 171 |
+| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 173 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
 | [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1429 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 86 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 12 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 1 |
 | [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 178 |
 
@@ -269,7 +269,7 @@ _Se muestran 200 de 202; la lista completa está en `inventario/flujos/hallazgos
 
 ## FLU-04
 
-**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 171 caso(s).
+**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 173 caso(s).
 
 **Qué hacer:** Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.
 
@@ -277,9 +277,9 @@ _Se muestran 200 de 202; la lista completa está en `inventario/flujos/hallazgos
 |---|---|---|---|
 | POST /accounting/cost-centers/{id}/unit-link | accounting | ninguna prueba la menciona | `src/modules/accounting/controllers/accounting-space.controller.ts:88` |
 | PATCH /accounting/infrastructure-items/{id} | accounting | ninguna prueba la menciona | `src/modules/accounting/controllers/accounting-space.controller.ts:54` |
-| DELETE /accounting/practitioner/simple/accounts/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:132` |
-| DELETE /accounting/practitioner/simple/records/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:204` |
-| DELETE /accounting/practitioner/simple/transactions/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:271` |
+| DELETE /accounting/practitioner/simple/accounts/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:133` |
+| DELETE /accounting/practitioner/simple/records/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:208` |
+| DELETE /accounting/practitioner/simple/transactions/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:278` |
 | GET /audio-assets/{assetId}/content | audio_assets | ninguna prueba la menciona | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48` |
 | POST /audio-assets/resolve | audio_assets | ninguna prueba la menciona | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32` |
 | POST /audit/retention/apply | audit | sólo prueba de controlador | `src/modules/audit/controllers/audit.controller.ts:136` |
@@ -319,6 +319,8 @@ _Se muestran 200 de 202; la lista completa está en `inventario/flujos/hallazgos
 | PUT /community/ratings | community | ninguna prueba la menciona | `src/modules/community/controllers/party-ratings.controller.ts:45` |
 | POST /community/reports | community | sólo prueba de controlador | `src/modules/community/controllers/community-moderation.controller.ts:61` |
 | POST /admin/content-packs/{code}/apply | content_packs | ninguna prueba la menciona | `src/modules/content_packs/content-packs.controller.ts:69` |
+| POST /admin/catalog/fit/run | data_catalog | ninguna prueba la menciona | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
+| POST /internal/catalog/fit/run | data_catalog | ninguna prueba la menciona | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
 | POST /delegated-permission-sets/{id}/versions | delegated_access | sólo prueba de controlador | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
 | POST /org/support-engagement-requests/{id}/decision | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-staff.controller.ts:224` |
 | POST /org/support-engagements/{id}/end | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-staff.controller.ts:258` |
@@ -427,8 +429,8 @@ _Se muestran 200 de 202; la lista completa está en `inventario/flujos/hallazgos
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
 | PUT /views/{frontendPageViewId}/preferences | read_models | sólo prueba de controlador | `src/modules/read_models/controllers/frontend-views.controller.ts:139` |
-| DELETE /scheduling/exceptions/{id} | scheduling | ninguna prueba la menciona | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:603` |
-| PATCH /scheduling/templates/{id} | scheduling | sólo prueba de controlador | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:291` |
+| DELETE /scheduling/exceptions/{id} | scheduling | ninguna prueba la menciona | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:605` |
+| PATCH /scheduling/templates/{id} | scheduling | sólo prueba de controlador | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:292` |
 | POST /surveys/me/invitations/{id}/responses | surveys | ninguna prueba la menciona | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
 | DELETE /surveys/templates/{id}/questions/{questionId} | surveys | ninguna prueba la menciona | `src/modules/surveys/controllers/surveys-templates.controller.ts:169` |
 | POST /internal/governance/retention-executions/run | system_ops | ninguna prueba la menciona | `src/modules/system_ops/controllers/retention-execution.controller.ts:28` |
@@ -695,98 +697,24 @@ _Se muestran 200 de 1429; la lista completa está en `inventario/flujos/hallazgo
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 86 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 12 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| GET /audit/data-access/summary | audit | handler sin operación en openapi.json | `src/modules/audit/controllers/audit-query.controller.ts:102` |
-| GET /privacy/dsar | audit | handler sin operación en openapi.json | `src/modules/audit/controllers/privacy.controller.ts:49` |
-| GET /privacy/dsar/{id} | audit | handler sin operación en openapi.json | `src/modules/audit/controllers/privacy.controller.ts:59` |
-| GET /authz/catalog/modules | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-modules-catalog.controller.ts:28` |
-| GET /authz/resource-scope-grants | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance-ext.controller.ts:72` |
-| DELETE /authz/resource-scope-grants/{grantId} | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance-ext.controller.ts:83` |
-| GET /authz/roles/{roleId}/field-permissions | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance-ext.controller.ts:57` |
-| GET /admin/catalogs/services/scopes | billing | handler sin operación en openapi.json | `src/modules/billing/controllers/admin-service-catalog.controller.ts:67` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:582` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:589` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:602` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:607` |
-| GET /admin/catalog/fit | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48` |
-| POST /admin/catalog/fit/run | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
-| GET /admin/catalog/pii/reconciliation | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:421` |
-| GET /admin/governance/jobs | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/governance-queue.controller.ts:47` |
-| GET /admin/governance/review-queue | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/governance-queue.controller.ts:32` |
-| POST /internal/catalog/fit/run | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
-| GET /admin/governance/data-quality/issues | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:52` |
-| GET /admin/governance/data-quality/issues/{id} | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:65` |
-| POST /admin/governance/data-quality/issues/{id}/resolution | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78` |
-| GET /admin/governance/data-quality/rules | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:99` |
-| GET /admin/governance/data-quality/rules/{id} | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:108` |
 | DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:486` |
-| GET /marketing/insights/alert-rules | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workflow.controller.ts:90` |
-| PATCH /marketing/insights/alert-rules/{code} | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workflow.controller.ts:100` |
-| GET /marketing/insights/alert-workflow | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workflow.controller.ts:52` |
-| PUT /marketing/insights/alert-workflow/{fingerprint} | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workflow.controller.ts:62` |
-| GET /marketing/insights/campaign-facts | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-facts.controller.ts:45` |
-| GET /marketing/insights/catalog | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-facts.controller.ts:35` |
-| GET /marketing/insights/notification-preferences | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:58` |
-| PUT /marketing/insights/notification-preferences | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:69` |
-| GET /marketing/insights/reports | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:173` |
-| DELETE /marketing/insights/reports/{id} | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:205` |
-| PUT /marketing/insights/reports/{id} | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:184` |
-| GET /marketing/insights/saved-views | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:126` |
-| DELETE /marketing/insights/saved-views/{id} | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:156` |
-| PUT /marketing/insights/saved-views/{id} | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:134` |
-| GET /marketing/insights/user-preferences | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:93` |
-| PUT /marketing/insights/user-preferences | marketing | handler sin operación en openapi.json | `src/modules/marketing/controllers/insights-workspace.controller.ts:104` |
 | DESCONOCIDO /notifications/web-push | messaging | handler sin operación en openapi.json | `src/modules/messaging/controllers/web-push.controller.ts:78` |
-| GET /admin/observability/coverage | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:85` |
-| GET /admin/observability/endpoints | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:69` |
-| GET /admin/observability/errors/events | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:116` |
-| GET /admin/observability/errors/groups | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:95` |
-| GET /admin/observability/errors/groups/{id} | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:105` |
-| PATCH /admin/observability/errors/groups/{id} | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:140` |
-| GET /admin/observability/modules | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:77` |
-| GET /admin/observability/requests/{requestId} | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:124` |
-| GET /admin/observability/sql/slow | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:181` |
-| GET /admin/observability/sql/statements | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:160` |
-| GET /admin/observability/sql/statements/{hash} | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:170` |
-| GET /admin/observability/summary | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:49` |
-| GET /admin/observability/timeseries | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability.controller.ts:59` |
 | GET /internal/observability/selftest/fail | observability | handler sin operación en openapi.json | `src/modules/observability/presentation/controllers/observability-selftest.controller.ts:32` |
-| GET /admin/ops/runtime-pieces | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:49` |
-| GET /admin/ops/runtime-pieces/{id} | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:62` |
-| POST /admin/ops/runtime-pieces/discover | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:73` |
 | GET /admin/ops/tools | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/controllers/ops-tools.controller.ts:24` |
 | DESCONOCIDO /admissions | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:86` |
 | DESCONOCIDO / | promotions | handler sin operación en openapi.json | `src/modules/promotions/controllers/loyalty.controller.ts:185` |
 | DESCONOCIDO /redis-runtime | redis_runtime | handler sin operación en openapi.json | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:44` |
 | DESCONOCIDO /search | search_platform | handler sin operación en openapi.json | `src/modules/search_platform/controllers/search-platform.controller.ts:114` |
-| GET /admin/governance/domains | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/controllers/governance-operations-read.controller.ts:48` |
-| GET /admin/governance/legal-holds | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/controllers/governance-operations-read.controller.ts:60` |
-| GET /admin/governance/mutability | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:34` |
-| GET /admin/governance/mutability/{schema}/{table} | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:57` |
-| GET /admin/governance/mutability/summary | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:46` |
-| GET /admin/governance/retention-executions | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/controllers/governance-operations-read.controller.ts:73` |
-| GET /admin/analytics/errors | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:28` |
-| GET /admin/analytics/errors/fingerprints | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:36` |
-| GET /admin/analytics/errors/fingerprints/{fingerprint} | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:52` |
-| GET /admin/analytics/errors/routes-not-found | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-errors-analytics.controller.ts:44` |
-| GET /admin/analytics/parts | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:17` |
-| GET /admin/analytics/parts/{routeCode} | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-parts-analytics.controller.ts:25` |
-| POST /telemetry/client-errors | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-client-errors.controller.ts:27` |
-| POST /telemetry/retention/purge | telemetry | handler sin operación en openapi.json | `src/modules/telemetry/presentation/controllers/telemetry-retention.controller.ts:40` |
-| GET /admin/ui-visibility/elements | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:53` |
-| POST /admin/ui-visibility/elements | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61` |
-| POST /admin/ui-visibility/elements/sync | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75` |
-| GET /admin/ui-visibility/preview | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:153` |
-| GET /admin/ui-visibility/rules | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:90` |
-| POST /admin/ui-visibility/rules | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96` |
-| PATCH /admin/ui-visibility/rules/{id} | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110` |
-| POST /admin/ui-visibility/rules/{id}/end | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:139` |
-| GET /me/ui-visibility | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23` |
 
 ## FLU-09
 
@@ -823,8 +751,8 @@ _Se muestran 200 de 1429; la lista completa está en `inventario/flujos/hallazgo
 | POST /authz/care-relationships | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-care-relationships.controller.ts:60` |
 | POST /authz/care-relationships/request | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-care-relationships.controller.ts:146` |
 | POST /authz/legal-representations | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-care-relationships.controller.ts:204` |
-| POST /authz/patients/{patientProfileId}/break-the-glass | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:61` |
-| POST /authz/patients/{patientProfileId}/clinical-access-grants | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:40` |
+| POST /authz/patients/{patientProfileId}/break-the-glass | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:62` |
+| POST /authz/patients/{patientProfileId}/clinical-access-grants | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:41` |
 | POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | automation | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/automation/services/record-automation.service.ts:276) | `src/modules/automation/controllers/automation-orchestration.controller.ts:235` |
 | GET /billing/bed-day/stays | billing | Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) | `src/modules/billing/controllers/billing-space-charges.controller.ts:158` |
 | POST /billing/charge-captures/{id}/void | billing | Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) \| Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) | `src/modules/billing/controllers/billing-space-charges.controller.ts:194` |
@@ -926,7 +854,7 @@ _Se muestran 200 de 1429; la lista completa está en `inventario/flujos/hallazgo
 | GET /internal/observability/selftest/fail | observability | TypeError: no se puede leer {String(holder.value.deep)} (src/modules/observability/presentation/controllers/observability-selftest.controller.ts:40) \| Error: selftest: falla controlada (src/modules/observability/presentation/controllers/observability-selftest.controller.ts:42) | `src/modules/observability/presentation/controllers/observability-selftest.controller.ts:32` |
 | GET /admin/ops/traffic | ops_console | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/ops-traffic.service.ts:93) | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:92` |
 | GET /admin/ops/traffic/endpoints | ops_console | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/ops-traffic.service.ts:93) | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:104` |
-| POST /internal/ops/heartbeats | ops_console | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/instance-liveness.service.ts:97) | `src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:25` |
+| POST /internal/ops/heartbeats | ops_console | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/instance-liveness.service.ts:97) | `src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:26` |
 | POST /payments/gateway-dispatches/{intentId}/close | payments | PaymentsGatewayBusyException: {intentId} (src/modules/payments/services/payments-gateway-charge.service.ts:185) | `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:74` |
 | POST /payments/gateway-webhooks | payments | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/modules/payments/services/payments-gateway-webhook.service.ts:135) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/payments/services/payments-gateway-webhook.service.ts:153) | `src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32` |
 | POST /pharmacies/{pharmacyId}/categories/bulk | pharmacy | DryRunRollback: {await withWarnings(tx, ctx, handler, { outcome: 'UNCHANGED'…} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:164) \| DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:175) | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:53` |
@@ -962,11 +890,11 @@ _Se muestran 200 de 1429; la lista completa está en `inventario/flujos/hallazgo
 | PATCH /profiles/patients/me/addresses/{id} | profiles | Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
 | POST /admin/qa/plans/{planId}/approvals | qa_execution | DomainException: {HttpStatus.FORBIDDEN} (src/modules/qa_execution/services/qa-execution.service.ts:432) | `src/modules/qa_execution/controllers/qa-execution.controller.ts:148` |
 | GET /admin/analytics/money | reporting | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/reporting/services/reporting-money.service.ts:63) | `src/modules/reporting/controllers/reporting-money.controller.ts:53` |
-| POST /scheduling/bookings/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546` |
-| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | scheduling | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) \| Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385` |
-| PUT /scheduling/bookings/{id}/payment-state | scheduling | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267` |
-| POST /scheduling/bookings/{id}/reschedule | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480` |
-| POST /scheduling/resources/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261) | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841` |
+| POST /scheduling/bookings/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:551` |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | scheduling | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) \| Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:387` |
+| PUT /scheduling/bookings/{id}/payment-state | scheduling | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:269` |
+| POST /scheduling/bookings/{id}/reschedule | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:485` |
+| POST /scheduling/resources/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:261) | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:844` |
 | POST /surveys/invitations | surveys | Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) (src/modules/surveys/services/surveys-system-templates.service.ts:142) | `src/modules/surveys/controllers/surveys-assignments.controller.ts:55` |
 | POST /system-context/contexts | system_context | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/system_context/services/system-contexts.service.ts:633) | `src/modules/system_context/controllers/system-context.controller.ts:289` |
 | POST /system-context/contexts/{id}/refresh | system_context | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/system_context/services/system-contexts.service.ts:633) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/system_context/services/system-contexts.service.ts:668) | `src/modules/system_context/controllers/system-context.controller.ts:310` |

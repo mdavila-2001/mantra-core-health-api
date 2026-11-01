@@ -111,11 +111,12 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. POST /admin/ui-visibility/elements
 
-
+Alta manual de un elemento (source ADMIN)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -123,7 +124,7 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.createElement"]:::llamada
   n2 --> n3
@@ -166,11 +167,12 @@ flowchart TD
 
 #### 2. POST /admin/ui-visibility/elements/sync
 
-
+Sincroniza el registro del front (idempotente por key)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -178,7 +180,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.syncElements"]:::llamada
   n2 --> n3
@@ -229,7 +231,7 @@ flowchart TD
 
 #### 3. GET /admin/ui-visibility/preview
 
-
+Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -310,7 +312,7 @@ flowchart TD
 
 #### 4. GET /admin/ui-visibility/rules
 
-
+Reglas de visibilidad (cursor por fecha de alta)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -385,11 +387,12 @@ flowchart TD
 
 #### 5. POST /admin/ui-visibility/rules
 
-
+Crear una regla SHOW/HIDE
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -397,7 +400,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.createRule"]:::llamada
   n2 --> n3
@@ -553,11 +556,12 @@ flowchart TD
 
 #### 6. PATCH /admin/ui-visibility/rules/{id}
 
-
+Editar una regla con bloqueo optimista (409 si cambió)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -565,7 +569,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a UiVisibilityAdminService.updateRule"]:::llamada
   n2 --> n3
@@ -677,7 +681,7 @@ flowchart TD
 
 #### 7. POST /admin/ui-visibility/rules/{id}/end
 
-
+Terminar una regla (validTo = ahora). Idempotente.
 
 | HTTP | Código | Cuándo |
 |---|---|---|

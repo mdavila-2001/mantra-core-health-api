@@ -3,9 +3,9 @@
 # Endpoints del módulo `data_catalog`
 
 - **Bloque:** —
-- **Operaciones:** 50 (44 en el contrato, 6 sólo en el código)
-- **Riesgo:** ALTO 1 · MEDIO 8 · BAJO 41
-- **Tablas distintas que tocan:** 19
+- **Operaciones:** 50 (50 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 3 · MEDIO 8 · BAJO 39
+- **Tablas distintas que tocan:** 20
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/data-catalog.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -18,8 +18,8 @@
 | 4 | GET | `/admin/catalog/columns/{id}/evidence` | Evidencia enlazada a una columna | BAJO | 2 | ...PORTAL_VIEW_ROLES |
 | 5 | POST | `/admin/catalog/columns/{id}/evidence` | Enlaza evidencia a una columna | MEDIO | 2 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD |
 | 6 | GET | `/admin/catalog/coverage` | Cobertura del catálogo por dimensión, calculada por el servidor | BAJO | 3 | ...PORTAL_VIEW_ROLES |
-| 7 | GET | `/admin/catalog/fit` | — | BAJO | 0 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 8 | POST | `/admin/catalog/fit/run` | — | BAJO | 5 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD |
+| 7 | GET | `/admin/catalog/fit` | Último resultado de la sonda de ajuste de la catalogación | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 8 | POST | `/admin/catalog/fit/run` | Pide una corrida de la sonda de ajuste (se ejecuta fuera de la petición) | ALTO | 7 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD |
 | 9 | GET | `/admin/catalog/objects` | Objetos del catálogo, paginados por cursor | BAJO | 3 | ...PORTAL_VIEW_ROLES |
 | 10 | GET | `/admin/catalog/objects/{id}` | Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto | BAJO | 5 | ...PORTAL_VIEW_ROLES |
 | 11 | PUT | `/admin/catalog/objects/{id}/annotation` | Crea o edita la ficha de un objeto (con versión esperada) | MEDIO | 6 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD |
@@ -31,7 +31,7 @@
 | 17 | GET | `/admin/catalog/objects/{id}/impact` | Quién referencia a un objeto y a quién referencia, por claves foráneas observadas | BAJO | 4 | ...PORTAL_VIEW_ROLES |
 | 18 | GET | `/admin/catalog/permission-drift` | Deriva de permisos: roles que las rutas exigen contra los que la API siembra | BAJO | 1 | ...PORTAL_VIEW_ROLES |
 | 19 | GET | `/admin/catalog/pii/columns` | Columnas clasificadas como datos personales, con su sensibilidad y estado de revisión | BAJO | 5 | ...PORTAL_VIEW_ROLES |
-| 20 | GET | `/admin/catalog/pii/reconciliation` | — | BAJO | 5 | ...PORTAL_VIEW_ROLES |
+| 20 | GET | `/admin/catalog/pii/reconciliation` | Conciliación de las columnas personales del catálogo con el registro declarado de gobierno | BAJO | 5 | ...PORTAL_VIEW_ROLES |
 | 21 | GET | `/admin/catalog/pii/summary` | Datos personales: cuántas columnas son personales según el catálogo y qué declaró el registro de gobierno | BAJO | 5 | ...PORTAL_VIEW_ROLES |
 | 22 | GET | `/admin/catalog/quality/issues` | Incidencias de calidad del catálogo (derivadas al leer), paginadas | BAJO | 3 | ...PORTAL_VIEW_ROLES |
 | 23 | GET | `/admin/catalog/quality/rules` | Reglas de calidad del catálogo, con las incidencias abiertas de cada una | BAJO | 3 | ...PORTAL_VIEW_ROLES |
@@ -39,8 +39,8 @@
 | 25 | POST | `/admin/catalog/scans` | Pide un escaneo de la base primaria (se ejecuta fuera de la petición) | MEDIO | 15 | GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD |
 | 26 | GET | `/admin/catalog/scans/{id}` | Un escaneo | BAJO | 1 | ...PORTAL_VIEW_ROLES |
 | 27 | GET | `/admin/catalog/schemas` | Schemas observados, con cuántos objetos tienen ficha y cuántos están aprobados | BAJO | 2 | ...PORTAL_VIEW_ROLES |
-| 28 | GET | `/admin/governance/jobs` | — | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 29 | GET | `/admin/governance/review-queue` | — | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 28 | GET | `/admin/governance/jobs` | Trabajos de gobierno: escaneos del catálogo, clasificaciones y ejecuciones de retención | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 29 | GET | `/admin/governance/review-queue` | Cola de revisión: fichas de objeto y de columna en NEEDS_REVIEW, la más antigua primero | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 30 | GET | `/admin/portal/catalogo/deriva` | Deriva entre el DDL del modelo y las entidades del ORM | BAJO | 0 | ...PORTAL_VIEW_ROLES |
 | 31 | GET | `/admin/portal/catalogo/tablas` | Listar las tablas del catálogo de datos | BAJO | 0 | ...PORTAL_VIEW_ROLES |
 | 32 | GET | `/admin/portal/catalogo/tablas/{schema}/{tabla}` | Ver la ficha de una tabla | BAJO | 0 | ...PORTAL_VIEW_ROLES |
@@ -59,7 +59,7 @@
 | 45 | GET | `/admin/portal/operaciones/{id}` | Ver la ficha de una operación | BAJO | 0 | ...PORTAL_VIEW_ROLES |
 | 46 | GET | `/admin/portal/operaciones/{id}/arbol` | Ver el árbol de decisión de una operación | BAJO | 0 | ...PORTAL_VIEW_ROLES |
 | 47 | GET | `/admin/portal/version` | Versión y tamaño del inventario publicado | BAJO | 0 | ...PORTAL_VIEW_ROLES |
-| 48 | POST | `/internal/catalog/fit/run` | — | BAJO | 5 | SYSTEM |
+| 48 | POST | `/internal/catalog/fit/run` | Corre la sonda de ajuste y espera su desenlace (worker) | ALTO | 7 | SYSTEM |
 | 49 | POST | `/internal/catalog/inventory/import` | Importa el inventario de la API a las tablas de operaciones y procesos (worker) | ALTO | 15 | SYSTEM |
 | 50 | POST | `/internal/catalog/scans/run-next` | Sonda: reclama y ejecuta el siguiente escaneo (worker) | MEDIO | 15 | SYSTEM |
 
@@ -663,22 +663,22 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 7. GET /admin/catalog/fit
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Último resultado de la sonda de ajuste de la catalogación
 - **Bloque:** —
-- **Riesgo:** BAJO — No toca tablas relacionales
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `AdminCatalogFitController.latest` — `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48`
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Último resultado de la sonda de ajuste de la catalogación.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/catalog/fit` la atiende `AdminCatalogFitController.latest` (src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogFitService.latest`. No se determinaron tablas para esta operación.
+`GET /admin/catalog/fit` la atiende `AdminCatalogFitController.latest` (src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `CatalogFitService.latest`. Lee data_catalog.catalog_fit_runs.
 
 ### Requerimientos
 
@@ -691,50 +691,52 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `data_catalog.catalog_fit_runs (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | AdminCatalogFitController.latest → CatalogFitService.latest → FitRunsRepository.latestCompleted | `src/modules/data_catalog/application/fit/fit-runs.repository.ts:113` |
 
 ### Cuerpo
 
 La operación no recibe cuerpo.
 
-### Respuesta — `CatalogFitDto` · DTO `CatalogFitDto`
+### Respuesta — `Promise<CatalogFitDto>` · DTO `CatalogFitDto`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `modelVersion` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:161` |
-| `state` | `string` | Sí | valores: SIN_RESULTADO, VIGENTE, ATRASADO | — | `ATRASADO`: se sirve, pero es más viejo que el umbral (S7) | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:166` |
-| `noResultReason` | `string` | Sí | valores: NUNCA_EJECUTADA, EXPIRADO; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:172` |
-| `ageSeconds` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:173` |
-| `running` | `FitRunViewDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:175` |
-| `running.runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:114` |
-| `running.status` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:115` |
-| `running.trigger` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:116` |
-| `running.requestedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:117` |
-| `running.finishedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:119` |
-| `running.durationMs` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:120` |
-| `running.errorCode` | `string` | Sí | admite null | — | Clase del error si la corrida falló | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:126` |
-| `lastRun` | `FitRunViewDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:177` |
-| `lastRun.runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:114` |
-| `lastRun.status` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:115` |
-| `lastRun.trigger` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:116` |
-| `lastRun.requestedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:117` |
-| `lastRun.finishedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:119` |
-| `lastRun.durationMs` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:120` |
-| `lastRun.errorCode` | `string` | Sí | admite null | — | Clase del error si la corrida falló | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:126` |
-| `lastFailure` | `FitRunViewDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:179` |
-| `lastFailure.runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:114` |
-| `lastFailure.status` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:115` |
-| `lastFailure.trigger` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:116` |
-| `lastFailure.requestedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:117` |
-| `lastFailure.finishedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:119` |
-| `lastFailure.durationMs` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:120` |
-| `lastFailure.errorCode` | `string` | Sí | admite null | — | Clase del error si la corrida falló | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:126` |
-| `report` | `FitReportDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:181` |
-| `report.modelVersion` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:97` |
-| `report.evaluatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:98` |
-| `report.verdict` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:99` |
-| `report.dimensions` | `array<FitDimensionScoreDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:101` |
-| `report.dimensions[].dimension` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:57` |
+| `modelVersion` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:194` |
+| `state` | `string` | Sí | valores: SIN_RESULTADO, VIGENTE, ATRASADO | — | `ATRASADO`: se sirve, pero es más viejo que el umbral (S7) | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:199` |
+| `noResultReason` | `string` | Sí | valores: NUNCA_EJECUTADA, EXPIRADO; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:205` |
+| `ageSeconds` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:206` |
+| `running` | `FitRunViewDto` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:208` |
+| `running.runId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `running.status` | `string` | Sí | valores: EN_CURSO, COMPLETADA, FALLIDA | — | — | sin fuente |
+| `running.trigger` | `string` | Sí | valores: TICK, MANUAL | — | — | sin fuente |
+| `running.requestedAt` | `string` | Sí | formato date-time | — | — | sin fuente |
+| `running.finishedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `running.durationMs` | `number` | Sí | admite null | — | — | sin fuente |
+| `running.errorCode` | `string` | Sí | admite null | — | Clase del error si la corrida falló | sin fuente |
+| `lastRun` | `FitRunViewDto` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:210` |
+| `lastRun.runId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `lastRun.status` | `string` | Sí | valores: EN_CURSO, COMPLETADA, FALLIDA | — | — | sin fuente |
+| `lastRun.trigger` | `string` | Sí | valores: TICK, MANUAL | — | — | sin fuente |
+| `lastRun.requestedAt` | `string` | Sí | formato date-time | — | — | sin fuente |
+| `lastRun.finishedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `lastRun.durationMs` | `number` | Sí | admite null | — | — | sin fuente |
+| `lastRun.errorCode` | `string` | Sí | admite null | — | Clase del error si la corrida falló | sin fuente |
+| `lastFailure` | `FitRunViewDto` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:212` |
+| `lastFailure.runId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `lastFailure.status` | `string` | Sí | valores: EN_CURSO, COMPLETADA, FALLIDA | — | — | sin fuente |
+| `lastFailure.trigger` | `string` | Sí | valores: TICK, MANUAL | — | — | sin fuente |
+| `lastFailure.requestedAt` | `string` | Sí | formato date-time | — | — | sin fuente |
+| `lastFailure.finishedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `lastFailure.durationMs` | `number` | Sí | admite null | — | — | sin fuente |
+| `lastFailure.errorCode` | `string` | Sí | admite null | — | Clase del error si la corrida falló | sin fuente |
+| `report` | `FitReportDto` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:214` |
+| `report.modelVersion` | `string` | Sí | — | — | — | sin fuente |
+| `report.evaluatedAt` | `string` | Sí | formato date-time | — | — | sin fuente |
+| `report.verdict` | `string` | Sí | valores: AJUSTADA, CON_AVISOS, DESAJUSTADA, SIN_DATOS | — | — | sin fuente |
+| `report.dimensions` | `array<FitDimensionScoreDto>` | Sí | — | — | — | sin fuente |
+| `report.dimensions[].dimension` | `string` | Sí | valores: ROUTES, MODEL, COMPLETENESS, FRESHNESS, MUTABILITY, SENSITIVITY | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:57` |
 | `report.dimensions[].status` | `string` | Sí | valores: MEDIDA, SIN_DATO, NO_DECLARADO, NO_APLICA | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:59` |
 | `report.dimensions[].covered` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:60` |
 | `report.dimensions[].denominator` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:61` |
@@ -742,53 +744,60 @@ La operación no recibe cuerpo.
 | `report.dimensions[].checksMeasured` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:69` |
 | `report.dimensions[].checksUnmeasured` | `number` | Sí | — | — | Comprobaciones sin dato o sin dónde declararse | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:73` |
 | `report.dimensions[].checksFailed` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:74` |
-| `report.checks` | `array<FitCheckResultDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:102` |
+| `report.checks` | `array<FitCheckResultDto>` | Sí | — | — | — | sin fuente |
 | `report.checks[].id` | `string` | Sí | — | — | Id estable: no se reutiliza ni se renombra | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:25` |
-| `report.checks[].dimension` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:26` |
+| `report.checks[].dimension` | `string` | Sí | valores: ROUTES, MODEL, COMPLETENESS, FRESHNESS, MUTABILITY, SENSITIVITY | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:26` |
 | `report.checks[].title` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:27` |
-| `report.checks[].severity` | `string` | Sí | — | — | Severidad si FALLA | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:29` |
-| `report.checks[].status` | `string` | Sí | — | — | `SIN_DATO` y `NO_DECLARADO` no son `OK`: no se pudo comprobar o aún no hay dónde declararlo | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:35` |
+| `report.checks[].severity` | `string` | Sí | valores: ALTA, MEDIA, BAJA, INFO | — | Severidad si FALLA | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:29` |
+| `report.checks[].status` | `string` | Sí | valores: OK, FALLA, SIN_DATO, NO_DECLARADO, NO_APLICA | — | `SIN_DATO` y `NO_DECLARADO` no son `OK`: no se pudo comprobar o aún no hay dónde declararlo | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:35` |
 | `report.checks[].covered` | `number` | Sí | admite null | — | Ítems que cumplen; `null` si no se midió (nunca 0) | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:41` |
 | `report.checks[].denominator` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:42` |
 | `report.checks[].summary` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:43` |
 | `report.checks[].reason` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:44` |
 | `report.checks[].remediation` | `string` | Sí | — | — | Cómo corregirlo | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:45` |
-| `report.checks[].evidence` | `object` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:47` |
+| `report.checks[].evidence` | `object` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:47` |
 | `report.checks[].findings` | `array<FitFindingDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:48` |
 | `report.checks[].findings[].subject` | `string` | Sí | — | — | Qué está desajustado: una ruta, una tabla, una columna | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:16` |
 | `report.checks[].findings[].detail` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:17` |
 | `report.checks[].findingsTotal` | `number` | Sí | — | — | Total real de hallazgos; `findings` se recorta | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:52` |
 | `report.checks[].findingsTruncated` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:53` |
-| `report.blindSpots` | `array<string>` | Sí | — | — | Ids de las comprobaciones que no pudieron medir | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:107` |
-| `report.fingerprints` | `FitFingerprintsDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:108` |
+| `report.blindSpots` | `array<string>` | Sí | — | — | Ids de las comprobaciones que no pudieron medir | sin fuente |
+| `report.fingerprints` | `FitFingerprintsDto` | Sí | — | — | — | sin fuente |
 | `report.fingerprints.routesInCode` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:78` |
 | `report.fingerprints.routesInInventory` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:79` |
 | `report.fingerprints.routesImported` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:81` |
-| `report.deployment` | `FitDeploymentDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:109` |
+| `report.deployment` | `FitDeploymentDto` | Sí | — | — | — | sin fuente |
 | `report.deployment.commit` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:85` |
 | `report.deployment.builtAt` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:86` |
-| `report.thresholds` | `FitThresholdsDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:110` |
+| `report.thresholds` | `FitThresholdsDto` | Sí | — | — | — | sin fuente |
 | `report.thresholds.scanStaleAfterMs` | `number` | Sí | — | — | Un escaneo exitoso más viejo que esto se declara vencido | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:93` |
-| `history` | `array<FitHistoryEntryDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:182` |
+| `history` | `array<FitHistoryEntryDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:215` |
 | `history[].runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:138` |
 | `history[].evaluatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:139` |
-| `history[].trigger` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:140` |
-| `history[].verdict` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:141` |
+| `history[].trigger` | `string` | Sí | valores: TICK, MANUAL | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:140` |
+| `history[].verdict` | `string` | Sí | valores: AJUSTADA, CON_AVISOS, DESAJUSTADA, SIN_DATOS | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:141` |
 | `history[].dimensions` | `array<FitHistoryDimensionDto>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:143` |
-| `history[].dimensions[].dimension` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:130` |
+| `history[].dimensions[].dimension` | `string` | Sí | valores: ROUTES, MODEL, COMPLETENESS, FRESHNESS, MUTABILITY, SENSITIVITY | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:130` |
 | `history[].dimensions[].status` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:131` |
 | `history[].dimensions[].covered` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:132` |
 | `history[].dimensions[].denominator` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:133` |
 | `history[].dimensions[].ratio` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:134` |
 | `history[].failedChecks` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:144` |
 | `history[].blindSpots` | `array<string>` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:145` |
-| `retention` | `FitRetentionDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:183` |
-| `retention.kind` | `string` | Sí | valores: MEMORIA_DEL_PROCESO | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:149` |
-| `retention.ttlSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:150` |
-| `retention.historySize` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:151` |
-| `retention.tickIntervalSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:152` |
-| `retention.staleAfterSeconds` | `number` | Sí | — | — | Pasado esto el resultado se sirve como ATRASADO | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:156` |
-| `retention.note` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:157` |
+| `retention` | `FitRetentionDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:216` |
+| `retention.kind` | `string` | Sí | valores: BASE_DE_DATOS, MEMORIA_DEL_PROCESO | — | `BASE_DE_DATOS`: leído de data_catalog.catalog_fit_runs. `MEMORIA_DEL_PROCESO`: sin repositorio o con la base caída (ver `fallbackReason`) | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:172` |
+| `retention.fallbackReason` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:178` |
+| `retention.storedForSeconds` | `number` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:180` |
+| `retention.lastWrite` | `FitPersistenceStatusDto` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:182` |
+| `retention.lastWrite.state` | `string` | Sí | valores: GUARDADA, CLAVE_REPETIDA, NO_GUARDADA, SIN_INTENTO | — | Desenlace de la última escritura en data_catalog.catalog_fit_runs intentada por este proceso | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:154` |
+| `retention.lastWrite.runId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:156` |
+| `retention.lastWrite.at` | `string` | Sí | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:157` |
+| `retention.lastWrite.errorCode` | `string` | Sí | admite null | — | Clase del error, nunca el mensaje | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:163` |
+| `retention.ttlSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:183` |
+| `retention.historySize` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:184` |
+| `retention.tickIntervalSeconds` | `number` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:185` |
+| `retention.staleAfterSeconds` | `number` | Sí | — | — | Pasado esto el resultado se sirve como ATRASADO | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:189` |
+| `retention.note` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:190` |
 
 ### Respuestas posibles
 
@@ -813,22 +822,22 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 8. POST /admin/catalog/fit/run
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Pide una corrida de la sonda de ajuste (se ejecuta fuera de la petición)
 - **Bloque:** —
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `AdminCatalogFitController.run` — `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Pide una corrida de la sonda de ajuste (se ejecuta fuera de la petición).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/catalog/fit/run` la atiende `AdminCatalogFitController.run` (src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Delega en `CatalogFitService.request`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_operations, data_catalog.catalog_scan_runs.
+`POST /admin/catalog/fit/run` la atiende `AdminCatalogFitController.run` (src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. Delega en `CatalogFitService.request`. Crea filas en data_catalog.catalog_fit_runs. Borra de data_catalog.catalog_fit_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_operations, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
@@ -837,6 +846,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
+| CABECERA | Idempotency-Key (obligatoria) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -845,6 +855,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 |---|---|---|---|---|---|
 | `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.liveObjects | `src/modules/data_catalog/application/fit/fit-live.repository.ts:57` |
 | `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.liveObjects | `src/modules/data_catalog/application/fit/fit-live.repository.ts:57` |
+| `data_catalog.catalog_fit_runs (vista u objeto no catalogado)` | BORRA | BORRA | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → CatalogFitService.persist → FitRunsRepository.purgeBefore | `src/modules/data_catalog/application/fit/fit-runs.repository.ts:102` |
+| `data_catalog.catalog_fit_runs (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → CatalogFitService.persist → FitRunsRepository.save | `src/modules/data_catalog/application/fit/fit-runs.repository.ts:74` |
 | `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.liveObjects | `src/modules/data_catalog/application/fit/fit-live.repository.ts:42` |
 | `data_catalog.catalog_operations` | LEE | LEE | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.importedOperations | `src/modules/data_catalog/application/fit/fit-live.repository.ts:153` |
 | `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | AdminCatalogFitController.run → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.scanState | `src/modules/data_catalog/application/fit/fit-live.repository.ts:120` |
@@ -853,7 +865,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `idempotency-key` | header | sin dato | `string \| undefined` | — |
+| `Idempotency-Key` | header | Sí | `string` | 8–128 caracteres; la misma clave devuelve la corrida ya aceptada. Con una corrida en vuelo también se devuelve esa, sin crear otra |
 
 ### Cuerpo
 
@@ -863,11 +875,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:187` |
-| `status` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:188` |
-| `created` | `boolean` | Sí | — | — | `false` si la petición repetía una `Idempotency-Key` ya aceptada o se unió a la corrida en vuelo | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:193` |
-| `acceptedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:194` |
-| `statusUrl` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:195` |
+| `runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:220` |
+| `status` | `string` | Sí | valores: EN_CURSO, COMPLETADA, FALLIDA | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:221` |
+| `created` | `boolean` | Sí | — | — | `false` si la petición repetía una `Idempotency-Key` ya aceptada o se unió a la corrida en vuelo | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:226` |
+| `acceptedAt` | `string` | Sí | formato date-time | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:227` |
+| `statusUrl` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:228` |
 
 ### Respuestas posibles
 
@@ -1809,8 +1821,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 20. GET /admin/catalog/pii/reconciliation
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Conciliación de las columnas personales del catálogo con el registro declarado de gobierno
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1818,9 +1830,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Conciliación de las columnas personales del catálogo con el registro declarado de gobierno.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -1849,7 +1861,10 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `PiiReconciliationQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior (`nextCursor`) |
+| `limit` | query | No | `number` | Filas por página |
+| `kind` | query | No | `string` | `MISSING_IN_REGISTRY`: personal aprobada sin declarar. `REGISTRY_DISAGREES`: declarada sin marca PII/PHI. `ORPHAN_IN_REGISTRY`: declarada pero no observada |
+| `schema` | query | No | `string` | Schema de PostgreSQL |
 
 ### Cuerpo
 
@@ -2388,8 +2403,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 28. GET /admin/governance/jobs
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Trabajos de gobierno: escaneos del catálogo, clasificaciones y ejecuciones de retención
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2397,9 +2412,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Trabajos de gobierno: escaneos del catálogo, clasificaciones y ejecuciones de retención.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -2427,7 +2442,12 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `JobsQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior (`nextCursor`) |
+| `limit` | query | No | `number` | Filas por página |
+| `type` | query | No | `string` | — |
+| `status` | query | No | `string` | Estado normalizado: QUEUED, RUNNING, SUCCEEDED, FAILED o CANCELLED |
+| `from` | query | No | `string` | Desde (ISO 8601, incluido). Sin rango, los últimos 30 días |
+| `to` | query | No | `string` | Hasta (ISO 8601, excluido) |
 
 ### Cuerpo
 
@@ -2461,8 +2481,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 29. GET /admin/governance/review-queue
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Cola de revisión: fichas de objeto y de columna en NEEDS_REVIEW, la más antigua primero
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2470,9 +2490,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Cola de revisión: fichas de objeto y de columna en NEEDS_REVIEW, la más antigua primero.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -2500,7 +2520,10 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ReviewQueueQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior (`nextCursor`) |
+| `limit` | query | No | `number` | Filas por página |
+| `kind` | query | No | `string` | — |
+| `schema` | query | No | `string` | Schema de PostgreSQL |
 
 ### Cuerpo
 
@@ -4057,22 +4080,22 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 48. POST /internal/catalog/fit/run
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Corre la sonda de ajuste y espera su desenlace (worker)
 - **Bloque:** —
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `InternalCatalogFitController.run` — `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109`
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Corre la sonda de ajuste y espera su desenlace (worker).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/catalog/fit/run` la atiende `InternalCatalogFitController.run` (src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogFitService.requestAndWait`. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_operations, data_catalog.catalog_scan_runs.
+`POST /internal/catalog/fit/run` la atiende `InternalCatalogFitController.run` (src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109). Exige sesión con alguno de los roles SYSTEM. Delega en `CatalogFitService.requestAndWait`. Crea filas en data_catalog.catalog_fit_runs. Borra de data_catalog.catalog_fit_runs. Lee data_catalog.catalog_annotations, data_catalog.catalog_columns, data_catalog.catalog_objects, data_catalog.catalog_operations, data_catalog.catalog_scan_runs.
 
 ### Requerimientos
 
@@ -4081,6 +4104,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
+| CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -4089,6 +4113,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 |---|---|---|---|---|---|
 | `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.liveObjects | `src/modules/data_catalog/application/fit/fit-live.repository.ts:57` |
 | `data_catalog.catalog_columns` | LEE | LEE | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.liveObjects | `src/modules/data_catalog/application/fit/fit-live.repository.ts:57` |
+| `data_catalog.catalog_fit_runs (vista u objeto no catalogado)` | BORRA | BORRA | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → CatalogFitService.persist → FitRunsRepository.purgeBefore | `src/modules/data_catalog/application/fit/fit-runs.repository.ts:102` |
+| `data_catalog.catalog_fit_runs (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → CatalogFitService.persist → FitRunsRepository.save | `src/modules/data_catalog/application/fit/fit-runs.repository.ts:74` |
 | `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.liveObjects | `src/modules/data_catalog/application/fit/fit-live.repository.ts:42` |
 | `data_catalog.catalog_operations` | LEE | LEE | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.importedOperations | `src/modules/data_catalog/application/fit/fit-live.repository.ts:153` |
 | `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | InternalCatalogFitController.run → CatalogFitService.requestAndWait → CatalogFitService.request → CatalogFitService.execute → FitInputsCollector.collect → FitLiveRepository.scanState | `src/modules/data_catalog/application/fit/fit-live.repository.ts:120` |
@@ -4097,7 +4123,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `idempotency-key` | header | sin dato | `string \| undefined` | — |
+| `Idempotency-Key` | header | No | `string` | Una clave por ventana de tick: un reintento dentro de la ventana no crea otra corrida |
 
 ### Cuerpo
 
@@ -4107,13 +4133,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:200` |
-| `status` | `string` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:201` |
-| `created` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:202` |
-| `verdict` | `string` | No | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:203` |
-| `failedChecks` | `number` | No | — | — | Comprobaciones que fallaron | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:205` |
-| `blindSpots` | `number` | No | — | — | Comprobaciones que no pudieron medir | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:207` |
-| `errorCode` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:208` |
+| `runId` | `string` | Sí | formato uuid | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:233` |
+| `status` | `string` | Sí | valores: EN_CURSO, COMPLETADA, FALLIDA | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:234` |
+| `created` | `boolean` | Sí | — | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:235` |
+| `verdict` | `string` | No | valores: AJUSTADA, CON_AVISOS, DESAJUSTADA, SIN_DATOS | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:236` |
+| `failedChecks` | `number` | No | — | — | Comprobaciones que fallaron | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:238` |
+| `blindSpots` | `number` | No | — | — | Comprobaciones que no pudieron medir | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:240` |
+| `errorCode` | `string` | No | admite null | — | — | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:241` |
+| `persisted` | `boolean` | No | — | — | Si el desenlace quedó en data_catalog.catalog_fit_runs | `src/modules/data_catalog/presentation/dto/catalog-fit.dto.ts:246` |
 
 ### Respuestas posibles
 

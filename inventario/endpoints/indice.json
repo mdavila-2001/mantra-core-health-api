@@ -2,17 +2,17 @@
   "resumen": {
     "total": 1925,
     "porOrigen": {
-      "CONTRATO": 1839,
-      "CONTRATO_AUSENTE": 86
+      "CONTRATO": 1913,
+      "CONTRATO_AUSENTE": 12
     },
     "porRiesgo": {
-      "BAJO": 718,
+      "BAJO": 716,
       "MEDIO": 938,
-      "ALTO": 269
+      "ALTO": 271
     },
-    "conTablas": 1842,
-    "sinTablasSinDeterminar": 15,
-    "sinExplicacionDeNegocio": 20,
+    "conTablas": 1843,
+    "sinTablasSinDeterminar": 14,
+    "sinExplicacionDeNegocio": 1,
     "conPruebas": 1047,
     "conRequerimientos": 1925
   },
@@ -1858,12 +1858,12 @@
     },
     {
       "id": "AuditQueryController_dataAccessSummary",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/audit/data-access/summary",
       "modulo": "audit",
       "bloque": "Auditoría y Reporting",
-      "nombre": null,
+      "nombre": "Resumen agregado de las lecturas de datos sensibles: por propósito, recurso y operación",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -2060,12 +2060,12 @@
     },
     {
       "id": "PrivacyController_listDsar",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/privacy/dsar",
       "modulo": "audit",
       "bloque": "Auditoría y Reporting",
-      "nombre": "Lectura de las solicitudes DSAR. `@PlatformScopeOptional()` va por método (no en la clase: el `POST`/`PATCH` sí exigen una organización). `dsar_requests` no tiene tenant: es del titular. Cada lectura queda sellada en `data_access_log` (identifica a titulares).",
+      "nombre": "Solicitudes DSAR, la más reciente primero",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -2098,12 +2098,12 @@
     },
     {
       "id": "PrivacyController_getDsar",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/privacy/dsar/{id}",
       "modulo": "audit",
       "bloque": "Auditoría y Reporting",
-      "nombre": null,
+      "nombre": "Una solicitud DSAR (sin el archivo resultante)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -2504,12 +2504,12 @@
     },
     {
       "id": "AuthzModulesCatalogController_modules",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/authz/catalog/modules",
       "modulo": "authz",
       "bloque": "Identidad y Seguridad",
-      "nombre": null,
+      "nombre": "Catálogo RBAC por módulo, con sus huecos",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -2813,12 +2813,12 @@
     },
     {
       "id": "AuthzGovernanceExtController_scopeGrants",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/authz/resource-scope-grants",
       "modulo": "authz",
       "bloque": "Identidad y Seguridad",
-      "nombre": null,
+      "nombre": "Permisos por alcance de recurso, paginados",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -2849,18 +2849,18 @@
     },
     {
       "id": "AuthzGovernanceExtController_endScopeGrant",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "DELETE",
       "ruta": "/authz/resource-scope-grants/{grantId}",
       "modulo": "authz",
       "bloque": "Identidad y Seguridad",
-      "nombre": null,
+      "nombre": "Terminar la vigencia de un permiso por alcance de recurso",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -2903,12 +2903,12 @@
     },
     {
       "id": "AuthzGovernanceExtController_fieldPermissions",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/authz/roles/{roleId}/field-permissions",
       "modulo": "authz",
       "bloque": "Identidad y Seguridad",
-      "nombre": null,
+      "nombre": "Reglas de enmascaramiento de campos de un rol",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -3611,12 +3611,12 @@
     },
     {
       "id": "AdminServiceCatalogController_scopes",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/catalogs/services/scopes",
       "modulo": "billing",
       "bloque": "Financiero y ERP",
-      "nombre": null,
+      "nombre": "Tipos de organización, prácticas y monedas del editor de servicios",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -10031,12 +10031,12 @@
     },
     {
       "id": "AdminCatalogFitController_latest",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/catalog/fit",
       "modulo": "data_catalog",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Último resultado de la sonda de ajuste de la catalogación",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -10048,27 +10048,27 @@
         "AUDITOR",
         "DATA_STEWARD"
       ],
-      "tablas": 0,
+      "tablas": 1,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
       "id": "AdminCatalogFitController_run",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/catalog/fit/run",
       "modulo": "data_catalog",
       "bloque": null,
-      "nombre": null,
-      "riesgo": "BAJO",
+      "nombre": "Pide una corrida de la sonda de ajuste (se ejecuta fuera de la petición)",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [
         "GOVERNANCE_ADMIN",
         "DATA_PLATFORM_ADMIN",
         "DATA_STEWARD"
       ],
-      "tablas": 5,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10277,12 +10277,12 @@
     },
     {
       "id": "AdminCatalogController_piiReconciliation",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/catalog/pii/reconciliation",
       "modulo": "data_catalog",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Conciliación de las columnas personales del catálogo con el registro declarado de gobierno",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -10423,12 +10423,12 @@
     },
     {
       "id": "GovernanceQueueController_jobs",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/jobs",
       "modulo": "data_catalog",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Trabajos de gobierno: escaneos del catálogo, clasificaciones y ejecuciones de retención",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -10448,12 +10448,12 @@
     },
     {
       "id": "GovernanceQueueController_reviewQueue",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/review-queue",
       "modulo": "data_catalog",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Cola de revisión: fichas de objeto y de columna en NEEDS_REVIEW, la más antigua primero",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -10797,18 +10797,18 @@
     },
     {
       "id": "InternalCatalogFitController_run",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/internal/catalog/fit/run",
       "modulo": "data_catalog",
       "bloque": null,
-      "nombre": null,
-      "riesgo": "BAJO",
+      "nombre": "Corre la sonda de ajuste y espera su desenlace (worker)",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [
         "SYSTEM"
       ],
-      "tablas": 5,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14274,12 +14274,12 @@
     },
     {
       "id": "AdminDataQualityController_issues",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/data-quality/issues",
       "modulo": "governance_admin",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Incidencias de calidad de datos clínicos, paginadas por cursor",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -14298,12 +14298,12 @@
     },
     {
       "id": "AdminDataQualityController_issue",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/data-quality/issues/{id}",
       "modulo": "governance_admin",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Una incidencia de calidad de datos clínicos",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -14322,12 +14322,12 @@
     },
     {
       "id": "AdminDataQualityController_resolve",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/governance/data-quality/issues/{id}/resolution",
       "modulo": "governance_admin",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Resolver o descartar una incidencia abierta",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -14343,12 +14343,12 @@
     },
     {
       "id": "AdminDataQualityController_rules",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/data-quality/rules",
       "modulo": "governance_admin",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Reglas de calidad de datos clínicos, paginadas por cursor",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -14367,12 +14367,12 @@
     },
     {
       "id": "AdminDataQualityController_rule",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/data-quality/rules/{id}",
       "modulo": "governance_admin",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Una regla de calidad con su expresión, sus incidencias por estado y sus últimas corridas",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18730,12 +18730,12 @@
     },
     {
       "id": "InsightsWorkflowController_listRules",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/alert-rules",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Las siete reglas de alerta con su umbral y estado",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18750,12 +18750,12 @@
     },
     {
       "id": "InsightsWorkflowController_patchRule",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/marketing/insights/alert-rules/{code}",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Enciende, apaga o cambia el umbral (1 a 500) de una regla",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18769,12 +18769,12 @@
     },
     {
       "id": "InsightsWorkflowController_listWorkflow",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/alert-workflow",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Estado, responsable e historial de las alertas que existen",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18789,12 +18789,12 @@
     },
     {
       "id": "InsightsWorkflowController_putWorkflow",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PUT",
       "ruta": "/marketing/insights/alert-workflow/{fingerprint}",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Cambia estado y/o responsable de una alerta (la crea la primera vez)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18807,12 +18807,12 @@
     },
     {
       "id": "InsightsFactsController_campaignFacts",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/campaign-facts",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Hechos diarios por campaña y canal; lo que la fuente no reporta se declara en meta.notMeasured",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18827,12 +18827,12 @@
     },
     {
       "id": "InsightsFactsController_catalog",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/catalog",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Campañas (con sus canales y objetivos) e hitos de Insights",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18847,12 +18847,12 @@
     },
     {
       "id": "InsightsWorkspaceController_getNotificationPreferences",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/notification-preferences",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Preferencias de aviso del usuario (rowVersion 0 si no guardó nada)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18867,12 +18867,12 @@
     },
     {
       "id": "InsightsWorkspaceController_putNotificationPreferences",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PUT",
       "ruta": "/marketing/insights/notification-preferences",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Guarda las preferencias de aviso del usuario (no se envía nada)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18885,12 +18885,12 @@
     },
     {
       "id": "InsightsWorkspaceController_listReports",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/reports",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Historial de informes del usuario (máximo 12, el más nuevo primero)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18905,12 +18905,12 @@
     },
     {
       "id": "InsightsWorkspaceController_deleteReport",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "DELETE",
       "ruta": "/marketing/insights/reports/{id}",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Borra un informe del usuario (idempotente)",
       "riesgo": "ALTO",
       "publica": false,
       "roles": [
@@ -18923,12 +18923,12 @@
     },
     {
       "id": "InsightsWorkspaceController_putReport",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PUT",
       "ruta": "/marketing/insights/reports/{id}",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Guarda un informe en el historial (idempotente por id)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18941,12 +18941,12 @@
     },
     {
       "id": "InsightsWorkspaceController_listSavedViews",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/saved-views",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Vistas guardadas del usuario",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18961,12 +18961,12 @@
     },
     {
       "id": "InsightsWorkspaceController_deleteSavedView",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "DELETE",
       "ruta": "/marketing/insights/saved-views/{id}",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Borra una vista del usuario (idempotente)",
       "riesgo": "ALTO",
       "publica": false,
       "roles": [
@@ -18979,12 +18979,12 @@
     },
     {
       "id": "InsightsWorkspaceController_putSavedView",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PUT",
       "ruta": "/marketing/insights/saved-views/{id}",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Guarda una vista con el id que manda el cliente (idempotente)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -18997,12 +18997,12 @@
     },
     {
       "id": "InsightsWorkspaceController_getUserPreferences",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/marketing/insights/user-preferences",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Preferencias de interfaz del usuario (rowVersion 0 si no guardó nada)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -19017,12 +19017,12 @@
     },
     {
       "id": "InsightsWorkspaceController_putUserPreferences",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PUT",
       "ruta": "/marketing/insights/user-preferences",
       "modulo": "marketing",
       "bloque": "Marketing y Crecimiento",
-      "nombre": null,
+      "nombre": "Guarda las preferencias de interfaz del usuario",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20164,12 +20164,12 @@
     },
     {
       "id": "ObservabilityController_coverage",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/coverage",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Qué se mide, qué no, y si la propia medición está sana",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20186,12 +20186,12 @@
     },
     {
       "id": "ObservabilityController_endpoints",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/endpoints",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Operaciones por tráfico, fallos y latencia",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20208,12 +20208,12 @@
     },
     {
       "id": "ObservabilityController_errorEvents",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/errors/events",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Eventos de error (sin mensajes), paginados",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20230,12 +20230,12 @@
     },
     {
       "id": "ObservabilityController_errorGroups",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/errors/groups",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Grupos de errores (huella estable) con su actividad",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20252,12 +20252,12 @@
     },
     {
       "id": "ObservabilityController_errorGroup",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/errors/groups/{id}",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Un grupo de errores con sus eventos recientes",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20274,12 +20274,12 @@
     },
     {
       "id": "ObservabilityController_changeErrorGroupState",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/admin/observability/errors/groups/{id}",
       "modulo": "observability",
       "bloque": null,
-      "nombre": "Cambia el estado de un grupo. **Sin** `@PlatformScopeOptional`: muta, así que exige una organización elegida (o un rol global con resolución propia, como `SUPERADMIN`). Es la decisión conservadora; ver el README del módulo.",
+      "nombre": "Marcar un grupo como visto, resuelto o ignorado (con motivo y versión)",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -20293,12 +20293,12 @@
     },
     {
       "id": "ObservabilityController_modules",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/modules",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Errores y latencia por módulo",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20315,12 +20315,12 @@
     },
     {
       "id": "ObservabilityController_request",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/requests/{requestId}",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Qué se guardó de una petición (errores y muestra lenta) por su requestId",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20337,12 +20337,12 @@
     },
     {
       "id": "ObservabilityController_sqlSlow",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/sql/slow",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Peticiones lentas o con error muestreadas, con su SQL",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20359,12 +20359,12 @@
     },
     {
       "id": "ObservabilityController_sqlStatements",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/sql/statements",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Consultas SQL por coste (huella, nunca parámetros)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20381,12 +20381,12 @@
     },
     {
       "id": "ObservabilityController_sqlStatement",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/sql/statements/{hash}",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Una consulta normalizada y quién la dispara",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20403,12 +20403,12 @@
     },
     {
       "id": "ObservabilityController_summary",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/summary",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Estado del sistema en la ventana: KPIs con null+reason",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -20425,12 +20425,12 @@
     },
     {
       "id": "ObservabilityController_timeseries",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/observability/timeseries",
       "modulo": "observability",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Serie temporal de una métrica (un cubo sin fila es «sin dato»)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -24128,12 +24128,12 @@
     },
     {
       "id": "RuntimePiecesController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/ops/runtime-pieces",
       "modulo": "platform_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Piezas descubiertas en el código, con su estado contrastado",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -24150,12 +24150,12 @@
     },
     {
       "id": "RuntimePiecesController_detail",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/ops/runtime-pieces/{id}",
       "modulo": "platform_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Una pieza con su evidencia, su registro y sus hallazgos",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -24172,12 +24172,12 @@
     },
     {
       "id": "RuntimePiecesController_discover",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/ops/runtime-pieces/discover",
       "modulo": "platform_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Descubrir y registrar las piezas del código (idempotente)",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -32251,12 +32251,12 @@
     },
     {
       "id": "GovernanceOperationsReadController_domains",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/domains",
       "modulo": "system_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Dominios de datos y cuántas entidades declara cada uno",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32347,7 +32347,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 7,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -32450,12 +32450,12 @@
     },
     {
       "id": "GovernanceOperationsReadController_legalHolds",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/legal-holds",
       "modulo": "system_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Retenciones legales (legal holds), sin la referencia de la autoridad",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32509,12 +32509,12 @@
     },
     {
       "id": "MutabilityController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/mutability",
       "modulo": "system_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32534,12 +32534,12 @@
     },
     {
       "id": "MutabilityController_detail",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/mutability/{schema}/{table}",
       "modulo": "system_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32559,12 +32559,12 @@
     },
     {
       "id": "MutabilityController_summary",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/mutability/summary",
       "modulo": "system_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32686,12 +32686,12 @@
     },
     {
       "id": "GovernanceOperationsReadController_retentionExecutions",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/governance/retention-executions",
       "modulo": "system_ops",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Ejecuciones de políticas de retención: estado, tiempos y conteos",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32877,12 +32877,12 @@
     },
     {
       "id": "TelemetryErrorsAnalyticsController_summary",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/analytics/errors",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32899,12 +32899,12 @@
     },
     {
       "id": "TelemetryErrorsAnalyticsController_fingerprints",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/analytics/errors/fingerprints",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Top de huellas de error con tendencia",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32921,12 +32921,12 @@
     },
     {
       "id": "TelemetryErrorsAnalyticsController_fingerprint",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/analytics/errors/fingerprints/{fingerprint}",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Detalle agregado de una huella; request_id recientes sólo a roles RAW",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -32943,12 +32943,12 @@
     },
     {
       "id": "TelemetryErrorsAnalyticsController_routesNotFound",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/analytics/errors/routes-not-found",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Rutas que cayeron en «no encontrada» o sin parte registrada",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -33097,12 +33097,12 @@
     },
     {
       "id": "TelemetryPartsAnalyticsController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/analytics/parts",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Árbol de partes con su uso, errores y vitales; lo que no casa va a unmapped",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -33119,12 +33119,12 @@
     },
     {
       "id": "TelemetryPartsAnalyticsController_detail",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/analytics/parts/{routeCode}",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Detalle de una parte: serie, acciones clave, vitales y errores",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -33297,12 +33297,12 @@
     },
     {
       "id": "TelemetryClientErrorsController_capture",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/telemetry/client-errors",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Registra un lote de errores del cliente (saneados en el servidor)",
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
@@ -33415,12 +33415,12 @@
     },
     {
       "id": "TelemetryRetentionController_purge",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/telemetry/retention/purge",
       "modulo": "telemetry",
       "bloque": "Operaciones de Plataforma",
-      "nombre": null,
+      "nombre": "Purga por retención del propósito: eventos de uso, propiedades y errores del cliente",
       "riesgo": "ALTO",
       "publica": false,
       "roles": [
@@ -34558,12 +34558,12 @@
     },
     {
       "id": "AdminUiVisibilityController_elements",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/ui-visibility/elements",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Catálogo de elementos de la interfaz (cursor por clave)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34576,12 +34576,12 @@
     },
     {
       "id": "AdminUiVisibilityController_createElement",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/ui-visibility/elements",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Alta manual de un elemento (source ADMIN)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34594,12 +34594,12 @@
     },
     {
       "id": "AdminUiVisibilityController_syncElements",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/ui-visibility/elements/sync",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Sincroniza el registro del front (idempotente por key)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34612,12 +34612,12 @@
     },
     {
       "id": "AdminUiVisibilityController_preview",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/ui-visibility/preview",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34630,12 +34630,12 @@
     },
     {
       "id": "AdminUiVisibilityController_rules",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/admin/ui-visibility/rules",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Reglas de visibilidad (cursor por fecha de alta)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34648,12 +34648,12 @@
     },
     {
       "id": "AdminUiVisibilityController_createRule",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/ui-visibility/rules",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Crear una regla SHOW/HIDE",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34666,12 +34666,12 @@
     },
     {
       "id": "AdminUiVisibilityController_updateRule",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/admin/ui-visibility/rules/{id}",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Editar una regla con bloqueo optimista (409 si cambió)",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34684,12 +34684,12 @@
     },
     {
       "id": "AdminUiVisibilityController_endRule",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/admin/ui-visibility/rules/{id}/end",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Terminar una regla (validTo = ahora). Idempotente.",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -34702,12 +34702,12 @@
     },
     {
       "id": "MeUiVisibilityController_mine",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/me/ui-visibility",
       "modulo": "ui_visibility",
       "bloque": null,
-      "nombre": null,
+      "nombre": "Claves ocultas para quien llama",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],

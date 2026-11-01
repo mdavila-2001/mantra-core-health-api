@@ -1487,7 +1487,7 @@ Representa incidentes operativos derivados de fallas o degradación de component
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: health_incidents`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `HealthIncidents` — `src/modules/platform_ops/entities/health_incidents.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 8 FK salientes · 6 entrantes · 10 operaciones
+- **Resumen:** 19 columnas · 10 índices · 8 FK salientes · 7 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -1531,6 +1531,7 @@ Representa incidentes operativos derivados de fallas o degradación de component
 | desde | id | platform_ops.incident_timeline_events (health_incident_id) | fk_incident_timeline_events_health_incident_id |
 | desde | id | platform_ops.incident_communications (health_incident_id) | fk_incident_communications_health_incident_id |
 | desde | id | platform_ops.postmortems (health_incident_id) | fk_postmortems_health_incident_id |
+| desde | id | observability.alert_evaluations (health_incident_id) | fk_alert_evaluations_health_incident_id |
 
 #### Índices
 
@@ -2877,7 +2878,7 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: service_components; BIZ note`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ServiceComponents` — `src/modules/platform_ops/entities/service_components.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 19 entrantes · 12 operaciones
+- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 20 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -2928,6 +2929,7 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 | desde | id | platform_ops.operational_improvement_items (service_component_id) | fk_operational_improvement_items_service_component_id |
 | desde | id | system_ops.workload_assessments (service_component_id) | fk_workload_assessments_service_component_id |
 | desde | id | automation.agents (system_service_component_id) | fk_agents_system_service_component_id |
+| desde | id | observability.dependency_probe_runs (service_component_id) | fk_dependency_probe_runs_service_component_id |
 
 #### Índices
 

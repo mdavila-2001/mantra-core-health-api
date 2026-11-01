@@ -208,7 +208,7 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_equipment`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticEquipment` — `src/modules/diagnostic_units/entities/diagnostic_equipment.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 0 entrantes · 15 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -246,6 +246,7 @@ Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar re
 | hacia | updated_by_user_id | iam.users (id) | fk_diagnostic_equipment_updated_by_user_id |
 | hacia | care_space_id | practice.care_spaces (id) | fk_diagnostic_equipment_care_space_id |
 | hacia | schedulable_resource_id | scheduling.schedulable_resources (id) | fk_diagnostic_equipment_schedulable_resource_id |
+| desde | id | diagnostics.imaging_procedure_steps (scheduled_equipment_id) | fk_imaging_procedure_steps_scheduled_equipment_id |
 
 #### Índices
 

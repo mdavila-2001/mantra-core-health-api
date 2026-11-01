@@ -3,7 +3,7 @@
 # Endpoints del módulo `ui_visibility`
 
 - **Bloque:** —
-- **Operaciones:** 9 (0 en el contrato, 9 sólo en el código)
+- **Operaciones:** 9 (9 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 0 · BAJO 9
 - **Tablas distintas que tocan:** 8
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/ui-visibility.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -12,22 +12,22 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/admin/ui-visibility/elements` | — | BAJO | 2 | SECURITY_ADMIN |
-| 2 | POST | `/admin/ui-visibility/elements` | — | BAJO | 2 | SECURITY_ADMIN |
-| 3 | POST | `/admin/ui-visibility/elements/sync` | — | BAJO | 0 | SECURITY_ADMIN |
-| 4 | GET | `/admin/ui-visibility/preview` | — | BAJO | 6 | SECURITY_ADMIN |
-| 5 | GET | `/admin/ui-visibility/rules` | — | BAJO | 5 | SECURITY_ADMIN |
-| 6 | POST | `/admin/ui-visibility/rules` | — | BAJO | 4 | SECURITY_ADMIN |
-| 7 | PATCH | `/admin/ui-visibility/rules/{id}` | — | BAJO | 4 | SECURITY_ADMIN |
-| 8 | POST | `/admin/ui-visibility/rules/{id}/end` | — | BAJO | 4 | SECURITY_ADMIN |
-| 9 | GET | `/me/ui-visibility` | — | BAJO | 1 | sesión (sin roles) |
+| 1 | GET | `/admin/ui-visibility/elements` | Catálogo de elementos de la interfaz (cursor por clave) | BAJO | 2 | SECURITY_ADMIN |
+| 2 | POST | `/admin/ui-visibility/elements` | Alta manual de un elemento (source ADMIN) | BAJO | 2 | SECURITY_ADMIN |
+| 3 | POST | `/admin/ui-visibility/elements/sync` | Sincroniza el registro del front (idempotente por key) | BAJO | 0 | SECURITY_ADMIN |
+| 4 | GET | `/admin/ui-visibility/preview` | Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento | BAJO | 6 | SECURITY_ADMIN |
+| 5 | GET | `/admin/ui-visibility/rules` | Reglas de visibilidad (cursor por fecha de alta) | BAJO | 5 | SECURITY_ADMIN |
+| 6 | POST | `/admin/ui-visibility/rules` | Crear una regla SHOW/HIDE | BAJO | 4 | SECURITY_ADMIN |
+| 7 | PATCH | `/admin/ui-visibility/rules/{id}` | Editar una regla con bloqueo optimista (409 si cambió) | BAJO | 4 | SECURITY_ADMIN |
+| 8 | POST | `/admin/ui-visibility/rules/{id}/end` | Terminar una regla (validTo = ahora). Idempotente. | BAJO | 4 | SECURITY_ADMIN |
+| 9 | GET | `/me/ui-visibility` | Claves ocultas para quien llama | BAJO | 1 | sesión (sin roles) |
 
 ---
 
 ## 1. GET /admin/ui-visibility/elements
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de elementos de la interfaz (cursor por clave)
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -35,9 +35,9 @@
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Catálogo de elementos de la interfaz (cursor por clave).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -63,7 +63,12 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ElementsQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco (`nextCursor`) |
+| `limit` | query | No | `number` | — |
+| `module` | query | No | `string` | Código del módulo |
+| `kind` | query | No | `string` | — |
+| `q` | query | No | `string` | Busca en la clave y la etiqueta |
+| `status` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -96,8 +101,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 2. POST /admin/ui-visibility/elements
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Alta manual de un elemento (source ADMIN)
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -105,9 +110,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Alta manual de un elemento (source ADMIN).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -120,6 +125,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -129,16 +136,16 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
 | `authz.ui_visibility_rules` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createElement → UiVisibilityAdminService.createElement → UiVisibilityAdminService.toElementViews → MikroOrmUiVisibilityStore.countActiveRules | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:268` |
 
-### Cuerpo — DTO `CreateElementDto`
+### Cuerpo — DTO `CreateElementDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `key` | `string` | Sí | longitud máxima UI_ELEMENT_KEY_MAX; patrón runtime UI_ELEMENT_KEY_PATTERN | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:172` |
-| `kind` | `object` | Sí | — | `@IsIn(UI_ELEMENT_KINDS)` | Tipo TypeScript no expandido: (typeof UI_ELEMENT_KINDS)[number] | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:176` |
-| `moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima UI_MODULE_CODE_MAX | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_MODULE_CODE_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:183` |
-| `parentKey` | `string` | No | longitud máxima UI_ELEMENT_KEY_MAX; patrón runtime UI_ELEMENT_KEY_PATTERN; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:191` |
-| `label` | `string` | Sí | longitud mínima 1; longitud máxima UI_LABEL_MAX | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_LABEL_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:198` |
-| `description` | `string` | No | longitud máxima UI_DESCRIPTION_MAX; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_DESCRIPTION_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:205` |
+| `key` | `string` | Sí | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:172` |
+| `kind` | `string` | Sí | valores: MODULE, MENU_SECTION, SCREEN, SECTION, WIDGET, FIELD, ACTION | `@IsIn(UI_ELEMENT_KINDS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:176` |
+| `moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_MODULE_CODE_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:183` |
+| `parentKey` | `object` | No | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:191` |
+| `label` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_LABEL_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:198` |
+| `description` | `object` | No | longitud máxima 500; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_DESCRIPTION_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:205` |
 | `defaultVisible` | `boolean` | No | — | `@IsOptional()` `@Transform(raw)` `@IsBoolean()` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:211` |
 
 **Payload mínimo** (sólo los obligatorios):
@@ -146,7 +153,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 ```json
 {
   "key": "pharmacy.orders.export-button",
-  "kind": {},
+  "kind": "MODULE",
   "moduleCode": "CODIGO_EJEMPLO",
   "label": "valor-ejemplo"
 }
@@ -157,11 +164,11 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 ```json
 {
   "key": "pharmacy.orders.export-button",
-  "kind": {},
+  "kind": "MODULE",
   "moduleCode": "CODIGO_EJEMPLO",
-  "parentKey": "valor-ejemplo",
+  "parentKey": {},
   "label": "valor-ejemplo",
-  "description": "Texto descriptivo de ejemplo",
+  "description": {},
   "defaultVisible": true
 }
 ```
@@ -177,6 +184,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -195,8 +203,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 3. POST /admin/ui-visibility/elements/sync
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Sincroniza el registro del front (idempotente por key)
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -204,9 +212,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Sincroniza el registro del front (idempotente por key).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -219,23 +227,25 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 
-### Cuerpo — DTO `SyncElementsDto`
+### Cuerpo — DTO `SyncElementsDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `elements` | `array<UiElementDraftDto>` | Sí | máximo UI_SYNC_MAX_ELEMENTS elemento(s) | `@IsArray()` `@ArrayMaxSize(UI_SYNC_MAX_ELEMENTS)` `@ValidateNested({ each: true })` `@Type(() => UiElementDraftDto)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:220` |
-| `elements[].key` | `string` | Sí | longitud máxima UI_ELEMENT_KEY_MAX; patrón runtime UI_ELEMENT_KEY_PATTERN | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:121` |
-| `elements[].kind` | `object` | Sí | — | `@IsIn(UI_ELEMENT_KINDS)` | Tipo TypeScript no expandido: (typeof UI_ELEMENT_KINDS)[number] | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:125` |
-| `elements[].moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima UI_MODULE_CODE_MAX | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_MODULE_CODE_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:132` |
-| `elements[].parentKey` | `string` | No | longitud máxima UI_ELEMENT_KEY_MAX; patrón runtime UI_ELEMENT_KEY_PATTERN; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:140` |
-| `elements[].label` | `string` | Sí | longitud mínima 1; longitud máxima UI_LABEL_MAX | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_LABEL_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:147` |
-| `elements[].description` | `string` | No | longitud máxima UI_DESCRIPTION_MAX; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_DESCRIPTION_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:154` |
+| `elements` | `array<UiElementDraftDto>` | Sí | máximo 2000 elemento(s) | `@IsArray()` `@ArrayMaxSize(UI_SYNC_MAX_ELEMENTS)` `@ValidateNested({ each: true })` `@Type(() => UiElementDraftDto)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:220` |
+| `elements[].key` | `string` | Sí | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:121` |
+| `elements[].kind` | `string` | Sí | valores: MODULE, MENU_SECTION, SCREEN, SECTION, WIDGET, FIELD, ACTION | `@IsIn(UI_ELEMENT_KINDS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:125` |
+| `elements[].moduleCode` | `string` | Sí | longitud mínima 1; longitud máxima 80 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_MODULE_CODE_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:132` |
+| `elements[].parentKey` | `object` | No | longitud máxima 160; patrón runtime UI_ELEMENT_KEY_PATTERN; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` `@Matches(UI_ELEMENT_KEY_PATTERN, { message: KEY_MESSAGE })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:140` |
+| `elements[].label` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@Transform(trimmed)` `@IsString()` `@MinLength(1)` `@MaxLength(UI_LABEL_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:147` |
+| `elements[].description` | `object` | No | longitud máxima 500; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_DESCRIPTION_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:154` |
 | `elements[].defaultVisible` | `boolean` | Sí | — | `@Transform(raw)` `@IsBoolean()` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:159` |
 
 **Payload mínimo** (sólo los obligatorios):
@@ -245,7 +255,7 @@ No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
   "elements": [
     {
       "key": "pharmacy.orders.export-button",
-      "kind": {},
+      "kind": "MODULE",
       "moduleCode": "CODIGO_EJEMPLO",
       "label": "valor-ejemplo",
       "defaultVisible": true
@@ -261,11 +271,11 @@ No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
   "elements": [
     {
       "key": "pharmacy.orders.export-button",
-      "kind": {},
+      "kind": "MODULE",
       "moduleCode": "CODIGO_EJEMPLO",
-      "parentKey": "valor-ejemplo",
+      "parentKey": {},
       "label": "valor-ejemplo",
-      "description": "Texto descriptivo de ejemplo",
+      "description": {},
       "defaultVisible": true
     }
   ]
@@ -283,6 +293,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -301,8 +312,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 4. GET /admin/ui-visibility/preview
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -310,9 +321,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Vista previa «ver como»: lo oculto y la regla ganadora de cada elemento.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -342,7 +353,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `PreviewQueryDto` | — |
+| `userId` | query | No | `string` | «Ver como» este usuario |
+| `roleCode` | query | No | `string` | «Ver como» este rol |
 
 ### Cuerpo
 
@@ -375,8 +387,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 5. GET /admin/ui-visibility/rules
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Reglas de visibilidad (cursor por fecha de alta)
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -384,9 +396,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Reglas de visibilidad (cursor por fecha de alta).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -415,7 +427,12 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `RulesQueryDto` | — |
+| `cursor` | query | No | `string` | Cursor opaco (`nextCursor`) |
+| `limit` | query | No | `number` | — |
+| `elementKey` | query | No | `string` | — |
+| `subjectType` | query | No | `string` | — |
+| `subjectId` | query | No | `string` | — |
+| `active` | query | No | `boolean` | true: sólo reglas en vigor ahora; false: terminadas, vencidas o futuras |
 
 ### Cuerpo
 
@@ -448,8 +465,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 6. POST /admin/ui-visibility/rules
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Crear una regla SHOW/HIDE
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -457,9 +474,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Crear una regla SHOW/HIDE.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -472,6 +489,8 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -483,25 +502,25 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
 | `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.createRule → UiVisibilityAdminService.createRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
 
-### Cuerpo — DTO `CreateRuleDto`
+### Cuerpo — DTO `CreateRuleDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `elementKey` | `string` | Sí | longitud máxima UI_ELEMENT_KEY_MAX | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:258` |
-| `effect` | `object` | Sí | — | `@IsIn(UI_RULE_EFFECTS)` | Tipo TypeScript no expandido: (typeof UI_RULE_EFFECTS)[number] | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:262` |
-| `subjectType` | `object` | Sí | — | `@IsIn(UI_RULE_SUBJECT_TYPES)` | Tipo TypeScript no expandido: (typeof UI_RULE_SUBJECT_TYPES)[number] | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:266` |
-| `subjectId` | `string` | No | longitud máxima UI_SUBJECT_ID_MAX; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_SUBJECT_ID_MAX)` | USER: id de usuario · TENANT: id de organización · ROLE: código de rol · ORG_TYPE: código del tipo de organización · ALL: null | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:278` |
-| `validFrom` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:283` |
-| `validTo` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:288` |
-| `reason` | `string` | Sí | longitud mínima UI_REASON_MIN; longitud máxima UI_REASON_MAX | `@Transform(trimmed)` `@IsString()` `@MinLength(UI_REASON_MIN)` `@MaxLength(UI_REASON_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:295` |
+| `elementKey` | `string` | Sí | longitud máxima 160 | `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_ELEMENT_KEY_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:258` |
+| `effect` | `string` | Sí | valores: SHOW, HIDE | `@IsIn(UI_RULE_EFFECTS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:262` |
+| `subjectType` | `string` | Sí | valores: USER, TENANT, ROLE, ORG_TYPE, ALL | `@IsIn(UI_RULE_SUBJECT_TYPES)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:266` |
+| `subjectId` | `object` | No | longitud máxima 160; admite null | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MaxLength(UI_SUBJECT_ID_MAX)` | USER: id de usuario · TENANT: id de organización · ROLE: código de rol · ORG_TYPE: código del tipo de organización · ALL: null | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:278` |
+| `validFrom` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:283` |
+| `validTo` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:288` |
+| `reason` | `string` | Sí | longitud mínima 10; longitud máxima 500 | `@Transform(trimmed)` `@IsString()` `@MinLength(UI_REASON_MIN)` `@MaxLength(UI_REASON_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:295` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
   "elementKey": "valor-ejemplo",
-  "effect": {},
-  "subjectType": {},
+  "effect": "SHOW",
+  "subjectType": "USER",
   "reason": "Texto descriptivo de ejemplo"
 }
 ```
@@ -511,11 +530,11 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 ```json
 {
   "elementKey": "valor-ejemplo",
-  "effect": {},
-  "subjectType": {},
-  "subjectId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z",
+  "effect": "SHOW",
+  "subjectType": "USER",
+  "subjectId": {},
+  "validFrom": {},
+  "validTo": {},
   "reason": "Texto descriptivo de ejemplo"
 }
 ```
@@ -531,6 +550,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -549,8 +569,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 7. PATCH /admin/ui-visibility/rules/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Editar una regla con bloqueo optimista (409 si cambió)
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -558,9 +578,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Editar una regla con bloqueo optimista (409 si cambió).
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -573,6 +593,9 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CABECERA | If-Match (obligatoria) | `contrato (parameters)` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -588,17 +611,16 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | path | Sí | `UuidParamDto` | — |
-| `—` | header | sin dato | `Record<string, unknown>` | — |
+| `If-Match` | header | Sí | `string` | Versión de la regla que se leyó |
 
-### Cuerpo — DTO `UpdateRuleDto`
+### Cuerpo — DTO `UpdateRuleDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `effect` | `object` | No | — | `@IsOptional()` `@IsIn(UI_RULE_EFFECTS)` | Tipo TypeScript no expandido: (typeof UI_RULE_EFFECTS)[number] | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:302` |
-| `validFrom` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:307` |
-| `validTo` | `string` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:312` |
-| `reason` | `string` | No | longitud mínima UI_REASON_MIN; longitud máxima UI_REASON_MAX | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MinLength(UI_REASON_MIN)` `@MaxLength(UI_REASON_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:320` |
+| `effect` | `string` | No | valores: SHOW, HIDE | `@IsOptional()` `@IsIn(UI_RULE_EFFECTS)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:302` |
+| `validFrom` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:307` |
+| `validTo` | `object` | No | formato date-time; admite null | `@IsOptional()` `@IsISO8601({ strict: true })` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:312` |
+| `reason` | `string` | No | longitud mínima 10; longitud máxima 500 | `@IsOptional()` `@Transform(trimmed)` `@IsString()` `@MinLength(UI_REASON_MIN)` `@MaxLength(UI_REASON_MAX)` | — | `src/modules/ui_visibility/dto/ui-visibility.dto.ts:320` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -610,9 +632,9 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 ```json
 {
-  "effect": {},
-  "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z",
+  "effect": "SHOW",
+  "validFrom": {},
+  "validTo": {},
   "reason": "Texto descriptivo de ejemplo"
 }
 ```
@@ -628,6 +650,7 @@ _No se identificó un DTO de respuesta con campos._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -646,8 +669,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 8. POST /admin/ui-visibility/rules/{id}/end
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Terminar una regla (validTo = ahora). Idempotente.
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -655,9 +678,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Terminar una regla (validTo = ahora). Idempotente.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -680,12 +703,6 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | `authz.ui_visibility_elements` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.findElementsByIds | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:193` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.tenantLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:427` |
 | `iam.users` | LEE | LEE | DIRECTA | AdminUiVisibilityController.endRule → UiVisibilityAdminService.endRule → UiVisibilityAdminService.toRuleViews → MikroOrmUiVisibilityStore.userLabels | `src/modules/ui_visibility/repositories/mikro-orm-ui-visibility.store.ts:417` |
-
-### Parámetros
-
-| Nombre | En | Obligatorio | Tipo | Descripción |
-|---|---|---|---|---|
-| `—` | path | Sí | `UuidParamDto` | — |
 
 ### Cuerpo
 
@@ -718,8 +735,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 9. GET /me/ui-visibility
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Claves ocultas para quien llama
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -727,9 +744,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-_Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen._
+Claves ocultas para quien llama.
 
-
+_Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
@@ -742,6 +759,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23` |
+| CABECERA | x-tenant-id (obligatoria) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
@@ -754,7 +772,7 @@ _Sin fuente: ni el contrato, ni el README del módulo ni el modelo la describen.
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `x-tenant-id` | header | sin dato | `string` | — |
+| `x-tenant-id` | header | Sí | `string` | — |
 
 ### Cuerpo
 

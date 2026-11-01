@@ -2,7 +2,7 @@
 
 # Catálogo del schema `system_ops`
 
-- **Tablas:** 29 · **Columnas:** 430 (100 con descripción: 23.3 %) · **Índices:** 178
+- **Tablas:** 32 · **Columnas:** 491 (100 con descripción: 20.4 %) · **Índices:** 196
 - **Dominio:** Operaciones de Plataforma
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -15,15 +15,18 @@
 | [assessment_findings](#assessment_findings) | Registra hallazgos de evaluaciones para priorizar riesgos y acciones correctivas. | 17 | 7 | 7 | COINCIDE |
 | [backup_policies](#backup_policies) | Define políticas de respaldo para proteger disponibilidad y recuperabilidad de información del sistema médico. | 16 | 7 | 4 | COINCIDE |
 | [breach_notifications](#breach_notifications) | Conserva notificaciones de brechas para documentar comunicaciones y obligaciones posteriores a un incidente. | 17 | 4 | 0 | COINCIDE |
+| [bulk_import_batch_rows](#bulk_import_batch_rows) | sin propósito | 13 | 5 | 0 | SIN_ENTIDAD |
+| [bulk_import_batches](#bulk_import_batches) | sin propósito | 33 | 7 | 0 | SIN_ENTIDAD |
 | [cross_border_transfer_events](#cross_border_transfer_events) | Registra transferencias internacionales de datos para mantener trazabilidad de movimientos entre jurisdicciones. | 10 | 9 | 2 | COINCIDE |
 | [data_classifications](#data_classifications) | Define niveles de clasificación de datos para gobernar su protección y uso en la plataforma médica. | 13 | 4 | 5 | COINCIDE |
 | [data_domains](#data_domains) | Cataloga dominios de datos para asignar ownership y organizar gobierno por área del sistema. | 10 | 3 | 4 | COINCIDE |
 | [data_residency_policies](#data_residency_policies) | Define requisitos de residencia geográfica de datos para controlar dónde pueden almacenarse datos de salud. | 17 | 9 | 4 | COINCIDE |
 | [draft_records](#draft_records) | Almacena registros en estado de borrador para separar preparación de datos de su publicación o uso operativo. | 17 | 6 | 3 | COINCIDE |
 | [encryption_keys](#encryption_keys) | Cataloga claves de cifrado gobernadas que protegen datos y secretos almacenados por la plataforma. | 18 | 4 | 0 | COINCIDE |
-| [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 20 | COINCIDE |
-| [field_registry](#field_registry) | Cataloga campos de entidades para mantener metadata de sensibilidad, clasificación y uso. | 14 | 6 | 12 | COINCIDE |
-| [governance_change_log](#governance_change_log) | Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasificación, acceso y ciclo de vida. | 10 | 4 | 11 | COINCIDE |
+| [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 21 | COINCIDE |
+| [field_registry](#field_registry) | Cataloga campos de entidades para mantener metadata de sensibilidad, clasificación y uso. | 14 | 6 | 13 | COINCIDE |
+| [governance_change_log](#governance_change_log) | Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasificación, acceso y ciclo de vida. | 10 | 5 | 11 | COINCIDE |
+| [governance_policy_revisions](#governance_policy_revisions) | sin propósito | 15 | 5 | 0 | SIN_ENTIDAD |
 | [key_rotation_events](#key_rotation_events) | Preserva eventos de rotación de claves para demostrar y operar el ciclo de vida criptográfico. | 9 | 2 | 0 | COINCIDE |
 | [legal_holds](#legal_holds) | Registra retenciones legales que suspenden disposición de información requerida para procesos o investigaciones. | 14 | 7 | 8 | COINCIDE |
 | [operational_framework_controls](#operational_framework_controls) | Define controles que componen marcos operativos para evaluar cumplimiento y preparación organizacional. | 15 | 7 | 1 | COINCIDE |
@@ -44,7 +47,7 @@
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 3 — 14 tablas
+### Familia 1 de 4 — 14 tablas
 
 ```mermaid
 erDiagram
@@ -184,7 +187,7 @@ erDiagram
   system_ops_key_rotation_events }o--|| system_ops_encryption_keys : "encryption_key_id"
 ```
 
-### Familia 2 de 3 — 7 tablas
+### Familia 2 de 4 — 7 tablas
 
 ```mermaid
 erDiagram
@@ -264,7 +267,7 @@ erDiagram
   system_ops_remediation_plans }o--|| system_ops_workload_assessments : "workload_assessment_id"
 ```
 
-### Familia 3 de 3 — 2 tablas
+### Familia 3 de 4 — 2 tablas
 
 ```mermaid
 erDiagram
@@ -287,9 +290,29 @@ erDiagram
   system_ops_restore_test_runs }o--|| system_ops_backup_policies : "backup_policy_id"
 ```
 
+### Familia 4 de 4 — 2 tablas
+
+```mermaid
+erDiagram
+  system_ops_bulk_import_batch_rows["system_ops.bulk_import_batch_rows"] {
+    uuid id PK
+    uuid batch_id FK
+    uuid tenant_id FK
+  }
+  system_ops_bulk_import_batches["system_ops.bulk_import_batches"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid confirmed_by_user_id FK
+    uuid approval_request_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  system_ops_bulk_import_batch_rows }o--|| system_ops_bulk_import_batches : "tenant_id+"
+```
+
 ### Tablas sin relaciones dentro del schema
 
-`system_ops.cross_border_transfer_events` · `system_ops.draft_records` · `system_ops.governance_change_log` · `system_ops.legal_holds` · `system_ops.record_revisions` · `system_ops.tenant_residency_bindings`
+`system_ops.cross_border_transfer_events` · `system_ops.draft_records` · `system_ops.governance_change_log` · `system_ops.governance_policy_revisions` · `system_ops.legal_holds` · `system_ops.record_revisions` · `system_ops.tenant_residency_bindings`
 
 ## Fichas
 
@@ -698,6 +721,176 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 ---
 
+### bulk_import_batch_rows
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 13 columnas · 5 índices · 2 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `batch_id` | `uuid` | Clave foránea → system_ops.bulk_import_batches.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `tenant_id` | `uuid` | Clave foránea → system_ops.bulk_import_batches.tenant_id; Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `row_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `outcome` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `reason_code` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `field_name` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `target_entity` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `target_id` | `uuid` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `processed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `row_key` | `varchar(64)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `row_data_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | tenant_id, batch_id | system_ops.bulk_import_batches (tenant_id, id) | fk_bulk_import_batch_rows_batch_id |
+| hacia | tenant_id | directory.tenants (id) | fk_bulk_import_batch_rows_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_bulk_import_batch_rows_row` | sí | batch_id, row_no | Garantiza que no se repita la combinación (batch_id, row_no) _(DOCUMENTO)_ |
+| `ix_bulk_import_batch_rows_outcome` | no | batch_id, outcome | _sin uso detectado estáticamente_ |
+| `ix_bulk_import_batch_rows_tenant_id` | no | tenant_id | Soporta la clave foránea fk_bulk_import_batch_rows_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_bulk_import_batch_rows_target` | no | target_entity, target_id donde WHERE target_id IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE target_id IS NOT NULL _(ESTRUCTURAL)_ |
+| `ix_bulk_import_batch_rows_pending_data` | no | batch_id donde WHERE row_data_json IS NOT NULL OR row_key IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE row_data_json IS NOT NULL OR row_key IS NOT NULL _(ESTRUCTURAL)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_bulk_import_batch_rows_row` | UNIQUE INDEX | UNIQUE INDEX ("batch_id", "row_no") |
+| `ck_bulk_import_batch_rows_row_no` | CHECK | CHECK (("row_no" >= 1)) |
+| `ck_bulk_import_batch_rows_closed_no_data` | CHECK | CHECK (("outcome" IS NULL OR ("row_data_json" IS NULL AND "row_key" IS NULL))) |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### bulk_import_batches
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 33 columnas · 7 índices · 5 FK salientes · 1 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Clave foránea → delegated_access.four_eyes_requests.tenant_id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `kind` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `kind_version` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `kind_group` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `source_format` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `source_byte_size` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `file_sha256` | `varchar(64)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `declared_reason` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `declared_source_organization` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `declared_legal_basis` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 13 | `declared_loaded_on` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 14 | `rows_total` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 15 | `rows_valid` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 16 | `rows_rejected` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 17 | `issues_total` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 18 | `processed_rows` | `integer = 0` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 19 | `file_issues_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 20 | `preview_issues_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 21 | `confirm_key` | `varchar(128)` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 22 | `confirmed_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 23 | `confirmed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 24 | `approval_request_id` | `uuid` | Clave foránea → delegated_access.four_eyes_requests.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 25 | `started_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 26 | `finished_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 27 | `failure_reason` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 28 | `report_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 29 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 30 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 31 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 32 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 33 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | tenant_id | directory.tenants (id) | fk_bulk_import_batches_tenant_id |
+| hacia | confirmed_by_user_id | iam.users (id) | fk_bulk_import_batches_confirmed_by_user_id |
+| hacia | tenant_id, approval_request_id | delegated_access.four_eyes_requests (tenant_id, id) | fk_bulk_import_batches_approval_request_id |
+| hacia | created_by_user_id | iam.users (id) | fk_bulk_import_batches_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_bulk_import_batches_updated_by_user_id |
+| desde | tenant_id, id | system_ops.bulk_import_batch_rows (tenant_id, batch_id) | fk_bulk_import_batch_rows_batch_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_bulk_import_batches_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_bulk_import_batches_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_bulk_import_batches_confirm_key` | sí | tenant_id, confirm_key donde WHERE confirm_key IS NOT NULL | Garantiza que no se repita la combinación (tenant_id, confirm_key) _(DOCUMENTO)_; Soporta la clave foránea fk_bulk_import_batches_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE confirm_key IS NOT NULL _(ESTRUCTURAL)_ |
+| `ix_bulk_import_batches_tenant_created` | no | tenant_id, ("created_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_bulk_import_batches_active` | no | status, ("created_at") WHERE status IN ('EN_COLA'), ('PROCESANDO') | _sin uso detectado estáticamente_ |
+| `ix_bulk_import_batches_file_hash` | no | tenant_id, kind, file_sha256 donde WHERE file_sha256 IS NOT NULL | Soporta la clave foránea fk_bulk_import_batches_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE file_sha256 IS NOT NULL _(ESTRUCTURAL)_ |
+| `ix_bulk_import_batches_approval_request_id` | no | approval_request_id donde WHERE approval_request_id IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE approval_request_id IS NOT NULL _(ESTRUCTURAL)_ |
+| `ix_bulk_import_batches_confirmed_by_user_id` | no | confirmed_by_user_id | Soporta la clave foránea fk_bulk_import_batches_confirmed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_bulk_import_batches_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
+| `ux_bulk_import_batches_confirm_key` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "confirm_key") WHERE confirm_key IS NOT NULL |
+| `ck_bulk_import_batches_counts` | CHECK | CHECK (("rows_total" >= 0 AND "rows_valid" >= 0 AND "rows_rejected" >= 0 AND "rows_total" = "rows_valid" + "rows_rejected" AND "processed_rows" BETWEEN 0 AND "rows_total" AND "issues_total" >= 0)) |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### cross_border_transfer_events
 
 #### Vista general
@@ -860,7 +1053,7 @@ Cataloga dominios de datos para asignar ownership y organizar gobierno por área
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: data_domains`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `DataDomains` — `src/modules/system_ops/entities/data_domains.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 2 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 10 columnas · 3 índices · 2 FK salientes · 5 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -884,6 +1077,10 @@ Cataloga dominios de datos para asignar ownership y organizar gobierno por área
 | hacia | created_by_user_id | iam.users (id) | fk_data_domains_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_data_domains_updated_by_user_id |
 | desde | id | system_ops.entity_registry (domain_id) | fk_entity_registry_domain_id |
+| desde | id | data_catalog.catalog_objects (domain_id) | fk_catalog_objects_domain_id |
+| desde | id | data_catalog.catalog_stewardships (domain_id) | fk_catalog_stewardships_domain_id |
+| desde | id | data_catalog.catalog_glossary_terms (domain_id) | fk_catalog_glossary_terms_domain_id |
+| desde | id | data_catalog.quality_score_snapshots (domain_id) | fk_quality_score_snapshots_domain_id |
 
 #### Índices
 
@@ -1180,7 +1377,7 @@ Registra entidades del modelo para aplicar políticas de gobierno, retención y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: entity_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `EntityRegistry` — `src/modules/system_ops/entities/entity_registry.entity.ts`
-- **Resumen:** 21 columnas · 7 índices · 8 FK salientes · 3 entrantes · 20 operaciones
+- **Resumen:** 21 columnas · 7 índices · 8 FK salientes · 3 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -1249,6 +1446,7 @@ Registra entidades del modelo para aplicar políticas de gobierno, retención y 
 | GET /admin/governance/domains | LEE | POR_SQL |
 | GET /admin/governance/entity-registry | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
+| POST /admin/governance/entity-registry | LEE | DIRECTA |
 | GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
 | PATCH /admin/governance/entity-registry/{id}/retention | ACTUALIZA | POR_TIPO |
 | PATCH /admin/governance/entity-registry/{id}/retention | LEE | DIRECTA |
@@ -1284,7 +1482,7 @@ Cataloga campos de entidades para mantener metadata de sensibilidad, clasificaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: field_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `FieldRegistry` — `src/modules/system_ops/entities/field_registry.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 0 entrantes · 12 operaciones
+- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -1320,7 +1518,7 @@ Cataloga campos de entidades para mantener metadata de sensibilidad, clasificaci
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_field_registry_entity_registry_id` | no | entity_registry_id | Soporta la clave foránea fk_field_registry_entity_registry_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_field_registry_entity_registry_id` | no | entity_registry_id | Soporta la clave foránea fk_field_registry_entity_registry_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «entity_registry_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_registry_classification_id` | no | classification_id | Soporta la clave foránea fk_field_registry_classification_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_registry_masking_strategy_concept_id` | no | masking_strategy_concept_id | Soporta la clave foránea fk_field_registry_masking_strategy_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_registry_anonymization_rule_id` | no | anonymization_rule_id | Soporta la clave foránea fk_field_registry_anonymization_rule_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1338,6 +1536,7 @@ Cataloga campos de entidades para mantener metadata de sensibilidad, clasificaci
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
 | GET /admin/governance/entity-registry | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
+| POST /admin/governance/entity-registry | LEE | DIRECTA |
 | GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
 | PATCH /admin/governance/field-registry/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /admin/governance/field-registry/{id} | LEE | DIRECTA |
@@ -1367,7 +1566,7 @@ Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasific
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: governance_change_log`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `GovernanceChangeLog` — `src/modules/system_ops/entities/governance_change_log.entity.ts`
-- **Resumen:** 10 columnas · 4 índices · 3 FK salientes · 0 entrantes · 11 operaciones
+- **Resumen:** 10 columnas · 5 índices · 3 FK salientes · 0 entrantes · 11 operaciones
 
 #### Columnas
 
@@ -1399,6 +1598,7 @@ Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasific
 | `ix_governance_change_log_action_concept_id` | no | action_concept_id | Soporta la clave foránea fk_governance_change_log_action_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_governance_change_log_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_governance_change_log_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_governance_change_log_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_governance_change_log_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_governance_change_log_target_recorded` | no | target_type, target_id, ("recorded_at" DESC) | _sin uso detectado estáticamente_ |
 | `brin_governance_change_log_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
@@ -1416,6 +1616,81 @@ Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasific
 | POST /admin/governance/residency-policies | CREA | DIRECTA |
 | POST /admin/governance/retention-policies | CREA | DIRECTA |
 | POST /admin/governance/write-policies | CREA | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### governance_policy_revisions
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 15 columnas · 5 índices · 2 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `policy_type` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `policy_id` | `uuid` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `revision_no` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `content_json` | `jsonb` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `content_hash` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `status` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `change_reason` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `submitted_by_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `submitted_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `decided_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 13 | `decision_comment` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 14 | `effective_from` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | submitted_by_user_id | iam.users (id) | fk_governance_policy_revisions_submitted_by_user_id |
+| hacia | decided_by_user_id | iam.users (id) | fk_governance_policy_revisions_decided_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_governance_policy_revisions_no` | sí | policy_type, policy_id, revision_no | Garantiza que no se repita la combinación (policy_type, policy_id, revision_no) _(DOCUMENTO)_ |
+| `ux_governance_policy_revisions_one_pending` | sí | policy_type, policy_id donde WHERE status = 'PENDING_APPROVAL' | Garantiza que no se repita la combinación (policy_type, policy_id) _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE status = 'PENDING_APPROVAL' _(ESTRUCTURAL)_ |
+| `ix_governance_policy_revisions_status_submitted` | no | status, ("submitted_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_governance_policy_revisions_submitted_by_user_id` | no | submitted_by_user_id | Soporta la clave foránea fk_governance_policy_revisions_submitted_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_governance_policy_revisions_decided_by_user_id` | no | decided_by_user_id | Soporta la clave foránea fk_governance_policy_revisions_decided_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_governance_policy_revisions_no` | UNIQUE INDEX | UNIQUE INDEX ("policy_type", "policy_id", "revision_no") |
+| `ux_governance_policy_revisions_one_pending` | UNIQUE INDEX | UNIQUE INDEX ("policy_type", "policy_id") WHERE status = 'PENDING_APPROVAL' |
+| `ck_governance_policy_revisions_not_self` | CHECK | CHECK (("decided_by_user_id" IS NULL OR "decided_by_user_id" <> "submitted_by_user_id")) |
+| `ck_governance_policy_revisions_decision` | CHECK | CHECK (("status" NOT IN ('APPROVED', 'REJECTED') OR ("decided_by_user_id" IS NOT NULL AND "decided_at" IS NOT NULL))) |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
 
 #### Gobierno
 

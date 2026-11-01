@@ -2,7 +2,7 @@
 
 # Catálogo del schema `profiles`
 
-- **Tablas:** 20 · **Columnas:** 259 (93 con descripción: 35.9 %) · **Índices:** 145
+- **Tablas:** 24 · **Columnas:** 348 (176 con descripción: 50.6 %) · **Índices:** 177
 - **Dominio:** Núcleo y Terminología
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -11,10 +11,11 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [administrator_profiles](#administrator_profiles) | Representa el perfil de administración institucional para distinguirlo de la identidad personal y de la cuenta de acceso. | 8 | 4 | 0 | COINCIDE |
+| [admission_requirements](#admission_requirements) | sin propósito | 21 | 7 | 21 | COINCIDE |
 | [emergency_staff_profiles](#emergency_staff_profiles) | Representa integrantes del personal de emergencia y permite identificarlos en las responsabilidades de atención correspondientes. | 8 | 4 | 0 | COINCIDE |
 | [health_practitioner_profiles](#health_practitioner_profiles) | Representa el perfil sanitario de un profesional para atribuirle atención, observaciones, prescripciones y responsabilidades clínicas. | 17 | 9 | 158 | COINCIDE |
 | [insurance_representative_profiles](#insurance_representative_profiles) | Representa a personas con rol de representación de seguros para vincularlas con procesos de cobertura y coordinación asistencial. | 8 | 4 | 0 | COINCIDE |
-| [jurisdiction_authorizations](#jurisdiction_authorizations) | Conserva las autorizaciones profesionales por jurisdicción necesarias para representar dónde puede ejercer un profesional. | 15 | 8 | 75 | DIVERGE |
+| [jurisdiction_authorizations](#jurisdiction_authorizations) | Conserva las autorizaciones profesionales por jurisdicción necesarias para representar dónde puede ejercer un profesional. | 19 | 9 | 75 | COINCIDE |
 | [patient_identity_links](#patient_identity_links) | Vincula identificadores de paciente de fuentes o sistemas distintos para conciliación de identidad clínica. | 15 | 10 | 4 | COINCIDE |
 | [patient_merge_events](#patient_merge_events) | Preserva evidencia de las decisiones y movimientos realizados al resolver perfiles duplicados de pacientes. | 9 | 8 | 4 | COINCIDE |
 | [patient_portal_proxies](#patient_portal_proxies) | Identifica personas habilitadas para actuar como delegadas en el portal del paciente, conservando su vínculo con el paciente representado. | 14 | 9 | 60 | COINCIDE |
@@ -23,10 +24,13 @@
 | [person_account_links](#person_account_links) | Relaciona una persona con una o más cuentas de usuario para mantener identidad y autenticación como conceptos separados. | 13 | 8 | 286 | COINCIDE |
 | [person_profiles](#person_profiles) | Conserva los datos de perfil compartidos de una persona que pueden ser utilizados por sus distintos roles dentro del sistema médico. | 9 | 6 | 72 | COINCIDE |
 | [persons](#persons) | Representa a una persona natural una sola vez, separando su identidad humana de sus cuentas de acceso y de sus roles clínicos. | 27 | 14 | 193 | COINCIDE |
+| [practitioner_admission_events](#practitioner_admission_events) | sin propósito | 15 | 5 | 27 | COINCIDE |
+| [practitioner_admission_reviews](#practitioner_admission_reviews) | sin propósito | 21 | 9 | 58 | COINCIDE |
+| [practitioner_admissions](#practitioner_admissions) | sin propósito | 26 | 10 | 65 | COINCIDE |
 | [practitioner_affiliations](#practitioner_affiliations) | Vincula profesionales con organizaciones o sedes donde prestan servicios para dar contexto institucional a la atención. | 17 | 9 | 38 | COINCIDE |
 | [practitioner_languages](#practitioner_languages) | Registra los idiomas que un profesional puede usar en su práctica para apoyar una atención comprensible para el paciente. | 10 | 5 | 15 | COINCIDE |
-| [practitioner_specialties](#practitioner_specialties) | Asocia especialidades clínicas codificadas a profesionales para describir su ámbito de práctica. | 16 | 8 | 88 | DIVERGE |
-| [professional_credentials](#professional_credentials) | Registra credenciales y documentación profesional que sustentan la identidad y habilitación declarada de un prestador. | 23 | 10 | 53 | DIVERGE |
+| [practitioner_specialties](#practitioner_specialties) | Asocia especialidades clínicas codificadas a profesionales para describir su ámbito de práctica. | 17 | 8 | 88 | COINCIDE |
+| [professional_credentials](#professional_credentials) | Registra credenciales y documentación profesional que sustentan la identidad y habilitación declarada de un prestador. | 24 | 10 | 53 | COINCIDE |
 | [provider_operator_profiles](#provider_operator_profiles) | Representa personas operadoras de prestadores que necesitan identidad de perfil propia para gestionar procesos institucionales del sistema médico. | 8 | 4 | 0 | COINCIDE |
 | [related_persons](#related_persons) | Registra vínculos de una persona con otras personas relevantes para la atención, el apoyo o la representación del paciente. | 12 | 7 | 13 | COINCIDE |
 | [secretary_profiles](#secretary_profiles) | Representa personal secretarial vinculado a tareas de coordinación y soporte de la práctica asistencial. | 7 | 3 | 5 | COINCIDE |
@@ -35,7 +39,7 @@
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 20 tablas
+### Familia 1 de 1 — 24 tablas
 
 ```mermaid
 erDiagram
@@ -137,8 +141,8 @@ erDiagram
     uuid practice_scope_concept_id FK
     uuid state_concept_id FK
     uuid file_id FK
+    uuid verified_by_user_id FK
     uuid created_by_user_id FK
-    uuid updated_by_user_id FK
   }
   profiles_patient_primary_practitioners["profiles.patient_primary_practitioners"] {
     uuid id PK
@@ -146,6 +150,16 @@ erDiagram
     uuid practitioner_profile_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+  }
+  profiles_practitioner_admissions["profiles.practitioner_admissions"] {
+    uuid id PK
+    uuid practitioner_profile_id FK
+    uuid admission_type_concept_id FK
+    uuid status_concept_id FK
+    uuid assigned_to_user_id FK
+    uuid decided_by_user_id FK
+    uuid decision_reason_code_concept_id FK
+    uuid created_by_user_id FK
   }
   profiles_practitioner_affiliations["profiles.practitioner_affiliations"] {
     uuid id PK
@@ -215,6 +229,35 @@ erDiagram
     uuid status_concept_id FK
     uuid created_by_user_id FK
   }
+  profiles_practitioner_admission_events["profiles.practitioner_admission_events"] {
+    uuid id PK
+    uuid admission_id FK
+    uuid event_type_concept_id FK
+    uuid from_status_concept_id FK
+    uuid to_status_concept_id FK
+    uuid item_type_concept_id FK
+    uuid requirement_id FK
+    uuid reason_code_concept_id FK
+  }
+  profiles_practitioner_admission_reviews["profiles.practitioner_admission_reviews"] {
+    uuid id PK
+    uuid admission_id FK
+    uuid requirement_id FK
+    uuid status_concept_id FK
+    uuid file_id FK
+    uuid source_type_concept_id FK
+    uuid reason_code_concept_id FK
+    uuid reviewed_by_user_id FK
+  }
+  profiles_admission_requirements["profiles.admission_requirements"] {
+    uuid id PK
+    uuid admission_type_concept_id FK
+    uuid item_type_concept_id FK
+    uuid evidence_kind_concept_id FK
+    uuid verification_method_concept_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
   profiles_administrator_profiles }o--|| profiles_persons : "profile_id"
   profiles_emergency_staff_profiles }o--|| profiles_persons : "profile_id"
   profiles_health_practitioner_profiles }o--|| profiles_persons : "profile_id"
@@ -229,6 +272,7 @@ erDiagram
   profiles_jurisdiction_authorizations }o--|| profiles_health_practitioner_profiles : "practitioner_profile_id"
   profiles_patient_primary_practitioners }o--|| profiles_patient_profiles : "patient_profile_id"
   profiles_patient_primary_practitioners }o--|| profiles_health_practitioner_profiles : "practitioner_profile_id"
+  profiles_practitioner_admissions }o--|| profiles_health_practitioner_profiles : "practitioner_profile_id"
   profiles_practitioner_affiliations }o--|| profiles_health_practitioner_profiles : "practitioner_profile_id"
   profiles_practitioner_languages }o--|| profiles_health_practitioner_profiles : "practitioner_profile_id"
   profiles_practitioner_specialties }o--|| profiles_health_practitioner_profiles : "practitioner_profile_id"
@@ -239,6 +283,10 @@ erDiagram
   profiles_patient_merge_events }o--|| profiles_patient_profiles : "merged_patient_profile_id"
   profiles_patient_portal_proxies }o--|| profiles_patient_profiles : "patient_profile_id"
   profiles_patient_portal_proxies }o--o| profiles_related_persons : "related_person_id"
+  profiles_practitioner_admission_events }o--|| profiles_practitioner_admissions : "admission_id"
+  profiles_practitioner_admission_events }o--o| profiles_admission_requirements : "requirement_id"
+  profiles_practitioner_admission_reviews }o--|| profiles_practitioner_admissions : "admission_id"
+  profiles_practitioner_admission_reviews }o--|| profiles_admission_requirements : "requirement_id"
 ```
 
 ## Fichas
@@ -289,6 +337,115 @@ Representa el perfil de administración institucional para distinguirlo de la id
 #### Operaciones que la tocan
 
 _Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### admission_requirements
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
+- **Entidad del ORM:** `AdmissionRequirements` — `src/modules/profiles/entities/admission_requirements.entity.ts`
+- **Resumen:** 21 columnas · 7 índices · 6 FK salientes · 2 entrantes · 21 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/admission_requirements.entity.ts:13`)_ | coincide |
+| 2 | `admission_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Tipo de admisión al que pertenece el requisito (p. ej. ALTA_DE_DOCTOR). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:19`)_ | coincide |
+| 3 | `requirement_code` | `varchar` | Obligatoria | Código estable del requisito, único dentro de su tipo de admisión. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:25`)_ | coincide |
+| 4 | `label` | `varchar` | Obligatoria | Nombre visible del requisito. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:31`)_ | coincide |
+| 5 | `description` | `text` | Opcional | Qué debe comprobar el revisor. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:37`)_ | coincide |
+| 6 | `item_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Que clase de ficha se revisa: LICENSE ¦ CREDENTIAL ¦ SPECIALTY ¦ PROFILE (dato del perfil). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:417`)_ | coincide |
+| 7 | `item_subtype_code` | `varchar` | Opcional | Subtipo dentro de item_type (p. ej. DEGREE, DIPLOMA, MASTER, DOCTORATE, SPECIALTY para CREDENTIAL; NATIONAL, PROFESSIONAL_COLLEGE, SEDES para LICENSE). Nulo = cualquiera. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:419`)_ | coincide |
+| 8 | `evidence_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Si la evidencia es un documento o un dato. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:59`)_ | coincide |
+| 9 | `verification_method_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Cómo se verifica (hoy siempre revisión manual). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:65`)_ | coincide |
+| 10 | `is_required` | `boolean = true` | Obligatoria | Si la admisión no puede verificarse sin este requisito. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:71`)_ | coincide |
+| 11 | `requires_source_uri` | `boolean = true` | Obligatoria | Si verificar el ítem exige declarar la fuente consultada. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:77`)_ | coincide |
+| 12 | `applies_to_profession_group` | `varchar` | Opcional | Grupo profesional al que aplica (MEDICO ¦ ODONTOLOGO). Nulo = a todos. Proceso 2.1: el colegio cambia entre Medico y Odontologo segun la profesion elegida. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:426`)_ | coincide |
+| 13 | `min_items` | `smallint` | Opcional | Cantidad mínima de ítems verificados para dar el requisito por cumplido. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:93`)_ | coincide |
+| 14 | `max_items` | `smallint` | Opcional | Cantidad máxima de ítems que el médico puede declarar. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:99`)_ | coincide |
+| 15 | `sort_order` | `integer` | Obligatoria | Orden de presentación del checklist. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:105`)_ | coincide |
+| 16 | `is_active` | `boolean = true` | Obligatoria | Si el requisito rige hoy. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:111`)_ | coincide |
+| 17 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/admission_requirements.entity.ts:117`)_ | coincide |
+| 18 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/admission_requirements.entity.ts:123`)_ | coincide |
+| 19 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/admission_requirements.entity.ts:141`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | admission_type_concept_id | terminology.catalog_concepts (id) | fk_admission_requirements_admission_type_concept_id |
+| hacia | item_type_concept_id | terminology.catalog_concepts (id) | fk_admission_requirements_item_type_concept_id |
+| hacia | evidence_kind_concept_id | terminology.catalog_concepts (id) | fk_admission_requirements_evidence_kind_concept_id |
+| hacia | verification_method_concept_id | terminology.catalog_concepts (id) | fk_admission_requirements_verification_method_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_admission_requirements_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_admission_requirements_updated_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (requirement_id) | fk_practitioner_admission_reviews_requirement_id |
+| desde | id | profiles.practitioner_admission_events (requirement_id) | fk_practitioner_admission_events_requirement_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_admission_requirements_type_code` | sí | admission_type_concept_id, requirement_code | Garantiza que no se repita la combinación (admission_type_concept_id, requirement_code) _(DOCUMENTO)_; Soporta la clave foránea fk_admission_requirements_admission_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admission_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_admission_requirements_admission_type_concept_id` | no | admission_type_concept_id | Soporta la clave foránea fk_admission_requirements_admission_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admission_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_admission_requirements_item_type_concept_id` | no | item_type_concept_id | Soporta la clave foránea fk_admission_requirements_item_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_admission_requirements_evidence_kind_concept_id` | no | evidence_kind_concept_id | Soporta la clave foránea fk_admission_requirements_evidence_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_admission_requirements_verification_method_concept_id` | no | verification_method_concept_id | Soporta la clave foránea fk_admission_requirements_verification_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_admission_requirements_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_admission_requirements_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_admission_requirements_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_admission_requirements_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_admission_requirements_type_code` | UNIQUE INDEX | UNIQUE INDEX ("admission_type_concept_id", "requirement_code") |
+| `ck_admission_requirements_item_range` | CHECK | CHECK ((COALESCE("min_items", 0) >= 0 AND ("max_items" IS NULL OR "max_items" >= COALESCE("min_items", 0)))) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /profiles/practitioners | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -374,7 +531,7 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: health_practitioner_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `HealthPractitionerProfiles` — `src/modules/profiles/entities/health_practitioner_profiles.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 9 FK salientes · 91 entrantes · 158 operaciones
+- **Resumen:** 17 columnas · 9 índices · 9 FK salientes · 94 entrantes · 158 operaciones
 
 #### Columnas
 
@@ -417,6 +574,7 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | desde | profile_id | profiles.jurisdiction_authorizations (practitioner_profile_id) | fk_jurisdiction_authorizations_practitioner_profile_id |
 | desde | profile_id | profiles.practitioner_affiliations (practitioner_profile_id) | fk_practitioner_affiliations_practitioner_profile_id |
 | desde | profile_id | profiles.patient_primary_practitioners (practitioner_profile_id) | fk_patient_primary_practitioners_practitioner_profile_id |
+| desde | profile_id | profiles.practitioner_admissions (practitioner_profile_id) | fk_practitioner_admissions_practitioner_profile_id |
 | desde | profile_id | authz.care_relationships (practitioner_profile_id) | fk_care_relationships_practitioner_profile_id |
 | desde | profile_id | clinical.care_episodes (responsible_practitioner_id) | fk_care_episodes_responsible_practitioner_id |
 | desde | profile_id | clinical.encounters (primary_practitioner_id) | fk_encounters_primary_practitioner_id |
@@ -497,6 +655,8 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | desde | profile_id | procedures_perioperative.pacu_assessments (assessed_by_profile_id) | fk_pacu_assessments_assessed_by_profile_id |
 | desde | profile_id | procedures_perioperative.postoperative_orders (verified_by_profile_id) | fk_postoperative_orders_verified_by_profile_id |
 | desde | profile_id | procedures_perioperative.postoperative_followups (completed_by_profile_id) | fk_postoperative_followups_completed_by_profile_id |
+| desde | profile_id | procedures_perioperative.operating_room_block_series (surgeon_profile_id) | fk_operating_room_block_series_surgeon_profile_id |
+| desde | profile_id | procedures_perioperative.operating_room_blocks (surgeon_profile_id) | fk_operating_room_blocks_surgeon_profile_id |
 | desde | profile_id | procedures_perioperative.sterility_verification_checks (checked_by_profile_id) | fk_sterility_verification_checks_checked_by_profile_id |
 | desde | profile_id | surveys.survey_templates (owner_practitioner_id) | fk_survey_templates_owner_practitioner_id |
 | desde | profile_id | medical_groups.groups (requesting_practitioner_id) | fk_groups_requesting_practitioner_id |
@@ -770,7 +930,7 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: jurisdiction_authorizations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `JurisdictionAuthorizations` — `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 1 entrantes · 75 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 75 operaciones
 
 #### Columnas
 
@@ -785,12 +945,16 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 | 7 | `state_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 8 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
 | 9 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
-| 10 | `file_id` | `uuid` | Clave foránea → common.files.id; Opcional | + v4.2.12 — el respaldo de la matrícula: el PDF o la foto del carnet que emitió el colegio. Misma columna y mismo destino que `file_id` en professional_credentials, porque es el mismo gesto —declarar una credencial y adjuntar lo que la prueba— y no hay razón para que el título lo acepte y la matrícula no. Nullable: el padrón se declara, no se prueba, y exigir el archivo dejaría fuera a quien todavía no lo tiene escaneado. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:250`)_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:116`)_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:122`)_ | coincide |
-| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:140`)_ | coincide |
+| 10 | `file_id` | `uuid` | Clave foránea → common.files.id; Opcional | + v4.2.12 — el respaldo de la matrícula: el PDF o la foto del carnet que emitió el colegio. Misma columna y mismo destino que `file_id` en professional_credentials, porque es el mismo gesto —declarar una credencial y adjuntar lo que la prueba— y no hay razón para que el título lo acepte y la matrícula no. Nullable: el padrón se declara, no se prueba, y exigir el archivo dejaría fuera a quien todavía no lo tiene escaneado. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:257`)_ | coincide |
+| 11 | `verified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | + v4.2.67 — la verificación de la matrícula: quién, cuándo, contra qué fuente y, si se rechazó, por qué. Antes sólo cambiaba `state_concept_id` y no quedaba rastro de la comprobación (el PDF de receta imprime la matrícula AUTH_ACTIVE). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:264`)_ | coincide |
+| 12 | `verified_at` | `timestamptz` | Opcional | Cuándo se verificó (o rechazó). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:86`)_ | coincide |
+| 13 | `verification_source_uri` | `text` | Opcional | Fuente consultada para verificarla (registro del colegio, resolución). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:96`)_ | coincide |
+| 14 | `rejection_reason_text` | `text` | Opcional | Por qué se rechazó. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:106`)_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:116`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:122`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts:140`)_ | coincide |
 
 #### Relaciones
 
@@ -801,6 +965,7 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 | hacia | practice_scope_concept_id | terminology.catalog_concepts (id) | fk_jurisdiction_authorizations_practice_scope_concept_id |
 | hacia | state_concept_id | terminology.catalog_concepts (id) | fk_jurisdiction_authorizations_state_concept_id |
 | hacia | file_id | common.files (id) | fk_jurisdiction_authorizations_file_id |
+| hacia | verified_by_user_id | iam.users (id) | fk_jurisdiction_authorizations_verified_by_user_id |
 | hacia | created_by_user_id | iam.users (id) | fk_jurisdiction_authorizations_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_jurisdiction_authorizations_updated_by_user_id |
 | desde | id | audit.jurisdiction_authorizations_history (jurisdiction_authorization_id) | fk_jurisdiction_authorizations_history_jurisdiction_au_5b12cb5b |
@@ -814,6 +979,7 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 | `ix_jurisdiction_authorizations_practice_scope_concept_id` | no | practice_scope_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_practice_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_file_id` | no | file_id | Soporta la clave foránea fk_jurisdiction_authorizations_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_jurisdiction_authorizations_verified_by_user_id` | no | verified_by_user_id | Soporta la clave foránea fk_jurisdiction_authorizations_verified_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_jurisdiction_authorizations_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_jurisdiction_authorizations_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gist_jurisdiction_authorizations_effective_period` | no | (daterange(valid_from, valid_to, '[)')) | GiST para periodos, no solapamiento y geografía _(DOCUMENTO)_ |
@@ -1297,7 +1463,7 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: patient_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PatientProfiles` — `src/modules/profiles/entities/patient_profiles.entity.ts`
-- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 82 entrantes · 169 operaciones
+- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 86 entrantes · 169 operaciones
 
 #### Columnas
 
@@ -1358,6 +1524,9 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | desde | profile_id | clinical.immunizations (patient_profile_id) | fk_immunizations_patient_profile_id |
 | desde | profile_id | clinical.received_services (patient_profile_id) | fk_received_services_patient_profile_id |
 | desde | profile_id | clinical.appointments (patient_profile_id) | fk_appointments_patient_profile_id |
+| desde | profile_id | clinical.placement_incidents (patient_profile_id) | fk_placement_incidents_patient_profile_id |
+| desde | profile_id | clinical.patient_admission_footprints (patient_profile_id) | fk_patient_admission_footprints_patient_profile_id |
+| desde | profile_id | clinical.inpatient_census_entries (patient_profile_id) | fk_inpatient_census_entries_patient_profile_id |
 | desde | profile_id | audit.data_access_log (patient_profile_id) | fk_data_access_log_patient_profile_id |
 | desde | profile_id | audit.patient_profiles_history (patient_profile_id) | fk_patient_profiles_history_patient_profile_id |
 | desde | profile_id | audit.patient_content_access_log (patient_profile_id) | fk_patient_content_access_log_patient_profile_id |
@@ -1367,6 +1536,7 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | desde | profile_id | chart.note_release_events (patient_profile_id) | fk_note_release_events_patient_profile_id |
 | desde | profile_id | chart.care_plans (patient_profile_id) | fk_care_plans_patient_profile_id |
 | desde | profile_id | chart.document_records (patient_profile_id) | fk_document_records_patient_profile_id |
+| desde | profile_id | billing.charge_captures (patient_profile_id) | fk_charge_captures_patient_profile_id |
 | desde | profile_id | billing.invoices (patient_profile_id) | fk_invoices_patient_profile_id |
 | desde | profile_id | billing.payments_received (patient_profile_id) | fk_payments_received_patient_profile_id |
 | desde | profile_id | billing.patient_statements (patient_profile_id) | fk_patient_statements_patient_profile_id |
@@ -2431,6 +2601,419 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 
 ---
 
+### practitioner_admission_events
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
+- **Entidad del ORM:** `PractitionerAdmissionEvents` — `src/modules/profiles/entities/practitioner_admission_events.entity.ts`
+- **Resumen:** 15 columnas · 5 índices · 8 FK salientes · 0 entrantes · 27 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:14`)_ | coincide |
+| 2 | `admission_id` | `uuid` | Clave foránea → profiles.practitioner_admissions.id; Obligatoria | Admisión a la que pertenece el evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:20`)_ | coincide |
+| 3 | `event_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Qué ocurrió. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:26`)_ | coincide |
+| 4 | `from_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Estado de la admisión antes del evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:32`)_ | coincide |
+| 5 | `to_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Estado de la admisión después del evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:42`)_ | coincide |
+| 6 | `item_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Clase de ficha a la que se refiere el evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:52`)_ | coincide |
+| 7 | `item_id` | `uuid` | Opcional | Ficha a la que se refiere el evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:62`)_ | coincide |
+| 8 | `requirement_id` | `uuid` | Clave foránea → profiles.admission_requirements.id; Opcional | Requisito del catálogo al que se refiere el evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:68`)_ | coincide |
+| 9 | `verification_source_uri` | `text` | Opcional | Fuente consultada, cuando el evento verifica un ítem. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:74`)_ | coincide |
+| 10 | `reason_code_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Código estructurado del motivo. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:84`)_ | coincide |
+| 11 | `reason_text` | `text` | Opcional | Motivo declarado por quien actuó. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:94`)_ | coincide |
+| 12 | `actor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Quién actuó (la cuenta de sistema en las acciones automáticas). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:100`)_ | coincide |
+| 13 | `actor_role_code` | `varchar` | Opcional | Rol con el que actuo (SECURITY_ADMIN, ADMISSIONS_APPROVER, PRACTITIONER, SYSTEM...) y la peticion HTTP que lo origino, para reconstruir quien hizo que y desde donde. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:530`)_ | coincide |
+| 14 | `request_id` | `uuid` | Opcional | Petición HTTP que originó el evento. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:116`)_ | coincide |
+| 15 | `occurred_at` | `timestamptz` | Obligatoria | Cuándo ocurrió. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_events.entity.ts:122`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | admission_id | profiles.practitioner_admissions (id) | fk_practitioner_admission_events_admission_id |
+| hacia | requirement_id | profiles.admission_requirements (id) | fk_practitioner_admission_events_requirement_id |
+| hacia | event_type_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_events_event_type_concept_id |
+| hacia | from_status_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_events_from_status_concept_id |
+| hacia | to_status_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_events_to_status_concept_id |
+| hacia | item_type_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_events_item_type_concept_id |
+| hacia | reason_code_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_events_reason_code_concept_id |
+| hacia | actor_user_id | iam.users (id) | fk_practitioner_admission_events_actor_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_practitioner_admission_events_admission_occurred` | no | admission_id, occurred_at | Soporta la clave foránea fk_practitioner_admission_events_admission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «admission_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admission_events_event_type_concept_id` | no | event_type_concept_id | Soporta la clave foránea fk_practitioner_admission_events_event_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_events_actor_user_id` | no | actor_user_id | Soporta la clave foránea fk_practitioner_admission_events_actor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_events_requirement_id` | no | requirement_id | Soporta la clave foránea fk_practitioner_admission_events_requirement_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_events_reason_code_concept_id` | no | reason_code_concept_id | Soporta la clave foránea fk_practitioner_admission_events_reason_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /identity/checks/{id}/results | CREA | DIRECTA |
+| POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
+| POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | CREA | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | CREA | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | CREA | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | CREA | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | CREA | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | CREA | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/expire-sweep | CREA | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
+| POST /profiles/practitioners | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | CREA | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### practitioner_admission_reviews
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
+- **Entidad del ORM:** `PractitionerAdmissionReviews` — `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts`
+- **Resumen:** 21 columnas · 9 índices · 9 FK salientes · 0 entrantes · 58 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:13`)_ | coincide |
+| 2 | `admission_id` | `uuid` | Clave foránea → profiles.practitioner_admissions.id; Obligatoria | Admisión a la que pertenece la revisión. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:19`)_ | coincide |
+| 3 | `requirement_id` | `uuid` | Clave foránea → profiles.admission_requirements.id; Obligatoria | Requisito del catálogo que se revisa. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:25`)_ | coincide |
+| 4 | `item_id` | `uuid` | Obligatoria | El id de la ficha revisada (matricula, titulo, especialidad) o, para un dato del perfil, el id del profesional. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:490`)_ | coincide |
+| 5 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Estado vigente de la revisión. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:38`)_ | coincide |
+| 6 | `file_id` | `uuid` | Clave foránea → common.files.id; Opcional | Archivo que respalda el ítem, si lo hay. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:44`)_ | coincide |
+| 7 | `verification_source_uri` | `text` | Opcional | Fuente consultada para verificar. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:50`)_ | coincide |
+| 8 | `source_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Fuente estructurada: tipo (catalogo), referencia (nº de tramite, comprobante o URL) y cuando se consulto (distinto de reviewed_at). Mapea a FHIR primarySource. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:496`)_ | coincide |
+| 9 | `source_ref` | `text` | Opcional | Referencia de la fuente: nº de trámite, comprobante o URL. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:70`)_ | coincide |
+| 10 | `source_consulted_at` | `timestamptz` | Opcional | Cuándo se consultó la fuente. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:76`)_ | coincide |
+| 11 | `evidence_sha256` | `varchar` | Opcional | Huella de lo que el revisor vio (documento + datos). Si el medico lo cambia al reenviar, la revision vuelve a PENDIENTE. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:501`)_ | coincide |
+| 12 | `reason_code_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Código estructurado del motivo. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:96`)_ | coincide |
+| 13 | `reason_text` | `text` | Opcional | Motivo del rechazo o de la información pedida. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:106`)_ | coincide |
+| 14 | `internal_note` | `text` | Opcional | Nota interna del revisor: NUNCA se expone al solicitante. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:112`)_ | coincide |
+| 15 | `reviewed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Quién revisó. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:118`)_ | coincide |
+| 16 | `reviewed_at` | `timestamptz` | Opcional | Cuándo se revisó. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:124`)_ | coincide |
+| 17 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:134`)_ | coincide |
+| 18 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:140`)_ | coincide |
+| 19 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts:158`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | admission_id | profiles.practitioner_admissions (id) | fk_practitioner_admission_reviews_admission_id |
+| hacia | requirement_id | profiles.admission_requirements (id) | fk_practitioner_admission_reviews_requirement_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_reviews_status_concept_id |
+| hacia | file_id | common.files (id) | fk_practitioner_admission_reviews_file_id |
+| hacia | source_type_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_reviews_source_type_concept_id |
+| hacia | reason_code_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admission_reviews_reason_code_concept_id |
+| hacia | reviewed_by_user_id | iam.users (id) | fk_practitioner_admission_reviews_reviewed_by_user_id |
+| hacia | created_by_user_id | iam.users (id) | fk_practitioner_admission_reviews_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_practitioner_admission_reviews_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_practitioner_admission_reviews_item` | sí | admission_id, requirement_id, item_id | Garantiza que no se repita la combinación (admission_id, requirement_id, item_id) _(DOCUMENTO)_; Soporta la clave foránea fk_practitioner_admission_reviews_admission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admission_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admission_reviews_requirement_id` | no | requirement_id | Soporta la clave foránea fk_practitioner_admission_reviews_requirement_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_reviews_admission_status` | no | admission_id, status_concept_id | Soporta la clave foránea fk_practitioner_admission_reviews_admission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admission_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admission_reviews_file_id` | no | file_id | Soporta la clave foránea fk_practitioner_admission_reviews_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_reviews_source_type_concept_id` | no | source_type_concept_id | Soporta la clave foránea fk_practitioner_admission_reviews_source_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_reviews_reason_code_concept_id` | no | reason_code_concept_id | Soporta la clave foránea fk_practitioner_admission_reviews_reason_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_reviews_reviewed_by_user_id` | no | reviewed_by_user_id | Soporta la clave foránea fk_practitioner_admission_reviews_reviewed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_reviews_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_admission_reviews_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admission_reviews_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_admission_reviews_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_practitioner_admission_reviews_item` | UNIQUE INDEX | UNIQUE INDEX ("admission_id", "requirement_id", "item_id") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /iam/auth/register-practitioner | BORRA | POR_TIPO |
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | BORRA | POR_TIPO |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | BORRA | POR_TIPO |
+| POST /identity/checks/{id}/results | CREA | DIRECTA |
+| POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | BORRA | POR_TIPO |
+| POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
+| POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | BORRA | POR_TIPO |
+| POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
+| POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | BORRA | POR_TIPO |
+| POST /admissions/{id}/claim | CREA | DIRECTA |
+| POST /admissions/{id}/claim | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | BORRA | POR_TIPO |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | BORRA | POR_TIPO |
+| POST /admissions/{id}/reassign | CREA | DIRECTA |
+| POST /admissions/{id}/reassign | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | BORRA | POR_TIPO |
+| POST /admissions/{id}/request-info | CREA | DIRECTA |
+| POST /admissions/{id}/request-info | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | BORRA | POR_TIPO |
+| POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | ACTUALIZA | POR_TIPO |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /profiles/practitioners | BORRA | POR_TIPO |
+| POST /profiles/practitioners | CREA | DIRECTA |
+| POST /profiles/practitioners | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | BORRA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### practitioner_admissions
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
+- **Entidad del ORM:** `PractitionerAdmissions` — `src/modules/profiles/entities/practitioner_admissions.entity.ts`
+- **Resumen:** 26 columnas · 10 índices · 8 FK salientes · 2 entrantes · 65 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admissions.entity.ts:14`)_ | coincide |
+| 2 | `practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | Profesional que pidió la admisión. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:20`)_ | coincide |
+| 3 | `admission_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Tipo de admisión (hoy ALTA_DE_DOCTOR). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:26`)_ | coincide |
+| 4 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Estado vigente en la máquina de la admisión. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:32`)_ | coincide |
+| 5 | `submitted_at` | `timestamptz` | Obligatoria | Cuándo se envió (o reenvió) la solicitud. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:38`)_ | coincide |
+| 6 | `due_at` | `timestamptz` | Obligatoria | Vencimiento del plazo de respuesta (SLA). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:44`)_ | coincide |
+| 7 | `assigned_to_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Revisor que tomó la solicitud. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:50`)_ | coincide |
+| 8 | `decided_at` | `timestamptz` | Opcional | Cuándo se resolvió por última vez (verificada, rechazada, suspendida). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:56`)_ | coincide |
+| 9 | `decided_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Quién resolvió. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:66`)_ | coincide |
+| 10 | `decision_reason_text` | `text` | Opcional | Motivo de la última resolución (obligatorio al rechazar o suspender). _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:72`)_ | coincide |
+| 11 | `decision_reason_code_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Codigo estructurado del motivo de la decision (catalogo de motivos) y nota interna: la nota NUNCA se expone al medico (solo a quien revisa). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:452`)_ | coincide |
+| 12 | `internal_note` | `text` | Opcional | Nota interna del personal: NUNCA se expone al solicitante. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:92`)_ | coincide |
+| 13 | `info_requested_text` | `text` | Opcional | Qué se le pidió corregir al médico. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:98`)_ | coincide |
+| 14 | `info_due_at` | `timestamptz` | Opcional | Plazo que tiene el solicitante para responder a una peticion de informacion; vencido, un barrido pasa la admision a ABANDONADA. El SLA de la plataforma (due_at) se pausa mientras tanto y se recalcula al reenviar. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:457`)_ | coincide |
+| 15 | `resubmission_count` | `integer` | Obligatoria | Cuántas veces reenvió la solicitud. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:118`)_ | coincide |
+| 16 | `valid_until` | `date` | Opcional | Fin de la vigencia, INCLUSIVE, hasta el fin del dia en America/La_Paz (UTC-4). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:462`)_ | coincide |
+| 17 | `four_eyes_waived` | `boolean` | Opcional | Si la plataforma resolvio sin segunda persona (cuatro ojos apagado) y el aprobador tambien habia revisado algun requisito. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:464`)_ | coincide |
+| 18 | `attested_at` | `timestamptz` | Opcional | Atestacion del solicitante al enviar: cuando acepto y que version del texto. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:467`)_ | coincide |
+| 19 | `attestation_text_version` | `varchar` | Opcional | Versión del texto de la declaración que aceptó. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:146`)_ | coincide |
+| 20 | `closed_at` | `timestamptz` | Opcional | Cuándo se cerró definitivamente (retirada); libera el lugar de la abierta. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:156`)_ | coincide |
+| 21 | `submitted_snapshot` | `jsonb` | Opcional | FOTO del formulario tal como el medico lo envio (o reenvio): datos personales, contacto, domicilios, matriculas, estudios, especialidades y consultorios. La revision se hace contra lo enviado, no contra lo que el perfil diga despues de una edicion posterior. Se reescribe en cada reenvio (el anterior queda en la bitacora por el evento RESUBMITTED). Nulo en las admisiones del backfill hasta que la API la toma, marcandola como lectura viva. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:471`)_ | coincide |
+| 22 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admissions.entity.ts:177`)_ | coincide |
+| 23 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_admissions.entity.ts:183`)_ | coincide |
+| 24 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 25 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 26 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_admissions.entity.ts:201`)_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | practitioner_profile_id | profiles.health_practitioner_profiles (profile_id) | fk_practitioner_admissions_practitioner_profile_id |
+| hacia | admission_type_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admissions_admission_type_concept_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admissions_status_concept_id |
+| hacia | assigned_to_user_id | iam.users (id) | fk_practitioner_admissions_assigned_to_user_id |
+| hacia | decided_by_user_id | iam.users (id) | fk_practitioner_admissions_decided_by_user_id |
+| hacia | decision_reason_code_concept_id | terminology.catalog_concepts (id) | fk_practitioner_admissions_decision_reason_code_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_practitioner_admissions_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_practitioner_admissions_updated_by_user_id |
+| desde | id | profiles.practitioner_admission_reviews (admission_id) | fk_practitioner_admission_reviews_admission_id |
+| desde | id | profiles.practitioner_admission_events (admission_id) | fk_practitioner_admission_events_admission_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_practitioner_admissions_open` | sí | practitioner_profile_id, admission_type_concept_id donde WHERE closed_at IS NULL | Garantiza que no se repita la combinación (practitioner_profile_id, admission_type_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_practitioner_admissions_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE closed_at IS NULL _(ESTRUCTURAL)_; 4 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admissions_inbox` | no | status_concept_id, due_at, id | Soporta la clave foránea fk_practitioner_admissions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admissions_assigned_to_user_id` | no | assigned_to_user_id | Soporta la clave foránea fk_practitioner_admissions_assigned_to_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admissions_admission_type_concept_id` | no | admission_type_concept_id | Soporta la clave foránea fk_practitioner_admissions_admission_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admission_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admissions_decided_by_user_id` | no | decided_by_user_id | Soporta la clave foránea fk_practitioner_admissions_decided_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admissions_decision_reason_code_concept_id` | no | decision_reason_code_concept_id | Soporta la clave foránea fk_practitioner_admissions_decision_reason_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admissions_info_due_at` | no | info_due_at donde WHERE info_due_at IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE info_due_at IS NOT NULL _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «info_due_at», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_admissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_admissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_admissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_admissions_valid_until` | no | valid_until donde WHERE valid_until IS NOT NULL | Índice parcial: sólo indexa las filas donde WHERE valid_until IS NOT NULL _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «valid_until», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_practitioner_admissions_open` | UNIQUE INDEX | UNIQUE INDEX ("practitioner_profile_id", "admission_type_concept_id") WHERE closed_at IS NULL |
+| `ck_practitioner_admissions_resubmission_count` | CHECK | CHECK (("resubmission_count" >= 0)) |
+| `ck_practitioner_admissions_due_after_submit` | CHECK | CHECK (("due_at" >= "submitted_at")) |
+| `ck_practitioner_admissions_attestation_version` | CHECK | CHECK (("attested_at" IS NULL OR "attestation_text_version" IS NOT NULL)) |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| GET /f/{slug} | LEE | DIRECTA |
+| POST /internal/community/search/reindex | LEE | DIRECTA |
+| GET /l/{slug} | LEE | DIRECTA |
+| GET /o/{slug} | LEE | DIRECTA |
+| GET /p/{slug} | LEE | DIRECTA |
+| GET /public/nearby | LEE | DIRECTA |
+| GET /public/profiles/{prefijo}/{slug} | LEE | DIRECTA |
+| GET /public/search | LEE | DIRECTA |
+| GET /public/search/diagnostic-units | LEE | DIRECTA |
+| GET /public/search/insurers | LEE | DIRECTA |
+| GET /public/search/medications | LEE | DIRECTA |
+| GET /public/search/organizations | LEE | DIRECTA |
+| GET /public/search/pharmacies | LEE | DIRECTA |
+| GET /public/search/practitioners | LEE | DIRECTA |
+| GET /s/{slug} | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | CREA | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| GET /admissions/{id}/documents/{fileId}/content | LEE | DIRECTA |
+| POST /admissions/{id}/documents/{fileId}/download-url | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
+| POST /admissions/expire-sweep | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| GET /profiles/practitioners | LEE | DIRECTA |
+| POST /profiles/practitioners | CREA | DIRECTA |
+| POST /profiles/practitioners | LEE | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
+| DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
+| PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
+| GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
+| GET /profiles/practitioners/me/summary | LEE | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### practitioner_affiliations
 
 #### Vista general
@@ -2450,14 +3033,14 @@ Vincula profesionales con organizaciones o sedes donde prestan servicios para da
 | 2 | `practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 3 | `organization_name` | `varchar` | Obligatoria | Nombre de la institución tal como la declara el profesional. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:52`)_ | coincide |
 | 4 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Opcional | Sede de la plataforma que corresponde a la institución, si la hay. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:58`)_ | coincide |
-| 5 | `health_facility_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.9 — la institución como concepto del padrón oficial. Apunta a los 503 establecimientos de VS_BO_HEALTH_FACILITY, conjunto que NO siembra el paquete del modelo: lo publica la API al arrancar (`bolivia-facilities-seed.service.ts`), un solo dueño, como VS_BO_OCCUPATION en `persons`. CONVIVE con `organization_name` y no lo reemplaza: el padrón es de Santa Cruz y la mayoría de los lugares donde alguien trabajó no están en él. Nullable y SIN migración por parecido de nombre —se probó: «Hospital Obrero N.º 1» da 9 candidatos y dos de las tres filas vivas son de La Paz—; se llena hacia adelante. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:270`)_ | coincide |
-| 6 | `role_title` | `varchar` | Opcional | v4.2.6 — deja de ser obligatorio (ALV-007): un vinculo de "atiende en su propio consultorio" no tiene cargo dentro de una jerarquia, y exigirlo bloqueaba el guardado. Si existe, se usa en perfil/trayectoria; vacio no dibuja hueco. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:279`)_ | coincide |
+| 5 | `health_facility_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.9 — la institución como concepto del padrón oficial. Apunta a los 503 establecimientos de VS_BO_HEALTH_FACILITY, conjunto que NO siembra el paquete del modelo: lo publica la API al arrancar (`bolivia-facilities-seed.service.ts`), un solo dueño, como VS_BO_OCCUPATION en `persons`. CONVIVE con `organization_name` y no lo reemplaza: el padrón es de Santa Cruz y la mayoría de los lugares donde alguien trabajó no están en él. Nullable y SIN migración por parecido de nombre —se probó: «Hospital Obrero N.º 1» da 9 candidatos y dos de las tres filas vivas son de La Paz—; se llena hacia adelante. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:284`)_ | coincide |
+| 6 | `role_title` | `varchar` | Opcional | v4.2.6 — deja de ser obligatorio (ALV-007): un vinculo de "atiende en su propio consultorio" no tiene cargo dentro de una jerarquia, y exigirlo bloqueaba el guardado. Si existe, se usa en perfil/trayectoria; vacio no dibuja hueco. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:293`)_ | coincide |
 | 7 | `department_text` | `varchar` | Opcional | Servicio o departamento, cuando el cargo no lo dice solo. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:91`)_ | coincide |
 | 8 | `affiliation_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 9 | `start_date` | `date` | Obligatoria | Inicio del vínculo laboral. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:111`)_ | coincide |
 | 10 | `end_date` | `date` | Opcional | Fin del vínculo. `null` mientras siga ejerciendo ahí. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:117`)_ | coincide |
-| 11 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | v4.1.9 — `status_concept_id` deja de ser el estado del REGISTRO y pasa a ser el de la APROBACIÓN del vínculo: pendiente · declarado · aprobado · rechazado · revocado (conjunto `practitioner-affiliation-status`, dueño la API). La vigencia laboral la sigue diciendo `end_date`. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:288`)_ | coincide |
-| 12 | `decision_reason_text` | `varchar` | Opcional | + v4.1.9 — por qué se rechazó o se revocó, escrito por quien decidió y leído por el profesional: un rechazo sin motivo es mudo para quien lo recibe. Texto libre a propósito —categorizar motivos que ninguna organización pidió sería inventarlos—; el tope de 500 vive en el DTO, como el resto del módulo. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:293`)_ | coincide |
+| 11 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | v4.1.9 — `status_concept_id` deja de ser el estado del REGISTRO y pasa a ser el de la APROBACIÓN del vínculo: pendiente · declarado · aprobado · rechazado · revocado (conjunto `practitioner-affiliation-status`, dueño la API). La vigencia laboral la sigue diciendo `end_date`. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:302`)_ | coincide |
+| 12 | `decision_reason_text` | `varchar` | Opcional | + v4.1.9 — por qué se rechazó o se revocó, escrito por quien decidió y leído por el profesional: un rechazo sin motivo es mudo para quien lo recibe. Texto libre a propósito —categorizar motivos que ninguna organización pidió sería inventarlos—; el tope de 500 vive en el DTO, como el resto del módulo. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:307`)_ | coincide |
 | 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:151`)_ | coincide |
 | 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_affiliations.entity.ts:157`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
@@ -2643,7 +3226,7 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: practitioner_specialties`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PractitionerSpecialties` — `src/modules/profiles/entities/practitioner_specialties.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 88 operaciones
+- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 88 operaciones
 
 #### Columnas
 
@@ -2658,13 +3241,14 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 | 7 | `board_certified` | `boolean` | Opcional | _sin dato_ | coincide |
 | 8 | `practice_scope_text` | `text` | Opcional | _sin dato_ | coincide |
 | 9 | `verification_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 10 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
-| 11 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_specialties.entity.ts:100`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_specialties.entity.ts:106`)_ | coincide |
-| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_specialties.entity.ts:124`)_ | coincide |
+| 10 | `verified_at` | `timestamptz` | Opcional | + v4.2.67 — cuándo se verificó la especialidad (la fija la resolución de la admisión; hasta hoy ninguna especialidad pasaba de SPEC_VERIF_PENDING). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:220`)_ | coincide |
+| 11 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
+| 12 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_specialties.entity.ts:100`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/practitioner_specialties.entity.ts:106`)_ | coincide |
+| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/practitioner_specialties.entity.ts:124`)_ | coincide |
 
 #### Relaciones
 
@@ -2813,7 +3397,7 @@ Registra credenciales y documentación profesional que sustentan la identidad y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: professional_credentials`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `ProfessionalCredentials` — `src/modules/profiles/entities/professional_credentials.entity.ts`
-- **Resumen:** 23 columnas · 10 índices · 10 FK salientes · 2 entrantes · 53 operaciones
+- **Resumen:** 24 columnas · 10 índices · 10 FK salientes · 2 entrantes · 53 operaciones
 
 #### Columnas
 
@@ -2837,11 +3421,12 @@ Registra credenciales y documentación profesional que sustentan la identidad y 
 | 16 | `verification_source_uri` | `text` | Opcional | _sin dato_ | coincide |
 | 17 | `verified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `verified_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/professional_credentials.entity.ts:162`)_ | coincide |
-| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/professional_credentials.entity.ts:168`)_ | coincide |
-| 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/professional_credentials.entity.ts:186`)_ | coincide |
+| 19 | `rejection_reason_text` | `text` | Opcional | + v4.2.67 — por qué se rechazó el título. Lo escribe la resolución de la admisión (practitioner_admissions); sin él, quien rechaza no deja rastro de la causa y el médico no sabe qué corregir. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_05_profiles.puml:198`)_ | coincide |
+| 20 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/professional_credentials.entity.ts:162`)_ | coincide |
+| 21 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/profiles/entities/professional_credentials.entity.ts:168`)_ | coincide |
+| 22 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 23 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 24 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/profiles/entities/professional_credentials.entity.ts:186`)_ | coincide |
 
 #### Relaciones
 

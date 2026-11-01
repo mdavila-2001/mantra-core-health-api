@@ -976,12 +976,12 @@ Asigna cada conversación de mensajes a un profesional y a quien del equipo de a
 | Sentido | Columnas | Tabla | Restricción |
 |---|---|---|---|
 | hacia | conversation_id | community.conversations (id) | fk_conversation_assignments_conversation_id |
+| hacia | tenant_id | directory.tenants (id) | fk_conversation_assignments_tenant_id |
 | hacia | practitioner_profile_id | profiles.health_practitioner_profiles (profile_id) | fk_conversation_assignments_practitioner_profile_id |
 | hacia | assigned_user_id | iam.users (id) | fk_conversation_assignments_assigned_user_id |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_conversation_assignments_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_conversation_assignments_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_conversation_assignments_updated_by_user_id |
-| hacia | tenant_id | directory.tenants (id) | fk_conversation_assignments_tenant_id |
 
 #### Índices
 
@@ -1047,8 +1047,8 @@ Guarda las notas internas del equipo sobre una conversación, que el paciente nu
 | Sentido | Columnas | Tabla | Restricción |
 |---|---|---|---|
 | hacia | conversation_id | community.conversations (id) | fk_conversation_internal_notes_conversation_id |
-| hacia | author_user_id | iam.users (id) | fk_conversation_internal_notes_author_user_id |
 | hacia | tenant_id | directory.tenants (id) | fk_conversation_internal_notes_tenant_id |
+| hacia | author_user_id | iam.users (id) | fk_conversation_internal_notes_author_user_id |
 
 #### Índices
 

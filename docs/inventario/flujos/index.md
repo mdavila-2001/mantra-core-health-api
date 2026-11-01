@@ -4,7 +4,7 @@
 
 **80 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 78 de módulo), **13 máquinas de estado** y **1925 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1720 · sin ellas: 205
+- Operaciones con decisiones propias: 1721 · sin ellas: 204
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 38 · CASO_DE_USO_README 11 · MIXTO 29 · CURADO_EN_DOCUMENTO 2
 

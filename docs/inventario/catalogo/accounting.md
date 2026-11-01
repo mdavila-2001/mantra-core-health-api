@@ -2,7 +2,7 @@
 
 # Catálogo del schema `accounting`
 
-- **Tablas:** 45 · **Columnas:** 648 (182 con descripción: 28.1 %) · **Índices:** 369
+- **Tablas:** 45 · **Columnas:** 652 (184 con descripción: 28.2 %) · **Índices:** 375
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -29,14 +29,14 @@
 | [company_bank_accounts](#company_bank_accounts) | Registra cuentas bancarias institucionales usadas para cobros y pagos de la organización sanitaria. | 18 | 10 | 1 | COINCIDE |
 | [controlling_areas](#controlling_areas) | Define ámbitos de control de gestión para consolidar información financiera de una o más unidades. | 13 | 7 | 0 | COINCIDE |
 | [cost_center_maps](#cost_center_maps) | Relaciona centros de costo con estructuras contables o institucionales para integrar reportes financieros. | 11 | 5 | 0 | COINCIDE |
-| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 19 | DIVERGE |
+| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 14 | 10 | 19 | COINCIDE |
 | [depreciation_areas](#depreciation_areas) | Define áreas de valoración donde se calculan depreciaciones con criterios contables o fiscales distintos. | 13 | 8 | 2 | COINCIDE |
 | [employee_payments](#employee_payments) | Registra pagos al personal para sostener contabilidad de remuneraciones institucionales. | 14 | 6 | 0 | COINCIDE |
 | [exchange_rates](#exchange_rates) | Conserva tasas de cambio utilizadas para registrar y comparar operaciones financieras en distintas monedas. | 11 | 4 | 3 | COINCIDE |
 | [fiscal_periods](#fiscal_periods) | Desglosa ejercicios en períodos contables para registrar y reportar movimientos financieros por fecha. | 11 | 4 | 21 | COINCIDE |
 | [fiscal_years](#fiscal_years) | Define ejercicios fiscales de la organización para ordenar períodos contables y cierres financieros. | 11 | 4 | 19 | COINCIDE |
 | [functional_areas](#functional_areas) | Define áreas funcionales para clasificar gastos y resultados según actividad institucional. | 11 | 7 | 0 | COINCIDE |
-| [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 5 | DIVERGE |
+| [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 16 | 9 | 5 | COINCIDE |
 | [internal_orders](#internal_orders) | Agrupa costos y compromisos de iniciativas internas para facilitar seguimiento presupuestario. | 20 | 14 | 0 | COINCIDE |
 | [journal_entry_assignments](#journal_entry_assignments) | Asocia asientos con dimensiones contables para clasificar movimientos por unidad y propósito. | 30 | 32 | 16 | COINCIDE |
 | [journal_transactions](#journal_transactions) | Agrupa asientos contables de una operación para conservar su registro financiero balanceado. | 22 | 9 | 38 | COINCIDE |
@@ -187,6 +187,7 @@ erDiagram
     uuid status_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+    uuid tenant_id FK
   }
   accounting_functional_areas["accounting.functional_areas"] {
     uuid id PK
@@ -2204,7 +2205,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: cost_centers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `CostCenters` — `src/modules/accounting/entities/cost_centers.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 19 operaciones
+- **Resumen:** 14 columnas · 10 índices · 8 FK salientes · 21 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -2222,6 +2223,8 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/cost_centers.entity.ts:86`)_ | coincide |
+| 13 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.68 (infraestructura F5f, CONTRATO-F2-F5.md §F5f): unidad organizativa que imputa a este centro de costo (un solo centro ACTIVO por unidad: índice único parcial); los cargos devengados toman el centro de costo de la unidad dueña del espacio. `tenant_id` (no está en el contrato) es el de la práctica: lo completa un trigger y ata (tenant_id, practice_id) y (tenant_id, clinical_unit_id) con FK compuesta (patch 2026-10-29_infraestructura_f5_facturacion.sql). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:138`)_ | coincide |
+| 14 | `clinical_unit_id` | `uuid` | Clave foránea → practice.clinical_units.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2233,6 +2236,8 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_cost_centers_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_cost_centers_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_cost_centers_updated_by_user_id |
+| hacia | tenant_id | directory.tenants (id) | fk_cost_centers_tenant_id |
+| hacia | clinical_unit_id | practice.clinical_units (id) | fk_cost_centers_clinical_unit_id |
 | desde | id | accounting.cost_centers (parent_cost_center_id) | fk_cost_centers_parent_cost_center_id |
 | desde | id | accounting.cost_center_maps (cost_center_id) | fk_cost_center_maps_cost_center_id |
 | desde | id | accounting.ledger_entries (cost_center_id) | fk_ledger_entries_cost_center_id |
@@ -2240,6 +2245,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | desde | id | accounting.journal_entry_assignments (cost_center_id) | fk_journal_entry_assignments_cost_center_id |
 | desde | id | accounting.asset_assignments (cost_center_id) | fk_asset_assignments_cost_center_id |
 | desde | id | accounting.accrual_objects (cost_center_id) | fk_accrual_objects_cost_center_id |
+| desde | id | billing.charge_captures (cost_center_id) | fk_charge_captures_cost_center_id |
 | desde | id | billing.invoice_lines (cost_center_id) | fk_invoice_lines_cost_center_id |
 | desde | id | billing.bill_lines (cost_center_id) | fk_bill_lines_cost_center_id |
 | desde | id | billing.budget_lines (cost_center_id) | fk_budget_lines_cost_center_id |
@@ -2264,6 +2270,17 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 | `ix_cost_centers_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_cost_centers_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_cost_centers_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_cost_centers_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_cost_centers_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_cost_centers_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cost_centers_tenant_id` | no | tenant_id | Soporta la clave foránea fk_cost_centers_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cost_centers_clinical_unit_id` | no | clinical_unit_id | Soporta la clave foránea fk_cost_centers_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «clinical_unit_id», la primera columna del índice _(CONSULTA)_ |
+| `ux_cost_centers_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_cost_centers_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_cost_centers_unit_active` | sí | clinical_unit_id donde WHERE clinical_unit_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' | Garantiza que no se repita la combinación (clinical_unit_id) _(DOCUMENTO)_; Soporta la clave foránea fk_cost_centers_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE clinical_unit_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «clinical_unit_id», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_cost_centers_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
+| `ux_cost_centers_unit_active` | UNIQUE INDEX | UNIQUE INDEX ("clinical_unit_id") WHERE clinical_unit_id IS NOT NULL AND status_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' |
 
 #### Operaciones que la tocan
 
@@ -2781,7 +2798,7 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: infrastructure_items`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `InfrastructureItems` — `src/modules/accounting/entities/infrastructure_items.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2801,6 +2818,8 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/infrastructure_items.entity.ts:98`)_ | coincide |
+| 15 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.68 (infraestructura F5f): espacio físico donde está el activo (location_text queda sólo como lectura heredada). `tenant_id` como en cost_centers: trigger desde la práctica y FK compuestas (tenant_id, practice_id) y (tenant_id, care_space_id). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:391`)_ | coincide |
+| 16 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2813,6 +2832,8 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_infrastructure_items_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_infrastructure_items_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_infrastructure_items_updated_by_user_id |
+| hacia | tenant_id | directory.tenants (id) | fk_infrastructure_items_tenant_id |
+| hacia | care_space_id | practice.care_spaces (id) | fk_infrastructure_items_care_space_id |
 
 #### Índices
 
@@ -2825,6 +2846,8 @@ Cataloga infraestructura física o tecnológica que representa recursos y activo
 | `ix_infrastructure_items_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_infrastructure_items_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_infrastructure_items_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_infrastructure_items_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_infrastructure_items_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_infrastructure_items_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_infrastructure_items_tenant_id` | no | tenant_id | Soporta la clave foránea fk_infrastructure_items_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_infrastructure_items_care_space_id` | no | care_space_id | Soporta la clave foránea fk_infrastructure_items_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
@@ -3137,7 +3160,7 @@ Agrupa asientos contables de una operación para conservar su registro financier
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/accounting/entities/journal_transactions.entity.ts:138`)_ | coincide |
-| 21 | `approved_at` | `timestamptz` | Opcional | + v4.0.8 (ALOVIDA C-17): traza de aprobación del asiento. Los estados en sí viven en status_concept_id (DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED → REVERSED); estas dos columnas solo sellan quién aprobó y cuándo, en paralelo a posted_at/posted_by_user_id. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:173`)_ | coincide |
+| 21 | `approved_at` | `timestamptz` | Opcional | + v4.0.8 (ALOVIDA C-17): traza de aprobación del asiento. Los estados en sí viven en status_concept_id (DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED → REVERSED); estas dos columnas solo sellan quién aprobó y cuándo, en paralelo a posted_at/posted_by_user_id. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_16_accounting.puml:184`)_ | coincide |
 | 22 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones

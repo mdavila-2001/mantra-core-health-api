@@ -2250,6 +2250,32 @@ La operación no recibe cuerpo.
 | `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:631` |
 | `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:637` |
 | `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:643` |
+| `transfer` | `ReferralTransferResponseDto` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:650` |
+| `transfer.required` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.transportMode` | `string` | Sí | valores: AMBULANCE_BASIC, AMBULANCE_ADVANCED, AIR_AMBULANCE, RIVER, PRIVATE_VEHICLE, PUBLIC_TRANSPORT, ON_FOOT, OTHER; admite null | — | — | sin fuente |
+| `transfer.transportDetail` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionRelationship` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionPhone` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalRole` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.departureCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL; admite null | — | — | sin fuente |
+| `transfer.vitals` | `ReferralTransferVitalsResponseDto` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.recordedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.vitals.systolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.diastolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.heartRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.respiratoryRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.temperatureC` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.oxygenSaturation` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.glasgow` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContacted` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.departedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivalCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL, DECEASED; admite null | — | — | sin fuente |
+| `transfer.arrivalNotes` | `string` | Sí | admite null | — | — | sin fuente |
 | `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:656` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
 | `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:685` |
@@ -3287,6 +3313,32 @@ La operación no recibe cuerpo.
 | `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:631` |
 | `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:637` |
 | `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:643` |
+| `transfer` | `ReferralTransferResponseDto` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:650` |
+| `transfer.required` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.transportMode` | `string` | Sí | valores: AMBULANCE_BASIC, AMBULANCE_ADVANCED, AIR_AMBULANCE, RIVER, PRIVATE_VEHICLE, PUBLIC_TRANSPORT, ON_FOOT, OTHER; admite null | — | — | sin fuente |
+| `transfer.transportDetail` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionRelationship` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.companionPhone` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.escortProfessionalRole` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.departureCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL; admite null | — | — | sin fuente |
+| `transfer.vitals` | `ReferralTransferVitalsResponseDto` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.recordedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.vitals.systolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.diastolicBp` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.heartRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.respiratoryRate` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.temperatureC` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.oxygenSaturation` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.vitals.glasgow` | `number` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContacted` | `boolean` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactName` | `string` | Sí | admite null | — | — | sin fuente |
+| `transfer.receiverContactedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.departedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivedAt` | `string` | Sí | formato date-time; admite null | — | — | sin fuente |
+| `transfer.arrivalCondition` | `string` | Sí | valores: STABLE, UNSTABLE, CRITICAL, DECEASED; admite null | — | — | sin fuente |
+| `transfer.arrivalNotes` | `string` | Sí | admite null | — | — | sin fuente |
 | `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:656` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
 | `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:685` |

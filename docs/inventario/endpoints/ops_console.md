@@ -731,7 +731,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsHeartbeatController.record` — `src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:25`
+- **Implementación:** `OpsHeartbeatController.record` — `src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:26`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -741,14 +741,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/ops/heartbeats` la atiende `OpsHeartbeatController.record` (src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:25). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `HeartbeatDto` (13 campos, 13 obligatorios). Delega en `InstanceLivenessService.recordHeartbeat`. No se determinaron tablas para esta operación.
+`POST /internal/ops/heartbeats` la atiende `OpsHeartbeatController.record` (src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:26). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `HeartbeatDto` (13 campos, 13 obligatorios). Delega en `InstanceLivenessService.recordHeartbeat`. No se determinaron tablas para esta operación.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:25` |
+| ROL | Alguno de: SYSTEM | `src/modules/ops_console/presentation/controllers/ops-heartbeat.controller.ts:26` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |

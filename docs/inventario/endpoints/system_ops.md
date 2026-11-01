@@ -3,7 +3,7 @@
 # Endpoints del módulo `system_ops`
 
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
-- **Operaciones:** 35 (29 en el contrato, 6 sólo en el código)
+- **Operaciones:** 35 (35 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 23 · BAJO 11
 - **Tablas distintas que tocan:** 47
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/system-ops.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -17,28 +17,28 @@
 | 3 | POST | `/admin/governance/assessments/{id}/remediation-plans` | Crear un plan de remediación con sus acciones | MEDIO | 5 | SECURITY_ADMIN |
 | 4 | GET | `/admin/governance/change-log` | Cambios de gobierno de datos: quién cambió qué y cuándo | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 5 | POST | `/admin/governance/cross-border-transfers` | Registrar una transferencia transfronteriza (append-only) | MEDIO | 2 | SECURITY_ADMIN |
-| 6 | GET | `/admin/governance/domains` | — | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 6 | GET | `/admin/governance/domains` | Dominios de datos y cuántas entidades declara cada uno | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 7 | POST | `/admin/governance/drafts` | Guardar un draft record genérico | MEDIO | 1 | SECURITY_ADMIN |
 | 8 | POST | `/admin/governance/drafts/{id}/publish` | Publicar un draft record y materializarlo | MEDIO | 3 | SECURITY_ADMIN |
 | 9 | GET | `/admin/governance/entity-registry` | Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI) | BAJO | 6 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 10 | POST | `/admin/governance/entity-registry` | Registrar dominio, clasificación y catalogar entidad + campos | MEDIO | 7 | SECURITY_ADMIN |
+| 10 | POST | `/admin/governance/entity-registry` | Registrar dominio, clasificación y catalogar entidad + campos | MEDIO | 9 | SECURITY_ADMIN |
 | 11 | GET | `/admin/governance/entity-registry/{id}/fields` | Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento | BAJO | 5 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 12 | PATCH | `/admin/governance/entity-registry/{id}/retention` | Aplicar una política de retención a una entidad | MEDIO | 4 | SECURITY_ADMIN |
 | 13 | PATCH | `/admin/governance/entity-registry/{id}/write-policy` | Vincular una política de escritura a una entidad | MEDIO | 4 | SECURITY_ADMIN |
 | 14 | PATCH | `/admin/governance/field-registry/{id}` | Asignar regla de anonimización / masking a un campo | MEDIO | 3 | SECURITY_ADMIN |
 | 15 | PATCH | `/admin/governance/findings/{id}` | Actualizar un hallazgo (estado / owner) | MEDIO | 2 | SECURITY_ADMIN |
-| 16 | GET | `/admin/governance/legal-holds` | — | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DPO, AUDITOR |
+| 16 | GET | `/admin/governance/legal-holds` | Retenciones legales (legal holds), sin la referencia de la autoridad | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DPO, AUDITOR |
 | 17 | POST | `/admin/governance/legal-holds` | Colocar un legal hold sobre un objetivo | MEDIO | 3 | SECURITY_ADMIN |
 | 18 | POST | `/admin/governance/legal-holds/{id}/release` | Levantar un legal hold ACTIVE | MEDIO | 3 | SECURITY_ADMIN |
-| 19 | GET | `/admin/governance/mutability` | — | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 20 | GET | `/admin/governance/mutability/{schema}/{table}` | — | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
-| 21 | GET | `/admin/governance/mutability/summary` | — | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 19 | GET | `/admin/governance/mutability` | Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia) | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 20 | GET | `/admin/governance/mutability/{schema}/{table}` | Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 21 | GET | `/admin/governance/mutability/summary` | Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 22 | POST | `/admin/governance/operational-frameworks` | Publicar un framework operativo con sus controles | MEDIO | 3 | SECURITY_ADMIN |
 | 23 | GET | `/admin/governance/policies` | Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada | BAJO | 5 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 24 | GET | `/admin/governance/policies/{policyType}/{id}` | Una política: ajustes, estado y a qué tablas o columnas se aplica | BAJO | 8 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 25 | POST | `/admin/governance/remediation-actions/{id}/verify` | Verificar y cerrar una acción de remediación | MEDIO | 6 | SECURITY_ADMIN |
 | 26 | POST | `/admin/governance/residency-policies` | Definir una política de residencia de datos | MEDIO | 3 | SECURITY_ADMIN |
-| 27 | GET | `/admin/governance/retention-executions` | — | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 27 | GET | `/admin/governance/retention-executions` | Ejecuciones de políticas de retención: estado, tiempos y conteos | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
 | 28 | POST | `/admin/governance/retention-policies` | Definir una política de retención con base legal | MEDIO | 3 | SECURITY_ADMIN |
 | 29 | POST | `/admin/governance/tenant-residency-bindings` | Vincular un tenant a una política de residencia | MEDIO | 4 | SECURITY_ADMIN |
 | 30 | POST | `/admin/governance/workload-assessments` | Iniciar una evaluación de workload | MEDIO | 2 | SECURITY_ADMIN |
@@ -84,9 +84,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.anonymization_rules` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createAnonymizationRule → GovernanceCatalogService.createAnonymizationRule → GovernanceRepository.createAnonymizationRule | `src/modules/system_ops/repositories/governance.repository.ts:536` |
-| `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | GovernanceCatalogController.createAnonymizationRule → GovernanceCatalogService.createAnonymizationRule → GovernanceRepository.findAnonymizationRuleByCode | `src/modules/system_ops/repositories/governance.repository.ts:500` |
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createAnonymizationRule → GovernanceCatalogService.createAnonymizationRule → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
+| `system_ops.anonymization_rules` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createAnonymizationRule → GovernanceCatalogService.createAnonymizationRule → GovernanceRepository.createAnonymizationRule | `src/modules/system_ops/repositories/governance.repository.ts:567` |
+| `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | GovernanceCatalogController.createAnonymizationRule → GovernanceCatalogService.createAnonymizationRule → GovernanceRepository.findAnonymizationRuleByCode | `src/modules/system_ops/repositories/governance.repository.ts:531` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createAnonymizationRule → GovernanceCatalogService.createAnonymizationRule → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
 
 ### Cuerpo — DTO `CreateAnonymizationRuleDto` · `application/json`
 
@@ -583,8 +583,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 6. GET /admin/governance/domains
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Dominios de datos y cuántas entidades declara cada uno
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -592,9 +592,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+Dominios de datos y cuántas entidades declara cada uno. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -620,7 +620,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.pum
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `DomainListQueryDto` | — |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `q` | query | No | `string` | Busca en código y nombre, sin mayúsculas |
 
 ### Cuerpo
 
@@ -954,7 +956,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/entity-registry` la atiende `GovernanceCatalogController.catalogEntity` (src/modules/system_ops/controllers/governance-catalog.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CatalogEntityDto` (26 campos, 13 obligatorios). Delega en `GovernanceCatalogService.catalogEntity`. Crea filas en system_ops.data_classifications, system_ops.data_domains, system_ops.entity_registry, system_ops.field_registry, system_ops.governance_change_log. Lee system_ops.data_classifications, system_ops.data_domains.
+`POST /admin/governance/entity-registry` la atiende `GovernanceCatalogController.catalogEntity` (src/modules/system_ops/controllers/governance-catalog.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CatalogEntityDto` (26 campos, 13 obligatorios). Delega en `GovernanceCatalogService.catalogEntity`. Crea filas en system_ops.data_classifications, system_ops.data_domains, system_ops.entity_registry, system_ops.field_registry, system_ops.governance_change_log. Lee system_ops.data_classifications, system_ops.data_domains, system_ops.entity_registry, system_ops.field_registry.
 
 ### Requerimientos
 
@@ -975,9 +977,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `system_ops.data_classifications` | LEE | LEE | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.findClassificationByCode | `src/modules/system_ops/repositories/governance.repository.ts:100` |
 | `system_ops.data_domains` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.createDomain | `src/modules/system_ops/repositories/governance.repository.ts:76` |
 | `system_ops.data_domains` | LEE | LEE | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.findDomainByCode | `src/modules/system_ops/repositories/governance.repository.ts:45` |
-| `system_ops.entity_registry` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.createEntity | `src/modules/system_ops/repositories/governance.repository.ts:243` |
-| `system_ops.field_registry` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.createField | `src/modules/system_ops/repositories/governance.repository.ts:307` |
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
+| `system_ops.entity_registry` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.createEntity | `src/modules/system_ops/repositories/governance.repository.ts:260` |
+| `system_ops.entity_registry` | LEE | LEE | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.findEntityByTable | `src/modules/system_ops/repositories/governance.repository.ts:192` |
+| `system_ops.field_registry` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.createField | `src/modules/system_ops/repositories/governance.repository.ts:338` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.findFieldsByEntity | `src/modules/system_ops/repositories/governance.repository.ts:290` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.catalogEntity → GovernanceCatalogService.catalogEntity → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
 
 ### Cuerpo — DTO `CatalogEntityDto` · `application/json`
 
@@ -1221,10 +1225,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.entity_registry` | ESCRIBE | ACTUALIZA | POR_TIPO | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention | `src/modules/system_ops/services/governance-catalog.service.ts:298` |
+| `system_ops.entity_registry` | ESCRIBE | ACTUALIZA | POR_TIPO | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention | `src/modules/system_ops/services/governance-catalog.service.ts:373` |
 | `system_ops.entity_registry` | LEE | LEE | DIRECTA | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention → GovernanceRepository.findEntityById | `src/modules/system_ops/repositories/governance.repository.ts:175` |
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
-| `system_ops.retention_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention → GovernanceRepository.findRetentionPolicyById | `src/modules/system_ops/repositories/governance.repository.ts:433` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.applyRetention → GovernanceCatalogService.applyRetention → GovernanceRepository.findRetentionPolicyById | `src/modules/system_ops/repositories/governance.repository.ts:464` |
 
 ### Parámetros
 
@@ -1325,10 +1329,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.entity_registry` | ESCRIBE | ACTUALIZA | POR_TIPO | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy | `src/modules/system_ops/services/governance-catalog.service.ts:221` |
+| `system_ops.entity_registry` | ESCRIBE | ACTUALIZA | POR_TIPO | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy | `src/modules/system_ops/services/governance-catalog.service.ts:296` |
 | `system_ops.entity_registry` | LEE | LEE | DIRECTA | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy → GovernanceRepository.findEntityById | `src/modules/system_ops/repositories/governance.repository.ts:175` |
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
-| `system_ops.write_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy → GovernanceRepository.findWritePolicyById | `src/modules/system_ops/repositories/governance.repository.ts:340` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
+| `system_ops.write_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.applyWritePolicy → GovernanceCatalogService.applyWritePolicy → GovernanceRepository.findWritePolicyById | `src/modules/system_ops/repositories/governance.repository.ts:371` |
 
 ### Parámetros
 
@@ -1428,9 +1432,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.field_registry` | ESCRIBE | ACTUALIZA | POR_TIPO | GovernanceCatalogController.updateField → GovernanceCatalogService.updateField | `src/modules/system_ops/services/governance-catalog.service.ts:355` |
-| `system_ops.field_registry` | LEE | LEE | DIRECTA | GovernanceCatalogController.updateField → GovernanceCatalogService.updateField → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.updateField → GovernanceCatalogService.updateField → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
+| `system_ops.field_registry` | ESCRIBE | ACTUALIZA | POR_TIPO | GovernanceCatalogController.updateField → GovernanceCatalogService.updateField | `src/modules/system_ops/services/governance-catalog.service.ts:430` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | GovernanceCatalogController.updateField → GovernanceCatalogService.updateField → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:276` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.updateField → GovernanceCatalogService.updateField → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
 
 ### Parámetros
 
@@ -1596,8 +1600,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 16. GET /admin/governance/legal-holds
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Retenciones legales (legal holds), sin la referencia de la autoridad
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1605,9 +1609,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+Retenciones legales (legal holds), sin la referencia de la autoridad. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1633,7 +1637,12 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.pum
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `LegalHoldListQueryDto` | — |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `status` | query | No | `string` | Código del estado (concepto), p. ej. `ACTIVE` o `RELEASED` |
+| `targetType` | query | No | `string` | Código del tipo de objetivo (concepto) |
+| `tenantId` | query | No | `string` | Organización del hold |
+| `targetId` | query | No | `string` | Objetivo retenido |
 
 ### Cuerpo
 
@@ -1698,7 +1707,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | LegalHoldController.place → LegalHoldService.place → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | LegalHoldController.place → LegalHoldService.place → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
 | `system_ops.legal_holds` | ESCRIBE | CREA | DIRECTA | LegalHoldController.place → LegalHoldService.place → LegalHoldRepository.create | `src/modules/system_ops/repositories/legal-hold.repository.ts:90` |
 | `system_ops.legal_holds` | LEE | LEE | DIRECTA | LegalHoldController.place → LegalHoldService.place → LegalHoldRepository.findActive | `src/modules/system_ops/repositories/legal-hold.repository.ts:37` |
 
@@ -1803,7 +1812,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | LegalHoldController.release → LegalHoldService.release → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | LegalHoldController.release → LegalHoldService.release → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
 | `system_ops.legal_holds` | ESCRIBE | ACTUALIZA | POR_TIPO | LegalHoldController.release → LegalHoldService.release | `src/modules/system_ops/services/legal-hold.service.ts:116` |
 | `system_ops.legal_holds` | LEE | LEE | DIRECTA | LegalHoldController.release → LegalHoldService.release → LegalHoldRepository.findById | `src/modules/system_ops/repositories/legal-hold.repository.ts:27` |
 
@@ -1867,8 +1876,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 19. GET /admin/governance/mutability
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia)
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1876,9 +1885,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+Listar la mutabilidad por tabla (modo de escritura, disposición, legal hold y nivel de evidencia). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1903,7 +1912,16 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.pum
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ListMutabilityQueryDto` | — |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `schema` | query | No | `string` | — |
+| `writeMode` | query | No | `string` | — |
+| `evidence` | query | No | `string` | — |
+| `finding` | query | No | `string` | — |
+| `disposition` | query | No | `string` | — |
+| `legalHold` | query | No | `string` | — |
+| `database` | query | No | `string` | — |
+| `q` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -1917,16 +1935,16 @@ La operación no recibe cuerpo.
 | `items[].schema` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:99` |
 | `items[].table` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:100` |
 | `items[].database` | `string` | Sí | valores: main, pay | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:101` |
-| `items[].writeMode` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof WRITE_MODES)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:102` |
-| `items[].writeModeLevel` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:103` |
-| `items[].disposition` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof DISPOSITIONS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:104` |
-| `items[].dispositionLevel` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:105` |
-| `items[].retention` | `MutabilityRetentionDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:107` |
-| `items[].retention.days` | `number` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:90` |
-| `items[].retention.source` | `string` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:92` |
-| `items[].retention.status` | `string` | Sí | valores: PENDIENTE_DE_CUMPLIMIENTO | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:94` |
-| `items[].legalHold` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof LEGAL_HOLD_STATES)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:108` |
-| `items[].legalHoldLevel` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:109` |
+| `items[].writeMode` | `string` | Sí | valores: APPEND_ONLY, APPEND_ONLY_PURGEABLE, LIFECYCLE_ONLY, UPDATABLE, UPDATABLE_DELETABLE, SOFT_DELETE, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:102` |
+| `items[].writeModeLevel` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:103` |
+| `items[].disposition` | `string` | Sí | valores: KEEP, PURGE_BY_RETENTION, ANONYMIZE, ARCHIVE, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:104` |
+| `items[].dispositionLevel` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:105` |
+| `items[].retention` | `MutabilityRetentionDto` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:107` |
+| `items[].retention.days` | `number` | Sí | admite null | — | — | sin fuente |
+| `items[].retention.source` | `string` | Sí | admite null | — | — | sin fuente |
+| `items[].retention.status` | `string` | Sí | valores: PENDIENTE_DE_CUMPLIMIENTO | — | — | sin fuente |
+| `items[].legalHold` | `string` | Sí | valores: HOLD_AWARE, HOLD_CAPABLE_NOT_ENFORCED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:108` |
+| `items[].legalHoldLevel` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:109` |
 | `items[].contradictions` | `number` | Sí | — | — | Contradicciones registradas (no resueltas) | `src/modules/system_ops/mutability/dto/mutability.dto.ts:111` |
 | `items[].gaps` | `number` | Sí | — | — | Brechas: declarado sin imponer | `src/modules/system_ops/mutability/dto/mutability.dto.ts:112` |
 | `items[].registered` | `boolean` | Sí | admite null | — | ¿Está en system_ops.entity_registry? `null` si no se pudo consultar | `src/modules/system_ops/mutability/dto/mutability.dto.ts:119` |
@@ -1957,8 +1975,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 20. GET /admin/governance/mutability/{schema}/{table}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -1966,9 +1984,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+Detalle de una tabla: toda la evidencia con su fuente y las contradicciones sin resolver. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2004,8 +2022,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `evidence` | `array<object>` | Sí | — | — | Toda la evidencia, con su fuente exacta | `src/modules/system_ops/mutability/dto/mutability.dto.ts:198` |
-| `findings` | `array<object>` | Sí | — | — | Contradicciones (no resueltas) y brechas | `src/modules/system_ops/mutability/dto/mutability.dto.ts:200` |
+| `schema` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:99` |
+| `table` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:100` |
+| `database` | `string` | Sí | valores: main, pay | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:101` |
+| `writeMode` | `string` | Sí | valores: APPEND_ONLY, APPEND_ONLY_PURGEABLE, LIFECYCLE_ONLY, UPDATABLE, UPDATABLE_DELETABLE, SOFT_DELETE, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:102` |
+| `writeModeLevel` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:103` |
+| `disposition` | `string` | Sí | valores: KEEP, PURGE_BY_RETENTION, ANONYMIZE, ARCHIVE, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:104` |
+| `dispositionLevel` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:105` |
+| `retention` | `MutabilityRetentionDto` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:107` |
+| `retention.days` | `number` | Sí | admite null | — | — | sin fuente |
+| `retention.source` | `string` | Sí | admite null | — | — | sin fuente |
+| `retention.status` | `string` | Sí | valores: PENDIENTE_DE_CUMPLIMIENTO | — | — | sin fuente |
+| `legalHold` | `string` | Sí | valores: HOLD_AWARE, HOLD_CAPABLE_NOT_ENFORCED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:108` |
+| `legalHoldLevel` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:109` |
+| `contradictions` | `number` | Sí | — | — | Contradicciones registradas (no resueltas) | `src/modules/system_ops/mutability/dto/mutability.dto.ts:111` |
+| `gaps` | `number` | Sí | — | — | Brechas: declarado sin imponer | `src/modules/system_ops/mutability/dto/mutability.dto.ts:112` |
+| `registered` | `boolean` | Sí | admite null | — | ¿Está en system_ops.entity_registry? `null` si no se pudo consultar | `src/modules/system_ops/mutability/dto/mutability.dto.ts:119` |
+| `evidence` | `array<string>` | Sí | — | — | Toda la evidencia, con su fuente exacta | `src/modules/system_ops/mutability/dto/mutability.dto.ts:198` |
+| `findings` | `array<string>` | Sí | — | — | Contradicciones (no resueltas) y brechas | `src/modules/system_ops/mutability/dto/mutability.dto.ts:200` |
 
 ### Respuestas posibles
 
@@ -2031,8 +2065,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 21. GET /admin/governance/mutability/summary
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2040,9 +2074,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+Resumen de mutabilidad: tablas por modo y por nivel de evidencia (numerador/denominador) y hallazgos. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2073,16 +2107,20 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `totalTables` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:149` |
 | `byWriteMode` | `array<MutabilityModeCountDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:151` |
-| `byWriteMode[].writeMode` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof WRITE_MODES)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:129` |
-| `byWriteMode[].byEvidence` | `object` | Sí | — | — | Cuántas de ellas con cada nivel de evidencia. | `src/modules/system_ops/mutability/dto/mutability.dto.ts:132` |
+| `byWriteMode[].numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `byWriteMode[].denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `byWriteMode[].writeMode` | `string` | Sí | valores: APPEND_ONLY, APPEND_ONLY_PURGEABLE, LIFECYCLE_ONLY, UPDATABLE, UPDATABLE_DELETABLE, SOFT_DELETE, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:129` |
+| `byWriteMode[].byEvidence` | `object` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:132` |
 | `byEvidence` | `array<MutabilityLevelCountDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:153` |
-| `byEvidence[].level` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:136` |
+| `byEvidence[].numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `byEvidence[].denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `byEvidence[].level` | `string` | Sí | valores: ENFORCED_DB, ENFORCED_CODE, DECLARED_MODEL, DECLARED_DOC, INFERRED, UNKNOWN | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:136` |
 | `decided` | `MutabilityRatioDto` | Sí | — | — | Tablas con modo distinto de UNKNOWN | `src/modules/system_ops/mutability/dto/mutability.dto.ts:158` |
-| `decided.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
-| `decided.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `decided.numerator` | `number` | Sí | — | — | — | sin fuente |
+| `decided.denominator` | `number` | Sí | — | — | — | sin fuente |
 | `enforcedByDatabase` | `MutabilityRatioDto` | Sí | — | — | Tablas con el modo impuesto por la base de datos | `src/modules/system_ops/mutability/dto/mutability.dto.ts:163` |
-| `enforcedByDatabase.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
-| `enforcedByDatabase.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `enforcedByDatabase.numerator` | `number` | Sí | — | — | — | sin fuente |
+| `enforcedByDatabase.denominator` | `number` | Sí | — | — | — | sin fuente |
 | `withContradictions` | `MutabilityRatioDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:165` |
 | `withContradictions.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
 | `withContradictions.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
@@ -2094,18 +2132,19 @@ La operación no recibe cuerpo.
 | `findingCodes[].kind` | `string` | Sí | valores: CONTRADICTION, GAP | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:141` |
 | `findingCodes[].findings` | `number` | Sí | — | — | Hallazgos con ese código | `src/modules/system_ops/mutability/dto/mutability.dto.ts:143` |
 | `findingCodes[].tables` | `number` | Sí | — | — | Tablas afectadas | `src/modules/system_ops/mutability/dto/mutability.dto.ts:144` |
-| `disposition` | `array<object>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:170` |
-| `legalHold` | `array<object>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:172` |
+| `disposition` | `array<MutabilityRatioDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:170` |
+| `disposition[].numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `disposition[].denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `legalHold` | `array<MutabilityRatioDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:172` |
+| `legalHold[].numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `legalHold[].denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
 | `withDeclaredPeriod` | `number` | Sí | — | — | Tablas con plazo declarado por una fuente | `src/modules/system_ops/mutability/dto/mutability.dto.ts:174` |
 | `pendingCompliance` | `number` | Sí | — | — | Tablas con retención aún PENDIENTE_DE_CUMPLIMIENTO | `src/modules/system_ops/mutability/dto/mutability.dto.ts:178` |
-| `registered` | `MutabilityRatioDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:180` |
-| `registered.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
-| `registered.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `registered` | `MutabilityRatioDto` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:180` |
+| `registered.numerator` | `number` | Sí | — | — | — | sin fuente |
+| `registered.denominator` | `number` | Sí | — | — | — | sin fuente |
 | `sources` | `object` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:182` |
 | `generatedFrom` | `object` | Sí | — | — | Desde qué fuentes se generó el catálogo | `src/modules/system_ops/mutability/dto/mutability.dto.ts:184` |
-| `generatedFrom.modelRoot` | `string` | Sí | — | — | — | sin fuente |
-| `generatedFrom.inventoryRoot` | `string` | Sí | — | — | — | sin fuente |
-| `generatedFrom.note` | `string` | Sí | — | — | — | sin fuente |
 
 ### Respuestas posibles
 
@@ -2554,7 +2593,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|
 | `system_ops.data_residency_policies` | ESCRIBE | CREA | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → ResidencyRepository.createPolicy | `src/modules/system_ops/repositories/residency.repository.ts:150` |
 | `system_ops.data_residency_policies` | LEE | LEE | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → ResidencyRepository.findPolicyByCode | `src/modules/system_ops/repositories/residency.repository.ts:30` |
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
 
 ### Cuerpo — DTO `CreateResidencyPolicyDto` · `application/json`
 
@@ -2632,8 +2671,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 27. GET /admin/governance/retention-executions
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Ejecuciones de políticas de retención: estado, tiempos y conteos
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2641,9 +2680,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+Ejecuciones de políticas de retención: estado, tiempos y conteos. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2671,7 +2710,13 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.pum
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `RetentionExecutionListQueryDto` | — |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `policyId` | query | No | `string` | Política de retención |
+| `entityRegistryId` | query | No | `string` | Entidad del registro |
+| `status` | query | No | `string` | — |
+| `from` | query | No | `string` | Registrada desde (ISO 8601, incluido) |
+| `to` | query | No | `string` | Registrada hasta (ISO 8601, excluido) |
 
 ### Cuerpo
 
@@ -2737,9 +2782,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createRetentionPolicy → GovernanceCatalogService.createRetentionPolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
-| `system_ops.retention_policies` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createRetentionPolicy → GovernanceCatalogService.createRetentionPolicy → GovernanceRepository.createRetentionPolicy | `src/modules/system_ops/repositories/governance.repository.ts:481` |
-| `system_ops.retention_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.createRetentionPolicy → GovernanceCatalogService.createRetentionPolicy → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:419` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createRetentionPolicy → GovernanceCatalogService.createRetentionPolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
+| `system_ops.retention_policies` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createRetentionPolicy → GovernanceCatalogService.createRetentionPolicy → GovernanceRepository.createRetentionPolicy | `src/modules/system_ops/repositories/governance.repository.ts:512` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.createRetentionPolicy → GovernanceCatalogService.createRetentionPolicy → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:450` |
 
 ### Cuerpo — DTO `CreateRetentionPolicyDto` · `application/json`
 
@@ -3170,9 +3215,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createWritePolicy → GovernanceCatalogService.createWritePolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
-| `system_ops.write_policies` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createWritePolicy → GovernanceCatalogService.createWritePolicy → GovernanceRepository.createWritePolicy | `src/modules/system_ops/repositories/governance.repository.ts:400` |
-| `system_ops.write_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.createWritePolicy → GovernanceCatalogService.createWritePolicy → GovernanceRepository.findWritePolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:326` |
+| `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createWritePolicy → GovernanceCatalogService.createWritePolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:615` |
+| `system_ops.write_policies` | ESCRIBE | CREA | DIRECTA | GovernanceCatalogController.createWritePolicy → GovernanceCatalogService.createWritePolicy → GovernanceRepository.createWritePolicy | `src/modules/system_ops/repositories/governance.repository.ts:431` |
+| `system_ops.write_policies` | LEE | LEE | DIRECTA | GovernanceCatalogController.createWritePolicy → GovernanceCatalogService.createWritePolicy → GovernanceRepository.findWritePolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:357` |
 
 ### Cuerpo — DTO `CreateWritePolicyDto` · `application/json`
 
@@ -3424,13 +3469,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `profiles.persons` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:235` |
 | `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findAnonymizationRuleById | `src/modules/system_ops/repositories/governance.repository.ts:31` |
 | `system_ops.entity_registry` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → GovernanceRepository.findEntityById | `src/modules/system_ops/repositories/governance.repository.ts:175` |
-| `system_ops.field_registry` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:276` |
 | `system_ops.legal_holds` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionRepository.countActiveHoldsForTarget | `src/modules/system_ops/repositories/retention-execution.repository.ts:104` |
 | `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionService.sweepBatch → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
 | `system_ops.record_revisions` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute | `src/modules/identity_assurance/services/identity-evidence-disposition.executor.ts:63` |
 | `system_ops.retention_executions` | ESCRIBE | ACTUALIZA | POR_TIPO | RetentionExecutionController.run → RetentionExecutionService.run | `src/modules/system_ops/services/retention-execution.service.ts:191` |
 | `system_ops.retention_executions` | ESCRIBE | CREA | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionRepository.createExecution | `src/modules/system_ops/repositories/retention-execution.repository.ts:45` |
-| `system_ops.retention_policies` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → GovernanceRepository.findRetentionPolicyById | `src/modules/system_ops/repositories/governance.repository.ts:433` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → GovernanceRepository.findRetentionPolicyById | `src/modules/system_ops/repositories/governance.repository.ts:464` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan | `src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:204` |
 
 ### Cuerpo — DTO `RunRetentionDto` · `application/json`

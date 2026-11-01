@@ -2,7 +2,7 @@
 
 # Catálogo del schema `audit`
 
-- **Tablas:** 133 · **Columnas:** 1343 (64 con descripción: 4.8 %) · **Índices:** 708
+- **Tablas:** 142 · **Columnas:** 1442 (64 con descripción: 4.4 %) · **Índices:** 762
 - **Dominio:** Auditoría y Reporting
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -28,11 +28,15 @@
 | [booking_policies_history](#booking_policies_history) | Preserva versiones o estados históricos de booking policies para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [campaigns_history](#campaigns_history) | Preserva versiones o estados históricos de campaigns para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [care_plans_history](#care_plans_history) | Preserva versiones o estados históricos de care plans para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
+| [care_space_blocks_history](#care_space_blocks_history) | Preserva versiones o estados históricos de los bloqueos de espacios para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
+| [care_space_category_periods_history](#care_space_category_periods_history) | Preserva versiones o estados históricos de los períodos de categoría de cama para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
 | [care_spaces_history](#care_spaces_history) | Preserva versiones o estados históricos de care spaces para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 11 | 6 | 3 | COINCIDE |
 | [care_teams_history](#care_teams_history) | Preserva versiones o estados históricos de care teams para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [catalog_products_history](#catalog_products_history) | Preserva versiones o estados históricos de catalog products para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [cds_rules_history](#cds_rules_history) | Preserva versiones o estados históricos de cds rules para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [certificates_history](#certificates_history) | Preserva versiones o estados históricos de certificates para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
+| [charge_captures_history](#charge_captures_history) | Preserva versiones o estados históricos de los cargos devengados por uso de espacio para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
+| [cleaning_orders_history](#cleaning_orders_history) | Preserva versiones o estados históricos de las órdenes de limpieza de espacios para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
 | [clinical_alerts_history](#clinical_alerts_history) | Preserva versiones o estados históricos de clinical alerts para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [clinical_note_headers_history](#clinical_note_headers_history) | Preserva versiones o estados históricos de clinical note headers para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [clinical_units_history](#clinical_units_history) | Preserva versiones o estados históricos de clinical units para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 11 | 6 | 3 | COINCIDE |
@@ -57,6 +61,7 @@
 | [document_records_history](#document_records_history) | Preserva versiones o estados históricos de document records para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [dsar_requests](#dsar_requests) | Gestiona solicitudes de derechos de titulares sobre sus datos, incluida su atención y resolución en el sistema médico. | 13 | 7 | 6 | COINCIDE |
 | [employment_records_history](#employment_records_history) | Preserva versiones o estados históricos de employment records para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
+| [encounter_locations_history](#encounter_locations_history) | Preserva versiones o estados históricos de las ubicaciones y camas asignadas a un encuentro para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
 | [enrollments_history](#enrollments_history) | Preserva versiones o estados históricos de enrollments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [event_subscriptions_history](#event_subscriptions_history) | Preserva versiones o estados históricos de event subscriptions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [federated_identities_history](#federated_identities_history) | Preserva versiones o estados históricos de federated identities para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -86,6 +91,8 @@
 | [message_templates_history](#message_templates_history) | Preserva versiones o estados históricos de message templates para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [moderation_decisions_history](#moderation_decisions_history) | Preserva versiones o estados históricos de moderation decisions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 1 | COINCIDE |
 | [moderation_events](#moderation_events) | Mantiene eventos de moderación de contenido para reconstruir revisiones y acciones de seguridad comunitaria. | 9 | 5 | 1 | COINCIDE |
+| [operating_room_block_series_history](#operating_room_block_series_history) | Preserva versiones o estados históricos de las series de bloques quirúrgicos para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
+| [operating_room_blocks_history](#operating_room_blocks_history) | Preserva versiones o estados históricos de los bloques quirúrgicos asignados a servicios o cirujanos para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
 | [opportunities_history](#opportunities_history) | Preserva versiones o estados históricos de opportunities para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [order_sets_history](#order_sets_history) | Preserva versiones o estados históricos de order sets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [organization_affiliations_history](#organization_affiliations_history) | Preserva versiones o estados históricos de organization affiliations para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -106,6 +113,7 @@
 | [pharmacovigilance_reports_history](#pharmacovigilance_reports_history) | Registra revisiones de reportes de farmacovigilancia junto con su operación, para seguir cambios en casos de seguridad asociados a productos farmacéuticos. | 10 | 5 | 0 | COINCIDE |
 | [pharmacy_inventory_access_log](#pharmacy_inventory_access_log) | Registra accesos al inventario de farmacia para auditar consultas y operaciones sobre existencias sanitarias. | 10 | 7 | 1 | COINCIDE |
 | [pharmacy_product_prices_history](#pharmacy_product_prices_history) | Preserva versiones o estados históricos de pharmacy product prices para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
+| [placement_incidents_history](#placement_incidents_history) | Preserva versiones o estados históricos de las excepciones de ubicación de pacientes para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
 | [positions_history](#positions_history) | Preserva versiones o estados históricos de positions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [practice_sites_history](#practice_sites_history) | Preserva versiones o estados históricos de practice sites para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 11 | 6 | 0 | COINCIDE |
 | [practices_history](#practices_history) | Preserva versiones o estados históricos de practices para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -131,6 +139,7 @@
 | [service_reviews_history](#service_reviews_history) | Preserva versiones o estados históricos de service reviews para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [shipments_history](#shipments_history) | Preserva versiones o estados históricos de shipments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [social_posts_history](#social_posts_history) | Preserva versiones o estados históricos de social posts para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
+| [space_tariffs_history](#space_tariffs_history) | Preserva versiones o estados históricos de las tarifas por uso de espacio para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia). | 11 | 6 | 0 | COINCIDE |
 | [subscription_plans_history](#subscription_plans_history) | Preserva versiones o estados históricos de subscription plans para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [subscriptions_history](#subscriptions_history) | Preserva versiones o estados históricos de subscriptions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [tenants_history](#tenants_history) | Preserva versiones o estados históricos de tenants para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
@@ -146,7 +155,7 @@
 
 ### Tablas sin relaciones dentro del schema
 
-`audit.accounts_history` · `audit.ad_accounts_history` · `audit.ad_creatives_history` · `audit.ad_experiments_history` · `audit.ad_sets_history` · `audit.ads_history` · `audit.agent_versions_history` · `audit.agents_history` · `audit.allergy_intolerances_history` · `audit.analytics_governance_log` · `audit.appointment_bookings_history` · `audit.assets_history` · `audit.audit_log` · `audit.automated_rules_history` · `audit.bills_history` · `audit.booking_policies_history` · `audit.campaigns_history` · `audit.care_plans_history` · `audit.care_spaces_history` · `audit.care_teams_history` · `audit.catalog_products_history` · `audit.cds_rules_history` · `audit.certificates_history` · `audit.clinical_alerts_history` · `audit.clinical_note_headers_history` · `audit.clinical_units_history` · `audit.comments_history` · `audit.conditions_history` · `audit.connected_accounts_history` · `audit.consents_history` · `audit.contacts_history` · `audit.contracts_history` · `audit.conversations_history` · `audit.coupons_history` · `audit.course_versions_history` · `audit.courses_history` · `audit.crm_accounts_history` · `audit.custom_audiences_history` · `audit.custom_conversions_history` · `audit.data_access_log` · `audit.delegated_access_audit_log` · `audit.departments_history` · `audit.diagnostic_reports_history` · `audit.diagnostic_study_prices_history` · `audit.document_records_history` · `audit.dsar_requests` · `audit.employment_records_history` · `audit.enrollments_history` · `audit.event_subscriptions_history` · `audit.federated_identities_history` · `audit.groups_history` · `audit.guardrail_policies_history` · `audit.health_practitioner_profiles_history` · `audit.identity_providers_history` · `audit.identity_verification_access_log` · `audit.imaging_studies_history` · `audit.inbound_messages_history` · `audit.informational_materials_history` · `audit.insurance_claims_history` · `audit.insurance_decision_access_log` · `audit.insurance_products_history` · `audit.integration_endpoints_history` · `audit.invoices_history` · `audit.journal_transactions_history` · `audit.journeys_history` · `audit.jurisdiction_authorizations_history` · `audit.liabilities_history` · `audit.loyalty_memberships_history` · `audit.loyalty_programs_history` · `audit.marketing_campaigns_history` · `audit.medical_visitors_history` · `audit.medication_requests_history` · `audit.message_retries_history` · `audit.message_templates_history` · `audit.moderation_decisions_history` · `audit.moderation_events` · `audit.opportunities_history` · `audit.order_sets_history` · `audit.organization_affiliations_history` · `audit.outbound_messages_history` · `audit.partnership_agreements_history` · `audit.partnerships_history` · `audit.patient_content_access_log` · `audit.patient_identity_links_history` · `audit.patient_profiles_history` · `audit.payment_intents_history` · `audit.payment_mandates_history` · `audit.payment_methods_history` · `audit.payment_transactions_history` · `audit.payouts_history` · `audit.pharma_lab_staff_history` · `audit.pharma_labs_history` · `audit.pharma_products_history` · `audit.pharmacovigilance_reports_history` · `audit.pharmacy_inventory_access_log` · `audit.pharmacy_product_prices_history` · `audit.positions_history` · `audit.practice_sites_history` · `audit.practices_history` · `audit.practitioner_role_assignments_history` · `audit.procedure_cases_history` · `audit.product_catalogs_history` · `audit.product_sets_history` · `audit.professional_credentials_history` · `audit.promotions_history` · `audit.provider_channel_configs_history` · `audit.provider_connections_history` · `audit.provider_protocol_configs_history` · `audit.provider_tenant_bindings_history` · `audit.public_profiles_history` · `audit.record_automations_history` · `audit.referral_programs_history` · `audit.referrals_history` · `audit.regulatory_documents_history` · `audit.report_definitions_history` · `audit.report_schedules_history` · `audit.schedule_templates_history` · `audit.segments_history` · `audit.service_reviews_history` · `audit.shipments_history` · `audit.social_posts_history` · `audit.subscription_plans_history` · `audit.subscriptions_history` · `audit.tenants_history` · `audit.test_cases_history` · `audit.test_suites_history` · `audit.topics_history` · `audit.trackable_subjects_history` · `audit.users_history` · `audit.verified_badges_history` · `audit.visit_requests_history` · `audit.wallets_history` · `audit.workflows_history`
+`audit.accounts_history` · `audit.ad_accounts_history` · `audit.ad_creatives_history` · `audit.ad_experiments_history` · `audit.ad_sets_history` · `audit.ads_history` · `audit.agent_versions_history` · `audit.agents_history` · `audit.allergy_intolerances_history` · `audit.analytics_governance_log` · `audit.appointment_bookings_history` · `audit.assets_history` · `audit.audit_log` · `audit.automated_rules_history` · `audit.bills_history` · `audit.booking_policies_history` · `audit.campaigns_history` · `audit.care_plans_history` · `audit.care_space_blocks_history` · `audit.care_space_category_periods_history` · `audit.care_spaces_history` · `audit.care_teams_history` · `audit.catalog_products_history` · `audit.cds_rules_history` · `audit.certificates_history` · `audit.charge_captures_history` · `audit.cleaning_orders_history` · `audit.clinical_alerts_history` · `audit.clinical_note_headers_history` · `audit.clinical_units_history` · `audit.comments_history` · `audit.conditions_history` · `audit.connected_accounts_history` · `audit.consents_history` · `audit.contacts_history` · `audit.contracts_history` · `audit.conversations_history` · `audit.coupons_history` · `audit.course_versions_history` · `audit.courses_history` · `audit.crm_accounts_history` · `audit.custom_audiences_history` · `audit.custom_conversions_history` · `audit.data_access_log` · `audit.delegated_access_audit_log` · `audit.departments_history` · `audit.diagnostic_reports_history` · `audit.diagnostic_study_prices_history` · `audit.document_records_history` · `audit.dsar_requests` · `audit.employment_records_history` · `audit.encounter_locations_history` · `audit.enrollments_history` · `audit.event_subscriptions_history` · `audit.federated_identities_history` · `audit.groups_history` · `audit.guardrail_policies_history` · `audit.health_practitioner_profiles_history` · `audit.identity_providers_history` · `audit.identity_verification_access_log` · `audit.imaging_studies_history` · `audit.inbound_messages_history` · `audit.informational_materials_history` · `audit.insurance_claims_history` · `audit.insurance_decision_access_log` · `audit.insurance_products_history` · `audit.integration_endpoints_history` · `audit.invoices_history` · `audit.journal_transactions_history` · `audit.journeys_history` · `audit.jurisdiction_authorizations_history` · `audit.liabilities_history` · `audit.loyalty_memberships_history` · `audit.loyalty_programs_history` · `audit.marketing_campaigns_history` · `audit.medical_visitors_history` · `audit.medication_requests_history` · `audit.message_retries_history` · `audit.message_templates_history` · `audit.moderation_decisions_history` · `audit.moderation_events` · `audit.operating_room_block_series_history` · `audit.operating_room_blocks_history` · `audit.opportunities_history` · `audit.order_sets_history` · `audit.organization_affiliations_history` · `audit.outbound_messages_history` · `audit.partnership_agreements_history` · `audit.partnerships_history` · `audit.patient_content_access_log` · `audit.patient_identity_links_history` · `audit.patient_profiles_history` · `audit.payment_intents_history` · `audit.payment_mandates_history` · `audit.payment_methods_history` · `audit.payment_transactions_history` · `audit.payouts_history` · `audit.pharma_lab_staff_history` · `audit.pharma_labs_history` · `audit.pharma_products_history` · `audit.pharmacovigilance_reports_history` · `audit.pharmacy_inventory_access_log` · `audit.pharmacy_product_prices_history` · `audit.placement_incidents_history` · `audit.positions_history` · `audit.practice_sites_history` · `audit.practices_history` · `audit.practitioner_role_assignments_history` · `audit.procedure_cases_history` · `audit.product_catalogs_history` · `audit.product_sets_history` · `audit.professional_credentials_history` · `audit.promotions_history` · `audit.provider_channel_configs_history` · `audit.provider_connections_history` · `audit.provider_protocol_configs_history` · `audit.provider_tenant_bindings_history` · `audit.public_profiles_history` · `audit.record_automations_history` · `audit.referral_programs_history` · `audit.referrals_history` · `audit.regulatory_documents_history` · `audit.report_definitions_history` · `audit.report_schedules_history` · `audit.schedule_templates_history` · `audit.segments_history` · `audit.service_reviews_history` · `audit.shipments_history` · `audit.social_posts_history` · `audit.space_tariffs_history` · `audit.subscription_plans_history` · `audit.subscriptions_history` · `audit.tenants_history` · `audit.test_cases_history` · `audit.test_suites_history` · `audit.topics_history` · `audit.trackable_subjects_history` · `audit.users_history` · `audit.verified_badges_history` · `audit.visit_requests_history` · `audit.wallets_history` · `audit.workflows_history`
 
 ## Fichas
 
@@ -1572,6 +1581,138 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 ---
 
+### care_space_blocks_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de los bloqueos de espacios para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: care_space_blocks_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `CareSpaceBlocksHistory` — `src/modules/audit/entities/care_space_blocks_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `care_space_block_id` | `uuid` | Clave foránea → practice.care_space_blocks.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | care_space_block_id | practice.care_space_blocks (id) | fk_care_space_blocks_history_care_space_block_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_care_space_blocks_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_care_space_blocks_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_care_space_blocks_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_care_space_blocks_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_care_space_blocks_history_care_space_block_id` | no | care_space_block_id | Soporta la clave foránea fk_care_space_blocks_history_care_space_block_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_blocks_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_care_space_blocks_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_blocks_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_care_space_blocks_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_blocks_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_care_space_blocks_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_blocks_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_space_blocks_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_care_space_blocks_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### care_space_category_periods_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de los períodos de categoría de cama para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: care_space_category_periods_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `CareSpaceCategoryPeriodsHistory` — `src/modules/audit/entities/care_space_category_periods_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `care_space_category_period_id` | `uuid` | Clave foránea → practice.care_space_category_periods.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | care_space_category_period_id | practice.care_space_category_periods (id) | fk_care_space_category_periods_history_care_space_cate_9048acce |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_care_space_category_periods_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_care_space_category_periods_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_care_space_category_periods_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_care_space_category_periods_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_care_space_category_periods_history_care_space_cate_fc6e2c97` | no | care_space_category_period_id | Soporta la clave foránea fk_care_space_category_periods_history_care_space_cate_9048acce: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_category_periods_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_care_space_category_periods_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_category_periods_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_care_space_category_periods_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_category_periods_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_care_space_category_periods_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_space_category_periods_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_space_category_periods_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_care_space_category_periods_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### care_spaces_history
 
 #### Vista general
@@ -1875,6 +2016,138 @@ Preserva versiones o estados históricos de certificates para reconstruir cambio
 | `ix_certificates_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_certificates_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_certificates_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_certificates_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `brin_certificates_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### charge_captures_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de los cargos devengados por uso de espacio para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: charge_captures_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `ChargeCapturesHistory` — `src/modules/audit/entities/charge_captures_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `charge_capture_id` | `uuid` | Clave foránea → billing.charge_captures.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | charge_capture_id | billing.charge_captures (id) | fk_charge_captures_history_charge_capture_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_charge_captures_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_charge_captures_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_charge_captures_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_charge_captures_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_charge_captures_history_charge_capture_id` | no | charge_capture_id | Soporta la clave foránea fk_charge_captures_history_charge_capture_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_charge_captures_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_charge_captures_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_charge_captures_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_charge_captures_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_charge_captures_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_charge_captures_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### cleaning_orders_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de las órdenes de limpieza de espacios para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: cleaning_orders_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `CleaningOrdersHistory` — `src/modules/audit/entities/cleaning_orders_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `cleaning_order_id` | `uuid` | Clave foránea → practice.cleaning_orders.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | cleaning_order_id | practice.cleaning_orders (id) | fk_cleaning_orders_history_cleaning_order_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_cleaning_orders_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_cleaning_orders_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_cleaning_orders_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_cleaning_orders_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_cleaning_orders_history_cleaning_order_id` | no | cleaning_order_id | Soporta la clave foránea fk_cleaning_orders_history_cleaning_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cleaning_orders_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_cleaning_orders_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cleaning_orders_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_cleaning_orders_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cleaning_orders_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_cleaning_orders_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cleaning_orders_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_cleaning_orders_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_cleaning_orders_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
@@ -3458,6 +3731,72 @@ Preserva versiones o estados históricos de employment records para reconstruir 
 | `ix_employment_records_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_employment_records_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_employment_records_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_employment_records_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `brin_employment_records_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### encounter_locations_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de las ubicaciones y camas asignadas a un encuentro para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: encounter_locations_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `EncounterLocationsHistory` — `src/modules/audit/entities/encounter_locations_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `encounter_location_id` | `uuid` | Clave foránea → clinical.encounter_locations.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | encounter_location_id | clinical.encounter_locations (id) | fk_encounter_locations_history_encounter_location_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_encounter_locations_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_encounter_locations_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_encounter_locations_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_encounter_locations_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_encounter_locations_history_encounter_location_id` | no | encounter_location_id | Soporta la clave foránea fk_encounter_locations_history_encounter_location_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_encounter_locations_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_encounter_locations_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_encounter_locations_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_encounter_locations_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_encounter_locations_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_encounter_locations_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_encounter_locations_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_encounter_locations_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_encounter_locations_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
@@ -5351,6 +5690,138 @@ Mantiene eventos de moderación de contenido para reconstruir revisiones y accio
 
 ---
 
+### operating_room_block_series_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de las series de bloques quirúrgicos para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: operating_room_block_series_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `OperatingRoomBlockSeriesHistory` — `src/modules/audit/entities/operating_room_block_series_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `operating_room_block_series_id` | `uuid` | Clave foránea → procedures_perioperative.operating_room_block_series.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | operating_room_block_series_id | procedures_perioperative.operating_room_block_series (id) | fk_operating_room_block_series_history_operating_room__9ea3a62d |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_operating_room_block_series_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_operating_room_block_series_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_operating_room_block_series_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_operating_room_block_series_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_operating_room_block_series_history_operating_room__bd611718` | no | operating_room_block_series_id | Soporta la clave foránea fk_operating_room_block_series_history_operating_room__9ea3a62d: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_block_series_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_operating_room_block_series_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_block_series_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_operating_room_block_series_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_block_series_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_operating_room_block_series_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_block_series_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_operating_room_block_series_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_operating_room_block_series_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### operating_room_blocks_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de los bloques quirúrgicos asignados a servicios o cirujanos para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: operating_room_blocks_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `OperatingRoomBlocksHistory` — `src/modules/audit/entities/operating_room_blocks_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `operating_room_block_id` | `uuid` | Clave foránea → procedures_perioperative.operating_room_blocks.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | operating_room_block_id | procedures_perioperative.operating_room_blocks (id) | fk_operating_room_blocks_history_operating_room_block_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_operating_room_blocks_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_operating_room_blocks_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_operating_room_blocks_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_operating_room_blocks_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_operating_room_blocks_history_operating_room_block_id` | no | operating_room_block_id | Soporta la clave foránea fk_operating_room_blocks_history_operating_room_block_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_blocks_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_operating_room_blocks_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_blocks_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_operating_room_blocks_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_blocks_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_operating_room_blocks_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_operating_room_blocks_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_operating_room_blocks_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_operating_room_blocks_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### opportunities_history
 
 #### Vista general
@@ -6610,6 +7081,72 @@ Preserva versiones o estados históricos de pharmacy product prices para reconst
 | `ix_pharmacy_product_prices_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_pharmacy_product_prices_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gist_pharmacy_product_prices_history_effective_period` | no | (tstzrange(valid_from, valid_to, '[)')) | GiST para periodos, no solapamiento y geografía _(DOCUMENTO)_ |
 | `brin_pharmacy_product_prices_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### placement_incidents_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de las excepciones de ubicación de pacientes para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: placement_incidents_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `PlacementIncidentsHistory` — `src/modules/audit/entities/placement_incidents_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `placement_incident_id` | `uuid` | Clave foránea → clinical.placement_incidents.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | placement_incident_id | clinical.placement_incidents (id) | fk_placement_incidents_history_placement_incident_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_placement_incidents_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_placement_incidents_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_placement_incidents_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_placement_incidents_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_placement_incidents_history_placement_incident_id` | no | placement_incident_id | Soporta la clave foránea fk_placement_incidents_history_placement_incident_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_placement_incidents_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_placement_incidents_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_placement_incidents_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_placement_incidents_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_placement_incidents_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_placement_incidents_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_placement_incidents_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_placement_incidents_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_placement_incidents_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
@@ -8191,6 +8728,72 @@ Preserva versiones o estados históricos de social posts para reconstruir cambio
 | `ix_social_posts_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_social_posts_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_social_posts_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_social_posts_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `brin_social_posts_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | sí (declarado) | `src/modules/audit/README.md:93` |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### space_tariffs_history
+
+#### Vista general
+
+Preserva versiones o estados históricos de las tarifas por uso de espacio para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico (sólo inserción y cierre de vigencia).
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: space_tariffs_history`
+- **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
+- **Entidad del ORM:** `SpaceTariffsHistory` — `src/modules/audit/entities/space_tariffs_history.entity.ts`
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `history_id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `space_tariff_id` | `uuid` | Clave foránea → billing.space_tariffs.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `revision_no` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `operation_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 7 | `data_snapshot` | `jsonb` | Obligatoria | _sin dato_ | coincide |
+| 8 | `changed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `change_reason_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `recorded_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | space_tariff_id | billing.space_tariffs (id) | fk_space_tariffs_history_space_tariff_id |
+| hacia | operation_concept_id | terminology.catalog_concepts (id) | fk_space_tariffs_history_operation_concept_id |
+| hacia | changed_by_user_id | iam.users (id) | fk_space_tariffs_history_changed_by_user_id |
+| hacia | change_reason_concept_id | terminology.catalog_concepts (id) | fk_space_tariffs_history_change_reason_concept_id |
+| hacia | tenant_id | directory.tenants (id) | fk_space_tariffs_history_tenant_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_space_tariffs_history_space_tariff_id` | no | space_tariff_id | Soporta la clave foránea fk_space_tariffs_history_space_tariff_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_space_tariffs_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_space_tariffs_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_space_tariffs_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_tariffs_history_tenant_id` | no | tenant_id | Soporta la clave foránea fk_space_tariffs_history_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `brin_space_tariffs_history_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 

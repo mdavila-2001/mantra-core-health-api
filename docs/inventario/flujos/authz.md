@@ -52,7 +52,7 @@ _Fuente: `src/modules/authz/README.md:3`_
 |  |  | GET /authz/users/{userId}/resource-scope-grants | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /authz/users/{userId}/restricted-fields | SECURITY_ADMIN | BAJO | 4 |
 | `ctrl:AuthzGovernanceExtController` | Operaciones de AuthzGovernanceExtController que el README no asigna a un caso de uso | GET /authz/resource-scope-grants | SECURITY_ADMIN | BAJO | 1 |
-|  |  | DELETE /authz/resource-scope-grants/{grantId} | SECURITY_ADMIN | MEDIO | 2 |
+|  |  | DELETE /authz/resource-scope-grants/{grantId} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | GET /authz/roles/{roleId}/field-permissions | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:AuthzGrantsController` | Operaciones de AuthzGrantsController que el README no asigna a un caso de uso | POST /authz/resource-scope-grants | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /authz/users/{userId}/permission-grants | SECURITY_ADMIN | MEDIO | 3 |
@@ -235,7 +235,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a36(["PATIENT"]):::actor
+  a37(["PATIENT"]):::actor
   t3[("audit.audit_log")]:::tabla
   t4[("iam.users")]:::tabla
   t6[("authz.user_role_assignments")]:::tabla
@@ -251,9 +251,10 @@ flowchart LR
   t19[("authz.field_permissions")]:::tabla
   t20[("authz.patient_legal_representations")]:::tabla
   t25[("iam.sessions")]:::tabla
-  t37[("profiles.patient_profiles")]:::tabla
-  t38[("profiles.person_account_links")]:::tabla
-  t39[("profiles.persons")]:::tabla
+  t31[("iam.security_events")]:::tabla
+  t38[("profiles.patient_profiles")]:::tabla
+  t39[("profiles.person_account_links")]:::tabla
+  t40[("profiles.persons")]:::tabla
   t14[("+1 tablas más")]
   t21[("+6 tablas más")]
   t23[("+2 tablas más")]
@@ -271,28 +272,28 @@ flowchart LR
   subgraph s1["ctrl:AuthzGovernanceExtController · Operaciones de AuthzGovernanceExtController…"]
     o29["GET /authz/resource-scope-grants"]:::op
     o30["DELETE /authz/resource-scope-grants/{grantId}"]:::op
-    o31["GET /authz/roles/{roleId}/field-permissions"]:::op
+    o32["GET /authz/roles/{roleId}/field-permissions"]:::op
   end
   subgraph s2["ctrl:AuthzGrantsController · Operaciones de AuthzGrantsController que el README…"]
-    o32["POST /authz/resource-scope-grants"]:::op
-    o33["POST /authz/users/{userId}/permission-grants"]:::op
-    o34["POST /authz/users/{userId}/role-assignments"]:::op
+    o33["POST /authz/resource-scope-grants"]:::op
+    o34["POST /authz/users/{userId}/permission-grants"]:::op
+    o35["POST /authz/users/{userId}/role-assignments"]:::op
   end
   subgraph s3["ctrl:AuthzMeController · Operaciones de AuthzMeController que el README no asig…"]
-    o35["GET /authz/me/access"]:::op
-    o40["POST /authz/me/care-relationships/{id}/revoke"]:::op
-    o41["POST /authz/me/clinical-access-grants/{grantId}/revoke"]:::op
+    o36["GET /authz/me/access"]:::op
+    o41["POST /authz/me/care-relationships/{id}/revoke"]:::op
+    o42["POST /authz/me/clinical-access-grants/{grantId}/revoke"]:::op
   end
   subgraph s4["ctrl:AuthzModulesCatalogController · Operaciones de AuthzModulesCatalogControll…"]
-    o42["GET /authz/catalog/modules"]:::op
+    o43["GET /authz/catalog/modules"]:::op
   end
-  t44[("+5 tablas más")]
+  t45[("+5 tablas más")]
   subgraph s5["ctrl:AuthzPdpController · Operaciones de AuthzPdpController que el README no as…"]
-    o43["POST /authz/decisions/evaluate"]:::op
-    o45["POST /authz/pdp/cache/invalidate"]:::op
+    o44["POST /authz/decisions/evaluate"]:::op
+    o46["POST /authz/pdp/cache/invalidate"]:::op
   end
   subgraph s6["ctrl:AuthzPoliciesController · Operaciones de AuthzPoliciesController que el RE…"]
-    o46["POST /authz/tenants/{tenantId}/access-policies"]:::op
+    o47["POST /authz/tenants/{tenantId}/access-policies"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -349,54 +350,55 @@ flowchart LR
   a2 --> o30
   o30 -->|"ACTUALIZA"| t10
   o30 -->|"LEE"| t10
-  a2 --> o31
-  o31 -->|"LEE"| t19
-  o31 -->|"LEE"| t12
+  o30 -->|"CREA"| t31
   a2 --> o32
-  o32 -->|"LEE"| t9
-  o32 -->|"CREA"| t10
-  o32 -->|"LEE"| t10
+  o32 -->|"LEE"| t19
+  o32 -->|"LEE"| t12
   a2 --> o33
   o33 -->|"LEE"| t9
-  o33 -->|"CREA"| t13
-  o33 -->|"LEE"| t13
+  o33 -->|"CREA"| t10
+  o33 -->|"LEE"| t10
   a2 --> o34
-  o34 -->|"LEE"| t12
-  o34 -->|"CREA"| t6
-  o34 -->|"LEE"| t6
-  a36 --> o35
-  o35 -->|"LEE"| t17
-  o35 -->|"LEE"| t18
-  o35 -->|"LEE"| t37
-  o35 -->|"LEE"| t38
-  o35 -->|"LEE"| t39
-  a36 --> o40
-  o40 -->|"LEE"| t17
-  o40 -->|"LEE"| t37
-  o40 -->|"LEE"| t38
-  a36 --> o41
-  o41 -->|"CREA"| t3
-  o41 -->|"LEE"| t3
-  o41 -->|"LEE"| t18
-  o41 -->|"LEE"| t25
-  o41 -->|"LEE"| t37
+  o34 -->|"LEE"| t9
+  o34 -->|"CREA"| t13
+  o34 -->|"LEE"| t13
+  a2 --> o35
+  o35 -->|"LEE"| t12
+  o35 -->|"CREA"| t6
+  o35 -->|"LEE"| t6
+  a37 --> o36
+  o36 -->|"LEE"| t17
+  o36 -->|"LEE"| t18
+  o36 -->|"LEE"| t38
+  o36 -->|"LEE"| t39
+  o36 -->|"LEE"| t40
+  a37 --> o41
+  o41 -->|"LEE"| t17
   o41 -->|"LEE"| t38
-  a2 --> o42
-  o42 -->|"LEE"| t9
-  o42 -->|"LEE"| t11
-  o42 -->|"LEE"| t12
+  o41 -->|"LEE"| t39
+  a37 --> o42
+  o42 -->|"CREA"| t3
+  o42 -->|"LEE"| t3
+  o42 -->|"LEE"| t18
+  o42 -->|"LEE"| t25
+  o42 -->|"LEE"| t38
+  o42 -->|"LEE"| t39
   a2 --> o43
-  o43 -->|"LEE"| t16
-  o43 -->|"LEE"| t17
-  o43 -->|"LEE"| t18
-  o43 -->|"LEE"| t19
-  o43 -->|"LEE"| t20
   o43 -->|"LEE"| t9
-  o43 -.-> t44
-  a2 --> o45
+  o43 -->|"LEE"| t11
+  o43 -->|"LEE"| t12
+  a2 --> o44
+  o44 -->|"LEE"| t16
+  o44 -->|"LEE"| t17
+  o44 -->|"LEE"| t18
+  o44 -->|"LEE"| t19
+  o44 -->|"LEE"| t20
+  o44 -->|"LEE"| t9
+  o44 -.-> t45
   a2 --> o46
-  o46 -->|"CREA"| t16
-  o46 -->|"LEE"| t16
+  a2 --> o47
+  o47 -->|"CREA"| t16
+  o47 -->|"LEE"| t16
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1904,11 +1906,12 @@ flowchart TD
 
 #### 20. DELETE /authz/resource-scope-grants/{grantId}
 
-
+Terminar la vigencia de un permiso por alcance de recurso
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: {NOT_FOUND.message} |
@@ -1919,7 +1922,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a AuthzGovernanceExtService.endResourceScopeGrant"]:::llamada
   n2 --> n3
@@ -1941,8 +1944,10 @@ flowchart TD
   n10 --> n11
   n12(["409 CONFLICT El permiso por alcance ya terminó su vigencia"]):::error
   n11 -->|"sí"| n12
-  n13(("200 Responde con éxito")):::ok
+  n13[("CREA iam.security_events")]:::efecto
   n11 -->|"no"| n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2013,7 +2018,7 @@ flowchart TD
 
 #### 22. GET /authz/roles/{roleId}/field-permissions
 
-
+Reglas de enmascaramiento de campos de un rol
 
 | HTTP | Código | Cuándo |
 |---|---|---|
