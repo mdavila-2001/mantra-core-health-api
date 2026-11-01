@@ -125,8 +125,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/admissions.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -186,8 +186,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -310,9 +310,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -553,11 +553,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -840,11 +840,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1150,9 +1150,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, fileId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1237,9 +1237,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, fileId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1325,11 +1325,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, itemId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1613,11 +1613,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1890,11 +1890,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2188,11 +2188,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2455,11 +2455,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2756,11 +2756,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3050,8 +3050,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3141,10 +3141,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3287,8 +3287,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:782` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3371,11 +3371,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3500,8 +3500,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:309` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3510,9 +3510,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.identifiers` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:166` |
 | `profiles.patient_profiles` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:190` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -3593,10 +3593,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:444` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3673,6 +3673,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 | INTEGRACION | `test/integration/fx11-notas-de-evolucion-coleccion.int-spec.ts:107` |
 | INTEGRACION | `test/integration/fx15-documentos-del-expediente.int-spec.ts:108` |
 | INTEGRACION | `test/integration/identity-verification-cycle.int-spec.ts:48` |
+| INTEGRACION | `test/integration/infrastructure-admission-footprint.int-spec.ts:46` |
 | INTEGRACION | `test/integration/lab-booking-relevamiento.int-spec.ts:55` |
 | CONTROLADOR | `src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts:73` |
 
@@ -3707,9 +3708,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3812,11 +3813,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -3929,11 +3930,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4047,11 +4048,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4164,8 +4165,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4330,10 +4331,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4578,8 +4579,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4657,10 +4658,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4772,9 +4773,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4860,11 +4861,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -4979,9 +4980,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5065,7 +5066,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 30, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:117` |
 
 ### Tablas que afecta
@@ -5145,8 +5146,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
 
@@ -5255,11 +5256,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
-| CUERPO | application/json; máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json; máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5368,9 +5369,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5460,8 +5461,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:142` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5533,8 +5534,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:223` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5617,10 +5618,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5636,9 +5637,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → RelatedPersonsRepository.create | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:68` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.registerOwnDependent → ProfilesPatientsService.registerOwnDependent → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Cuerpo — DTO `CreateDependentDto` · `application/json`
 
@@ -5753,8 +5754,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:201` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -5917,10 +5918,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6106,8 +6107,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6179,8 +6180,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6253,10 +6254,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6352,8 +6353,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6429,10 +6430,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:497` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6539,8 +6540,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:406` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6619,11 +6620,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: eventId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6727,10 +6728,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:378` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6739,9 +6740,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `common.identifiers` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:166` |
 | `profiles.patient_profiles` | LEE | LEE | POR_SQL | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PatientProfilesRepository.searchPage | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:190` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPatientsController.searchPatientsByBody → ProfilesPatientsController.searchPatients → ProfilesPatientsService.searchPatients → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Cuerpo — DTO `SearchPatientsQueryDto` · `application/json`
 
@@ -6839,11 +6840,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -6946,11 +6947,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -7053,8 +7054,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -7167,10 +7168,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -7208,9 +7209,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Cuerpo — DTO `CreatePractitionerDto` · `application/json`
 
@@ -7337,11 +7338,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -7371,9 +7372,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfessionalCredentialsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:180` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -7649,11 +7650,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -7673,17 +7674,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.findSite | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:19` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.findSite | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:74` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:340` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:342` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:339` |
+| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:341` |
 | `profiles.practitioner_affiliations` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → PractitionerAffiliationsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:294` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → PractitionerAffiliationsRepository.findSame | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:254` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify | `src/modules/profiles/application/services/profiles-affiliations.service.ts:622` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify | `src/modules/profiles/application/services/profiles-affiliations.service.ts:624` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -7797,11 +7798,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -7917,9 +7918,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -8122,11 +8123,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -8352,11 +8353,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -8368,9 +8369,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_specialties` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → PractitionerSpecialtiesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:61` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → ProfessionalCredentialsRepository.findById | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:93` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addSpecialty → ProfilesPractitionersService.addSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -8470,9 +8471,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -8676,10 +8677,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -8709,9 +8710,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfessionalCredentialsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:180` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → AdministrativeAreaCatalogService.assertIsAdministrativeArea → AdministrativeAreaCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Cuerpo — DTO `UpdateOwnPractitionerProfileDto` · `application/json`
 
@@ -8982,8 +8983,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9087,10 +9088,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9242,8 +9243,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9365,8 +9366,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:446` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9447,10 +9448,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9470,17 +9471,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.findSite | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:19` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.findSite | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:74` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:340` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:342` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:339` |
+| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:341` |
 | `profiles.practitioner_affiliations` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → PractitionerAffiliationsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:294` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → PractitionerAffiliationsRepository.findSame | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:254` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify | `src/modules/profiles/application/services/profiles-affiliations.service.ts:622` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify | `src/modules/profiles/application/services/profiles-affiliations.service.ts:624` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → HealthFacilityCatalogService.assertIsHealthFacility → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Cuerpo — DTO `ProfilesCreateAffiliationDto` · `application/json`
 
@@ -9590,9 +9591,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9665,11 +9666,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9785,10 +9786,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:535` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9909,9 +9910,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -9985,11 +9986,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10101,9 +10102,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10179,11 +10180,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10283,8 +10284,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:414` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10292,9 +10293,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → ProfilesTerminologyAdapter.search → CatalogConceptsRepository.search | `src/modules/terminology/repositories/catalog-concepts.repository.ts:257` |
 | `terminology.concept_properties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.narrowByMunicipality → ProfilesTerminologyAdapter.findPropertyForConcepts → ConceptDesignationsRepository.findPropertyForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:200` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.registerMembers → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.registerMembers → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.registerMembers → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.registerMembers → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.registerMembers → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.searchLinkableOrganizations → LinkableOrganizationsService.search → LinkableOrganizationsService.registerMembers → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -10368,8 +10369,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10448,8 +10449,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10532,8 +10533,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10603,10 +10604,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10700,9 +10701,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10776,11 +10777,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10790,9 +10791,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2670` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → PractitionerSpecialtiesRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:101` |
-| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
-| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
-| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:438` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:612` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:121` |
 
 ### Parámetros
 
@@ -10878,9 +10879,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -10962,8 +10963,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -11163,8 +11164,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -11233,18 +11234,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:58` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.findSitesByTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:23` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:340` |
-| `profiles.persons` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:339` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.findSitesByTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:78` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:342` |
+| `profiles.persons` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:341` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → PractitionerAffiliationsRepository.findBySites | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:159` |
 
 ### Parámetros
@@ -11322,9 +11323,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -11345,9 +11346,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → AffiliationOrganizationsAdapter.findSiteForTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:31` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → AffiliationOrganizationsAdapter.findSiteForTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:86` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide | `src/modules/profiles/application/services/profiles-affiliations.service.ts:512` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide | `src/modules/profiles/application/services/profiles-affiliations.service.ts:514` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → PractitionerAffiliationsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:193` |
 
 ### Parámetros
@@ -11416,11 +11417,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -11441,9 +11442,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → AffiliationOrganizationsAdapter.findSiteForTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:31` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → AffiliationOrganizationsAdapter.findSiteForTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:86` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide | `src/modules/profiles/application/services/profiles-affiliations.service.ts:512` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide | `src/modules/profiles/application/services/profiles-affiliations.service.ts:514` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → PractitionerAffiliationsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:193` |
 
 ### Parámetros
@@ -11528,11 +11529,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -11553,9 +11554,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → AffiliationOrganizationsAdapter.findSiteForTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:31` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → AffiliationOrganizationsAdapter.findSiteForTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:86` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide | `src/modules/profiles/application/services/profiles-affiliations.service.ts:512` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide | `src/modules/profiles/application/services/profiles-affiliations.service.ts:514` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → PractitionerAffiliationsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:193` |
 
 ### Parámetros

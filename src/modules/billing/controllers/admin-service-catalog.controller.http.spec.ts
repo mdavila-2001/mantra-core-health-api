@@ -51,6 +51,7 @@ const item = (over: Record<string, unknown> = {}) => ({
 describe('HTTP de /admin/catalogs/services', () => {
   let app: INestApplication;
   const service = {
+    scopes: jest.fn<(...a: unknown[]) => Promise<unknown>>(),
     list: jest.fn<(...a: unknown[]) => Promise<unknown>>(),
     get: jest.fn<(...a: unknown[]) => Promise<unknown>>(),
     create: jest.fn<(...a: unknown[]) => Promise<unknown>>(),
@@ -93,6 +94,11 @@ describe('HTTP de /admin/catalogs/services', () => {
 
   describe('autorización (sin token, rol insuficiente)', () => {
     const calls: Array<[string, string, (a?: string) => request.Test]> = [
+      [
+        'GET scopes',
+        'scopes',
+        (a) => auth(http().get('/admin/catalogs/services/scopes'), a),
+      ],
       [
         'GET lista',
         'list',
@@ -184,6 +190,35 @@ describe('HTTP de /admin/catalogs/services', () => {
         .expect(200);
       await http()
         .get('/admin/catalogs/services')
+        .set('Authorization', bearer(['SUPERADMIN']))
+        .expect(200);
+    });
+  });
+
+  describe('scopes', () => {
+    it('`scopes` se resuelve antes que `:id` (no se lee como identificador)', async () => {
+      service.scopes.mockResolvedValue({
+        types: [],
+        practices: [],
+        currencies: [],
+      });
+      const res = await http()
+        .get('/admin/catalogs/services/scopes')
+        .set('Authorization', bearer(['SECURITY_ADMIN']))
+        .expect(200);
+      expect(res.body).toEqual({ types: [], practices: [], currencies: [] });
+      expect(service.scopes).toHaveBeenCalledTimes(1);
+      expect(service.get).not.toHaveBeenCalled();
+    });
+
+    it('SUPERADMIN entra por comodín', async () => {
+      service.scopes.mockResolvedValue({
+        types: [],
+        practices: [],
+        currencies: [],
+      });
+      await http()
+        .get('/admin/catalogs/services/scopes')
         .set('Authorization', bearer(['SUPERADMIN']))
         .expect(200);
     });

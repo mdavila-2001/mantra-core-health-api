@@ -3,12 +3,12 @@
 # Flujos del módulo `medical_groups`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 9 (9 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 14 (14 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [medical_groups](../endpoints/medical_groups.md)
 
 ## Proceso: Módulo Medical Groups — Grupos médicos (FT-21)
 
-- **Código:** `medical_groups` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 9
+- **Código:** `medical_groups` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 14
 - **Actores:** CLINICIAN · PRACTITIONER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/medical_groups/README.md`
@@ -25,8 +25,13 @@ _Fuente: `src/modules/medical_groups/README.md:3`_
 |---|---|---|---|---|---|
 | `ctrl:MedicalGroupsController` | Operaciones de MedicalGroupsController que el README no asigna a un caso de uso | GET /medical-groups | PRACTITIONER · CLINICIAN | BAJO | 5 |
 |  |  | POST /medical-groups | PRACTITIONER · CLINICIAN | MEDIO | 27 |
+|  |  | DELETE /medical-groups/{id} | PRACTITIONER · CLINICIAN | ALTO | 6 |
 |  |  | GET /medical-groups/{id} | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | PATCH /medical-groups/{id} | PRACTITIONER · CLINICIAN | MEDIO | 7 |
 |  |  | PATCH /medical-groups/{id}/exercise-notes | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | POST /medical-groups/{id}/members | PRACTITIONER · CLINICIAN | MEDIO | 10 |
+|  |  | DELETE /medical-groups/{id}/members/{memberId} | PRACTITIONER · CLINICIAN | ALTO | 8 |
+|  |  | PATCH /medical-groups/{id}/members/{memberId} | PRACTITIONER · CLINICIAN | MEDIO | 7 |
 |  |  | POST /medical-groups/{id}/members/{memberId}/respond | PRACTITIONER · CLINICIAN | MEDIO | 7 |
 |  |  | POST /medical-groups/{id}/reschedule-requests | PRACTITIONER · CLINICIAN | MEDIO | 6 |
 |  |  | POST /medical-groups/{id}/reschedule-requests/respond | PRACTITIONER · CLINICIAN | MEDIO | 6 |
@@ -49,21 +54,30 @@ flowchart LR
   t12[("authz.field_permissions")]:::tabla
   t13[("authz.patient_legal_representations")]:::tabla
   t14[("authz.permissions")]:::tabla
+  t17[("practice.practitioner_role_assignments")]:::tabla
   t23[("practice.practices")]:::tabla
-  t24[("practice.practitioner_role_assignments")]:::tabla
   t15[("+21 tablas más")]
-  t19[("+1 tablas más")]
-  t26[("+14 tablas más")]
+  t20[("+1 tablas más")]
+  t24[("+4 tablas más")]
+  t26[("+2 tablas más")]
+  t28[("+1 tablas más")]
+  t30[("+1 tablas más")]
+  t35[("+14 tablas más")]
   subgraph s0["ctrl:MedicalGroupsController · Operaciones de MedicalGroupsController que el RE…"]
     o1["GET /medical-groups"]:::op
     o8["POST /medical-groups"]:::op
-    o16["GET /medical-groups/{id}"]:::op
-    o17["PATCH /medical-groups/{id}/exercise-notes"]:::op
-    o18["POST /medical-groups/{id}/members/{memberId}/respond"]:::op
-    o20["POST /medical-groups/{id}/reschedule-requests"]:::op
-    o21["POST /medical-groups/{id}/reschedule-requests/respond"]:::op
-    o22["GET /medical-groups/eligible-members"]:::op
-    o25["GET /medical-groups/patients/{patientProfileId}/conditions"]:::op
+    o16["DELETE /medical-groups/{id}"]:::op
+    o18["GET /medical-groups/{id}"]:::op
+    o19["PATCH /medical-groups/{id}"]:::op
+    o21["PATCH /medical-groups/{id}/exercise-notes"]:::op
+    o22["POST /medical-groups/{id}/members"]:::op
+    o25["DELETE /medical-groups/{id}/members/{memberId}"]:::op
+    o27["PATCH /medical-groups/{id}/members/{memberId}"]:::op
+    o29["POST /medical-groups/{id}/members/{memberId}/respond"]:::op
+    o31["POST /medical-groups/{id}/reschedule-requests"]:::op
+    o32["POST /medical-groups/{id}/reschedule-requests/respond"]:::op
+    o33["GET /medical-groups/eligible-members"]:::op
+    o34["GET /medical-groups/patients/{patientProfileId}/conditions"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -80,34 +94,27 @@ flowchart LR
   o8 -->|"LEE"| t14
   o8 -.-> t15
   a2 --> o16
-  o16 -->|"LEE"| t3
+  o16 -->|"BORRA"| t4
   o16 -->|"LEE"| t4
+  o16 -->|"BORRA"| t5
   o16 -->|"ACTUALIZA"| t5
   o16 -->|"LEE"| t5
-  o16 -->|"LEE"| t6
-  o16 -->|"LEE"| t7
-  a2 --> o17
-  o17 -->|"LEE"| t3
-  o17 -->|"LEE"| t4
-  o17 -->|"ACTUALIZA"| t5
-  o17 -->|"LEE"| t5
-  o17 -->|"LEE"| t6
-  o17 -->|"LEE"| t7
+  o16 -->|"LEE"| t17
   a2 --> o18
   o18 -->|"LEE"| t3
-  o18 -->|"ACTUALIZA"| t4
   o18 -->|"LEE"| t4
   o18 -->|"ACTUALIZA"| t5
   o18 -->|"LEE"| t5
   o18 -->|"LEE"| t6
-  o18 -.-> t19
-  a2 --> o20
-  o20 -->|"LEE"| t3
-  o20 -->|"LEE"| t4
-  o20 -->|"ACTUALIZA"| t5
-  o20 -->|"LEE"| t5
-  o20 -->|"LEE"| t6
-  o20 -->|"LEE"| t7
+  o18 -->|"LEE"| t7
+  a2 --> o19
+  o19 -->|"LEE"| t3
+  o19 -->|"LEE"| t4
+  o19 -->|"ACTUALIZA"| t5
+  o19 -->|"LEE"| t5
+  o19 -->|"LEE"| t17
+  o19 -->|"LEE"| t6
+  o19 -.-> t20
   a2 --> o21
   o21 -->|"LEE"| t3
   o21 -->|"LEE"| t4
@@ -117,18 +124,64 @@ flowchart LR
   o21 -->|"LEE"| t7
   a2 --> o22
   o22 -->|"LEE"| t3
+  o22 -->|"CREA"| t4
+  o22 -->|"LEE"| t4
+  o22 -->|"ACTUALIZA"| t5
+  o22 -->|"LEE"| t5
   o22 -->|"LEE"| t23
-  o22 -->|"LEE"| t24
-  o22 -->|"LEE"| t6
-  o22 -->|"LEE"| t7
+  o22 -.-> t24
   a2 --> o25
-  o25 -->|"LEE"| t9
-  o25 -->|"LEE"| t10
-  o25 -->|"LEE"| t11
-  o25 -->|"LEE"| t12
-  o25 -->|"LEE"| t13
-  o25 -->|"LEE"| t14
+  o25 -->|"LEE"| t3
+  o25 -->|"BORRA"| t4
+  o25 -->|"LEE"| t4
+  o25 -->|"ACTUALIZA"| t5
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t17
   o25 -.-> t26
+  a2 --> o27
+  o27 -->|"LEE"| t3
+  o27 -->|"LEE"| t4
+  o27 -->|"ACTUALIZA"| t5
+  o27 -->|"LEE"| t5
+  o27 -->|"LEE"| t17
+  o27 -->|"LEE"| t6
+  o27 -.-> t28
+  a2 --> o29
+  o29 -->|"LEE"| t3
+  o29 -->|"ACTUALIZA"| t4
+  o29 -->|"LEE"| t4
+  o29 -->|"ACTUALIZA"| t5
+  o29 -->|"LEE"| t5
+  o29 -->|"LEE"| t6
+  o29 -.-> t30
+  a2 --> o31
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t4
+  o31 -->|"ACTUALIZA"| t5
+  o31 -->|"LEE"| t5
+  o31 -->|"LEE"| t6
+  o31 -->|"LEE"| t7
+  a2 --> o32
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t4
+  o32 -->|"ACTUALIZA"| t5
+  o32 -->|"LEE"| t5
+  o32 -->|"LEE"| t6
+  o32 -->|"LEE"| t7
+  a2 --> o33
+  o33 -->|"LEE"| t3
+  o33 -->|"LEE"| t23
+  o33 -->|"LEE"| t17
+  o33 -->|"LEE"| t6
+  o33 -->|"LEE"| t7
+  a2 --> o34
+  o34 -->|"LEE"| t9
+  o34 -->|"LEE"| t10
+  o34 -->|"LEE"| t11
+  o34 -->|"LEE"| t12
+  o34 -->|"LEE"| t13
+  o34 -->|"LEE"| t14
+  o34 -.-> t35
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -346,37 +399,37 @@ flowchart TD
   n54 -->|"cada elemento"| n55
   n56(["409 CONFLICT Un mismo profesional no puede repetirse (ni ser también el creador)"]):::error
   n55 -->|"sí"| n56
-  n57["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n57["Llama a MedicalGroupsService.assertInvitable"]:::llamada
   n55 -->|"no"| n57
-  n58[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n58["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n57 --> n58
-  n59{"invited === null"}:::decision
+  n59[("LEE profiles.health_practitioner_profiles")]:::efecto
   n58 --> n59
-  n60(["↩ (relanza el error capturado)"]):::error
-  n59 -->|"sí"| n60
-  n61["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
-  n59 -->|"no"| n61
-  n62["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
-  n61 --> n62
-  n63[("LEE practice.practitioner_role_assignments")]:::efecto
+  n60{"invited === null"}:::decision
+  n59 --> n60
+  n61(["↩ (relanza el error capturado)"]):::error
+  n60 -->|"sí"| n61
+  n62["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n60 -->|"no"| n62
+  n63["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
   n62 --> n63
-  n64{"!invitedPracticeIds.some((id) =› tenantPracticeIds.has(id))"}:::decision
+  n64[("LEE practice.practitioner_role_assignments")]:::efecto
   n63 --> n64
-  n65(["↩ (relanza el error capturado)"]):::error
-  n64 -->|"sí"| n65
-  n66["Llama a MedicalGroupsRepository.create"]:::llamada
-  n64 -->|"no"| n66
-  n54 -->|"al terminar"| n66
-  n67[("CREA medical_groups.groups")]:::efecto
-  n66 --> n67
-  n68["Llama a MedicalGroupMembersRepository.create"]:::llamada
+  n65{"!invitedPracticeIds.some((id) =› tenantPracticeIds.has(id))"}:::decision
+  n64 --> n65
+  n66(["↩ (relanza el error capturado)"]):::error
+  n65 -->|"sí"| n66
+  n67["Llama a MedicalGroupsRepository.create"]:::llamada
+  n65 -->|"no"| n67
+  n54 -->|"al terminar"| n67
+  n68[("CREA medical_groups.groups")]:::efecto
   n67 --> n68
-  n69[("CREA medical_groups.group_members")]:::efecto
+  n69["Llama a MedicalGroupMembersRepository.create"]:::llamada
   n68 --> n69
-  n70["Repite: por cada const member de dto.members"]:::bucle
+  n70[("CREA medical_groups.group_members")]:::efecto
   n69 --> n70
-  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
-  n70 -->|"cada elemento"| n71
+  n71["… el resto del árbol (11 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -385,7 +438,105 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. GET /medical-groups/{id}
+#### 3. DELETE /medical-groups/{id}
+
+Eliminar un grupo médico no realizado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Sólo quien creó el grupo puede modificarlo o eliminarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo médico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El expediente ya está cerrado y es inmutable; PreconditionFailedException: El grupo ya se realizó: sólo admite las notas del procedimiento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MedicalGroupsService.remove"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a MedicalGroupsService.loadForCreatorEdit"]:::llamada
+  n4 --> n5
+  n6["Llama a MedicalGroupsService.requirePractitioner"]:::llamada
+  n5 --> n6
+  n7{"actor.practitionerProfileId === undefined"}:::decision
+  n6 --> n7
+  n8(["401 UNAUTHENTICATED La cuenta no tiene un perfil profesional asociado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a MedicalGroupsRepository.findById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE medical_groups.groups")]:::efecto
+  n9 --> n10
+  n11{"group === null"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE medical_groups.group_members")]:::efecto
+  n13 --> n14
+  n15["Llama a MedicalGroupsService.assertActorSeesGroup"]:::llamada
+  n14 --> n15
+  n16{"!can"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"group.requestingPractitionerId !== practitionerProfileId"}:::decision
+  n16 -->|"no"| n18
+  n19(["403 FORBIDDEN Sólo quien creó el grupo puede modificarlo o eliminarlo"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n18 -->|"no"| n20
+  n21["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n20 --> n21
+  n22[("LEE practice.practitioner_role_assignments")]:::efecto
+  n21 --> n22
+  n23{"!ownPractices.includes(group.practiceId)"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a MedicalGroupsService.closeIfExpired"]:::llamada
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA medical_groups.groups")]:::efecto
+  n25 --> n26
+  n27{"group.status !== MEDICAL_GROUP_STATUS.CLOSED"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA medical_groups.groups")]:::efecto
+  n27 -->|"sí"| n28
+  n29{"justClosed || isClosedNow(group)"}:::decision
+  n28 --> n29
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El expediente ya está cerrado y es inmutable"]):::error
+  n29 -->|"sí"| n30
+  n31{"isRealizedNow(group)"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED El grupo ya se realizó: sólo admite las notas del procedimiento"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a MedicalGroupMembersRepository.removeByGroup"]:::llamada
+  n31 -->|"no"| n33
+  n34[("BORRA medical_groups.group_members")]:::efecto
+  n33 --> n34
+  n35["Llama a MedicalGroupsRepository.remove"]:::llamada
+  n34 --> n35
+  n36[("BORRA medical_groups.groups")]:::efecto
+  n35 --> n36
+  n37(("204 Responde con éxito")):::ok
+  n36 --> n37
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. GET /medical-groups/{id}
 
 Consultar un grupo médico (formulario de sólo lectura)
 
@@ -448,7 +599,110 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. PATCH /medical-groups/{id}/exercise-notes
+#### 5. PATCH /medical-groups/{id}
+
+Corregir el lugar o las notas del grupo médico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Sólo quien creó el grupo puede modificarlo o eliminarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo médico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El expediente ya está cerrado y es inmutable; PreconditionFailedException: El grupo ya se realizó: sólo admite las notas del procedimiento; PreconditionFailedException: El lugar de realización no puede quedar vacío |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a MedicalGroupsService.update"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a MedicalGroupsService.loadForCreatorEdit"]:::llamada
+  n4 --> n5
+  n6["Llama a MedicalGroupsService.requirePractitioner"]:::llamada
+  n5 --> n6
+  n7{"actor.practitionerProfileId === undefined"}:::decision
+  n6 --> n7
+  n8(["401 UNAUTHENTICATED La cuenta no tiene un perfil profesional asociado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a MedicalGroupsRepository.findById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE medical_groups.groups")]:::efecto
+  n9 --> n10
+  n11{"group === null"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE medical_groups.group_members")]:::efecto
+  n13 --> n14
+  n15["Llama a MedicalGroupsService.assertActorSeesGroup"]:::llamada
+  n14 --> n15
+  n16{"!can"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"group.requestingPractitionerId !== practitionerProfileId"}:::decision
+  n16 -->|"no"| n18
+  n19(["403 FORBIDDEN Sólo quien creó el grupo puede modificarlo o eliminarlo"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n18 -->|"no"| n20
+  n21["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n20 --> n21
+  n22[("LEE practice.practitioner_role_assignments")]:::efecto
+  n21 --> n22
+  n23{"!ownPractices.includes(group.practiceId)"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a MedicalGroupsService.closeIfExpired"]:::llamada
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA medical_groups.groups")]:::efecto
+  n25 --> n26
+  n27{"group.status !== MEDICAL_GROUP_STATUS.CLOSED"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA medical_groups.groups")]:::efecto
+  n27 -->|"sí"| n28
+  n29{"justClosed || isClosedNow(group)"}:::decision
+  n28 --> n29
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El expediente ya está cerrado y es inmutable"]):::error
+  n29 -->|"sí"| n30
+  n31{"isRealizedNow(group)"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED El grupo ya se realizó: sólo admite las notas del procedimiento"]):::error
+  n31 -->|"sí"| n32
+  n33{"dto.locationText !== undefined"}:::decision
+  n31 -->|"no"| n33
+  n34{"location === ''"}:::decision
+  n33 -->|"sí"| n34
+  n35(["422 PRECONDITION_FAILED El lugar de realización no puede quedar vacío"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a MedicalGroupsService.toDto"]:::llamada
+  n34 -->|"no"| n36
+  n33 -->|"no"| n36
+  n37["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n36 --> n37
+  n38[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n37 --> n38
+  n39(("200 Responde con éxito")):::ok
+  n38 --> n39
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. PATCH /medical-groups/{id}/exercise-notes
 
 Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)
 
@@ -530,7 +784,395 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /medical-groups/{id}/members/{memberId}/respond
+#### 7. POST /medical-groups/{id}/members
+
+Agregar un cargo al equipo del grupo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Sólo quien creó el grupo puede modificarlo o eliminarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo médico no encontrado |
+| 409 | `CONFLICT` | ConflictException: Un mismo profesional no puede repetirse (ni ser también el creador) |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El expediente ya está cerrado y es inmutable; PreconditionFailedException: El grupo ya se realizó: sólo admite las notas del procedimiento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a MedicalGroupsService.addMember"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a MedicalGroupsService.loadForCreatorEdit"]:::llamada
+  n4 --> n5
+  n6["Llama a MedicalGroupsService.requirePractitioner"]:::llamada
+  n5 --> n6
+  n7{"actor.practitionerProfileId === undefined"}:::decision
+  n6 --> n7
+  n8(["401 UNAUTHENTICATED La cuenta no tiene un perfil profesional asociado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a MedicalGroupsRepository.findById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE medical_groups.groups")]:::efecto
+  n9 --> n10
+  n11{"group === null"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE medical_groups.group_members")]:::efecto
+  n13 --> n14
+  n15["Llama a MedicalGroupsService.assertActorSeesGroup"]:::llamada
+  n14 --> n15
+  n16{"!can"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"group.requestingPractitionerId !== practitionerProfileId"}:::decision
+  n16 -->|"no"| n18
+  n19(["403 FORBIDDEN Sólo quien creó el grupo puede modificarlo o eliminarlo"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n18 -->|"no"| n20
+  n21["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n20 --> n21
+  n22[("LEE practice.practitioner_role_assignments")]:::efecto
+  n21 --> n22
+  n23{"!ownPractices.includes(group.practiceId)"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a MedicalGroupsService.closeIfExpired"]:::llamada
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA medical_groups.groups")]:::efecto
+  n25 --> n26
+  n27{"group.status !== MEDICAL_GROUP_STATUS.CLOSED"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA medical_groups.groups")]:::efecto
+  n27 -->|"sí"| n28
+  n29{"justClosed || isClosedNow(group)"}:::decision
+  n28 --> n29
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El expediente ya está cerrado y es inmutable"]):::error
+  n29 -->|"sí"| n30
+  n31{"isRealizedNow(group)"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED El grupo ya se realizó: sólo admite las notas del procedimiento"]):::error
+  n31 -->|"sí"| n32
+  n33{"members.some( (m) =› m.practitionerProfileId === dto.practitionerProfileId, )"}:::decision
+  n31 -->|"no"| n33
+  n34(["409 CONFLICT Un mismo profesional no puede repetirse (ni ser también el creador)"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a PracticeTenantLookupService.findActivePracticeIdsForTenant"]:::llamada
+  n33 -->|"no"| n35
+  n36["Llama a PracticesRepository.findByTenant"]:::llamada
+  n35 --> n36
+  n37[("LEE practice.practices")]:::efecto
+  n36 --> n37
+  n38["Llama a MedicalGroupsService.assertInvitable"]:::llamada
+  n37 --> n38
+  n39["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n38 --> n39
+  n40[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n39 --> n40
+  n41{"invited === null"}:::decision
+  n40 --> n41
+  n42(["↩ (relanza el error capturado)"]):::error
+  n41 -->|"sí"| n42
+  n43["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n41 -->|"no"| n43
+  n44["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n43 --> n44
+  n45[("LEE practice.practitioner_role_assignments")]:::efecto
+  n44 --> n45
+  n46{"!invitedPracticeIds.some((id) =› tenantPracticeIds.has(id))"}:::decision
+  n45 --> n46
+  n47(["↩ (relanza el error capturado)"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a MedicalGroupMembersRepository.create"]:::llamada
+  n46 -->|"no"| n48
+  n49[("CREA medical_groups.group_members")]:::efecto
+  n48 --> n49
+  n50["Llama a MedicalGroupsService.syncTeamStatus"]:::llamada
+  n49 --> n50
+  n51["Llama a MedicalGroupMembersRepository.hasPendingInvites"]:::llamada
+  n50 --> n51
+  n52[("LEE medical_groups.group_members")]:::efecto
+  n51 --> n52
+  n53{"next !== group.status"}:::decision
+  n52 --> n53
+  n54[("ACTUALIZA medical_groups.groups")]:::efecto
+  n53 -->|"sí"| n54
+  n55["Llama a MedicalGroupsService.toDto"]:::llamada
+  n54 --> n55
+  n53 -->|"no"| n55
+  n56["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n55 --> n56
+  n57[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n56 --> n57
+  n58["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n57 --> n58
+  n59[("LEE medical_groups.group_members")]:::efecto
+  n58 --> n59
+  n60(("201 Responde con éxito")):::ok
+  n59 --> n60
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. DELETE /medical-groups/{id}/members/{memberId}
+
+Quitar un cargo del equipo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Sólo quien creó el grupo puede modificarlo o eliminarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo médico no encontrado; ResourceNotFoundException: Integrante no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El expediente ya está cerrado y es inmutable; PreconditionFailedException: El grupo ya se realizó: sólo admite las notas del procedimiento; PreconditionFailedException: Quien creó el grupo no se puede quitar del equipo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MedicalGroupsService.removeMember"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a MedicalGroupsService.loadForCreatorEdit"]:::llamada
+  n4 --> n5
+  n6["Llama a MedicalGroupsService.requirePractitioner"]:::llamada
+  n5 --> n6
+  n7{"actor.practitionerProfileId === undefined"}:::decision
+  n6 --> n7
+  n8(["401 UNAUTHENTICATED La cuenta no tiene un perfil profesional asociado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a MedicalGroupsRepository.findById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE medical_groups.groups")]:::efecto
+  n9 --> n10
+  n11{"group === null"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE medical_groups.group_members")]:::efecto
+  n13 --> n14
+  n15["Llama a MedicalGroupsService.assertActorSeesGroup"]:::llamada
+  n14 --> n15
+  n16{"!can"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"group.requestingPractitionerId !== practitionerProfileId"}:::decision
+  n16 -->|"no"| n18
+  n19(["403 FORBIDDEN Sólo quien creó el grupo puede modificarlo o eliminarlo"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n18 -->|"no"| n20
+  n21["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n20 --> n21
+  n22[("LEE practice.practitioner_role_assignments")]:::efecto
+  n21 --> n22
+  n23{"!ownPractices.includes(group.practiceId)"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a MedicalGroupsService.closeIfExpired"]:::llamada
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA medical_groups.groups")]:::efecto
+  n25 --> n26
+  n27{"group.status !== MEDICAL_GROUP_STATUS.CLOSED"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA medical_groups.groups")]:::efecto
+  n27 -->|"sí"| n28
+  n29{"justClosed || isClosedNow(group)"}:::decision
+  n28 --> n29
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El expediente ya está cerrado y es inmutable"]):::error
+  n29 -->|"sí"| n30
+  n31{"isRealizedNow(group)"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED El grupo ya se realizó: sólo admite las notas del procedimiento"]):::error
+  n31 -->|"sí"| n32
+  n33{"member === undefined"}:::decision
+  n31 -->|"no"| n33
+  n34(["404 NOT_FOUND Integrante no encontrado"]):::error
+  n33 -->|"sí"| n34
+  n35{"member.isCreator"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED Quien creó el grupo no se puede quitar del equipo"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a MedicalGroupMembersRepository.remove"]:::llamada
+  n35 -->|"no"| n37
+  n38[("BORRA medical_groups.group_members")]:::efecto
+  n37 --> n38
+  n39["Llama a MedicalGroupsService.syncTeamStatus"]:::llamada
+  n38 --> n39
+  n40["Llama a MedicalGroupMembersRepository.hasPendingInvites"]:::llamada
+  n39 --> n40
+  n41[("LEE medical_groups.group_members")]:::efecto
+  n40 --> n41
+  n42{"next !== group.status"}:::decision
+  n41 --> n42
+  n43[("ACTUALIZA medical_groups.groups")]:::efecto
+  n42 -->|"sí"| n43
+  n44["Llama a MedicalGroupsService.toDto"]:::llamada
+  n43 --> n44
+  n42 -->|"no"| n44
+  n45["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n44 --> n45
+  n46[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n45 --> n46
+  n47["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n46 --> n47
+  n48[("LEE medical_groups.group_members")]:::efecto
+  n47 --> n48
+  n49(("200 Responde con éxito")):::ok
+  n48 --> n49
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. PATCH /medical-groups/{id}/members/{memberId}
+
+Modificar un cargo del equipo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Sólo quien creó el grupo puede modificarlo o eliminarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo médico no encontrado; ResourceNotFoundException: Integrante no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El expediente ya está cerrado y es inmutable; PreconditionFailedException: El grupo ya se realizó: sólo admite las notas del procedimiento; PreconditionFailedException: El cargo de quien creó el grupo no se modifica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a MedicalGroupsService.updateMember"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a MedicalGroupsService.loadForCreatorEdit"]:::llamada
+  n4 --> n5
+  n6["Llama a MedicalGroupsService.requirePractitioner"]:::llamada
+  n5 --> n6
+  n7{"actor.practitionerProfileId === undefined"}:::decision
+  n6 --> n7
+  n8(["401 UNAUTHENTICATED La cuenta no tiene un perfil profesional asociado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a MedicalGroupsRepository.findById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE medical_groups.groups")]:::efecto
+  n9 --> n10
+  n11{"group === null"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE medical_groups.group_members")]:::efecto
+  n13 --> n14
+  n15["Llama a MedicalGroupsService.assertActorSeesGroup"]:::llamada
+  n14 --> n15
+  n16{"!can"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"group.requestingPractitionerId !== practitionerProfileId"}:::decision
+  n16 -->|"no"| n18
+  n19(["403 FORBIDDEN Sólo quien creó el grupo puede modificarlo o eliminarlo"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n18 -->|"no"| n20
+  n21["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n20 --> n21
+  n22[("LEE practice.practitioner_role_assignments")]:::efecto
+  n21 --> n22
+  n23{"!ownPractices.includes(group.practiceId)"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Grupo médico no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a MedicalGroupsService.closeIfExpired"]:::llamada
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA medical_groups.groups")]:::efecto
+  n25 --> n26
+  n27{"group.status !== MEDICAL_GROUP_STATUS.CLOSED"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA medical_groups.groups")]:::efecto
+  n27 -->|"sí"| n28
+  n29{"justClosed || isClosedNow(group)"}:::decision
+  n28 --> n29
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El expediente ya está cerrado y es inmutable"]):::error
+  n29 -->|"sí"| n30
+  n31{"isRealizedNow(group)"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED El grupo ya se realizó: sólo admite las notas del procedimiento"]):::error
+  n31 -->|"sí"| n32
+  n33{"member === undefined"}:::decision
+  n31 -->|"no"| n33
+  n34(["404 NOT_FOUND Integrante no encontrado"]):::error
+  n33 -->|"sí"| n34
+  n35{"member.isCreator"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED El cargo de quien creó el grupo no se modifica"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a MedicalGroupsService.syncTeamStatus"]:::llamada
+  n35 -->|"no"| n37
+  n38["Llama a MedicalGroupMembersRepository.hasPendingInvites"]:::llamada
+  n37 --> n38
+  n39[("LEE medical_groups.group_members")]:::efecto
+  n38 --> n39
+  n40{"next !== group.status"}:::decision
+  n39 --> n40
+  n41[("ACTUALIZA medical_groups.groups")]:::efecto
+  n40 -->|"sí"| n41
+  n42["Llama a MedicalGroupsService.toDto"]:::llamada
+  n41 --> n42
+  n40 -->|"no"| n42
+  n43["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n42 --> n43
+  n44[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n43 --> n44
+  n45["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n44 --> n45
+  n46[("LEE medical_groups.group_members")]:::efecto
+  n45 --> n46
+  n47(("200 Responde con éxito")):::ok
+  n46 --> n47
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. POST /medical-groups/{id}/members/{memberId}/respond
 
 Aceptar o rechazar la invitación a un cargo del grupo
 
@@ -617,7 +1259,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /medical-groups/{id}/reschedule-requests
+#### 11. POST /medical-groups/{id}/reschedule-requests
 
 Solicitar cambio de horario
 
@@ -708,7 +1350,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /medical-groups/{id}/reschedule-requests/respond
+#### 12. POST /medical-groups/{id}/reschedule-requests/respond
 
 Resolver la solicitud de cambio de horario
 
@@ -780,7 +1422,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /medical-groups/eligible-members
+#### 13. GET /medical-groups/eligible-members
 
 Colegas que se pueden invitar a un grupo de este servicio
 
@@ -848,7 +1490,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. GET /medical-groups/patients/{patientProfileId}/conditions
+#### 14. GET /medical-groups/patients/{patientProfileId}/conditions
 
 Diagnósticos del paciente para el selector del formulario
 

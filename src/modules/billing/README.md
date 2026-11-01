@@ -184,3 +184,17 @@ reciente al más antiguo, con importes en texto decimal exacto y
 
 Código: `controllers/patient-spending.controller.ts`,
 `services/patient-spending.service.ts`, `repositories/patient-spending.repository.ts`.
+
+## Editor de catálogos · Servicios — `/admin/catalogs/services`
+
+Acceso `SECURITY_ADMIN` (`SUPERADMIN` por comodín); todo se acota a la organización del token y un recurso ajeno responde 404. Sin `DELETE`: se desactiva. Auditoría `@Audited` (entidad `service_catalog`): `ADMIN_SERVICE_CATALOG_CREATED|UPDATED|DEACTIVATED|REACTIVATED`.
+
+| Ruta | Qué hace |
+| --- | --- |
+| `GET /admin/catalogs/services/scopes` | Tipos de organización en uso, prácticas activas y monedas del editor (declarada **antes** de `:id`) |
+| `GET /admin/catalogs/services` · `GET …/:id` | Lista con cursor `(code, id)` y filtros; uno con su `rowVersion` |
+| `POST /admin/catalogs/services` | Alta idempotente por `(práctica, código)`: 201 / 200 repetición idéntica / 409 contenido distinto |
+| `PATCH …/:id` | Edición con `expectedRowVersion` (409 `SERVICE_CATALOG_VERSION_MISMATCH`) |
+| `POST …/:id/deactivate` · `…/reactivate` | Idempotentes |
+
+El contrato completo vive en el comentario de `controllers/admin-service-catalog.controller.ts`. El glosario (`/admin/catalogs/glossary`) está en `terminology/`; el reporte contable por tipo de usuario sigue siendo una decisión de negocio sin construir.

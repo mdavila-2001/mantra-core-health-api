@@ -26,6 +26,8 @@ Los que operan sobre un lote o crean uno exigen además el **permiso fino** del 
 | `GET /:id` | Estado, vista previa y avance | 200 |
 | `GET /:id/report?format=json\|csv` | Informe: creadas, omitidas, conflictos, rechazadas, con motivo | 200 |
 
+`GET /:id` y `GET /:id/report` llevan `@AccessLogged` (`BULK_IMPORT_BATCH` / `BULK_IMPORT_REPORT`, propósito `DATA_ADMINISTRATION`): cada lectura de lo cargado queda en `audit.data_access_log`, además del sello `BULK_IMPORT_BATCH_READ` / `BULK_IMPORT_REPORT_READ` del servicio. Spec: `controllers/bulk-import.controller.access-log.spec.ts`.
+
 `POST /` acepta `multipart/form-data` (`file` CSV/JSON hasta 20 MB + campos de texto) o
 `application/json` (`rows`). El cuerpo JSON lo limita antes el tope global de `main.ts` (1 MB); para
 lotes grandes se sube archivo. Más de 20 MB o de 5.000 filas → **413** sin crear lote.

@@ -45,6 +45,16 @@ const row = (over: Partial<Row> = {}): Row => ({
 function build(rows: Row[] = []) {
   const em: Record<string, unknown> = {};
   em.fork = () => em;
+  // Conceptos de tipo de organización que lee `scopes` (doble declarado).
+  const concepts = [
+    { id: TYPE_LAB, code: 'PR_TYPE_LAB', display: 'Laboratorio' },
+    { id: TYPE_OFFICE, code: 'PR_TYPE_OFFICE', display: 'Consultorio' },
+    { id: 'type-unused', code: 'PR_TYPE_UNUSED', display: 'Sin uso' },
+  ];
+  em.find = jest.fn(
+    async (_entity: unknown, where: { id: { $in: string[] } }) =>
+      concepts.filter((c) => where.id.$in.includes(c.id)),
+  );
   em.transactional = (cb: (tx: unknown) => unknown) => cb(em);
   em.flush = jest.fn(async () => {
     // Simula `version: true`: cada flush con cambios sube la versión.
@@ -89,8 +99,18 @@ function build(rows: Row[] = []) {
       async (_em: unknown, tenantId: string, _active?: string) =>
         tenantId === 't-mine'
           ? [
-              { id: 'p-mine', tenantId: 't-mine', typeConceptId: TYPE_OFFICE },
-              { id: 'p-lab', tenantId: 't-mine', typeConceptId: TYPE_LAB },
+              {
+                id: 'p-mine',
+                name: 'Zeta',
+                tenantId: 't-mine',
+                typeConceptId: TYPE_OFFICE,
+              },
+              {
+                id: 'p-lab',
+                name: 'Alfa',
+                tenantId: 't-mine',
+                typeConceptId: TYPE_LAB,
+              },
             ]
           : [],
     ),
@@ -127,6 +147,49 @@ function build(rows: Row[] = []) {
 }
 
 describe('AdminServiceCatalogService', () => {
+  describe('scopes', () => {
+    it('devuelve sólo los tipos usados y las prácticas activas de la organización, ordenados', async () => {
+      const d = build();
+      const res = await d.inTenant(() => d.service.scopes());
+      expect(d.practices.findByTenant).toHaveBeenCalledWith(
+        expect.anything(),
+        't-mine',
+        PRAC.PRACTICE_ACTIVE,
+      );
+      expect(res.practices.map((p) => p.name)).toEqual(['Alfa', 'Zeta']);
+      expect(res.types.map((t) => t.code)).toEqual([
+        'PR_TYPE_OFFICE',
+        'PR_TYPE_LAB',
+      ]);
+      expect(res.types.map((t) => t.code)).not.toContain('PR_TYPE_UNUSED');
+      expect(res.currencies.map((c) => c.code).sort()).toEqual(['BOB', 'USD']);
+      expect(res.currencies).toContainEqual({
+        conceptId: CONCEPTS.CURRENCY_BOB,
+        code: 'BOB',
+      });
+    });
+
+    it('organización sin prácticas => listas vacías y no consulta conceptos', async () => {
+      const d = build();
+      const res = await d.inTenant(() => d.service.scopes(), 't-vacia');
+      expect(res.types).toEqual([]);
+      expect(res.practices).toEqual([]);
+      expect(res.currencies).toHaveLength(2);
+      expect(d.em.find).not.toHaveBeenCalled();
+    });
+
+    it('otra organización no ve las prácticas de la primera', async () => {
+      const d = build();
+      const res = await d.inTenant(() => d.service.scopes(), 't-other');
+      expect(res.practices).toEqual([]);
+    });
+
+    it('sin tenant en el contexto => 422 (nunca se infiere del cliente)', async () => {
+      const d = build();
+      await expect(d.service.scopes()).rejects.toMatchObject({ status: 422 });
+    });
+  });
+
   describe('list', () => {
     it('sólo consulta prácticas activas de la organización del actor', async () => {
       const d = build([

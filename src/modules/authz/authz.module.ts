@@ -1,3 +1,6 @@
+import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
+import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
+import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -12,6 +15,7 @@ import {
   AuthzMeController,
   AuthzAdminController,
   AuthzGovernanceController,
+  AuthzGovernanceExtController,
 } from './controllers';
 import {
   AuthzCatalogService,
@@ -27,6 +31,7 @@ import {
   AuthzAdminReadService,
   AuthzAssignmentRevocationService,
   AuthzGovernanceService,
+  AuthzGovernanceExtService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -84,8 +89,12 @@ import {
     AuthzMeController,
     AuthzAdminController,
     AuthzGovernanceController,
+    AuthzGovernanceExtController,
+    AuthzModulesCatalogController,
   ],
   providers: [
+    AuthzModulesCatalogService,
+    AuthzModulesRouteInventory,
     // Repositorios
     PermissionCategoriesRepository,
     PermissionsRepository,
@@ -125,6 +134,7 @@ import {
     AuthzAdminReadService,
     AuthzAssignmentRevocationService,
     AuthzGovernanceService,
+    AuthzGovernanceExtService,
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `common`
 
-- **Tablas:** 7 · **Columnas:** 111 (27 con descripción: 24.3 %) · **Índices:** 52
+- **Tablas:** 7 · **Columnas:** 115 (31 con descripción: 27.0 %) · **Índices:** 56
 - **Dominio:** Núcleo y Terminología
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,13 +10,13 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 20 | 8 | 101 | DIVERGE |
-| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 48 | COINCIDE |
+| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 102 | COINCIDE |
+| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 49 | COINCIDE |
 | [file_derivatives](#file_derivatives) | Cataloga derivados de archivos —como representaciones o vistas procesadas— asociados al original. | 7 | 4 | 5 | COINCIDE |
 | [file_links](#file_links) | Vincula archivos con registros de negocio para reutilizar documentos sin duplicar su identidad. | 13 | 6 | 10 | COINCIDE |
 | [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 97 | COINCIDE |
 | [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 107 | COINCIDE |
-| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 10 | 62 | COINCIDE |
+| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 11 | 63 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -84,7 +84,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: addresses`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Addresses` — `src/modules/common/entities/addresses.entity.ts`
-- **Resumen:** 20 columnas · 8 índices · 8 FK salientes · 7 entrantes · 101 operaciones
+- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 102 operaciones
 
 #### Columnas
 
@@ -98,18 +98,22 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | 6 | `lines` | `varchar` | Opcional | _sin dato_ | coincide |
 | 7 | `city` | `varchar` | Opcional | _sin dato_ | coincide |
 | 8 | `administrative_area_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 9 | `municipality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.5 — municipio. `administrative_area_concept_id` sigue siendo el departamento; éste es el nivel de detalle que `city` (texto libre) no puede garantizar consistente. Value set: vs_bo_municipality (340 municipios). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:90`)_ | coincide |
-| 10 | `postal_code` | `varchar` | Opcional | _sin dato_ | coincide |
-| 11 | `country_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 12 | `latitude` | `numeric` | Opcional | _sin dato_ | coincide |
-| 13 | `longitude` | `numeric` | Opcional | _sin dato_ | coincide |
-| 14 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
-| 15 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:152`)_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:158`)_ | coincide |
-| 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/common/entities/addresses.entity.ts:176`)_ | coincide |
+| 9 | `administrative_area_2_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.63 — ADR-0028 (direcciones multipaís): el nivel 2 —provincia, condado— de cualquier país. Concepto del catálogo de divisiones administrativas (VS_ADMIN_DIVISION, nivel 2), hijo del nivel 1 de arriba. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:86`)_ | coincide |
+| 10 | `municipality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.5 — municipio. `administrative_area_concept_id` sigue siendo el departamento; éste es el nivel de detalle que `city` (texto libre) no puede garantizar consistente. Value set: vs_bo_municipality (340 municipios). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:90`)_ | coincide |
+| 11 | `district_text` | `varchar` | Opcional | + v4.2.63 — ADR-0028: distrito o zona como texto. Ningún catálogo oficial cubre los distritos de todos los países y no se inventa uno; antes viajaba pegado a `lines`. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:94`)_ | coincide |
+| 12 | `postal_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 13 | `country_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 14 | `latitude` | `numeric` | Opcional | _sin dato_ | coincide |
+| 15 | `longitude` | `numeric` | Opcional | _sin dato_ | coincide |
+| 16 | `label` | `varchar` | Opcional | + v4.2.61 — libreta de direcciones del paciente (pedido del cliente del 26/10/2026: «varias ubicaciones guardadas, como en una app de pedidos»). `label` es el nombre que la persona le pone («Casa», «Oficina», «Casa de mi mamá»); `is_preferred` marca la que se ofrece primero. Una sola preferida vigente por (owner, use): índice único parcial, ver 04_indexes. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:102`)_ | coincide |
+| 17 | `is_preferred` | `boolean = false` | Obligatoria | La que se ofrece primero. Una sola preferida vigente por dueño: lo garantiza `uq_addresses_owner_preferred` en la base (v4.2.61). _(JSDOC_ENTIDAD, `src/modules/common/entities/addresses.entity.ts:130`)_ | coincide |
+| 18 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
+| 19 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
+| 20 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:152`)_ | coincide |
+| 21 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:158`)_ | coincide |
+| 22 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 23 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 24 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/common/entities/addresses.entity.ts:176`)_ | coincide |
 
 #### Relaciones
 
@@ -119,6 +123,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | hacia | use_concept_id | terminology.catalog_concepts (id) | fk_addresses_use_concept_id |
 | hacia | type_concept_id | terminology.catalog_concepts (id) | fk_addresses_type_concept_id |
 | hacia | administrative_area_concept_id | terminology.catalog_concepts (id) | fk_addresses_administrative_area_concept_id |
+| hacia | administrative_area_2_concept_id | terminology.catalog_concepts (id) | fk_addresses_administrative_area_2_concept_id |
 | hacia | municipality_concept_id | terminology.catalog_concepts (id) | fk_addresses_municipality_concept_id |
 | hacia | country_concept_id | terminology.catalog_concepts (id) | fk_addresses_country_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_addresses_created_by_user_id |
@@ -139,10 +144,19 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | `ix_addresses_use_concept_id` | no | use_concept_id | Soporta la clave foránea fk_addresses_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «use_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_addresses_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_addresses_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_administrative_area_concept_id` | no | administrative_area_concept_id | Soporta la clave foránea fk_addresses_administrative_area_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_addresses_administrative_area_2_concept_id` | no | administrative_area_2_concept_id | Soporta la clave foránea fk_addresses_administrative_area_2_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_municipality_concept_id` | no | municipality_concept_id | Soporta la clave foránea fk_addresses_municipality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_country_concept_id` | no | country_concept_id | Soporta la clave foránea fk_addresses_country_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_addresses_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_addresses_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_addresses_owner_current` | no | owner_type_concept_id, owner_id donde WHERE valid_to IS NULL | Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE valid_to IS NULL _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «owner_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_addresses_owner_preferred` | sí | owner_type_concept_id, owner_id donde WHERE is_preferred AND valid_to IS NULL | Garantiza que no se repita la combinación (owner_type_concept_id, owner_id) _(DOCUMENTO)_; Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE is_preferred AND valid_to IS NULL _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «owner_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_addresses_owner_preferred` | UNIQUE INDEX | UNIQUE INDEX ("owner_type_concept_id", "owner_id") WHERE is_preferred AND valid_to IS NULL |
 
 #### Operaciones que la tocan
 
@@ -189,6 +203,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /public/pharmacies/open-now | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
+| GET /pharmacy-inventory/availability/medications | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
@@ -273,7 +288,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: contact_points`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `ContactPoints` — `src/modules/common/entities/contact_points.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 48 operaciones
+- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 49 operaciones
 
 #### Columnas
 
@@ -328,6 +343,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | CREA | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
@@ -727,7 +743,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: files`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Files` — `src/modules/common/entities/files.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 85 entrantes · 107 operaciones
+- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 89 entrantes · 107 operaciones
 
 #### Columnas
 
@@ -778,6 +794,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | desde | id | audit.dsar_requests (result_file_id) | fk_dsar_requests_result_file_id |
 | desde | id | system_ops.restore_test_runs (evidence_file_id) | fk_restore_test_runs_evidence_file_id |
 | desde | id | practice.practice_sites (bank_qr_file_id) | fk_practice_sites_bank_qr_file_id |
+| desde | id | practice.practice_sites (logo_file_id) | fk_practice_sites_logo_file_id |
 | desde | id | practice.practice_accreditations (evidence_file_id) | fk_practice_accreditations_evidence_file_id |
 | desde | id | chart.document_record_files (file_id) | fk_document_record_files_file_id |
 | desde | id | accounting.transaction_files (file_id) | fk_transaction_files_file_id |
@@ -797,8 +814,10 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | desde | id | organization_extensions.facility_licenses (evidence_file_id) | fk_facility_licenses_evidence_file_id |
 | desde | id | diagnostic_units.diagnostic_unit_accreditations (evidence_file_id) | fk_diagnostic_unit_accreditations_evidence_file_id |
 | desde | id | pharmacy.pharmacy_licenses (evidence_file_id) | fk_pharmacy_licenses_evidence_file_id |
+| desde | id | pharmacy.pharmacy_product_images (image_file_id) | fk_pharmacy_product_images_image_file_id |
 | desde | id | pharmacy_inventory.pharmacy_goods_receipts (source_document_file_id) | fk_pharmacy_goods_receipts_source_document_file_id |
 | desde | id | insurance.broker_carrier_agreements (contract_file_id) | fk_broker_carrier_agreements_contract_file_id |
+| desde | id | insurance.insurance_terms_conditions (document_file_id) | fk_insurance_terms_conditions_document_file_id |
 | desde | id | insurance.insurance_plans (policy_document_file_id) | fk_insurance_plans_policy_document_file_id |
 | desde | id | insurance.prior_authorization_determinations (supporting_file_id) | fk_prior_authorization_determinations_supporting_file_id |
 | desde | id | insurance.claim_disputes (supporting_evidence_file_id) | fk_claim_disputes_supporting_evidence_file_id |
@@ -817,6 +836,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | desde | id | erp.contract_obligation_events (evidence_file_id) | fk_contract_obligation_events_evidence_file_id |
 | desde | id | reporting.report_executions (output_file_id) | fk_report_executions_output_file_id |
 | desde | id | auth_providers.identity_providers (logo_file_id) | fk_identity_providers_logo_file_id |
+| desde | id | scheduling.appointment_payment_receipts (file_id) | fk_appointment_payment_receipts_file_id |
 | desde | id | payments.payment_disputes (evidence_file_id) | fk_payment_disputes_evidence_file_id |
 | desde | id | payments.kyc_verifications (evidence_file_id) | fk_kyc_verifications_evidence_file_id |
 | desde | id | payments.provider_invoice_artifacts (file_id) | fk_provider_invoice_artifacts_file_id |
@@ -996,7 +1016,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: identifiers`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Identifiers` — `src/modules/common/entities/identifiers.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 9 FK salientes · 2 entrantes · 62 operaciones
+- **Resumen:** 19 columnas · 11 índices · 9 FK salientes · 2 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -1052,6 +1072,13 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | `ix_identifiers_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_identifiers_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_identifiers_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_identifiers_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identifiers_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_identifiers_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_identifiers_national_id_normalized` | sí | (coalesce(nullif(regexp_replace(upper(regexp_replace(value, '[\s.-]+', '', 'g')), '^0+', ''), ''), '0')) donde WHERE type_concept_id = '595e7a3d-ba37-5014-9a72-635363b94864' AND state_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' AND owner_type_concept_id = '350a0150-c27c-5241-b5d8-78daa13bed34' AND valid_to IS NULL | Garantiza que no se repita la combinación (coalesce(nullif(regexp_replace(upper(regexp_replace(value, '[\s.-]+', '', 'g')), '^0+', ''), ''), '0')) _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE type_concept_id = '595e7a3d-ba37-5014-9a72-635363b94864' AND state_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' AND owner_type_concept_id = '350a0150-c27c-5241-b5d8-78daa13bed34' AND valid_to IS NULL _(ESTRUCTURAL)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_identifiers_national_id_normalized` | UNIQUE INDEX | UNIQUE INDEX (coalesce(nullif(regexp_replace(upper(regexp_replace(value, '[\s.-]+', '', 'g')), '^0+', ''), ''), '0')) WHERE type_concept_id = '595e7a3d-ba37-5014-9a72-635363b94864' AND state_concept_id = '38a1d301-f40d-5b17-a695-5e6d605f8b19' AND owner_type_concept_id = '350a0150-c27c-5241-b5d8-78daa13bed34' AND valid_to IS NULL |
 
 #### Operaciones que la tocan
 
@@ -1072,6 +1099,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |

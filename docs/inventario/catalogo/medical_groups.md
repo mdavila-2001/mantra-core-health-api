@@ -10,8 +10,8 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [group_members](#group_members) | Relaciona perfiles de profesionales o integrantes con un grupo médico, permitiendo representar equipos asistenciales y su composición. | 15 | 4 | 9 | COINCIDE |
-| [groups](#groups) | Representa grupos médicos para organizar equipos de profesionales y vincular a sus integrantes con una estructura de atención. | 22 | 6 | 12 | COINCIDE |
+| [group_members](#group_members) | Relaciona perfiles de profesionales o integrantes con un grupo médico, permitiendo representar equipos asistenciales y su composición. | 15 | 4 | 17 | COINCIDE |
+| [groups](#groups) | Representa grupos médicos para organizar equipos de profesionales y vincular a sus integrantes con una estructura de atención. | 22 | 6 | 23 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -53,7 +53,7 @@ Relaciona perfiles de profesionales o integrantes con un grupo médico, permitie
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_66_medical_groups.puml:43: entity group_members {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_66_medical_groups.puml` · **DDL:** `SQL/66_medical_groups/02_tables.sql`
 - **Entidad del ORM:** `MedicalGroupMembers` — `src/modules/medical_groups/entities/medical_group_members.entity.ts`
-- **Resumen:** 15 columnas · 4 índices · 5 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 15 columnas · 4 índices · 5 FK salientes · 0 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -89,10 +89,10 @@ Relaciona perfiles de profesionales o integrantes con un grupo médico, permitie
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_medical_groups_group_members_group_id` | no | group_id | Soporta la clave foránea fk_group_members_group_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «group_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_medical_groups_group_members_group_id` | no | group_id | Soporta la clave foránea fk_group_members_group_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «group_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_medical_groups_group_members_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_group_members_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_medical_groups_group_members_invitation_status` | no | invitation_status | 3 consulta(s) de repositorio filtran u ordenan por «invitation_status», la primera columna del índice _(CONSULTA)_ |
-| `ux_medical_groups_group_members_group_practitioner` | sí | group_id, practitioner_profile_id | Garantiza que no se repita la combinación (group_id, practitioner_profile_id) _(DOCUMENTO)_; Soporta la clave foránea fk_group_members_group_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «group_id», la primera columna del índice _(CONSULTA)_ |
+| `ux_medical_groups_group_members_group_practitioner` | sí | group_id, practitioner_profile_id | Garantiza que no se repita la combinación (group_id, practitioner_profile_id) _(DOCUMENTO)_; Soporta la clave foránea fk_group_members_group_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «group_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -108,8 +108,16 @@ Relaciona perfiles de profesionales o integrantes con un grupo médico, permitie
 | GET /medical-groups | LEE | DIRECTA |
 | POST /medical-groups | CREA | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
+| DELETE /medical-groups/{id} | BORRA | DIRECTA |
+| DELETE /medical-groups/{id} | LEE | DIRECTA |
 | GET /medical-groups/{id} | LEE | DIRECTA |
+| PATCH /medical-groups/{id} | LEE | DIRECTA |
 | PATCH /medical-groups/{id}/exercise-notes | LEE | DIRECTA |
+| POST /medical-groups/{id}/members | CREA | DIRECTA |
+| POST /medical-groups/{id}/members | LEE | DIRECTA |
+| DELETE /medical-groups/{id}/members/{memberId} | BORRA | POR_TIPO |
+| DELETE /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
+| PATCH /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
 | POST /medical-groups/{id}/members/{memberId}/respond | ACTUALIZA | POR_TIPO |
 | POST /medical-groups/{id}/members/{memberId}/respond | LEE | DIRECTA |
 | POST /medical-groups/{id}/reschedule-requests | LEE | DIRECTA |
@@ -138,7 +146,7 @@ Representa grupos médicos para organizar equipos de profesionales y vincular a 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_66_medical_groups.puml:7: entity groups {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_66_medical_groups.puml` · **DDL:** `SQL/66_medical_groups/02_tables.sql`
 - **Entidad del ORM:** `MedicalGroups` — `src/modules/medical_groups/entities/medical_groups.entity.ts`
-- **Resumen:** 22 columnas · 6 índices · 9 FK salientes · 1 entrantes · 12 operaciones
+- **Resumen:** 22 columnas · 6 índices · 9 FK salientes · 1 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -205,10 +213,21 @@ Representa grupos médicos para organizar equipos de profesionales y vincular a 
 |---|---|---|
 | GET /medical-groups | LEE | DIRECTA |
 | POST /medical-groups | CREA | DIRECTA |
+| DELETE /medical-groups/{id} | BORRA | POR_TIPO |
+| DELETE /medical-groups/{id} | ACTUALIZA | POR_TIPO |
+| DELETE /medical-groups/{id} | LEE | DIRECTA |
 | GET /medical-groups/{id} | ACTUALIZA | POR_TIPO |
 | GET /medical-groups/{id} | LEE | DIRECTA |
+| PATCH /medical-groups/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /medical-groups/{id} | LEE | DIRECTA |
 | PATCH /medical-groups/{id}/exercise-notes | ACTUALIZA | POR_TIPO |
 | PATCH /medical-groups/{id}/exercise-notes | LEE | DIRECTA |
+| POST /medical-groups/{id}/members | ACTUALIZA | POR_TIPO |
+| POST /medical-groups/{id}/members | LEE | DIRECTA |
+| DELETE /medical-groups/{id}/members/{memberId} | ACTUALIZA | POR_TIPO |
+| DELETE /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
+| PATCH /medical-groups/{id}/members/{memberId} | ACTUALIZA | POR_TIPO |
+| PATCH /medical-groups/{id}/members/{memberId} | LEE | DIRECTA |
 | POST /medical-groups/{id}/members/{memberId}/respond | ACTUALIZA | POR_TIPO |
 | POST /medical-groups/{id}/members/{memberId}/respond | LEE | DIRECTA |
 | POST /medical-groups/{id}/reschedule-requests | ACTUALIZA | POR_TIPO |
