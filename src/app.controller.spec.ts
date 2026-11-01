@@ -26,5 +26,11 @@ describe('AppController', () => {
     it('should return "Hello World!"', () => {
       expect(appController.getHello()).toBe('Hello World!');
     });
+
+    it('should return prometheus runtime metrics', () => {
+      const output = appController.metrics();
+      expect(output).toContain('process_uptime_seconds');
+      expect(output).toContain('nodejs_heap_size_used_bytes');
+    });
   });
 });

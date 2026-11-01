@@ -66,4 +66,33 @@ export class AppController {
   readiness(): Promise<ReadinessResult> {
     return this.readinessService.check();
   }
+
+  /**
+   * Métricas de runtime y proceso en formato estándar Prometheus (OpenMetrics).
+   * Excluido de trazas OTLP para evitar polución de spans en muestreo.
+   */
+  @Get('metrics')
+  @Public()
+  @ApiOperation({ summary: 'Métricas de runtime y proceso en formato Prometheus' })
+  metrics(): string {
+    const mem = process.memoryUsage();
+    const uptime = process.uptime();
+    return [
+      '# HELP process_uptime_seconds Tiempo de actividad del proceso Node.js en segundos.',
+      '# TYPE process_uptime_seconds gauge',
+      `process_uptime_seconds ${uptime}`,
+      '# HELP nodejs_heap_size_total_bytes Memoria total asignada al heap de V8.',
+      '# TYPE nodejs_heap_size_total_bytes gauge',
+      `nodejs_heap_size_total_bytes ${mem.heapTotal}`,
+      '# HELP nodejs_heap_size_used_bytes Memoria actualmente utilizada en el heap de V8.',
+      '# TYPE nodejs_heap_size_used_bytes gauge',
+      `nodejs_heap_size_used_bytes ${mem.heapUsed}`,
+      '# HELP nodejs_external_memory_bytes Memoria vinculada a buffers C++ externos de Node.js.',
+      '# TYPE nodejs_external_memory_bytes gauge',
+      `nodejs_external_memory_bytes ${mem.external}`,
+      '# HELP nodejs_resident_set_size_bytes Memoria física total ocupada en RAM (RSS).',
+      '# TYPE nodejs_resident_set_size_bytes gauge',
+      `nodejs_resident_set_size_bytes ${mem.rss}`,
+    ].join('\n') + '\n';
+  }
 }
