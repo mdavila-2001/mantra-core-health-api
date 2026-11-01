@@ -8,10 +8,12 @@ import { audioAssetsForeignKeys } from './audio_assets.fk';
 import { auditForeignKeys1 } from './audit.1.fk';
 import { auditForeignKeys2 } from './audit.2.fk';
 import { auditForeignKeys3 } from './audit.3.fk';
+import { auditForeignKeys4 } from './audit.4.fk';
 import { authProvidersForeignKeys } from './auth_providers.fk';
 import { authzForeignKeys } from './authz.fk';
 import { automationForeignKeys } from './automation.fk';
-import { billingForeignKeys } from './billing.fk';
+import { billingForeignKeys1 } from './billing.1.fk';
+import { billingForeignKeys2 } from './billing.2.fk';
 import { chartForeignKeys } from './chart.fk';
 import { clinicalForeignKeys1 } from './clinical.1.fk';
 import { clinicalForeignKeys2 } from './clinical.2.fk';
@@ -45,9 +47,12 @@ import { integrationsForeignKeys } from './integrations.fk';
 import { marketingForeignKeys } from './marketing.fk';
 import { medicalGroupsForeignKeys } from './medical_groups.fk';
 import { messagingForeignKeys } from './messaging.fk';
+import { observabilityForeignKeys } from './observability.fk';
 import { organizationExtensionsForeignKeys } from './organization_extensions.fk';
 import { paymentsForeignKeys1 } from './payments.1.fk';
 import { paymentsForeignKeys2 } from './payments.2.fk';
+import { pharmaLabForeignKeys1 } from './pharma_lab.1.fk';
+import { pharmaLabForeignKeys2 } from './pharma_lab.2.fk';
 import { pharmacyForeignKeys } from './pharmacy.fk';
 import { pharmacyInventoryForeignKeys } from './pharmacy_inventory.fk';
 import { platformOpsForeignKeys1 } from './platform_ops.1.fk';
@@ -79,11 +84,11 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   accounting: [accountingForeignKeys1, accountingForeignKeys2],
   ads: [adsForeignKeys1, adsForeignKeys2, adsForeignKeys3],
   audio_assets: [audioAssetsForeignKeys],
-  audit: [auditForeignKeys1, auditForeignKeys2, auditForeignKeys3],
+  audit: [auditForeignKeys1, auditForeignKeys2, auditForeignKeys3, auditForeignKeys4],
   auth_providers: [authProvidersForeignKeys],
   authz: [authzForeignKeys],
   automation: [automationForeignKeys],
-  billing: [billingForeignKeys],
+  billing: [billingForeignKeys1, billingForeignKeys2],
   chart: [chartForeignKeys],
   clinical: [clinicalForeignKeys1, clinicalForeignKeys2],
   clinical_ext: [clinicalExtForeignKeys],
@@ -110,8 +115,10 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   marketing: [marketingForeignKeys],
   medical_groups: [medicalGroupsForeignKeys],
   messaging: [messagingForeignKeys],
+  observability: [observabilityForeignKeys],
   organization_extensions: [organizationExtensionsForeignKeys],
   payments: [paymentsForeignKeys1, paymentsForeignKeys2],
+  pharma_lab: [pharmaLabForeignKeys1, pharmaLabForeignKeys2],
   pharmacy: [pharmacyForeignKeys],
   pharmacy_inventory: [pharmacyInventoryForeignKeys],
   platform_ops: [platformOpsForeignKeys1, platformOpsForeignKeys2],

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `scheduling`.
- * 120 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 140 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingIndexes: readonly IndexTuple[] = [
@@ -24,6 +24,20 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['appointment_bookings', 'ix_appointment_bookings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_tenant_id', ['tenant_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_appointment_booking_id', ['appointment_booking_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_file_id', ['file_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_uploaded_by_user_id', ['uploaded_by_user_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_review_status_concept_id', ['review_status_concept_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_reviewed_by_user_id', ['reviewed_by_user_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['appointment_payment_receipts', 'ix_appointment_payment_receipts_booking_uploaded', ['appointment_booking_id', 'uploaded_at'], false, 'btree'],
+  ['appointment_payment_states', 'ux_appointment_payment_states_booking', ['appointment_booking_id'], true, 'btree'],
+  ['appointment_payment_states', 'ix_appointment_payment_states_tenant_status', ['tenant_id', 'status_concept_id'], false, 'btree'],
+  ['appointment_payment_states', 'ix_appointment_payment_states_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['appointment_payment_states', 'ix_appointment_payment_states_marked_by_user_id', ['marked_by_user_id'], false, 'btree'],
+  ['appointment_payment_states', 'ux_appointment_payment_states_invoice', ['invoice_id'], true, 'btree', 'invoice_id IS NOT NULL'],
   ['appointment_reminders', 'ix_appointment_reminders_booking_id', ['booking_id'], false, 'btree'],
   ['appointment_reminders', 'ix_appointment_reminders_channel_concept_id', ['channel_concept_id'], false, 'btree'],
   ['appointment_reminders', 'ix_appointment_reminders_notification_request_id', ['notification_request_id'], false, 'btree'],
@@ -34,6 +48,8 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['availability_exceptions', 'ix_availability_exceptions_exception_type_concept_id', ['exception_type_concept_id'], false, 'btree'],
   ['availability_exceptions', 'ix_availability_exceptions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['availability_exceptions', 'ix_availability_exceptions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['availability_exceptions', 'ix_availability_exceptions_source_kind_concept_id', ['source_kind_concept_id'], false, 'btree'],
+  ['availability_exceptions', 'ix_availability_exceptions_source_ref', ['source_ref_id'], false, 'btree', 'source_ref_id IS NOT NULL'],
   ['availability_slots', 'ix_availability_slots_schedule_id', ['schedule_id'], false, 'btree'],
   ['availability_slots', 'ix_availability_slots_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
   ['availability_slots', 'ix_availability_slots_care_space_id', ['care_space_id'], false, 'btree'],
@@ -98,6 +114,9 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['schedulable_resources', 'ix_schedulable_resources_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['schedulable_resources', 'ix_schedulable_resources_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['schedulable_resources', 'ix_schedulable_resources_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
+  ['schedulable_resources', 'ix_schedulable_resources_care_space_id', ['care_space_id'], false, 'btree'],
+  ['schedulable_resources', 'ux_schedulable_resources_tenant_id_id', ['tenant_id', 'id'], true, 'btree'],
+  ['schedulable_resources', 'ux_schedulable_resources_care_space_active', ['care_space_id'], true, 'btree', 'care_space_id IS NOT NULL AND state_concept_id = \'38a1d301-f40d-5b17-a695-5e6d605f8b19\''],
   ['schedule_rules', 'ix_schedule_rules_schedule_template_id', ['schedule_template_id'], false, 'btree'],
   ['schedule_rules', 'ix_schedule_rules_booking_mode_concept_id', ['booking_mode_concept_id'], false, 'btree'],
   ['schedule_rules', 'ix_schedule_rules_created_by_user_id', ['created_by_user_id'], false, 'btree'],
@@ -109,6 +128,7 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['schedule_templates', 'ix_schedule_templates_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['schedule_templates', 'ix_schedule_templates_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['schedule_templates', 'ix_schedule_templates_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['schedule_templates', 'ix_schedule_templates_care_space_id', ['care_space_id'], false, 'btree'],
   ['slot_holds', 'uq_slot_holds_hold_token', ['hold_token'], true, 'btree'],
   ['slot_holds', 'ix_slot_holds_bookable_slot_id', ['bookable_slot_id'], false, 'btree'],
   ['slot_holds', 'ix_slot_holds_patient_profile_id', ['patient_profile_id'], false, 'btree'],

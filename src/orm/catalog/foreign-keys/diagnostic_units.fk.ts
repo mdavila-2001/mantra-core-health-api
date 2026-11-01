@@ -2,16 +2,18 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `diagnostic_units`.
- * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 71 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['diagnostic_equipment', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['diagnostic_equipment', 'created_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_equipment', 'diagnostic_unit_site_id', 'diagnostic_units', 'diagnostic_unit_sites', 'id'],
   ['diagnostic_equipment', 'equipment_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_equipment', 'modality_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_equipment', 'operational_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['diagnostic_equipment', 'schedulable_resource_id', 'scheduling', 'schedulable_resources', 'id'],
   ['diagnostic_equipment', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_price_schedules', 'broker_tenant_id', 'directory', 'tenants', 'id'],
   ['diagnostic_price_schedules', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -39,16 +41,6 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_study_prices', 'price_schedule_id', 'diagnostic_units', 'diagnostic_price_schedules', 'id'],
   ['diagnostic_study_prices', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_study_prices', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['diagnostic_units', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['diagnostic_units', 'diagnostic_unit_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['diagnostic_units', 'ownership_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['diagnostic_units', 'practice_id', 'practice', 'practices', 'id'],
-  ['diagnostic_units', 'primary_practice_site_id', 'practice', 'practice_sites', 'id'],
-  ['diagnostic_units', 'public_profile_id', 'community', 'public_profiles', 'id'],
-  ['diagnostic_units', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['diagnostic_units', 'tenant_id', 'directory', 'tenants', 'id'],
-  ['diagnostic_units', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['diagnostic_units', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_unit_accreditations', 'accreditation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_unit_accreditations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_unit_accreditations', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
@@ -76,4 +68,14 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_unit_specialties', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_unit_specialties', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_unit_specialties', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['diagnostic_units', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['diagnostic_units', 'diagnostic_unit_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['diagnostic_units', 'ownership_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['diagnostic_units', 'practice_id', 'practice', 'practices', 'id'],
+  ['diagnostic_units', 'primary_practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['diagnostic_units', 'public_profile_id', 'community', 'public_profiles', 'id'],
+  ['diagnostic_units', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['diagnostic_units', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['diagnostic_units', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['diagnostic_units', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
 ];

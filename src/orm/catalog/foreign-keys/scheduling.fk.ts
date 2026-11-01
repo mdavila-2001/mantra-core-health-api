@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `scheduling`.
- * 115 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 138 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -22,6 +22,21 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['appointment_bookings', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['appointment_bookings', 'tenant_id', 'directory', 'tenants', 'id'],
   ['appointment_bookings', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_receipts', 'appointment_booking_id', 'scheduling', 'appointment_bookings', 'id'],
+  ['appointment_payment_receipts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_receipts', 'file_id', 'common', 'files', 'id'],
+  ['appointment_payment_receipts', 'review_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['appointment_payment_receipts', 'reviewed_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_receipts', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['appointment_payment_receipts', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_receipts', 'uploaded_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_states', 'appointment_booking_id', 'scheduling', 'appointment_bookings', 'id'],
+  ['appointment_payment_states', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_states', 'invoice_id', 'billing', 'invoices', 'id'],
+  ['appointment_payment_states', 'marked_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_payment_states', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['appointment_payment_states', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['appointment_payment_states', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['appointment_reminders', 'booking_id', 'scheduling', 'appointment_bookings', 'id'],
   ['appointment_reminders', 'channel_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['appointment_reminders', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -31,6 +46,7 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['availability_exceptions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['availability_exceptions', 'exception_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['availability_exceptions', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],
+  ['availability_exceptions', 'source_kind_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['availability_exceptions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['availability_slots', 'appointment_id', 'clinical', 'appointments', 'id'],
   ['availability_slots', 'care_space_id', 'practice', 'care_spaces', 'id'],
@@ -54,6 +70,11 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['booking_cancellations', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['booking_cancellations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['booking_cancellations', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['booking_confirmation_rules', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['booking_confirmation_rules', 'decision_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['booking_confirmation_rules', 'scope_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['booking_confirmation_rules', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['booking_confirmation_rules', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['booking_policies', 'created_by_user_id', 'iam', 'users', 'id'],
   ['booking_policies', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['booking_policies', 'practice_id', 'practice', 'practices', 'id'],
@@ -91,6 +112,7 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['practitioner_service_offerings', 'service_catalog_id', 'billing', 'service_catalog', 'id'],
   ['practitioner_service_offerings', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_service_offerings', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['schedulable_resources', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['schedulable_resources', 'created_by_user_id', 'iam', 'users', 'id'],
   ['schedulable_resources', 'practice_id', 'practice', 'practices', 'id'],
   ['schedulable_resources', 'resource_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -102,6 +124,7 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['schedule_rules', 'schedule_template_id', 'scheduling', 'schedule_templates', 'id'],
   ['schedule_rules', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['schedule_templates', 'booking_policy_id', 'scheduling', 'booking_policies', 'id'],
+  ['schedule_templates', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['schedule_templates', 'created_by_user_id', 'iam', 'users', 'id'],
   ['schedule_templates', 'practitioner_schedule_id', 'scheduling', 'practitioner_schedules', 'id'],
   ['schedule_templates', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],

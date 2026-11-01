@@ -2,25 +2,11 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `consent`.
- * 97 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 99 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const consentIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
-  ['consents', 'ix_consents_patient_profile_id', ['patient_profile_id'], false, 'btree'],
-  ['consents', 'ix_consents_granted_by_user_id', ['granted_by_user_id'], false, 'btree'],
-  ['consents', 'ix_consents_granted_by_related_person_id', ['granted_by_related_person_id'], false, 'btree'],
-  ['consents', 'ix_consents_category_concept_id', ['category_concept_id'], false, 'btree'],
-  ['consents', 'ix_consents_processing_purpose_id', ['processing_purpose_id'], false, 'btree'],
-  ['consents', 'ix_consents_processing_legal_basis_id', ['processing_legal_basis_id'], false, 'btree'],
-  ['consents', 'ix_consents_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['consents', 'ix_consents_tenant_id', ['tenant_id'], false, 'btree'],
-  ['consents', 'ix_consents_withdrawal_reason_concept_id', ['withdrawal_reason_concept_id'], false, 'btree'],
-  ['consents', 'ix_consents_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['consents', 'ix_consents_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['consents', 'ix_consents_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
-  ['consents', 'ix_consents_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
-  ['consents', 'ix_consents_patient_purpose_status', ['patient_profile_id', 'processing_purpose_id', 'status_concept_id', 'valid_from desc'], false, 'btree'],
   ['consent_events', 'ix_consent_events_subject_type_concept_id', ['subject_type_concept_id'], false, 'btree'],
   ['consent_events', 'ix_consent_events_event_type_concept_id', ['event_type_concept_id'], false, 'btree'],
   ['consent_events', 'ix_consent_events_previous_status_concept_id', ['previous_status_concept_id'], false, 'btree'],
@@ -46,6 +32,20 @@ export const consentIndexes: readonly IndexTuple[] = [
   ['consent_provisions', 'ix_consent_provisions_security_label_concept_id', ['security_label_concept_id'], false, 'btree'],
   ['consent_provisions', 'ix_consent_provisions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['consent_provisions', 'ix_consent_provisions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['consents', 'ix_consents_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['consents', 'ix_consents_granted_by_user_id', ['granted_by_user_id'], false, 'btree'],
+  ['consents', 'ix_consents_granted_by_related_person_id', ['granted_by_related_person_id'], false, 'btree'],
+  ['consents', 'ix_consents_category_concept_id', ['category_concept_id'], false, 'btree'],
+  ['consents', 'ix_consents_processing_purpose_id', ['processing_purpose_id'], false, 'btree'],
+  ['consents', 'ix_consents_processing_legal_basis_id', ['processing_legal_basis_id'], false, 'btree'],
+  ['consents', 'ix_consents_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['consents', 'ix_consents_tenant_id', ['tenant_id'], false, 'btree'],
+  ['consents', 'ix_consents_withdrawal_reason_concept_id', ['withdrawal_reason_concept_id'], false, 'btree'],
+  ['consents', 'ix_consents_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['consents', 'ix_consents_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['consents', 'ix_consents_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['consents', 'ix_consents_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['consents', 'ix_consents_patient_purpose_status', ['patient_profile_id', 'processing_purpose_id', 'status_concept_id', 'valid_from desc'], false, 'btree'],
   ['hipaa_authorizations', 'ix_hipaa_authorizations_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['hipaa_authorizations', 'ix_hipaa_authorizations_tenant_id', ['tenant_id'], false, 'btree'],
   ['hipaa_authorizations', 'ix_hipaa_authorizations_processing_purpose_id', ['processing_purpose_id'], false, 'btree'],
@@ -104,4 +104,6 @@ export const consentIndexes: readonly IndexTuple[] = [
   ['treatment_informed_consents', 'ix_treatment_informed_consents_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['treatment_informed_consents', 'ix_treatment_informed_consents_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['treatment_informed_consents', 'ix_treatment_informed_consents_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['treatment_informed_consents', 'ix_treatment_informed_consents_target', ['target_type', 'target_id'], false, 'btree'],
+  ['treatment_informed_consents', 'ix_treatment_informed_consents_patient_target', ['patient_profile_id', 'target_type'], false, 'btree'],
 ];

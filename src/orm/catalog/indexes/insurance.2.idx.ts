@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `insurance` (parte 2/2).
- * 41 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 48 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceIndexes2: readonly IndexTuple[] = [
@@ -22,6 +22,13 @@ export const insuranceIndexes2: readonly IndexTuple[] = [
   ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_patient_profile_id__2239c1f8', ['patient_profile_id', 'created_at desc'], false, 'btree'],
+  ['practitioner_insurer_requests', 'ix_practitioner_insurer_requests_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
+  ['practitioner_insurer_requests', 'ix_practitioner_insurer_requests_insurance_carrier_id', ['insurance_carrier_id'], false, 'btree'],
+  ['practitioner_insurer_requests', 'ix_practitioner_insurer_requests_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['practitioner_insurer_requests', 'ix_practitioner_insurer_requests_decided_by_user_id', ['decided_by_user_id'], false, 'btree'],
+  ['practitioner_insurer_requests', 'ix_practitioner_insurer_requests_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practitioner_insurer_requests', 'ix_practitioner_insurer_requests_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['practitioner_insurer_requests', 'uq_practitioner_insurer_requests_live_pair', ['practitioner_profile_id', 'insurance_carrier_id'], true, 'btree', 'status_concept_id IN (\'bc4f121c-f0cf-54b9-a1b8-f9a62a1cde8c\', \'dfb1912e-d1ad-5566-8f9b-1d7a09f9da8f\')'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_prior_authorizat_9b22376b', ['prior_authorization_request_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_prior_authorizat_3c8c8cdf', ['prior_authorization_item_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_decision_concept_id', ['decision_concept_id'], false, 'btree'],

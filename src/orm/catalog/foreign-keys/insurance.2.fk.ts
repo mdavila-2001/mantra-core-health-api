@@ -2,11 +2,17 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `insurance` (parte 2/2).
- * 23 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 29 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['practitioner_insurer_requests', 'insurance_carrier_id', 'insurance', 'insurance_carriers', 'id'],
+  ['practitioner_insurer_requests', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['practitioner_insurer_requests', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_insurer_requests', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['prior_authorization_determinations', 'decided_by_user_id', 'iam', 'users', 'id'],
+  ['prior_authorization_determinations', 'decision_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['prior_authorization_determinations', 'denial_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['prior_authorization_determinations', 'prior_authorization_item_id', 'insurance', 'prior_authorization_items', 'id'],
   ['prior_authorization_determinations', 'prior_authorization_request_id', 'insurance', 'prior_authorization_requests', 'id'],

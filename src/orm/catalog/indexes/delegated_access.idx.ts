@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `delegated_access`.
- * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 73 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const delegatedAccessIndexes: readonly IndexTuple[] = [
@@ -26,14 +26,14 @@ export const delegatedAccessIndexes: readonly IndexTuple[] = [
   ['delegated_access_grants', 'ix_delegated_access_grants_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['delegated_access_grants', 'ix_delegated_access_grants_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['delegated_access_grants', 'ix_delegated_access_grants_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_delegated_permission_set_id', ['delegated_permission_set_id'], false, 'btree'],
+  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_permission_id', ['permission_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_tenant_id', ['tenant_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_delegate_type_concept_id', ['delegate_type_concept_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
-  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_delegated_permission_set_id', ['delegated_permission_set_id'], false, 'btree'],
-  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_permission_id', ['permission_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_practitioner_delegate_assignment_id', ['practitioner_delegate_assignment_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_event_type_concept_id', ['event_type_concept_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_actor_user_id', ['actor_user_id'], false, 'btree'],
@@ -53,6 +53,7 @@ export const delegatedAccessIndexes: readonly IndexTuple[] = [
   ['organization_user_assignments', 'ix_organization_user_assignments_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['organization_user_assignments', 'ix_organization_user_assignments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['organization_user_assignments', 'ix_organization_user_assignments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['organization_user_assignments', 'ix_organization_user_assignments_supervisor', ['supervisor_user_id'], false, 'btree', 'supervisor_user_id IS NOT NULL'],
   ['practitioner_delegate_assignments', 'ix_practitioner_delegate_assignments_practitioner_role_5ab23b12', ['practitioner_role_assignment_id'], false, 'btree'],
   ['practitioner_delegate_assignments', 'ix_practitioner_delegate_assignments_delegate_user_ass_52dcb36c', ['delegate_user_assignment_id'], false, 'btree'],
   ['practitioner_delegate_assignments', 'ix_practitioner_delegate_assignments_delegated_permiss_e45e3818', ['delegated_permission_set_id'], false, 'btree'],
@@ -62,4 +63,21 @@ export const delegatedAccessIndexes: readonly IndexTuple[] = [
   ['practitioner_delegate_assignments', 'ix_practitioner_delegate_assignments_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['practitioner_delegate_assignments', 'ix_practitioner_delegate_assignments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['practitioner_delegate_assignments', 'ix_practitioner_delegate_assignments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['shared_access_link_uses', 'ix_shared_access_link_uses_link_occurred', ['shared_access_link_id', 'occurred_at desc'], false, 'btree'],
+  ['shared_access_link_uses', 'ix_shared_access_link_uses_action_concept_id', ['action_concept_id'], false, 'btree'],
+  ['shared_access_link_uses', 'ix_shared_access_link_uses_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
+  ['shared_access_link_uses', 'brin_shared_access_link_uses_occurred_at', ['occurred_at'], false, 'brin'],
+  ['shared_access_links', 'uq_shared_access_links_token_hash', ['token_hash'], true, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_tenant_id', ['tenant_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_resource', ['resource_type_concept_id', 'resource_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_scope_concept_id', ['scope_concept_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_recipient_kind_concept_id', ['recipient_kind_concept_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_purpose_of_use_concept_id', ['purpose_of_use_concept_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_revoked_by_user_id', ['revoked_by_user_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['shared_access_links', 'ix_shared_access_links_live_expiry', ['expires_at'], false, 'btree', 'revoked_at IS NULL'],
+  ['shared_access_links', 'ix_shared_access_links_patient_profile_id_created_at', ['patient_profile_id', 'created_at desc'], false, 'btree'],
 ];

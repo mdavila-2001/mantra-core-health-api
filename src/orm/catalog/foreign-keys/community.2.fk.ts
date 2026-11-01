@@ -2,11 +2,26 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `community` (parte 2/2).
- * 58 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 73 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['prestige_scores', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['prestige_scores', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['prestige_scores', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['public_profiles', 'avatar_file_id', 'common', 'files', 'id'],
+  ['public_profiles', 'cover_file_id', 'common', 'files', 'id'],
+  ['public_profiles', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['public_profiles', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['public_profiles', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['public_profiles', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['public_profiles', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['public_profiles', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['public_profiles', 'visibility_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['reactions', 'actor_profile_id', 'community', 'public_profiles', 'id'],
+  ['reactions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['reactions', 'reactable_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reactions', 'reaction_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reactions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['review_dimension_scores', 'dimension_concept_id', 'terminology', 'catalog_concepts', 'id'],

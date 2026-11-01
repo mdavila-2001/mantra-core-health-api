@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `diagnostic_units`.
- * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 75 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
@@ -13,6 +13,9 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_equipment', 'ix_diagnostic_equipment_operational_status_concept_id', ['operational_status_concept_id'], false, 'btree'],
   ['diagnostic_equipment', 'ix_diagnostic_equipment_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['diagnostic_equipment', 'ix_diagnostic_equipment_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['diagnostic_equipment', 'ix_diagnostic_equipment_care_space_id', ['care_space_id'], false, 'btree'],
+  ['diagnostic_equipment', 'ix_diagnostic_equipment_schedulable_resource_id', ['schedulable_resource_id'], false, 'btree'],
+  ['diagnostic_equipment', 'ux_diagnostic_equipment_site_ae_title', ['diagnostic_unit_site_id', 'ae_title'], true, 'btree', 'ae_title IS NOT NULL'],
   ['diagnostic_price_schedules', 'ix_diagnostic_price_schedules_diagnostic_unit_id', ['diagnostic_unit_id'], false, 'btree'],
   ['diagnostic_price_schedules', 'ix_diagnostic_price_schedules_diagnostic_unit_site_id', ['diagnostic_unit_site_id'], false, 'btree'],
   ['diagnostic_price_schedules', 'ix_diagnostic_price_schedules_price_schedule_type_concept_id', ['price_schedule_type_concept_id'], false, 'btree'],
@@ -40,18 +43,6 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_study_prices', 'ix_diagnostic_study_prices_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['diagnostic_study_prices', 'ix_diagnostic_study_prices_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['diagnostic_study_prices', 'uq_diagnostic_study_prices_price_schedule_id_version_number', ['price_schedule_id', 'version_number'], true, 'btree'],
-  ['diagnostic_units', 'uq_diagnostic_units_tenant_id_code', ['tenant_id', 'code'], true, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_tenant_id', ['tenant_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_practice_id', ['practice_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_primary_practice_site_id', ['primary_practice_site_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_diagnostic_unit_type_concept_id', ['diagnostic_unit_type_concept_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_ownership_type_concept_id', ['ownership_type_concept_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_public_profile_id', ['public_profile_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['diagnostic_units', 'ix_diagnostic_units_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['diagnostic_unit_accreditations', 'ix_diagnostic_unit_accreditations_diagnostic_unit_id', ['diagnostic_unit_id'], false, 'btree'],
   ['diagnostic_unit_accreditations', 'ix_diagnostic_unit_accreditations_diagnostic_unit_site_id', ['diagnostic_unit_site_id'], false, 'btree'],
   ['diagnostic_unit_accreditations', 'ix_diagnostic_unit_accreditations_accreditation_concept_id', ['accreditation_concept_id'], false, 'btree'],
@@ -79,4 +70,16 @@ export const diagnosticUnitsIndexes: readonly IndexTuple[] = [
   ['diagnostic_unit_specialties', 'ix_diagnostic_unit_specialties_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
   ['diagnostic_unit_specialties', 'ix_diagnostic_unit_specialties_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['diagnostic_unit_specialties', 'ix_diagnostic_unit_specialties_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['diagnostic_units', 'uq_diagnostic_units_tenant_id_code', ['tenant_id', 'code'], true, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_tenant_id', ['tenant_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_practice_id', ['practice_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_primary_practice_site_id', ['primary_practice_site_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_diagnostic_unit_type_concept_id', ['diagnostic_unit_type_concept_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_ownership_type_concept_id', ['ownership_type_concept_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_public_profile_id', ['public_profile_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['diagnostic_units', 'ix_diagnostic_units_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
 ];

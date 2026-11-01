@@ -2,11 +2,26 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `community` (parte 2/2).
- * 63 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 78 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['prestige_scores', 'ix_prestige_scores_total_points', ['tenant_id', 'total_points'], false, 'btree'],
+  ['public_profiles', 'uq_public_profiles_slug', ['slug'], true, 'btree'],
+  ['public_profiles', 'ix_public_profiles_tenant_id', ['tenant_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_target_type_concept_id', ['target_type_concept_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_avatar_file_id', ['avatar_file_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_cover_file_id', ['cover_file_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_visibility_concept_id', ['visibility_concept_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['public_profiles', 'ix_public_profiles_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['reactions', 'ix_reactions_actor_profile_id', ['actor_profile_id'], false, 'btree'],
+  ['reactions', 'ix_reactions_reactable_type_concept_id', ['reactable_type_concept_id'], false, 'btree'],
+  ['reactions', 'ix_reactions_reaction_type_concept_id', ['reaction_type_concept_id'], false, 'btree'],
   ['reactions', 'ix_reactions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['reactions', 'ix_reactions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['reactions', 'uq_reactions_actor_target_type', ['actor_profile_id', 'reactable_type_concept_id', 'reactable_ref_id', 'reaction_type_concept_id'], true, 'btree'],
