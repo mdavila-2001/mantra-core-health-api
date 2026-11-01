@@ -74,6 +74,7 @@ tiene tenant, el rol se mide **en ese tenant**; cuando no lo tiene, solo pasa el
 | `BookingAccess.assertResourceInActiveTenant` y las sedes de las reservas flexibles y por servicio (`SUPERADMIN`) | el del recurso de agenda |
 | `FileLinkTargetGuard` (`SUPERADMIN`): elegir cualquier dueño en `POST /common/files/:id/links` | sin tenant (el dueño puede ser una persona u otra organización): solo global; el acotado vincula a su usuario o a su tenant resuelto |
 | `ClinicalReadService.assertCanReadHistory/assertCanWriteHistory` (`SUPERADMIN`) y `GET /profiles/patients/:profileId` (`SECURITY_ADMIN`) | sin tenant (la historia y el perfil de una persona no son de ninguna organización): solo global; el acotado sigue la regla de quien atiende |
+| Rol de analítica de `InsuranceAnalyticsService` (`INSURANCE_OPERATOR`, `SECURITY_ADMIN`, `SUPERADMIN`) | el de la aseguradora activa |
 | Pista `422 TENANT_REQUIRED` de las campañas de seguro sin `X-Tenant-Id` | sin tenant: solo global; el acotado recibe el `403` auditado de cualquier actor sin tenant |
 
 `SYSTEM` lo emiten los workers y los chats de pedido y turno sin `scopedRoles`, así que sigue siendo
