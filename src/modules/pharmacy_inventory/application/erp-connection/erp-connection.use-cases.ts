@@ -290,8 +290,14 @@ export class ErpConnectionUseCases {
     assertOutboundUrlAllowed(baseUrl);
     let apiKey = dto.apiKey;
     if (!apiKey) {
-      const current = await this.connections.findForPharmacy(em, pharmacyId);
-      if (!current?.credential?.secretRef) throw keyRequired();
+      const current = await this.connections.findForPharmacy(em, pharmacyId, {
+        erpOnly: true,
+      });
+      if (
+        !current?.credential?.secretRef ||
+        pharmacyConnectionFormat(current.connection.configJson) !== 'ERP'
+      )
+        throw keyRequired();
       if (destinationChanged(current, dto.systemCode, baseUrl)) {
         throw keyRequiredForNewDestination();
       }

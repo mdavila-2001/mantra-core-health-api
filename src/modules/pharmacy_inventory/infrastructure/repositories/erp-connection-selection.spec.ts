@@ -96,7 +96,7 @@ function fixture() {
   };
   const repo = new ErpConnectionRepository();
   const find = (options: { linkId?: string; erpOnly?: boolean }) =>
-    Reflect.apply(repo.findForPharmacy, repo, [
+    Reflect.apply(repo.findForPharmacy.bind(repo), repo, [
       em,
       'ph',
       options,

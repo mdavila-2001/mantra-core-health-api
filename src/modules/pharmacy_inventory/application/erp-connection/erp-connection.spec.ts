@@ -606,3 +606,68 @@ describe('rejects incomplete or ambiguous persisted formats', () => {
     },
   );
 });
+
+describe('draft reuses only a supported ERP credential', () => {
+  it.each([
+    { version: 2, baseUrl: 'http://farmacia.test/std', pharmacyCode: 'FARM-1' },
+    { baseUrl: 'http://farmacia.test/std', pharmacyCode: 'FARM-1' },
+    {
+      kind: 'PHARMACY_EXTERNAL_SYSTEM',
+      format: 'ALOVIDA_STANDARD',
+      baseUrl: 'http://farmacia.test/std',
+    },
+    {
+      kind: 'PHARMACY_EXTERNAL_SYSTEM',
+      version: 1,
+      format: 'ALOVIDA_STANDARD',
+      baseUrl: 'http://farmacia.test/std',
+    },
+  ])(
+    'does not borrow a saved key from unsupported identity: %j',
+    async (raw) => {
+      const d = doubles();
+      d.connections.findForPharmacy.mockResolvedValue(
+        record({ connection: { ...record().connection, configJson: raw } }),
+      );
+      await expect(
+        d.useCases.testDraft(
+          'ph-1',
+          {
+            systemCode: 'ALOVIDA_STANDARD',
+            baseUrl: 'http://farmacia.test/std',
+            pharmacyCode: 'FARM-1',
+          } as never,
+          ACTOR,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.cipher.decrypt).not.toHaveBeenCalled();
+      expect(d.catalogs.forAccess).not.toHaveBeenCalled();
+    },
+  );
+  it('uses the owned ERP even when an external connection is newer', async () => {
+    const d = doubles();
+    const owned = record();
+    const foreign = record({
+      credential: { id: 'foreign', secretRef: 'synthetic-foreign' },
+    });
+    d.connections.findForPharmacy.mockImplementation(
+      async (...args: unknown[]) =>
+        (args[2] as { erpOnly?: boolean } | undefined)?.erpOnly
+          ? owned
+          : foreign,
+    );
+    await expect(
+      d.useCases.testDraft(
+        'ph-1',
+        {
+          systemCode: 'ALOVIDA_STANDARD',
+          baseUrl: 'http://farmacia.test/std',
+          pharmacyCode: 'FARM-1',
+        } as never,
+        ACTOR,
+      ),
+    ).resolves.toEqual({ result: 'OK' });
+    expect(d.cipher.decrypt).toHaveBeenCalledWith(owned.credential.secretRef);
+    expect(d.cipher.decrypt).not.toHaveBeenCalledWith('synthetic-foreign');
+  });
+});
