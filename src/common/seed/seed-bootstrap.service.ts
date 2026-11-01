@@ -711,6 +711,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       ...(this.personalSpace
         ? [
             {
+              id: 'membresias-espacio-personal',
               name: 'membresías del espacio personal',
               kind: 'core' as const,
               run: () => this.personalSpace!.run(),
