@@ -35,6 +35,7 @@ import {
   PurgeResultDto,
 } from '../../presentation/dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
+import { enterAuthBoundaryContext } from './auth-boundary-context';
 import {
   ACCOUNT_PROFILE_IDS_PORT,
   type AccountProfileIdsPort,
@@ -400,6 +401,7 @@ export class IamAuthService {
     await this.assertMfaChallenge(readEm, user.id, dto.mfaCode, span, ip);
 
     return this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
       const { roles, scopedRoles } = await this.mergeRoleCodes(
         tx,
@@ -546,6 +548,7 @@ export class IamAuthService {
     // la política de reuso, igual que un token repetido más tarde.
     const outcome = await this.em.transactional(
       async (tx): Promise<RefreshOutcome> => {
+        await enterAuthBoundaryContext(tx);
         const rt = await this.refreshRepo.findByHashForUpdate(tx, tokenHash);
         if (!rt) return { kind: 'invalid' };
 
@@ -786,6 +789,9 @@ export class IamAuthService {
     ip: string | undefined,
   ): Promise<void> {
     await this.em.transactional(async (tx) => {
+      // `iam.account_lockouts` tiene RLS forzado: sin esto el bloqueo no se ve
+      // ni se puede insertar, y el intento que alcanza el umbral daba 500.
+      await enterAuthBoundaryContext(tx);
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
         outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,

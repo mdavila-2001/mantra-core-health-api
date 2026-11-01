@@ -22,7 +22,10 @@ const dto: RegisterSupportStaffDto = {
 };
 
 function build() {
-  const tx = { flush: fn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: fn().mockResolvedValue(undefined),
+    execute: fn().mockResolvedValue(undefined),
+  };
   const em = { transactional: fn((cb: (t: unknown) => unknown) => cb(tx)) };
   const tokenService = {
     issueRefreshToken: fn(() => ({ raw: 'raw', hash: 'hash' })),
