@@ -4,6 +4,58 @@ import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
 import { roleAuthorizesInTenant } from '../auth/roles.guard';
 import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../errors/system-error-reasons';
+import { SEED } from '../constants/concepts';
+
+/**
+ * Espacio personal: el tenant por defecto donde el autorregistro de paciente,
+ * de profesional (y su consultorio propio) y de personal de apoyo deja a cada
+ * cuenta. Pertenecer a una organización **no** es requisito para usar la
+ * plataforma (propietario, 01/11/2026): el paciente no necesita ninguna y el
+ * médico sin organización usa todo lo personal —chat, notificaciones, red
+ * social, su ficha— igual que el que la tiene.
+ */
+export const PERSONAL_TENANT_ID: string = SEED.tenantId;
+
+/**
+ * Roles de una **persona** que usa la plataforma para sí: atenderse, atender,
+ * asistir a un profesional. Son los que tienen espacio personal sin
+ * organización. Un rol administrativo (SECURITY_ADMIN, PLATFORM_ADMIN…) sin
+ * membresía sigue sin contexto: administrar es siempre de una organización o
+ * de la plataforma, nunca «personal».
+ */
+export const PERSONAL_SPACE_ROLES: ReadonlySet<string> = new Set([
+  'PATIENT',
+  'PRACTITIONER',
+  'CLINICIAN',
+  'SURGEON',
+  'ANESTHESIOLOGIST',
+  'SUPPORT_STAFF',
+  'CAREGIVER',
+  'USER',
+]);
+
+/** Si el actor tiene algún rol con espacio personal. */
+export function hasPersonalSpaceRole(
+  roles: readonly string[] | undefined,
+): boolean {
+  return roles?.some((role) => PERSONAL_SPACE_ROLES.has(role)) ?? false;
+}
+
+/**
+ * Membresías con las que se resuelve el tenant. Una persona sin ninguna —alta
+ * asistida, alta por `POST /iam/users`, o una cuenta anterior a que el
+ * autorregistro diera la membresía por defecto— opera en el espacio personal
+ * en vez de quedar bloqueada con 403 en cada petición.
+ */
+export function effectiveMemberships(
+  user: Pick<AuthenticatedUser, 'tenantIds' | 'roles'>,
+): readonly string[] {
+  const memberships = user.tenantIds ?? [];
+  if (memberships.length > 0 || !hasPersonalSpaceRole(user.roles)) {
+    return memberships;
+  }
+  return [PERSONAL_TENANT_ID];
+}
 
 /**
  * Roles cuyo alcance es la plataforma entera, no un tenant: operan sin cabecera
@@ -47,7 +99,7 @@ export function resolveOrdinaryTenantId(
 ): string {
   const header = request.headers['x-tenant-id'];
   const declared = Array.isArray(header) ? header[0] : header;
-  const memberships = user.tenantIds ?? [];
+  const memberships = effectiveMemberships(user);
 
   if (declared) {
     if (!memberships.includes(declared)) {
@@ -61,6 +113,14 @@ export function resolveOrdinaryTenantId(
 
   if (memberships.length === 1) {
     return memberships[0];
+  }
+
+  // Varias organizaciones y ninguna elegida: si una es el espacio personal, se
+  // opera en él. Lo personal (chat, notificaciones, perfil, red social) no es de
+  // ninguna organización, y entrar a una es elegirla con `X-Tenant-Id`. Antes
+  // esto era un 403 en cada petición hasta elegir, también para lo personal.
+  if (memberships.includes(PERSONAL_TENANT_ID)) {
+    return PERSONAL_TENANT_ID;
   }
 
   // El status no cambia (403); `reason` le deja al cliente distinguir «falta

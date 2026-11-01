@@ -3,6 +3,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { of, lastValueFrom } from 'rxjs';
 import { TenantContextInterceptor } from './tenant-context.interceptor';
 import { getCurrentTenantId } from './tenant-context';
+import { PERSONAL_TENANT_ID } from './tenant-resolution';
 
 /** Construye un ExecutionContext HTTP mínimo con cabeceras, sujeto, cuerpo y query. */
 function httpContext(
@@ -86,6 +87,42 @@ describe('TenantContextInterceptor', () => {
         expect((error as ForbiddenException).getStatus()).toBe(403);
         expect(body.details?.reason).toBe('TENANT_AMBIGUOUS');
       }
+    });
+
+    it('un paciente sin organización opera en el espacio personal (tenant por defecto)', async () => {
+      const ctx = httpContext(
+        {},
+        { id: 'u1', roles: ['PATIENT'], tenantIds: [] },
+      );
+      let seen: string | undefined;
+      const spy = { handle: () => of((seen = getCurrentTenantId())) };
+      await lastValueFrom(build().intercept(ctx, spy));
+      expect(seen).toBe(PERSONAL_TENANT_ID);
+    });
+
+    it('un médico en varias organizaciones, sin elegir, opera en su espacio personal si es una de ellas', async () => {
+      const ctx = httpContext(
+        {},
+        {
+          id: 'u1',
+          roles: ['PRACTITIONER'],
+          tenantIds: ['tenant-A', PERSONAL_TENANT_ID],
+        },
+      );
+      let seen: string | undefined;
+      const spy = { handle: () => of((seen = getCurrentTenantId())) };
+      await lastValueFrom(build().intercept(ctx, spy));
+      expect(seen).toBe(PERSONAL_TENANT_ID);
+    });
+
+    it('una persona sin organización no puede declarar un tenant ajeno', () => {
+      const ctx = httpContext(
+        { 'x-tenant-id': 'tenant-A' },
+        { id: 'u1', roles: ['PATIENT'], tenantIds: [] },
+      );
+      expect(() => build().intercept(ctx, handler('ok'))).toThrow(
+        ForbiddenException,
+      );
     });
 
     it('rechaza si el actor no pertenece a ningún tenant', () => {
