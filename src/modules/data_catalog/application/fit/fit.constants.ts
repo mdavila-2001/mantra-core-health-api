@@ -24,13 +24,13 @@ export const FIT_TICK_INTERVAL_MS = 5 * 60 * 1000;
 export const FIT_STALE_AFTER_MS = 3 * FIT_TICK_INTERVAL_MS;
 
 /**
- * Cuánto vive un resultado en memoria. Pasado esto `GET /admin/catalog/fit` dice que no hay
- * resultado vigente en vez de servir uno de ayer como si fuera de hoy. No hay tabla donde
- * persistirlo (ver `README.md` de esta carpeta); mientras no la haya, el TTL es la garantía.
+ * Cuánto vale un resultado como «el último». Pasado esto `GET /admin/catalog/fit` dice que no hay
+ * resultado vigente en vez de servir uno de ayer como si fuera de hoy, venga de la base
+ * (`data_catalog.catalog_fit_runs`) o, si la base no responde, de la memoria del proceso.
  */
 export const FIT_RESULT_TTL_MS = 24 * 60 * 60 * 1000;
 
-/** Cuántos resultados resumidos conserva el historial en memoria (a 5 min por tick, 4 horas). */
+/** Cuántos resultados resumidos devuelve el historial (a 5 min por tick, 4 horas). */
 export const FIT_HISTORY_SIZE = 48;
 
 /** Hallazgos que conserva cada comprobación; el total real viaja aparte en `findingsTotal`. */
@@ -41,3 +41,9 @@ export const FIT_IDEMPOTENCY_TTL_MS = 60 * 60 * 1000;
 
 /** Largo de la huella (hex) de un conjunto de rutas. */
 export const FINGERPRINT_LENGTH = 16;
+
+/**
+ * Cuánto se conservan las corridas en `data_catalog.catalog_fit_runs` antes de purgarlas
+ * (clase de mutabilidad `APPEND_ONLY_PURGEABLE`). A un tick cada 5 min son ~8 600 filas.
+ */
+export const FIT_RUN_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;

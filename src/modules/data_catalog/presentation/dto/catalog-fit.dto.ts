@@ -145,8 +145,41 @@ export class FitHistoryEntryDto {
   @ApiProperty({ type: [String] }) blindSpots!: string[];
 }
 
+export class FitPersistenceStatusDto {
+  @ApiProperty({
+    enum: ['GUARDADA', 'CLAVE_REPETIDA', 'NO_GUARDADA', 'SIN_INTENTO'],
+    description:
+      'Desenlace de la última escritura en data_catalog.catalog_fit_runs intentada por este proceso',
+  })
+  state!: string;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  runId!: string | null;
+  @ApiProperty({ nullable: true, type: String }) at!: string | null;
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    description: 'Clase del error, nunca el mensaje',
+  })
+  errorCode!: string | null;
+}
+
 export class FitRetentionDto {
-  @ApiProperty({ enum: ['MEMORIA_DEL_PROCESO'] }) kind!: string;
+  @ApiProperty({
+    enum: ['BASE_DE_DATOS', 'MEMORIA_DEL_PROCESO'],
+    description:
+      '`BASE_DE_DATOS`: leído de data_catalog.catalog_fit_runs. `MEMORIA_DEL_PROCESO`: sin repositorio o con la base caída (ver `fallbackReason`)',
+  })
+  kind!: string;
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    example: 'BD_NO_DISPONIBLE:Error',
+  })
+  fallbackReason!: string | null;
+  @ApiProperty({ nullable: true, type: Number })
+  storedForSeconds!: number | null;
+  @ApiProperty({ type: FitPersistenceStatusDto })
+  lastWrite!: FitPersistenceStatusDto;
   @ApiProperty() ttlSeconds!: number;
   @ApiProperty() historySize!: number;
   @ApiProperty() tickIntervalSeconds!: number;
@@ -207,4 +240,8 @@ export class FitRunResultDto {
   blindSpots?: number;
   @ApiPropertyOptional({ nullable: true, type: String }) errorCode?:
     string | null;
+  @ApiPropertyOptional({
+    description: 'Si el desenlace quedó en data_catalog.catalog_fit_runs',
+  })
+  persisted?: boolean;
 }

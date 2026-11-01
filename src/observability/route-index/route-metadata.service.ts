@@ -1,5 +1,9 @@
 import { Injectable, RequestMethod, type OnModuleInit } from '@nestjs/common';
-import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
+import {
+  GUARDS_METADATA,
+  METHOD_METADATA,
+  PATH_METADATA,
+} from '@nestjs/common/constants';
 import { DiscoveryService, MetadataScanner } from '@nestjs/core';
 import {
   AUDITED_KEY,
@@ -36,6 +40,13 @@ export interface RouteSecurity {
   readonly auditedAction: string | null;
   /** `true` si lleva `@NotAudited`. */
   readonly notAudited: boolean;
+  /**
+   * Clase del módulo de Nest que declara el controlador (p. ej. `AuthzModule`), o `null` si el
+   * contenedor no lo dice. Opcional para no romper a quien arma un `RouteSecurity` a mano.
+   */
+  readonly module?: string | null;
+  /** `true` si el controlador o el handler declaran `@UseGuards(...)` propios (además de los globales). */
+  readonly guarded?: boolean;
 }
 
 function pathsOf(value: unknown): string[] {
@@ -51,6 +62,12 @@ function metadataOf<T>(
 ): T | undefined {
   return (Reflect.getMetadata(key, handler) ??
     Reflect.getMetadata(key, controller)) as T | undefined;
+}
+
+function guardsOf(target: object): number {
+  const guards = Reflect.getMetadata(GUARDS_METADATA, target) as
+    unknown[] | undefined;
+  return guards?.length ?? 0;
 }
 
 @Injectable()
@@ -77,6 +94,8 @@ export class RouteMetadataService implements OnModuleInit {
         Reflect.getMetadata(PATH_METADATA, metatype),
       );
       const prototype = Object.getPrototypeOf(instance) as object | null;
+      const moduleName = wrapper.host?.metatype?.name ?? null;
+      const controllerGuards = guardsOf(metatype);
       for (const handlerName of this.scanner.getAllMethodNames(prototype)) {
         const target: unknown = Reflect.get(prototype ?? {}, handlerName);
         if (typeof target !== 'function') continue;
@@ -100,6 +119,8 @@ export class RouteMetadataService implements OnModuleInit {
           auditedAction: audited?.action ?? null,
           notAudited:
             metadataOf<string>(NOT_AUDITED_KEY, target, metatype) !== undefined,
+          module: moduleName,
+          guarded: controllerGuards + guardsOf(target) > 0,
         };
         for (const controllerPath of controllerPaths)
           for (const handlerPath of pathsOf(

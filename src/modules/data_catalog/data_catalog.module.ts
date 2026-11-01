@@ -30,6 +30,7 @@ import { FitCheckRegistry } from './application/fit/fit-check.registry';
 import { FitInputsCollector } from './application/fit/fit-inputs.collector';
 import { FitLiveRepository } from './application/fit/fit-live.repository';
 import { FitResultsStore } from './application/fit/fit-results.store';
+import { FitRunsRepository } from './application/fit/fit-runs.repository';
 import { FIT_MUTABILITY_SOURCE } from './application/fit/fit.types';
 import { MutabilityFitSource } from './application/fit/mutability-source.adapter';
 import { MutabilityModule } from '../system_ops/mutability/mutability.module';
@@ -85,6 +86,7 @@ import {
     FitInputsCollector,
     FitCheckRegistry,
     FitResultsStore,
+    FitRunsRepository,
     CatalogFitService,
     { provide: FIT_MUTABILITY_SOURCE, useClass: MutabilityFitSource },
     IamPlatformRoleCodesAdapter,

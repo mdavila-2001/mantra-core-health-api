@@ -54,6 +54,7 @@ import {
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
+import { RouteIndexModule } from '../../observability/route-index/route-index.module';
 import { MessagingModule } from '../messaging/messaging.module';
 // Igual que `clinical` la provee bare (sin importar `ProfilesModule` entero):
 // es una clase sin estado que recibe el `EntityManager` por parámetro.
@@ -77,6 +78,8 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    // `AuthzModulesRouteInventory` lee el índice único de rutas (`RouteMetadataService`).
+    RouteIndexModule,
   ],
   controllers: [
     AuthzCatalogController,

@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MutabilityCatalogService } from '../../../system_ops/mutability/services/mutability-catalog.service';
-import type {
-  FitMutabilitySource,
-  MutabilityDeclarations,
-} from './fit.types';
+import type { FitMutabilitySource, MutabilityDeclarations } from './fit.types';
 
 /**
  * Fuente de mutabilidad de la sonda de ajuste: lee el registro derivado por el gobierno de
