@@ -74,3 +74,4 @@ AloVida gestiona datos de salud altamente sensibles (PHI / Ley 1173 de Bolivia).
 - [ ] `yarn build` exitoso con código 0.
 - [ ] `yarn test` con todas las suites en verde.
 - [ ] `REPORTE.md` completado y evidencia en `evidencia/`.
+
