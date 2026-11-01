@@ -126,6 +126,26 @@ del sistema — fija el tenant activo para la request/transacción. Que Row-Leve
 (`RLS_ENFORCE`) esté activo depende de la configuración de cada entorno, no sólo del código — ver
 [aislamiento por tenant](../security/tenant-isolation.md).
 
+### Espacio personal (personas sin organización)
+
+Pertenecer a una organización no es requisito para usar la plataforma. Un paciente, o un médico que
+atiende de forma independiente, opera en el **espacio personal**: el tenant por defecto
+(`SEED.tenantId`), con una membresía `ACTIVE` explícita (`ROLE_STAFF`, `SCOPE_ALL_TENANT`). Esa
+membresía la crea el autorregistro. Para las cuentas anteriores o dadas de alta sin ella, el paso de
+seed `membresías del espacio personal` (`personal-space-memberships-seed.service.ts`, núcleo, idempotente)
+la crea, pero solo a quien tiene un rol personal global (`PATIENT`, `PRACTITIONER`, `CLINICIAN`,
+`SUPPORT_STAFF`) y **ninguna** fila de membresía.
+
+Reglas que no cambian:
+
+- La API **no inventa membresías** al resolver el tenant ni al emitir el token. Una cuenta sin
+  membresía recibe `403 TENANT_REQUIRED`; una suspendida o revocada sigue sin contexto.
+- Quien tiene un rol personal **y** un rol administrativo global no se repara solo (`needsReview`).
+- Con varias membresías y sin `X-Tenant-Id`, la respuesta sigue siendo `403 TENANT_AMBIGUOUS`: elegir
+  el espacio personal o una organización es una decisión explícita de la persona.
+
+Fijado por `src/common/seed/personal-space-memberships-seed.service.spec.ts`.
+
 ### Datasets de plataforma: AloVida Insights
 
 `/marketing/insights/*` sirve tablas sin `tenant_id` (`marketing.insights_*`), así que no aísla por

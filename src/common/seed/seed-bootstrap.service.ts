@@ -42,6 +42,7 @@ import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
 import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { PersonalSpaceMembershipsSeedService } from './personal-space-memberships-seed.service';
 import { ToolRegistrySeedService } from './tool-registry-seed.service';
 import { CommunitySearchIndexService } from '../../modules/community/services';
 import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
@@ -314,6 +315,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly toolRegistry?: ToolRegistrySeedService,
     @Optional()
     private readonly frontendRoutes?: FrontendRoutesSeedService,
+    @Optional()
+    private readonly personalSpace?: PersonalSpaceMembershipsSeedService,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -700,6 +703,20 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'content',
         run: () => this.insurerAccounts.run(),
       },
+      // Reparación de datos (núcleo, sin candado): da la membresía del espacio
+      // personal a las personas que no tienen ninguna, para que una cuenta sin
+      // organización pueda usar la plataforma. Va después del administrador de
+      // arranque (necesita `iam.user_global_roles` y el actor semilla) y antes
+      // de la carga de demostración, que no toca esto.
+      ...(this.personalSpace
+        ? [
+            {
+              name: 'membresías del espacio personal',
+              kind: 'core' as const,
+              run: () => this.personalSpace!.run(),
+            },
+          ]
+        : []),
       // H2 (carril M2 · MacBook, 2026-09-26): después de los roles de sistema
       // y del administrador de arranque, porque el alta de médico/paciente
       // necesita `authz.roles` materializado y un actor con el que auditar.

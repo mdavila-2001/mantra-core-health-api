@@ -22,6 +22,7 @@ Agrupa los componentes relacionados con **seed** y mantiene cohesionada esta res
 | `seed-actor.ts`                        | El actor semilla (id determinista, sin credencial) que firma lo que siembra la plataforma, y `ensureSeedActor`, que lo crea si falta.                                                                                         |
 | `demo-gate.ts`                         | Candado común de las cuentas de demostración: exigen `SEED_DEMO_PASSWORD` y, en `production`, `SEED_DEMO_ALLOW_PRODUCTION=true`.                                                                                              |
 | `padron-organizations-seed.service.ts` | Crea como organizaciones los establecimientos del padrón público (`health-facilities.dataset.json`, sin los consultorios de red) con id determinista. Adopta las `CARGA_*` de la carga anterior en vez de duplicarlas.        |
+| `personal-space-memberships-seed.service.ts` | Membresía del espacio personal para personas sin organización (núcleo, idempotente). Sin ella, una cuenta de paciente o de médico independiente recibe 403 `TENANT_REQUIRED` en cada petición. |
 | `padron-org-admins-seed.service.ts`    | Una cuenta `admin.<organización>@alovida.test` por organización (salvo centros de salud) y por aseguradora, con membresía ADMIN. Solo con el candado de demostración abierto.                                                 |
 | `practitioner-showcase-seed.ts`        | Crea la vitrina pública de un profesional sembrado por el mismo caso de uso que `PUT /community/profiles/me`.                                                                                                                 |
 | `seed-census.service.ts`               | Censo de lo que dejó la carga (conteos por paso) que `seed-cli` imprime al final, para comparar entornos con `diff`.                                                                                                          |
@@ -48,6 +49,7 @@ Cada paso se enciende con su variable y, apagado, no hace nada:
 
 | Variable                            | Paso (`--only=<id>`)                                                                            |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| (núcleo, sin variable) | `membresías del espacio personal`: da la membresía del tenant por defecto a las personas con rol personal y sin ninguna fila de membresía (ver `docs/api/authorization.md`, «Espacio personal») |
 | `SEED_PADRON_ORGANIZATIONS_ENABLED` | `padron-organizaciones`: organizaciones del padrón (todos los entornos; no crea cuentas)        |
 | `SEED_PADRON_ORG_ADMINS_ENABLED`    | `padron-administradores`: un administrador por organización (demostración)                      |
 | `SEED_PEOPLE_ENABLED`               | `padron-de-personas`: médicos y pacientes del padrón, con vitrina de los médicos (demostración) |
