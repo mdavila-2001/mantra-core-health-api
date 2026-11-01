@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
+  // Valor, no `type`: el constructor lo inyecta y Nest lee su metadata.
+  EntityManager,
   UniqueConstraintViolationException,
-  type EntityManager,
 } from '@mikro-orm/postgresql';
 import { OptimisticLockError, type FilterQuery } from '@mikro-orm/core';
 import { CONCEPTS } from '../../../common';
