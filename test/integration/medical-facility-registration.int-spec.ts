@@ -54,10 +54,18 @@ describe('alta de establecimiento médico (integración)', () => {
     email: `gerencia${n}-${marca}@example.test`,
   });
 
+  /**
+   * Número de registro sanitario único por corrida. El DTO lo acota a
+   * `MEDICAL_FACILITY_REGISTRATION_PATTERN` (`[A-Za-z0-9./-]`, sin `_`), y los
+   * sufijos que se arman con el tipo de tenant (`MEDICAL_OFFICE`) lo traían.
+   */
+  const registro = (sufijo: string) =>
+    `SEDES-${marca}-${sufijo.replace(/_/g, '-')}`;
+
   /** El bloque `medicalFacility` completo, con un registro único por corrida. */
   const bloque = (sufijo: string) => ({
     taxIdentifierNumber: '1023456789',
-    healthFacilityRegistrationNumber: `SEDES-${marca}-${sufijo}`,
+    healthFacilityRegistrationNumber: registro(sufijo),
     medicalDirector: {
       name: 'Ana',
       middleName: 'Lucía',
@@ -198,7 +206,7 @@ describe('alta de establecimiento médico (integración)', () => {
         tenantId: res.body.tenantId,
       });
       expect(facility.healthFacilityRegistrationNumber).toBe(
-        `SEDES-${marca}-${tenantType}`,
+        registro(tenantType),
       );
       expect(
         await em.count(TenantMedicalFacilitySites, {
