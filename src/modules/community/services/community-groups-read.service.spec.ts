@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityGroupsReadService } from './community-groups-read.service';
 import { CommunityPollsReadService } from './community-polls-read.service';
+import { CommunityVisibilityService } from './community-visibility.service';
 import { ResourceNotFoundException } from '../../../common';
 import { COMM } from '../community.concepts';
 
@@ -220,6 +221,53 @@ describe('CommunityGroupsReadService', () => {
     await expect(
       d.service.listMembers('g-1', actor, 'p-1', { limit: 10 }),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  /**
+   * Rol de plataforma acotado a un tenant: con la regla real de
+   * `CommunityVisibilityService.isPlatform`, un `SECURITY_ADMIN`/`SUPERADMIN`/
+   * `SYSTEM` concedido sólo en A no es plataforma sobre lo de B.
+   */
+  describe('rol de plataforma acotado a un tenant', () => {
+    const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
+    const scopedTo = (role: string, tenantId: string) =>
+      ({
+        id: 'admin-a',
+        roles: [role],
+        scopedRoles: { [tenantId]: [role] },
+      }) as any;
+    const realIsPlatform = (a: any, t: any) =>
+      CommunityVisibilityService.prototype.isPlatform.call(undefined, a, t);
+
+    it('acotado a A: en el directorio de B se evalúa el público; en el de A, no', async () => {
+      for (const role of PLATFORM) {
+        const d = buildGroups();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        const scoped = scopedTo(role, 't-a');
+
+        await d.service.listGroups('t-b', { limit: 10 }, scoped);
+        expect(d.audience.hiddenFrom).toHaveBeenCalledWith(
+          expect.anything(),
+          't-b',
+          scoped,
+        );
+
+        d.audience.hiddenFrom.mockClear();
+        await d.service.listGroups('t-a', { limit: 10 }, scoped);
+        expect(d.audience.hiddenFrom).not.toHaveBeenCalled();
+      }
+    });
+
+    it('global: ve el directorio completo de A y de B', async () => {
+      for (const role of PLATFORM) {
+        const d = buildGroups();
+        d.visibility.isPlatform.mockImplementation(realIsPlatform);
+        const global = { id: 'admin-g', roles: [role] } as any;
+        await d.service.listGroups('t-a', { limit: 10 }, global);
+        await d.service.listGroups('t-b', { limit: 10 }, global);
+        expect(d.audience.hiddenFrom).not.toHaveBeenCalled();
+      }
+    });
   });
 });
 
