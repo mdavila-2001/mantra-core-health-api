@@ -1,7 +1,12 @@
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
-import { CONCEPTS } from '../../src/common';
+import {
+  bootstrapTestApp,
+  bearer,
+  camposObligatoriosDePaciente,
+  type TestContext,
+} from './harness';
+import { CONCEPTS, SEED } from '../../src/common';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
 import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/identity_assurance.seed';
 import { IdentityAssertions } from '../../src/modules/identity_assurance/entities';
@@ -34,7 +39,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   async function idsEnCola(): Promise<string[]> {
     const res = await http()
       .get('/identity/verification-cases')
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .expect(200);
     return res.body.cases.map((kase: { id: string }) => kase.id);
   }
@@ -42,18 +47,30 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
 
-    // El alta devuelve `profileId`, que es también el id de la persona: es el
-    // sujeto sobre el que se abre el caso.
-    const patient = await http()
-      .post('/profiles/patients')
-      .set(bearer(ctx.adminToken))
+    // El sujeto tiene que ser del tenant del caso: una cuenta propia con
+    // membresía activa en él (`IdentityCaseScope.subjectInTenant`, 6d411c8dc).
+    // Un perfil dado de alta por un admin, sin cuenta, responde 404
+    // IDENTITY_SUBJECT_NOT_AVAILABLE; por eso el paciente se registra solo.
+    const campos = await camposObligatoriosDePaciente(ctx);
+    const nationalId = `INT-IDA-${randomUUID().slice(0, 8)}`;
+    await http()
+      .post('/iam/auth/register-patient')
       .send({
-        patientCode: `INT-IDA-${randomUUID().slice(0, 8)}`,
+        ...campos,
+        nationalId,
+        password: 'S3cret-passw0rd',
         displayName: 'Paciente de verificación',
-        birthDate: '1990-05-14',
+        email: `ida-${randomUUID().slice(0, 8)}@example.test`,
       })
       .expect(201);
-    subjectEntityId = patient.body.profileId;
+    const login = await http()
+      .post('/iam/auth/login')
+      .send({ nationalId, password: 'S3cret-passw0rd' })
+      .expect(200);
+    const [, cuerpo] = (login.body.accessToken as string).split('.');
+    subjectEntityId = JSON.parse(
+      Buffer.from(cuerpo, 'base64url').toString('utf8'),
+    ).pid as string;
   });
 
   afterAll(async () => {
@@ -63,7 +80,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   it('abre el caso, y un caso recién abierto todavía no está en la cola', async () => {
     const abierto = await http()
       .post('/identity/verification-cases')
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .send({
         identityVerificationPolicyId: IDENTITY_CARD_VERTICAL.policyId,
         subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
@@ -81,7 +98,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   it('planificar los checks lo pone en verificación, y ahí sí entra en la cola', async () => {
     const planificado = await http()
       .post(`/identity/verification-cases/${caseId}/checks:plan`)
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .send({
         checks: [{ checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD }],
       })
@@ -94,7 +111,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   it('la cola trae los datos que el revisor necesita para priorizar', async () => {
     const res = await http()
       .get('/identity/verification-cases')
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .expect(200);
 
     const enCola = res.body.cases.find(
@@ -114,7 +131,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
     const enRevision = await http()
       .get('/identity/verification-cases')
       .query({ status: IDA.CASE_MANUAL_REVIEW })
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .expect(200);
 
     // Todavía está `IN_VERIFICATION`: pedir explícitamente los de revisión
@@ -130,7 +147,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   it('devuelve la cola de la más vieja a la más nueva', async () => {
     const res = await http()
       .get('/identity/verification-cases')
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .expect(200);
 
     const aperturas = res.body.cases
@@ -147,7 +164,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
     const res = await http()
       .get('/identity/verification-cases')
       .query({ limit: 1 })
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .expect(200);
     expect(res.body.cases.length).toBeLessThanOrEqual(1);
   });
@@ -156,14 +173,14 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
     await http()
       .get('/identity/verification-cases')
       .query({ status: 'no-es-un-uuid' })
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .expect(400);
   });
 
   it('escala a revisión manual y sigue en la cola', async () => {
     const revision = await http()
       .post(`/identity/verification-cases/${caseId}/manual-review`)
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       .send({ reviewReasonConceptId: CONCEPTS.STATE_ACTIVE })
       .expect(201);
     reviewId = revision.body.id;
@@ -176,7 +193,7 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   it('aprobar la revisión deja el caso asertado y lo saca de la cola', async () => {
     const decision = await http()
       .post(`/identity/manual-review/${reviewId}/decision`)
-      .set(bearer(ctx.adminToken))
+      .set(admin())
       // 200, no 201: decidir resuelve una revisión que ya existía, no crea nada
       // (`@HttpCode(HttpStatus.OK)` en el controller).
       .send({ decision: 'APPROVED', decisionReason: 'Documento legible' })
@@ -215,6 +232,16 @@ describe('Verificación de identidad — ciclo completo contra la API real (inte
   it('la cola exige autenticación', async () => {
     await http().get('/identity/verification-cases').expect(401);
   });
+
+  /**
+   * Admin dentro del tenant semilla. Desde 6d411c8dc (IDA-01/02, #750, #793)
+   * la cola, el alta y la revisión toman el tenant del contexto
+   * (`requireTenantId()`): un SUPERADMIN sin `X-Tenant-Id` opera en modo
+   * sistema, sin tenant, y recibe 422 TENANT_REQUIRED.
+   */
+  function admin(): Record<string, string> {
+    return { ...bearer(ctx.adminToken), 'X-Tenant-Id': SEED.tenantId };
+  }
 
   /** Cliente HTTP contra la app bajo prueba. */
   function http(): request.Agent {
