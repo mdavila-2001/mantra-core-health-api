@@ -277,4 +277,30 @@ describe('does not overwrite or retire ERP-format credentials', () => {
     expect(d.repo.pauseConnection).not.toHaveBeenCalled();
     expect(d.repo.retireCredential).not.toHaveBeenCalled();
   });
+  it('rejects ambiguous ownership before resolving a client or decrypting', async () => {
+    const d = fixture();
+    Object.assign(d.row.configJson, {
+      kind: 'PHARMACY_EXTERNAL_SYSTEM',
+      format: 'ALOVIDA_STANDARD',
+      externalPharmacyCode: 'SYN',
+    });
+    await expect(d.adapter.resolve(em, 't', d.row.id)).resolves.toEqual({
+      status: 'NOT_CONFIGURED',
+    });
+    expect(d.credential.active).toBe(true);
+  });
+  it('does not describe an ambiguous configuration as an external system', async () => {
+    const d = fixture();
+    Object.assign(d.row.configJson, {
+      kind: 'PHARMACY_EXTERNAL_SYSTEM',
+      format: 'ALOVIDA_STANDARD',
+      externalPharmacyCode: 'SYN',
+    });
+    d.repo.findMany.mockResolvedValue(
+      new Map([[d.row.id, { connection: d.row, credential: d.credential }]]),
+    );
+    await expect(d.adapter.describe(em, 't', [d.row.id])).resolves.toEqual(
+      new Map(),
+    );
+  });
 });

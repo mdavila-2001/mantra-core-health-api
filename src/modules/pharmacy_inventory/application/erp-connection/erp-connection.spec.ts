@@ -16,6 +16,7 @@ function record(overrides: Record<string, unknown> = {}) {
     id: 'conn-1',
     stateConceptId: INTEG.CONN_ACTIVE,
     configJson: {
+      version: 1,
       baseUrl: 'http://farmacia.test/std',
       pharmacyCode: 'FARM-1',
       siteCodes: { 'site-1': 'SUC-CENTRO' },
@@ -562,4 +563,46 @@ describe('coexistencia con el configurador de sistemas externos de dev', () => {
       integrationConnectionId: null,
     });
   });
+});
+
+describe('rejects incomplete or ambiguous persisted formats', () => {
+  it.each([
+    {
+      kind: 'PHARMACY_EXTERNAL_SYSTEM',
+      format: 'ALOVIDA_STANDARD',
+      baseUrl: 'http://farmacia.test/std',
+    },
+    {
+      kind: 'PHARMACY_EXTERNAL_SYSTEM',
+      version: 1,
+      format: 'ALOVIDA_STANDARD',
+      baseUrl: 'http://farmacia.test/std',
+    },
+    { version: 2, baseUrl: 'http://farmacia.test/std', pharmacyCode: 'FARM-1' },
+    { baseUrl: 'http://farmacia.test/std', pharmacyCode: 'FARM-1' },
+  ])(
+    'does not reinterpret unsupported config as an editable ERP: %j',
+    async (raw) => {
+      const d = doubles();
+      d.connections.findForPharmacy.mockResolvedValue(
+        record({ connection: { ...record().connection, configJson: raw } }),
+      );
+      await expect(
+        d.useCases.save(
+          'ph-1',
+          {
+            mode: 'CONNECTED',
+            systemCode: 'ALOVIDA_STANDARD',
+            baseUrl: 'http://farmacia.test/std',
+            pharmacyCode: 'FARM-1',
+            apiKey: 'synthetic-new',
+          } as never,
+          ACTOR,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.connections.updateConnection).not.toHaveBeenCalled();
+      expect(d.connections.rotateCredential).not.toHaveBeenCalled();
+      expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    },
+  );
 });

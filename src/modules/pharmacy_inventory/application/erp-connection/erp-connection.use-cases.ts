@@ -14,7 +14,7 @@ import {
 } from '../../domain/erp-connection/pharmacy-stock-mode';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
-import { parseExternalSystemConfig } from '../../domain/sync/external-system';
+import { pharmacyConnectionFormat } from '../../domain/erp-connection/pharmacy-connection-format';
 import {
   ErpConnectionRepository,
   type ErpConnectionConfig,
@@ -123,11 +123,13 @@ export class ErpConnectionUseCases {
     pharmacyCode?: string;
     siteCodes: Readonly<Record<string, string>>;
   }> {
-    const current = await this.connections.findForPharmacy(em, pharmacyId);
+    const current = await this.connections.findForPharmacy(em, pharmacyId, {
+      linkId,
+    });
     if (
       !current ||
       current.link.id !== linkId ||
-      parseExternalSystemConfig(current.connection.configJson)
+      pharmacyConnectionFormat(current.connection.configJson) !== 'ERP'
     ) {
       return {
         catalog: typeof fallback === 'function' ? await fallback() : fallback,
@@ -160,10 +162,16 @@ export class ErpConnectionUseCases {
       await this.scope.requireManagedPharmacy(tx, pharmacyId, actor);
       const pharmacy = await this.connections.findPharmacy(tx, pharmacyId);
       if (!pharmacy) throw connectionNotFound();
-      const current = await this.connections.findForPharmacy(tx, pharmacyId);
+      const current =
+        (await this.connections.findForPharmacy(tx, pharmacyId, {
+          erpOnly: true,
+        })) ?? (await this.connections.findForPharmacy(tx, pharmacyId));
       // A different persisted format has its own configurator and cipher.
       // Never convert it or overwrite its credentials through this contract.
-      if (current && parseExternalSystemConfig(current.connection.configJson))
+      if (
+        current &&
+        pharmacyConnectionFormat(current.connection.configJson) !== 'ERP'
+      )
         throw connectionIncomplete();
       const enabled = dto.mode === 'CONNECTED';
 
@@ -307,7 +315,9 @@ export class ErpConnectionUseCases {
     if (!this.cipher.isConfigured()) throw encryptionNotConfigured();
     const result = await this.em.transactional(async (tx) => {
       await this.scope.requireManagedPharmacy(tx, pharmacyId, actor);
-      const current = await this.connections.findForPharmacy(tx, pharmacyId);
+      const current = await this.connections.findForPharmacy(tx, pharmacyId, {
+        erpOnly: true,
+      });
       if (!current?.systemCode || !current.credential?.secretRef) {
         throw connectionNotFound();
       }
@@ -330,7 +340,7 @@ export class ErpConnectionUseCases {
 
   /** Con qué hablarle al sistema guardado (la clave, descifrada en memoria). */
   accessFor(record: ErpConnectionRecord): PharmacySystemAccess {
-    if (parseExternalSystemConfig(record.connection.configJson))
+    if (pharmacyConnectionFormat(record.connection.configJson) !== 'ERP')
       throw connectionIncomplete();
     if (!record.systemCode || !record.credential?.secretRef) {
       throw connectionNotFound();
@@ -390,14 +400,16 @@ export class ErpConnectionUseCases {
     em: EntityManager,
     pharmacyId: string,
   ): Promise<ErpConnectionDto> {
-    const loaded = await this.connections.findForPharmacy(em, pharmacyId);
+    const loaded = await this.connections.findForPharmacy(em, pharmacyId, {
+      erpOnly: true,
+    });
     const record =
-      loaded && !parseExternalSystemConfig(loaded.connection.configJson)
+      loaded && pharmacyConnectionFormat(loaded.connection.configJson) === 'ERP'
         ? loaded
         : null;
     const sites = await this.connections.findActiveSites(em, pharmacyId);
     const mode = resolveStockMode(
-      record && !parseExternalSystemConfig(record.connection.configJson)
+      record && pharmacyConnectionFormat(record.connection.configJson) === 'ERP'
         ? {
             linked: true,
             enabled: record.connection.stateConceptId === INTEG.CONN_ACTIVE,

@@ -233,3 +233,9 @@ externo, además de sus controles de destino. La consulta viva del pedido corres
 al contrato ERP; una conexión del otro formato conserva el camino manual del pedido.
 La separación de claves y la evolución del contrato se describen en
 [FAR-C9 #1258](https://github.com/mdavila-2001/mantra-core-health-api/issues/1258).
+
+La consulta por vínculo ERP usa ese vínculo aunque exista otro más reciente de
+otro formato. La selección global del contrato ERP busca su última configuración
+propia. Las conexiones se consultan con el tenant de la farmacia y la credencial
+debe pertenecer a esa conexión. Una identidad/versionado incompleta o ambigua
+no se convierte en otro formato al faltar campos.

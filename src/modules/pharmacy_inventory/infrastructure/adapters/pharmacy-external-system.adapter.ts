@@ -18,6 +18,7 @@ import {
   type ExternalSystemConfig,
 } from '../../domain/sync/external-system';
 import { loadPharmacyErpEnv } from './pharmacy-erp.env';
+import { pharmacyConnectionFormat } from '../../domain/erp-connection/pharmacy-connection-format';
 import { integrationNotConfigured } from '../../application/inventory-sync/integration-errors';
 import { createExternalSystemClient } from './external-system-clients';
 import { ExternalSystemRepository } from '../repositories/external-system.repository';
@@ -54,9 +55,10 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
         : { status: 'NOT_CONFIGURED' };
     }
     const row = await this.repo.find(em, connectionId, tenantId);
-    const config = row
-      ? parseExternalSystemConfig(row.connection.configJson)
-      : null;
+    const config =
+      row && pharmacyConnectionFormat(row.connection.configJson) === 'EXTERNAL'
+        ? parseExternalSystemConfig(row.connection.configJson)
+        : null;
     if (!row || !config || !row.credential?.secretRef) {
       return { status: 'NOT_CONFIGURED' };
     }
@@ -81,6 +83,8 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
     const rows = await this.repo.findMany(em, connectionIds, tenantId);
     const summaries = new Map<string, ExternalSystemSummary>();
     for (const [id, row] of rows) {
+      if (pharmacyConnectionFormat(row.connection.configJson) !== 'EXTERNAL')
+        continue;
       const config = parseExternalSystemConfig(row.connection.configJson);
       if (!config) continue;
       summaries.set(id, {
@@ -139,7 +143,10 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
     } else {
       const row = await this.repo.find(em, data.connectionId, data.tenantId);
       if (!row) throw new Error('external system connection not in tenant');
-      if (!parseExternalSystemConfig(row.connection.configJson))
+      if (
+        pharmacyConnectionFormat(row.connection.configJson) !== 'EXTERNAL' ||
+        !parseExternalSystemConfig(row.connection.configJson)
+      )
         throw integrationNotConfigured();
       // Otro formato es otro proveedor: la conexión pasa al suyo.
       const provider = await this.repo.ensureProvider(
@@ -171,7 +178,10 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
   ): Promise<void> {
     const row = await this.repo.find(em, data.connectionId, data.tenantId);
     if (!row) return;
-    if (!parseExternalSystemConfig(row.connection.configJson))
+    if (
+      pharmacyConnectionFormat(row.connection.configJson) !== 'EXTERNAL' ||
+      !parseExternalSystemConfig(row.connection.configJson)
+    )
       throw integrationNotConfigured();
     this.repo.pauseConnection(row.connection, data.actorUserId);
     if (row.credential) {

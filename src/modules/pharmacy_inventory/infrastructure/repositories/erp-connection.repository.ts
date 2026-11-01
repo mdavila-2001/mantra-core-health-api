@@ -7,6 +7,7 @@ import {
   ProviderCredentials,
 } from '../../../integrations/entities';
 import { INTEG } from '../../../integrations/integrations.concepts';
+import { pharmacyConnectionFormat } from '../../domain/erp-connection/pharmacy-connection-format';
 import {
   Pharmacies,
   PharmacyIntegrationConnections,
@@ -119,33 +120,55 @@ export class ErpConnectionRepository {
   async findForPharmacy(
     em: EntityManager,
     pharmacyId: string,
+    options: { linkId?: string; erpOnly?: boolean } = {},
   ): Promise<ErpConnectionRecord | null> {
-    const link = await em.findOne(
-      PharmacyIntegrationConnections,
-      { pharmacyId, connectionId: { $ne: null } },
-      { orderBy: { createdAt: 'desc', id: 'asc' } },
-    );
-    if (!link?.connectionId) return null;
-    const connection = await em.findOne(ProviderConnections, {
-      id: link.connectionId,
-    });
-    if (!connection) return null;
-    const provider = await em.findOne(ExternalProviders, {
-      id: connection.providerId,
-    });
-    const credential = connection.credentialId
-      ? await em.findOne(ProviderCredentials, {
-          id: connection.credentialId,
-          stateConceptId: INTEG.CRED_ACTIVE,
-        })
-      : null;
-    return {
-      link,
-      connection,
-      systemCode: isPharmacySystemCode(provider?.code) ? provider.code : null,
-      config: readConfig(connection.configJson),
-      credential,
-    };
+    const pharmacy = await this.findPharmacy(em, pharmacyId);
+    if (!pharmacy) return null;
+    const pageSize = 50;
+    for (let offset = 0; ; offset += pageSize) {
+      const links = await em.find(
+        PharmacyIntegrationConnections,
+        {
+          pharmacyId,
+          connectionId: { $ne: null },
+          ...(options.linkId ? { id: options.linkId } : {}),
+        },
+        { orderBy: { createdAt: 'desc', id: 'asc' }, limit: pageSize, offset },
+      );
+      for (const link of links) {
+        if (!link.connectionId) continue;
+        const connection = await em.findOne(ProviderConnections, {
+          id: link.connectionId,
+          tenantId: pharmacy.tenantId,
+        });
+        if (
+          !connection ||
+          (options.erpOnly &&
+            pharmacyConnectionFormat(connection.configJson) !== 'ERP')
+        )
+          continue;
+        const provider = await em.findOne(ExternalProviders, {
+          id: connection.providerId,
+        });
+        const credential = connection.credentialId
+          ? await em.findOne(ProviderCredentials, {
+              id: connection.credentialId,
+              connectionId: connection.id,
+              stateConceptId: INTEG.CRED_ACTIVE,
+            })
+          : null;
+        return {
+          link,
+          connection,
+          systemCode: isPharmacySystemCode(provider?.code)
+            ? provider.code
+            : null,
+          config: readConfig(connection.configJson),
+          credential,
+        };
+      }
+      if (links.length < pageSize || options.linkId) return null;
+    }
   }
 
   /**

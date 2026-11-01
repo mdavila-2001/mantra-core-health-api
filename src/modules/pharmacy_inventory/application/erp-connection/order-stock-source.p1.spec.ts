@@ -6,7 +6,11 @@ import { ExternalCatalogUnavailableError } from '../../domain/sync/external-cata
 import { OrderStockSourceResolver } from './order-stock-source.resolver';
 
 function fixture(mappings: readonly ExternalMapping[]) {
-  const connection = { id: 'connection', stateConceptId: INTEG.CONN_ACTIVE };
+  const connection = {
+    id: 'connection',
+    stateConceptId: INTEG.CONN_ACTIVE,
+    configJson: { version: 1 },
+  };
   const em = {
     fork: jest.fn(() => em),
     transactional: jest.fn(async (work: (tx: unknown) => Promise<void>) =>
