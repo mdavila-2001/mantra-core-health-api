@@ -64,12 +64,12 @@ decisión coordinada con el front, no el efecto colateral de un despliegue.
 | `AUTH_REFRESH_COOKIE_ENABLED` | `false` | `true` entrega el refresh token como cookie httpOnly y deja de devolverlo en el cuerpo. |
 | `AUTH_REFRESH_COOKIE_NAME` | `redesa_refresh` | Nombre de la cookie. El default es el nombre que ya tenía (TX-28); declarar `mch_refresh` lo cambia y el refresh la lee con ese nombre. |
 | `AUTH_REFRESH_COOKIE_PATH` | `/iam/auth/token/refresh` | `Path` de la cookie. Detrás de un prefijo de proxy (`/api/...`) hay que declararlo igual. |
-| `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | `strict`, `lax` o `none`. |
+| `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | En modo cookie se fuerza `strict`. |
 | `AUTH_MFA_CHALLENGE_ENABLED` | `false` | Con `true`, el login de una cuenta con factor MFA verificado exige `mfaCode`: sin él, `401 details.reason = MFA_REQUIRED`; con uno que no valida, `MFA_INVALID` (TX-29). |
-| `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | Fuerza o quita el atributo `Secure`. Sólo hace falta declararlo en pruebas o tras un proxy que termina TLS. |
+| `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | En modo cookie se fuerza `Secure`. |
 
-Por defecto la cookie se llama `redesa_refresh` y va con `HttpOnly`, `SameSite=Strict`,
-`Path=/iam/auth/token/refresh` (los tres se pueden declarar, ver arriba) y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
+Por defecto la cookie se llama `redesa_refresh` y va con `HttpOnly`, `Secure`,
+`SameSite=Strict`, `Path=/iam/auth/token/refresh` y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
 El `Path` acotado es deliberado: la cookie no viaja en ninguna otra petición del
 API.
 

@@ -10,6 +10,8 @@ export interface AuthenticatedUser {
   readonly id: string;
   /** Identificador de sesión (`iam.sessions.token_id`) que respalda el token. */
   readonly sessionId?: string;
+  /** Expiración Unix del access token que autenticó esta petición. */
+  readonly tokenExpiresAt?: number;
   /**
    * Roles efectivos que exige `RolesGuard`. Al emitir el token se componen de
    * los globales de plataforma (`iam.user_global_roles`: `USER`, `PATIENT`,

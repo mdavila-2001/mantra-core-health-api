@@ -101,6 +101,7 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
+  const sessionValidator = { revokeSession: mockFn() };
 
   const service = new IamAuthService(
     em as any,
@@ -121,6 +122,7 @@ function build() {
     new DirectoryTenantClaimsAdapter(),
     logger as any,
     new TracingService(),
+    sessionValidator as any,
   );
   return {
     effectiveRoles,
@@ -138,6 +140,7 @@ function build() {
     patientProfilesRepo,
     practitionerProfilesRepo,
     logger,
+    sessionValidator,
   };
 }
 
@@ -861,6 +864,7 @@ describe('IamAuthService', () => {
       const res = await d.service.logout({
         id: 'u1',
         sessionId: 'sid-1',
+        tokenExpiresAt: Math.floor(Date.now() / 1000) + 900,
         roles: [],
       });
 
@@ -868,6 +872,10 @@ describe('IamAuthService', () => {
       expect(d.sessionsRepo.revokeById).toHaveBeenCalledWith(d.tx, 's1');
       // El refresh token es lo que sobrevive al cierre si no se revoca.
       expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
+      expect(d.sessionValidator.revokeSession).toHaveBeenCalledWith(
+        'sid-1',
+        expect.any(Number),
+      );
     });
 
     it('no revoca la sesión de otro usuario aunque nombre su sid', async () => {
