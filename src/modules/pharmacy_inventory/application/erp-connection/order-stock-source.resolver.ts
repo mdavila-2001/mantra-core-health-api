@@ -8,6 +8,7 @@ import {
   type OrderStockSource,
 } from '../../domain/erp-connection/pharmacy-stock-mode';
 import { ExternalCatalogUnavailableError } from '../../domain/sync/external-catalog';
+import { resolveExternalCodes } from '../../domain/sync/external-mapping';
 import { ErpConnectionRepository } from '../../infrastructure/repositories/erp-connection.repository';
 import { IntegrationReadRepository } from '../../infrastructure/repositories/integration-read.repository';
 import {
@@ -32,7 +33,7 @@ const MANUAL: OrderStockSource = { mode: 'MANUAL' };
  * - Farmacia en manual: manual.
  * - Conectada: se consulta el stock de esa sucursal, con 3 s como máximo y sin
  *   reintentos. Solo cuentan los productos con un único vínculo a un código
- *   de la farmacia; los demás entran «por confirmar».
+ *   de la farmacia; los demás conservan el carril del libro local.
  * - Si el sistema falla, la conexión queda «con error» con su motivo y el
  *   pedido sigue como manual. La siguiente llamada que funcione la deja
  *   activa otra vez.
@@ -99,15 +100,23 @@ export class OrderStockSourceResolver {
     if (!this.cipher.isConfigured()) return MANUAL;
 
     const wanted = new Set(productIds);
+    const mappings = await this.reads.findMappings(em, record.link.id);
+    // Resolve the complete connection before selecting the requested products:
+    // a conflicting product outside this order still makes its ERP code ambiguous.
+    const resolved = resolveExternalCodes(mappings);
     const codeOf = new Map<string, string>();
     const repeated = new Set<string>();
-    for (const mapping of await this.reads.findMappings(em, record.link.id)) {
+    for (const mapping of mappings) {
       if (!wanted.has(mapping.pharmacyProductId)) continue;
       if (codeOf.has(mapping.pharmacyProductId))
         repeated.add(mapping.pharmacyProductId);
       codeOf.set(mapping.pharmacyProductId, mapping.externalProductCode);
     }
-    for (const productId of repeated) codeOf.delete(productId);
+    for (const [productId, code] of codeOf) {
+      if (repeated.has(productId) || resolved.get(code)?.status !== 'MAPPED') {
+        codeOf.delete(productId);
+      }
+    }
     if (codeOf.size === 0) {
       return { mode: 'CONNECTED', liveQuantities: new Map() };
     }
