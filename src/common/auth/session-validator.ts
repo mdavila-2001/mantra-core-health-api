@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  REDIS_CLIENT,
+  type RedisClient,
+} from '../../modules/redis_runtime/redis.provider';
 import { CONCEPTS, SEED } from '../constants/concepts';
 import type { JwtPayload } from './jwt-payload.interface';
 import { unauthorizedWithReason } from '../errors/reasoned-http-exceptions';
@@ -15,23 +19,41 @@ import { SystemErrorReason } from '../errors/system-error-reasons';
  * esta consulta el token seguía sirviendo hasta expirar. Un token robado
  * sobrevivía justamente al gesto que busca cortarlo.
  *
- * Es una consulta por petición sobre el índice único `uq_sessions_token_id`. No
- * hay caché a propósito: una caché de positivos reabre la ventana que esto
- * cierra, y ante un fallo de la base la respuesta es rechazar, no suponer.
+ * La blacklist Redis se comprueba antes de la consulta por petición sobre el
+ * índice único `uq_sessions_token_id`. Ante un fallo de Redis o de la base la
+ * respuesta es rechazar, no suponer.
  */
 @Injectable()
 export class SessionValidator {
+  private readonly revocationKeyPrefix = 'iam:auth:revoked-session:';
   /**
    * @param em - Contexto de persistencia; sólo se usa para una lectura.
    */
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    @Optional() @Inject(REDIS_CLIENT) private readonly redis?: RedisClient,
+  ) {}
+
+  /** Guarda la sesión revocada en Redis hasta que expire el access token. */
+  async revokeSession(sessionId: string, expiresAt?: number): Promise<void> {
+    if (!this.redis)
+      throw new Error('Redis no está disponible para revocar sesiones');
+    const ttlSeconds = Math.ceil((expiresAt ?? 0) - Date.now() / 1000);
+    if (ttlSeconds <= 0) return;
+    await this.redis.set(
+      `${this.revocationKeyPrefix}${sessionId}`,
+      '1',
+      'EX',
+      ttlSeconds,
+    );
+  }
 
   /**
    * Lanza si la sesión del token no está activa.
    *
    * @param payload - Claims ya verificados (firma, expiración y tipo).
-   * @throws UnauthorizedException (`SESSION_REQUIRED`/`SESSION_INACTIVE`) si la sesión fue revocada, venció, es de otro
-   *   usuario o la cuenta no está activa.
+   * @throws UnauthorizedException (`SESSION_REQUIRED`/`SESSION_INACTIVE`) si
+   *   la sesión fue revocada, venció, es de otro usuario o la cuenta no está activa.
    */
   async assertActive(payload: JwtPayload): Promise<void> {
     // La identidad de servicio de los workers firma tokens de corta vida sin
@@ -44,6 +66,15 @@ export class SessionValidator {
       throw unauthorizedWithReason(
         'Token sin sesión',
         SystemErrorReason.SESSION_REQUIRED,
+      );
+    }
+
+    if (!this.redis)
+      throw new Error('Redis no está disponible para validar sesiones');
+    if (await this.redis.get(`${this.revocationKeyPrefix}${payload.sid}`)) {
+      throw unauthorizedWithReason(
+        'La sesión ya no está activa',
+        SystemErrorReason.SESSION_INACTIVE,
       );
     }
 

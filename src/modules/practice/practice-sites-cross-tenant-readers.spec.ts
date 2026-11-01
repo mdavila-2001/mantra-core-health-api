@@ -110,6 +110,10 @@ const KNOWN_READERS: Record<string, string> = {
     'em.find(PracticeSites) por lista de ids para la admisión (sedes que pueden ser de otro tenant). Contexto de RLS pendiente de decidir (#1167).',
   'public/infrastructure/repositories/public-pharmacy-branches.repository.ts':
     'SQL público: sedes activas de farmacias verificadas de un tenant; en ruta pública sin contexto de tenant el RLS devuelve 0 sedes. Contexto de RLS pendiente de decidir (#1167).',
+  'delegated_access/repositories/support-links.repository.ts':
+    'Vínculos de la secretaria (personal de apoyo): valida y nombra sedes, servicios y pisos del hospital al que pide ' +
+    'entrar —todavía sin membresía— y los de sus vínculos en varios hospitales (rutas sin tenant activo). ' +
+    'Cruza tenants por diseño; con RLS_ENFORCE necesita contexto SYSTEM, igual que affiliation-organizations.',
 };
 
 const MODULES = join(process.cwd(), 'src', 'modules');

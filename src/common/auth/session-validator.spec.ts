@@ -27,8 +27,16 @@ function payload(overrides: Partial<JwtPayload> = {}): JwtPayload {
 
 function validatorWith(rows: unknown[]) {
   const execute = mockFn(async () => rows);
+  const redis = {
+    get: mockFn(async () => null),
+    set: mockFn(async () => 'OK'),
+  };
   const em = { getConnection: () => ({ execute }) };
-  return { validator: new SessionValidator(em as any), execute };
+  return {
+    validator: new SessionValidator(em as any, redis as any),
+    execute,
+    redis,
+  };
 }
 
 describe('SessionValidator (MCH-004)', () => {
@@ -50,6 +58,33 @@ describe('SessionValidator (MCH-004)', () => {
     await expect(validator.assertActive(payload())).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
+  });
+
+  it('rechaza una sesión incluida en blacklist Redis antes de consultar la base', async () => {
+    const { validator, execute, redis } = validatorWith([{ ok: 1 }]);
+    redis.get.mockResolvedValue('1');
+
+    await expect(validator.assertActive(payload())).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('guarda la revocación con TTL igual al tiempo restante del token', async () => {
+    const { validator, redis } = validatorWith([]);
+    const expiry = Math.floor(Date.now() / 1000) + 900;
+
+    await validator.revokeSession('sid-1', expiry);
+
+    expect(redis.set).toHaveBeenCalledWith(
+      'iam:auth:revoked-session:sid-1',
+      '1',
+      'EX',
+      expect.any(Number),
+    );
+    const ttl = (redis.set.mock.calls[0] as unknown[])[3] as number;
+    expect(ttl).toBeGreaterThanOrEqual(899);
+    expect(ttl).toBeLessThanOrEqual(900);
   });
 
   it('rechaza un token de usuario sin `sid`: no hay sesión que lo respalde', async () => {
