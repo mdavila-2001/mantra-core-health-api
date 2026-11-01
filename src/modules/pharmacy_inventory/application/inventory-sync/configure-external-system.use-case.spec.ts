@@ -118,7 +118,27 @@ describe('ConfigureExternalSystemUseCase (FAR-C9 · C9-3)', () => {
       }),
     });
     expect(d.systems.save).not.toHaveBeenCalled();
-    expect(d.em.transactional).not.toHaveBeenCalled();
+    // Una sola transacción: la lectura del ámbito, antes de llamar afuera.
+    expect(d.em.transactional).toHaveBeenCalledTimes(1);
+    expect(d.connection.connectionId).toBeUndefined();
+  });
+
+  it('a connection outside the actor scope is refused before calling anyone', async () => {
+    const d = build();
+    const denied = new ConfigureExternalSystemUseCase(
+      d.em as any,
+      {
+        requireManagedPharmacy: jest.fn(async () => {
+          throw new Error('404');
+        }),
+        notAvailable: jest.fn(),
+      } as any,
+      { findConnection: jest.fn() } as any,
+      d.systems as any,
+    );
+    await expect(denied.save(REF, DTO, ACTOR)).rejects.toThrow('404');
+    expect(d.systems.clientFor).not.toHaveBeenCalled();
+    expect(d.client.checkHealth).not.toHaveBeenCalled();
   });
 
   it('a bad or forbidden address is refused before calling anyone', async () => {

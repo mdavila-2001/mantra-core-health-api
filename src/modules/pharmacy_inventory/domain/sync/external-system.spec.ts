@@ -6,7 +6,11 @@ import {
   parseExternalSystemConfig,
 } from './external-system';
 
-const DEV = { production: false, allowedHosts: [] as string[] };
+const DEV = {
+  production: false,
+  allowedHosts: [] as string[],
+  allowAnyHost: true,
+};
 
 describe('external system (FAR-C9 · C9-3)', () => {
   it('config_json round-trips and anything else is not a pharmacy system', () => {
@@ -55,6 +59,7 @@ describe('external system (FAR-C9 · C9-3)', () => {
     const policy = {
       production: false,
       allowedHosts: ['sim', '*.farmacia.bo'],
+      allowAnyHost: false,
     };
     expect(externalSystemUrlProblem('http://sim:4100/x', policy)).toBeNull();
     expect(
@@ -71,14 +76,27 @@ describe('external system (FAR-C9 · C9-3)', () => {
     ).toBe('HOST_NOT_ALLOWED');
   });
 
-  it('in production nobody is called without a list, and only https', () => {
+  it('without a list nobody is called, in any environment, unless opened on purpose', () => {
+    const closed = { production: false, allowedHosts: [], allowAnyHost: false };
+    expect(externalSystemUrlProblem('http://sim:4100/x', closed)).toBe(
+      'HOST_NOT_ALLOWED',
+    );
+    expect(externalSystemUrlProblem('http://sim:4100/x', DEV)).toBeNull();
+  });
+
+  it('in production nobody is called without a list, even opened, and only https', () => {
     expect(
       externalSystemUrlProblem('https://api.farmacia.bo', {
         production: true,
         allowedHosts: [],
+        allowAnyHost: true,
       }),
     ).toBe('HOST_NOT_ALLOWED');
-    const policy = { production: true, allowedHosts: ['api.farmacia.bo'] };
+    const policy = {
+      production: true,
+      allowedHosts: ['api.farmacia.bo'],
+      allowAnyHost: false,
+    };
     expect(
       externalSystemUrlProblem('https://api.farmacia.bo', policy),
     ).toBeNull();
@@ -93,6 +111,10 @@ describe('external system (FAR-C9 · C9-3)', () => {
         NODE_ENV: 'production',
         PHARMACY_EXTERNAL_ALLOWED_HOSTS: ' Sim , *.Farmacia.bo ,',
       }),
-    ).toEqual({ production: true, allowedHosts: ['sim', '*.farmacia.bo'] });
+    ).toEqual({
+      production: true,
+      allowedHosts: ['sim', '*.farmacia.bo'],
+      allowAnyHost: false,
+    });
   });
 });

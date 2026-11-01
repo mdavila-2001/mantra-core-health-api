@@ -111,10 +111,12 @@ export function normalizeBaseUrl(raw: string): string {
  * internas (metadatos de la nube, la base, otros servicios). Por eso:
  *
  * - solo `http` y `https`, sin usuario ni contraseña en la URL;
- * - con lista de hosts permitidos (`PHARMACY_EXTERNAL_ALLOWED_HOSTS`), solo
- *   esos (exactos o `*.dominio`);
- * - en producción, la lista es obligatoria y solo vale `https`: sin lista, no
- *   se llama a nadie.
+ * - solo los hosts de `PHARMACY_EXTERNAL_ALLOWED_HOSTS` (exactos o
+ *   `*.dominio`). **Sin lista no se llama a nadie**, en cualquier entorno;
+ *   solo fuera de producción, `PHARMACY_EXTERNAL_ALLOW_ANY_HOST=true` lo abre
+ *   a propósito (una máquina local con el simulador);
+ * - en producción solo vale `https`, y además el cliente rechaza al conectar
+ *   las IP internas (`external-system-clients.ts`).
  *
  * @returns `null` si se permite; si no, el motivo.
  */
@@ -137,7 +139,9 @@ export function externalSystemUrlProblem(
     return 'HOST_NOT_ALLOWED';
   }
   if (policy.allowedHosts.length === 0) {
-    return policy.production ? 'HOST_NOT_ALLOWED' : null;
+    return policy.allowAnyHost && !policy.production
+      ? null
+      : 'HOST_NOT_ALLOWED';
   }
   const host = url.hostname.toLowerCase();
   const allowed = policy.allowedHosts.some((entry) =>
@@ -153,6 +157,8 @@ export interface ExternalSystemHostPolicy {
   readonly production: boolean;
   /** En minúsculas; `*.dominio` admite subdominios. */
   readonly allowedHosts: readonly string[];
+  /** Sin lista, cualquiera (solo fuera de producción). */
+  readonly allowAnyHost: boolean;
 }
 
 /** Lee la política del entorno. */
@@ -165,5 +171,6 @@ export function loadExternalSystemHostPolicy(
       .split(',')
       .map((entry) => entry.trim().toLowerCase())
       .filter((entry) => entry !== ''),
+    allowAnyHost: source.PHARMACY_EXTERNAL_ALLOW_ANY_HOST === 'true',
   };
 }
