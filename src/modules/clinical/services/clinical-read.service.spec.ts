@@ -1093,6 +1093,31 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
     expect(c.accountLinksRepo.findActiveByUser).toHaveBeenCalledTimes(1);
   });
+
+  // `SUPERADMIN` acotado a un tenant (`scopedRoles`, MCH-001) no es el comodín:
+  // `RolesGuard` tampoco lo trata como tal. La historia no es de ningún tenant,
+  // así que el atajo exige el rol global (#1241).
+  it('SUPERADMIN acotado a un tenant NO lee la historia ajena sin turno ni vínculo', async () => {
+    const c = build();
+    await expect(
+      c.service.assertCanReadHistory(PATIENT, {
+        id: 'admin-a',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { 'tenant-a': ['SUPERADMIN'] },
+      } as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('SUPERADMIN acotado que además atiende: cae a la regla del profesional', async () => {
+    const c = build();
+    await expect(
+      c.service.assertCanReadHistory(PATIENT, {
+        id: 'admin-a',
+        roles: ['SUPERADMIN', 'CLINICIAN'],
+        scopedRoles: { 'tenant-a': ['SUPERADMIN'] },
+      } as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
 });
 
 describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
@@ -1189,5 +1214,19 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
         roles: ['SUPERADMIN'],
       } as any),
     ).resolves.toBeUndefined();
+  });
+
+  // `SUPERADMIN` acotado a un tenant (`scopedRoles`, MCH-001) no es el comodín:
+  // `RolesGuard` tampoco lo trata como tal. La historia no es de ningún tenant,
+  // así que el atajo exige el rol global (#1241).
+  it('SUPERADMIN acotado a un tenant NO escribe la historia sin base asistencial', async () => {
+    const c = build();
+    await expect(
+      c.service.assertCanWriteHistory(PATIENT, {
+        id: 'admin-a',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { 'tenant-a': ['SUPERADMIN'] },
+      } as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

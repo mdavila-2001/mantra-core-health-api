@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { jest } from '@jest/globals';
 import { readFileSync } from 'node:fs';
 
@@ -63,6 +64,42 @@ describe('ProfilesPatientsController', () => {
       ID,
       clinical,
     );
+  });
+
+  it('SECURITY_ADMIN global lee la ficha sin pasar por la regla de quien atiende', async () => {
+    const d = build();
+    d.patientsService.getPatientById.mockResolvedValue({ profileId: ID });
+
+    await expect(d.controller.getPatient(ID, actor)).resolves.toEqual({
+      profileId: ID,
+    });
+    expect(
+      d.clinicalPatientHistory.assertCanReadHistory,
+    ).not.toHaveBeenCalled();
+  });
+
+  // Un SECURITY_ADMIN acotado a una organización (`scopedRoles`, MCH-001) pasa
+  // `@Roles` en su tenant, pero el perfil de persona no es de ningún tenant: no
+  // tiene el atajo y la lectura la decide la regla de quien atiende (#1241).
+  it('SECURITY_ADMIN acotado a un tenant no lee la ficha de cualquiera: decide la regla de quien atiende', async () => {
+    const d = build();
+    const scoped = {
+      id: 'admin-a',
+      roles: ['SECURITY_ADMIN'],
+      scopedRoles: { 'tenant-a': ['SECURITY_ADMIN'] },
+    } as any;
+    d.clinicalPatientHistory.assertCanReadHistory.mockRejectedValue(
+      new ForbiddenException('no atiende'),
+    );
+
+    await expect(d.controller.getPatient(ID, scoped)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(d.clinicalPatientHistory.assertCanReadHistory).toHaveBeenCalledWith(
+      ID,
+      scoped,
+    );
+    expect(d.patientsService.getPatientById).not.toHaveBeenCalled();
   });
 
   it('delegates registerPatient (UC-05-01)', async () => {
