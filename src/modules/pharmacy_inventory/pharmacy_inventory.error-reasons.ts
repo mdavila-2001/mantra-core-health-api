@@ -86,6 +86,13 @@ export enum PharmacyInventoryErrorReason {
   PHARMACY_INTEGRATION_UNAVAILABLE = 'PHARMACY_INTEGRATION_UNAVAILABLE',
   /** La conexión no está activa o no admite consultar stock. */
   PHARMACY_INTEGRATION_CONNECTION_INACTIVE = 'PHARMACY_INTEGRATION_CONNECTION_INACTIVE',
+  /**
+   * La dirección del sistema de la farmacia no es http(s) válida o no está en la
+   * lista de hosts permitidos (`PHARMACY_EXTERNAL_ALLOWED_HOSTS`): no se llama.
+   */
+  PHARMACY_INTEGRATION_HOST_NOT_ALLOWED = 'PHARMACY_INTEGRATION_HOST_NOT_ALLOWED',
+  /** La dirección no es una URL http(s) válida (sin usuario, sin consulta). */
+  PHARMACY_INTEGRATION_URL_INVALID = 'PHARMACY_INTEGRATION_URL_INVALID',
   /** F5c: el espacio o la unidad no son de la sede de práctica de la sede de farmacia. */
   STOCK_POINT_SITE_MISMATCH = 'STOCK_POINT_SITE_MISMATCH',
   /** F5c: la función del espacio no tiene perfil `stockPoint` o el espacio no está activo. */

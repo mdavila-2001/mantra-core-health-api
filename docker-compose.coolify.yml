@@ -283,6 +283,10 @@ x-app-env: &app-env
   PHARMACY_ERP_BASE_URL: ${PHARMACY_ERP_BASE_URL:-}
   PHARMACY_ERP_API_KEY: ${PHARMACY_ERP_API_KEY:-}
   PHARMACY_ERP_TIMEOUT_MS: ${PHARMACY_ERP_TIMEOUT_MS:-5000}
+  # Sistema propio de cada farmacia (FAR-C9 · C9-3): la dirección la carga la
+  # farmacia y la llama la API. En producción solo se llaman los hosts de esta
+  # lista y solo por https; VACÍA = no se llama a ninguno (fail-closed).
+  PHARMACY_EXTERNAL_ALLOWED_HOSTS: ${PHARMACY_EXTERNAL_ALLOWED_HOSTS:-}
 
   # --- Plazos HTTP --------------------------------------------------------
   # `keepAlive` por encima del idle timeout del proxy que va delante, o

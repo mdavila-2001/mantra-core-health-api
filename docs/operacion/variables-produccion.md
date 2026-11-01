@@ -67,6 +67,7 @@ la sonda del rol de base de datos de las secciones siguientes también deciden.
 | `DEV_VERIFICATION_BYPASS` | Solo `false` (o ausente). Con `true` expondría profesionales sin verificar | Esquema: `src/common/verification/verification-bypass.env.ts:16-24`; guarda: `:52-64`, invocada en `verification-bypass.service.ts:29` | No |
 | `PHARMACY_ERP_BASE_URL` | Vacía. El único sistema externo que existe es el simulador, que inventaría stock | Esquema: `src/modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env.ts:17-21`; guarda: `:49-63` | No |
 | `PHARMACY_ERP_API_KEY` | Sin uso mientras la URL quede vacía | `pharmacy-erp.env.ts:22` | **Sí** |
+| `PHARMACY_EXTERNAL_ALLOWED_HOSTS` | Hosts que la API puede llamar como sistema propio de una farmacia (`api.farmacia.bo,*.cadena.bo`). Vacía = no se llama a ninguno; solo `https`. La clave de cada farmacia se cifra con `MFA_ENCRYPTION_KEY` | `src/modules/pharmacy_inventory/domain/sync/external-system.ts` (`externalSystemUrlProblem`) | No |
 | `MOCK_PROVIDER_BASE_URL` | Vacía, o apuntando al proveedor real. El emulador acepta toda verificación de identidad y matrícula. Su valor por defecto en producción ya es vacío | Esquema: `src/worker/worker.env.ts:162-166`; guarda: `:246-260`, invocada en `src/worker/bootstrap.ts:68` (cada worker) | No |
 | `MOCK_PROVIDER_API_KEY` | Solo con proveedor real | `src/worker/worker.env.ts:168` | **Sí** |
 | `AUDIO_TTS_PROVIDER` | Distinto de `fake` | `src/modules/audio_assets/audio.env.ts:125-126` (`loadAudioEnv`) | No |
