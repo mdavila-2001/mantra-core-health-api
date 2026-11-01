@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DIR } from '../../modules/directory/directory.concepts';
 import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { INSURER_ACCOUNTS } from './insurer-accounts.catalog';
+import { SEED_ACTOR_ID } from './seed-actor';
 
 /**
  * Construye el seed con un `em` en memoria.
@@ -21,6 +22,8 @@ import { INSURER_ACCOUNTS } from './insurer-accounts.catalog';
 function build(existing: Record<string, string> = {}, carriers = true) {
   const credentials = new Map(Object.entries(existing));
   const memberships: any[] = [];
+  /** Orden en que se escribió cada cosa: el actor tiene que ir antes. */
+  const order: string[] = [];
   const em = {
     findOne: mockFn((entity: any, where: any) => {
       if (entity.name === 'AuthenticationCredentials') {
@@ -36,6 +39,7 @@ function build(existing: Record<string, string> = {}, carriers = true) {
     }),
     create: mockFn((entity: any, data: any) => {
       if (entity.name === 'TenantMemberships') memberships.push(data);
+      if (entity.name === 'Users') order.push(`actor:${data.id}`);
       return data;
     }),
     flush: mockFn(() => Promise.resolve()),
@@ -43,6 +47,7 @@ function build(existing: Record<string, string> = {}, carriers = true) {
   const orm = { em: { fork: mockFn(() => em) } };
   const users = {
     createUser: mockFn((input: any) => {
+      order.push(`cuenta:${input.email}`);
       credentials.set(input.email, 'hash-nuevo');
       return Promise.resolve({ id: `user:${input.email}` });
     }),
@@ -53,7 +58,7 @@ function build(existing: Record<string, string> = {}, carriers = true) {
     users as any,
     logger as any,
   );
-  return { service, users, memberships, credentials };
+  return { service, users, memberships, credentials, order };
 }
 
 describe('InsurerAccountsSeedService', () => {
@@ -94,6 +99,16 @@ describe('InsurerAccountsSeedService', () => {
       statusConceptId: DIR.MEMBERSHIP_ACTIVE,
     });
     expect(new Set(memberships.map((m) => m.id)).size).toBe(33);
+  });
+
+  it('en una base nueva materializa el actor semilla antes de la primera cuenta (api#1230)', async () => {
+    const { service, order } = build();
+
+    await service.run('clave', 'development');
+
+    expect(order[0]).toBe(`actor:${SEED_ACTOR_ID}`);
+    expect(order.filter((o) => o.startsWith('actor:'))).toHaveLength(1);
+    expect(order).toHaveLength(34);
   });
 
   it('con permiso explícito siembra también en producción', async () => {
