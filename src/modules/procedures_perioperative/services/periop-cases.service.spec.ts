@@ -1197,6 +1197,32 @@ describe('PeriopCasesService', () => {
       expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
     });
 
+    it.each(['PERIOP_ADMIN', 'SUPERADMIN'])(
+      '%s acotado a otro tenant no acepta por el integrante; acotado a éste o global sí (#1241)',
+      async (role) => {
+        const scopedTo = (tenantId: string) => ({
+          id: 'admin-scoped',
+          roles: [role],
+          scopedRoles: { [tenantId]: [role] },
+        });
+        const denied = withTeam();
+        await expect(
+          denied.d.service.acceptTeamMember(
+            CASE,
+            'm-1',
+            scopedTo(TENANT_B) as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(denied.member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+
+        for (const who of [scopedTo(TENANT), { id: 'g', roles: [role] }]) {
+          const { d, member } = withTeam();
+          await d.service.acceptTeamMember(CASE, 'm-1', who as any);
+          expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+        }
+      },
+    );
+
     it('rechaza al integrante que no pertenece al caso', async () => {
       const { d } = withTeam();
 
@@ -1324,6 +1350,34 @@ describe('PeriopCasesService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
     });
+
+    it.each(['PERIOP_ADMIN', 'SUPERADMIN'])(
+      '%s acotado a otro tenant no responde por el integrante; acotado a éste o global sí (#1241)',
+      async (role) => {
+        const scopedTo = (tenantId: string) => ({
+          id: 'admin-scoped',
+          roles: [role],
+          scopedRoles: { [tenantId]: [role] },
+        });
+        const dto = { response: 'DECLINE', reasonText: 'Motivo' } as any;
+        const denied = withTeam();
+        await expect(
+          denied.d.service.respondTeamMember(
+            CASE,
+            'm-1',
+            dto,
+            scopedTo(TENANT_B) as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(denied.member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+
+        for (const who of [scopedTo(TENANT), { id: 'g', roles: [role] }]) {
+          const { d, member } = withTeam();
+          await d.service.respondTeamMember(CASE, 'm-1', dto, who as any);
+          expect(member.statusConceptId).toBe(PERIOP.TEAM_DECLINED);
+        }
+      },
+    );
 
     it('rechaza responder sobre un caso cancelado', async () => {
       const { d, titular } = withTeam();
