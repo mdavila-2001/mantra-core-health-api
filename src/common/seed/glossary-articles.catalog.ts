@@ -1,3 +1,4 @@
+import articleAliasesDataset from './data/glossary/glossary-article-aliases.json';
 import articlesDataset from './data/glossary/glossary-articles.json';
 
 /**
@@ -93,27 +94,65 @@ export interface GlossaryArticleDocument {
 const GLOSSARY_ARTICLES_JSON: Readonly<Record<string, string>> =
   articlesDataset;
 
-/** Los slugs que tienen artículo propio, ordenados. */
-export const GLOSSARY_ARTICLE_SLUGS: readonly string[] = Object.keys(
-  GLOSSARY_ARTICLES_JSON,
-).sort();
+/**
+ * Término visible → artículo que se le muestra.
+ *
+ * El slug de un artículo casi nunca es el del término que la gente abre: la
+ * «Ecografía» del glosario es `medlineplus-lab-ecografia` (y su duplicado
+ * `wikidata-prueba-q234904`), no `ecografia`. Sin esta tabla el seed buscaba
+ * el concepto `ecografia`, no lo encontraba y el término quedaba sin artículo.
+ * La escribe el generador del front (`articulos-terminos.json`, al revés).
+ */
+const GLOSSARY_ARTICLE_ALIASES: Readonly<Record<string, string>> =
+  articleAliasesDataset;
+
+/**
+ * Los slugs de término con artículo, ordenados: los que tienen uno propio y
+ * los que muestran uno por `glossary-article-aliases.json`.
+ */
+export const GLOSSARY_ARTICLE_SLUGS: readonly string[] = [
+  ...new Set([
+    ...Object.keys(GLOSSARY_ARTICLES_JSON),
+    ...Object.keys(GLOSSARY_ARTICLE_ALIASES).filter((slug) =>
+      Object.hasOwn(
+        GLOSSARY_ARTICLES_JSON,
+        GLOSSARY_ARTICLE_ALIASES[slug],
+      ),
+    ),
+  ]),
+].sort();
 
 const parsed = new Map<string, GlossaryArticleDocument>();
 
 /**
- * El artículo de un término, o `undefined` si no tiene uno propio.
+ * El artículo de un término, o `undefined` si no tiene uno.
  *
- * Se parsea la primera vez que se pide y se guarda: son ~70 KB de texto por
- * término y el seed lo consulta varias veces por corrida.
+ * Un término con alias recibe el artículo de su fuente con `conceptRef`
+ * reescrito a su propio slug: el documento declara siempre el término al que
+ * cuelga. Se parsea la primera vez que se pide y se guarda: son ~70 KB de
+ * texto por término y el seed lo consulta varias veces por corrida.
  */
 export function glossaryArticleFor(
   slug: string,
 ): GlossaryArticleDocument | undefined {
   const cached = parsed.get(slug);
   if (cached !== undefined) return cached;
-  if (!Object.hasOwn(GLOSSARY_ARTICLES_JSON, slug)) return undefined;
-  const raw = GLOSSARY_ARTICLES_JSON[slug];
-  const article = JSON.parse(raw) as GlossaryArticleDocument;
+  let article: GlossaryArticleDocument;
+  if (Object.hasOwn(GLOSSARY_ARTICLES_JSON, slug)) {
+    article = JSON.parse(GLOSSARY_ARTICLES_JSON[slug]) as GlossaryArticleDocument;
+  } else if (Object.hasOwn(GLOSSARY_ARTICLE_ALIASES, slug)) {
+    const source = GLOSSARY_ARTICLE_ALIASES[slug];
+    if (!Object.hasOwn(GLOSSARY_ARTICLES_JSON, source)) return undefined;
+    const original = JSON.parse(
+      GLOSSARY_ARTICLES_JSON[source],
+    ) as GlossaryArticleDocument;
+    article = {
+      ...original,
+      conceptRef: { ...original.conceptRef, code: slug, slug },
+    };
+  } else {
+    return undefined;
+  }
   parsed.set(slug, article);
   return article;
 }
