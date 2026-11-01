@@ -145,9 +145,7 @@ export class OrderStockSourceResolver {
       // turn the three-second ERP lookup into two consecutive time budgets.
       const [products, lines] = await Promise.race([
         Promise.all([
-          requiresUnitCatalog
-            ? catalog.listProducts()
-            : Promise.resolve([]),
+          requiresUnitCatalog ? catalog.listProducts() : Promise.resolve([]),
           catalog.stockForSite(siteCode, record.config.pharmacyCode),
         ]),
         new Promise<never>((_, reject) => {
