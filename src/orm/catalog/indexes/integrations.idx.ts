@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `integrations`.
- * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 56 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const integrationsIndexes: readonly IndexTuple[] = [
@@ -18,6 +18,7 @@ export const integrationsIndexes: readonly IndexTuple[] = [
   ['inbound_messages', 'ix_inbound_messages_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['inbound_messages', 'ix_inbound_messages_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['inbound_messages', 'ix_inbound_messages_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['inbound_messages', 'uq_inbound_messages_connection_id_signature', ['connection_id', 'signature'], true, 'btree', 'signature IS NOT NULL'],
   ['integration_endpoints', 'ix_integration_endpoints_provider_id', ['provider_id'], false, 'btree'],
   ['integration_endpoints', 'ix_integration_endpoints_http_method_concept_id', ['http_method_concept_id'], false, 'btree'],
   ['integration_endpoints', 'ix_integration_endpoints_state_concept_id', ['state_concept_id'], false, 'btree'],

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `telemetry`.
- * 83 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 94 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const telemetryIndexes: readonly IndexTuple[] = [
@@ -27,6 +27,14 @@ export const telemetryIndexes: readonly IndexTuple[] = [
   ['client_contexts', 'ix_client_contexts_browser_family_concept_id', ['browser_family_concept_id'], false, 'btree'],
   ['client_contexts', 'ix_client_contexts_country_concept_id', ['country_concept_id'], false, 'btree'],
   ['client_contexts', 'ix_client_contexts_data_classification_concept_id', ['data_classification_concept_id'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_received_at', ['received_at desc'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_fingerprint_received_at', ['fingerprint', 'received_at'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_route_template_received_at', ['route_template', 'received_at'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_request_id', ['request_id'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_portal_type_concept_id', ['portal_type_concept_id'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_error_class_concept_id', ['error_class_concept_id'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_user_id', ['user_id'], false, 'btree'],
+  ['client_error_events', 'ix_client_error_events_session_id', ['session_id'], false, 'btree'],
   ['conversion_events', 'ix_conversion_events_funnel_definition_id', ['funnel_definition_id'], false, 'btree'],
   ['conversion_events', 'ix_conversion_events_analytics_subject_id', ['analytics_subject_id'], false, 'btree'],
   ['conversion_events', 'ix_conversion_events_session_journey_id', ['session_journey_id'], false, 'btree'],
@@ -65,6 +73,10 @@ export const telemetryIndexes: readonly IndexTuple[] = [
   ['tracking_purpose_definitions', 'ix_tracking_purpose_definitions_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
   ['tracking_purpose_definitions', 'ix_tracking_purpose_definitions_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['tracking_purpose_definitions', 'ix_tracking_purpose_definitions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_user_activity_event_id', ['user_activity_event_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_type_concept_id', ['value_type_concept_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_concept_id', ['value_concept_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_data_classification__18c7c7cf', ['data_classification_concept_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_event_schema_definition_id', ['event_schema_definition_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_analytics_subject_id', ['analytics_subject_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_user_id', ['user_id'], false, 'btree'],
@@ -77,10 +89,9 @@ export const telemetryIndexes: readonly IndexTuple[] = [
   ['user_activity_events', 'ix_user_activity_events_security_audit_event_id', ['security_audit_event_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_tenant_id_created_at', ['tenant_id', 'created_at desc'], false, 'btree'],
   ['user_activity_events', 'brin_user_activity_events_created_at', ['created_at'], false, 'brin'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_user_activity_event_id', ['user_activity_event_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_type_concept_id', ['value_type_concept_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_concept_id', ['value_concept_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_data_classification__18c7c7cf', ['data_classification_concept_id'], false, 'btree'],
+  ['user_activity_events', 'ix_user_activity_events_occurred_at', ['occurred_at'], false, 'btree'],
+  ['user_activity_events', 'ix_user_activity_events_route_template_occurred_at', ['route_template', 'occurred_at'], false, 'btree'],
+  ['user_activity_events', 'ix_user_activity_events_user_idempotency', ['user_id', 'event_idempotency_key'], false, 'btree', 'user_id IS NOT NULL'],
   ['web_vitals', 'ix_web_vitals_user_activity_event_id', ['user_activity_event_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_session_journey_id', ['session_journey_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_analytics_subject_id', ['analytics_subject_id'], false, 'btree'],
