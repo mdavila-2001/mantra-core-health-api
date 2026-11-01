@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 25 · schema pharmacy_inventory
+-- SALUD v4.2.82 · módulo 25 · schema pharmacy_inventory
 -- Generado de diagram_25_pharmacy_inventory.puml — NO editar a mano.
 
 
@@ -15,6 +15,12 @@ CREATE INDEX IF NOT EXISTS "ix_inventory_locations_status_concept_id" ON "pharma
 CREATE INDEX IF NOT EXISTS "ix_inventory_locations_created_by_user_id" ON "pharmacy_inventory"."inventory_locations" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_locations_updated_by_user_id" ON "pharmacy_inventory"."inventory_locations" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_inventory_locations_care_space_id" ON "pharmacy_inventory"."inventory_locations" ("care_space_id");
+
+CREATE INDEX IF NOT EXISTS "ix_inventory_locations_clinical_unit_id" ON "pharmacy_inventory"."inventory_locations" ("clinical_unit_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_inventory_locations_ward_stock_unit" ON "pharmacy_inventory"."inventory_locations" ("clinical_unit_id") WHERE location_type_concept_id = '51dd3c8b-d630-5f5a-8bf4-2b9366752a73' AND status_concept_id = '4e556b5a-7ee6-5c64-abf9-f7e32bf83115';
 
 CREATE INDEX IF NOT EXISTS "ix_inventory_lots_pharmacy_product_id" ON "pharmacy_inventory"."inventory_lots" ("pharmacy_product_id");
 

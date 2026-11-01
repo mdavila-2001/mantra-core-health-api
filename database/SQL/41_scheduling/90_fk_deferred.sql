@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 41 · schema scheduling
+-- SALUD v4.2.82 · módulo 41 · schema scheduling
 -- Generado de diagram_41_scheduling.puml — NO editar a mano.
 
 
@@ -128,6 +128,13 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."schedulable_resources"
+        ADD CONSTRAINT "fk_schedulable_resources_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "scheduling"."schedule_templates"
@@ -154,6 +161,13 @@ DO $$ BEGIN
     ALTER TABLE "scheduling"."schedule_templates"
         ADD CONSTRAINT "fk_schedule_templates_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."schedule_templates"
+        ADD CONSTRAINT "fk_schedule_templates_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -200,6 +214,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
+    ALTER TABLE "scheduling"."availability_exceptions"
+        ADD CONSTRAINT "fk_availability_exceptions_source_kind_concept_id" FOREIGN KEY ("source_kind_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
     ALTER TABLE "scheduling"."bookable_slots"
         ADD CONSTRAINT "fk_bookable_slots_service_concept_id" FOREIGN KEY ("service_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
@@ -224,6 +245,20 @@ DO $$ BEGIN
     ALTER TABLE "scheduling"."bookable_slots"
         ADD CONSTRAINT "fk_bookable_slots_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."bookable_slots"
+        ADD CONSTRAINT "fk_bookable_slots_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.healthcare_services (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."bookable_slots"
+        ADD CONSTRAINT "fk_bookable_slots_healthcare_service_id" FOREIGN KEY ("healthcare_service_id")
+        REFERENCES "practice"."healthcare_services" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: profiles.patient_profiles (requiere schema profiles)
@@ -371,6 +406,27 @@ DO $$ BEGIN
     ALTER TABLE "scheduling"."appointment_bookings"
         ADD CONSTRAINT "fk_appointment_bookings_form_instance_id" FOREIGN KEY ("form_instance_id")
         REFERENCES "forms"."form_instances" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_bookings"
+        ADD CONSTRAINT "fk_appointment_bookings_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.healthcare_services (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_bookings"
+        ADD CONSTRAINT "fk_appointment_bookings_healthcare_service_id" FOREIGN KEY ("healthcare_service_id")
+        REFERENCES "practice"."healthcare_services" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: delegated_access.support_scope_grants (requiere schema delegated_access)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_bookings"
+        ADD CONSTRAINT "fk_appointment_bookings_booked_via_grant_id" FOREIGN KEY ("booked_via_grant_id")
+        REFERENCES "delegated_access"."support_scope_grants" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: profiles.health_practitioner_profiles (requiere schema profiles)
