@@ -15,6 +15,27 @@ describe('billing-simulated.access', () => {
     });
   });
 
+  it('SUPERADMIN acotado en scopedRoles no opera sin acotar: sólo en sus tenants (#1241)', () => {
+    expect(
+      operatingScope(
+        user({
+          roles: ['SUPERADMIN'],
+          scopedRoles: { t1: ['SUPERADMIN'] },
+          tenantIds: ['t1', 't2'],
+        }),
+      ),
+    ).toEqual({ kind: 'admin', tenantIds: ['t1'] });
+    expect(
+      operatingScope(
+        user({
+          roles: ['SUPERADMIN', 'BILLING'],
+          scopedRoles: { t3: ['SUPERADMIN'] },
+          tenantIds: ['t1'],
+        }),
+      ),
+    ).toEqual({ kind: 'admin', tenantIds: ['t1', 't3'] });
+  });
+
   it('la administración queda acotada a sus tenants (y a ninguno si no tiene)', () => {
     expect(
       operatingScope(user({ roles: ['SECURITY_ADMIN'], tenantIds: ['t1'] })),

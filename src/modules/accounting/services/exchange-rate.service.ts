@@ -18,9 +18,10 @@ import { RegisterExchangeRateDto, ExchangeRateResponseDto } from '../dto';
  *
  * `accounting.exchange_rates` no lleva `tenant_id` ni práctica: es una tabla de
  * plataforma compartida por todas las organizaciones. Por eso sólo la escribe un
- * actor de plataforma (`SUPERADMIN` o `SYSTEM`); un administrador de tenant
- * sobrescribiría la tasa que usan los demás (ACC-01). Aislar la tasa por tenant
- * exige una columna `tenant_id` en el modelo.
+ * actor de plataforma global (`SUPERADMIN` o `SYSTEM` sin ámbito en
+ * `scopedRoles`); un administrador de tenant sobrescribiría la tasa que usan
+ * los demás (ACC-01). Aislar la tasa por tenant exige una columna `tenant_id`
+ * en el modelo.
  */
 @Injectable()
 export class ExchangeRateService {
@@ -107,8 +108,9 @@ export class ExchangeRateService {
    * @throws InsufficientRoleException (403) si el actor está acotado a un tenant.
    */
   private assertPlatformActor(actor: AuthenticatedUser): void {
+    // Tabla sin tenant: sólo el rol global, también para `SUPERADMIN` (#1241).
     if (
-      actor.roles.includes('SUPERADMIN') ||
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
       roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
     ) {
       return;
