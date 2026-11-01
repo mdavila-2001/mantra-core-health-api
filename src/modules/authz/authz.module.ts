@@ -1,6 +1,8 @@
 import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
 import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
 import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
+import { AuthzPermissionDecisionPoint } from './services/authz-permission-decision-point';
+import { PERMISSION_DECISION_POINT } from '../../common/auth/permission-decision.port';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -138,6 +140,13 @@ import {
     AuthzAssignmentRevocationService,
     AuthzGovernanceService,
     AuthzGovernanceExtService,
+    // `@RequirePermission` (common/auth) consulta el PDP por este token; la
+    // guarda lo busca en todo el contenedor, así que no hace falta exportarlo.
+    AuthzPermissionDecisionPoint,
+    {
+      provide: PERMISSION_DECISION_POINT,
+      useExisting: AuthzPermissionDecisionPoint,
+    },
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume
