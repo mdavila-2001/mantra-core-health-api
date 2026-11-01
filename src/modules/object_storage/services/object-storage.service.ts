@@ -41,6 +41,7 @@ import {
   COLD_STORAGE_CLASSES,
   DICOMWEB_OPERATION,
   DICOMWEB_OUTCOME,
+  MULTIPART_UPLOAD,
   NAMESPACE_ACTIVE,
   OBJECT_LIFECYCLE,
   PLACEMENT_ROLE,
@@ -197,7 +198,9 @@ export class ObjectStorageService {
         targetObjectKey: dto.targetObjectKey,
         expectedSizeBytes: dto.expectedSizeBytes,
         status: UPLOAD_STATUS.INITIATED,
-        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+        expiresAt: dto.expiresAt
+          ? new Date(dto.expiresAt)
+          : new Date(Date.now() + MULTIPART_UPLOAD.DEFAULT_TTL_SECONDS * 1000),
       });
 
       return {

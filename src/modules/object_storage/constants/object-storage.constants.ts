@@ -106,6 +106,19 @@ export const CHECKSUM_SOURCES_TRUSTED: readonly string[] = [
 ];
 
 /**
+ * Carga multiparte (UC-60-01).
+ *
+ * `multipart_uploads.expires_at` es NOT NULL y el cliente puede no mandarla:
+ * sin un plazo propio el alta fallaba con 500. Una carga a medias que nadie
+ * cierra caduca a las 24 h, el mismo orden que el corte de cargas incompletas
+ * del proveedor.
+ */
+export const MULTIPART_UPLOAD = {
+  /** Vida de una carga iniciada sin `expiresAt`. */
+  DEFAULT_TTL_SECONDS: 24 * 60 * 60,
+} as const;
+
+/**
  * Acceso temporal a una versión (MCH-009).
  *
  * El enlace que se emite es un canje contra este servicio, no la URI del
