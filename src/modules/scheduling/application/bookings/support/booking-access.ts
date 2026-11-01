@@ -3,6 +3,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   getCurrentTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../../common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -178,13 +179,15 @@ export class BookingAccess {
    *
    * `tenantIds` es el respaldo para invocaciones internas sin contexto HTTP.
    * Sin contexto ni membresía comprobable se rechaza; `SUPERADMIN` mantiene su
-   * alcance de plataforma.
+   * alcance de plataforma sólo donde autoriza: el global en cualquier tenant;
+   * el acotado en `scopedRoles`, sólo sobre recursos de su tenant
+   * (`roleAuthorizesInTenant` con el tenant del recurso, #1241).
    */
   assertResourceInActiveTenant(
     resourceTenantId: string,
     actor: AuthenticatedUser,
   ): void {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', resourceTenantId)) return;
 
     const activeTenantId = getCurrentTenantId();
     const withinScope = activeTenantId
