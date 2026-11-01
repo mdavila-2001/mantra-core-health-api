@@ -21,7 +21,11 @@ export const CHECKLIST_PHASES = ['SIGN_IN', 'TIME_OUT', 'SIGN_OUT'] as const;
 
 /** Cómo se responde a un ítem del checklist. */
 export type ResponseStatus = 'CONFIRMED' | 'NOT_APPLICABLE' | 'EXCEPTION';
-export const RESPONSE_STATUSES = ['CONFIRMED', 'NOT_APPLICABLE', 'EXCEPTION'] as const;
+export const RESPONSE_STATUSES = [
+  'CONFIRMED',
+  'NOT_APPLICABLE',
+  'EXCEPTION',
+] as const;
 
 /**
  * Define el contrato validado para checklist response item.

@@ -4,4 +4,9 @@ export const LATERALITIES = ['LEFT', 'RIGHT', 'BILATERAL'] as const;
 
 /** Gravedad de un evento clínico. */
 export type ClinicalSeverity = 'ROUTINE' | 'MINOR' | 'MAJOR' | 'CRITICAL';
-export const CLINICAL_SEVERITIES = ['ROUTINE', 'MINOR', 'MAJOR', 'CRITICAL'] as const;
+export const CLINICAL_SEVERITIES = [
+  'ROUTINE',
+  'MINOR',
+  'MAJOR',
+  'CRITICAL',
+] as const;

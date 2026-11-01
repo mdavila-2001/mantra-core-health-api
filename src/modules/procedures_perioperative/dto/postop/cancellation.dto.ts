@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsIn,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
 
 // ---------------------------------------------------------------------------
 // UC-53-13 · Cancelación
@@ -13,7 +7,11 @@ import {
 
 /** A quién se atribuye la cancelación. */
 export type CancellationCategory = 'PATIENT' | 'FACILITY' | 'CLINICAL';
-export const CANCELLATION_CATEGORIES = ['PATIENT', 'FACILITY', 'CLINICAL'] as const;
+export const CANCELLATION_CATEGORIES = [
+  'PATIENT',
+  'FACILITY',
+  'CLINICAL',
+] as const;
 
 /** Cuerpo de `POST /procedure-cases/{id}/cancel` (UC-53-13). */
 export class CancelCaseDto {

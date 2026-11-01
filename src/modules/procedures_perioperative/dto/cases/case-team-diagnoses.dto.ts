@@ -19,7 +19,11 @@ import {
 
 /** Papel del diagnóstico en el caso. */
 export type DiagnosisRole = 'PRIMARY' | 'SECONDARY' | 'POSTOPERATIVE';
-export const DIAGNOSIS_ROLES = ['PRIMARY', 'SECONDARY', 'POSTOPERATIVE'] as const;
+export const DIAGNOSIS_ROLES = [
+  'PRIMARY',
+  'SECONDARY',
+  'POSTOPERATIVE',
+] as const;
 
 /**
  * Define el contrato validado para case diagnosis.

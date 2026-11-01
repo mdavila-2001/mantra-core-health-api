@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsIn,
-  IsISO8601,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsIn, IsISO8601, IsOptional, IsString, IsUUID } from 'class-validator';
 
 // ---------------------------------------------------------------------------
 // UC-53-01 · Programación del caso

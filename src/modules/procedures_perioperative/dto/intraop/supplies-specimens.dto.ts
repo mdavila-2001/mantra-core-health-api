@@ -1,10 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsIn,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
 
 // ---------------------------------------------------------------------------
 // UC-53-10 · Insumos y muestras
@@ -12,7 +7,11 @@ import {
 
 /** Para qué se usó el medicamento en la intervención. */
 export type MedicationUseRole = 'ANESTHESIA' | 'ANTIBIOTIC' | 'ANALGESIA';
-export const MEDICATION_USE_ROLES = ['ANESTHESIA', 'ANTIBIOTIC', 'ANALGESIA'] as const;
+export const MEDICATION_USE_ROLES = [
+  'ANESTHESIA',
+  'ANTIBIOTIC',
+  'ANALGESIA',
+] as const;
 
 /** Naturaleza de la muestra tomada. */
 export type SpecimenRole = 'BIOPSY' | 'RESECTION' | 'CULTURE';

@@ -21,7 +21,12 @@ import {
 
 /** Naturaleza del cargo generado. */
 export type ChargeType = 'PROCEDURE' | 'IMPLANT' | 'SUPPLY' | 'OR_TIME';
-export const CHARGE_TYPES = ['PROCEDURE', 'IMPLANT', 'SUPPLY', 'OR_TIME'] as const;
+export const CHARGE_TYPES = [
+  'PROCEDURE',
+  'IMPLANT',
+  'SUPPLY',
+  'OR_TIME',
+] as const;
 
 /**
  * Define el contrato validado para charge item.

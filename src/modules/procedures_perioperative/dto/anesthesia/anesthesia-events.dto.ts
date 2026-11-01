@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsIn,
-  IsISO8601,
-  IsObject,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsIn, IsISO8601, IsObject, IsOptional, IsUUID } from 'class-validator';
 import { CLINICAL_SEVERITIES, type ClinicalSeverity } from '../common';
 
 // ---------------------------------------------------------------------------

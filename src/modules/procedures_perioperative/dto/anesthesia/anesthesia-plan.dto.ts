@@ -17,7 +17,12 @@ import {
 
 /** Tipo de anestesia planificada. */
 export type AnesthesiaType = 'GENERAL' | 'REGIONAL' | 'LOCAL' | 'SEDATION';
-export const ANESTHESIA_TYPES = ['GENERAL', 'REGIONAL', 'LOCAL', 'SEDATION'] as const;
+export const ANESTHESIA_TYPES = [
+  'GENERAL',
+  'REGIONAL',
+  'LOCAL',
+  'SEDATION',
+] as const;
 
 /** Plan de vía aérea. */
 export type AirwayPlan = 'ETT' | 'LMA' | 'MASK';
