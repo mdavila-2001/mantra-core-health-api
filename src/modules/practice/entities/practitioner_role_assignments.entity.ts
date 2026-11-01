@@ -96,6 +96,9 @@ export class PractitionerRoleAssignments {
   @Property({ fieldName: 'valid_to', columnType: 'date', nullable: true })
   validTo?: Date;
 
+  /**
+   * Valor de contact phone mantenido por la instancia.
+   */
   @Property({
     fieldName: 'contact_phone',
     columnType: 'varchar',

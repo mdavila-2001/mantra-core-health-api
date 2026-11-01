@@ -65,6 +65,9 @@ export class ScheduleRules {
   @Property({ fieldName: 'gap_minutes', columnType: 'int', nullable: true })
   gapMinutes?: number;
 
+  /**
+   * Identificador asociado a booking mode concept.
+   */
   @Property({
     fieldName: 'booking_mode_concept_id',
     type: 'uuid',
