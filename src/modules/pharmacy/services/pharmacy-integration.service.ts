@@ -106,26 +106,9 @@ export class PharmacyIntegrationService {
         );
       }
 
-      if (dto.connectionId) {
-        const clash = await this.connectionsRepo.findByPharmacyAndConnection(
-          tx,
-          pharmacyId,
-          dto.connectionId,
-        );
-        if (clash) {
-          throw new ConflictException(
-            'Ya existe una conexión para esa integración',
-            {
-              connectionId: dto.connectionId,
-            },
-          );
-        }
-      }
-
       const connection = this.connectionsRepo.create(tx, {
         pharmacyId,
         pharmacySiteId: dto.pharmacySiteId,
-        connectionId: dto.connectionId,
         integrationModeConceptId:
           INTEGRATION_MODE_CONCEPT_BY_CODE[dto.integrationMode],
         inventoryAuthorityConceptId: dto.inventoryAuthorityConceptId,
@@ -150,7 +133,7 @@ export class PharmacyIntegrationService {
       return {
         id: connection.id,
         pharmacyId: connection.pharmacyId,
-        connectionId: connection.connectionId,
+        connectionId: connection.connectionId ?? null,
         status: connection.statusConceptId,
         createdAt: connection.createdAt,
       };

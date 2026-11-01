@@ -27,8 +27,8 @@ export class PharmacyIntegrationConnections {
   /**
    * Identificador asociado a connection.
    */
-  @Property({ fieldName: 'connection_id', type: 'uuid' }) // FK → pharmacy.pharmacy_integration_connections
-  connectionId!: string;
+  @Property({ fieldName: 'connection_id', type: 'uuid', nullable: true }) // FK → integrations.provider_connections
+  connectionId?: string;
 
   /**
    * Identificador asociado a integration mode concept.
