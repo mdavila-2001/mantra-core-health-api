@@ -71,13 +71,13 @@ export class JurisdictionAuthorizations {
   /**
    * Identificador asociado a file.
    */
-  @Property({ fieldName: 'file_id', type: 'uuid', nullable: true }) // FK → common.files
+  @Property({ fieldName: 'file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   fileId?: string;
 
   /**
    * Quién verificó (o rechazó) la matrícula.
    */
-  @Property({ fieldName: 'verified_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'verified_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   verifiedByUserId?: string;
 
   /**

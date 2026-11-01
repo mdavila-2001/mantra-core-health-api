@@ -27,7 +27,7 @@ export class InsightsCampaignHourlyFacts {
   /**
    * Identificador asociado a campaign.
    */
-  @Property({ fieldName: 'campaign_id', type: 'uuid' }) // FK → marketing.insights_campaigns
+  @Property({ fieldName: 'campaign_id', type: 'uuid' }) // FK → ads.campaigns (inferida)
   campaignId!: string;
 
   /**

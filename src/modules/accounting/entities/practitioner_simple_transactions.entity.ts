@@ -7,10 +7,7 @@ import { randomUUID } from 'node:crypto';
  * Una transacción debe/haber de la contabilidad simple del doctor (P49). No es
  * un asiento del libro mayor: no toca `accounting.journal_transactions`.
  */
-@Entity({
-  schema: 'accounting',
-  tableName: 'practitioner_simple_transactions',
-})
+@Entity({ schema: 'accounting', tableName: 'practitioner_simple_transactions' })
 export class PractitionerSimpleTransactions {
   /**
    * Identificador único de la instancia.
@@ -21,7 +18,7 @@ export class PractitionerSimpleTransactions {
   /**
    * Identificador asociado a practice.
    */
-  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
+  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices (inferida)
   practiceId!: string;
 
   /**
@@ -39,13 +36,13 @@ export class PractitionerSimpleTransactions {
   /**
    * Cuenta del debe.
    */
-  @Property({ fieldName: 'debit_account_id', type: 'uuid' }) // FK → accounting.practitioner_simple_accounts
+  @Property({ fieldName: 'debit_account_id', type: 'uuid' }) // FK (destino no resuelto)
   debitAccountId!: string;
 
   /**
    * Cuenta del haber; distinta de la del debe.
    */
-  @Property({ fieldName: 'credit_account_id', type: 'uuid' }) // FK → accounting.practitioner_simple_accounts
+  @Property({ fieldName: 'credit_account_id', type: 'uuid' }) // FK (destino no resuelto)
   creditAccountId!: string;
 
   /**
@@ -69,13 +66,13 @@ export class PractitionerSimpleTransactions {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**
