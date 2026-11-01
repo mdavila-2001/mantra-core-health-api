@@ -3,7 +3,7 @@ import { MutabilityCatalogService } from '../../../system_ops/mutability/service
 import type {
   FitMutabilitySource,
   MutabilityDeclarations,
-} from './fit.types';
+} from '../../application/fit/fit.types';
 
 /**
  * Fuente de mutabilidad de la sonda de ajuste: lee el registro derivado por el gobierno de

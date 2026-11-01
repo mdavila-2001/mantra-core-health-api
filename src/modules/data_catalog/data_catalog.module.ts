@@ -31,7 +31,7 @@ import { FitInputsCollector } from './application/fit/fit-inputs.collector';
 import { FitLiveRepository } from './application/fit/fit-live.repository';
 import { FitResultsStore } from './application/fit/fit-results.store';
 import { FIT_MUTABILITY_SOURCE } from './application/fit/fit.types';
-import { MutabilityFitSource } from './application/fit/mutability-source.adapter';
+import { MutabilityFitSource } from './infrastructure/adapters/mutability-fit-source.adapter';
 import { MutabilityModule } from '../system_ops/mutability/mutability.module';
 import {
   AdminCatalogFitController,
