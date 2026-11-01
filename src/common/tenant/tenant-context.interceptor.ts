@@ -66,7 +66,17 @@ export class TenantContextInterceptor implements NestInterceptor {
   constructor(
     private readonly em: EntityManager,
     private readonly reflector: Reflector,
-  ) {}
+  ) {
+    if (process.env.NODE_ENV === 'production' && !this.enforceRls) {
+      process.stderr.write(
+        JSON.stringify({
+          level: 'warn',
+          name: 'tenant-security',
+          msg: 'ALERTA CRÍTICA DE AISLAMIENTO: RLS_ENFORCE no está activo en entorno de producción. El aislamiento multi-tenant depende exclusivamente de filtros de capa de aplicación.',
+        }) + '\n',
+      );
+    }
+  }
 
   /**
    * Resuelve, valida y propaga el tenant del request.
