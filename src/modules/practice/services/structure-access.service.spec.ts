@@ -2,6 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { ResourceNotFoundException } from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
+import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
 import { StructureAccessService } from './structure-access.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -141,5 +142,87 @@ describe('StructureAccessService (F1, contrato §3 «Autorización»)', () => {
       TENANT,
       user,
     );
+  });
+});
+
+/**
+ * Rol de plataforma acotado a un tenant (`scopedRoles`, MCH-001): figura en
+ * `roles`, pero sólo vale en su tenant. Con la regla real de
+ * `TenantAdministrationService` y sin membresías.
+ */
+describe('StructureAccessService · plataforma acotada a un tenant', () => {
+  const PLATFORM = ['SECURITY_ADMIN', 'SUPERADMIN'];
+  const scopedTo = (role: string, tenantId: string) =>
+    ({
+      id: 'admin-a',
+      roles: [role],
+      scopedRoles: { [tenantId]: [role] },
+    }) as any;
+  const siteOf = (tenantId: string) =>
+    ({ id: `s-${tenantId}`, tenantId, branchId: 'br-1' }) as any;
+
+  function buildReal() {
+    const membershipsRepo = {
+      findActiveByUserTenant: mockFn().mockResolvedValue(null),
+    };
+    const em: any = { findOne: mockFn().mockResolvedValue(null) };
+    const service = new StructureAccessService(
+      new TenantAdministrationService(membershipsRepo as any),
+      membershipsRepo as any,
+      {} as any,
+      {} as any,
+      {} as any,
+    );
+    return { service, em };
+  }
+
+  it('acotado a A NO administra la organización ni escribe sedes de B', async () => {
+    for (const role of PLATFORM) {
+      const d = buildReal();
+      const actor = scopedTo(role, 'tenant-a');
+      await expect(
+        d.service.assertCanAdministerOrganization(d.em, 'tenant-b', actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        d.service.assertCanWriteSite(d.em, siteOf('tenant-b'), actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        d.service.canWriteSite(d.em, siteOf('tenant-b'), actor),
+      ).resolves.toBe(false);
+      await expect(
+        d.service.adminLevelOf(d.em, siteOf('tenant-b'), actor),
+      ).resolves.toBeNull();
+    }
+  });
+
+  it('acotado a A sí administra A y es plataforma en sus sedes', async () => {
+    for (const role of PLATFORM) {
+      const d = buildReal();
+      const actor = scopedTo(role, 'tenant-a');
+      await expect(
+        d.service.assertCanAdministerOrganization(d.em, 'tenant-a', actor),
+      ).resolves.toBeUndefined();
+      await expect(
+        d.service.assertCanWriteSite(d.em, siteOf('tenant-a'), actor),
+      ).resolves.toBeUndefined();
+      await expect(
+        d.service.adminLevelOf(d.em, siteOf('tenant-a'), actor),
+      ).resolves.toBe('PLATFORM');
+    }
+  });
+
+  it('global administra A y B', async () => {
+    for (const role of PLATFORM) {
+      const d = buildReal();
+      const actor = { id: 'admin-g', roles: [role] } as any;
+      for (const tenantId of ['tenant-a', 'tenant-b']) {
+        await expect(
+          d.service.assertCanAdministerOrganization(d.em, tenantId, actor),
+        ).resolves.toBeUndefined();
+        await expect(
+          d.service.adminLevelOf(d.em, siteOf(tenantId), actor),
+        ).resolves.toBe('PLATFORM');
+      }
+    }
   });
 });
