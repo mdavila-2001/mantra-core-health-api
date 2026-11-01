@@ -104,7 +104,7 @@ export class ErpConnectionUseCases {
     pharmacyId: string,
     actor: AuthenticatedUser,
   ): Promise<ErpConnectionDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     await this.scope.requireManagedPharmacy(em, pharmacyId, actor);
     return this.describe(em, pharmacyId);
   }
@@ -248,7 +248,10 @@ export class ErpConnectionUseCases {
       },
       'Conexión de la farmacia guardada',
     );
-    return this.describe(this.em.fork(), pharmacyId);
+    return this.describe(
+      this.em.fork({ keepTransactionContext: true }),
+      pharmacyId,
+    );
   }
 
   /** «Probar conexión» con los datos del formulario, sin guardar nada. */
@@ -258,7 +261,7 @@ export class ErpConnectionUseCases {
     actor: AuthenticatedUser,
   ): Promise<ErpConnectionTestResultDto> {
     if (!this.cipher.isConfigured()) throw encryptionNotConfigured();
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     await this.scope.requireManagedPharmacy(em, pharmacyId, actor);
     const baseUrl = normalizeUrl(dto.baseUrl);
     assertOutboundUrlAllowed(baseUrl);
@@ -303,7 +306,10 @@ export class ErpConnectionUseCases {
     });
     return {
       result,
-      connection: await this.describe(this.em.fork(), pharmacyId),
+      connection: await this.describe(
+        this.em.fork({ keepTransactionContext: true }),
+        pharmacyId,
+      ),
     };
   }
 

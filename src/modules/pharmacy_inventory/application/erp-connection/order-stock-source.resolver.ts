@@ -30,8 +30,8 @@ const MANUAL: OrderStockSource = { mode: 'MANUAL' };
 
 /**
  * De dónde sale el stock de un pedido nuevo (FAR-C9, D-7), resuelto **antes**
- * de abrir la transacción del alta: la consulta en vivo no retiene ni la
- * transacción ni los candados del libro.
+ * de abrir la transacción de reserva y adquirir candados del libro. Conserva
+ * la transacción del request cuando existe: allí vive el contexto local RLS.
  *
  * - Farmacia en manual: manual.
  * - Conectada: se consulta el stock de esa sucursal, con 3 s como máximo y sin
@@ -81,7 +81,7 @@ export class OrderStockSourceResolver {
     siteId: string,
     productIds: readonly string[],
   ): Promise<OrderStockSource> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const site = await this.connections.findSite(em, siteId);
     if (!site) return MANUAL;
     const record = await this.connections.findForPharmacy(em, site.pharmacyId);
@@ -213,21 +213,26 @@ export class OrderStockSourceResolver {
     return { mode: 'CONNECTED', liveQuantities };
   }
 
-  /** Deja el estado de la llamada en la conexión, en su propia transacción. */
+  /** Registra el estado conservando la frontera transaccional/RLS del request. */
   private async recordStatus(
     connectionId: string,
     result: ConnectionCheckResult,
   ): Promise<void> {
     try {
-      await this.em.fork().transactional(async (tx) => {
-        const record = await this.connections.findConnectionById(
-          tx,
-          connectionId,
-        );
-        if (record) {
-          this.connections.recordStatus(record, statusFor(result, new Date()));
-        }
-      });
+      await this.em
+        .fork({ keepTransactionContext: true })
+        .transactional(async (tx) => {
+          const record = await this.connections.findConnectionById(
+            tx,
+            connectionId,
+          );
+          if (record) {
+            this.connections.recordStatus(
+              record,
+              statusFor(result, new Date()),
+            );
+          }
+        });
     } catch (error) {
       this.logger.warn(
         {
