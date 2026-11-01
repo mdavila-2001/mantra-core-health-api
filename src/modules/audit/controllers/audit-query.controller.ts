@@ -41,7 +41,8 @@ const AUDIT_READ_PURPOSE = 'SECURITY_OVERSIGHT';
  * `recorded_at desc, id desc` (desempate estable); paginación por cursor opaco (`nextCursor`).
  *
  *  - GET /audit/log
- *      query: from?, to? (ISO 8601; `to` > `from`, si no 400; sin rango: últimos 30 días),
+ *      query: from?, to? (ISO 8601; `to` > `from`, si no 400; sin `from`: los 30 días previos a
+ *             `to`, o los últimos 30 si tampoco viene `to`),
  *             userId? (actor, uuid), tenantId?, entity?, entityId? (recurso, uuid), action?,
  *             method? (POST|PUT|PATCH|DELETE), route?, result? (SUCCESS|FAILURE),
  *             limit? (1..200, 50), cursor?

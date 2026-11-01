@@ -17,13 +17,13 @@ export class MedicalVisitorSpecialties {
   /**
    * Visitador al que pertenece la autorización.
    */
-  @Property({ fieldName: 'medical_visitor_id', type: 'uuid' }) // FK → pharma_lab.medical_visitors
+  @Property({ fieldName: 'medical_visitor_id', type: 'uuid' }) // FK → pharma_lab.medical_visitors (inferida)
   medicalVisitorId!: string;
 
   /**
    * Especialidad del catálogo de terminología.
    */
-  @Property({ fieldName: 'specialty_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'specialty_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   specialtyConceptId!: string;
 
   /**
@@ -35,6 +35,6 @@ export class MedicalVisitorSpecialties {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 }

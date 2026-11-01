@@ -35,7 +35,7 @@ import { AccountingScopeService } from './accounting-scope.service';
 import { AuditTrailService } from '../../audit/services';
 import {
   PracticeTenantLookupService,
-  practiceAccessScope,
+  practiceAccessScopeFor,
 } from '../../practice/services';
 
 /** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
@@ -135,9 +135,16 @@ export class LedgerService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
-    // sólo se traduce a los errores 422 propios de contabilidad.
-    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño, medida en
+    // el tenant de la práctica); acá sólo se traduce a los errores 422 propios
+    // de contabilidad.
+    if (
+      (await practiceAccessScopeFor(
+        actor,
+        practiceId,
+        this.practiceTenantLookup,
+      )) !== 'ACTIVE_ASSIGNMENTS'
+    ) {
       // Ningún otro rol llega hoy a estas rutas (el `@Roles` del controlador
       // ya lo impide); no-op defensivo, no un permiso implícito.
       return;

@@ -919,3 +919,111 @@ describe('QuotationsService.createQuotation con el body del front (AG-35)', () =
     ]);
   });
 });
+
+/**
+ * `SECURITY_ADMIN` acotado a un tenant (`scopedRoles`, MCH-001): figura en
+ * `roles`, pero sólo alcanza las prácticas de su tenant, aunque tenga
+ * membresía en otro o no haya tenant en contexto (#1241).
+ */
+describe('QuotationsService · administración acotada a un tenant', () => {
+  const scopedAdmin = {
+    id: 'admin-a',
+    roles: ['SECURITY_ADMIN'],
+    scopedRoles: { 'tenant-a': ['SECURITY_ADMIN'] },
+  } as any;
+
+  /** Lee la cotización `q-1`, cuya práctica es del tenant indicado. */
+  const readAs = (
+    actorUser: unknown,
+    practiceTenant: string,
+    contextTenant?: string,
+  ) => {
+    const d = build();
+    d.quotationsRepo.findById.mockResolvedValue(quotationRow());
+    d.installmentsRepo.findByQuotationId.mockResolvedValue([]);
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      practiceTenant,
+    );
+    const run = () => d.service.getQuotation('q-1', actorUser as any);
+    return contextTenant === undefined
+      ? run()
+      : runWithTenant(contextTenant, run);
+  };
+
+  it('acotado a A no lee la cotización de una práctica de B, con B en contexto ni sin tenant', async () => {
+    await expect(
+      readAs(scopedAdmin, 'tenant-b', 'tenant-b'),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    await expect(readAs(scopedAdmin, 'tenant-b')).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+  });
+
+  it('acotado a A lee la de su tenant; el global, la de cualquiera', async () => {
+    await expect(
+      readAs(scopedAdmin, 'tenant-a', 'tenant-a'),
+    ).resolves.toMatchObject({ id: 'q-1' });
+    await expect(readAs(scopedAdmin, 'tenant-a')).resolves.toMatchObject({
+      id: 'q-1',
+    });
+    await expect(readAs(admin, 'tenant-b', 'tenant-b')).resolves.toMatchObject({
+      id: 'q-1',
+    });
+    await expect(readAs(admin, 'tenant-b')).resolves.toMatchObject({
+      id: 'q-1',
+    });
+  });
+
+  it('acotado a A no cotiza en una práctica de B: 422', async () => {
+    const d = build();
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('tenant-b');
+    const scopedDoctorAdmin = {
+      ...scopedAdmin,
+      practitionerProfileId: 'hp-admin',
+    };
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      [],
+    );
+
+    await expect(
+      runWithTenant('tenant-b', () =>
+        d.service.createQuotation(baseDto as any, scopedDoctorAdmin),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.quotationsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('acotado a A no lista por organización en B; en A sí, y el global en cualquiera', async () => {
+    const listAs = async (actorUser: unknown, tenant: string) => {
+      const d = build();
+      d.practiceTenantLookup.findActivePracticeIdsForTenant.mockResolvedValue([
+        `pr-${tenant}`,
+      ]);
+      d.quotationsRepo.findByPatient.mockResolvedValue([]);
+      await runWithTenant(tenant, () =>
+        d.service.listQuotationsByPatient('pat-1', actorUser as any),
+      );
+      return d;
+    };
+
+    const foreign = await listAs(scopedAdmin, 'tenant-b');
+    expect(
+      foreign.practiceTenantLookup.findActivePracticeIdsForTenant,
+    ).not.toHaveBeenCalled();
+    expect(foreign.quotationsRepo.findByPatient).not.toHaveBeenCalled();
+
+    const own = await listAs(scopedAdmin, 'tenant-a');
+    expect(own.quotationsRepo.findByPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      'pat-1',
+      ['pr-tenant-a'],
+    );
+
+    const global = await listAs(admin, 'tenant-b');
+    expect(global.quotationsRepo.findByPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      'pat-1',
+      ['pr-tenant-b'],
+    );
+  });
+});

@@ -229,9 +229,11 @@ export class AuthzClinicalScopeService {
    *   historia y no hay otro tenant que lo limite.
    * - Cualquier otro actor revoca sólo en el tenant activo: una base de otro tenant
    *   responde igual que una inexistente.
-   * - Un actor de plataforma (`SUPERADMIN` o `SYSTEM`) que no fija tenant revoca
-   *   por id sin acotar; revocar sólo reduce acceso y esos roles ya autorizan en
-   *   toda la API. Cualquier otro actor sin tenant recibe `TENANT_REQUIRED`.
+   * - Un actor de plataforma global (`SUPERADMIN` o `SYSTEM` sin ámbito en
+   *   `scopedRoles`) que no fija tenant revoca por id sin acotar; revocar sólo
+   *   reduce acceso y esos roles ya autorizan en toda la API. Cualquier otro
+   *   actor sin tenant —también uno de plataforma acotado— recibe
+   *   `TENANT_REQUIRED`.
    *
    * @param resource - Base de acceso ya cargada por id, o `null` si no existe.
    * @param actor - Quien revoca.
@@ -254,8 +256,10 @@ export class AuthzClinicalScopeService {
     }
     const activeTenantId = getCurrentTenantId();
     if (activeTenantId === undefined) {
+      // Sin tenant activo no hay contra qué medir un rol acotado: el atajo es
+      // del rol global; el acotado fija su tenant como cualquiera (#1241).
       const isPlatformActor =
-        actor.roles.includes('SUPERADMIN') ||
+        roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
         roleAuthorizesInTenant(actor, 'SYSTEM', undefined);
       if (!isPlatformActor) requireTenantId();
       if (!resource) throw this.notFound(failure);

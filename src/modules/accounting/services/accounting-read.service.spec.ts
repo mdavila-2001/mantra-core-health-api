@@ -25,6 +25,8 @@ const TENANT = 'tenant-1';
 function build(
   overrides: {
     practica?: { id: string; tenantId: string } | null;
+    /** Puerto de `practice`; sin él el servicio no puede cortar a un PRACTITIONER. */
+    practiceTenantLookup?: unknown;
   } = {},
 ) {
   const tx: any = {
@@ -134,6 +136,7 @@ function build(
     accrualRepo,
     controllingRepo,
     assetRepo,
+    overrides.practiceTenantLookup as any,
   );
 
   return {
@@ -278,6 +281,42 @@ describe('AccountingReadService', () => {
         ResourceNotFoundException,
       );
     });
+  });
+
+  /**
+   * `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` acotado a otro tenant en
+   * `scopedRoles` no salta el corte 422 de `PRACTITIONER`: el rol se mide en
+   * el tenant de la práctica (#1241).
+   */
+  describe('administración acotada a un tenant (D-8)', () => {
+    const lookup = {
+      findActivePracticeIdsForPractitioner: mockFn(() => Promise.resolve([])),
+      findTenantOfPractice: mockFn(() => Promise.resolve(TENANT)),
+    };
+    const doctorAdmin = (role: string, tenant?: string) =>
+      ({
+        id: 'u-doc',
+        roles: ['PRACTITIONER', role],
+        practitionerProfileId: 'hpp-doc',
+        ...(tenant ? { scopedRoles: { [tenant]: [role] } } : {}),
+      }) as any;
+
+    it.each(['SECURITY_ADMIN', 'ACCOUNTING_APPROVER'])(
+      '%s acotado a otro tenant sin vinculación recibe 422; en el de la práctica o global, lee',
+      async (role) => {
+        const read = (actor: unknown) => {
+          const { service } = build({ practiceTenantLookup: lookup });
+          return runWithTenant(TENANT, () =>
+            service.dimensions(PRACTICE, actor as any),
+          );
+        };
+        await expect(
+          read(doctorAdmin(role, 'otro-tenant')),
+        ).rejects.toMatchObject({ status: 422 });
+        await expect(read(doctorAdmin(role, TENANT))).resolves.toBeDefined();
+        await expect(read(doctorAdmin(role))).resolves.toBeDefined();
+      },
+    );
   });
 
   describe('openItems (D-7)', () => {

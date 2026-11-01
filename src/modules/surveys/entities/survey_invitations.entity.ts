@@ -37,7 +37,7 @@ export class SurveyInvitations {
     fieldName: 'extension_survey_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → surveys.survey_versions
+  }) // FK (destino no resuelto)
   extensionSurveyVersionId?: string;
 
   /**
@@ -77,7 +77,7 @@ export class SurveyInvitations {
     fieldName: 'subject_type_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   subjectTypeConceptId?: string;
 
   /**

@@ -21,7 +21,7 @@ export class InsightsCampaignDailyFacts {
   /**
    * Identificador asociado a campaign.
    */
-  @Property({ fieldName: 'campaign_id', type: 'uuid' }) // FK → marketing.insights_campaigns
+  @Property({ fieldName: 'campaign_id', type: 'uuid' }) // FK → ads.campaigns (inferida)
   campaignId!: string;
 
   /**
@@ -33,7 +33,7 @@ export class InsightsCampaignDailyFacts {
   /**
    * Identificador asociado a creative.
    */
-  @Property({ fieldName: 'creative_id', type: 'uuid', nullable: true }) // FK → marketing.insights_creatives
+  @Property({ fieldName: 'creative_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   creativeId?: string;
 
   /**

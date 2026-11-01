@@ -72,25 +72,34 @@ export class ServiceRequests {
   @Property({ fieldName: 'performer_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
   performerTenantId?: string;
 
+  /**
+   * Identificador asociado a performer selection concept.
+   */
   @Property({
     fieldName: 'performer_selection_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts (inferida)
+  }) // FK → terminology.catalog_concepts
   performerSelectionConceptId?: string;
 
+  /**
+   * Identificador asociado a performer practitioner profile.
+   */
   @Property({
     fieldName: 'performer_practitioner_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   performerPractitionerProfileId?: string;
 
+  /**
+   * Identificador asociado a suggested practice site.
+   */
   @Property({
     fieldName: 'suggested_practice_site_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → practice.practice_sites
   suggestedPracticeSiteId?: string;
 
   /**
@@ -124,34 +133,8 @@ export class ServiceRequests {
    * P43: instancia (cerrada) del formulario médico de la que sale el registro.
    * Nula cuando se emite desde la historia del paciente, sin formulario.
    */
-  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances (inferida)
   formInstanceId?: string;
-
-  @Property({ fieldName: 'requisition_id', type: 'uuid', nullable: true })
-  requisitionId?: string;
-
-  @Property({
-    fieldName: 'specimen_type_concept_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → terminology.catalog_concepts
-  specimenTypeConceptId?: string;
-
-  @Property({ fieldName: 'modality_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
-  modalityConceptId?: string;
-
-  @Property({ fieldName: 'body_site_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
-  bodySiteConceptId?: string;
-
-  @Property({
-    fieldName: 'laterality_concept_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → terminology.catalog_concepts
-  lateralityConceptId?: string;
-
-  @Property({ fieldName: 'contrast_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
-  contrastConceptId?: string;
 
   /**
    * Fecha y hora en que se creó el registro.
@@ -192,4 +175,48 @@ export class ServiceRequests {
     nullable: true,
   }) // FK (destino no resuelto)
   suggestedCareSpaceId?: string;
+
+  /**
+   * Identificador asociado a requisition.
+   */
+  @Property({ fieldName: 'requisition_id', type: 'uuid', nullable: true })
+  requisitionId?: string;
+
+  /**
+   * Identificador asociado a specimen type concept.
+   */
+  @Property({
+    fieldName: 'specimen_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  specimenTypeConceptId?: string;
+
+  /**
+   * Identificador asociado a modality concept.
+   */
+  @Property({ fieldName: 'modality_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  modalityConceptId?: string;
+
+  /**
+   * Identificador asociado a body site concept.
+   */
+  @Property({ fieldName: 'body_site_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  bodySiteConceptId?: string;
+
+  /**
+   * Identificador asociado a laterality concept.
+   */
+  @Property({
+    fieldName: 'laterality_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  lateralityConceptId?: string;
+
+  /**
+   * Identificador asociado a contrast concept.
+   */
+  @Property({ fieldName: 'contrast_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  contrastConceptId?: string;
 }

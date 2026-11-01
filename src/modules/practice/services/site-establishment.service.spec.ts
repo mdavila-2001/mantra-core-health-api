@@ -157,6 +157,41 @@ describe('SiteEstablishmentService', () => {
   });
 
   describe('verificación SNIS', () => {
+    // Un rol de plataforma acotado al tenant (`scopedRoles`, MCH-001) no es la
+    // plataforma: verificaría a su propia organización (#1241).
+    it('plataforma acotada al tenant (aun el propio) no verifica ni cambia habilitaciones', async () => {
+      for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+        const scoped = {
+          id: 'p-a',
+          roles: [role],
+          scopedRoles: { [TENANT]: [role] },
+        } as any;
+        const d = build();
+        d.site.snisCode = '200101';
+        await expect(
+          d.service.verifySnis('s1', scoped, TENANT),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.tx.execute).not.toHaveBeenCalled();
+        d.licenses.push({
+          id: 'l1',
+          practiceSiteId: 's1',
+          tenantId: TENANT,
+          licenseNumber: 'X',
+          verificationStatusConceptId: ORGEXT.LICENSE_PENDING,
+          rowVersion: 1,
+        });
+        await expect(
+          d.service.updateLicense(
+            'l1',
+            { status: 'LIC_VALID' },
+            undefined,
+            scoped,
+            TENANT,
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      }
+    });
+
     it('sólo plataforma', async () => {
       const d = build();
       d.site.snisCode = '200101';

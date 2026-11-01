@@ -75,6 +75,12 @@ export class ResourceScopeGrants {
   validTo?: Date;
 
   /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @Property({ fieldName: 'reason_text', columnType: 'text', nullable: true })
+  reasonText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

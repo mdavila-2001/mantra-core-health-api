@@ -15,7 +15,7 @@ export class InsightsAlertTransitions {
   /**
    * Identificador asociado a alert.
    */
-  @Property({ fieldName: 'alert_id', type: 'uuid' }) // FK → marketing.insights_alerts
+  @Property({ fieldName: 'alert_id', type: 'uuid' }) // FK (destino no resuelto)
   alertId!: string;
 
   /**

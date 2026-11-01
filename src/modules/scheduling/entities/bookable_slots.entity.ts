@@ -41,7 +41,7 @@ export class BookableSlots {
     fieldName: 'practitioner_service_offering_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → scheduling.practitioner_service_offerings
+  }) // FK → scheduling.practitioner_service_offerings (inferida)
   practitionerServiceOfferingId?: string;
 
   /**
@@ -103,4 +103,20 @@ export class BookableSlots {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a care space.
+   */
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
+
+  /**
+   * Identificador asociado a healthcare service.
+   */
+  @Property({
+    fieldName: 'healthcare_service_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → practice.healthcare_services (inferida)
+  healthcareServiceId?: string;
 }

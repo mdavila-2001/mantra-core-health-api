@@ -246,10 +246,10 @@ describe('P47 · catálogo de la farmacia (DB real)', () => {
     );
     await run(
       `insert into practice.practice_sites
-         (id, practice_id, code, name, site_type_concept_id, status_concept_id,
-          created_at, updated_at)
-       values (?, ?, ?, ?, ?, ?, now(), now())`,
-      [practiceSiteA, practiceA, `${mark}-PS`, mark, any, any],
+         (id, tenant_id, practice_id, code, name, site_type_concept_id,
+          status_concept_id, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, now(), now())`,
+      [practiceSiteA, ids.tenantA, practiceA, `${mark}-PS`, mark, any, any],
     );
     await run(
       `insert into pharmacy.pharmacy_sites
