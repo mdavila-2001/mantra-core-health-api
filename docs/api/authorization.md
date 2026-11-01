@@ -53,6 +53,12 @@ propio. Las rutas revisadas caen en estas clases:
 | Guard propio | Un guard de clase en lugar de `@Roles` | `LabStaffGuard` en recepción de muestras y laboratorio |
 | Catálogo de lectura abierta | Datos publicados, iguales para toda sesión, acotados por tenant (RLS) | directorio de farmacias y de unidades diagnósticas, terminología, temas de la comunidad |
 
+En la clase de membresía, `TenantAdministrationService` deja pasar sin consultar membresías a un
+`SECURITY_ADMIN` o `SUPERADMIN` que autoriza **en el tenant objetivo** según `roleAuthorizesInTenant`:
+el concedido sin ámbito vale en cualquier organización; el acotado al tenant A en `scopedRoles`
+administra, lee y cambia los dueños de A, pero en el tenant B solo cuenta su membresía en B (sin ella,
+`403`). Cada operación del servicio recibe el tenant objetivo, así que no existe un atajo «sin tenant».
+
 **Rutas de farmacia, laboratorio y gastos del paciente.**
 
 - `GET /patient-spending/me` lleva `@Roles('PATIENT')` y no recibe identificador de persona: el titular
