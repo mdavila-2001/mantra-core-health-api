@@ -176,6 +176,23 @@ export class GovernanceRepository {
   }
 
   /**
+   * Entidad por su clave natural `(schema_name, table_name)`, única en el modelo
+   * (`uq_entity_registry_schema_name_table_name`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param schemaName - Esquema de la tabla.
+   * @param tableName - Nombre de la tabla.
+   * @returns La fila del registro o `null` si la tabla no está catalogada.
+   */
+  findEntityByTable(
+    em: EntityManager,
+    schemaName: string,
+    tableName: string,
+  ): Promise<EntityRegistry | null> {
+    return em.findOne(EntityRegistry, { schemaName, tableName });
+  }
+
+  /**
    * Crea create entity.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -257,6 +274,20 @@ export class GovernanceRepository {
    */
   findFieldById(em: EntityManager, id: string): Promise<FieldRegistry | null> {
     return em.findOne(FieldRegistry, { id });
+  }
+
+  /**
+   * Campos registrados de una entidad (para reconciliar un alta repetida).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param entityRegistryId - Identificador de la entidad registrada.
+   * @returns Campos de la entidad.
+   */
+  findFieldsByEntity(
+    em: EntityManager,
+    entityRegistryId: string,
+  ): Promise<FieldRegistry[]> {
+    return em.find(FieldRegistry, { entityRegistryId });
   }
 
   /**
