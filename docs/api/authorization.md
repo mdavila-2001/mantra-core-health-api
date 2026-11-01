@@ -76,6 +76,17 @@ tiene tenant, el rol se mide **en ese tenant**; cuando no lo tiene, solo pasa el
 | `ClinicalReadService.assertCanReadHistory/assertCanWriteHistory` (`SUPERADMIN`) y `GET /profiles/patients/:profileId` (`SECURITY_ADMIN`) | sin tenant (la historia y el perfil de una persona no son de ninguna organización): solo global; el acotado sigue la regla de quien atiende |
 | Rol de analítica de `InsuranceAnalyticsService` (`INSURANCE_OPERATOR`, `SECURITY_ADMIN`, `SUPERADMIN`) | el de la aseguradora activa |
 | Pista `422 TENANT_REQUIRED` de las campañas de seguro sin `X-Tenant-Id` | sin tenant: solo global; el acotado recibe el `403` auditado de cualquier actor sin tenant |
+| `TrackingService` (`SUPERADMIN`): operar cualquier envío | el del envío (tenant activo) |
+| `ErpScopeService.isHrOrAdmin` (`SUPERADMIN`, junto a `ERP_ADMIN` y `HR_ADMIN`): operar sobre empleados ajenos | el tenant activo; el acotado a otro opera sólo sobre sí mismo |
+| `EducationScopeService.isLearnerOnly` (`SUPERADMIN`): vía administrativa sobre inscripciones ajenas | el tenant activo; el acotado a otro queda anclado a sus inscripciones |
+| `LabStaffGuard` y `StudyCatalogReaderGuard` (`SUPERADMIN`): recepción de muestras, laboratorio y catálogo de estudios | el tenant resuelto; sin tenant, solo global |
+| `DiagnosticsPatientAccessService.assertCanReadPatient` (`SUPERADMIN`): estudios de un paciente | sin tenant (los datos de salud de una persona no son de ninguna organización): solo global; el acotado sigue la regla de quien atiende |
+| `MedicationsService` (`SUPERADMIN`): prescribir con otro perfil profesional y firmar la receta de otro | sin tenant (la receta es historia de una persona): solo global; el acotado prescribe y firma como cualquier profesional |
+| `PeriopCasesService.acceptTeamMember/respondTeamMember` (`PERIOP_ADMIN`, `SUPERADMIN`): aceptar o responder por un integrante del equipo | el del caso (tenant activo, el caso se carga acotado) |
+| `AuthzClinicalScopeService.scopeRevocation` (`SUPERADMIN`, `SYSTEM`): revocar una base de acceso por id sin tenant activo | sin tenant: solo global; el acotado fija su tenant (si no, `412 TENANT_REQUIRED`) |
+| `PharmaLabAccessService.administersAllLabs` (`SUPERADMIN`, `PLATFORM_ADMIN`, `BUSINESS_ADMIN`): todos los laboratorios farmacéuticos | ninguno: solo global; el acotado administra los laboratorios de sus organizaciones |
+| `operatingScope` de `/billing/simulated/*` (`SUPERADMIN`): cobros sin acotar (`tenantIds: null`) | sin acotar, solo global; el acotado administra los tenants donde se le concedió |
+| `ExchangeRateService` (`SUPERADMIN`, `SYSTEM`): tabla global de tipos de cambio | ninguno: solo global |
 
 `SYSTEM` lo emiten los workers y los chats de pedido y turno sin `scopedRoles`, así que sigue siendo
 global.
