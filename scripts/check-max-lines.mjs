@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Tamaño máximo de archivo en backend NestJS (ALOVIDA · reforma estructural <= 300 líneas).
+ * Tamaño máximo de archivo en backend NestJS (ALOVIDA · reforma estructural ≤ 300 líneas).
  *
  * El techo oficial es TOPE (300) líneas y no se sube.
  * Los archivos heredados que superan 300 líneas quedan congelados en
  * `scripts/baselines/max-lines.json` con su tamaño actual (ratchet descendente).
  * Falla si:
- *   - un archivo que NO está en la lista supera TOPE;
+ *   - un archivo que NO está en la lista supera TOPE (archivo nuevo o que cruzó el techo);
  *   - un archivo congelado crece por encima de su tamaño registrado.
  *
  * Exentos: *.spec.ts, *.test.ts, *.generated.ts, *.catalog.ts y *.data.ts.
