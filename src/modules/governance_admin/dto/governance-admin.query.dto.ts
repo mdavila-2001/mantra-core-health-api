@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsIn,
@@ -94,6 +94,7 @@ export class RulesQueryDto extends PageQueryDto {
 }
 
 export class IdParamDto {
+  @ApiProperty({ format: 'uuid' })
   @IsUUID()
   id!: string;
 }

@@ -7,6 +7,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -105,8 +106,8 @@ export class MedicationsService {
    * El DTO conserva `prescriberProfileId` por compatibilidad, pero si declara
    * un perfil distinto del de la sesión es 403: nadie prescribe en nombre de
    * otro profesional. Sin perfil profesional en la sesión tampoco se prescribe
-   * (403), porque la receta saldría sin médico ni matrícula. `SUPERADMIN` pasa
-   * con lo que declare, igual que en `assertFirmaElPrescriptor`.
+   * (403), porque la receta saldría sin médico ni matrícula. `SUPERADMIN`
+   * global pasa con lo que declare, igual que en `assertPrescriberSignature`.
    *
    * @param declared - Lo que trajo el cuerpo, si trajo algo.
    * @param actor - La sesión que prescribe.
@@ -116,7 +117,10 @@ export class MedicationsService {
     declared: string | undefined,
     actor: AuthenticatedUser,
   ): string {
-    if (actor.roles.includes('SUPERADMIN')) {
+    // Prescribir por otro profesional es un atajo de plataforma sobre la
+    // historia de una persona, que no es de ningún tenant: sólo el
+    // `SUPERADMIN` global (#1241). El acotado prescribe como cualquiera.
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) {
       const chosen = declared ?? actor.practitionerProfileId;
       if (!chosen) {
         throw new ForbiddenException(
@@ -290,13 +294,15 @@ export class MedicationsService {
    *
    * Si la receta declara prescriptor, firma ese perfil. Si no lo declara (el
    * campo es opcional al prescribir), firma quien redactó el borrador.
-   * `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
+   * `SUPERADMIN` global pasa, igual que en el resto del sistema de roles.
    */
   private assertPrescriberSignature(
     request: MedicationRequests,
     actor: AuthenticatedUser,
   ): void {
-    if (actor.roles.includes('SUPERADMIN')) return;
+    // Firmar por otro profesional: sólo el `SUPERADMIN` global; el acotado en
+    // `scopedRoles` firma lo suyo, como cualquiera (#1241).
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)) return;
     const isTheirs = request.prescriberProfileId
       ? request.prescriberProfileId === actor.practitionerProfileId
       : request.createdByUserId === actor.id;

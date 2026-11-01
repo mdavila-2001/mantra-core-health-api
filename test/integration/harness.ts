@@ -11,6 +11,7 @@ import {
   TokenService,
   createGlobalValidationPipe,
   createdBy,
+  stripEtagOnNoStore,
 } from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
@@ -222,6 +223,8 @@ export async function bootstrapTestApp(
   app.useLogger(app.get(Logger));
   app.flushLogs();
   app.useGlobalPipes(createGlobalValidationPipe());
+  // Mismo middleware que `main.ts` (api#1242): `no-store` sale sin `ETag`.
+  app.use(stripEtagOnNoStore);
   // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando
   // Nest conecta cada `@WebSocketGateway` al servidor.
   if (opts.realtime) {

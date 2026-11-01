@@ -11,6 +11,7 @@ import {
   encodeKeysetCursor,
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -372,10 +373,25 @@ export class BillingServiceCatalogService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    const administra =
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('SUPERADMIN');
-    if (administra) return;
+    const roles = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
+    // El global administra cualquier práctica sin leer nada, como siempre; el
+    // acotado en `scopedRoles`, sólo las de sus tenants (#1241): se mide en el
+    // tenant de la práctica, y una inexistente cuenta como sin tenant.
+    if (roles.some((role) => roleAuthorizesInTenant(actor, role, undefined))) {
+      return;
+    }
+    if (roles.some((role) => actor.roles.includes(role))) {
+      const tenantPractice =
+        await this.practiceTenantLookup.findTenantOfPractice(practiceId);
+      if (
+        tenantPractice !== null &&
+        roles.some((role) =>
+          roleAuthorizesInTenant(actor, role, tenantPractice),
+        )
+      ) {
+        return;
+      }
+    }
     if (await this.practiceTenantLookup.isOwnOffice(practiceId, actor.id)) {
       return;
     }
@@ -483,10 +499,13 @@ export class BillingServiceCatalogService {
       const tenantPractice =
         await this.practiceTenantLookup.findTenantOfPractice(practiceId);
       // Sin tenant en contexto son los carriles internos, que no pasan por la
-      // cabecera: lo único que se exige es que la práctica exista.
+      // cabecera: se exige que la práctica exista. En los dos casos el rol se
+      // mide en el tenant de la práctica (#1241): el acotado en `scopedRoles`
+      // a otra organización no la alcanza por tener membresía en la suya.
       if (
         tenantPractice !== null &&
-        (tenantId === undefined || tenantPractice === tenantId)
+        (tenantId === undefined || tenantPractice === tenantId) &&
+        roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', tenantPractice)
       ) {
         return;
       }

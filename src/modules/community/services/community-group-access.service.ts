@@ -119,7 +119,7 @@ export class CommunityGroupAccessService {
 
     // La plataforma modera cualquier grupo: es su trabajo, y sin esto un grupo
     // secreto sería un punto ciego para la cola de reportes de P6.
-    const isPlatform = this.visibility.isPlatform(actor);
+    const isPlatform = this.visibility.isPlatform(actor, group.tenantId);
     const role = membership?.memberRoleConceptId;
     const canAdminister =
       isPlatform || (isMember && !!role && ADMIN_ROLES.includes(role));
@@ -189,7 +189,7 @@ export class CommunityGroupAccessService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     if (!this.audience.isRestricted(group.visibilityConceptId)) return;
-    if (this.visibility.isPlatform(actor)) return;
+    if (this.visibility.isPlatform(actor, group.tenantId)) return;
     if (
       await this.audience.isEligible(
         em,

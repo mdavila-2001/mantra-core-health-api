@@ -247,6 +247,54 @@ describe('SchedulingFlexibleBookingService', () => {
         ),
       ).rejects.toMatchObject({ status: 422 });
     });
+
+    // `SUPERADMIN` acotado a un tenant (`scopedRoles`, MCH-001) no es plataforma
+    // fuera de él: la agenda de otra organización sigue respondiendo 403 (#1241).
+    describe('SUPERADMIN acotado a un tenant', () => {
+      const scopedTo = (tenantId: string) =>
+        ({
+          id: 'admin-a',
+          roles: ['SUPERADMIN'],
+          scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+          tenantIds: [TENANT],
+        }) as any;
+
+      it('acotado a A: 403 sobre la agenda de B', async () => {
+        const d = build();
+        d.catalogRepo.findResourceById.mockImplementation(async () =>
+          site({ tenantId: OTHER_TENANT }),
+        );
+        await expect(
+          inTenant(() => d.service.availability(SITE, query, scopedTo(TENANT))),
+        ).rejects.toMatchObject({ status: 403 });
+      });
+
+      it('acotado a B (la de la agenda) sí la consulta, aun con otro tenant activo', async () => {
+        const d = build();
+        d.catalogRepo.findResourceById.mockImplementation(async () =>
+          site({ tenantId: OTHER_TENANT }),
+        );
+        const result = await inTenant(() =>
+          d.service.availability(SITE, query, scopedTo(OTHER_TENANT)),
+        );
+        expect(result.items.length).toBeGreaterThan(0);
+      });
+
+      it('global: consulta la agenda de B', async () => {
+        const d = build();
+        d.catalogRepo.findResourceById.mockImplementation(async () =>
+          site({ tenantId: OTHER_TENANT }),
+        );
+        const result = await inTenant(() =>
+          d.service.availability(SITE, query, {
+            id: 'root',
+            roles: ['SUPERADMIN'],
+            tenantIds: [],
+          } as any),
+        );
+        expect(result.items.length).toBeGreaterThan(0);
+      });
+    });
   });
 
   describe('placeHold', () => {

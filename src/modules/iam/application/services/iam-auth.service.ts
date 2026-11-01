@@ -80,6 +80,23 @@ function withPharmacyStaffRole(
     : roles;
 }
 
+/**
+ * Abre el contexto de sistema de RLS en la transacción que arma el token.
+ *
+ * Al iniciar sesión o refrescar todavía no hay organización elegida, así que
+ * `app.current_tenant_id` está vacío. Con la API conectada como `mantra_app`
+ * (RLS forzado, O3-1) las lecturas de `directory.tenant_memberships` y de las
+ * asignaciones de rol por organización devolvían 0 filas: el token salía sin
+ * `tenants` ni `scopedRoles` y toda ruta respondía 403 `TENANT_REQUIRED`.
+ *
+ * Es seguro porque cada consulta de estas transacciones va filtrada por el
+ * sujeto que se autentica (o por la fila del refresh token): no lista datos de
+ * otros. `set_config(..., true)` vale sólo hasta el fin de la transacción.
+ */
+async function enterAuthBoundaryContext(tx: EntityManager): Promise<void> {
+  await tx.execute("select set_config('app.system_context', 'true', true)");
+}
+
 @Injectable()
 export class IamAuthService {
   /**
@@ -400,6 +417,7 @@ export class IamAuthService {
     await this.assertMfaChallenge(readEm, user.id, dto.mfaCode, span, ip);
 
     return this.em.transactional(async (tx) => {
+      await enterAuthBoundaryContext(tx);
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
       const { roles, scopedRoles } = await this.mergeRoleCodes(
         tx,
@@ -546,6 +564,7 @@ export class IamAuthService {
     // la política de reuso, igual que un token repetido más tarde.
     const outcome = await this.em.transactional(
       async (tx): Promise<RefreshOutcome> => {
+        await enterAuthBoundaryContext(tx);
         const rt = await this.refreshRepo.findByHashForUpdate(tx, tokenHash);
         if (!rt) return { kind: 'invalid' };
 

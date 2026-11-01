@@ -1622,6 +1622,46 @@ describe('TrackingService', () => {
       expect(d.trackingRepo.createEvent).not.toHaveBeenCalled();
     });
 
+    it('SUPERADMIN acotado a otro tenant no opera en éste; acotado a éste o global sí (#1241)', async () => {
+      const scopedTo = (tenantId: string) => ({
+        id: 'sa-1',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { [tenantId]: ['SUPERADMIN'] },
+      });
+
+      const denied = build();
+      denied.trackingRepo.findShipmentForUpdate.mockResolvedValue(
+        liveShipment(),
+      );
+      const error = await failure(
+        denied.service.cancelShipment(
+          SHIPMENT,
+          { reason: 'x' } as any,
+          scopedTo(OTHER_TENANT),
+        ),
+      );
+      expect(error.reason).toBe(TrackingErrorReason.SHIPMENT_ACCESS_DENIED);
+      expect(denied.trackingRepo.createEvent).not.toHaveBeenCalled();
+
+      for (const who of [
+        scopedTo(TENANT),
+        { id: 'sa-g', roles: ['SUPERADMIN'] },
+      ]) {
+        const d = build();
+        d.trackingRepo.findShipmentForUpdate.mockResolvedValue(liveShipment());
+        d.trackingRepo.findSubjectForUpdate.mockResolvedValue(openSubject());
+        d.trackingRepo.createEvent.mockReturnValue({ id: 'event-1' });
+        const res = await d.service.cancelShipment(
+          SHIPMENT,
+          { reason: 'x' } as any,
+          who,
+        );
+        expect(res).toMatchObject({
+          statusConceptId: CONCEPTS.TRACK_CANCELLED,
+        });
+      }
+    });
+
     it('el tenant del cuerpo no cuenta: el sujeto y el envío se abren en el del contexto', async () => {
       const d = build();
       d.trackingRepo.findOpenSubjectByRef.mockResolvedValue(null);

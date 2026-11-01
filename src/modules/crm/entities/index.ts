@@ -12,6 +12,7 @@ export * from './crm_call_logs.entity';
 export * from './crm_case_comments.entity';
 export * from './crm_case_contacts.entity';
 export * from './crm_case_milestones.entity';
+export * from './crm_case_owner_history.entity';
 export * from './crm_case_status_history.entity';
 export * from './crm_cases.entity';
 export * from './crm_email_messages.entity';

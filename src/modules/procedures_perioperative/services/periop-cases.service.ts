@@ -10,6 +10,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -1337,6 +1338,20 @@ export class PeriopCasesService {
   }
 
   /**
+   * Si el actor responde por un integrante como administración del caso:
+   * `PERIOP_ADMIN` o `SUPERADMIN` autorizados en el tenant activo —que es el
+   * del caso, porque se cargó acotado—. Un rol global vale en cualquiera; uno
+   * acotado en `scopedRoles`, sólo en el suyo (#1241).
+   */
+  private isPeriopAdministration(actor: AuthenticatedUser): boolean {
+    const tenantId = requireTenantId();
+    return (
+      roleAuthorizesInTenant(actor, 'PERIOP_ADMIN', tenantId) ||
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)
+    );
+  }
+
+  /**
    * C-14 (CAN-INT-002): el integrante acepta su participación en el caso.
    *
    * Es el eslabón que faltaba del circuito quirúrgico. `confirmCase` exige que
@@ -1390,9 +1405,7 @@ export class PeriopCasesService {
         );
       }
 
-      const isAdministration =
-        actor.roles.includes('PERIOP_ADMIN') ||
-        actor.roles.includes('SUPERADMIN');
+      const isAdministration = this.isPeriopAdministration(actor);
       if (
         !isAdministration &&
         actor.practitionerProfileId !== member.practitionerProfileId
@@ -1513,9 +1526,7 @@ export class PeriopCasesService {
       // Spec 168: responder por otro es exactamente lo que la regla impide. La
       // excepción administrativa es la misma que admite `acceptTeamMember`
       // —autorización institucional expresa— y no se amplía aquí.
-      const isAdministration =
-        actor.roles.includes('PERIOP_ADMIN') ||
-        actor.roles.includes('SUPERADMIN');
+      const isAdministration = this.isPeriopAdministration(actor);
       if (
         !isAdministration &&
         actor.practitionerProfileId !== member.practitionerProfileId

@@ -20,7 +20,7 @@ export class InformationalMaterialsHistory {
   /**
    * Identificador del agregado versionado.
    */
-  @Property({ fieldName: 'informational_material_id', type: 'uuid' }) // FK → pharma_lab.informational_materials
+  @Property({ fieldName: 'informational_material_id', type: 'uuid' }) // FK → pharma_lab.informational_materials (inferida)
   informationalMaterialId!: string;
 
   /**
@@ -32,7 +32,7 @@ export class InformationalMaterialsHistory {
   /**
    * Identificador asociado a operation concept.
    */
-  @Property({ fieldName: 'operation_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'operation_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   operationConceptId!: string;
 
   /**
@@ -60,7 +60,7 @@ export class InformationalMaterialsHistory {
   /**
    * Identificador asociado a changed by user.
    */
-  @Property({ fieldName: 'changed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'changed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   changedByUserId?: string;
 
   /**
@@ -70,7 +70,7 @@ export class InformationalMaterialsHistory {
     fieldName: 'change_reason_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   changeReasonConceptId?: string;
 
   /**
