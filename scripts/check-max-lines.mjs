@@ -13,7 +13,7 @@
  *
  * Uso: node scripts/check-max-lines.mjs [--lista] [--actualizar] [--congelar] [--tope 300]
  */
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,7 +23,8 @@ const SRC_ROOT = join(REPO_ROOT, 'src');
 
 const argv = process.argv.slice(2);
 const TOPE = Number(argv.includes('--tope') ? argv[argv.indexOf('--tope') + 1] : 300);
-const EXCEPCIONES = join(REPO_ROOT, 'scripts/baselines/max-lines.json');
+const BASELINE_DIR = join(REPO_ROOT, 'scripts/baselines');
+const EXCEPCIONES = join(BASELINE_DIR, 'max-lines.json');
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
 const hoy = process.env.CHECK_MAX_LINES_HOY ?? new Date().toISOString().slice(0, 10);
@@ -75,6 +76,7 @@ if (argv.includes('--lista')) {
 }
 
 if (argv.includes('--congelar') || argv.includes('--fijar-reforma')) {
+  if (!existsSync(BASELINE_DIR)) mkdirSync(BASELINE_DIR, { recursive: true });
   const excepciones = {};
   for (const f of filas) {
     excepciones[f.ruta] = { lineas: f.lineas };

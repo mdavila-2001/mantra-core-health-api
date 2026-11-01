@@ -10,9 +10,6 @@
     "src/modules/profiles/application/services/profiles-practitioners.service.ts": {
       "lineas": 3635
     },
-    "src/modules/procedures_perioperative/dto/periop.dto.ts": {
-      "lineas": 2975
-    },
     "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts": {
       "lineas": 2877
     },
