@@ -1,12 +1,16 @@
 import type { IndexTuple } from '../catalog.types';
 
 /**
- * Índices secundarios declarados por el modelo oficial para el schema `accounting` (parte 2/2).
+ * Índices secundarios declarados por el modelo oficial para el schema `accounting` (parte 2/3).
  * 180 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const accountingIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['exchange_rates', 'ix_exchange_rates_to_currency_concept_id', ['to_currency_concept_id'], false, 'btree'],
+  ['exchange_rates', 'ix_exchange_rates_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['exchange_rates', 'ix_exchange_rates_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['fiscal_periods', 'ix_fiscal_periods_fiscal_year_id', ['fiscal_year_id'], false, 'btree'],
   ['fiscal_periods', 'ix_fiscal_periods_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['fiscal_periods', 'ix_fiscal_periods_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['fiscal_periods', 'ix_fiscal_periods_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
@@ -27,6 +31,8 @@ export const accountingIndexes2: readonly IndexTuple[] = [
   ['infrastructure_items', 'ix_infrastructure_items_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['infrastructure_items', 'ix_infrastructure_items_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['infrastructure_items', 'ix_infrastructure_items_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['infrastructure_items', 'ix_infrastructure_items_tenant_id', ['tenant_id'], false, 'btree'],
+  ['infrastructure_items', 'ix_infrastructure_items_care_space_id', ['care_space_id'], false, 'btree'],
   ['internal_orders', 'uq_internal_orders_tenant_id_order_number', ['tenant_id', 'order_number'], true, 'btree'],
   ['internal_orders', 'ix_internal_orders_controlling_area_id', ['controlling_area_id'], false, 'btree'],
   ['internal_orders', 'ix_internal_orders_tenant_id', ['tenant_id'], false, 'btree'],
@@ -181,10 +187,4 @@ export const accountingIndexes2: readonly IndexTuple[] = [
   ['subledger_accounts', 'ix_subledger_accounts_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['subledger_accounts', 'ix_subledger_accounts_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['subledger_accounts', 'ix_subledger_accounts_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['subledger_accounts', 'ix_subledger_accounts_tenant_status', ['tenant_id', 'status_concept_id'], false, 'btree'],
-  ['transaction_files', 'ix_transaction_files_transaction_id', ['transaction_id'], false, 'btree'],
-  ['transaction_files', 'ix_transaction_files_file_id', ['file_id'], false, 'btree'],
-  ['transaction_files', 'ix_transaction_files_category_concept_id', ['category_concept_id'], false, 'btree'],
-  ['transaction_files', 'ix_transaction_files_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['transaction_files', 'ix_transaction_files_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

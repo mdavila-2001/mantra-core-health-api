@@ -2,11 +2,15 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `accounting` (parte 2/2).
- * 135 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 140 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['internal_orders', 'controlling_area_id', 'accounting', 'controlling_areas', 'id'],
+  ['internal_orders', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['internal_orders', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['internal_orders', 'order_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['internal_orders', 'project_id', 'erp', 'projects', 'id'],
   ['internal_orders', 'responsible_cost_center_id', 'accounting', 'cost_centers', 'id'],
   ['internal_orders', 'responsible_profit_center_id', 'accounting', 'profit_centers', 'id'],
@@ -41,6 +45,7 @@ export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   ['journal_entry_assignments', 'segment_id', 'accounting', 'segments', 'id'],
   ['journal_entry_assignments', 'subledger_account_id', 'accounting', 'subledger_accounts', 'id'],
   ['journal_entry_assignments', 'wbs_element_id', 'erp', 'wbs_elements', 'id'],
+  ['journal_transactions', 'approved_by_user_id', 'iam', 'users', 'id'],
   ['journal_transactions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['journal_transactions', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['journal_transactions', 'fiscal_period_id', 'accounting', 'fiscal_periods', 'id'],
