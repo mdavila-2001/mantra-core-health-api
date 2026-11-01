@@ -52,6 +52,9 @@ export class InsuranceClaims {
   }) // FK → insurance.prior_authorization_requests
   priorAuthorizationRequestId?: string;
 
+  /**
+   * Identificador asociado a inventory reservation.
+   */
   @Property({
     fieldName: 'inventory_reservation_id',
     type: 'uuid',
@@ -59,6 +62,9 @@ export class InsuranceClaims {
   }) // FK → pharmacy_inventory.inventory_reservations
   inventoryReservationId?: string;
 
+  /**
+   * Identificador asociado a service request.
+   */
   @Property({ fieldName: 'service_request_id', type: 'uuid', nullable: true }) // FK → clinical.service_requests
   serviceRequestId?: string;
 

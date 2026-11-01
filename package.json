@@ -105,6 +105,7 @@
     "test:terminology-import": "node --test \"tools/terminology-import/**/*.test.mjs\"",
     "orm": "mikro-orm",
     "docs:tsdoc": "node tools/documentation/generate-documentation.mjs",
+    "docs:tsdoc:test": "node --test tools/documentation/generate-documentation.test.mjs",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
     "catalog:permission-drift": "node tools/catalog/permission-drift-gate.mjs",
     "ddl:sources": "python ../mantra-core-health-model/salud-db/check_ddl_sources.py",
