@@ -168,6 +168,11 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // llevan `@Public()` y entraron sin sumarse acá (2026-10-30).
   ['get', '/public/prescription-shares/{token}'],
   ['post', '/payments/gateway-webhooks'],
+  // Alta de personal de apoyo (`iam-auth.controller.ts`, `@Public()`) y errores
+  // del portal y la app (`telemetry-client-errors.controller.ts`, `@Public()`):
+  // entraron sin sumarse acá y Redocly los daba como `security-defined` (01/11).
+  ['post', '/iam/auth/register-support-staff'],
+  ['post', '/telemetry/client-errors'],
 ];
 
 function markPublicOperations(document) {
