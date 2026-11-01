@@ -73,6 +73,24 @@ describe('Contabilidad simple del doctor (DB real)', () => {
     return rows[0].pk;
   }
 
+  async function practitionerSinHistoria(): Promise<string> {
+    const rows = await all<{ pk: string }>(
+      `select p.profile_id as pk
+         from profiles.health_practitioner_profiles p
+        where not exists (select 1 from clinical.appointments a
+                           where a.practitioner_profile_id = p.profile_id)
+          and not exists (select 1 from clinical.encounters e
+                           where e.primary_practitioner_id = p.profile_id)
+        order by p.profile_id
+        limit 1`,
+    );
+    if (!rows[0])
+      throw new Error(
+        'La prueba necesita un profesional sin citas ni encuentros previos',
+      );
+    return rows[0].pk;
+  }
+
   async function rejected(promise: Promise<unknown>): Promise<any> {
     return promise.then(
       () => {
@@ -93,10 +111,12 @@ describe('Contabilidad simple del doctor (DB real)', () => {
       user: await firstId('iam.users'),
       tenant: await firstId('directory.tenants'),
       patient: await firstId('profiles.patient_profiles', 'profile_id'),
-      practitioner: await firstId(
-        'profiles.health_practitioner_profiles',
-        'profile_id',
-      ),
+      // Un profesional SIN citas ni encuentros previos: `summary` cuenta todas
+      // sus citas cumplidas del tenant, así que «el primero» de la tabla
+      // arrastraba las que otras suites (o una corrida anterior) le dejaron y
+      // `consultations` salía 6 en vez de 2. La prueba exige las cifras exactas
+      // de lo que siembra ella misma.
+      practitioner: await practitionerSinHistoria(),
       carrier: await firstId('insurance.insurance_carriers'),
       plan: await firstId('insurance.insurance_plans'),
       concept: await firstId('terminology.catalog_concepts'),

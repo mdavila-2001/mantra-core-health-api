@@ -1,4 +1,4 @@
--- SALUD v4.2.68 · módulo 18 · schema clinical_ext
+-- SALUD v4.2.82 · módulo 18 · schema clinical_ext
 -- Generado de diagram_18_clinical_ext.puml — NO editar a mano.
 
 
@@ -34,6 +34,8 @@ CREATE INDEX IF NOT EXISTS "ix_care_team_members_created_by_user_id" ON "clinica
 
 CREATE INDEX IF NOT EXISTS "ix_care_team_members_updated_by_user_id" ON "clinical_ext"."care_team_members" ("updated_by_user_id");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_referrals_id_patient_target" ON "clinical_ext"."referrals" ("id", "patient_profile_id", "target_tenant_id");
+
 CREATE INDEX IF NOT EXISTS "ix_referrals_patient_profile_id" ON "clinical_ext"."referrals" ("patient_profile_id");
 
 CREATE INDEX IF NOT EXISTS "ix_referrals_source_encounter_id" ON "clinical_ext"."referrals" ("source_encounter_id");
@@ -63,7 +65,6 @@ CREATE INDEX IF NOT EXISTS "ix_referrals_created_by_user_id" ON "clinical_ext"."
 CREATE INDEX IF NOT EXISTS "ix_referrals_updated_by_user_id" ON "clinical_ext"."referrals" ("updated_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_referrals_patient_profile_id_updated_at" ON "clinical_ext"."referrals" ("patient_profile_id", "updated_at" DESC);
-
 
 CREATE INDEX IF NOT EXISTS "ix_referrals_target_branch" ON "clinical_ext"."referrals" ("target_branch_id");
 
@@ -226,6 +227,3 @@ CREATE INDEX IF NOT EXISTS "ix_care_gaps_updated_by_user_id" ON "clinical_ext"."
 CREATE INDEX IF NOT EXISTS "ix_care_gaps_patient_profile_id_updated_at" ON "clinical_ext"."care_gaps" ("patient_profile_id", "updated_at" DESC);
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_care_gaps_open_logical_key" ON "clinical_ext"."care_gaps" ("patient_profile_id", "gap_type_concept_id", COALESCE(measure_concept_id, '00000000-0000-0000-0000-000000000000'::uuid)) WHERE closed_at IS NULL;
-
--- + Admisión crea el vínculo (2026-10-31): destino de la FK compuesta de patient_admission_footprints
-CREATE UNIQUE INDEX IF NOT EXISTS "ux_referrals_id_patient_target" ON "clinical_ext"."referrals" ("id", "patient_profile_id", "target_tenant_id");

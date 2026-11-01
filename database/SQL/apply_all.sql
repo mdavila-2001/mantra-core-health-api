@@ -28,6 +28,8 @@
 \ir 01_iam/03_fk_intra.sql
 \echo >>> 01_iam/04_indexes.sql
 \ir 01_iam/04_indexes.sql
+\echo >>> 01_iam/05_constraints.sql
+\ir 01_iam/05_constraints.sql
 
 -- ═══ módulo 02_common ═══
 \echo >>> 02_common/01_schema.sql
@@ -58,6 +60,8 @@
 \ir 04_directory/03_fk_intra.sql
 \echo >>> 04_directory/04_indexes.sql
 \ir 04_directory/04_indexes.sql
+\echo >>> 04_directory/05_constraints.sql
+\ir 04_directory/05_constraints.sql
 
 -- ═══ módulo 05_profiles ═══
 \echo >>> 05_profiles/01_schema.sql
@@ -80,6 +84,8 @@
 \ir 06_authz/03_fk_intra.sql
 \echo >>> 06_authz/04_indexes.sql
 \ir 06_authz/04_indexes.sql
+\echo >>> 06_authz/05_constraints.sql
+\ir 06_authz/05_constraints.sql
 
 -- ═══ módulo 07_consent ═══
 \echo >>> 07_consent/01_schema.sql
@@ -226,6 +232,8 @@
 \ir 19_community/03_fk_intra.sql
 \echo >>> 19_community/04_indexes.sql
 \ir 19_community/04_indexes.sql
+\echo >>> 19_community/05_constraints.sql
+\ir 19_community/05_constraints.sql
 
 -- ═══ módulo 20_diagnostics ═══
 \echo >>> 20_diagnostics/01_schema.sql
@@ -670,6 +678,18 @@
 \ir 69_pharma_lab/03_fk_intra.sql
 \echo >>> 69_pharma_lab/04_indexes.sql
 \ir 69_pharma_lab/04_indexes.sql
+
+-- ═══ módulo 70_observability ═══
+\echo >>> 70_observability/01_schema.sql
+\ir 70_observability/01_schema.sql
+\echo >>> 70_observability/02_tables.sql
+\ir 70_observability/02_tables.sql
+\echo >>> 70_observability/03_fk_intra.sql
+\ir 70_observability/03_fk_intra.sql
+\echo >>> 70_observability/04_indexes.sql
+\ir 70_observability/04_indexes.sql
+\echo >>> 70_observability/05_constraints.sql
+\ir 70_observability/05_constraints.sql
 
 -- 90_fk_deferred.sql OMITIDOS a propósito.
 \echo === apply_all completado (sin 90_fk_deferred) ===
