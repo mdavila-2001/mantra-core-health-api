@@ -114,6 +114,7 @@ function build(
     ),
   };
   const positions = {
+    reservedInSite: jest.fn(async () => 5),
     countLotPositionsInSite: jest.fn(async () => options.lots ?? 0),
   };
   const external = {
@@ -132,6 +133,14 @@ function build(
     ),
   };
   const logger = { info: jest.fn(), warn: jest.fn() };
+  const erp = {
+    catalogForConnection: jest.fn(async () => ({
+      catalog: external,
+      pharmacyCode: undefined as string | undefined,
+      siteCodes: {} as Readonly<Record<string, string>>,
+    })),
+  };
+  Object.assign(em, { fork: jest.fn(() => em) });
   const useCase = new SyncExternalPharmacyCatalogUseCase(
     em as any,
     allowAllScope(),
@@ -143,9 +152,11 @@ function build(
     writer as any,
     external,
     logger as any,
+    erp as never,
   );
   return {
     useCase,
+    erp,
     reads,
     createBatch,
     reconcile,
@@ -168,6 +179,26 @@ async function reasonOf(
 }
 
 describe('SyncExternalPharmacyCatalogUseCase', () => {
+  it('usa códigos ERP y descuenta reservas locales sin cambiar el modo de C8', async () => {
+    const d = build({});
+    d.erp.catalogForConnection.mockResolvedValue({
+      catalog: d.external,
+      pharmacyCode: 'EXTERNAL-PHARMACY',
+      siteCodes: { 'site-1': 'EXTERNAL-CENTRAL' },
+    });
+    await d.useCase.execute(REF, ACTOR);
+    expect(d.external.stockForSite).toHaveBeenCalledWith(
+      'EXTERNAL-CENTRAL',
+      'EXTERNAL-PHARMACY',
+    );
+    expect(
+      d.writer.write.mock.calls.some((call) =>
+        (call[2] as { availableQuantity: number }[]).some(
+          (target) => target.availableQuantity === 5,
+        ),
+      ),
+    ).toBe(true);
+  });
   it('a connection of another pharmacy (or none) → 404', async () => {
     const d = build({ connection: null });
     await expect(d.useCase.execute(REF, ACTOR)).rejects.toBeInstanceOf(

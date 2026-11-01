@@ -98,6 +98,13 @@ describe('cómo entra cada línea', () => {
 });
 
 describe('la clave nunca se muestra entera', () => {
+  it.each(['a', 'ab', 'abc', 'abcd'])(
+    'no publica una pista que revele una clave corta (%s)',
+    (secret) => {
+      expect(maskSecretHint(lastFour(secret))).toBeNull();
+    },
+  );
+
   it('solo los últimos 4 caracteres', () => {
     const secret = 'clave-muy-secreta-1234';
     const hint = maskSecretHint(lastFour(secret));

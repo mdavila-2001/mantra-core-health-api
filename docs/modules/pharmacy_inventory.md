@@ -9,7 +9,7 @@
 # Módulo `pharmacy_inventory`
 
 **Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/README.md)
-· 9 controllers · 12 services · 20 repositories · 21 entidades · 20 DTO
+· 10 controllers · 12 services · 21 repositories · 21 entidades · 22 DTO
 
 ---
 
@@ -43,6 +43,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
 | `GET /pharmacy-inventory/sites/:siteId/stock` | sesión | `pharmacy-inventory-read` |
 | `GET /pharmacy-inventory/availability` | sesión | `pharmacy-inventory-read` |
+| `GET /pharmacy-inventory/availability/medications` | sesión | `pharmacy-inventory-read` |
 | `POST /pharmacy/:siteId/inventory-locations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/reservations` | SECURITY_ADMIN | `pharmacy-inventory` |
 | `POST /pharmacy/:pharmacyId/transfers` | SECURITY_ADMIN | `pharmacy-inventory` |
@@ -65,6 +66,67 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /pharmacy/:pharmacyId/suppliers` | SECURITY_ADMIN | `pharmacy-procurement` |
 | `POST /pharmacy/:pharmacyId/purchase-orders` | SECURITY_ADMIN | `pharmacy-procurement` |
 | `POST /pharmacy/:pharmacyId/goods-receipts` | SECURITY_ADMIN | `pharmacy-procurement` |
+
+## Conexión de cada farmacia con su sistema (FAR-C9)
+
+La llave `PHARMACY_CONNECTION_SECRET_KEY` debe conservarse y respaldarse bajo
+custodia del responsable del entorno. Cambiarla o perderla impide descifrar las
+credenciales existentes: no se regenera en cada arranque ni se rota sin un
+procedimiento de recifrado o recarga de conexiones. Nunca se publica su valor.
+Las pistas de claves de cuatro caracteres o menos se omiten. Las pistas
+anteriores sin marca de cálculo seguro también se ocultan hasta recargar la
+clave, sin descifrarla para mostrar la configuración.
+La consulta paginada de la cadena simulada comparte un presupuesto total de
+tiempo entre todas sus páginas; no reinicia ese plazo por página ni reintenta.
+El plazo incluye la resolución del destino. Las lecturas de catálogo y la
+sincronización de una conexión propia usan ese mismo ERP y sus códigos externos;
+la configuración global sólo se conserva para las conexiones anteriores sin ERP
+propio. El stock consultado descuenta las reservas locales pendientes antes de
+ofrecer unidades nuevas, bajo el candado de la sede. Esto no es una reserva
+atómica en el sistema externo: ese contrato sólo expone consultas.
+Los conteos agregados no se superponen a existencias por lote: se conserva el
+rechazo `SITE_PRODUCT_KEPT_BY_LOTS` que exige recepciones y conteos por lote.
+Una línea manual pendiente con posiciones por lote no admite actualmente una
+confirmación positiva mediante `CONFIRMAR_STOCK`: contar los lotes no elimina
+el rechazo al conteo agregado. El cliente no debe sustituir silenciosamente
+esa declaración por una confirmación sin ajustes, aunque la compatibilidad API
+sin ajustes conserve la reserva contra el libro existente.
+La
+sincronización de una conexión propia también descuenta las reservas locales;
+el adaptador global anterior conserva su interpretación.
+
+Cada farmacia configura en su pestaña Integración la conexión con su propio
+sistema: tipo, dirección, clave, código de farmacia y código de cada sucursal.
+
+- **Endpoints** (`PharmacyErpConnectionController`, rol de la farmacia o
+  `SECURITY_ADMIN`): `GET`/`PUT /pharmacies/:pharmacyId/erp-connection`,
+  `POST …/erp-connection/test` (prueba los datos del formulario sin guardarlos)
+  y `POST …/erp-connection/test-saved` (prueba lo guardado y deja su estado).
+- **Dónde se guarda**, sin columnas nuevas: el tipo es una fila de
+  `integrations.external_providers` (`ALOVIDA_STANDARD`, `SIMULATED_CHAIN`, por
+  el seed «tipos de sistema de farmacia»); la conexión, una
+  `integrations.provider_connections` del tenant de la farmacia, apuntada por
+  `pharmacy_integration_connections.connection_id`; dirección, códigos, últimos
+  4 de la clave y último estado van en su `config_json`; la clave, cifrada en
+  `provider_credentials.secret_ref` (`enc:v1:`, AES-256-GCM con
+  `PHARMACY_CONNECTION_SECRET_KEY`). Sin esa variable la API arranca, y guardar
+  o probar responde «falta configurar el cifrado de conexiones». La clave nunca
+  vuelve: solo `••••` y sus últimos 4 caracteres.
+- **La regla del modo** vive en un solo lugar:
+  `domain/erp-connection/pharmacy-stock-mode.ts`. **Manual** (por defecto): las
+  líneas del pedido entran «por confirmar» y la sucursal confirma con
+  `CONFIRMAR_STOCK`. **Conectada**: al pedir se consulta en vivo el stock de la
+  sucursal (3 s como máximo, sin reintentos); con stock se reserva y con 0 la
+  línea queda sin stock. Si el sistema no responde o rechaza la clave, la
+  conexión queda «con error» (`UNREACHABLE` o `AUTH_REJECTED`), el pedido sigue
+  como manual y la siguiente llamada que funcione la deja activa otra vez.
+- **Adaptadores**: uno por tipo, detrás de `ExternalPharmacyCatalogPort`
+  (`infrastructure/adapters/pharmacy-catalog.factory.ts`). El contrato del
+  **Estándar ALOVIDA** está publicado en
+  [`docs/integrations/pharmacy-standard.openapi.yaml`](../../../docs/integrations/pharmacy-standard.openapi.yaml).
+- **«Sincronizar ahora» (FAR-07)** sigue usando la configuración única del
+  servidor (`PHARMACY_ERP_BASE_URL`) como respaldo: el pedido ya no depende de
+  ella.
 
 ## Contenido
 
@@ -89,6 +151,7 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | --- | --- |
 | `GET /pharmacy-inventory/sites/{siteId}/stock?product=` | Stock disponible de una sede, agregado por producto sobre sus ubicaciones activas |
 | `GET /pharmacy-inventory/availability?products=a,b&lat=&lng=&limit=` | Qué sedes pueden surtir un pedido: completas primero, luego distancia y precio |
+| `GET /pharmacy-inventory/availability/medications?medications=a,b&lat=&lng=&limit=` | Lo mismo por medicamento de una receta, en toda la red: un producto propio por medicamento en cada sede y los medicamentos que le faltan |
 
 La visibilidad es la del directorio de farmacias (módulo 24) y se **reutiliza**
 —`PharmacyReadRepository` viene exportado por `PharmacyModule`— en vez de

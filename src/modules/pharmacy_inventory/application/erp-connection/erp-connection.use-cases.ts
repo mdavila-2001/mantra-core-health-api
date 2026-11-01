@@ -31,8 +31,10 @@ import {
   type PharmacyCatalogFactoryPort,
   type PharmacyConnectionCipherPort,
   type PharmacySystemAccess,
+  type ExternalPharmacyCatalogPort,
 } from '../ports/external-pharmacy-catalog.port';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
+import { integrationConnectionInactive } from '../inventory-sync/integration-errors';
 import {
   connectionIncomplete,
   connectionNotFound,
@@ -106,6 +108,30 @@ export class ErpConnectionUseCases {
     return this.describe(em, pharmacyId);
   }
 
+  /** Catálogo de una conexión ya validada por ámbito; conserva C8 donde no hay ERP propio. */
+  async catalogForConnection(
+    em: EntityManager,
+    pharmacyId: string,
+    linkId: string,
+    fallback: ExternalPharmacyCatalogPort,
+  ): Promise<{
+    catalog: ExternalPharmacyCatalogPort;
+    pharmacyCode?: string;
+    siteCodes: Readonly<Record<string, string>>;
+  }> {
+    const current = await this.connections.findForPharmacy(em, pharmacyId);
+    if (!current || current.link.id !== linkId)
+      return { catalog: fallback, siteCodes: {} };
+    if (current.connection.stateConceptId !== INTEG.CONN_ACTIVE)
+      throw integrationConnectionInactive();
+    if (!this.cipher.isConfigured()) throw encryptionNotConfigured();
+    return {
+      catalog: this.catalogs.forAccess(this.accessFor(current)),
+      pharmacyCode: current.config.pharmacyCode,
+      siteCodes: current.config.siteCodes,
+    };
+  }
+
   /**
    * Guarda la conexión. «Manual» la desactiva y conserva lo cargado;
    * «Conectada» exige tipo, dirección, código de farmacia y una clave (la
@@ -166,6 +192,7 @@ export class ErpConnectionUseCases {
         keyLast4: dto.apiKey
           ? lastFour(dto.apiKey)
           : (current?.config.keyLast4 ?? null),
+        keyHintSafe: dto.apiKey ? true : current?.config.keyHintSafe === true,
         statusCode: null,
         reasonCode: null,
         checkedAt: null,

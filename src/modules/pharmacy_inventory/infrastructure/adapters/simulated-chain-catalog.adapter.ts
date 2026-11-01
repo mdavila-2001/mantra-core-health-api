@@ -34,10 +34,12 @@ const PER_PAGE = '50';
  * - todo viene en `data` y se recorren las páginas hasta `meta.total_pages`.
  */
 export class SimulatedChainCatalogAdapter implements ConnectedPharmacyCatalog {
+  private readonly timeoutMs: number;
   private readonly http: AxiosInstance;
   private readonly base: string;
 
   constructor(access: PharmacySystemAccess) {
+    this.timeoutMs = access.timeoutMs;
     this.http = createPharmacySystemHttp(access.baseUrl, access.timeoutMs, {
       Authorization: `Bearer ${access.apiKey}`,
       Accept: 'application/json',
@@ -102,12 +104,18 @@ export class SimulatedChainCatalogAdapter implements ConnectedPharmacyCatalog {
 
   private async allPages(path: string): Promise<Record<string, unknown>[]> {
     const rows: Record<string, unknown>[] = [];
+    const signal = AbortSignal.timeout(this.timeoutMs);
     for (let page = 1; page <= MAX_PAGES; page += 1) {
       const body = asRecord(
-        await getJson(this.http, path, {
-          page: String(page),
-          per_page: PER_PAGE,
-        }),
+        await getJson(
+          this.http,
+          path,
+          {
+            page: String(page),
+            per_page: PER_PAGE,
+          },
+          signal,
+        ),
         'page',
       );
       rows.push(...asArray(body.data, 'row'));

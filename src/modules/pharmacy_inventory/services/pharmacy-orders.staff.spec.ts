@@ -813,34 +813,52 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
     });
 
-    it('a product that got a position meanwhile is governed by the ledger: no write', async () => {
-      const d = build();
-      d.withSiteInMemory();
-      d.sitePositions.push({
-        inventoryLocationId: 'loc-1',
-        pharmacyProductId: 'prod-1',
-        onHandQuantity: '4',
-        reservedQuantity: '0',
-        quarantineQuantity: '0',
-        availableQuantity: '4',
-      });
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
-      const line = pendingLine();
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
+    it.each([
+      ['explicit count', true, '9', '6'],
+      ['legacy confirmation', false, '4', '1'],
+    ] as const)(
+      'a position created meanwhile respects %s',
+      async (_name, explicit, onHand, available) => {
+        const d = build();
+        d.withSiteInMemory();
+        d.sitePositions.push({
+          inventoryLocationId: 'loc-1',
+          pharmacyProductId: 'prod-1',
+          onHandQuantity: '4',
+          reservedQuantity: '0',
+          quarantineQuantity: '0',
+          availableQuantity: '4',
+        });
+        d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(order());
+        const line = pendingLine();
+        d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line]);
 
-      await confirmWith(d, [
-        { productId: 'prod-1', decision: 'CONFIRMAR_STOCK', quantity: 9 },
-      ]);
+        await confirmWith(
+          d,
+          explicit
+            ? [
+                {
+                  productId: 'prod-1',
+                  decision: 'CONFIRMAR_STOCK',
+                  quantity: 9,
+                },
+              ]
+            : [],
+        );
 
-      // Lo que dice el libro manda: 4 en la sede, 3 reservadas.
-      expect(d.writerPositions.findByKeyForUpdate).not.toHaveBeenCalled();
-      expect(d.sitePositions[0]).toMatchObject({
-        onHandQuantity: '4',
-        reservedQuantity: '3',
-        availableQuantity: '1',
-      });
-      expect(line.statusConceptId).toBe(PINV.RES_LINE_CONFIRMED);
-    });
+        // El conteo explícito se aplica; la confirmación antigua conserva el libro.
+        if (explicit)
+          expect(d.writerPositions.findByKeyForUpdate).toHaveBeenCalled();
+        else
+          expect(d.writerPositions.findByKeyForUpdate).not.toHaveBeenCalled();
+        expect(d.sitePositions[0]).toMatchObject({
+          onHandQuantity: onHand,
+          reservedQuantity: '3',
+          availableQuantity: available,
+        });
+        expect(line.statusConceptId).toBe(PINV.RES_LINE_CONFIRMED);
+      },
+    );
 
     it.each([
       [

@@ -31,6 +31,9 @@ function build(mappings: Record<string, unknown>[]) {
     allowAllScope(),
     reads as any,
     external,
+    {
+      catalogForConnection: async () => ({ catalog: external, siteCodes: {} }),
+    } as never,
   );
   return { service };
 }

@@ -145,5 +145,5 @@ export function maskSecretHint(
 
 /** Los últimos 4 caracteres de una clave, para la pista. */
 export function lastFour(secret: string): string {
-  return secret.slice(-4);
+  return secret.length > 4 ? secret.slice(-4) : '';
 }

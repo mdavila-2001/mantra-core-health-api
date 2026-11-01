@@ -38,7 +38,13 @@ export function createPharmacySystemHttp(
   // Se resuelve una vez, en producción se rechaza todo destino interno, y el
   // socket se conecta a esa misma dirección ya validada (sin rebinding).
   client.interceptors.request.use(async (config) => {
-    const destination = await resolveOutboundDestination(baseUrl);
+    const deadline = AbortSignal.timeout(timeoutMs);
+    const signal =
+      config.signal instanceof AbortSignal
+        ? AbortSignal.any([config.signal, deadline])
+        : deadline;
+    config.signal = signal;
+    const destination = await resolveBeforeDeadline(baseUrl, signal);
     const lookup = pinnedLookup(destination) as never;
     config.httpAgent = new http.Agent({ lookup });
     config.httpsAgent = new https.Agent({ lookup });
@@ -47,14 +53,44 @@ export function createPharmacySystemHttp(
   return client;
 }
 
+/** El plazo también cubre DNS, antes de que Axios abra el transporte. */
+function resolveBeforeDeadline(
+  baseUrl: string,
+  signal: AbortSignal,
+): ReturnType<typeof resolveOutboundDestination> {
+  return new Promise((resolve, reject) => {
+    const abort = () => reject(new Error('Tiempo de resolución agotado'));
+    if (signal.aborted) {
+      abort();
+      return;
+    }
+    signal.addEventListener('abort', abort, { once: true });
+    resolveOutboundDestination(baseUrl).then(
+      (destination) => {
+        signal.removeEventListener('abort', abort);
+        resolve(destination);
+      },
+      (error: unknown) => {
+        signal.removeEventListener('abort', abort);
+        reject(
+          error instanceof Error
+            ? error
+            : new Error('No se pudo resolver el destino'),
+        );
+      },
+    );
+  });
+}
+
 /** GET que devuelve el cuerpo o lanza el error del dominio con su motivo. */
 export async function getJson(
   http: AxiosInstance,
   path: string,
   params?: Record<string, string>,
+  signal?: AbortSignal,
 ): Promise<unknown> {
   try {
-    const response = await http.get<unknown>(path, { params });
+    const response = await http.get<unknown>(path, { params, signal });
     return response.data;
   } catch (error) {
     throw classifyFailure(error, path);

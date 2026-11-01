@@ -22,6 +22,7 @@ import {
   integrationUnavailable,
 } from './integration-errors';
 import type { ConnectionRef } from './sync-external-pharmacy-catalog.use-case';
+import { ErpConnectionUseCases } from '../erp-connection/erp-connection.use-cases';
 
 /** Tope de lotes que se listan de una vez. */
 const MAX_BATCHES = 20;
@@ -48,6 +49,7 @@ export class IntegrationReadService {
     private readonly reads: IntegrationReadRepository,
     @Inject(EXTERNAL_PHARMACY_CATALOG_PORT)
     private readonly external: ExternalPharmacyCatalogPort,
+    private readonly erp: ErpConnectionUseCases,
   ) {}
 
   async connections(
@@ -72,7 +74,14 @@ export class IntegrationReadService {
         .filter((id): id is string => typeof id === 'string'),
     );
     const siteNames = new Map(sites.map((site) => [site.id, site.name]));
-    const providerConfigured = this.external.isConfigured();
+    const erp = await this.erp.view(pharmacyId, actor);
+    const configuredFor = (id: string) =>
+      id === erp.integrationConnectionId
+        ? erp.mode === 'CONNECTED' && erp.encryptionConfigured
+        : this.external.isConfigured();
+    const providerConfigured =
+      connections.some((connection) => configuredFor(connection.id)) ||
+      (connections.length === 0 && this.external.isConfigured());
     return {
       providerConfigured,
       items: connections.map((connection) => ({
@@ -91,7 +100,7 @@ export class IntegrationReadService {
           connection.statusConceptId === PHARM.CONNECTION_ACTIVE
             ? 'ACTIVE'
             : 'INACTIVE',
-        providerConfigured,
+        providerConfigured: configuredFor(connection.id),
         createdAt: connection.createdAt.toISOString(),
       })),
     };
@@ -135,10 +144,16 @@ export class IntegrationReadService {
     const em = this.em.fork();
     const connection = await this.requireConnection(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
-    if (!this.external.isConfigured()) throw integrationNotConfigured();
+    const { catalog: external } = await this.erp.catalogForConnection(
+      em,
+      connection.pharmacyId,
+      connection.id,
+      this.external,
+    );
+    if (!external.isConfigured()) throw integrationNotConfigured();
     let catalog;
     try {
-      catalog = await this.external.listProducts();
+      catalog = await external.listProducts();
     } catch (error) {
       if (error instanceof ExternalCatalogUnavailableError) {
         throw integrationUnavailable();

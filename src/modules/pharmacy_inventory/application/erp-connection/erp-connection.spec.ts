@@ -20,6 +20,7 @@ function record(overrides: Record<string, unknown> = {}) {
       pharmacyCode: 'FARM-1',
       siteCodes: { 'site-1': 'SUC-CENTRO' },
       keyLast4: '1234',
+      keyHintSafe: true,
     },
   };
   return {
@@ -201,6 +202,52 @@ describe('OrderStockSourceResolver (FAR-C9)', () => {
 });
 
 describe('ErpConnectionUseCases (FAR-C9)', () => {
+  it('usa el catálogo y los códigos de la conexión propia y no el global', async () => {
+    const d = doubles();
+    const fallback = { isConfigured: () => false } as never;
+    const source = await d.useCases.catalogForConnection(
+      {} as never,
+      'ph-1',
+      'link-1',
+      fallback,
+    );
+    expect(source.catalog).toBe(d.adapter);
+    expect(source.pharmacyCode).toBe('FARM-1');
+    expect(source.siteCodes).toEqual({ 'site-1': 'SUC-CENTRO' });
+    expect(d.catalogs.forAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseUrl: 'http://farmacia.test/std',
+        pharmacyCode: 'FARM-1',
+      }),
+    );
+  });
+
+  it('conserva C8 sólo para una conexión sin ERP propio', async () => {
+    const d = doubles();
+    const fallback = { isConfigured: () => true } as never;
+    expect(
+      (
+        await d.useCases.catalogForConnection(
+          {} as never,
+          'ph-1',
+          'legacy-link',
+          fallback,
+        )
+      ).catalog,
+    ).toBe(fallback);
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+  });
+
+  it('oculta pistas anteriores cuya seguridad no está acreditada, sin descifrar ni rotar', async () => {
+    const d = doubles();
+    d.connections.findForPharmacy.mockResolvedValue(
+      record({ config: readConfig({ keyLast4: '1234' }) }),
+    );
+    expect((await d.useCases.view('ph-1', ACTOR)).keyHint).toBeNull();
+    expect(d.cipher.decrypt).not.toHaveBeenCalled();
+    expect(d.connections.rotateCredential).not.toHaveBeenCalled();
+  });
+
   it('sin llave de cifrado, guardar y probar responden un error claro', async () => {
     const d = doubles({ cipherReady: false });
 

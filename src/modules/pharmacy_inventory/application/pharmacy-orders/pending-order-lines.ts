@@ -210,9 +210,9 @@ export class PendingOrderLines {
    *   cualquier línea sin stock.
    *
    * Lo confirmado se escribe por {@link SiteStockWriter} en una sola
-   * escritura (un solo candado de sede) y sólo para los productos que siguen
-   * sin posición en la sede: si mientras tanto alguien le escribió una, el
-   * libro manda y la línea se reserva contra lo que haya.
+   * escritura bajo el candado de sede. Un conteo explícito actualiza también
+   * una posición sin lote creada mientras tanto; sin conteo explícito se
+   * conserva el libro existente. Los productos por lotes exigen su flujo de conteo.
    *
    * @returns Las líneas a reservar, con las posiciones del producto en la
    *   sede, y cuántas quedaron sin stock.
@@ -273,9 +273,22 @@ export class PendingOrderLines {
     if (confirmed.length === 0) return { toReserve: [], unavailable };
 
     const productIds = confirmed.map(({ line }) => line.pharmacyProductId);
+    await this.writer.lockSite(tx, order.pharmacySiteId);
     const before = await this.sitePositions(tx, order, productIds);
+    for (const { line } of confirmed) {
+      if (
+        adjustmentOf.get(line.pharmacyProductId)?.decision === 'CONFIRMAR_STOCK'
+      ) {
+        assertAggregateCountAllowed(before.get(line.pharmacyProductId) ?? []);
+      }
+    }
     const targets = confirmed
-      .filter(({ line }) => !before.has(line.pharmacyProductId))
+      .filter(
+        ({ line }) =>
+          !before.has(line.pharmacyProductId) ||
+          adjustmentOf.get(line.pharmacyProductId)?.decision ===
+            'CONFIRMAR_STOCK',
+      )
       .map(({ line, quantity }) => ({
         productId: line.pharmacyProductId,
         availableQuantity: quantity,
@@ -323,10 +336,23 @@ export class PendingOrderLines {
     quantity: number,
     actorUserId: string,
   ): Promise<InventoryStockPositions[]> {
+    await this.writer.lockSite(tx, order.pharmacySiteId);
+    const previous =
+      (await this.sitePositions(tx, order, [productId])).get(productId) ?? [];
+    assertAggregateCountAllowed(previous);
+    const locallyReserved = previous.reduce(
+      (sum, position) => sum + Number(position.reservedQuantity ?? 0),
+      0,
+    );
     await this.writer.write(
       tx,
       { tenantId, pharmacyId: order.pharmacyId, siteId: order.pharmacySiteId },
-      [{ productId, availableQuantity: quantity }],
+      [
+        {
+          productId,
+          availableQuantity: Math.max(0, quantity - locallyReserved),
+        },
+      ],
       {
         movementTypeConceptId: PINV.MV_SYNC_ADJUSTMENT,
         sourceId: order.id,
@@ -360,4 +386,17 @@ export class PendingOrderLines {
     }
     return byProduct;
   }
+}
+
+/** Los conteos agregados no crean existencias sin lote encima de lotes existentes. */
+function assertAggregateCountAllowed(
+  positions: readonly InventoryStockPositions[],
+): void {
+  if (!positions.some((position) => position.inventoryLotId != null)) return;
+  const reason = PharmacyInventoryErrorReason.SITE_PRODUCT_KEPT_BY_LOTS;
+  throw new PreconditionFailedException(
+    'La sucursal lleva este producto por lotes: su existencia cambia con recepciones y conteos',
+    { reason },
+    reason,
+  );
 }

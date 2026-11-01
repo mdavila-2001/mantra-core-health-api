@@ -128,6 +128,26 @@ describe('adaptadores del sistema de cada farmacia (FAR-C9)', () => {
   });
 
   describe('cadena simulada', () => {
+    it('acota el tiempo total de las páginas, sin reiniciar el presupuesto por página', async () => {
+      const url = await serve(() => ({
+        delayMs: 80,
+        body: {
+          data: [{ sku: 'E-1', on_hand: { units: 3 } }],
+          meta: { total_pages: 50 },
+        },
+      }));
+      expect(
+        await failureKind(
+          catalog({
+            baseUrl: url,
+            systemCode: 'SIMULATED_CHAIN',
+            timeoutMs: 200,
+          }).stockForSite('SUC-1'),
+        ),
+      ).toBe('UNREACHABLE');
+      expect(seen.length).toBeLessThan(10);
+    });
+
     const chain = (baseUrl: string) =>
       catalog({ baseUrl, systemCode: 'SIMULATED_CHAIN', pharmacyCode: 'CAD' });
 

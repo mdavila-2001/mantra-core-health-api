@@ -154,6 +154,23 @@ export class StockPositionsRepository {
     );
   }
 
+  /** Reservas locales sin lote que el stock externo todavía debe descontar. */
+  async reservedInSite(
+    em: EntityManager,
+    siteId: string,
+    productId: string,
+  ): Promise<number> {
+    const rows = await em.execute<{ total: string | number }[]>(
+      `select coalesce(sum(st.reserved_quantity), 0) as total
+         from pharmacy_inventory.inventory_locations loc
+         join pharmacy_inventory.inventory_stock_positions st on st.inventory_location_id = loc.id
+        where loc.pharmacy_site_id = ? and loc.status_concept_id = ?
+          and st.pharmacy_product_id = ? and st.inventory_lot_id is null`,
+      [siteId, PINV.LOCATION_ACTIVE, productId],
+    );
+    return Number(rows?.[0]?.total ?? 0);
+  }
+
   /**
    * Cuántas posiciones **con lote** tiene un producto en las ubicaciones
    * activas de una sede. Con lotes, la existencia la llevan las recepciones y

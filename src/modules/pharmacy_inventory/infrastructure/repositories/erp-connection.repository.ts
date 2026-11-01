@@ -31,6 +31,8 @@ export interface ErpConnectionConfig {
   /** Sede de la plataforma → código de esa sucursal en el sistema de la farmacia. */
   readonly siteCodes: Readonly<Record<string, string>>;
   readonly keyLast4: string | null;
+  /** La pista fue calculada sin revelar íntegramente una clave corta. */
+  readonly keyHintSafe?: boolean;
   /** `PINV_ERP_CONNECTION_*` de la última llamada o prueba de lo guardado. */
   readonly statusCode: string | null;
   /** `PINV_ERP_REASON_*` si quedó con error. */
@@ -278,7 +280,8 @@ export function readConfig(raw: unknown): ErpConnectionConfig {
     baseUrl: text('baseUrl') ?? '',
     pharmacyCode: text('pharmacyCode') ?? '',
     siteCodes,
-    keyLast4: text('keyLast4'),
+    keyLast4: value.keyHintSafe === true ? text('keyLast4') : null,
+    keyHintSafe: value.keyHintSafe === true,
     statusCode: text('statusCode'),
     reasonCode: text('reasonCode'),
     checkedAt: text('checkedAt'),

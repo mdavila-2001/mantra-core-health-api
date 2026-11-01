@@ -54,6 +54,32 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 
 ## Conexión de cada farmacia con su sistema (FAR-C9)
 
+La llave `PHARMACY_CONNECTION_SECRET_KEY` debe conservarse y respaldarse bajo
+custodia del responsable del entorno. Cambiarla o perderla impide descifrar las
+credenciales existentes: no se regenera en cada arranque ni se rota sin un
+procedimiento de recifrado o recarga de conexiones. Nunca se publica su valor.
+Las pistas de claves de cuatro caracteres o menos se omiten. Las pistas
+anteriores sin marca de cálculo seguro también se ocultan hasta recargar la
+clave, sin descifrarla para mostrar la configuración.
+La consulta paginada de la cadena simulada comparte un presupuesto total de
+tiempo entre todas sus páginas; no reinicia ese plazo por página ni reintenta.
+El plazo incluye la resolución del destino. Las lecturas de catálogo y la
+sincronización de una conexión propia usan ese mismo ERP y sus códigos externos;
+la configuración global sólo se conserva para las conexiones anteriores sin ERP
+propio. El stock consultado descuenta las reservas locales pendientes antes de
+ofrecer unidades nuevas, bajo el candado de la sede. Esto no es una reserva
+atómica en el sistema externo: ese contrato sólo expone consultas.
+Los conteos agregados no se superponen a existencias por lote: se conserva el
+rechazo `SITE_PRODUCT_KEPT_BY_LOTS` que exige recepciones y conteos por lote.
+Una línea manual pendiente con posiciones por lote no admite actualmente una
+confirmación positiva mediante `CONFIRMAR_STOCK`: contar los lotes no elimina
+el rechazo al conteo agregado. El cliente no debe sustituir silenciosamente
+esa declaración por una confirmación sin ajustes, aunque la compatibilidad API
+sin ajustes conserve la reserva contra el libro existente.
+La
+sincronización de una conexión propia también descuenta las reservas locales;
+el adaptador global anterior conserva su interpretación.
+
 Cada farmacia configura en su pestaña Integración la conexión con su propio
 sistema: tipo, dirección, clave, código de farmacia y código de cada sucursal.
 

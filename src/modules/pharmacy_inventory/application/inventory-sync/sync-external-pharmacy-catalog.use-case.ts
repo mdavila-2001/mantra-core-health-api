@@ -47,6 +47,7 @@ import {
   integrationUnavailable,
 } from './integration-errors';
 import { ReconcileInventorySyncBatchUseCase } from './reconcile-inventory-sync-batch.use-case';
+import { ErpConnectionUseCases } from '../erp-connection/erp-connection.use-cases';
 
 /** Ruta del recurso, tal como llega del controlador. */
 export interface ConnectionRef {
@@ -56,6 +57,7 @@ export interface ConnectionRef {
 
 /** Lo que se decide en la primera lectura, antes de llamar afuera. */
 interface SyncPlan {
+  readonly erpConnection?: boolean;
   readonly pharmacy: PharmacyScope;
   /** Código de la farmacia: el sistema externo distingue farmacias por él. */
   readonly pharmacyCode: string;
@@ -132,6 +134,7 @@ export class SyncExternalPharmacyCatalogUseCase {
     @Inject(EXTERNAL_PHARMACY_CATALOG_PORT)
     private readonly external: ExternalPharmacyCatalogPort,
     private readonly logger: PinoLogger,
+    private readonly erp: ErpConnectionUseCases,
   ) {}
 
   async execute(
@@ -147,9 +150,15 @@ export class SyncExternalPharmacyCatalogUseCase {
       'Syncing external pharmacy catalog',
     );
     const plan = await this.plan(ref, actor);
-    if (!this.external.isConfigured()) throw integrationNotConfigured();
+    const source = await this.erp.catalogForConnection(
+      this.em.fork(),
+      ref.pharmacyId,
+      ref.connectionId,
+      this.external,
+    );
+    if (!source.catalog.isConfigured()) throw integrationNotConfigured();
 
-    const { catalog, stockBySite } = await this.fetch(plan);
+    const { catalog, stockBySite } = await this.fetch(plan, source);
 
     const items: TranslatedSyncItem[] = [];
     const unmapped = new Map<string, UnmappedExternalProduct>();
@@ -195,7 +204,7 @@ export class SyncExternalPharmacyCatalogUseCase {
     for (const site of plan.sites) {
       const siteCandidates = candidates.get(site.id) ?? [];
       const outcome = await this.applySite(
-        plan,
+        { ...plan, erpConnection: source.pharmacyCode !== undefined },
         site,
         siteCandidates,
         units,
@@ -274,17 +283,27 @@ export class SyncExternalPharmacyCatalogUseCase {
     });
   }
 
-  private async fetch(plan: SyncPlan): Promise<{
+  private async fetch(
+    plan: SyncPlan,
+    source: {
+      catalog: ExternalPharmacyCatalogPort;
+      pharmacyCode?: string;
+      siteCodes: Readonly<Record<string, string>>;
+    },
+  ): Promise<{
     catalog: ExternalProduct[];
     stockBySite: Map<string, ExternalStockLine[]>;
   }> {
     try {
-      const catalog = await this.external.listProducts();
+      const catalog = await source.catalog.listProducts();
       const stockBySite = new Map<string, ExternalStockLine[]>();
       for (const site of plan.sites) {
         stockBySite.set(
           site.id,
-          await this.external.stockForSite(site.code, plan.pharmacyCode),
+          await source.catalog.stockForSite(
+            source.siteCodes[site.id] ?? site.code,
+            source.pharmacyCode ?? plan.pharmacyCode,
+          ),
         );
       }
       return { catalog, stockBySite };
@@ -409,13 +428,20 @@ export class SyncExternalPharmacyCatalogUseCase {
       });
       if (targets.length === 0) return { applied: 0, unchanged: 0, skipped };
 
+      const stockTargets = [];
+      for (const target of targets) {
+        const reserved = plan.erpConnection
+          ? await this.positions.reservedInSite(tx, site.id, target.productId)
+          : 0;
+        stockTargets.push({
+          productId: target.productId,
+          availableQuantity: Math.max(0, target.quantity - reserved),
+        });
+      }
       const results = await this.writer.write(
         tx,
         { ...plan.pharmacy, siteId: site.id },
-        targets.map((target) => ({
-          productId: target.productId,
-          availableQuantity: target.quantity,
-        })),
+        stockTargets,
         {
           movementTypeConceptId: PINV.MV_SYNC_ADJUSTMENT,
           sourceId: batchId,

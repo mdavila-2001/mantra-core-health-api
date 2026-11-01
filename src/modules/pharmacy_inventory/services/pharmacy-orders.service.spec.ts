@@ -190,7 +190,10 @@ function build() {
   const prescriptionGuard = new PrescriptionOrderGuard(balances as any);
   const logger = { setContext: mockFn(), info: mockFn() };
   // El escritor por sede: por defecto no escribe nada.
-  const siteStockWriter = { write: mockFn(async () => []) };
+  const siteStockWriter = {
+    write: mockFn(async () => []),
+    lockSite: mockFn(async () => undefined),
+  };
   const stockSource = {
     resolve: mockFn(async (): Promise<OrderStockSource> => ({
       mode: 'CONNECTED',
