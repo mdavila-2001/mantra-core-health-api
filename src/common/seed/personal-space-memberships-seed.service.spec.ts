@@ -17,7 +17,7 @@ interface Fixture {
   memberships: { userId: string; tenantId: string }[];
 }
 
-/** EntityManager en memoria: sólo lo que el paso usa. */
+/** In-memory mock EntityManager: provides subset used by the seed step. */
 function fakeEm(fx: Fixture) {
   const created: Record<string, unknown>[] = [];
   const em = {
@@ -104,9 +104,7 @@ describe('PersonalSpaceMembershipsSeedService', () => {
   });
 
   it('no reactiva una membresía suspendida o revocada: cualquier fila cuenta', async () => {
-    // El adaptador de lectura filtra por estado; el paso mira la existencia de
-    // cualquier fila, así que una suspensión (que sigue siendo una fila) no se
-    // reemplaza por una activa.
+    // Read adapter filters by status; seed checks for existence of any record.
     const { service, created } = build({
       roles: [role('pat-2', PAT)],
       memberships: [{ userId: 'pat-2', tenantId: SEED.tenantId }],

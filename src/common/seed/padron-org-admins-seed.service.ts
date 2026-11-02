@@ -75,7 +75,7 @@ export class PadronOrgAdminsSeedService {
     if (skipped) {
       this.logger.warn(
         { operation: 'seed.padron-org-admins', reason: skipped },
-        'Administradores de organizaciones omitidos: faltan SEED_DEMO_PASSWORD y SEED_DEMO_ALLOW_PRODUCTION=true',
+        'Organization administrators skipped: missing SEED_DEMO_PASSWORD or SEED_DEMO_ALLOW_PRODUCTION=true',
       );
       return { ...result, reason: skipped };
     }
