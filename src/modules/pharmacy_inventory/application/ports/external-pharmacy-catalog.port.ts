@@ -18,7 +18,7 @@ export interface ExternalPharmacyCatalogPort {
   /** Si el entorno dice dónde está el sistema externo. */
   isConfigured(): boolean;
   /** El catálogo del sistema externo. */
-  listProducts(): Promise<ExternalProduct[]>;
+  listProducts(options?: { signal?: AbortSignal }): Promise<ExternalProduct[]>;
   /**
    * El stock de una sucursal, por el código que la farmacia le da a esa sede y
    * el de la farmacia (`pharmacies.code`): dos farmacias pueden tener sedes con
@@ -27,6 +27,7 @@ export interface ExternalPharmacyCatalogPort {
   stockForSite(
     siteCode: string,
     pharmacyCode?: string,
+    options?: { signal?: AbortSignal },
   ): Promise<ExternalStockLine[]>;
   /**
    * Si el sistema responde y acepta la clave. No devuelve nada: un sistema que

@@ -1,6 +1,14 @@
-import { randomInt } from 'node:crypto';
+import { generatePickupCode, isPickupCodeCollision } from './pickup-code';
+export {
+  PICKUP_CODE_ALPHABET,
+  PICKUP_CODE_LENGTH,
+  PICKUP_CODE_UNIQUE_INDEX,
+} from './pickup-code';
+import {
+  ExternalOrderStock,
+  type ExternalOrderStockSource,
+} from './external-order-stock';
 import { Inject, Injectable } from '@nestjs/common';
-import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -100,18 +108,6 @@ import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 export const ORDER_TTL_HOURS = 48;
 
 /**
- * Alfabeto del código de retiro: **sin ambiguos** (`0`/`O`, `1`/`I`/`L`
- * excluidos a propósito). El código se dicta en voz alta en un mostrador y se
- * copia a mano de la pantalla de un teléfono; `IL01` es una discusión
- * garantizada. 30⁶ ≈ 7,3 × 10⁸ combinaciones. Contrato v4.2.1
- * (`DISENO-CODIGO-RETIRO.md`).
- */
-export const PICKUP_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-
-/** Largo del código de retiro. */
-export const PICKUP_CODE_LENGTH = 6;
-
-/**
  * Intentos ante colisión de código (violación del único parcial). La unicidad
  * la garantiza el índice, no una consulta previa: se genera, se inserta y se
  * reintenta la transacción entera si el índice lo rechaza — consultar antes de
@@ -119,16 +115,6 @@ export const PICKUP_CODE_LENGTH = 6;
  * casi imposibles; tres intentos están de sobra.
  */
 const PICKUP_CODE_MAX_ATTEMPTS = 3;
-
-/**
- * El único parcial que respalda la unicidad del código de retiro, POR SEDE
- * desde v4.2.2. El detector de colisiones compara contra ESTE nombre y nada
- * más; un spec lo contrasta contra el catálogo ORM (`pharmacy_inventory.idx`)
- * para que el próximo rename rompa un test en vez de matar el reintento en
- * silencio — que es exactamente lo que el rename de v4.2.2 le hizo a v4.2.1.
- */
-export const PICKUP_CODE_UNIQUE_INDEX =
-  'ux_inventory_reservations_pharmacy_site_pickup_code';
 
 /** Del código de modalidad del contrato (`RETIRO`…) al concepto persistible. */
 const DELIVERY_MODE_ID_BY_CODE: ReadonlyMap<string, string> = new Map([
@@ -363,6 +349,7 @@ export class PharmacyOrdersUseCases {
     private readonly accountLinks: PersonAccountLinksPort,
     private readonly prescriptionGuard: PrescriptionOrderGuard,
     private readonly pendingLines: PendingOrderLines,
+    private readonly externalStock: ExternalOrderStock,
   ) {
     this.logger.setContext('PharmacyOrdersService');
   }
@@ -384,6 +371,30 @@ export class PharmacyOrdersUseCases {
     this.assertNoDuplicateProducts(dto);
     const deliveryModeConceptId = this.resolveDeliveryMode(dto.deliveryMode);
 
+    const preflight = this.em.fork({ keepTransactionContext: true });
+    if (dto.idempotencyKey) {
+      const existing = await this.ordersRepo.findOrderByIdempotencyKey(
+        preflight,
+        patientProfileId,
+        dto.idempotencyKey,
+        ORDER_STATUS_IDS,
+      );
+      if (existing)
+        return this.readOwnOrder(existing.id, undefined, patientProfileId);
+    }
+    const checked = await this.validateCreatePrerequisites(
+      preflight,
+      dto,
+      patientProfileId,
+      false,
+    );
+    const stock = await this.externalStock.resolve(
+      checked.site,
+      checked.pharmacy,
+      checked.productIds,
+      actor.id,
+    );
+
     const orderId = await this.em.transactional(async (tx) => {
       if (dto.idempotencyKey) {
         const existing = await this.ordersRepo.findOrderByIdempotencyKey(
@@ -395,65 +406,8 @@ export class PharmacyOrdersUseCases {
         if (existing) return existing.id;
       }
 
-      const site = await this.pharmacyRepo.findActiveSiteById(tx, dto.siteId);
-      const pharmacy = site
-        ? await this.pharmacyRepo.findVisibleById(
-            tx,
-            undefined,
-            site.pharmacyId,
-          )
-        : null;
-      if (!site || !pharmacy) {
-        throw new ResourceNotFoundException('Sede de farmacia no encontrada', {
-          siteId: dto.siteId,
-        });
-      }
-
-      // Receta con lock y un solo instante por pedido (FAR-03).
-      const now = new Date();
-      const request = dto.medicationRequestId
-        ? await this.prescriptionGuard.lockOwnRequest(
-            tx,
-            dto.medicationRequestId,
-            patientProfileId,
-            now,
-          )
-        : null;
-      // Receta inexistente y receta ajena: el mismo 404.
-      if (dto.medicationRequestId && !request) {
-        throw new ResourceNotFoundException('Receta no encontrada', {
-          medicationRequestId: dto.medicationRequestId,
-        });
-      }
-
-      const productIds = dto.lines.map((line) => line.productId);
-      // Un producto que la farmacia marcó «no tengo» no se reserva en un
-      // pedido nuevo (P47): para el paciente es lo mismo que no estar.
-      const products = await this.pharmacyRepo.findSellableProductsByIds(
-        tx,
-        productIds,
-      );
-      const sellable = new Set(
-        products
-          .filter((product) => product.pharmacyId === site.pharmacyId)
-          .map((product) => product.id),
-      );
-      const unknown = productIds.filter((id) => !sellable.has(id));
-      // Producto inexistente, retirado, sin stock declarado o de otra farmacia: el mismo 404.
-      if (unknown.length > 0) {
-        throw new ResourceNotFoundException(
-          'Producto no disponible en la sede',
-          { productIds: unknown },
-        );
-      }
-
-      // El pedido respeta la receta (FAR-03), antes de reservar nada.
-      await this.prescriptionGuard.assertOrderRespectsPrescription(
-        tx,
-        request,
-        products,
-        dto.lines,
-      );
+      const { site, pharmacy, productIds, products } =
+        await this.validateCreatePrerequisites(tx, dto, patientProfileId, true);
 
       // El precio se CONGELA acá, al crear (v4.2.1): lo que el paciente vio
       // al pedir es lo que el comprobante va a decir, aunque la lista cambie
@@ -485,6 +439,7 @@ export class PharmacyOrdersUseCases {
         actor,
         frozenPrices,
         products,
+        stock,
       );
       // Todas «No lo tengo» o sin unidades: 422 y la transacción no deja nada.
       if (outOfStock === dto.lines.length) {
@@ -530,6 +485,82 @@ export class PharmacyOrdersUseCases {
     return this.readOwnOrder(orderId, undefined, patientProfileId);
   }
 
+  /** Preflight de lectura y revalidación autoritativa comparten las mismas reglas. */
+  private async validateCreatePrerequisites(
+    em: EntityManager,
+    dto: CreatePharmacyOrderDto,
+    patientProfileId: string,
+    lockPrescription: boolean,
+  ): Promise<{
+    site: PharmacySiteSnapshot;
+    pharmacy: PharmacySnapshot;
+    productIds: string[];
+    products: PharmacyProductSnapshot[];
+  }> {
+    const site = await this.pharmacyRepo.findActiveSiteById(em, dto.siteId);
+    const pharmacy = site
+      ? await this.pharmacyRepo.findVisibleById(em, undefined, site.pharmacyId)
+      : null;
+    if (!site || !pharmacy) {
+      throw new ResourceNotFoundException('Sede de farmacia no encontrada', {
+        siteId: dto.siteId,
+      });
+    }
+
+    // La fase autoritativa conserva el lock y la política de receta (FAR-03).
+    const now = new Date();
+    const request = dto.medicationRequestId
+      ? await (lockPrescription
+          ? this.prescriptionGuard.lockOwnRequest(
+              em,
+              dto.medicationRequestId,
+              patientProfileId,
+              now,
+            )
+          : this.prescriptionGuard.readOwnRequest(
+              em,
+              dto.medicationRequestId,
+              patientProfileId,
+              now,
+            ))
+      : null;
+    // Receta inexistente y receta ajena: el mismo 404.
+    if (dto.medicationRequestId && !request) {
+      throw new ResourceNotFoundException('Receta no encontrada', {
+        medicationRequestId: dto.medicationRequestId,
+      });
+    }
+
+    const productIds = dto.lines.map((line) => line.productId);
+    // Un producto que la farmacia marcó «no tengo» no se reserva en un
+    // pedido nuevo (P47): para el paciente es lo mismo que no estar.
+    const products = await this.pharmacyRepo.findSellableProductsByIds(
+      em,
+      productIds,
+    );
+    const sellable = new Set(
+      products
+        .filter((product) => product.pharmacyId === site.pharmacyId)
+        .map((product) => product.id),
+    );
+    const unknown = productIds.filter((id) => !sellable.has(id));
+    // Producto inexistente, retirado, sin stock declarado o de otra farmacia: el mismo 404.
+    if (unknown.length > 0) {
+      throw new ResourceNotFoundException('Producto no disponible en la sede', {
+        productIds: unknown,
+      });
+    }
+
+    // El pedido respeta la receta (FAR-03), antes de reservar nada.
+    await this.prescriptionGuard.assertOrderRespectsPrescription(
+      em,
+      request,
+      products,
+      dto.lines,
+    );
+    return { site, pharmacy, productIds, products };
+  }
+
   /**
    * FAR-E1: los pedidos del paciente autenticado, más nuevos primero.
    *
@@ -542,7 +573,7 @@ export class PharmacyOrdersUseCases {
   ): Promise<PharmacyOrderListResponseDto> {
     const patientProfileId = this.requirePatientProfile(actor);
 
-    let em = this.em.fork();
+    let em = this.em.fork({ keepTransactionContext: true });
     let orders = await this.ordersRepo.findOrdersByPatient(
       em,
       patientProfileId,
@@ -555,7 +586,7 @@ export class PharmacyOrdersUseCases {
     if (dueIds.length > 0) {
       await this.expireDue(actor, dueIds);
       // Fork nuevo: el mapa de identidad del anterior quedó desactualizado.
-      em = this.em.fork();
+      em = this.em.fork({ keepTransactionContext: true });
       orders = await this.ordersRepo.findOrdersByPatient(
         em,
         patientProfileId,
@@ -591,7 +622,7 @@ export class PharmacyOrdersUseCases {
     id: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
-    let em = this.em.fork();
+    let em = this.em.fork({ keepTransactionContext: true });
     let order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
     if (!order) throw orderNotFound(id);
 
@@ -628,7 +659,7 @@ export class PharmacyOrdersUseCases {
 
     if (this.isDue(order)) {
       await this.expireDue(actor, [id]);
-      em = this.em.fork();
+      em = this.em.fork({ keepTransactionContext: true });
       order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
       if (!order) throw orderNotFound(id);
     }
@@ -667,7 +698,7 @@ export class PharmacyOrdersUseCases {
     id: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderConversationDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
     if (!order) throw orderNotFound(id);
 
@@ -842,7 +873,7 @@ export class PharmacyOrdersUseCases {
       limit: filters.limit ?? DEFAULT_INBOX_LIMIT,
     };
 
-    let em = this.em.fork();
+    let em = this.em.fork({ keepTransactionContext: true });
     const pharmacies = await this.ordersRepo.findPharmaciesByTenant(
       em,
       tenantId,
@@ -861,7 +892,7 @@ export class PharmacyOrdersUseCases {
       .map((order) => order.id);
     if (dueIds.length > 0) {
       await this.expireDue(actor, dueIds);
-      em = this.em.fork();
+      em = this.em.fork({ keepTransactionContext: true });
       orders = await this.ordersRepo.findOrdersForPharmacies(
         em,
         pharmacyIds,
@@ -2194,7 +2225,7 @@ export class PharmacyOrdersUseCases {
     id: string,
     tenantId: string,
   ): Promise<PharmacyOrderDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
     if (!order) throw orderNotFound(id);
     const [dto] = await this.composeOrders(em, tenantId, [order]);
@@ -2260,6 +2291,7 @@ export class PharmacyOrdersUseCases {
     actor: AuthenticatedUser,
     frozenPrices: ReadonlyMap<string, FrozenPrice>,
     products: readonly PharmacyProductSnapshot[],
+    source: ExternalOrderStockSource,
   ): Promise<number> {
     const locations = await this.inventoryReadRepo.findActiveLocationsBySites(
       tx,
@@ -2281,7 +2313,23 @@ export class PharmacyOrdersUseCases {
     for (const line of dto.lines) {
       const held = byProduct.get(line.productId) ?? [];
       const product = products.find((item) => item.id === line.productId);
-      if (entersPendingConfirmation(product, held)) {
+      const live =
+        source.mode === 'CONNECTED'
+          ? source.liveQuantities.get(line.productId)
+          : undefined;
+      const available = held.reduce(
+        (sum, position) => sum + num(position.availableQuantity),
+        0,
+      );
+      const manuallyPending =
+        source.mode === 'MANUAL' &&
+        (held.length ? available > 0 : product?.stockQuantity !== 0);
+      // Live stock restricts availability; it never fabricates a position or overwrites a count.
+      const liveOut = live !== undefined && live < line.quantity;
+      if (
+        !liveOut &&
+        (manuallyPending || entersPendingConfirmation(product, held))
+      ) {
         this.reservationsRepo.createLine(
           tx,
           pendingLineData(
@@ -2294,7 +2342,7 @@ export class PharmacyOrdersUseCases {
         );
         continue;
       }
-      const candidates = held
+      const candidates = (liveOut ? [] : held)
         .filter((position) => num(position.availableQuantity) > 0)
         .sort(comparePositions);
       const reserved = await this.reserveLineStock(
@@ -2432,7 +2480,7 @@ export class PharmacyOrdersUseCases {
     tenantId: string | undefined,
     patientProfileId: string,
   ): Promise<PharmacyOrderDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
     if (!order || order.patientProfileId !== patientProfileId) {
       throw orderNotFound(id);
@@ -2654,56 +2702,6 @@ function uniqueIds(ids: readonly (string | null | undefined)[]): string[] {
 /** Saldo por retirar de una línea: lo reservado menos lo ya entregado. */
 function remainingOf(line: InventoryReservationLines): number {
   return num(line.reservedQuantity) - num(line.fulfilledQuantity);
-}
-
-/**
- * Un código de retiro nuevo: 6 símbolos del alfabeto sin ambiguos, con
- * aleatoriedad criptográfica. Ya sale normalizado (mayúsculas): lo que se
- * guarda y lo que se compara comparten forma.
- */
-function generatePickupCode(): string {
-  let code = '';
-  for (let i = 0; i < PICKUP_CODE_LENGTH; i += 1) {
-    code += PICKUP_CODE_ALPHABET[randomInt(PICKUP_CODE_ALPHABET.length)];
-  }
-  return code;
-}
-
-/**
- * ¿El flush murió por el único parcial del código de retiro? Solo esa
- * violación se reintenta con un código nuevo; cualquier otra unicidad
- * (idempotencia, por ejemplo) es un error real y sube tal cual. El nombre de
- * la constraint se busca en la cadena de causas, como hace el filtro global,
- * y se compara contra {@link PICKUP_CODE_UNIQUE_INDEX} y NADA más — el spec
- * que lo ata al catálogo ORM es lo que impide que un rename futuro deje el
- * reintento muerto en silencio.
- */
-function isPickupCodeCollision(error: unknown): boolean {
-  if (!(error instanceof UniqueConstraintViolationException)) return false;
-  let current: unknown = error;
-  for (let depth = 0; depth < 5 && current; depth += 1) {
-    const candidate = current as {
-      /** Nombre de la constraint, si el driver lo trae. */
-      constraint?: unknown;
-      /** Mensaje del eslabón. */
-      message?: unknown;
-      /** Causa envuelta (Error.cause). */
-      cause?: unknown;
-      /** Causa envuelta (convención del driver). */
-      previous?: unknown;
-    };
-    if (candidate.constraint === PICKUP_CODE_UNIQUE_INDEX) {
-      return true;
-    }
-    if (
-      typeof candidate.message === 'string' &&
-      candidate.message.includes(PICKUP_CODE_UNIQUE_INDEX)
-    ) {
-      return true;
-    }
-    current = candidate.cause ?? candidate.previous;
-  }
-  return false;
 }
 
 /** Orden estable de posiciones: mayor disponible, luego ubicación y lote. */

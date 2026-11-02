@@ -15,7 +15,14 @@ function build() {
   };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
   const service = new IamRegistrationDocumentUploadService(
-    new CommonRegistrationFilesAdapter(fileUploadService as never, {} as never),
+    new CommonRegistrationFilesAdapter(
+      fileUploadService as never,
+      {} as never,
+      {
+        transactional: async (callback: any) =>
+          callback({ name: 'default', execute: async () => undefined }),
+      } as never,
+    ),
     logger as never,
   );
   return { service, fileUploadService };

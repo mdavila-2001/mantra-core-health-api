@@ -1,3 +1,5 @@
+import { withTenantTransactionCompletion } from './tenant-transaction-completion';
+import { ownedTransaction } from './owned-transaction';
 import {
   CallHandler,
   ExecutionContext,
@@ -182,16 +184,18 @@ export class TenantContextInterceptor implements NestInterceptor {
       runWithTenant(
         tenantId,
         () =>
-          this.em.transactional(async () => {
-            await this.em.execute(
-              "select set_config('app.system_context', 'false', true)",
-            );
-            await this.em.execute(
-              "select set_config('app.current_tenant_id', ?, true)",
-              [tenantId],
-            );
-            return lastValueFrom(next.handle());
-          }),
+          withTenantTransactionCompletion(() =>
+            ownedTransaction(this.em, async () => {
+              await this.em.execute(
+                "select set_config('app.system_context', 'false', true)",
+              );
+              await this.em.execute(
+                "select set_config('app.current_tenant_id', ?, true)",
+                [tenantId],
+              );
+              return lastValueFrom(next.handle());
+            }),
+          ),
         options,
       ),
     );
@@ -219,12 +223,14 @@ export class TenantContextInterceptor implements NestInterceptor {
       return from(lastValueFrom(next.handle()));
     }
     return from(
-      this.em.transactional(async () => {
-        await this.em.execute(
-          "select set_config('app.system_context', 'true', true)",
-        );
-        return lastValueFrom(next.handle());
-      }),
+      withTenantTransactionCompletion(() =>
+        ownedTransaction(this.em, async () => {
+          await this.em.execute(
+            "select set_config('app.system_context', 'true', true)",
+          );
+          return lastValueFrom(next.handle());
+        }),
+      ),
     );
   }
 

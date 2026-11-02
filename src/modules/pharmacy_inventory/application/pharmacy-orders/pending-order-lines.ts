@@ -1,3 +1,5 @@
+import { notPending } from './pending-order-errors';
+export { noStockForAnyLine } from './pending-order-errors';
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
@@ -66,23 +68,6 @@ export function entersPendingConfirmation(
   return declared === null || declared === undefined || declared > 0;
 }
 
-/**
- * El 422 de un pedido en el que ninguna línea tiene stock real: todas son «No
- * lo tengo» o sin unidades. Corre dentro de la transacción del alta, así que
- * no queda ni el pedido, ni sus líneas, ni sus asientos, ni el evento.
- */
-export function noStockForAnyLine(
-  siteId: string,
-  productIds: readonly string[],
-): PreconditionFailedException {
-  const reason = PharmacyInventoryErrorReason.PRODUCT_OUT_OF_STOCK;
-  return new PreconditionFailedException(
-    'La farmacia no tiene en esta sucursal ninguno de los productos del pedido',
-    { reason, siteId, productIds: [...productIds] },
-    reason,
-  );
-}
-
 /** Los datos de una línea «por confirmar» del alta del pedido. */
 export function pendingLineData(
   reservation: InventoryReservations,
@@ -146,20 +131,6 @@ export interface PendingLinesResolution {
   readonly toReserve: readonly PendingLineToReserve[];
   /** Cuántas quedaron sin stock por decisión de la farmacia. */
   readonly unavailable: number;
-}
-
-/** 422 tipificado para un ajuste que no cuadra con una línea por confirmar. */
-function notPending(
-  message: string,
-  details: Record<string, unknown>,
-): PreconditionFailedException {
-  const reason =
-    PharmacyInventoryErrorReason.ORDER_LINE_NOT_PENDING_CONFIRMATION;
-  return new PreconditionFailedException(
-    message,
-    { reason, ...details },
-    reason,
-  );
 }
 
 /**
@@ -254,7 +225,24 @@ export class PendingOrderLines {
     if (confirmed.length === 0) return { toReserve: [], unavailable };
 
     const productIds = confirmed.map(({ line }) => line.pharmacyProductId);
+    await this.writer.lockSite(tx, order.pharmacySiteId);
     const before = await this.sitePositions(tx, order, productIds);
+    for (const { line } of confirmed) {
+      if (
+        adjustmentOf.get(line.pharmacyProductId)?.decision ===
+          'CONFIRMAR_STOCK' &&
+        (before.get(line.pharmacyProductId) ?? []).some(
+          (position) => position.inventoryLotId != null,
+        )
+      ) {
+        const reason = PharmacyInventoryErrorReason.SITE_PRODUCT_KEPT_BY_LOTS;
+        throw new PreconditionFailedException(
+          'La sucursal lleva este producto por lotes: su existencia cambia con recepciones y conteos',
+          { reason },
+          reason,
+        );
+      }
+    }
     const targets = confirmed
       .filter(({ line }) => !before.has(line.pharmacyProductId))
       .map(({ line, quantity }) => ({

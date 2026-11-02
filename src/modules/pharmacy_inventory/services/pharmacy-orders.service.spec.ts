@@ -179,6 +179,9 @@ function build() {
   // El saldo de la receta (FAR-03), doblado: por defecto ninguna receta
   // existe, y no hay entregas ni reservas.
   const balances = {
+    readRequest: mockFn(async (...args: any[]) =>
+      balances.lockRequest.getMockImplementation()?.(...args),
+    ),
     lockRequest: mockFn(async () => null),
     balanceByConcept: mockFn(async () => ({
       dispensed: new Map(),
@@ -189,7 +192,17 @@ function build() {
   const prescriptionGuard = new PrescriptionOrderGuard(balances as any);
   const logger = { setContext: mockFn(), info: mockFn() };
   // El escritor por sede: por defecto no escribe nada.
-  const siteStockWriter = { write: mockFn(async () => []) };
+  const siteStockWriter = {
+    write: mockFn(async () => []),
+    lockSite: mockFn(async () => undefined),
+  };
+  // Existing accounting cases explicitly use the CONNECTED/unmapped ledger path.
+  const externalStock = {
+    resolve: mockFn(async () => ({
+      mode: 'CONNECTED',
+      liveQuantities: new Map(),
+    })),
+  };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
@@ -211,10 +224,12 @@ function build() {
     prescriptionGuard,
     // Las líneas «por confirmar», con el escritor por sede doblado.
     new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
+    externalStock as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    externalStock,
     balances,
     orderChat,
     accountLinks,
@@ -413,12 +428,14 @@ describe('PharmacyOrdersService', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.balances.lockRequest).toHaveBeenCalledWith(
-        d.tx,
+      expect(d.balances.readRequest).toHaveBeenCalledWith(
+        d.fork,
         'req-ajena',
         'pat-1',
         expect.any(Date),
       );
+      expect(d.balances.lockRequest).not.toHaveBeenCalled();
+      expect(d.externalStock.resolve).not.toHaveBeenCalled();
       expect(d.reservationsRepo.create).not.toHaveBeenCalled();
     });
 
@@ -839,10 +856,12 @@ describe('PharmacyOrdersService', () => {
       // Entregado y reservado en una sola lectura (la misma foto).
       expect(d.balances.balanceByConcept).toHaveBeenCalledTimes(1);
       expect(d.balances.balanceByConcept).toHaveBeenCalledWith(
-        d.tx,
+        d.fork,
         ['rx-1'],
         ['concept-amoxi'],
       );
+      expect(d.balances.lockRequest).not.toHaveBeenCalled();
+      expect(d.externalStock.resolve).not.toHaveBeenCalled();
       expectNoEffects(d);
     });
 
@@ -894,17 +913,29 @@ describe('PharmacyOrdersService', () => {
         'pat-1',
         expect.any(Date),
       );
-      // Un solo instante por pedido, y solo se mide en el lock: la referida
-      // y sus hermanos salen de esa lectura; después solo se lee el saldo.
+      // Read-only preflight first; authoritative balance and prescription lock are rechecked after ERP.
       expect(d.balances.lockRequest).toHaveBeenCalledTimes(1);
-      expect(d.balances.balanceByConcept).toHaveBeenCalledTimes(1);
+      expect(d.balances.readRequest).toHaveBeenCalledTimes(1);
+      expect(d.balances.balanceByConcept).toHaveBeenCalledTimes(2);
+      expect(d.balances.balanceByConcept).toHaveBeenNthCalledWith(
+        1,
+        d.fork,
+        ['rx-1'],
+        ['concept-amoxi'],
+      );
+      expect(d.balances.balanceByConcept).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        ['rx-1'],
+        ['concept-amoxi'],
+      );
       expect(d.reservationsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ medicationRequestId: 'rx-1' }),
       );
       // El lock va antes de leer los productos y de reservar.
       expect(d.balances.lockRequest.mock.invocationCallOrder[0]).toBeLessThan(
-        d.pharmacyRepo.findSellableProductsByIds.mock.invocationCallOrder[0],
+        d.pharmacyRepo.findSellableProductsByIds.mock.invocationCallOrder[1],
       );
     });
 
@@ -2041,5 +2072,92 @@ describe('PharmacyOrdersService', () => {
       expect(res.expiredCount).toBe(0);
       expect(d.outbox.publish).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('D7 external-system order integration and M1 prerequisites', () => {
+  const dto = {
+    siteId: 'site-1',
+    deliveryMode: 'RETIRO',
+    lines: [{ productId: 'prod-1', quantity: 2 }],
+  } as any;
+  it('MANUAL defaults to pending even when the ledger has loose stock', async () => {
+    const d = build();
+    d.externalStock.resolve.mockResolvedValue({ mode: 'MANUAL' });
+    d.inventoryReadRepo.findStockPositions.mockResolvedValue([
+      position({ inventoryLotId: undefined }),
+    ]);
+    withReading(d, order(), []);
+    await d.service.create(dto, patient);
+    expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        reservedQuantity: '0',
+      }),
+    );
+    expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+  });
+  it('live zero prevents reservation of stale positive ledger stock', async () => {
+    const d = build();
+    d.externalStock.resolve.mockResolvedValue({
+      mode: 'CONNECTED',
+      liveQuantities: new Map([['prod-1', 0]]),
+    });
+    d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+    await expect(d.service.create(dto, patient)).rejects.toBeInstanceOf(
+      PreconditionFailedException,
+    );
+    expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ statusConceptId: PINV.RES_LINE_OUT_OF_STOCK }),
+    );
+    expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+  });
+  it('live positive without a position remains pending, not invented stock', async () => {
+    const d = build();
+    d.externalStock.resolve.mockResolvedValue({
+      mode: 'CONNECTED',
+      liveQuantities: new Map([['prod-1', 10]]),
+    });
+    withReading(d, order(), []);
+    await d.service.create(dto, patient);
+    expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+      }),
+    );
+    expect(d.siteStockWriter.write).not.toHaveBeenCalled();
+  });
+  it('idempotent replay does not consult ERP or acquire prescription locks', async () => {
+    const d = build();
+    d.ordersRepo.findOrderByIdempotencyKey.mockResolvedValue(order());
+    withReading(d, order(), []);
+    await d.service.create({ ...dto, idempotencyKey: 'repeat' }, patient);
+    expect(d.externalStock.resolve).not.toHaveBeenCalled();
+    expect(d.balances.lockRequest).not.toHaveBeenCalled();
+    expect(d.reservationsRepo.create).not.toHaveBeenCalled();
+  });
+  it('invalid product is rejected before ERP lookup', async () => {
+    const d = build();
+    d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([]);
+    await expect(d.service.create(dto, patient)).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+    expect(d.externalStock.resolve).not.toHaveBeenCalled();
+    expect(d.reservationsRepo.create).not.toHaveBeenCalled();
+  });
+  it('revalidates after ERP so removed products cannot create a reservation', async () => {
+    const d = build();
+    d.pharmacyRepo.findSellableProductsByIds
+      .mockResolvedValueOnce([PRODUCT])
+      .mockResolvedValueOnce([]);
+    await expect(d.service.create(dto, patient)).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+    expect(d.externalStock.resolve).toHaveBeenCalledTimes(1);
+    expect(d.reservationsRepo.create).not.toHaveBeenCalled();
+    expect(d.em.fork).toHaveBeenCalledWith({ keepTransactionContext: true });
   });
 });

@@ -1,3 +1,9 @@
+import {
+  externalSystemLastCheck,
+  type ExternalSystemCheckResult,
+} from '../../domain/sync/external-catalog';
+import type { ExternalSystemCheckToken } from '../../application/ports/external-pharmacy-system.port';
+import { INTEG } from '../../../integrations/integrations.concepts';
 import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { decryptSecret, encryptSecret, touch } from '../../../../common';
@@ -56,7 +62,12 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
     const config = row
       ? parseExternalSystemConfig(row.connection.configJson)
       : null;
-    if (!row || !config || !row.credential?.secretRef) {
+    if (
+      !row ||
+      row.connection.stateConceptId !== INTEG.CONN_ACTIVE ||
+      !config ||
+      !row.credential?.secretRef
+    ) {
       return { status: 'NOT_CONFIGURED' };
     }
     if (
@@ -64,12 +75,22 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
     ) {
       return { status: 'HOST_NOT_ALLOWED' };
     }
-    const apiKey = decryptSecret(row.credential.secretRef);
-    return {
-      status: 'READY',
-      source: 'PHARMACY',
-      client: this.clientFor(config, apiKey),
+    const check: ExternalSystemCheckToken = {
+      connectionId,
+      credentialId: row.credential.id,
+      configJson: row.connection.configJson,
     };
+    try {
+      const apiKey = decryptSecret(row.credential.secretRef);
+      return {
+        status: 'READY',
+        source: 'PHARMACY',
+        client: this.clientFor(config, apiKey),
+        check,
+      };
+    } catch {
+      return { status: 'UNAVAILABLE', errorReason: 'UNREACHABLE', check };
+    }
   }
 
   async describe(
@@ -87,10 +108,69 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
         baseUrl: config.baseUrl,
         externalPharmacyCode: config.externalPharmacyCode,
         apiKeyConfigured: row.credential !== null,
-        configuredAt: row.connection.updatedAt.toISOString(),
+        configuredAt:
+          this.configuredAt(row.connection.configJson) ??
+          row.connection.updatedAt.toISOString(),
+        ...this.checkSummary(row.connection.configJson),
       });
     }
     return summaries;
+  }
+
+  async recordCheck(
+    em: EntityManager,
+    data: {
+      tenantId: string;
+      check: ExternalSystemCheckToken;
+      result: ExternalSystemCheckResult;
+      actorUserId: string;
+    },
+  ): Promise<void> {
+    await this.repo.recordCheck(em, {
+      ...data,
+      lastCheck: externalSystemLastCheck(data.result),
+    });
+  }
+
+  private configuredAt(json: unknown): string | undefined {
+    if (!json || typeof json !== 'object') return undefined;
+    const value = (json as Record<string, unknown>).configuredAt;
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  private checkSummary(
+    json: unknown,
+  ): Pick<ExternalSystemSummary, 'lastCheck'> {
+    if (!json || typeof json !== 'object') return {};
+    const check = (json as Record<string, unknown>).lastCheck;
+    if (!check || typeof check !== 'object') return {};
+    const value = check as Record<string, unknown>;
+    if (
+      typeof value.checkedAt !== 'string' ||
+      !Number.isFinite(Date.parse(value.checkedAt))
+    )
+      return {};
+    if (value.status === 'ACTIVE' && value.errorReason === null)
+      return {
+        lastCheck: {
+          status: 'ACTIVE',
+          errorReason: null,
+          checkedAt: value.checkedAt,
+        },
+      };
+    if (
+      value.status === 'ERROR' &&
+      (value.errorReason === 'AUTH_REJECTED' ||
+        value.errorReason === 'UNREACHABLE')
+    )
+      return {
+        lastCheck: {
+          status: 'ERROR',
+          errorReason: value.errorReason,
+          checkedAt: value.checkedAt,
+        },
+      };
+    return {};
   }
 
   urlProblem(baseUrl: string) {
@@ -118,7 +198,11 @@ export class PharmacyExternalSystemAdapter implements ExternalPharmacySystemPort
       actorUserId: string;
     },
   ): Promise<string> {
-    const configJson = externalSystemConfigJson(data.config);
+    const configJson = {
+      ...externalSystemConfigJson(data.config),
+      configuredAt: new Date().toISOString(),
+      lastCheck: externalSystemLastCheck('OK'),
+    };
     let connectionRowId: string;
     if (data.connectionId === null) {
       const provider = await this.repo.ensureProvider(

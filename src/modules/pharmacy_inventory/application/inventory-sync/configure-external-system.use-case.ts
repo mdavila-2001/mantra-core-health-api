@@ -1,4 +1,5 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { recordExternalSystemCheck } from './record-external-system-check';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   DomainException,
@@ -36,6 +37,8 @@ import type { ConnectionRef } from './sync-external-pharmacy-catalog.use-case';
  */
 @Injectable()
 export class ConfigureExternalSystemUseCase {
+  private readonly logger = new Logger(ConfigureExternalSystemUseCase.name);
+
   constructor(
     private readonly em: EntityManager,
     private readonly scope: PharmacyInventoryScopePolicy,
@@ -61,12 +64,12 @@ export class ConfigureExternalSystemUseCase {
     if (problem === 'HOST_NOT_ALLOWED') throw integrationHostNotAllowed();
 
     // Probar antes de guardar: una clave o una dirección malas no entran.
-    const client = this.systems.clientFor(config, dto.apiKey);
     try {
+      const client = this.systems.clientFor(config, dto.apiKey);
       await client.checkHealth();
     } catch (error) {
       if (error instanceof ExternalCatalogUnavailableError) {
-        throw integrationUnavailable();
+        throw integrationUnavailable(error.errorReason);
       }
       throw error;
     }
@@ -99,7 +102,7 @@ export class ConfigureExternalSystemUseCase {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<ExternalSystemProbeDto> {
-    const { system } = await this.em.transactional(async (tx) => {
+    const { system, tenantId } = await this.em.transactional(async (tx) => {
       const { tenantId, connection } = await this.requireConnection(
         tx,
         ref,
@@ -110,7 +113,7 @@ export class ConfigureExternalSystemUseCase {
         tenantId,
         connection.connectionId ?? null,
       );
-      return { system: resolved };
+      return { system: resolved, tenantId };
     });
     if (system.status === 'NOT_CONFIGURED') {
       throw new DomainException(
@@ -125,14 +128,32 @@ export class ConfigureExternalSystemUseCase {
       );
     }
     if (system.status === 'HOST_NOT_ALLOWED') throw integrationHostNotAllowed();
+    if (system.status === 'UNAVAILABLE') {
+      await this.recordFailedCheck(
+        tenantId,
+        system.check,
+        system.errorReason,
+        actor.id,
+      );
+      throw integrationUnavailable(system.errorReason);
+    }
     try {
       await system.client.checkHealth();
     } catch (error) {
       if (error instanceof ExternalCatalogUnavailableError) {
-        throw integrationUnavailable();
+        if (system.check)
+          await this.recordFailedCheck(
+            tenantId,
+            system.check,
+            error.errorReason,
+            actor.id,
+          );
+        throw integrationUnavailable(error.errorReason);
       }
       throw error;
     }
+    if (system.check)
+      await this.recordCheck(tenantId, system.check, 'OK', actor.id);
     return { status: 'OK', source: system.source };
   }
 
@@ -155,6 +176,41 @@ export class ConfigureExternalSystemUseCase {
         touch(connection, actor.id);
         await tx.flush();
       }
+    });
+  }
+
+  private async recordFailedCheck(
+    tenantId: string,
+    check: import('../ports/external-pharmacy-system.port').ExternalSystemCheckToken,
+    errorReason: import('../../domain/sync/external-catalog').ExternalSystemErrorReason,
+    actorUserId: string,
+  ): Promise<void> {
+    await recordExternalSystemCheck(
+      this.em,
+      this.systems,
+      { tenantId, check, result: errorReason, actorUserId },
+      () => {
+        this.logger.warn({
+          operation: 'pharmacy_inventory.external_system.check_status',
+          connectionId: check.connectionId,
+          errorReason,
+          persistenceFailed: true,
+        });
+      },
+    );
+  }
+
+  private async recordCheck(
+    tenantId: string,
+    check: import('../ports/external-pharmacy-system.port').ExternalSystemCheckToken,
+    result: import('../../domain/sync/external-catalog').ExternalSystemCheckResult,
+    actorUserId: string,
+  ): Promise<void> {
+    await recordExternalSystemCheck(this.em, this.systems, {
+      tenantId,
+      check,
+      result,
+      actorUserId,
     });
   }
 

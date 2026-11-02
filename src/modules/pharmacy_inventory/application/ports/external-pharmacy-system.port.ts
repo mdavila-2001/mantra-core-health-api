@@ -1,3 +1,7 @@
+import type {
+  ExternalSystemCheckResult,
+  ExternalSystemLastCheck,
+} from '../../domain/sync/external-catalog';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import type {
   ExternalSystemConfig,
@@ -9,13 +13,25 @@ import type { ExternalPharmacyCatalogPort } from './external-pharmacy-catalog.po
 export type ExternalSystemSource = 'PHARMACY' | 'SERVER';
 
 /** Lo que resulta de buscar el sistema de una conexión de farmacia. */
+export interface ExternalSystemCheckToken {
+  readonly connectionId: string;
+  readonly credentialId: string;
+  readonly configJson: unknown;
+}
+
 export type ResolvedExternalSystem =
   | {
       readonly status: 'READY';
       readonly source: ExternalSystemSource;
       readonly client: ExternalPharmacyCatalogPort;
+      readonly check?: ExternalSystemCheckToken;
     }
   /** Ni la farmacia cargó el suyo ni el servidor tiene uno. */
+  | {
+      readonly status: 'UNAVAILABLE';
+      readonly errorReason: 'UNREACHABLE';
+      readonly check: ExternalSystemCheckToken;
+    }
   | { readonly status: 'NOT_CONFIGURED' }
   /** La farmacia cargó una dirección que la política de hosts no deja llamar. */
   | { readonly status: 'HOST_NOT_ALLOWED' };
@@ -28,6 +44,7 @@ export interface ExternalSystemSummary {
   /** Si hay una clave activa guardada. */
   readonly apiKeyConfigured: boolean;
   readonly configuredAt: string;
+  lastCheck?: ExternalSystemLastCheck;
 }
 
 /**
@@ -37,6 +54,15 @@ export interface ExternalSystemSummary {
  */
 export interface ExternalPharmacySystemPort {
   /** Si el servidor tiene su propio sistema (`PHARMACY_ERP_BASE_URL`). */
+  recordCheck(
+    em: EntityManager,
+    data: {
+      tenantId: string;
+      check: ExternalSystemCheckToken;
+      result: ExternalSystemCheckResult;
+      actorUserId: string;
+    },
+  ): Promise<void>;
   serverConfigured(): boolean;
 
   /**
