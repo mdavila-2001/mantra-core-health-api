@@ -24,8 +24,16 @@ function build(
     pharmacyId: 'pharmacy-1',
     connectionId: options.linked ?? undefined,
   };
-  const tx = { flush: jest.fn(async () => undefined) };
-  const em = { transactional: jest.fn(async (fn: any) => fn(tx)) };
+  const tx = {
+    getTransactionContext: () => undefined,
+    flush: jest.fn(async () => undefined),
+    execute: jest.fn(async () => []),
+  };
+  const em = {
+    getTransactionContext: () => undefined,
+    isInTransaction: () => false,
+    transactional: jest.fn(async (fn: any) => fn(tx)),
+  };
   const scope = {
     requireManagedPharmacy: jest.fn(async () => ({
       tenantId: 'tenant-1',
@@ -64,6 +72,7 @@ function build(
       source: 'PHARMACY',
       client,
     })),
+    recordCheck: jest.fn(async () => undefined),
     remove: jest.fn(async () => undefined),
   };
   const useCase = new ConfigureExternalSystemUseCase(
@@ -177,5 +186,93 @@ describe('ConfigureExternalSystemUseCase (FAR-C9 · C9-3)', () => {
       status: 'OK',
       source: 'PHARMACY',
     });
+  });
+});
+
+describe('external-system saved checks (regression A2)', () => {
+  it('persists AUTH_REJECTED without returning transport details', async () => {
+    const d = build({ linked: 'provider-conn-1' });
+    const check = {
+      connectionId: 'provider-conn-1',
+      credentialId: 'cred-1',
+      configJson: {},
+    };
+    d.systems.resolve.mockResolvedValueOnce({
+      status: 'READY',
+      source: 'PHARMACY',
+      client: d.client,
+      check,
+    } as any);
+    d.client.checkHealth.mockRejectedValueOnce(
+      new ExternalCatalogUnavailableError(
+        'private endpoint/key',
+        'AUTH_REJECTED',
+      ),
+    );
+    await expect(d.useCase.probe(REF, ACTOR)).rejects.toMatchObject({
+      details: { errorReason: 'AUTH_REJECTED' },
+    });
+    expect(d.systems.recordCheck).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        check,
+        result: 'AUTH_REJECTED',
+      }),
+    );
+  });
+  it('records adapter preparation failure too (M2)', async () => {
+    const d = build({ linked: 'provider-conn-1' });
+    const check = {
+      connectionId: 'provider-conn-1',
+      credentialId: 'cred-1',
+      configJson: {},
+    };
+    d.systems.resolve.mockResolvedValueOnce({
+      status: 'UNAVAILABLE',
+      errorReason: 'UNREACHABLE',
+      check,
+    } as any);
+    await expect(d.useCase.probe(REF, ACTOR)).rejects.toMatchObject({
+      details: { errorReason: 'UNREACHABLE' },
+    });
+    expect(d.systems.recordCheck).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ result: 'UNREACHABLE', check }),
+    );
+  });
+  it('records a successful saved probe, not a SERVER probe', async () => {
+    const d = build({ linked: 'provider-conn-1' });
+    const check = {
+      connectionId: 'provider-conn-1',
+      credentialId: 'cred-1',
+      configJson: {},
+    };
+    d.systems.resolve.mockResolvedValueOnce({
+      status: 'READY',
+      source: 'PHARMACY',
+      client: d.client,
+      check,
+    } as any);
+    await d.useCase.probe(REF, ACTOR);
+    expect(d.systems.recordCheck).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ result: 'OK', check }),
+    );
+    d.systems.recordCheck.mockClear();
+    d.systems.resolve.mockResolvedValueOnce({
+      status: 'READY',
+      source: 'SERVER',
+      client: d.client,
+    } as any);
+    await d.useCase.probe(REF, ACTOR);
+    expect(d.systems.recordCheck).not.toHaveBeenCalled();
+  });
+  it('a rejected proposed destination preserves the previous saved status', async () => {
+    const d = build({ health: 'down', linked: 'provider-conn-1' });
+    await expect(d.useCase.save(REF, DTO, ACTOR)).rejects.toBeDefined();
+    expect(d.systems.save).not.toHaveBeenCalled();
+    expect(d.systems.recordCheck).not.toHaveBeenCalled();
+    expect(d.connection.connectionId).toBe('provider-conn-1');
   });
 });

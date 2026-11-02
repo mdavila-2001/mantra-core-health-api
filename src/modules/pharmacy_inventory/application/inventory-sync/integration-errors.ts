@@ -18,13 +18,15 @@ export function integrationNotConfigured(): PreconditionFailedException {
 }
 
 /** 502: el sistema de la farmacia externa no respondió o no se le entendió. */
-export function integrationUnavailable(): DomainException {
+export function integrationUnavailable(
+  errorReason?: 'AUTH_REJECTED' | 'UNREACHABLE',
+): DomainException {
   const reason = PharmacyInventoryErrorReason.PHARMACY_INTEGRATION_UNAVAILABLE;
   return new DomainException(
     HttpStatus.BAD_GATEWAY,
     ErrorCode.DEPENDENCY_UNAVAILABLE,
     'No pudimos hablar con el sistema de la farmacia',
-    { reason },
+    { reason, ...(errorReason ? { errorReason } : {}) },
     reason,
   );
 }

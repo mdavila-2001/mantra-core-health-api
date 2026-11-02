@@ -1,14 +1,11 @@
+import { toPrescriptionOrderItem } from './prescription-order-item';
+export { toPrescriptionOrderItem } from './prescription-order-item';
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { MedicationRequests } from '../../../clinical/entities';
-import { prescriptionItemState } from '../../../clinical/services/prescription-validity';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
-import type {
-  LockedPrescription,
-  PrescriptionItemStatus,
-  PrescriptionOrderItem,
-} from '../../domain/prescription-order-policy';
+import type { LockedPrescription } from '../../domain/prescription-order-policy';
 
 /**
  * Estados de pedido que todavía retienen lo pedido contra la receta: el pedido
@@ -55,32 +52,6 @@ const MAX_REPLACED_HOPS = 20;
 export interface PrescriptionBalanceByConcept {
   dispensed: Map<string, number>;
   reserved: Map<string, number>;
-}
-
-/**
- * Traduce un `medication_request` al ítem del módulo, con su estado resuelto
- * por la regla única de receta vigente (`prescriptionItemState`).
- *
- * @param row - La fila de `clinical.medication_requests`.
- * @param now - Instante contra el que se mide el vencimiento.
- * @returns El ítem plano que usan el guard y la política del pedido.
- */
-export function toPrescriptionOrderItem(
-  row: MedicationRequests,
-  now: Date,
-): PrescriptionOrderItem {
-  const state: PrescriptionItemStatus = prescriptionItemState(row, now);
-  const quantity =
-    row.quantityDecimal == null ? null : Number(row.quantityDecimal);
-  return {
-    id: row.id,
-    patientProfileId: row.patientProfileId,
-    encounterId: row.encounterId ?? null,
-    medicationConceptId: row.medicationConceptId,
-    state,
-    quantity: quantity !== null && Number.isFinite(quantity) ? quantity : null,
-    unitConceptId: row.unitConceptId ?? null,
-  };
 }
 
 /**
@@ -131,6 +102,25 @@ export class PrescriptionBalanceRepository {
     patientProfileId: string,
     now: Date,
   ): Promise<LockedPrescription | null> {
+    return this.loadRequest(em, id, patientProfileId, now, true);
+  }
+
+  readRequest(
+    em: EntityManager,
+    id: string,
+    patientProfileId: string,
+    now: Date,
+  ): Promise<LockedPrescription | null> {
+    return this.loadRequest(em, id, patientProfileId, now, false);
+  }
+
+  private async loadRequest(
+    em: EntityManager,
+    id: string,
+    patientProfileId: string,
+    now: Date,
+    lock: boolean,
+  ): Promise<LockedPrescription | null> {
     const referred = await em.findOne(MedicationRequests, {
       id,
       patientProfileId,
@@ -142,7 +132,7 @@ export class PrescriptionBalanceRepository {
         ? { encounterId: referred.encounterId, patientProfileId }
         : { id, patientProfileId },
       {
-        lockMode: LockMode.PESSIMISTIC_WRITE,
+        ...(lock ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {}),
         orderBy: { id: 'asc' },
         refresh: true,
       },

@@ -61,7 +61,7 @@ export class IntegrationReadService {
     pharmacyId: string,
     actor: AuthenticatedUser,
   ): Promise<IntegrationConnectionListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const pharmacy = await this.scope.requireManagedPharmacy(
       em,
       pharmacyId,
@@ -121,7 +121,7 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<IntegrationMappingListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
     const products = await this.reads.findProducts(
@@ -152,7 +152,7 @@ export class IntegrationReadService {
     ref: ConnectionRef,
     actor: AuthenticatedUser,
   ): Promise<ExternalCatalogListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const { connection, tenantId } = await this.requireScoped(em, ref, actor);
     const mappings = await this.reads.findMappings(em, connection.id);
     const system = await this.systems.resolve(
@@ -160,6 +160,8 @@ export class IntegrationReadService {
       tenantId,
       connection.connectionId ?? null,
     );
+    if (system.status === 'UNAVAILABLE')
+      throw integrationUnavailable(system.errorReason);
     if (system.status === 'NOT_CONFIGURED') throw integrationNotConfigured();
     if (system.status === 'HOST_NOT_ALLOWED') throw integrationHostNotAllowed();
     let catalog;
@@ -202,7 +204,7 @@ export class IntegrationReadService {
     limit: number | undefined,
     actor: AuthenticatedUser,
   ): Promise<IntegrationSyncBatchListDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const connection = await this.requireConnection(em, ref, actor);
     const batches = await this.reads.findBatches(
       em,

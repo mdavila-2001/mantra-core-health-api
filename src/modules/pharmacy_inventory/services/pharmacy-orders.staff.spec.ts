@@ -237,6 +237,13 @@ function build() {
       async (_tx: unknown, key: any) => byKey(key),
     );
   };
+  // Existing accounting cases explicitly use the CONNECTED/unmapped ledger path.
+  const externalStock = {
+    resolve: mockFn(async () => ({
+      mode: 'CONNECTED',
+      liveQuantities: new Map(),
+    })),
+  };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
@@ -259,10 +266,12 @@ function build() {
     {} as any,
     // Las líneas «por confirmar», con el escritor por sede doblado.
     new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
+    externalStock as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    externalStock,
     orderChat,
     accountLinks,
     settlements,

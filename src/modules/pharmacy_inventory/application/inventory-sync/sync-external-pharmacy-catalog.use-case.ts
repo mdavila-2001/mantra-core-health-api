@@ -1,3 +1,4 @@
+import { unitProblems, type UnitProblem } from './sync-unit-problems';
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -17,9 +18,7 @@ import {
 } from '../../domain/sync/external-catalog';
 import {
   mappedCodesNotSent,
-  resolveExternalCodes,
   translateExternalStock,
-  unitIssue,
   type ExternalMapping,
   type TranslatedSyncItem,
   type UnmappedExternalProduct,
@@ -84,13 +83,6 @@ interface SiteOutcome {
   readonly applied: number;
   readonly unchanged: number;
   readonly skipped: IntegrationSyncSkippedDto[];
-}
-
-/** Un problema de unidad de un producto, por su código externo. */
-interface UnitProblem {
-  readonly reason: 'UNIT_MISMATCH' | 'UNIT_NOT_REPORTED';
-  readonly mappingUnitCode: string | null;
-  readonly externalUnitCode: string | null;
 }
 
 /**
@@ -283,6 +275,8 @@ export class SyncExternalPharmacyCatalogUseCase {
         pharmacy.tenantId,
         connection.connectionId ?? null,
       );
+      if (system.status === 'UNAVAILABLE')
+        throw integrationUnavailable(system.errorReason);
       if (system.status === 'NOT_CONFIGURED') throw integrationNotConfigured();
       if (system.status === 'HOST_NOT_ALLOWED') {
         throw integrationHostNotAllowed();
@@ -491,30 +485,4 @@ export class SyncExternalPharmacyCatalogUseCase {
     );
     return lots > 0 ? 'SITE_PRODUCT_KEPT_BY_LOTS' : null;
   }
-}
-
-/**
- * Los productos cuya línea no se puede leer en su unidad: el vínculo declara
- * una unidad y el catálogo externo cuenta ese código en otra, o no dice en
- * cuál.
- */
-function unitProblems(
-  mappings: readonly ExternalMapping[],
-  catalog: readonly ExternalProduct[],
-): Map<string, UnitProblem> {
-  const units = new Map(catalog.map((product) => [product.code, product]));
-  const problems = new Map<string, UnitProblem>();
-  for (const [code, resolution] of resolveExternalCodes(mappings)) {
-    if (resolution.status !== 'MAPPED') continue;
-    const externalUnitCode = units.get(code)?.unitCode ?? null;
-    const reason = unitIssue(resolution.externalUnitCode, externalUnitCode);
-    if (reason) {
-      problems.set(resolution.productId, {
-        reason,
-        mappingUnitCode: resolution.externalUnitCode,
-        externalUnitCode,
-      });
-    }
-  }
-  return problems;
 }

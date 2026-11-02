@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsString, MaxLength, MinLength } from 'class-validator';
 import {
   EXTERNAL_SYSTEM_FORMATS,
@@ -40,6 +40,15 @@ export class ConfigureExternalSystemDto {
   apiKey!: string;
 }
 
+export class ExternalSystemLastCheckDto {
+  @ApiProperty({ enum: ['ACTIVE', 'ERROR'] })
+  status!: 'ACTIVE' | 'ERROR';
+  @ApiProperty({ enum: ['AUTH_REJECTED', 'UNREACHABLE'], nullable: true })
+  errorReason!: 'AUTH_REJECTED' | 'UNREACHABLE' | null;
+  @ApiProperty({ format: 'date-time' })
+  checkedAt!: string;
+}
+
 /** Lo que se muestra del sistema de la farmacia. Sin clave. */
 export class ExternalSystemSummaryDto {
   @ApiProperty({ enum: EXTERNAL_SYSTEM_FORMATS })
@@ -56,6 +65,9 @@ export class ExternalSystemSummaryDto {
 
   @ApiProperty({ format: 'date-time' })
   configuredAt!: string;
+
+  @ApiPropertyOptional({ type: ExternalSystemLastCheckDto })
+  lastCheck?: ExternalSystemLastCheckDto;
 }
 
 /** Resultado de guardar: el sistema tal como quedó y que respondió al probarlo. */

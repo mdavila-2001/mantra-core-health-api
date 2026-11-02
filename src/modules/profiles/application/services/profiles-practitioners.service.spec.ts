@@ -139,7 +139,7 @@ function build() {
             { resourceId: { $in: resources.map((r: any) => r.id) } },
           )
         : 0;
-      return { resources, slotCount };
+      return { resources, slotCount, activeTemplates: 0 };
     }),
     activity: mockFn(async (em: any, userId: string) => {
       const [encounters, medicationRequests, clinicalNotes, documents] =
@@ -3645,10 +3645,7 @@ describe('ProfilesPractitionersService', () => {
       expect(where?.missing).toEqual([]);
     });
 
-    /**
-     * Tener el recurso no es tener agenda: mientras no haya cupos generados, lo
-     * que falta es publicarlos, y el faltante lo dice con esa palabra.
-     */
+    /** Con recurso pero sin cupos ni plantillas, faltan cupos. */
     it('con recurso y sin cupos, lo que falta son los cupos', async () => {
       const d = build();
       justRegistered(d);
@@ -3661,6 +3658,22 @@ describe('ProfilesPractitionersService', () => {
       expect(agenda?.missing).toEqual(['slots']);
     });
 
+    it('con horarios flexibles o plantilla activa sin cupos da la agenda por cumplida', async () => {
+      const d = build();
+      justRegistered(d);
+      d.practitionerContext.onboardingContext.mockResolvedValueOnce({
+        resources: [{ id: 'res-1' }],
+        slotCount: 0,
+        activeTemplates: 1,
+      });
+
+      const progress = await d.service.getOwnOnboarding(actor);
+
+      const agenda = progress.steps.find((step) => step.key === 'schedule');
+      expect(agenda?.complete).toBe(true);
+      expect(agenda?.missing).toEqual([]);
+    });
+
     it('sin ningún recurso, lo que falta es la agenda entera', async () => {
       const d = build();
       justRegistered(d);
@@ -3671,11 +3684,7 @@ describe('ProfilesPractitionersService', () => {
       expect(agenda?.missing).toEqual(['published-schedule']);
     });
 
-    /**
-     * Los profesionales que ya estaban completos antes de que el asistente
-     * existiera no ven nada: `done` es lo que apaga el aviso, y se llega sin
-     * migrar una sola fila.
-     */
+    /** Un profesional completo responde done sin migrar filas. */
     it('un profesional ya completo responde «done»', async () => {
       const d = build();
       complete(d);
@@ -3687,10 +3696,7 @@ describe('ProfilesPractitionersService', () => {
       expect(progress.steps.at(-1)?.key).toBe('review');
     });
 
-    /**
-     * Los cupos se cuentan sólo sobre los recursos del profesional. Sin esta
-     * acotación, la agenda de cualquier colega daría por publicada la propia.
-     */
+    /** Los cupos se cuentan sólo sobre recursos propios. */
     it('los cupos se cuentan sólo sobre los recursos propios', async () => {
       const d = build();
       complete(d);
@@ -3712,14 +3718,6 @@ describe('ProfilesPractitionersService', () => {
     });
   });
 
-  /**
-   * **Los títulos propios, varios y con diploma adjunto.**
-   *
-   * El registro de procesos (MÓDULO MÉDICO §1.17 a §1.20) pide «espacio para
-   * poder subir varios diplomados», y lo mismo para maestrías, doctorados y
-   * especialidades. Hasta acá el alta creaba UNA credencial y no existía forma
-   * de agregar la segunda.
-   */
   /**
    * **La ficha de directorio: un profesional sin matrícula conocida.**
    *

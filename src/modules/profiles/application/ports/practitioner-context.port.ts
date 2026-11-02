@@ -25,6 +25,7 @@ export interface PractitionerContextPort {
   ): Promise<{
     resources: Array<{ id: string }>;
     slotCount: number;
+    activeTemplates?: number;
   }>;
   activity(
     em: EntityManager,
