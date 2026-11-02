@@ -385,15 +385,12 @@ export class ProfilesPractitionersService {
         this.affiliationsRepo.findByPractitioner(em, practitionerProfileId),
         this.practitionerContext.onboardingContext(em, practitionerProfileId),
       ]);
-    const { resources, slotCount: quotas } = context;
+    const { resources, slotCount: quotas, activeTemplates = 0 } = context;
 
-    // Tener el recurso no es tener agenda. El asistente crea el recurso en su
-    // primer paso, así que darlo por «horarios publicados» daba por completa el
-    // alta de alguien a quien todavía no se le puede pedir turno — que es
-    // exactamente lo que este paso existe para evitar. Se cuentan todos los
-    // cupos y no sólo los futuros: si vencieran, un alta ya terminada volvería
-    // a mostrarse incompleta sola, y la agenda vencida es otro aviso, con su
-    // propia superficie.
+    // Tener el recurso no es tener agenda (se crea al inicio). Se da por
+    // cumplido con cupos generados o plantilla activa (p. ej. horarios flexibles
+    // que no pregeneran cupos o franjas vigentes).
+    const hasSchedule = quotas > 0 || activeTemplates > 0;
     const hasPhoto =
       profile.photoFileId !== undefined && profile.photoFileId !== null;
 
@@ -431,13 +428,12 @@ export class ProfilesPractitionersService {
       },
       {
         key: 'schedule',
-        complete: quotas > 0,
-        missing:
-          quotas > 0
-            ? []
-            : resources.length === 0
-              ? ['published-schedule']
-              : ['slots'],
+        complete: hasSchedule,
+        missing: hasSchedule
+          ? []
+          : resources.length === 0
+            ? ['published-schedule']
+            : ['slots'],
       },
     ];
 
