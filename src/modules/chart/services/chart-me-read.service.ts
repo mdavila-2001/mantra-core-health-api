@@ -78,7 +78,7 @@ export class ChartMeReadService {
       { operation: 'chart.me.notes.list', limit },
       'Leyendo evoluciones liberadas del titular',
     );
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     // Se pide de más para poder declarar el recorte tras filtrar por
     // liberación: un header sin versión liberada no cuenta para el `limit`
@@ -149,7 +149,7 @@ export class ChartMeReadService {
       { operation: 'chart.me.documents.list', limit },
       'Leyendo documentos visibles del titular',
     );
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     const records = await this.documentsRepo.findRecordsByPatient(
       em,
@@ -220,7 +220,7 @@ export class ChartMeReadService {
     actor: AuthenticatedUser,
   ): Promise<FileContentDto> {
     const patientProfileId = this.requirePatientProfile(actor);
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
 
     const record = await this.documentsRepo.findRecordById(em, documentId);
     const doesNotExist = () =>
