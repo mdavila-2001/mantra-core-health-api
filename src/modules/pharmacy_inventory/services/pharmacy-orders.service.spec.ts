@@ -85,8 +85,12 @@ function order(extra: Record<string, unknown> = {}) {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
-  const fork = {};
+  const tx = { flush: mockFn(), execute: mockFn(async () => []) };
+  const fork = {
+    flush: mockFn(),
+    transactional: mockFn((cb: any) => cb(tx)),
+    execute: mockFn(async () => []),
+  };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => fork),

@@ -652,7 +652,7 @@ export class ClinicalReadService {
       'Leyendo historial clínico del paciente',
     );
 
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const over = limit + 1;
 
     this.dataAccessLogRepo.record(em, {

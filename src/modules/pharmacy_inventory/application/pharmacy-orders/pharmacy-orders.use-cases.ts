@@ -1772,20 +1772,17 @@ export class PharmacyOrdersUseCases {
     actor: AuthenticatedUser,
     ids?: readonly string[],
   ): Promise<{ expiredCount: number }> {
-    const expired = await this.em.transactional(async (tx) => {
+    const runner = this.em.fork({ clear: true });
+    const expired = await runner.transactional(async (tx) => {
+      // The worker has no HTTP tenant: run under the system context for RLS.
+      await tx.execute("select set_config('app.system_context', 'true', true)");
       const due = await this.ordersRepo.findDueOrdersForUpdate(
         tx,
         ORDER_NON_TERMINAL_STATUS_IDS,
         new Date(),
         ids,
       );
-      if (due.length === 0) {
-        return [] as {
-          orderId: string;
-          patientProfileId?: string;
-          medicationRequestId?: string;
-        }[];
-      }
+      if (due.length === 0) return [];
 
       // El worker corre sin tenant HTTP: el tenant del evento es el de la
       // farmacia del pedido.
