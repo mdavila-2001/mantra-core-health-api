@@ -57,6 +57,6 @@ autor no se puede reconstruir después.
 
 `GET .../transitions` es la única que no lo pide: no escribe nada.
 
-## Pruebas
+## Tests
 
 11 pruebas de delegación, una por endpoint, en `workflow-controllers.spec.ts`.

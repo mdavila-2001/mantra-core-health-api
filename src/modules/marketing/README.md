@@ -103,7 +103,7 @@ enlace (active) ── GET /r/{code}?t=<token> ──> click_count++ [+ touchpoi
 touchpoints del miembro en ventana ── attribution/compute ──> reparto con SUM(weight) = 1
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El refresco recibe la membresía completa**: quien no viene en el cuerpo sale del segmento. La
   baja es lógica (`removed`), no borrado, para conservar a quién se contactó alguna vez; y quien
@@ -129,7 +129,7 @@ touchpoints del miembro en ventana ── attribution/compute ──> reparto co
   porque dos repartos superpuestos romperían `SUM(weight) = 1`. En el modelo lineal el resto de la
   división cae en el último touchpoint para que la suma dé exactamente 1.
 
-## Permisos
+## Permissions
 
 **AloVida Insights** (`/marketing/insights/*`, decisión D-7): `@Roles('MARKETING_MANAGER',
 'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en cada handler (`SUPERADMIN` entra por el comodín de
@@ -177,7 +177,7 @@ recurso de otro tenant responde igual que uno inexistente (`404`, mismo mensaje 
 unicidad de la base responde `409 MARKETING_CODE_ALREADY_EXISTS`
 (`database/SQL/patches/2026-10-24_marketing_code_unique_per_tenant.sql`).
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre segmento (serializa refrescos), campaña, journey, plantilla vigente, enlace
 rastreable (para no perder clicks) y miembro de campaña. `FOR UPDATE SKIP LOCKED` en el avance de
@@ -206,7 +206,7 @@ otro ya tiene tomada. `row_version` aporta bloqueo optimista automático.
 `operation: 'marketing.<área>.<acción>'`. No se loguean identificadores de miembro más allá del UUID
 ni el contenido de las plantillas.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/marketing --runInBand --silent` — incluye, para Insights,
 `insights-access.spec.ts` (guards reales, casos a-f de D-7), `insights-facts.controller.spec.ts`

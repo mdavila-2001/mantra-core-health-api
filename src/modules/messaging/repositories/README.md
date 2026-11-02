@@ -53,6 +53,6 @@ los tres dejarían de servir para lo que existen si se pudieran reescribir.
 `createdBy(actorUserId)` en las tablas que tienen columnas de auditoría —solicitudes, entregas,
 bandeja in-app—. El resto lleva sus propias marcas (`recorded_at`, `created_at`).
 
-## Pruebas
+## Tests
 
 Los repositorios no tienen suite propia; se ejercitan como dobles desde los tres servicios.

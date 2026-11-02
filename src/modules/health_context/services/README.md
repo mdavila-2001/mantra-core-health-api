@@ -13,7 +13,7 @@ Dos, uno por mitad del flujo:
 
 Comparten repositorio y nada más: recolectar es continuo y automático; publicar es puntual y humano.
 
-## Reglas de negocio
+## Business rules
 
 ### Recolección
 
@@ -95,7 +95,7 @@ contexto duplicado, corrida ya cerrada).
 versión rechazada, retiro de versión y resolución de un contexto caducado. No se loguea el payload de
 las observaciones ni el del contexto.
 
-## Pruebas
+## Tests
 
 - `context-collection.service.spec.ts` (28): códigos únicos, forma del cron, idempotencia de la
   corrida, herencia desde la programación, corrida manual incompleta, dedupe por hash, contadores al

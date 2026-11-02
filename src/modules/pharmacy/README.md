@@ -161,7 +161,7 @@ fusionan**: cada una conserva su id de origen; el ancla común con la receta es 
 `pharmacy_integration_connections`, `pharmacy_external_product_mappings` (schema
 `pharmacy`).
 
-## Reglas de negocio
+## Business rules
 
 - **Ciclo de verificación:** una farmacia nace en `DRAFT` con verificación
   `PENDING`. Al verificar todas sus licencias pasa a `ACTIVE` / `VERIFIED`. Las
@@ -183,7 +183,7 @@ fusionan**: cada una conserva su id de origen; el ancla común con la receta es 
   `(pharmacy, code)` de sede/lista, `(pharmacy, product_code)` de producto,
   `(connection, product)` de mapeo → `409 Conflict`.
 
-## Permisos
+## Permissions
 
 Las operaciones sobre `/pharmacies/:pharmacyId/...` exigen `SECURITY_ADMIN` o
 `PHARMACY_STAFF` (rol de runtime que nace de una membresía activa en un tenant

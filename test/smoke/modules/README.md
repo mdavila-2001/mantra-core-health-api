@@ -1,40 +1,40 @@
 # test / smoke / modules
 
-Agrupa los componentes relacionados con **modules** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **modules**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `accounting.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `audit.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `authz.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `billing.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `chart.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `clinical_ext.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `clinical.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `community.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `consent.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `delegated_access.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `diagnostic_units.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `diagnostics.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `directory.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `forms.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `geo.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `identity_assurance.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `integration_contracts.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `integrations.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `organization_extensions.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `pharmacy.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `practice.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `profiles.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `read_models.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `system_ops.smoke.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `accounting.smoke.ts` | Support implementation or resource for this folder. |
+| `audit.smoke.ts` | Support implementation or resource for this folder. |
+| `authz.smoke.ts` | Support implementation or resource for this folder. |
+| `billing.smoke.ts` | Support implementation or resource for this folder. |
+| `chart.smoke.ts` | Support implementation or resource for this folder. |
+| `clinical_ext.smoke.ts` | Support implementation or resource for this folder. |
+| `clinical.smoke.ts` | Support implementation or resource for this folder. |
+| `community.smoke.ts` | Support implementation or resource for this folder. |
+| `consent.smoke.ts` | Support implementation or resource for this folder. |
+| `delegated_access.smoke.ts` | Support implementation or resource for this folder. |
+| `diagnostic_units.smoke.ts` | Support implementation or resource for this folder. |
+| `diagnostics.smoke.ts` | Support implementation or resource for this folder. |
+| `directory.smoke.ts` | Support implementation or resource for this folder. |
+| `forms.smoke.ts` | Support implementation or resource for this folder. |
+| `geo.smoke.ts` | Support implementation or resource for this folder. |
+| `identity_assurance.smoke.ts` | Support implementation or resource for this folder. |
+| `integration_contracts.smoke.ts` | Support implementation or resource for this folder. |
+| `integrations.smoke.ts` | Support implementation or resource for this folder. |
+| `organization_extensions.smoke.ts` | Support implementation or resource for this folder. |
+| `pharmacy.smoke.ts` | Support implementation or resource for this folder. |
+| `practice.smoke.ts` | Support implementation or resource for this folder. |
+| `profiles.smoke.ts` | Support implementation or resource for this folder. |
+| `read_models.smoke.ts` | Support implementation or resource for this folder. |
+| `system_ops.smoke.ts` | Support implementation or resource for this folder. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

@@ -41,7 +41,7 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `external_providers`, 
 | `POST /integrations/webhooks/inbound` | pública | `integrations-webhooks` |
 
 
-## Contenido
+## Contents
 
 <!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
   find src/modules/integrations -name '*.controller.ts' | wc -l

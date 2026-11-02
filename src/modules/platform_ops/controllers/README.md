@@ -52,7 +52,7 @@ que actúa sobre algo existente (07, 12, 14).
 
 `ParseUUIDPipe` en todos los identificadores de ruta: aquí todos son UUID.
 
-## Permisos
+## Permissions
 
 `PLATFORM_ADMIN` en todo. Además, por área: `RELEASE_MANAGER` (01, 04, 05, 12), `CHANGE_APPROVER`
 (02), `DEPLOY_PIPELINE` (03, 04), `SRE` (05–08, 09–10, 13, 14), `INCIDENT_COMMANDER` (07, 08),
@@ -60,7 +60,7 @@ que actúa sobre algo existente (07, 12, 14).
 
 Ninguna ruta es `@Public()`: incluso las que llama un worker pasan por sesión de servicio.
 
-## Pruebas
+## Tests
 
 `platform-ops.controller.spec.ts` (15): una por endpoint, comprobando que delega en el servicio
 correcto y que pasa el id de la ruta, el cuerpo y el actor.

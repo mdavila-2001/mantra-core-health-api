@@ -10,7 +10,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `PeriopPreopService`   | 03 … 07        | Valoración, clearance, checklist y anestesia              |
 | `PeriopIntraopService` | 08 … 12        | Intervención, implantes, insumos, reporte y recuperación  |
 
-## Reglas de negocio
+## Business rules
 
 - **Programación (01)**: comprueba el solape de quirófano, numera el caso, deja registrada la
   primera transición, crea el hito y el evento de reserva, y sienta al cirujano en el equipo.
@@ -91,7 +91,7 @@ cancelado, cargos ya emitidos).
 anestesia grave o crítico, complicación quirúrgica y cancelación. Nunca se loguean datos clínicos
 del paciente más allá del identificador del caso.
 
-## Pruebas
+## Tests
 
 `periop-cases.service.spec.ts` (24), `periop-preop.service.spec.ts` (28) y
 `periop-intraop.service.spec.ts` (27): solape de quirófano, único diagnóstico principal, clearance

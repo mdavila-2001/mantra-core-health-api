@@ -186,7 +186,7 @@ El módulo mapea **40 entidades** (`find src/modules/community -name '*.entity.t
 
 **Tiempo real:** `gateways/community-messaging.gateway.ts` es un gateway socket.io (`@WebSocketGateway()`) con los mensajes `join:inbox`, `join:conversation`, `leave:conversation`, `typing` y `presence:ping`; el CORS lo impone `CorsIoAdapter` en `main.ts`.
 
-## Reglas de negocio
+## Business rules
 
 - Foros (`community.groups`): `visibility_concept_id` guarda el público autorizado
   (ORG-FOR-002, DOC-SOC-015). `PUBLIC` es el público general y `PRIVATE`/`SECRET` el ingreso por

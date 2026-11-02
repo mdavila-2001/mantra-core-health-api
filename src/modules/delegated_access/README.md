@@ -109,7 +109,7 @@ cuerpos no se guardan: las tablas no tienen columna para ellos.
 `delegated_permission_set_items`, `practitioner_delegate_assignments`,
 `delegated_access_approval_requests`, `delegated_access_grants`, `delegation_events`.
 
-## Reglas de negocio
+## Business rules
 
 - Escrituras en `em.transactional`; las FK son columnas uuid planas, por lo que se
   hace `flush` del padre antes de los hijos.

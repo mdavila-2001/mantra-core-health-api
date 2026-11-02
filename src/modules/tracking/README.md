@@ -75,7 +75,7 @@ sujeto (open, created) + envío (preparing)
 sla/scan ──> hito siguiente vencido ⇒ evento de incumplimiento + escalada de prioridad
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El número de seguimiento es opaco**: se genera aleatorio, no derivado de la entidad. Un número
   que dejara deducir qué se transporta o de quién es sería un canal de fuga por sí mismo.
@@ -101,7 +101,7 @@ sla/scan ──> hito siguiente vencido ⇒ evento de incumplimiento + escalada 
 - **El SLA se mide contra el hito siguiente al alcanzado**, que es el que se está incumpliendo ahora,
   y contra el último movimiento del sujeto.
 
-## Permisos
+## Permissions
 
 `TRACKING_ADMIN` cubre el módulo y es el único que define el catálogo de hitos. `LOGISTICS_OPERATOR`
 abre sujetos, despacha, traspasa, cancela y registra eventos. `COURIER` registra eventos, traspasos,
@@ -117,7 +117,7 @@ transportista inactivo, firma inválida o ausente: `401 TRACKING_WEBHOOK_SIGNATU
 válida con marca vencida: `401 TRACKING_WEBHOOK_REPLAY_REJECTED`. El transportista sólo mueve envíos
 que tiene asignados (y de su tenant, si es de un tenant).
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el sujeto (es el agregado del timeline) y sobre el envío en toda operación que
 los mueva. `FOR UPDATE SKIP LOCKED` en el barrido de SLA, que procesa por lotes y no debe esperar a
@@ -129,7 +129,7 @@ otra pasada. `row_version` aporta bloqueo optimista automático.
 una excepción de envío, una cancelación y los incumplimientos detectados en el barrido. Nunca se
 loguea qué se transporta ni datos del destinatario.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura demuestra la autenticación del webhook (firma, ventana anti-replay, transportista y tenant del envío).
 

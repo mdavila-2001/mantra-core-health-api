@@ -2,16 +2,16 @@
 
 Contratos del dominio de telemetría que no dependen de ningún proveedor concreto.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `web-analytics.port.ts` | Puerto de analítica web: qué se reenvía, con qué identidad y consentimiento, y qué se sabe del resultado. Publica el token `WEB_ANALYTICS_PORT`. |
 | `web-analytics.errors.ts` | Errores del puerto con código estable y transitoriedad decidida, que es lo que consultan el reintento y el cortacircuitos. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
 - El puerto describe **intención**, no formato de proveedor: ningún tipo de aquí
   puede mencionar campos del Measurement Protocol ni de ninguna otra API.

@@ -48,7 +48,7 @@ parámetros abriría la puerta a declarar aprobado lo que no lo está.
 programación). `200 OK` en lo que muta algo existente: publicar la suite, evaluar, cerrar, hacer
 triage y enlazar el release.
 
-## Pruebas
+## Tests
 
 `qa-lab.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el actor
 y los ids de ruta, con los dos de la ejecución de caso), los endpoints sin cuerpo y propagación de

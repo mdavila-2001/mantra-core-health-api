@@ -101,7 +101,7 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `frontend_page_views`,
 `frontend_view_filters`, `frontend_view_sort_options`, `frontend_view_actions`,
 `frontend_view_kpis`, `frontend_view_states`, `user_view_preferences`.
 
-## Reglas de negocio
+## Business rules
 
 - `unique(schema_name, object_name, version_number)`: no colisionan versiones;
   publicar es DRAFT→ACTIVE (UC-30-01 nace ACTIVE; UC-30-08 nace DRAFT).

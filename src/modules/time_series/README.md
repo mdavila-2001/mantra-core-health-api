@@ -105,7 +105,7 @@ CONSULTA
                        bucket múltiplo de 1 h / 1 día  ──> continuous_sli_hourly / _daily
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Nada se actualiza en su sitio.** Una corrección es un evento nuevo con `source_version` mayor y
   `quality_state = backfill`. Un histórico reescribible deja de servir para responder "qué se sabía
@@ -178,7 +178,7 @@ listas cerradas del módulo (`TIMESERIES_TABLES`, `ROLLUPS`, `VALUE_COLUMN`, `AG
 `COMPRESSION_SEGMENTS`) antes de entrar en la sentencia. Los valores —intervalos, rangos, tenant,
 serie, límites— sí van parametrizados.
 
-## Permisos
+## Permissions
 
 `INGEST_GATEWAY`, `DEVICE` y `SYSTEM` ingieren. `SYSTEM` normaliza. `DATA_PLATFORM_ADMIN` administra
 particiones, compresión, retención y rollups, y es el único que puede hacer backfill.
@@ -186,7 +186,7 @@ particiones, compresión, retención y rollups, y es el único que puede hacer b
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sólo en un sitio: la lectura cruda que se va a normalizar, para no promoverla dos veces.
 El resto de la ingesta es `INSERT` puro sobre el chunk activo, sin bloqueos: es lo que permite que
@@ -198,7 +198,7 @@ varios colectores escriban a la vez.
 momentos en que se altera o se pierde histórico—. No se loguean valores de medición, ni coordenadas,
 ni `raw_value`.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/time_series --runInBand --silent` — 6 suites y 89 pruebas
 aprobadas durante la revisión.

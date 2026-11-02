@@ -136,7 +136,7 @@ transacción de negocio
             └─ /webhooks/providers/:code/receipts ──> delivered | bounced
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Nunca se llama a un sistema externo dentro de la transacción de negocio.** Es la razón de ser del
   módulo entero: se escribe el hecho, se confirma con el cambio, y entregarlo es problema de otro
@@ -179,7 +179,7 @@ de proveedor, categoría, idioma y moneda son catálogos abiertos y llegan como 
 `max_attempts` existe y sin estado terminal el relay no pararía nunca. Está documentada como tal en
 `concepts.ts`.
 
-## Permisos
+## Permissions
 
 `MESSAGING_ADMIN` cubre el módulo. `SYSTEM` —los workers— opera el relay, el despacho, el reclamo de
 jobs y la entrega de notificaciones. `USER` lee su propia bandeja, marca sus notificaciones como
@@ -188,7 +188,7 @@ leídas y administra sus preferencias.
 `POST /webhooks/providers/:providerCode/receipts` es **la única ruta pública**: quien llama es un
 proveedor externo sin sesión.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE SKIP LOCKED` en el reclamo del outbox y de la cola. `FOR UPDATE` sobre la entrega de
 eventos al acusarla, sobre el job al cerrarlo o fallarlo, sobre la solicitud al entregarla y sobre la
@@ -201,7 +201,7 @@ evita que dos workers cierren el mismo trabajo.
 evento fallida, cola destino inactiva, job en cola muerta, redrive manual, notificación suprimida,
 intento de entrega fallido y rebote del proveedor. No se loguea el contenido de las notificaciones.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/messaging --runInBand --silent` — 9 suites y 123 pruebas
 (ejecutado el 2026-10-05). Las pruebas dirigidas son unitarias; no sustituyen las pruebas de

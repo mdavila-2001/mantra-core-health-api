@@ -52,7 +52,7 @@ Las tablas con columnas de auditoría —agentes, fuentes, programaciones y cont
 `createdBy(actorUserId)` al crearse y por `touch(entity, actorUserId)` al modificarse desde el
 servicio.
 
-## Pruebas
+## Tests
 
 El repositorio no tiene suite propia; se ejercita como doble desde
 `context-collection.service.spec.ts` y `country-context.service.spec.ts`.

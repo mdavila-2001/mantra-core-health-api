@@ -52,7 +52,7 @@ corrida depende de que su evidencia no se pueda tocar.
 Consultas por PK, FK, clave natural o firma de fallo, todas indexadas. `countActiveCases` y
 `countAssertionResults` son `COUNT` sobre índice, no carga de colecciones. Sin N+1.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de los bloqueos y
 de las UNIQUE llega con las pruebas de integración.

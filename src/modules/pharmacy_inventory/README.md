@@ -52,9 +52,9 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 | `POST /pharmacy/:pharmacyId/purchase-orders` | SECURITY_ADMIN | `pharmacy-procurement` |
 | `POST /pharmacy/:pharmacyId/goods-receipts` | SECURITY_ADMIN | `pharmacy-procurement` |
 
-## Contenido
+## Contents
 
-### Subcarpetas
+### Subdirectories
 
 - [`controllers/`](./controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
 - [`dto/`](./dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
@@ -62,12 +62,12 @@ Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `Insur
 - [`repositories/`](./repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 - [`services/`](./services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `pharmacy_inventory.concepts.ts` | Conceptos de terminología del módulo. |
-| `pharmacy_inventory.module.ts` | Composición de dependencias del módulo NestJS. |
+| `pharmacy_inventory.module.ts` | NestJS module dependency composition. |
 
 ## Cara de lectura (carril E2 · `/pharmacy-inventory`)
 
@@ -132,13 +132,13 @@ farmacia** en vez del que configura el servidor (`PHARMACY_ERP_BASE_URL`, FAR-07
   `apiKeyConfigured`) a cada conexión, y `providerConfigured` pasa a ser por
   conexión: el sistema propio o, si no tiene, el del servidor.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test src/modules/pharmacy_inventory --runInBand --silent

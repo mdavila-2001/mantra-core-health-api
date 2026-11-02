@@ -119,7 +119,7 @@ MANTENIMIENTO
   admin/archive-jobs ──────────────> sin manifiesto frío no se purga lo caliente
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un dataset no se proyecta sobre sí mismo.** Eso no es una proyección: es un bucle, y el canónico
   dejaría de ser el único origen.
@@ -168,7 +168,7 @@ MANTENIMIENTO
 qué clave, si se confirmó, hasta dónde se ha leído, qué no cuadró y qué evidencia hay de que un
 borrado se cumplió. La escritura real la hace el worker de cada backend.
 
-## Permisos
+## Permissions
 
 `DATA_GOVERNANCE_ADMIN` define proyecciones, repara derivas, mueve datos y reprocesa la cola muerta.
 `PRIVACY_OFFICER` / `DPO` solicitan y cierran borrados. `PROJECTION_WORKER` entrega y manda a cola
@@ -184,7 +184,7 @@ desde el canónico es una decisión de gobierno.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el SLO al hacer upsert, sobre el intento de entrega, sobre el **checkpoint** —dos
 consumidores de la misma partición no pueden avanzarlo a la vez—, sobre la entrada de cola muerta, la
@@ -200,7 +200,7 @@ ya tomó.
 detectada, solicitud de borrado, ejecución, referencias residuales, cierre y archivado. Es un módulo
 donde casi todo lo que pasa merece atención. No se loguean payloads ni localizadores.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/cross_store_consistency --runInBand --silent` — 6 suites y 99 pruebas aprobadas durante la revisión. El módulo conserva control e idempotencia; la confirmación física depende de los workers y adaptadores de cada store.
 

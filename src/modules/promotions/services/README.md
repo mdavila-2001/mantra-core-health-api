@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `PromotionsLoyaltyService`   | 01 … 06, 12, 13 | Programas, membresías, ledger de puntos y referidos |
 | `PromotionsDiscountsService` | 07 … 11         | Promociones, cupones, redenciones y checkout        |
 
-## Reglas de negocio
+## Business rules
 
 - **Programa (01)**: nace `draft`. Los niveles se ordenan por umbral, no por el orden en que
   llegaron: el ordinal debe reflejar la escalera real. Una regla de puntos exige `pointsAmount` y
@@ -78,7 +78,7 @@ referido ya calificado, imposible generar un código libre).
 
 `operation: 'promotions.<área>.<acción>'`. No se loguean códigos de cupón ni saldos.
 
-## Pruebas
+## Tests
 
 `promotions-loyalty.service.spec.ts` (39) y `promotions-discounts.service.spec.ts` (32):
 idempotencia en ambos sentidos, multiplicador de nivel, ascenso, tope por periodo, expiración

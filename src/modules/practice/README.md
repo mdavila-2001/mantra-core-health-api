@@ -159,7 +159,7 @@ Lectores de `practice_sites` fuera del módulo con RLS: inventario fijado en
 > que todos los demás casos presuponen (y su `practice_id` es una FK forzada), por
 > lo que se expone un endpoint de bootstrap para poder crearla y encadenar recursos.
 
-## Reglas de negocio
+## Business rules
 
 - **Transacciones**: cada escritura corre en `em.transactional`; el padre se hace
   `flush` antes de crear hijos (las FK son columnas uuid planas).
@@ -176,7 +176,7 @@ Lectores de `practice_sites` fuera del módulo con RLS: inventario fijado en
 - **Cascada (UC-14-12)**: sitio→RETIRED/CLOSED, unidades→RETIRED,
   espacios→RETIRED/CLOSED, servicios→SUSPENDED, roles→ENDED (`valid_to`=hoy).
 
-## Permisos
+## Permissions
 
 Guard global de auth. Las rutas de estructura e infraestructura (F0/F1) no
 llevan `@Roles`: autoriza el servicio (ver la sección de infraestructura). El

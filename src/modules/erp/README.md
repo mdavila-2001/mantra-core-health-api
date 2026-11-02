@@ -85,7 +85,7 @@ orden de compra (open) ── goods-receipt ──> received (aceptado vs rechaz
 factura ── invoice-match-run ──> matched | variance
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Cuenta bancaria no verificada por defecto**: nace `unverified` y verificar es un acto
   deliberado y auditable. Pagar a una cuenta sin verificar es el vector de fraude que UC-38-02 cierra.
@@ -106,7 +106,7 @@ factura ── invoice-match-run ──> matched | variance
 - **Three-way match**: compara lo facturado contra el valor de la orden. Si la diferencia excede la
   tolerancia se marca desviación (con `warn` en el log) en vez de aprobar el pago.
 
-## Permisos
+## Permissions
 
 `ERP_ADMIN` en todo. Además: `CONTRACT_MANAGER` en el ciclo contractual, `HR_ADMIN` y `EMPLOYEE` en
 ausencias, `BUYER`/`WAREHOUSE` en compras y recepción, `ACCOUNTS_PAYABLE` en conciliación, `SALES`
@@ -128,7 +128,7 @@ acepta si coincide con el activo. Lo ajeno responde igual que lo inexistente (`4
 - **Recepción**: cada línea debe existir, no repetirse y ser hija de la orden (carga `id IN (...)` +
   `purchaseOrderId`); si no, `422` `ERP_PO_ITEM_NOT_IN_ORDER` antes de crear la recepción.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre contrato, cuenta bancaria, solicitud de ausencia y orden de compra antes de
 mutarlos. `row_version` da bloqueo optimista automático.
@@ -138,7 +138,7 @@ mutarlos. `row_version` da bloqueo optimista automático.
 `operation: 'erp.<área>.<acción>'`. Nivel `warn` cuando el three-way match detecta una desviación.
 Nunca se loguean identificadores bancarios, salarios ni datos personales del empleado.
 
-## Pruebas
+## Tests
 
 `corepack yarn test --testPathPatterns=erp --runInBand --silent` — 3 suites y 50 pruebas aprobadas en la revisión ALOVIDA.
 

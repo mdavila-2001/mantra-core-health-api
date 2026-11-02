@@ -51,7 +51,7 @@ o devuelve un lote (02, 03, 04, 06, 07, 08, 12, 13).
 
 Las respuestas con `duplicate: true` también son `2xx`: lo repetido no es un error en este módulo.
 
-## Permisos
+## Permissions
 
 `MESSAGING_ADMIN` en todo. `SYSTEM` en lo que operan los workers (02–08, 11) y en el encolado y la
 solicitud de notificación (05, 10). `USER` sólo en 13, y el servicio comprueba además que la
@@ -60,7 +60,7 @@ notificación sea suya.
 `/webhooks/providers/:providerCode/receipts` es `@Public()`: quien llama es un proveedor externo sin
 sesión. La ruta verifica la firma HMAC antes de conciliar (ver README del módulo).
 
-## Pruebas
+## Tests
 
 - `messaging.controller.spec.ts` (4)
 - `messaging-internal.controller.spec.ts` (7)

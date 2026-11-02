@@ -113,7 +113,7 @@ review event ── approved ──> efectivo activo + infracciones cerradas
 lead form ── submission (idempotente por lead externo) ── respuestas cifradas ──> entrega a CRM
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Todo nace pausado y en revisión**: la jerarquía completa se crea en una transacción, pero no
   entrega hasta que se active y la plataforma la apruebe. Una jerarquía a medias no debe gastar.
@@ -141,7 +141,7 @@ lead form ── submission (idempotente por lead externo) ── respuestas cif
 - **Los webhooks son idempotentes** por identificador externo: revisión y lead reentregados no
   duplican efectos.
 
-## Permisos
+## Permissions
 
 `ADS_ADMIN` cubre el módulo. `BUSINESS_ADMIN` provisiona cuentas, vincula socios y conecta
 plataformas. `AD_OPS` lanza campañas, define segmentación, sube conversiones offline, crea
@@ -149,7 +149,7 @@ experimentos y programa presupuesto. `DATA_PRIVACY_OFFICER` publica la política
 `POLICY_REVIEWER` registra revisiones y apela. `FINANCE` emite facturas. `SYSTEM` ejecuta la
 ingesta, la evaluación de reglas, el feed del catálogo, las conversiones y los leads.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre cuenta publicitaria (el gasto es un contador compartido), campaña, conjunto,
 anuncio, conexión, relación de socio vigente, asignación de identidad vigente, catálogo, feed,
@@ -162,7 +162,7 @@ una regla. `row_version` aporta bloqueo optimista automático.
 la política bloquea un evento y cuando la plataforma rechaza un anuncio. Nunca se loguean payloads
 de conversión, respuestas de leads ni identificadores de usuario.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/ads --runInBand --silent` — 5 suites y 115 pruebas aprobadas durante la revisión. No hay integración que demuestre aislamiento multitenant en las cadenas de cuenta, datos y leads.
 

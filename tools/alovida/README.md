@@ -1,10 +1,10 @@
 # tools / alovida
 
-Agrupa los componentes relacionados con **alovida** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **alovida**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -26,8 +26,8 @@ responde; el segundo, que el actor que debe usarla **puede** usarla. `SUPERADMIN
 atraviesa cualquier `@Roles(...)` por comodín, así que un flujo verde con el
 administrador no dice nada sobre los permisos reales.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

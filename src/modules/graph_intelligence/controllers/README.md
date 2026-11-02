@@ -72,6 +72,6 @@ Todas las rutas reciben `@CurrentUser()`; va al `actorUserId` del evento de outb
 en la decisión de scoping —eso lo determina el alcance declarado en el cuerpo—, pero sí queda
 registrado en cada cambio de política, hallazgo y purga.
 
-## Pruebas
+## Tests
 
 15 pruebas de delegación en `graph-controllers.spec.ts`.

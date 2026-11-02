@@ -2,9 +2,9 @@
 
 Entidades y relaciones que representan el modelo persistente.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo                               | Responsabilidad                                    |
 | ------------------------------------- | -------------------------------------------------- |
@@ -22,7 +22,7 @@ Entidades y relaciones que representan el modelo persistente.
 | `group_members.entity.ts`             | Mapeo de una entidad persistente y sus relaciones. |
 | `groups.entity.ts`                    | Mapeo de una entidad persistente y sus relaciones. |
 | `hashtags.entity.ts`                  | Mapeo de una entidad persistente y sus relaciones. |
-| `index.ts`                            | Punto de exportación pública de la carpeta.        |
+| `index.ts`                            | Public export barrel for this folder.        |
 | `mentions.entity.ts`                  | Mapeo de una entidad persistente y sus relaciones. |
 | `message_receipts.entity.ts`          | Mapeo de una entidad persistente y sus relaciones. |
 | `moderation_appeals.entity.ts`        | Mapeo de una entidad persistente y sus relaciones. |
@@ -48,8 +48,8 @@ Entidades y relaciones que representan el modelo persistente.
 | `user_blocks.entity.ts`               | Mapeo de una entidad persistente y sus relaciones. |
 | `verified_badges.entity.ts`           | Mapeo de una entidad persistente y sus relaciones. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

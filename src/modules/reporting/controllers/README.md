@@ -49,7 +49,7 @@ Los casos de uso escriben tres rutas con dos puntos (`/versions:publish`, `/exec
 del proyecto: el enrutador de Nest 11 interpreta `:` como inicio de parámetro en cualquier posición
 del segmento.
 
-## Pruebas
+## Tests
 
 `reporting.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta) y propagación de errores.

@@ -20,7 +20,7 @@ revés. Enlistándose, ambos se confirman juntos o no se confirma ninguno.
 
 La prueba `never opens its own transaction` existe para que nadie lo "arregle" añadiéndole una.
 
-## Reglas de negocio
+## Business rules
 
 ### Outbox
 
@@ -96,7 +96,7 @@ worker que reenvía o un proveedor que reentrega su webhook obtienen la respuest
 destino inactiva, job a cola muerta, redrive, notificación suprimida, intento fallido y rebote. No se
 loguea el contenido de las notificaciones.
 
-## Pruebas
+## Tests
 
 - `outbox.service.spec.ts` (23): que no abre transacción propia, clave derivada estable, publicación
   duplicada, lote publicado y agotado, filtro de suscripción, fan-out idempotente, encolado del

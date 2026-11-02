@@ -1,10 +1,10 @@
 # src / common / auth
 
-Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **auth**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -41,11 +41,11 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 cortan también el access token ya emitido, sin esperar a que expire
 (`JWT_ACCESS_TTL`, 15 minutos por defecto). No hay caché a propósito.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 
 ## Entrega del refresh token: cuerpo o cookie httpOnly
 
