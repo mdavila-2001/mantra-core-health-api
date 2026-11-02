@@ -62,7 +62,7 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `contract_webhook_subscr
 `integration_exchange_attempts`, `integration_idempotency_records`,
 `integration_sync_cursors`, `webhook_delivery_evidence`.
 
-## Reglas de negocio
+## Business rules
 
 - **Ciclo de vida del contrato**: DRAFT → ACTIVE (al activar la primera versión) →
   RETIRED. Solo se publican versiones sobre contratos DRAFT o ACTIVE.

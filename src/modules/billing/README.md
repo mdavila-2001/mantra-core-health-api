@@ -117,7 +117,7 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 `dunning_items`, `financial_kpi_snapshots` (+ catálogos `vendors`, `service_catalog`,
 `tax_codes`, `budgets`, `tax_periods` sin endpoint propio en este módulo).
 
-## Reglas de negocio
+## Business rules
 
 - Totales de factura derivados de líneas (`base = cantidad*precio - descuento`,
   `total = subtotal + impuestos`); `balance = total - paid_total`.
@@ -132,7 +132,7 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 - Statement/dunning/KPI: unicidad lógica (periodo, `run_number`, clave de KPI).
 - Plan de pagos: la suma de cuotas debe igualar el saldo origen.
 
-## Permisos
+## Permissions
 
 Las operaciones financieras requieren `SECURITY_ADMIN` (`SUPERADMIN` es comodín).
 El catálogo tiene lectura abierta y altas/ediciones con roles administrativos o

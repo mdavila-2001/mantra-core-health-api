@@ -47,7 +47,7 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `activity_event_schema
 | `POST /telemetry/funnels` | SECURITY_ADMIN | `telemetry-governance` |
 
 
-## Contenido
+## Contents
 
 <!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
   find src/modules/telemetry -name '*.controller.ts' | wc -l
@@ -178,7 +178,7 @@ un método nuevo que mute debe NO llevarlo.
 `telemetry-onboarding-analytics.*` queda `@deprecated` (en memoria, cifras fijas): el front
 aún la consume. Qué falta para retirarla está en el TSDoc del servicio.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/telemetry --runInBand --silent` aprobó 14 suites y
 121 pruebas durante la revisión. Hay cobertura unitaria de controladores, servicios,

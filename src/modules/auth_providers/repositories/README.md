@@ -50,7 +50,7 @@ append-only y lleva `occurred_at`/`recorded_at` propios, sin campos de modificac
 `createLinkRequest` acepta `userId` ausente: el callback abre solicitudes antes de que IAM haya
 resuelto al usuario, y quien la completa aporta el suyo.
 
-## Pruebas
+## Tests
 
 Los repositorios no tienen suite propia; se ejercitan como dobles desde los servicios
 (`auth-providers-config.service.spec.ts`, `federated-login.service.spec.ts`).

@@ -2,9 +2,9 @@
 
 Entidades y relaciones que representan el modelo persistente.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo                                   | Responsabilidad                                    |
 | ----------------------------------------- | -------------------------------------------------- |
@@ -20,7 +20,7 @@ Entidades y relaciones que representan el modelo persistente.
 | `event_deliveries.entity.ts`              | Mapeo de una entidad persistente y sus relaciones. |
 | `event_subscriptions.entity.ts`           | Mapeo de una entidad persistente y sus relaciones. |
 | `in_app_notifications.entity.ts`          | Mapeo de una entidad persistente y sus relaciones. |
-| `index.ts`                                | Punto de exportación pública de la carpeta.        |
+| `index.ts`                                | Public export barrel for this folder.        |
 | `message_channels.entity.ts`              | Mapeo de una entidad persistente y sus relaciones. |
 | `message_queues.entity.ts`                | Mapeo de una entidad persistente y sus relaciones. |
 | `message_templates.entity.ts`             | Mapeo de una entidad persistente y sus relaciones. |
@@ -32,8 +32,8 @@ Entidades y relaciones que representan el modelo persistente.
 | `queued_jobs.entity.ts`                   | Mapeo de una entidad persistente y sus relaciones. |
 | `recipient_preferences.entity.ts`         | Mapeo de una entidad persistente y sus relaciones. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

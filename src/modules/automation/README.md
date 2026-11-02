@@ -94,7 +94,7 @@ EJECUCIÓN
   runs/:id/finalize ───> cierra agent_runs abiertos, suma coste, run COMPLETED|FAILED
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **El agente y su versión 1 nacen en borrador.** Un agente sin versión publicada no puede
   ejecutarse; crearlo ya activo daría a entender que sí.
@@ -196,7 +196,7 @@ Ninguna ruta es pública.
 Los servicios no aplican el alcance de tenant de la identidad a la cadena de
 workflows, runs y automatizaciones de registro.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre el agente al publicar o adjuntar guardrail, sobre el `agent_run` al registrar paso
 o decidir, sobre la aprobación al decidirla, sobre el `workflow_run` al pausarlo o cerrarlo, sobre
@@ -209,7 +209,7 @@ registro al ejecutarla.
 aprobación —los dos momentos en que una persona tiene que intervenir—. No se loguean
 `payloadJson`, `thought_text` ni el contenido de la memoria.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/automation --runInBand --silent` — 6 suites y 133 pruebas
 aprobadas durante la revisión. No cubren dos tenants ni los errores HTTP

@@ -1,19 +1,19 @@
 # docker / db init
 
-Agrupa los componentes relacionados con **db init** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **db init**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `init-mongo.sh` | Implementación o recurso de soporte de esta carpeta. |
-| `init-opensearch.sh` | Implementación o recurso de soporte de esta carpeta. |
-| `init-postgres.sh` | Implementación o recurso de soporte de esta carpeta. |
+| `init-mongo.sh` | Support implementation or resource for this folder. |
+| `init-opensearch.sh` | Support implementation or resource for this folder. |
+| `init-postgres.sh` | Support implementation or resource for this folder. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

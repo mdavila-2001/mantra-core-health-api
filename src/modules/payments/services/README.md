@@ -57,7 +57,7 @@ que no habilitan la operación) y `ConflictException` (duplicado o límite exced
 merecen atención (intent rechazado por riesgo, conciliación con excepciones abiertas). Nunca se
 loguean tokens, secretos del gateway ni datos del pagador.
 
-## Pruebas
+## Tests
 
 `payments-intents.service.spec.ts`, `payments-transactions.service.spec.ts` y
 `payments-operations.service.spec.ts` (incluye `PaymentsCheckoutService`) con los repositorios

@@ -2,9 +2,9 @@
 
 Entidades y relaciones que representan el modelo persistente.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo                                       | Responsabilidad                                    |
 | --------------------------------------------- | -------------------------------------------------- |
@@ -12,7 +12,7 @@ Entidades y relaciones que representan el modelo persistente.
 | `anesthesia_events.entity.ts`                 | Mapeo de una entidad persistente y sus relaciones. |
 | `anesthesia_plans.entity.ts`                  | Mapeo de una entidad persistente y sus relaciones. |
 | `implant_identifiers.entity.ts`               | Mapeo de una entidad persistente y sus relaciones. |
-| `index.ts`                                    | Punto de exportación pública de la carpeta.        |
+| `index.ts`                                    | Public export barrel for this folder.        |
 | `instrument_sets.entity.ts`                   | Mapeo de una entidad persistente y sus relaciones. |
 | `operating_room_utilization_events.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `operative_findings.entity.ts`                | Mapeo de una entidad persistente y sus relaciones. |
@@ -47,8 +47,8 @@ Entidades y relaciones que representan el modelo persistente.
 | `surgical_safety_items.entity.ts`             | Mapeo de una entidad persistente y sus relaciones. |
 | `surgical_safety_responses.entity.ts`         | Mapeo de una entidad persistente y sus relaciones. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

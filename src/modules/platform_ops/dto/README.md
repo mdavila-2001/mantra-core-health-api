@@ -90,7 +90,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 - **`CompleteResilienceExerciseDto` no acepta el resultado**: lo deriva el servicio comparando lo
   observado con el objetivo de recuperación.
 
-## Pruebas
+## Tests
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.

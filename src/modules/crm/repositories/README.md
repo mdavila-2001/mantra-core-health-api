@@ -44,7 +44,7 @@ y `limit` explícito (50), para que la vista no crezca sin control con la antig�
 Consultas por PK, FK o clave natural indexada. Sin N+1: la vista 360 lanza las dos consultas en
 paralelo (`Promise.all`) en lugar de recorrer relaciones una por una.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de las consultas
 llega con las pruebas de integración sobre testcontainers.

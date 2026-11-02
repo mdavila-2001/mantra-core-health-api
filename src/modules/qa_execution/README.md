@@ -96,7 +96,7 @@ para no duplicar mutaciones).
 `execution_targets`, `execution_plans` (job + evidencia de lo aprobado), `plan_approvals`
 (append-only), `plan_events` (bitácora, sin cuerpos ni secretos).
 
-## Pruebas
+## Tests
 
 Dominio (`domain/*.spec.ts`: guarda SSRF con IPv4/IPv6/mapeadas/encoding, plan, aprobación),
 cliente HTTP contra un servidor local real, autorización por handler, y

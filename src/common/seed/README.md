@@ -1,17 +1,17 @@
 # src / common / seed
 
-Agrupa los componentes relacionados con **seed** y mantiene cohesionada esta responsabilidad del sistema.
+Groups **seed**-related components and keeps this system responsibility cohesive.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo                                      | Responsabilidad                                                                                                                                                                                                               |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `concept-seed.ts`                            | Implementación o recurso de soporte de esta carpeta.                                                                                                                                                                          |
-| `module-concepts.ts`                         | Implementación o recurso de soporte de esta carpeta.                                                                                                                                                                          |
-| `seed.module.ts`                             | Composición de dependencias del módulo NestJS.                                                                                                                                                                                |
-| `terminology-seed.service.ts`                | Casos de uso y reglas de negocio.                                                                                                                                                                                             |
+| `concept-seed.ts`                            | Support implementation or resource for this folder.                                                                                                                                                                          |
+| `module-concepts.ts`                         | Support implementation or resource for this folder.                                                                                                                                                                          |
+| `seed.module.ts`                             | NestJS module dependency composition.                                                                                                                                                                                |
+| `terminology-seed.service.ts`                | Use cases and business rules.                                                                                                                                                                                             |
 | `clinical-forms-seed.service.ts`             | Siembra el catálogo de formularios clínicos estándar por especialidad (carril R2-5).                                                                                                                                          |
 | `bo-geography.catalog.ts`                    | Los nueve departamentos de Bolivia y los derivadores deterministas de sus ids.                                                                                                                                                |
 | `bo-geography-seed.service.ts`               | Siembra `VS_BO_DEPARTMENT`: el conjunto, su versión vigente y los nueve miembros. Lo lee el registro público para «departamento que emitió tu documento».                                                                     |
@@ -28,13 +28,13 @@ Agrupa los componentes relacionados con **seed** y mantiene cohesionada esta res
 | `seed-census.service.ts`                     | Censo de lo que dejó la carga (conteos por paso) que `seed-cli` imprime al final, para comparar entornos con `diff`.                                                                                                          |
 | `data/clinical-forms/`                       | El contenido de ese catálogo: un `.json` por formulario, con su ficha de procedencia. Tiene su propio `README.md`.                                                                                                            |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 
-## Ejecución y límite operativo
+## Execution & operational limits
 
 La cadena se ejecuta en bootstrap con `SEED_ON_BOOT=true`, o una sola vez con
 `corepack yarn seed:boot`; `SEED_CONTENT_ON_BOOT=false` omite sólo contenido

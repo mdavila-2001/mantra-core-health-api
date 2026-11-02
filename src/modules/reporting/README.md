@@ -77,7 +77,7 @@ fuente (active, gobernada) ── definición (draft) ── versión ──> de
 tablero (active) ── widgets ──> apuntan a definiciones no deprecadas
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La fuente es gobernada**: o apunta a un read model declarado o a una vista nombrada. No hay
   consulta libre, y eso es lo que hace que la seguridad por fila (`row_security_json`) tenga dónde
@@ -106,13 +106,13 @@ tablero (active) ── widgets ──> apuntan a definiciones no deprecadas
 - **Deprecar suspende las programaciones** en la misma transacción, para no dejar disparos
   huérfanos.
 
-## Permisos
+## Permissions
 
 `REPORTING_ADMIN` cubre el módulo. `DATA_STEWARD` registra fuentes. `REPORT_AUTHOR` autora
 definiciones, versiones, programaciones y tableros. `REPORT_VIEWER` ejecuta bajo demanda y se
 suscribe. `SYSTEM` materializa snapshots, corre el tick, crea distribuciones y reintenta.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la definición (serializa el versionado y la deprecación), la ejecución y las
 programaciones que se suspenden. `FOR UPDATE SKIP LOCKED` sobre las programaciones vencidas del
@@ -123,7 +123,7 @@ tick. `row_version` aporta bloqueo optimista automático.
 `operation: 'reporting.<área>.<acción>'`. Nivel `warn` al deprecar una definición. No se loguean
 parámetros de ejecución ni direcciones de destinatarios.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/reporting --runInBand --silent` — 3 suites y 68 pruebas
 aprobadas durante la revisión.

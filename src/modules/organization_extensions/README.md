@@ -53,7 +53,7 @@ Entidades (`tableName`, 6 de 6 archivos `*.entity.ts`): `data_use_agreements`, `
 `organization_affiliations`, `organization_data_boundaries`,
 `data_use_agreements` (esquema `organization_extensions`).
 
-## Reglas de negocio
+## Business rules
 
 - **Especialización 1:1**: un tenant y un practice sólo pueden tener un hospital
   (guard de unicidad en `specialize`).

@@ -38,7 +38,7 @@ los tres endpoints de worker.
 de espera, ya que los recordatorios (UC-41-13) cuelgan de una cita pero pertenecen al dominio de
 recordatorios.
 
-## Pruebas
+## Tests
 
 `scheduling.controller.spec.ts` cubre los tres controladores con servicios mockeados: delegación,
 argumentos (incluido el actor y el límite de lote) y propagación de errores.

@@ -2,9 +2,9 @@
 
 Contratos de entrada y salida, validación y documentación de la API.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -13,8 +13,8 @@ Contratos de entrada y salida, validación y documentación de la API.
 | `page-response.dto.ts` | Contratos validados de entrada y salida. |
 | `pagination-query.dto.ts` | Contratos validados de entrada y salida. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

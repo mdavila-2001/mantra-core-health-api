@@ -7,9 +7,9 @@ con Google, habla con esta API, y esta API decide qué sale. Un bloqueador de
 anuncios no lo silencia, ningún dato personal se le escapa al navegador y el
 consentimiento se aplica una sola vez, aquí.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -39,7 +39,7 @@ como si lo descarta**: lo que no valide el mapper no lo valida nadie. Para ver e
 motivo real está `GA4_DEBUG_VALIDATION=true`, que envía a `/debug/mp/collect` y
 registra en el log lo que Google objeta.
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
 - El `client_id` se deriva con SHA-256 y sal del despliegue: estable para que un
   visitante no se multiplique, e irreversible para que Google no pueda cruzar

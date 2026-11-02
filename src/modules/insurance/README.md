@@ -337,9 +337,9 @@ aseguradora y correo (REQ-16-032); rechazo de servicios ya reclamados que se fac
 `issueFromEncounter` sin declarar el reclamo (REQ-16-029, segundo punto), porque los reclamos no guardan el
 encuentro y una coincidencia por concepto de servicio bloquearía facturas legítimas.
 
-## Contenido
+## Contents
 
-### Subcarpetas
+### Subdirectories
 
 - [`controllers/`](./controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
 - [`dto/`](./dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
@@ -347,20 +347,20 @@ encuentro y una coincidencia por concepto de servicio bloquearía facturas legí
 - [`repositories/`](./repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 - [`services/`](./services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `insurance.concepts.ts` | Conceptos de terminología del módulo. |
-| `insurance.module.ts` | Composición de dependencias del módulo NestJS. |
+| `insurance.module.ts` | NestJS module dependency composition. |
 | `insurance-patient-settlement.module.ts` | Módulo aparte: puerto de lectura de la liquidación al paciente, sin dependencias circulares con los módulos operativos (lo consume `pharmacy_inventory`). |
 | `insurance-currency.ts` | Mapa concepto de moneda → código (`BOB`, `USD`). |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.
 
 ## Revisión backend 2026-10-05
 

@@ -127,7 +127,7 @@ clasificación automática ──> ficha de columna en AUTO_DETECTED (certeza) o
   └─ una persona que guarda la ficha la saca de AUTO_DETECTED (queda DRAFT o NEEDS_REVIEW, origin MANUAL)
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **Un escaneo activo por fuente**: lo decide un índice único parcial, no un `if`. Dos pedidos
   simultáneos: uno se acepta (202) y el otro recibe 409. Un escaneo `RUNNING` cuyo lease venció
@@ -236,7 +236,7 @@ escritura, en los dos sentidos) y `common/auth/role-aliases.spec.ts`.
 - `schemas.catalog.ts` no lista `data_catalog`, `medical_groups` ni `qa_execution`; regenerarlo
   (`yarn orm:catalog`) exige el vault externo y no se corrió en este trabajo.
 
-## Pruebas
+## Tests
 
 - Unitarias de reglas puras: `yarn test src/modules/data_catalog`.
 - Contra PostgreSQL real (escaneo, concurrencia, segregación, autorización, contrato OpenAPI):

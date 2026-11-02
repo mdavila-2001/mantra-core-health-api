@@ -33,7 +33,7 @@ mutaciones de recursos existentes (publicación, propiedades, `$expand`,
 la clave completa del concepto y resolver con uno solo devolvería un resultado
 arbitrario.
 
-## Pruebas
+## Tests
 
 `*.controller.spec.ts` — unitarias con el servicio mockeado; verifican la
 delegación con los argumentos correctos y el valor devuelto.

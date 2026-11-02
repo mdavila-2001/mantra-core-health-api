@@ -72,6 +72,6 @@ servir para lo que existen si se pudieran reescribir.
 identidad—. El resto lleva sus propias marcas (`recorded_at`, `created_at`, `requested_at`), y las
 tablas con `updated_at` se sellan desde el servicio.
 
-## Pruebas
+## Tests
 
 Los repositorios no tienen suite propia; se ejercitan como dobles desde los cinco servicios.

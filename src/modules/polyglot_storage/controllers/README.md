@@ -61,6 +61,6 @@ posición del segmento: `placements/{id}:failover` intentaría declarar un pará
 declara `dataset_placements — INSERT/UPSERT` en sus tablas impactadas, así que la colocación se crea
 en esta misma llamada y no hay ningún id que poner en la ruta. Detallado en el README del módulo.
 
-## Pruebas
+## Tests
 
 15 pruebas de delegación, una por endpoint, en los tres `*.controller.spec.ts`.

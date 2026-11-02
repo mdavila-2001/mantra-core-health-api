@@ -93,7 +93,7 @@ CREATE INDEX ix_tool_registry_discovery_source ON platform_ops.tool_registry (di
   WHERE discovery_source IS NOT NULL;
 ```
 
-## Pruebas
+## Tests
 
 ```bash
 corepack yarn test src/modules/platform_ops/runtime_pieces --runInBand

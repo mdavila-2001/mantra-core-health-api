@@ -107,7 +107,7 @@ Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `dynamic_field_definit
   (`ResourceNotFoundException` → 404, `ConflictException` → 409,
   `PreconditionFailedException` → 422).
 
-## Permisos
+## Permissions
 
 Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exigen
 `SECURITY_ADMIN`; los clínicos/steward/ETL requieren solo autenticación.

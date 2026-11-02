@@ -86,7 +86,7 @@ ambigüedad de parseo del path).
 `resource_scope_grants` (esquema `authz`). Todas con `row_version` optimista y
 FKs como columnas `uuid` planas.
 
-## Reglas de negocio
+## Business rules
 
 - **Deny-overrides**: en la evaluación del PDP y en `role_permissions`, `deny`
   prevalece sobre `allow`; las excepciones de usuario `deny` prevalecen sobre el

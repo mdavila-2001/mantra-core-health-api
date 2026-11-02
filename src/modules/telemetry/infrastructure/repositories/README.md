@@ -2,9 +2,9 @@
 
 Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -14,7 +14,7 @@ Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 | `conversion-events.repository.ts` | Consultas y operaciones de persistencia. |
 | `funnel-definitions.repository.ts` | Consultas y operaciones de persistencia. |
 | `funnel-steps.repository.ts` | Consultas y operaciones de persistencia. |
-| `index.ts` | Punto de exportación pública de la carpeta. |
+| `index.ts` | Public export barrel for this folder. |
 | `session-journeys.repository.ts` | Consultas y operaciones de persistencia. |
 | `tracking-consents.repository.ts` | Consultas y operaciones de persistencia. |
 | `tracking-disclosure-acceptances.repository.ts` | Consultas y operaciones de persistencia. |
@@ -24,8 +24,8 @@ Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 | `user-activity-events.repository.ts` | Consultas y operaciones de persistencia. |
 | `web-vitals.repository.ts` | Consultas y operaciones de persistencia. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

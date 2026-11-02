@@ -55,7 +55,7 @@ Consultas por PK, FK, clave natural (número de seguimiento, número de envío, 
 transportista) o referencia externa, todas indexadas. El barrido acota con `limit` y ordena por
 apertura. Sin N+1.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde el spec de servicio, donde va mockeado. La cobertura real de los bloqueos, del
 SKIP LOCKED y de las UNIQUE llega con las pruebas de integración.

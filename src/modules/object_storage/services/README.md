@@ -14,7 +14,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 URL firmada es de un objeto DICOM. Llamar a `DicomCatalogService` repartiría la transacción entre dos
 dueños.
 
-## Reglas de negocio
+## Business rules
 
 ### Objetos
 
@@ -91,7 +91,7 @@ DICOMweb —incluidos los denegados—, y además en retención aplicada, retenc
 liberada, corrupción detectada y borrado solicitado. No se loguean claves de objeto ni metadatos
 DICOM.
 
-## Pruebas
+## Tests
 
 - `object-storage.service.spec.ts` (30): idempotencia de la carga, tamaño discordante, carga
   caducada, versión duplicada por contenido, encadenado de versiones, frío rechazado, objeto corrupto

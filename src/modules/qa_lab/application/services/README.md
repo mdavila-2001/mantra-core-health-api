@@ -9,7 +9,7 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 | `QaCatalogService` | 01, 02, 03, 11 | Entornos, casos con aserciones, publicación y programación |
 | `QaRunsService`    | 04 … 10, 12    | Corridas, captura, evaluación, cierre, defectos y release  |
 
-## Reglas de negocio
+## Business rules
 
 - **Entorno (01)**: código único. Un entorno de producción no puede declararse seguro para capturar
   payloads.
@@ -89,7 +89,7 @@ evaluado, corrida ya cerrada).
 `operation: 'qa.<área>.<acción>'`. `warn` cuando una corrida termina con fallos. Nunca se loguean
 payloads ni valores capturados.
 
-## Pruebas
+## Tests
 
 `qa-catalog.service.spec.ts` (20) y `qa-runs.service.spec.ts` (38): rechazo de producción segura,
 validación de aserciones, activación en bloque al publicar, numeración secuencial, enmascarado con

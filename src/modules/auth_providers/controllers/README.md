@@ -49,12 +49,12 @@ un error de la petición.
 `ParseUUIDPipe` en los `:id`. El `:code` **no** lo lleva: es el código del proveedor, una cadena
 elegida al registrarlo.
 
-## Permisos
+## Permissions
 
 `IDENTITY_ADMIN` en todo. `AUTH_SERVICE` además en 07 … 10, que es lo que opera el servicio de
 autenticación. Ninguna ruta es `@Public()`.
 
-## Pruebas
+## Tests
 
 `auth-providers.controller.spec.ts` (12): una por caso de uso, comprobando que delega en el servicio
 correcto y que pasa el id o el código de la ruta, el cuerpo y el actor.

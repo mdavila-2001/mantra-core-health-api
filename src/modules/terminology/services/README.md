@@ -48,7 +48,7 @@ contención.
 su éxito y cada rechazo por regla de negocio (`warn`). No se registran datos
 sensibles.
 
-## Pruebas
+## Tests
 
 `*.service.spec.ts` — unitarias con `em`/repos mockeados
 (`transactional: jest.fn((cb) => cb(txMock))`). Cubren happy path, not-found y

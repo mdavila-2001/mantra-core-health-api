@@ -124,7 +124,7 @@ acepta `SYSTEM`/`SYSTEM_WORKER`.
 `prescription_signature_policies` y `appointments` (solo referenciada por el
 check-in).
 
-## Reglas de negocio
+## Business rules
 
 - **Servicios recibidos** (`received_services`): una fila por servicio que el paciente
   recibió. Hoy son dos tipos, ambos conceptos del value set `vs_received_service_type`:

@@ -56,7 +56,7 @@ del curso. Es un `COUNT` sobre índice, no carga de colecciones.
 
 Consultas por PK, FK o clave natural indexada. Sin N+1: nada recorre relaciones fila por fila.
 
-## Pruebas
+## Tests
 
 Se ejercitan desde los specs de servicio, donde van mockeados. La cobertura real de los bloqueos y
 de las UNIQUE llega con las pruebas de integración.

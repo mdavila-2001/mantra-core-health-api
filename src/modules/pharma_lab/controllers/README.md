@@ -2,13 +2,13 @@
 
 Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
 
-## Contenido
+## Contents
 
-### Archivos
+### Files
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `index.ts` | Punto de exportación pública de la carpeta. |
+| `index.ts` | Public export barrel for this folder. |
 | `medical-visitors.controller.ts` | Adaptador HTTP del dominio. |
 | `pharma-catalog.controller.ts` | Adaptador HTTP del dominio. |
 | `pharma-lab-social.controller.ts` | Adaptador HTTP del dominio. |
@@ -20,8 +20,8 @@ Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la ló
 | `visit-requests.controller.ts` | Adaptador HTTP del dominio. |
 | `visit-surveys.controller.ts` | Adaptador HTTP del dominio. |
 
-## Criterios de mantenimiento
+## Maintenance guidelines
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Keep business rules outside transport adapters.
+- Document decisions, preconditions, parameters, return values, and relevant errors with TSDoc.
+- Update this index when a component is added, removed, or its responsibility changes.

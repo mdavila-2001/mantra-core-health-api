@@ -103,7 +103,7 @@ versions/:id/signed-url ──────> URI + versión de clave + caducidad
                                  [frío exige rehidratación; corrupto y borrado no se sirven]
 ```
 
-## Reglas de negocio
+## Business rules
 
 - **La clave de destino es opaca**: no lleva datos del paciente. Una clave que dejara deducir de
   quién es el estudio sería una fuga por sí sola, aunque el objeto esté cifrado.
@@ -136,7 +136,7 @@ versions/:id/signed-url ──────> URI + versión de clave + caducidad
 - **El borrado es lógico**: se marca la intención y el worker la ejecuta después contra el proveedor.
   Dos guardas lo abortan, y las dos son deliberadas.
 
-## Permisos
+## Permissions
 
 `STORAGE_ADMIN` cubre el módulo. `STORAGE_CLIENT` sube. `PACS_GATEWAY` cataloga DICOM.
 `COMPLIANCE_OFFICER` retiene y solicita borrados. `LEGAL_COUNSEL` coloca y libera retenciones
@@ -145,7 +145,7 @@ verifica integridad y archiva.
 
 Ninguna ruta es pública.
 
-## Concurrencia
+## Concurrency
 
 `FOR UPDATE` sobre la carga al completarla, sobre el manifiesto en todo lo que lo versione, retenga,
 archive o borre, sobre el estudio y la serie DICOM al recalcular contadores, sobre la retención
@@ -162,7 +162,7 @@ todo acceso DICOMweb** —son el momento en que el dato sale de nuestro control�
 aplicación de retención, colocación y liberación de retención legal, corrupción detectada y solicitud
 de borrado. No se loguean claves de objeto ni metadatos DICOM.
 
-## Pruebas
+## Tests
 
 `corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb no la aplica.
 
