@@ -101,7 +101,11 @@ function orderLine(extra: Record<string, unknown> = {}) {
  */
 function build() {
   const tx = { flush: mockFn(), execute: mockFn(async () => []) };
-  const fork = {};
+  const fork = {
+    flush: mockFn(),
+    transactional: mockFn((cb: any) => cb(tx)),
+    execute: mockFn(async () => []),
+  };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => fork),
