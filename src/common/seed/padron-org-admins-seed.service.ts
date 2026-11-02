@@ -15,99 +15,32 @@ import {
   BOLIVIA_PUBLIC_INSURERS,
 } from './bolivia-insurance.catalog';
 import { carrierTenantId } from './bolivia-insurance-seed.service';
-import {
-  demoGateSkip,
-  loadDemoGateEnv,
-  type DemoGateEnv,
-  type DemoGateSkip,
-} from './demo-gate';
+import { demoGateSkip, loadDemoGateEnv, type DemoGateEnv } from './demo-gate';
 import {
   PadronOrganizationsSeedService,
   padronFacilities,
 } from './padron-organizations-seed.service';
 import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
+import {
+  DEMO_EMAIL_DOMAIN,
+  padronAdminEmail,
+  slugOf,
+  type AdminTarget,
+  type PadronOrgAdminsResult,
+} from './padron-org-admins.types';
 
-/** Dominio reservado a cuentas de prueba: ningún correo sale a una persona real. */
-const DEMO_EMAIL_DOMAIN = 'alovida.test';
-
-/** Lo que el paso dejó hecho en esta pasada. */
-export interface PadronOrgAdminsResult {
-  /** Cuentas de administrador creadas. */
-  created: number;
-  /** Cuentas que ya estaban. */
-  existing: number;
-  /**
-   * Organizaciones que ya tenían un administrador de demostración (una cuenta
-   * `@alovida.test` con membresía `ADMIN` activa) de una carga anterior, y por
-   * eso no recibieron otro.
-   */
-  adopted: number;
-  /** Membresías ADMIN creadas. */
-  memberships: number;
-  /** Organizaciones que todavía no existen: su administrador espera al paso de organizaciones. */
-  organizationMissing: number;
-  /** Cuentas que fallaron, con el motivo. */
-  failed: string[];
-  /** Por qué no se hizo nada, si se saltó todo el paso. */
-  reason?: DemoGateSkip;
-}
-
-/** Una organización que recibe administrador. */
-interface AdminTarget {
-  /** Base estable del correo y de los ids. */
-  slug: string;
-  /** Nombre con que se presenta la cuenta. */
-  organizationName: string;
-  /** Organización a la que administra. */
-  tenantId: string | undefined;
-}
-
-/** `BO_EST_CLINICA_LAS_AMERICAS` → `clinica-las-americas`. */
-function slugOf(code: string): string {
-  return code
-    .replace(/^BO_EST_/, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/** Correo de la cuenta de administrador de una organización. */
-export function padronAdminEmail(slug: string): string {
-  return `admin.${slug}@${DEMO_EMAIL_DOMAIN}`;
-}
+// Re-export core helpers and types for backwards compatibility.
+export {
+  padronAdminEmail,
+  type PadronOrgAdminsResult,
+} from './padron-org-admins.types';
 
 /**
- * Una cuenta de administrador por organización del padrón (y por aseguradora).
- *
- * ## A qué organizaciones
- *
- * A todas salvo los centros de primer nivel (`CENTRO_SALUD`): una cuenta por
- * cada uno de los 464 centros no aporta a una demostración y llena la base de
- * credenciales. Quedan las clínicas, los hospitales y cajas, los laboratorios,
- * los centros de imágenes, las farmacias y las aseguradoras. La regla se infirió
- * de los conteos de la carga anterior y está escrita acá para que no dependa de
- * una lista exportada de otra base.
- *
- * ## Qué es una cuenta de demostración
- *
- * Tiene la contraseña compartida `SEED_DEMO_PASSWORD` y por eso pasa por el
- * candado común (`demo-gate.ts`): en producción no se crea ninguna. El correo es
- * siempre `admin.<organización>@alovida.test`, un dominio de pruebas al que no
- * llega correo de verdad.
- *
- * Todo entra por los servicios de la aplicación: `IamUsersService.createUser`
- * para la cuenta y `DirectoryMembershipsService.invite` para la membresía
- * `ADMIN`, esta última con id determinista.
+ * Provisions one demo administrator account per padron organization and insurer carrier.
+ * Applies shared demo password gates and generates deterministic directory memberships.
  */
 @Injectable()
 export class PadronOrgAdminsSeedService {
-  /**
-   * @param orm - Acceso al `EntityManager` para las lecturas de convergencia.
-   * @param users - Alta de cuentas, que sabe hashear la contraseña.
-   * @param memberships - Alta de membresías de organización.
-   * @param organizations - Resolución de la organización de cada fila del padrón.
-   * @param logger - Registro con el contexto de este servicio.
-   */
   constructor(
     private readonly orm: MikroORM,
     private readonly users: IamUsersService,
@@ -119,11 +52,11 @@ export class PadronOrgAdminsSeedService {
   }
 
   /**
-   * Ejecuta el paso.
+   * Executes the organization administrator seeding process.
    *
-   * @param env - Candado de cuentas de demostración; por defecto, el del proceso.
-   * @param enabled - Interruptor del paso.
-   * @returns Qué quedó hecho en esta pasada.
+   * @param env - Demo gate environment settings enforcing password security.
+   * @param enabled - Feature flag switch; defaults to env variable configuration.
+   * @returns Seeding result summary metrics.
    */
   async run(
     env: DemoGateEnv = loadDemoGateEnv(),
@@ -176,7 +109,7 @@ export class PadronOrgAdminsSeedService {
             slug: target.slug,
             err: error,
           },
-          'No se pudo dar de alta un administrador de organización',
+          'Failed to seed organization administrator',
         );
       }
     }
@@ -191,10 +124,10 @@ export class PadronOrgAdminsSeedService {
         organizationMissing: result.organizationMissing,
         failed: result.failed.length,
       },
-      'Administradores de organizaciones sembrados',
+      'Organization administrators seeded',
     );
-    // Una cuenta que falla es puntual y no detiene a las demás; que fallen
-    // todas es una falla sistémica y el paso tiene que salir como fallido.
+
+    // If all administrator accounts fail, fail the whole seed step.
     if (attempted > 0 && result.failed.length === attempted) {
       throw new Error(
         `Fallaron las ${attempted} cuentas de administrador; la primera: ${result.failed[0]}`,
@@ -203,7 +136,7 @@ export class PadronOrgAdminsSeedService {
     return result;
   }
 
-  /** Las organizaciones que reciben administrador, con su organización ya resuelta. */
+  /** Gathers all candidate organizations (excluding first-tier health centers) and carriers. */
   private async targets(): Promise<AdminTarget[]> {
     const em = this.orm.em.fork();
     const facilities = padronFacilities().filter(
@@ -230,8 +163,7 @@ export class PadronOrgAdminsSeedService {
   }
 
   /**
-   * Si la organización ya tiene un administrador de demostración: una
-   * membresía `ADMIN` activa cuyo usuario entra con un correo `@alovida.test`.
+   * Checks if an organization already has an active demo administrator with an @alovida.test email.
    */
   private async hasDemoAdmin(
     em: EntityManager,
@@ -250,6 +182,7 @@ export class PadronOrgAdminsSeedService {
     return demo.length > 0;
   }
 
+  /** Idempotently creates administrator user credentials and assigns the ADMIN membership. */
   private async ensureAdmin(
     target: AdminTarget,
     tenantId: string,
@@ -263,9 +196,7 @@ export class PadronOrgAdminsSeedService {
     const credential = await em.findOne(AuthenticationCredentials, {
       externalSubject: email,
     });
-    // Dev y test se cargaron con scripts que dejaron sus propios administradores
-    // y después se les cambió el correo: la cuenta sintética no existe, pero la
-    // organización ya tiene un administrador de demostración. No se crea otro.
+    // Check if an existing demo admin was already provisioned in previous environments.
     if (!credential && (await this.hasDemoAdmin(em, tenantId))) {
       result.adopted++;
       return;

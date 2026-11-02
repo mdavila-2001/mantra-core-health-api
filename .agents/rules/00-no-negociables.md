@@ -43,6 +43,8 @@ contradice esta regla, esta regla gana y el conflicto se registra en la descripc
 4. **Prohibido crear archivos de código de más de 300 líneas** salvo necesidad estricta demostrada.
    Los archivos existentes > 300 líneas están congelados en su baseline por ratchet y no pueden crecer;
    al modificarse deben ser descompuestos en unidades modulares.
+5. **Comentarios de código exclusivamente en inglés (English inline comments).** Todo comentario inline,
+   documentación JSDoc o anotación técnica en el código fuente debe redactarse obligatoriamente en idioma inglés.
 
 
 ## 4. Pruebas

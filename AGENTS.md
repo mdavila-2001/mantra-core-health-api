@@ -102,6 +102,8 @@ Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepci
     DTO específico en `dto/` (≤ 80 líneas).
   - Al modificar o refactorizar un archivo existente de más de 300 líneas, es obligatorio descomponerlo
     extrayendo casos de uso, servicios especializados, DTOs atómicos o helpers de dominio.
+- **Comentarios inline en inglés (English inline comments):** Todo comentario de código, JSDoc y notas inline
+  debe escribirse obligatoriamente en inglés para mantener coherencia técnica internacional.
 - **Orquestación con KMAN:** Se utiliza la skill y CLI de `kman` para orquestar agentes en carriles paralelos disjuntos.
 
 
