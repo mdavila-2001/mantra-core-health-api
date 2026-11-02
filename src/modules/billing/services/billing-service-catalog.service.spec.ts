@@ -37,14 +37,17 @@ function build() {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
   };
+  const emFork = {
+    flush: mockFn().mockResolvedValue(undefined),
+  };
   const em = {
-    fork: mockFn().mockReturnValue({}),
+    fork: mockFn().mockReturnValue(emFork),
     transactional: mockFn((cb: any) => cb(tx)),
   };
   const serviceCatalogRepo = {
-    findByCode: mockFn(),
+    findByCode: mockFn().mockResolvedValue(null),
     findById: mockFn(),
-    create: mockFn(),
+    create: mockFn().mockReturnValue(item),
     searchPage: mockFn(),
   };
   const practiceTenantLookup = {

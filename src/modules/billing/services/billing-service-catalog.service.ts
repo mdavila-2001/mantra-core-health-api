@@ -24,6 +24,7 @@ import {
 import type { FileContentDto } from '../../common/dto';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { ServiceCatalogRepository } from '../repositories';
+import { ensureDefaultAppointmentService } from '../default-services';
 import {
   CreateServiceCatalogItemDto,
   SearchServiceCatalogResponseDto,
@@ -125,6 +126,11 @@ export class BillingServiceCatalogService {
     limit?: number;
   }): Promise<SearchServiceCatalogResponseDto> {
     const em = this.em.fork();
+    await ensureDefaultAppointmentService(
+      em,
+      this.serviceCatalogRepo,
+      options.practiceId,
+    );
     const limit = options.limit ?? DEFAULT_PAGE_SIZE;
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
