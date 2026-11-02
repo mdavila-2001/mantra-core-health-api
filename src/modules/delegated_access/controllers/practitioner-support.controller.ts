@@ -59,10 +59,21 @@ export class PractitionerSupportController {
   /** Sus secretarias, activas y pendientes. */
   @Get('me/practitioner/support-team')
   @TenantAgnostic()
-  @Roles('PRACTITIONER', 'CLINICIAN')
+  @Roles('PRACTITIONER', 'CLINICIAN', 'SUPPORT_STAFF')
   @ApiOperation({ summary: 'Mi equipo de apoyo (secretarias)' })
   team(@CurrentUser() actor: AuthenticatedUser): Promise<SupportLinkListDto> {
     return this.support.practitionerTeam(actor);
+  }
+
+  /** Actividad reciente del equipo de apoyo. */
+  @Get('me/practitioner/support-activity')
+  @TenantAgnostic()
+  @Roles('PRACTITIONER', 'CLINICIAN', 'SUPPORT_STAFF')
+  @ApiOperation({ summary: 'Actividad de mi equipo de apoyo' })
+  activity(
+    @CurrentUser() _actor: AuthenticatedUser,
+  ): Promise<{ items: readonly unknown[]; count: number; nextCursor: string | null }> {
+    return Promise.resolve({ items: [], count: 0, nextCursor: null });
   }
 
   /** Acepta a la secretaria que pidió asistirlo. */
