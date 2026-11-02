@@ -79,9 +79,10 @@ Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepci
   terminada. Un mock cubre una capa, no prueba la integración.
 - Un test en rojo **bloquea el cierre**. Se corrige, o se declara `BLOQUEADO` con evidencia externa.
 
-### 1.6 Ramas
+### 1.6 Ramas y Pull Requests Obligatorios (Orden de Pablo - 02/11/2026)
 
-- **Los cambios van por PR hacia `dev`.**
+- **Los cambios van SIEMPRE por PR hacia `dev`.**
+- **Obligatorio para toda sesión**: Al terminar el objetivo y pasar los gates, crear rama, hacer push y **ABRIR PULL REQUEST HACIA `dev`**. Nada puede quedar pendiente en local.
 - **Prohibido abrir PR hacia `test`.** Está dada de baja desde el 30/10/2026: no despliega nada y
   `test.alovidasalud.com` redirige a `dev`.
 
