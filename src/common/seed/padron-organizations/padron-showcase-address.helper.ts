@@ -128,6 +128,6 @@ export async function completeFacilityShowcase(
       actor,
     ),
   );
-  known.showcaseHeadlines.set(tenantId, 'listo');
+  known.showcaseHeadlines.set(tenantId, 'done');
   result.showcases++;
 }

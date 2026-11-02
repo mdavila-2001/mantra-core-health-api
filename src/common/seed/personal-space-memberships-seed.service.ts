@@ -13,10 +13,7 @@ import {
 } from '../../modules/iam/domain/role-mapping';
 import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
 
-/**
- * Roles de una **persona** que usa la plataforma para sí (atenderse, atender,
- * asistir a un profesional). Son los únicos que dan espacio personal.
- */
+/** Personal roles granting individual personal space memberships. */
 export const PERSONAL_SPACE_ROLE_CODES: readonly RoleCode[] = [
   'PATIENT',
   'PRACTITIONER',
@@ -24,49 +21,26 @@ export const PERSONAL_SPACE_ROLE_CODES: readonly RoleCode[] = [
   'SUPPORT_STAFF',
 ];
 
-/** Lo que el paso dejó hecho en esta pasada. */
+/** Execution metrics for personal space memberships seed. */
 export interface PersonalSpaceMembershipsResult {
-  /** Cuentas de persona sin ninguna membresía a las que se les dio la del espacio personal. */
+  /** Newly provisioned personal space memberships. */
   created: number;
-  /** Cuentas de persona que ya tenían alguna membresía (de cualquier tenant y estado). */
+  /** Users that already possess a tenant membership. */
   alreadyMember: number;
-  /**
-   * Cuentas con un rol personal **y** un rol administrativo global. No se
-   * reparan solas: su alcance lo decide una persona, no el arranque.
-   */
+  /** Users with both personal and global admin roles requiring manual review. */
   needsReview: number;
-  /** Cuentas que fallaron, con el motivo. */
+  /** Failed operations with error messages. */
   failed: string[];
 }
 
-/** Id determinista de la membresía de espacio personal de una persona. */
+/** Deterministic personal space membership UUID for a user. */
 export function personalSpaceMembershipId(userId: string): string {
   return deterministicId(`seed:membership:personal-space:${userId}`);
 }
 
 /**
- * Reparación de datos: da la membresía del espacio personal (el tenant por
- * defecto, el mismo que el autorregistro ya asigna) a las personas que no
- * tienen **ninguna** membresía.
- *
- * ## Por qué existe
- *
- * Una persona sin organización (paciente, médico independiente) necesita una
- * membresía para que `TenantContextInterceptor` la deje operar: sin ella, cada
- * petición responde 403 `TENANT_REQUIRED`. El autorregistro ya la crea, pero
- * las cuentas dadas de alta antes, o por el alta asistida o `POST /iam/users`,
- * no la tienen. Esta reparación las cubre.
- *
- * ## Qué NO hace
- *
- * - No da membresía a quien tiene **cualquier** fila de membresía: una
- *   organización (activa o no), o una suspensión o revocación. Una membresía
- *   suspendida es una decisión explícita y no se reactiva desde acá.
- * - No da membresía a quien tiene un rol administrativo global además del
- *   personal: se cuenta en `needsReview`.
- * - No se apoya en el token ni en la resolución de la petición: deja una fila
- *   real, con id determinista, así que la API se comporta igual con o sin este
- *   paso y es idempotente.
+ * Assigns default personal space memberships to individual accounts without existing memberships.
+ * Prevents 403 TENANT_REQUIRED errors on personal user interactions.
  */
 @Injectable()
 export class PersonalSpaceMembershipsSeedService {
@@ -77,11 +51,7 @@ export class PersonalSpaceMembershipsSeedService {
     this.logger.setContext(PersonalSpaceMembershipsSeedService.name);
   }
 
-  /**
-   * Ejecuta el paso. Es núcleo: corre en todos los entornos y no crea cuentas.
-   *
-   * @returns Qué quedó hecho en esta pasada.
-   */
+  /** Runs the idempotent personal space membership assignment. */
   async run(): Promise<PersonalSpaceMembershipsResult> {
     const result: PersonalSpaceMembershipsResult = {
       created: 0,
@@ -139,7 +109,7 @@ export class PersonalSpaceMembershipsSeedService {
         result.failed.push(`${userId}: ${message}`);
         this.logger.error(
           { operation: 'seed.personal-space-memberships', userId, err: error },
-          'No se pudo dar la membresía del espacio personal',
+          'Failed to assign personal space membership',
         );
       }
     }
@@ -152,12 +122,12 @@ export class PersonalSpaceMembershipsSeedService {
         needsReview: result.needsReview,
         failed: result.failed.length,
       },
-      'Membresías del espacio personal sembradas',
+      'Personal space memberships seeded',
     );
     return result;
   }
 
-  /** Conceptos de rol global activos, agrupados por persona. */
+  /** Maps active global role concepts grouped by user UUID. */
   private async activeGlobalRoleConceptsByUser(
     em: EntityManager,
   ): Promise<Map<string, string[]>> {
@@ -173,7 +143,7 @@ export class PersonalSpaceMembershipsSeedService {
     return byUser;
   }
 
-  /** Quién, de estas personas, ya tiene alguna fila de membresía (cualquier tenant o estado). */
+  /** Finds which users already have an existing membership in any tenant or status. */
   private async usersWithAnyMembership(
     em: EntityManager,
     userIds: string[],

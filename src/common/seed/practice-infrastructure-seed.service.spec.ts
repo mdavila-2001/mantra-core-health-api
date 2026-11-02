@@ -12,7 +12,7 @@ import { PracticeInfrastructureSeedService } from './practice-infrastructure-see
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-/** Base en memoria: lo que se crea en una corrida existe en la siguiente. */
+/** In-memory mock DB: preserves created entities across invocations. */
 function build() {
   const rows = new Map<unknown, any[]>([
     [SpaceFormParentRules, []],
