@@ -28,6 +28,8 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
 
 @Injectable()
 export class PharmacyTenantScopeGuard implements CanActivate {
+  private readonly enforceRls = process.env.RLS_ENFORCE === 'true';
+
   constructor(private readonly em: EntityManager) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,9 +47,27 @@ export class PharmacyTenantScopeGuard implements CanActivate {
         'Esta operación es de la plataforma, no del personal de una farmacia',
       );
     }
-    const pharmacy = await this.em
-      .fork()
-      .findOne(Pharmacies, { id: pharmacyId });
+    const em = this.em.fork();
+    let pharmacy: Pharmacies | null = null;
+    if (this.enforceRls) {
+      // Guards precede the tenant interceptor: this read needs its own local
+      // tenant transaction, using only the scope verified by TenantScopeGuard.
+      const tenantId = request.resolvedTenantId;
+      if (tenantId) {
+        pharmacy = await em.transactional(async (tx) => {
+          await tx.execute(
+            "select set_config('app.system_context', 'false', true)",
+          );
+          await tx.execute(
+            "select set_config('app.current_tenant_id', ?, true)",
+            [tenantId],
+          );
+          return tx.findOne(Pharmacies, { id: pharmacyId, tenantId });
+        });
+      }
+    } else {
+      pharmacy = await em.findOne(Pharmacies, { id: pharmacyId });
+    }
     if (pharmacy && platformIn(pharmacy.tenantId)) return true;
     const tenantIds = request.user?.tenantIds ?? [];
     const header = request.headers['x-tenant-id'];

@@ -199,6 +199,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       new CommonRegistrationFilesAdapter(
         fileUploadService as never,
         attachableFileService as never,
+        em as never,
       ),
       workplaces as never,
     );
@@ -1592,8 +1593,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
       );
       const [uploadOrder] =
         d.fileUploadService.uploadAnonymous.mock.invocationCallOrder;
-      const [transactionOrder] = d.em.transactional.mock.invocationCallOrder;
-      expect(uploadOrder).toBeLessThan(transactionOrder);
+      // The upload has its own RLS boundary; the separate registration transaction still starts afterwards.
+      const [uploadBoundaryOrder, registrationOrder] =
+        d.em.transactional.mock.invocationCallOrder;
+      expect(d.em.transactional).toHaveBeenCalledTimes(2);
+      expect(uploadBoundaryOrder).toBeLessThan(uploadOrder);
+      expect(uploadOrder).toBeLessThan(registrationOrder);
     });
 
     it('reclama la foto para la cuenta nueva DENTRO de la transacción y la vincula', async () => {
@@ -1681,7 +1686,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
           profilePhotoBase64: PHOTO_JPEG_B64,
         }),
       ).rejects.toMatchObject({ status: 422 });
-      expect(d.em.transactional).not.toHaveBeenCalled();
+      // Only the upload boundary ran and rejected; no registration transaction or user is created.
+      expect(d.em.transactional).toHaveBeenCalledTimes(1);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
 
     it('si el almacenamiento no responde, el registro concluye, lo dice en la respuesta y deja log', async () => {

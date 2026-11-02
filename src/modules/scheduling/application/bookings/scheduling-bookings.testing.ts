@@ -1,3 +1,4 @@
+import { BookingStateTransitionHandler } from './booking-state-transition.handler';
 import type { BookingBillingPort } from '../ports/booking-billing.port';
 import type { BookingCompletedPort } from '../ports/booking-completed.port';
 import { createFakeBookingBilling } from './booking-billing.testing';
@@ -145,6 +146,14 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.logger,
   );
 
+  const startAppointment = new StartAppointmentUseCase(
+    d.em,
+    access,
+    transitions,
+    clinicalSync,
+    d.logger,
+  );
+
   return new SchedulingBookingsService(
     new PlaceHoldUseCase(d.em, d.bookingsRepo, slotPolicy, access, d.logger),
     new ConfirmBookingUseCase(materializer, d.logger),
@@ -174,8 +183,33 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       notifier,
       d.logger,
     ),
-    cancelBooking,
-    new RejectBookingUseCase(cancelBooking, d.logger),
+    new BookingStateTransitionHandler(
+      new AcceptBookingUseCase(
+        d.em,
+        d.bookingsRepo,
+        d.catalogRepo,
+        d.professionalTime,
+        access,
+        transitions,
+        clinicalSync,
+        displaced,
+        notifier,
+        d.logger,
+      ),
+      cancelBooking,
+      new RejectBookingUseCase(cancelBooking, d.logger),
+      startAppointment,
+      new CompleteAppointmentUseCase(
+        d.em,
+        access,
+        transitions,
+        serviceSlots,
+        clinicalSync,
+        d.bookingCompleted ?? { onBookingCompleted: async () => undefined },
+        d.logger,
+      ),
+      new CheckInBookingUseCase(d.em, d.bookingsRepo, transitions, d.logger),
+    ),
     new SetPaymentStateUseCase(
       d.em,
       d.bookingsRepo,
@@ -185,18 +219,6 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       d.logger,
     ),
     new GetPaymentStateUseCase(d.em, d.bookingsRepo, access, billing),
-    new AcceptBookingUseCase(
-      d.em,
-      d.bookingsRepo,
-      d.catalogRepo,
-      d.professionalTime,
-      access,
-      transitions,
-      clinicalSync,
-      displaced,
-      notifier,
-      d.logger,
-    ),
     new RequestBookingInfoUseCase(d.em, access, transitions, d.logger),
     new ProposeScheduleUseCase(
       d.em,
@@ -206,23 +228,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       transitions,
       d.logger,
     ),
-    new StartAppointmentUseCase(
-      d.em,
-      access,
-      transitions,
-      clinicalSync,
-      d.logger,
-    ),
-    new CompleteAppointmentUseCase(
-      d.em,
-      access,
-      transitions,
-      serviceSlots,
-      clinicalSync,
-      d.bookingCompleted ?? { onBookingCompleted: async () => undefined },
-      d.logger,
-    ),
-    new CheckInBookingUseCase(d.em, d.bookingsRepo, transitions, d.logger),
+    startAppointment,
     new SearchBookingsUseCase(
       d.em,
       d.bookingsRepo,

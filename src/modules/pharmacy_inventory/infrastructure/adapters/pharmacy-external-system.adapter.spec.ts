@@ -1,3 +1,4 @@
+import { INTEG } from '../../../integrations/integrations.concepts';
 import { jest } from '@jest/globals';
 import { PharmacyExternalSystemAdapter } from './pharmacy-external-system.adapter';
 import { externalSystemConfigJson } from '../../domain/sync/external-system';
@@ -16,6 +17,7 @@ function fakeRepo() {
     createConnection: jest.fn((_em: any, data: any) => {
       const row = {
         id: `conn-${++n}`,
+        stateConceptId: INTEG.CONN_ACTIVE,
         ...data,
         updatedAt: new Date('2026-11-01T00:00:00Z'),
       };
@@ -24,6 +26,7 @@ function fakeRepo() {
     }),
     createCredential: jest.fn((_em: any, data: any) => {
       const row = {
+        id: `credential-${credentials.length}`,
         connectionId: data.connectionId,
         secretRef: data.encryptedKeyRef,
         active: true,
@@ -101,7 +104,7 @@ describe('PharmacyExternalSystemAdapter (FAR-C9 · C9-3)', () => {
     });
     expect(repo.credentials[0].secretRef).not.toContain('plain-key');
     expect(repo.connections.get(id).configJson).toEqual(
-      externalSystemConfigJson(CONFIG),
+      expect.objectContaining(externalSystemConfigJson(CONFIG)),
     );
     const clientFor = jest.spyOn(adapter, 'clientFor');
     const resolved = await adapter.resolve(em, 't', id);
@@ -170,7 +173,7 @@ describe('PharmacyExternalSystemAdapter (FAR-C9 · C9-3)', () => {
       'provider-SIMULATED_CHAIN',
     );
     expect(repo.connections.get(id).configJson).toEqual(
-      externalSystemConfigJson(chain),
+      expect.objectContaining(externalSystemConfigJson(chain)),
     );
   });
 
@@ -215,5 +218,71 @@ describe('PharmacyExternalSystemAdapter (FAR-C9 · C9-3)', () => {
     await expect(adapter.resolve(em, 't', id)).resolves.toEqual({
       status: 'NOT_CONFIGURED',
     });
+  });
+});
+
+describe('external-system state safety', () => {
+  const env = { ...process.env };
+  beforeEach(() => {
+    process.env.PHARMACY_EXTERNAL_ALLOWED_HOSTS = 'sim';
+  });
+  afterEach(() => {
+    process.env = { ...env };
+  });
+  it('preparation failures are typed and keep a credential-bound status token', async () => {
+    const repo = fakeRepo();
+    const adapter = new PharmacyExternalSystemAdapter(
+      repo as any,
+      { isConfigured: () => false } as any,
+    );
+    const id = await adapter.save(em, {
+      tenantId: 'tenant',
+      connectionId: null,
+      config: CONFIG,
+      apiKey: 'synthetic',
+      actorUserId: 'actor',
+    });
+    jest.spyOn(adapter, 'clientFor').mockImplementation(() => {
+      throw new Error('never publish this internal detail');
+    });
+    expect(await adapter.resolve(em, 'tenant', id)).toMatchObject({
+      status: 'UNAVAILABLE',
+      errorReason: 'UNREACHABLE',
+      check: { connectionId: id, credentialId: 'credential-0' },
+    });
+  });
+  it('summary exposes only a validated public lastCheck, and configuredAt remains stable', async () => {
+    const repo = fakeRepo();
+    const adapter = new PharmacyExternalSystemAdapter(
+      repo as any,
+      { isConfigured: () => false } as any,
+    );
+    const row = {
+      connection: {
+        configJson: {
+          ...externalSystemConfigJson(CONFIG),
+          configuredAt: '2026-11-01T17:00:00Z',
+          lastCheck: {
+            status: 'ERROR',
+            errorReason: 'AUTH_REJECTED',
+            checkedAt: '2026-11-01T18:00:00Z',
+            secret: 'never-return',
+          },
+        },
+        updatedAt: new Date(),
+      },
+      credential: { secretRef: 'never-return' },
+    };
+    repo.findMany.mockResolvedValue(new Map([['provider', row]]) as any);
+    const summary = (await adapter.describe(em, 'tenant', ['provider'])).get(
+      'provider',
+    );
+    expect(summary?.lastCheck).toEqual({
+      status: 'ERROR',
+      errorReason: 'AUTH_REJECTED',
+      checkedAt: '2026-11-01T18:00:00Z',
+    });
+    expect(summary?.configuredAt).toBe('2026-11-01T17:00:00Z');
+    expect(JSON.stringify(summary)).not.toContain('never-return');
   });
 });

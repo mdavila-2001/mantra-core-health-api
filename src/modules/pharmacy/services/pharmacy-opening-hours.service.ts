@@ -136,7 +136,7 @@ export class PharmacyOpeningHoursService {
     actor: AuthenticatedUser,
     now: Date = new Date(),
   ): Promise<PharmacyOpeningHoursDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     await requireManagedPharmacy(this.pharmaciesRepo, em, pharmacyId, actor);
     const sites = await this.readRepo.findActiveSites(em, [pharmacyId]);
     const [zones, shifts] = await Promise.all([

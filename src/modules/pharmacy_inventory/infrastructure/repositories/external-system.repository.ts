@@ -1,3 +1,5 @@
+import type { ExternalSystemCheckToken } from '../../application/ports/external-pharmacy-system.port';
+import type { ExternalSystemLastCheck } from '../../domain/sync/external-catalog';
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { createdBy, touch } from '../../../../common';
@@ -157,6 +159,44 @@ export class ExternalSystemRepository {
     );
     em.persist(credential);
     return credential;
+  }
+
+  /**
+   * Compare the business configuration and active credential, not prior telemetry.
+   * Concurrent checks of the same configuration may publish newer observations;
+   * checkedAt is produced only here as canonical UTC ISO, never supplied by clients.
+   * A rotated/removed system or an older observation cannot overwrite current state.
+   */
+  async recordCheck(
+    em: EntityManager,
+    data: {
+      tenantId: string;
+      check: ExternalSystemCheckToken;
+      lastCheck: ExternalSystemLastCheck;
+      actorUserId: string;
+    },
+  ): Promise<void> {
+    await em.execute(
+      `update integrations.provider_connections as c
+      set config_json = jsonb_set(c.config_json, '{lastCheck}', ?::jsonb),
+          updated_at = now(), updated_by_user_id = ?, row_version = c.row_version + 1
+      where c.id = ? and c.tenant_id = ? and c.state_concept_id = ?
+        and (c.config_json - 'lastCheck') = (?::jsonb - 'lastCheck')
+        and coalesce(c.config_json->'lastCheck'->>'checkedAt', '') <= ?
+        and exists (select 1 from integrations.provider_credentials as k
+          where k.id = ? and k.connection_id = c.id and k.state_concept_id = ?)`,
+      [
+        JSON.stringify(data.lastCheck),
+        data.actorUserId,
+        data.check.connectionId,
+        data.tenantId,
+        INTEG.CONN_ACTIVE,
+        JSON.stringify(data.check.configJson),
+        data.lastCheck.checkedAt,
+        data.check.credentialId,
+        INTEG.CRED_ACTIVE,
+      ],
+    );
   }
 
   /** Retira una credencial: deja de valer, la fila queda para auditoría. */

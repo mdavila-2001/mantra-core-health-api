@@ -1,3 +1,4 @@
+import { EXTERNAL_SYSTEM_PROVIDERS } from './external-system.providers';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { InsurancePatientSettlementModule } from '../insurance/insurance-patient-settlement.module';
 import { Module } from '@nestjs/common';
@@ -14,10 +15,6 @@ import { CommunityModule } from '../community/community.module';
 import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
 import { EXTERNAL_PHARMACY_CATALOG_PORT } from './application/ports/external-pharmacy-catalog.port';
 import { HttpExternalPharmacyCatalogAdapter } from './infrastructure/adapters/http-external-pharmacy-catalog.adapter';
-import { EXTERNAL_PHARMACY_SYSTEM_PORT } from './application/ports/external-pharmacy-system.port';
-import { PharmacyExternalSystemAdapter } from './infrastructure/adapters/pharmacy-external-system.adapter';
-import { ExternalSystemRepository } from './infrastructure/repositories/external-system.repository';
-import { ConfigureExternalSystemUseCase } from './application/inventory-sync/configure-external-system.use-case';
 import { PharmacyCatalogBulkLoadAdapter } from './infrastructure/adapters/pharmacy-catalog-bulk-load.adapter';
 import { CATALOG_BULK_LOAD_PORT } from './application/ports/catalog-bulk-load.port';
 import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
@@ -236,13 +233,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
       useExisting: HttpExternalPharmacyCatalogAdapter,
     },
     // FAR-C9 · C9-3: el sistema propio de cada farmacia, por conexión.
-    ExternalSystemRepository,
-    PharmacyExternalSystemAdapter,
-    {
-      provide: EXTERNAL_PHARMACY_SYSTEM_PORT,
-      useExisting: PharmacyExternalSystemAdapter,
-    },
-    ConfigureExternalSystemUseCase,
+    ...EXTERNAL_SYSTEM_PROVIDERS,
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,

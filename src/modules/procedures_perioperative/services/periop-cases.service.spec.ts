@@ -1686,7 +1686,9 @@ describe('PeriopCasesService', () => {
       const detail = await d.service.getCaseDetail(CASE, actor);
 
       expect(detail.operativeSteps).toHaveLength(1);
-      expect(detail.operativeSteps[0].description).toBe('Abordaje');
+      expect(detail.operativeSteps[0]).toMatchObject({
+        description: 'Abordaje',
+      });
       expect(detail.findings[0].findingText).toBe('Adherencias');
       expect(detail.implants[0].implantDeviceId).toBe('dev-1');
     });

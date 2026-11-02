@@ -1,7 +1,9 @@
+import { isForbiddenAddress } from './external-system-address-policy';
+export { isForbiddenAddress } from './external-system-address-policy';
 import { lookup as dnsLookup } from 'node:dns';
 import { Agent as HttpAgent } from 'node:http';
 import { Agent as HttpsAgent } from 'node:https';
-import { BlockList, isIP, type LookupFunction } from 'node:net';
+import { isIP, type LookupFunction } from 'node:net';
 import axios, { type AxiosInstance } from 'axios';
 import type {
   ExternalPharmacyCatalogPort,
@@ -19,91 +21,6 @@ const CHAIN_PER_PAGE = 50;
 const MAX_RESPONSE_BYTES = 10 * 1024 * 1024;
 /** Tope de filas de un listado, sumando todas sus páginas. */
 const MAX_ROWS = 20_000;
-
-/**
- * Rangos que nunca se llaman en producción, aunque el nombre esté en la lista
- * de hosts: loopback, privados, link-local (metadatos de la nube), CGNAT,
- * multicast y reservados, en IPv4 e IPv6.
- */
-const FORBIDDEN_RANGES = (() => {
-  const list = new BlockList();
-  for (const [net, prefix] of [
-    ['0.0.0.0', 8],
-    ['10.0.0.0', 8],
-    ['100.64.0.0', 10],
-    ['127.0.0.0', 8],
-    ['169.254.0.0', 16],
-    ['172.16.0.0', 12],
-    ['192.0.0.0', 24],
-    ['192.168.0.0', 16],
-    ['198.18.0.0', 15],
-    ['224.0.0.0', 4],
-    ['240.0.0.0', 4],
-  ] as const) {
-    list.addSubnet(net, prefix, 'ipv4');
-  }
-  for (const [net, prefix] of [
-    // Sin especificar, loopback e IPv4 compatible (`::a.b.c.d`).
-    ['::', 96],
-    // Prefijos que llevan una IPv4 adentro y la alcanzan por traducción:
-    // NAT64, NAT64 local, 6to4 y Teredo.
-    ['64:ff9b::', 96],
-    ['64:ff9b:1::', 48],
-    ['2002::', 16],
-    ['2001::', 32],
-    // Descarte, ULA, link-local y multicast.
-    ['100::', 64],
-    ['fc00::', 7],
-    ['fe80::', 10],
-    ['ff00::', 8],
-  ] as const) {
-    list.addSubnet(net, prefix, 'ipv6');
-  }
-  return list;
-})();
-
-/**
- * Los ocho grupos de 16 bits de una IPv6 válida (admite `::` y una IPv4 al
- * final, `::ffff:1.2.3.4`).
- */
-function ipv6Groups(address: string): number[] {
-  let text = address.toLowerCase();
-  const dotted = /(\d+\.\d+\.\d+\.\d+)$/.exec(text);
-  if (dotted) {
-    const [a, b, c, d] = dotted[1].split('.').map(Number);
-    text =
-      text.slice(0, dotted.index) +
-      `${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
-  }
-  const [head, tail] = text.includes('::') ? text.split('::') : [text, null];
-  const left = head ? head.split(':') : [];
-  const right = tail ? tail.split(':') : [];
-  const missing = 8 - left.length - right.length;
-  const groups = [
-    ...left,
-    ...Array<string>(tail === null ? 0 : missing).fill('0'),
-    ...right,
-  ];
-  return groups.map((group) => Number.parseInt(group, 16));
-}
-
-/** Si una IP cae en un rango que no se llama. */
-export function isForbiddenAddress(address: string): boolean {
-  const family = isIP(address);
-  if (family === 0) return true;
-  if (family === 6) {
-    // IPv4 mapeada (`::ffff:a.b.c.d`, también en hexadecimal): vale lo que
-    // vale su IPv4.
-    const g = ipv6Groups(address);
-    if (g.slice(0, 5).every((group) => group === 0) && g[5] === 0xffff) {
-      return isForbiddenAddress(
-        `${g[6] >> 8}.${g[6] & 0xff}.${g[7] >> 8}.${g[7] & 0xff}`,
-      );
-    }
-    return FORBIDDEN_RANGES.check(address, 'ipv6');
-  }
-  return FORBIDDEN_RANGES.check(address, 'ipv4');
-}
 
 /**
  * Si la dirección base apunta a una IP literal prohibida. Con una IP en la URL
@@ -158,6 +75,7 @@ function createHttp(
     headers,
     timeout: timeoutMs,
     maxRedirects: 0,
+    proxy: false,
     maxContentLength: MAX_RESPONSE_BYTES,
     maxBodyLength: MAX_RESPONSE_BYTES,
     // Fuera de producción el simulador vive en 127.0.0.1 o en la red de compose.
@@ -212,15 +130,19 @@ async function getJson(
   http: AxiosInstance,
   path: string,
   params?: Record<string, string | number>,
+  signal?: AbortSignal,
 ): Promise<unknown> {
   try {
-    const response = await http.get<unknown>(path, { params });
+    const response = await http.get<unknown>(path, { params, signal });
     return response.data;
   } catch (error) {
     const status = axios.isAxiosError(error)
       ? (error.response?.status ?? error.code ?? 'network')
       : 'unknown';
-    throw new ExternalCatalogUnavailableError(`GET ${path} → ${status}`);
+    throw new ExternalCatalogUnavailableError(
+      `GET ${path} → ${status}`,
+      status === 401 || status === 403 ? 'AUTH_REJECTED' : 'UNREACHABLE',
+    );
   }
 }
 
@@ -271,9 +193,16 @@ class AlovidaStandardClient implements ExternalPharmacyCatalogPort {
     await getJson(this.http, `${this.prefix}/health`);
   }
 
-  async listProducts(): Promise<ExternalProduct[]> {
+  async listProducts(options?: {
+    signal?: AbortSignal;
+  }): Promise<ExternalProduct[]> {
     const body = objectOf(
-      await getJson(this.http, `${this.prefix}/products`),
+      await getJson(
+        this.http,
+        `${this.prefix}/products`,
+        undefined,
+        options?.signal,
+      ),
       'body',
     );
     return arrayOf(body.items, 'product').map((item) => {
@@ -289,11 +218,17 @@ class AlovidaStandardClient implements ExternalPharmacyCatalogPort {
     });
   }
 
-  async stockForSite(siteCode: string): Promise<ExternalStockLine[]> {
+  async stockForSite(
+    siteCode: string,
+    _pharmacyCode?: string,
+    options?: { signal?: AbortSignal },
+  ): Promise<ExternalStockLine[]> {
     const body = objectOf(
       await getJson(
         this.http,
         `${this.prefix}/sites/${encodeURIComponent(siteCode)}/stock`,
+        undefined,
+        options?.signal,
       ),
       'body',
     );
@@ -338,8 +273,10 @@ class SimulatedChainClient implements ExternalPharmacyCatalogPort {
     }
   }
 
-  async listProducts(): Promise<ExternalProduct[]> {
-    const rows = await this.allPages(`${this.prefix}/catalog`);
+  async listProducts(options?: {
+    signal?: AbortSignal;
+  }): Promise<ExternalProduct[]> {
+    const rows = await this.allPages(`${this.prefix}/catalog`, options?.signal);
     return rows.map((row) => {
       if (typeof row.sku !== 'string' || typeof row.description !== 'string') {
         throw new ExternalCatalogUnavailableError('invalid product');
@@ -357,9 +294,14 @@ class SimulatedChainClient implements ExternalPharmacyCatalogPort {
     });
   }
 
-  async stockForSite(siteCode: string): Promise<ExternalStockLine[]> {
+  async stockForSite(
+    siteCode: string,
+    _pharmacyCode?: string,
+    options?: { signal?: AbortSignal },
+  ): Promise<ExternalStockLine[]> {
     const rows = await this.allPages(
       `${this.prefix}/branches/${encodeURIComponent(siteCode)}/inventory`,
+      options?.signal,
     );
     return rows.map((row) => {
       const onHand = objectOf(row.on_hand, 'stock line');
@@ -370,11 +312,19 @@ class SimulatedChainClient implements ExternalPharmacyCatalogPort {
     });
   }
 
-  private async allPages(path: string): Promise<Record<string, unknown>[]> {
+  private async allPages(
+    path: string,
+    signal?: AbortSignal,
+  ): Promise<Record<string, unknown>[]> {
     const rows: Record<string, unknown>[] = [];
     for (let page = 1; page <= MAX_PAGES; page++) {
       const body = objectOf(
-        await getJson(this.http, path, { page, per_page: CHAIN_PER_PAGE }),
+        await getJson(
+          this.http,
+          path,
+          { page, per_page: CHAIN_PER_PAGE },
+          signal,
+        ),
         'body',
       );
       for (const row of arrayOf(body.data, 'row')) {
