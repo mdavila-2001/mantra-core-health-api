@@ -49,6 +49,10 @@ function build() {
     create: mockFn().mockReturnValue({ id: 'site-1' }),
   };
   const addressesRepo = { create: mockFn().mockReturnValue({ id: 'addr-1' }) };
+  const serviceCatalogRepo = {
+    findByCode: mockFn().mockResolvedValue(null),
+    create: mockFn().mockReturnValue({ id: 'sc-default' }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new OrganizationPracticeProvisioningService(
@@ -58,6 +62,7 @@ function build() {
     practicesRepo as any,
     sitesRepo as any,
     addressesRepo as any,
+    serviceCatalogRepo as any,
     logger as any,
   );
   return {
@@ -69,6 +74,7 @@ function build() {
     practicesRepo,
     sitesRepo,
     addressesRepo,
+    serviceCatalogRepo,
   };
 }
 
@@ -116,6 +122,16 @@ describe('OrganizationPracticeProvisioningService', () => {
         addressId: 'addr-1',
         managingTenantId: TENANT_ID,
         statusConceptId: PRAC.SITE_ACTIVE,
+      }),
+    );
+    expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        practiceId: 'pr-1',
+        code: 'CITA_MEDICA',
+        name: 'Cita médica',
+        defaultPrice: '0.00',
+        isActive: true,
       }),
     );
   });
