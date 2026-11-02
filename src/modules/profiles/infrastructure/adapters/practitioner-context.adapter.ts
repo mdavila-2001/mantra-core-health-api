@@ -12,6 +12,7 @@ import { PracticeSites } from '../../../practice/entities';
 import {
   BookableSlots,
   SchedulableResources,
+  ScheduleTemplates,
 } from '../../../scheduling/entities';
 import type {
   PractitionerActivityCounts,
@@ -28,12 +29,19 @@ export class PractitionerContextAdapter implements PractitionerContextPort {
     const resources = await em.find(SchedulableResources, {
       resourceRefId: profileId,
     });
-    const slotCount = resources.length
-      ? await em.count(BookableSlots, {
-          resourceId: { $in: resources.map((resource) => resource.id) },
-        })
-      : 0;
-    return { resources, slotCount };
+    const resourceIds = resources.map((resource) => resource.id);
+    const [slotCount, activeTemplates] = resourceIds.length
+      ? await Promise.all([
+          em.count(BookableSlots, {
+            resourceId: { $in: resourceIds },
+          }),
+          em.count(ScheduleTemplates, {
+            resourceId: { $in: resourceIds },
+            statusConceptId: { $ne: CONCEPTS.TEMPLATE_RETIRED },
+          }),
+        ])
+      : [0, 0];
+    return { resources, slotCount, activeTemplates };
   }
 
   async activity(
