@@ -15,7 +15,9 @@ import type {
   RegisterPatientDto,
 } from '../../modules/iam/presentation/dto';
 import {
+  HealthPractitionerProfiles,
   JurisdictionAuthorizations,
+  PatientPrimaryPractitioners,
   PatientProfiles,
   PersonAccountLinks,
   Persons,
@@ -69,27 +71,9 @@ interface PractitionerOutcome {
   practitionerProfileId?: string;
 }
 
-/** Nombre completo normalizado: la clave con que se reconoce a una persona ya cargada. */
-function nameKey(person: {
-  name?: string;
-  middleName?: string;
-  lastName?: string;
-  motherLastName?: string;
-}): string {
-  return [
-    person.name,
-    person.middleName,
-    person.lastName,
-    person.motherLastName,
-  ]
-    .map((part) =>
-      (part ?? '')
-        .normalize('NFKD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase()
-        .replace(/\s+/g, ' ')
-        .trim(),
-    )
+function nameKey(person: { name?: string; middleName?: string; lastName?: string; motherLastName?: string }): string {
+  return [person.name, person.middleName, person.lastName, person.motherLastName]
+    .map((p) => (p ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim())
     .join('|');
 }
 
@@ -102,40 +86,15 @@ interface CommonCandidate {
   email: string;
 }
 
+interface PatientOutcome {
+  outcome: string;
+  userId?: string;
+  patientProfileId?: string;
+}
+
 /**
  * Siembra las cuentas del padrón (H2 del carril M2 · MacBook, 2026-09-26).
- *
- * ## Qué toma del markdown, y qué inventa
- *
- * Decisión del propietario, ya tomada: los repos de front y API son
- * **públicos**, y `mantra-core-health-model/markdown_convertidos/*.md` trae
- * cédula, nacimiento, celular, correo y domicilio **reales** de personas. Este
- * seed toma del markdown **sólo** nombre, apellidos, matrícula/registro y
- * ocupación — el resto se inventa, determinista por fila
- * (`synthetic-person.ts`), para no multiplicar esa exposición cada vez que
- * alguien clona el repo y levanta la base.
- *
- * ## Por qué reusa el alta de autorregistro, y no `IamUsersService` a secas
- *
- * `provider-accounts-seed.service.ts` alcanza con `createUser` porque sólo da
- * de alta la **cuenta**. Acá hace falta persona + perfil + (para el médico)
- * licencia, exactamente lo que ya hace `IamPractitionerSelfRegistrationService`/
- * `IamPatientSelfRegistrationService` para el alta pública — reimplementarlo a
- * mano con `EntityManager` sería la segunda copia de esa transacción que la
- * regla 96.1 prohíbe. El costo es el mismo de cualquier alta real: valida
- * duplicados, encola un correo de verificación (inerte sin los workers de
- * mensajería, que este carril no necesita) y corre en su propia transacción
- * por persona — aceptable para 105 filas, no para miles.
- *
- * ## Filtro de candidatos, medido contra el propio padrón
- *
- * De 170 filas de médicos y 165 de pacientes, sólo 13 y 92 respectivamente
- * traen un nombre (`grep`/conteo real sobre el padrón) — el
- * resto son filas en blanco del generador del markdown. De los 13 médicos con
- * nombre, sólo los que además traen matrícula del Ministerio pueden darse de
- * alta como `PRACTITIONER` (`licenseNumber` es obligatorio en el DTO): no se
- * inventa una matrícula, porque es una credencial profesional, no un dato de
- * contacto — inventar «cosas que no sean nombres» no cubre eso.
+ * Toma nombre, registro y ocupación del padrón y genera datos sintéticos deterministas.
  */
 @Injectable()
 export class PeopleSeedService {
@@ -162,16 +121,7 @@ export class PeopleSeedService {
     nodeEnv = process.env.NODE_ENV,
     allowProduction = process.env.SEED_DEMO_ALLOW_PRODUCTION === 'true',
   ): Promise<PeopleSeedResult> {
-    const empty: PeopleSeedResult = {
-      practitionersCreated: 0,
-      practitionersExisting: 0,
-      practitionersAdopted: 0,
-      patientsCreated: 0,
-      patientsExisting: 0,
-      patientsAdopted: 0,
-      showcasesCreated: 0,
-      skipped: [],
-    };
+    const empty: PeopleSeedResult = { practitionersCreated: 0, practitionersExisting: 0, practitionersAdopted: 0, patientsCreated: 0, patientsExisting: 0, patientsAdopted: 0, showcasesCreated: 0, skipped: [] };
     if (!enabled) return { ...empty, reason: 'not-configured' };
     const gate = demoGateSkip({ password, nodeEnv, allowProduction });
     if (gate || !password) {
@@ -254,10 +204,7 @@ export class PeopleSeedService {
       if (created.outcome === 'created') result.practitionersCreated++;
       else if (created.outcome === 'existing') result.practitionersExisting++;
       else if (created.outcome === 'adopted') result.practitionersAdopted++;
-      else {
-        result.skipped.push(`${DOCTORS_FILE}#${i}: ${created.outcome}`);
-        continue;
-      }
+      else { result.skipped.push(`${DOCTORS_FILE}#${i}: ${created.outcome}`); continue; }
       await this.ensureShowcase(created, dto, result);
     }
 
@@ -295,11 +242,24 @@ export class PeopleSeedService {
       };
 
       const created = await this.registrationPatient(dto, ownSubjects);
-      if (created === 'created') result.patientsCreated++;
-      else if (created === 'existing') result.patientsExisting++;
-      else if (created === 'adopted') result.patientsAdopted++;
-      else result.skipped.push(`${PATIENTS_FILE}#${i}: ${created}`);
+      if (created.outcome === 'created') result.patientsCreated++;
+      else if (created.outcome === 'existing') result.patientsExisting++;
+      else if (created.outcome === 'adopted') result.patientsAdopted++;
+      else { result.skipped.push(`${PATIENTS_FILE}#${i}: ${created.outcome}`); continue; }
+      if (created.userId) {
+        const fullName = [dto.name, dto.middleName, dto.lastName, dto.motherLastName]
+          .filter(Boolean)
+          .join(' ');
+        await this.showcases.ensurePatient?.({
+          userId: created.userId,
+          displayName: fullName,
+          email: dto.email,
+          headline: dto.occupationFreeText,
+        });
+      }
     }
+
+    await this.ensurePrimaryPractitionerLink();
 
     this.logger.info(
       {
@@ -379,13 +339,8 @@ export class PeopleSeedService {
     const adopted = await this.adoptPractitioner(dto);
     if (adopted) return adopted;
     try {
-      const registered =
-        await this.practitionerRegistration.registerPractitioner(dto);
-      return {
-        outcome: 'created',
-        userId: registered.userId,
-        practitionerProfileId: registered.practitionerProfileId,
-      };
+      const registered = await this.practitionerRegistration.registerPractitioner(dto);
+      return { outcome: 'created', userId: registered.userId, practitionerProfileId: registered.practitionerProfileId };
     } catch (error) {
       if (error instanceof ConflictException) return { outcome: 'existing' };
       const message = error instanceof Error ? error.message : String(error);
@@ -468,14 +423,7 @@ export class PeopleSeedService {
       const created = await this.showcases.ensure({
         userId: outcome.userId,
         practitionerProfileId: outcome.practitionerProfileId,
-        displayName: [
-          dto.name,
-          dto.middleName,
-          dto.lastName,
-          dto.motherLastName,
-        ]
-          .filter(Boolean)
-          .join(' '),
+        displayName: [dto.name, dto.middleName, dto.lastName, dto.motherLastName].filter(Boolean).join(' '),
         email: dto.email,
         headline: dto.professionalTitle,
       });
@@ -552,24 +500,75 @@ export class PeopleSeedService {
     return true;
   }
 
-  /** Devuelve 'created', 'existing', 'adopted' o el mensaje del error si no se pudo dar de alta. */
+  /** Da de alta al paciente y devuelve cómo quedó con sus ids. */
   private async registrationPatient(
     dto: RegisterPatientDto,
     ownSubjects: ReadonlySet<string>,
-  ): Promise<string> {
-    if (await this.existsCredential(dto.nationalId)) return 'existing';
-    if (await this.adoptPatient(dto, ownSubjects)) return 'adopted';
-    try {
-      await this.patientRegistration.registerPatient(dto);
-      return 'created';
-    } catch (error) {
-      if (error instanceof ConflictException) return 'existing';
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        { operation: 'seed.people.patient', err: error },
-        'No se pudo dar de alta un paciente del padrón',
+  ): Promise<PatientOutcome> {
+    const cred = await this.orm.em
+      .fork()
+      .findOne(AuthenticationCredentials, { externalSubject: dto.nationalId });
+    if (cred) return { outcome: 'existing', userId: cred.userId };
+    if (await this.adoptPatient(dto, ownSubjects)) {
+      const em = this.orm.em.fork();
+      const person = (await em.find(Persons, {})).find(
+        (p) => nameKey(p) === nameKey(dto),
       );
-      return message;
+      const link = person
+        ? await em.findOne(PersonAccountLinks, {
+            personId: person.id,
+            statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+          })
+        : null;
+      return {
+        outcome: 'adopted',
+        userId: link?.userId,
+        patientProfileId: person?.id,
+      };
+    }
+    try {
+      const reg = await this.patientRegistration.registerPatient(dto);
+      return {
+        outcome: 'created',
+        userId: reg.userId,
+        patientProfileId: reg.patientProfileId,
+      };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        const c = await this.orm.em
+          .fork()
+          .findOne(AuthenticationCredentials, { externalSubject: dto.nationalId });
+        return { outcome: 'existing', userId: c?.userId };
+      }
+      return { outcome: error instanceof Error ? error.message : String(error) };
+    }
+  }
+
+  private async ensurePrimaryPractitionerLink(): Promise<void> {
+    try {
+      const em = this.orm.em.fork();
+      const [practitioner, patient] = await Promise.all([
+        em.findOne(HealthPractitionerProfiles, {}),
+        em.findOne(PatientProfiles, {}),
+      ]);
+      if (!practitioner || !patient) return;
+      const existing = await em.findOne(PatientPrimaryPractitioners, {
+        patientProfileId: patient.profileId,
+        validTo: null,
+      });
+      if (existing) return;
+      const link = await em.findOne(PersonAccountLinks, { personId: practitioner.profileId });
+      em.create(PatientPrimaryPractitioners, {
+        patientProfileId: patient.profileId,
+        practitionerProfileId: practitioner.profileId,
+        validFrom: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdByUserId: link?.userId,
+      } as PatientPrimaryPractitioners);
+      await em.flush();
+    } catch {
+      // Ignora error si la tabla no está disponible o falla por concurrencia
     }
   }
 }

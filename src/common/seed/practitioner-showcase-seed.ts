@@ -92,4 +92,38 @@ export class PractitionerShowcaseSeed {
     );
     return true;
   }
+
+  /**
+   * Deja al paciente con vitrina pública básica para participar en mensajería.
+   *
+   * @returns `true` si la creó en esta pasada; `false` si ya la tenía.
+   */
+  async ensurePatient(input: {
+    userId: string;
+    displayName: string;
+    email: string;
+    headline?: string;
+  }): Promise<boolean> {
+    const em = this.orm.em.fork();
+    const existing = await em.findOne(PublicProfiles, { targetId: input.userId });
+    if (existing) return false;
+
+    const suffix = deterministicId(`seed:showcase:${input.email}`).slice(0, 6);
+    const slug = `${slugOf(input.displayName) || 'paciente'}-${suffix}`;
+    await runWithTenant(SEED.tenantId, () =>
+      this.social.upsertOwnProfile(
+        {
+          tenantId: SEED.tenantId,
+          slug,
+          displayName: input.displayName.slice(0, 200),
+          headline: input.headline?.slice(0, 200) || 'Paciente',
+          biography: 'Perfil de paciente en AloVida.',
+          acceptsReviews: false,
+          visibility: 'PUBLIC',
+        },
+        { id: input.userId, roles: ['PATIENT'] },
+      ),
+    );
+    return true;
+  }
 }
