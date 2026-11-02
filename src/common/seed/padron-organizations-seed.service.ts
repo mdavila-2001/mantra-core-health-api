@@ -558,9 +558,8 @@ export class PadronOrganizationsSeedService {
 
     if (kind.needsPapers) {
       result.pendingForPapers++;
-      // Sin papeles no hay sello ni vitrina; solo la demostración la proyecta,
-      // con la ficha todavía pendiente.
-      if (!demoShowcases || status !== DIR.TENANT_PENDING) return;
+      // Sin papeles no hay sello ni vitrina; la demostración la proyecta si está pendiente o activa.
+      if (!demoShowcases || (status !== DIR.TENANT_PENDING && status !== CONCEPTS.TENANT_ACTIVE)) return;
       await this.completeShowcase(tenantId, row, kind, actor, known, result);
       return;
     }
@@ -623,14 +622,14 @@ export class PadronOrganizationsSeedService {
           targetTypeConceptId:
             kind.tenantType === 'PHARMACY'
               ? COMM.PROFILE_TARGET_PHARMACY
-              : COMM.PROFILE_TARGET_ORGANIZATION,
+              : kind.tenantType === 'DIAGNOSTIC_CENTER'
+                ? COMM.PROFILE_TARGET_DIAGNOSTIC_UNIT
+                : COMM.PROFILE_TARGET_ORGANIZATION,
         }),
       );
       known.showcaseHeadlines.set(tenantId, undefined);
     }
-    const municipality = titleCase(
-      row.municipio.replace(/\(.*?\)/g, '').trim(),
-    );
+    const municipality = titleCase(row.municipio.replace(/\(.*?\)/g, '').trim());
     const lines = [
       'Ficha del padrón público de establecimientos de salud, no reclamada. ' +
         'La información no fue verificada por la organización.',
