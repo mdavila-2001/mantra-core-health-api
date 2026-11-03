@@ -29,6 +29,7 @@ import { IS_PUBLIC_KEY } from '../auth/public.decorator';
 import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { IS_TENANT_AGNOSTIC_KEY } from './tenant-agnostic.decorator';
+import { PATIENT_ANY_TENANT_KEY } from './patient-any-tenant.decorator';
 import type { AuthenticatedRequest } from '../auth/authenticated-user.interface';
 
 /**
@@ -156,7 +157,13 @@ export class TenantContextInterceptor implements NestInterceptor {
       request.resolvedTenantId ??
       (hasPrivilegedTenantRole(user)
         ? resolvePrivilegedTenantId(request)
-        : resolveOrdinaryTenantId(request, user));
+        : resolveOrdinaryTenantId(request, user, {
+            patientAnyTenant:
+              this.reflector.getAllAndOverride<boolean>(
+                PATIENT_ANY_TENANT_KEY,
+                [context.getHandler(), context.getClass()],
+              ) === true,
+          }));
     if (!tenantId) {
       return this.runSystemSweep(next);
     }

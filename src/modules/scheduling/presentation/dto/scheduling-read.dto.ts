@@ -309,6 +309,16 @@ export class BookingItemDto {
   id!: string;
 
   /**
+   * La organización de la agenda en que está la cita.
+   *
+   * Una cuenta de paciente lista sus citas de **todas** las organizaciones, y
+   * para cancelar, reprogramar o subir un comprobante tiene que hablarle a la
+   * de cada cita (`X-Tenant-Id`): ya no alcanza con la activa de la sesión.
+   */
+  @ApiProperty({ format: 'uuid' })
+  tenantId!: string;
+
+  /**
    * Identificador asociado a patient profile.
    */
   @ApiPropertyOptional({ format: 'uuid' })
