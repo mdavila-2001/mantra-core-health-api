@@ -15,3 +15,4 @@ export * from './support-staff.dto';
 export * from './create-practitioner-support-staff.dto';
 export * from './create-org-support-staff.dto';
 export * from './created-support-staff-view.dto';
+export * from './practitioner-governance.dto';
